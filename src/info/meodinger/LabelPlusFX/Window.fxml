@@ -53,7 +53,7 @@
         </BorderPane>
     </center>
     <right>
-        <SplitPane fx:id="pRight" dividerPositions="0.6" orientation="VERTICAL" prefWidth="300.0" BorderPane.alignment="CENTER">
+        <SplitPane fx:id="pRight" dividerPositions="0.7" orientation="VERTICAL" prefWidth="300.0" BorderPane.alignment="CENTER">
             <AnchorPane fx:id="pTree">
                 <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

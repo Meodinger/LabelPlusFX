@@ -1,6 +1,7 @@
 package info.meodinger.LabelPlusFX.Component;
 
 import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.Util.CTree;
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -42,9 +43,15 @@ public class CTreeCell extends TreeCell<String> {
 
             if (i != null) {
                 if (i.getClass() == CTreeItem.class) {
+                    // Label
                     menu.labelMenu.init(i);
                     setContextMenu(menu.labelMenu);
-                } else if (i.getParent() == null) {
+                } else if (i.getParent() != null) {
+                    // Group
+                    menu.groupMenu.init(i);
+                    setContextMenu(menu.groupMenu);
+                } else {
+                    // Root
                     if (config.getViewMode() == Config.VIEW_MODE_GROUP) {
                         menu.rootMenu.init(i);
                         setContextMenu(menu.rootMenu);
@@ -52,9 +59,9 @@ public class CTreeCell extends TreeCell<String> {
                         menu.rootMenu.init(null);
                         setContextMenu(null);
                     }
-                } else {
-                    menu.groupMenu.init(i);
-                    setContextMenu(menu.groupMenu);
+                    if (event.getClickCount() > 1) {
+                        CTree.expandAll(i);
+                    }
                 }
             } else {
                 menu.rootMenu.init(null);

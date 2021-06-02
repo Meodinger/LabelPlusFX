@@ -217,18 +217,12 @@ public class Config {
     public int getViewMode() {
         return viewMode;
     }
-    public void switchViewMode() {
-        viewMode = (viewMode + 1) % 2;
-    }
 
     public void setWorkMode(int workMode) {
         this.workMode = workMode;
     }
     public int getWorkMode() {
         return workMode;
-    }
-    public void switchWorkMode() {
-        workMode = (workMode + 1) % 3;
     }
 
     public void setCurrentGroupId(int groupId) {

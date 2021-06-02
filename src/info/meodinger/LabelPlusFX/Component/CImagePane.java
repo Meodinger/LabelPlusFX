@@ -31,6 +31,14 @@ import java.util.Optional;
  * Author: Meodinger
  * Date: 2021/6/1
  * Location: info.meodinger.LabelPlusFX.Component
+ *
+ *           |   Layout   | Width
+ * -----------------------------
+ * pane      | -          | actual width
+ * container | 0 - Fixed  | ?
+ * image     | left-top   | image width
+ * root      | with image | image width
+ * layer     | with image | image width
  */
 public class CImagePane extends ScrollPane {
 
@@ -46,6 +54,7 @@ public class CImagePane extends ScrollPane {
     private final static javafx.scene.text.Font DISPLAY_FONT = new Font(DISPLAY_FONT_SIZE);
 
     public final static int TEXT_LAYER = -1;
+    public final static int NOT_FOUND = -1;
 
     /**
      * For contain, event handle,
@@ -60,8 +69,10 @@ public class CImagePane extends ScrollPane {
     private final Canvas textLayer;
 
     private Config config;
-    private double moveX = 0;
-    private double moveY = 0;
+    private double shiftX = 0;
+    private double shiftY = 0;
+    private double maxScale = NOT_FOUND;
+    private double minScale = NOT_FOUND;
 
     private static class Position {
         double x,y;
@@ -84,7 +95,7 @@ public class CImagePane extends ScrollPane {
         this.layers = new ArrayList<>();
         this.textLayer = new Canvas();
         this.scale = new SimpleDoubleProperty(1);
-        this.selectedLabel = new SimpleIntegerProperty(-1);
+        this.selectedLabel = new SimpleIntegerProperty(NOT_FOUND);
 
         init();
         render();
@@ -100,14 +111,17 @@ public class CImagePane extends ScrollPane {
 
         scaleProperty().addListener((observable, oldValue, newValue) -> resize());
 
+        // ScenePos -> CursorPos; LayoutPos -> CtxPos
+        // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
+        // nLx = (Lx - Sx) + nSx; nLy = (Ly - Sy) + nSy
         root.setOnMousePressed(event -> {
-            moveX = root.getLayoutX() - event.getSceneX();
-            moveY = root.getLayoutY() - event.getSceneY();
+            shiftX = root.getLayoutX() - event.getSceneX();
+            shiftY = root.getLayoutY() - event.getSceneY();
             root.setCursor(javafx.scene.Cursor.MOVE);
         });
         root.setOnMouseDragged(event -> {
-            double nX = event.getSceneX() + moveX;
-            double nY = event.getSceneY() + moveY;
+            double nX = event.getSceneX() + shiftX;
+            double nY = event.getSceneY() + shiftY;
             root.setLayoutX(nX);
             root.setLayoutY(nY);
         });
@@ -146,7 +160,7 @@ public class CImagePane extends ScrollPane {
                     root.setCursor(Cursor.CROSSHAIR);
                     break;
             }
-            if (getIndexOf(new Position(event.getX(), event.getY())) != -1) {
+            if (getIndexOf(new Position(event.getX(), event.getY())) != NOT_FOUND) {
                 root.setCursor(Cursor.HAND);
             }
         });
@@ -195,7 +209,7 @@ public class CImagePane extends ScrollPane {
     public void reset() {
         setImage(null);
         setupLayers(0);
-        setSelectedLabel(-1);
+        setSelectedLabel(NOT_FOUND);
         positions.clear();
 
         root.setLayoutX(0);
@@ -319,13 +333,13 @@ public class CImagePane extends ScrollPane {
                 }
             }
         }
-        return -1;
+        return NOT_FOUND;
     }
 
     private void handleCheckMode(MouseEvent event) {
         cleatText();
         int index = getIndexOf(new Position(event.getX(), event.getY()));
-        if (index != -1) {
+        if (index != NOT_FOUND) {
             List<TransLabel> labels = config.getLabelsNow();
             Optional<TransLabel> result = labels.stream().filter(e -> e.getIndex() == index).findFirst();
             if (result.isPresent()) {
@@ -362,7 +376,7 @@ public class CImagePane extends ScrollPane {
             }
             case SECONDARY: {
                 int index = getSelectedLabel();
-                if (index != -1) {
+                if (index != NOT_FOUND) {
                     CTreeItem item = config.getControllerAccessor().findLabelByIndex(index);
                     TreeItem<String> parent = item.getParent();
 
@@ -442,6 +456,30 @@ public class CImagePane extends ScrollPane {
             updateLayer(groupId);
         }
     }
+    public void moveTo(int index) {
+        if (index != NOT_FOUND) {
+            setVvalue(0);
+            setHvalue(0);
+            Position position = positions.get(index);
+            // ScenePos -> CursorPos; LayoutPos -> CtxPos; LabelLayoutPos -> LayoutPos + Pos
+            // Scale -> nL -> Image / 2 * (1 - Scale)
+
+            // Label Center  -> Pos + Radius * 0.5
+            double centerX = position.x + LABEL_RADIUS * 0.5;
+            double centerY = position.y + LABEL_RADIUS * 0.5;
+
+            // Scaled (fake) -> Image / 2 - (Image / 2 - Center) * Scale -> Image / 2 * (1 - Scale) + Center * Scale
+            double fakeX = getViewWidth() * 0.5 - (getViewWidth() * 0.5 - centerX) * getScale();
+            double fakeY = getViewHeight() * 0.5 - (getViewHeight() * 0.5 - centerY) * getScale();
+
+            // To center (getW /2, getH /2) = LP + fake
+            double X = getWidth() / 2 - fakeX;
+            double Y = getHeight() / 2 - fakeY;
+
+            root.setLayoutX(X);
+            root.setLayoutY(Y);
+        }
+    }
 
     public double getViewWidth() {
         return getImage().getWidth();
@@ -459,11 +497,37 @@ public class CImagePane extends ScrollPane {
         return view.imageProperty();
     }
 
+    public void setMinScale(double minScale) {
+        if (minScale >= 0) {
+            if (maxScale != NOT_FOUND) {
+                if (minScale <= maxScale) {
+                    this.minScale = minScale;
+                }
+            } else {
+                this.minScale = minScale;
+            }
+        }
+    }
+    public void setMaxScale(double maxScale) {
+        if (maxScale >= 0) {
+            if (minScale != NOT_FOUND) {
+                if (maxScale >= minScale) {
+                    this.maxScale = maxScale;
+                }
+            } else {
+                this.maxScale = maxScale;
+            }
+        }
+    }
     public double getScale() {
         return scale.get();
     }
     public void setScale(double scale) {
-        this.scale.set(scale);
+        if (scale >= 0) {
+            if (minScale != NOT_FOUND) scale = Math.max(scale, minScale);
+            if (maxScale != NOT_FOUND) scale = Math.min(scale, maxScale);
+            this.scale.set(scale);
+        }
     }
     public DoubleProperty scaleProperty() {
         return scale;

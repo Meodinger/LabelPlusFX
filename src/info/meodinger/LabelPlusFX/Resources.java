@@ -1,6 +1,5 @@
 package info.meodinger.LabelPlusFX;
 
-import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -10,13 +9,13 @@ import java.io.InputStream;
  */
 public class Resources {
 
-    static {
-        init();
-    }
-
+    public static InputStream ICON;
+    public static InputStream PS_Script_Stream;
+    public static InputStream PS_Template_Stream_CN;
+    public static InputStream PS_Template_Stream_EN;
 
     private static String getResource(String name) {
-        return "Resources" + File.separator + name;
+        return "Resources/" + name;
     }
     public static void init() {
         ICON = Resources.class.getResourceAsStream(getResource("icon.png"));
@@ -24,10 +23,5 @@ public class Resources {
         PS_Template_Stream_CN = Resources.class.getResourceAsStream(getResource("zh.psd"));
         PS_Template_Stream_EN = Resources.class.getResourceAsStream(getResource("en.psd"));
     }
-
-    public static InputStream ICON;
-    public static InputStream PS_Script_Stream;
-    public static InputStream PS_Template_Stream_CN;
-    public static InputStream PS_Template_Stream_EN;
 
 }

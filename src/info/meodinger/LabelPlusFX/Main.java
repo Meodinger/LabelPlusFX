@@ -8,12 +8,12 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
-import java.io.File;
 
 public class Main extends Application {
 
     static {
         I18N.init();
+        Resources.init();
     }
 
     private Config config;

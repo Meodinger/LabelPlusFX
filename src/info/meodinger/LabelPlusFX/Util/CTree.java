@@ -14,4 +14,13 @@ public class CTree {
         while (root.getParent() != null) root = root.getParent();
         return root;
     }
+
+    public static void expandAll(TreeItem<?> item) {
+        if (item.getChildren().size() > 0) {
+            item.setExpanded(true);
+            for (TreeItem<?> i : item.getChildren()) {
+                expandAll(i);
+            }
+        }
+    }
 }

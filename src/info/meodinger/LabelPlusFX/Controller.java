@@ -11,6 +11,9 @@ import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 
 import info.meodinger.LabelPlusFX.Util.CString;
+import info.meodinger.LabelPlusFX.Util.CTree;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
@@ -70,6 +73,55 @@ public class Controller implements Initializable {
         }
     }
     private final TransLabelTextListener textListener = new TransLabelTextListener();
+
+
+    private abstract class TreeItemListener<T extends Event> implements EventHandler<T> {
+        public TreeItem<String> getItem(T event) {
+            int shift = 0;
+
+            // Shift edit
+            if (event.getEventType() == KeyEvent.KEY_PRESSED) {
+                KeyEvent keyEvent = (KeyEvent) event;
+                if (keyEvent.getCode() == KeyCode.UP) shift = -1;
+                else if (keyEvent.getCode() == KeyCode.DOWN) shift = 1;
+                else shift = 0;
+            }
+
+            int index = vTree.getSelectionModel().getSelectedIndex() + shift;
+            return vTree.getTreeItem(index);
+        }
+    }
+    private class TreeItemListener4Text<T extends Event> extends TreeItemListener<T> {
+        @Override
+        public void handle(T event) {
+            TreeItem<String> item = getItem(event);
+
+            if (item != null) {
+                if (item.getClass() == CTreeItem.class) {
+                    // Label
+                    textListener.retargetTo((CTreeItem) item);
+                } else {
+                    // Other
+                    textListener.retargetTo(null);
+                }
+            } else {
+                textListener.retargetTo(null);
+            }
+        }
+    }
+    private class TreeItemListener4Label<T extends Event> extends TreeItemListener<T> {
+        @Override
+        public void handle(T event) {
+            TreeItem<String> item = getItem(event);
+            if (item != null) {
+                if (item.getClass() == CTreeItem.class) {
+                    // Label
+                    int index = ((CTreeItem) item).meta.getIndex();
+                    cImagePane.moveTo(index);
+                }
+            }
+        }
+    }
 
     private final CTreeMenu menu;
 
@@ -213,6 +265,8 @@ public class Controller implements Initializable {
 
         // Initialize
         cImagePane.setConfig(config);
+        cImagePane.setMinScale(cSlider.getMinScale());
+        cImagePane.setMaxScale(cSlider.getMaxScale());
         vTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         vTree.setCellFactory(view -> new CTreeCell(config, menu));
 
@@ -238,87 +292,90 @@ public class Controller implements Initializable {
             cImagePane.update(CImagePane.TEXT_LAYER);
         });
 
-        // Bind view scale and slider value (Use slider value limitation to limit view scale)
-        cImagePane.scaleProperty().addListener((observable, oldValue, newValue) -> {
-            double nValue = (Double) newValue;
-            nValue = Math.max(nValue, cSlider.getMinScale());
-            nValue = Math.min(nValue, cSlider.getMaxScale());
-
-            cSlider.setScale(nValue);
-        });
+        // Bind view scale and slider value
+        cImagePane.scaleProperty().addListener((observable, oldValue, newValue) -> cSlider.setScale((Double) newValue));
         cSlider.scaleProperty().addListener((observableValue, oldValue, newValue) -> cImagePane.setScale((Double) newValue));
 
-        // Bind Text and Tree (Also bind selected group with config)
+        // Bind Text and Tree
         tTransText.textProperty().addListener(textListener);
-        vTree.setOnMouseClicked(event -> {
-            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Text<>());
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Text<>());
+        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Text<>());
 
+        // Bind selected group with Config & GroupBox
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
             if (item != null) {
-                if (item.getClass() == CTreeItem.class) {
-                    // Label
-                    textListener.retargetTo((CTreeItem) item);
-                } else if (item.getParent() == null) {
-                    // Root
-                    textListener.retargetTo(null);
-                } else {
-                    // Group
+                if (item.getParent() != null && item.getClass() != CTreeItem.class) {
                     textListener.retargetTo(null);
                     cGroupBox.moveTo(config.getGroupIdByName(item.getValue()));
                 }
-            } else {
-                textListener.retargetTo(null);
-            }
-        });
-        vTree.setOnKeyPressed(event -> {
-            int shift;
-            if (event.getCode() == KeyCode.UP) shift = -1;
-            else if (event.getCode() == KeyCode.DOWN) shift = 1;
-            else shift = 0;
-
-            int index = vTree.getSelectionModel().getSelectedIndex() + shift;
-            TreeItem<String> item = vTree.getTreeItem(index);
-
-            if (item != null) {
-                if (item.getClass() == CTreeItem.class) {
-                    // Label
-                    textListener.retargetTo((CTreeItem) item);
-                } else {
-                    // Other
-                    textListener.retargetTo(null);
-                }
-            } else {
-                textListener.retargetTo(null);
-            }
-        });
-        vTree.setOnScrollTo(event -> {
-            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
-
-            if (item != null) {
-                if (item.getClass() == CTreeItem.class) {
-                    // Label
-                    textListener.retargetTo((CTreeItem) item);
-                } else {
-                    // Other
-                    textListener.retargetTo(null);
-                }
-            } else {
-                textListener.retargetTo(null);
             }
         });
 
         // Bind Label Graphic and Tree
         cImagePane.selectedLabelProperty().addListener((observable, oldValue, newValue) -> {
             int index = (int) newValue;
-            CTreeItem item = findLabelItemByIndex(index);
-            vTree.getSelectionModel().select(item);
-            vTree.scrollTo(vTree.getRow(item));
+            if (index != CImagePane.NOT_FOUND) {
+                CTreeItem item = findLabelItemByIndex(index);
+                vTree.getSelectionModel().select(item);
+                vTree.scrollTo(vTree.getRow(item));
+            }
         });
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Label<>());
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Label<>());
+        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Label<>());
 
         // Bind number input with group selection
-        cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+        config.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode().isDigitKey()) {
                 cGroupBox.moveTo(Integer.parseInt(event.getText()) - 1);
             }
+        });
+
+        // Bind Arrow KeyEvent with TreeItem change in InputMode
+        config.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.isControlDown() && event.getCode().isArrowKey()) {
+                switch (event.getCode()) {
+                    case UP:
+                    case DOWN:
+                        int shift, index;
+
+                        // Shift edit
+                        if (event.getCode() == KeyCode.UP) shift = -1;
+                        else shift = 1;
+
+                        index = vTree.getSelectionModel().getSelectedIndex() + shift;
+                        TreeItem<String> item = vTree.getTreeItem(index);
+
+                        if (item != null) {
+                            if (item.getClass() == CTreeItem.class) {
+                                // Label
+                            } else if (item.getParent() != null) {
+                                // Group
+                                item.setExpanded(true);
+                                index = index + shift;
+
+                            } else {
+                                // Root
+                                CTree.expandAll(item);
+                                if (config.getViewMode() == Config.VIEW_MODE_GROUP) index++;
+                                while (vTree.getTreeItem(index).getChildren().size() == 0) index++;
+                                index = index + shift;
+                            }
+                            vTree.getSelectionModel().select(index);
+                            vTree.scrollTo(index);
+                        }
+                        break;
+                    case LEFT:
+                        cPicBox.back();
+                        break;
+                    case RIGHT:
+                        cPicBox.next();
+                        break;
+                }
+            }
+
         });
 
     }
@@ -604,9 +661,9 @@ public class Controller implements Initializable {
         CDialog.showInfo(I18N.ABOUT, I18N.ABOUT_CONTENT);
     }
 
-    @FXML public void switchViewMode() {
-        config.switchViewMode();
-        switch (config.getViewMode()) {
+    private void setViewMode(int viewMode) {
+        config.setViewMode(viewMode);
+        switch (viewMode) {
             case Config.VIEW_MODE_GROUP:
                 btnSwitchViewMode.setText(I18N.VIEW_GROUP);
                 break;
@@ -616,19 +673,31 @@ public class Controller implements Initializable {
         }
         loadTransLabel();
     }
-    @FXML public void switchWorkMode() {
-        config.switchWorkMode();
-        switch (config.getWorkMode()) {
+    @FXML public void switchViewMode() {
+        int viewMode = (config.getViewMode() + 1) % 2;
+        setViewMode(viewMode);
+    }
+
+    private void setWorkMode(int workMode) {
+        config.setWorkMode(workMode);
+        switch (workMode) {
             case Config.WORK_MODE_CHECK:
                 btnSwitchWorkMode.setText(I18N.WORK_CHECK);
+                setViewMode(Config.VIEW_MODE_GROUP);
                 break;
             case Config.WORK_MODE_LABEL:
                 btnSwitchWorkMode.setText(I18N.WORK_LABEL);
+                setViewMode(Config.VIEW_MODE_GROUP);
                 break;
             case Config.WORK_MODE_INPUT:
+                setViewMode(Config.VIEW_MODE_INDEX);
                 btnSwitchWorkMode.setText(I18N.WORK_INPUT);
                 break;
         }
+    }
+    @FXML public void switchWorkMode() {
+        int workMode = (config.getWorkMode() + 1) % 3;
+        setWorkMode(workMode);
     }
 
     /**
@@ -687,7 +756,7 @@ public class Controller implements Initializable {
         vTree.setRoot(root);
     }
     private CTreeItem findLabelItemByIndex(int index) {
-        if (index != -1) {
+        if (index != CImagePane.NOT_FOUND) {
             List<TransLabel> labels = config.getLabelsNow();
             Optional<TransLabel> labelResult = labels.stream().filter(e -> e.getIndex() == index).findFirst();
             if (labelResult.isPresent()) {

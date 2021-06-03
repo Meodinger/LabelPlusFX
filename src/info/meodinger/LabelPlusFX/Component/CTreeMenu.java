@@ -132,13 +132,13 @@ public class CTreeMenu {
                 Optional<TransFile.MeoTransFile.Group> result = dialog.showAndWait();
                 if (result.isPresent()) {
                     TransFile.MeoTransFile.Group group = result.get();
-                    Node node = new Circle(8, Color.web(group.color));
 
                     // Edit data
                     config.getGroups().add(group);
                     // Update view
                     config.getControllerAccessor().updateGroupList();
-                    rootItem.getChildren().add(new TreeItem<>(group.name, node));
+                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).addNewLayer();
+                    rootItem.getChildren().add(new TreeItem<>(group.name, new Circle(8, Color.web(group.color))));
                     // Mark change
                     config.setChanged(true);
                 }
@@ -235,6 +235,7 @@ public class CTreeMenu {
                 // Update view
                 config.getControllerAccessor().updateGroupList();
                 groupItem.getParent().getChildren().remove(groupItem);
+                ((CImagePane) config.getControllerAccessor().get("cImagePane")).removeLayer(config.getGroupIdByName(groupItem.getValue()));
                 // Mark change
                 config.setChanged(true);
             });
@@ -271,12 +272,17 @@ public class CTreeMenu {
             editGroup.setOnAction(e -> {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 Config config = getConfig();
+                int prevGroupId = labelItem.meta.getGroupId();
                 Optional<String> result = CDialog.showChoice(I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, config.getGroupNames());
 
                 // Edit data
                 result.ifPresent(labelItem::setGroupName);
                 // Update view
-                config.getControllerAccessor().loadTransLabel();
+                if (config.getViewMode() == Config.VIEW_MODE_GROUP) {
+                    TreeItem<String> rootItem = CTree.getRootOf(labelItem);
+                    rootItem.getChildren().get(prevGroupId).getChildren().remove(labelItem);
+                    rootItem.getChildren().get(labelItem.meta.getGroupId()).getChildren().add(labelItem);
+                }
                 // Mark change
                 config.setChanged(true);
             });

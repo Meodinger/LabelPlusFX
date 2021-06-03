@@ -446,12 +446,23 @@ public class CImagePane extends ScrollPane {
         setupLayers(config.getGroupCount());
         setupLabels();
     }
+
+    public void addNewLayer() {
+        Canvas layer = new Canvas(getViewWidth(), getViewWidth());
+        root.getChildren().add(layer);
+        layers.add(layer);
+        textLayer.toFront();
+    }
+    public void removeLayer(int index) {
+        root.getChildren().remove(index);
+        layers.remove(index);
+    }
     public void update(int groupId) {
         if (groupId == TEXT_LAYER){
             if (config.getWorkMode() == Config.WORK_MODE_LABEL) {
                 cleatText();
             }
-        } else {
+        } else if (groupId < layers.size()) {
             updatePositions();
             updateLayer(groupId);
         }

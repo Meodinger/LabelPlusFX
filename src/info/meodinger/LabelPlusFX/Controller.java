@@ -12,8 +12,6 @@ import info.meodinger.LabelPlusFX.Util.CDialog;
 
 import info.meodinger.LabelPlusFX.Util.CString;
 import info.meodinger.LabelPlusFX.Util.CTree;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
@@ -125,14 +123,14 @@ public class Controller implements Initializable {
 
     private final CTreeMenu menu;
 
-    private final class AutoSave extends TimerTask {
+    private final class AutoBack extends TimerTask {
         @Override
         public void run() {
-            Controller.this.silentSave();
+            Controller.this.silentBak();
         }
     }
     private final Timer timer;
-    private AutoSave task = null;
+    private AutoBack task = null;
 
 
     @FXML private BorderPane main;
@@ -213,11 +211,6 @@ public class Controller implements Initializable {
             }
 
             @Override
-            public void loadTransLabel() {
-                Controller.this.loadTransLabel();
-            }
-
-            @Override
             public CTreeItem findLabelByIndex(int index) {
                 return Controller.this.findLabelItemByIndex(index);
             }
@@ -283,9 +276,10 @@ public class Controller implements Initializable {
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentPicName(newValue);
             loadTransLabel();
+            cImagePane.update();
         });
 
-        // Change config
+        // Update text layer
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentGroupId(config.getGroupIdByName(newValue));
             config.setCurrentGroupName(newValue);
@@ -295,12 +289,6 @@ public class Controller implements Initializable {
         // Bind view scale and slider value
         cImagePane.scaleProperty().addListener((observable, oldValue, newValue) -> cSlider.setScale((Double) newValue));
         cSlider.scaleProperty().addListener((observableValue, oldValue, newValue) -> cImagePane.setScale((Double) newValue));
-
-        // Bind Text and Tree
-        tTransText.textProperty().addListener(textListener);
-        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Text<>());
-        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Text<>());
-        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Text<>());
 
         // Bind selected group with Config & GroupBox
         vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
@@ -313,6 +301,12 @@ public class Controller implements Initializable {
             }
         });
 
+        // Bind Text and Tree
+        tTransText.textProperty().addListener(textListener);
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Text<>());
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Text<>());
+        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Text<>());
+
         // Bind Label Graphic and Tree
         cImagePane.selectedLabelProperty().addListener((observable, oldValue, newValue) -> {
             int index = (int) newValue;
@@ -324,17 +318,16 @@ public class Controller implements Initializable {
         });
         vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Label<>());
         vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Label<>());
-        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Label<>());
 
         // Bind number input with group selection
-        config.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+        cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode().isDigitKey()) {
                 cGroupBox.moveTo(Integer.parseInt(event.getText()) - 1);
             }
         });
 
-        // Bind Arrow KeyEvent with TreeItem change in InputMode
-        config.stage.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+        // Bind Arrow KeyEvent with Label change and Pic change
+        tTransText.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if (event.isControlDown() && event.getCode().isArrowKey()) {
                 switch (event.getCode()) {
                     case UP:
@@ -360,11 +353,14 @@ public class Controller implements Initializable {
                                 // Root
                                 CTree.expandAll(item);
                                 if (config.getViewMode() == Config.VIEW_MODE_GROUP) index++;
-                                while (vTree.getTreeItem(index).getChildren().size() == 0) index++;
+                                while (vTree.getTreeItem(index).getChildren().size() == 0) {
+                                    index++;
+                                    if (vTree.getTreeItem(index) == null) break;
+                                }
                                 index = index + shift;
                             }
                             vTree.getSelectionModel().select(index);
-                            vTree.scrollTo(index);
+                            vTree.fireEvent(event);
                         }
                         break;
                     case LEFT:
@@ -448,7 +444,7 @@ public class Controller implements Initializable {
         cGroupBox.setList(config.getGroupNames());
     }
 
-    private void silentSave() {
+    private void silentBak() {
         File bak = new File(config.getBakFolder() + File.separator + new Date().getTime() + Config.EXTENSION_BAK);
         exporterMeo.export(bak);
     }
@@ -462,7 +458,7 @@ public class Controller implements Initializable {
         }
         File bakDir = new File(config.getBakFolder());
         if ((bakDir.exists() && bakDir.isDirectory()) || bakDir.mkdir()) {
-            task = new AutoSave();
+            task = new AutoBack();
             timer.schedule(task, Config.AUTO_SAVE_DELAY , Config.AUTO_SAVE_PERIOD);
         } else {
             CDialog.showAlert(I18N.AUTO_SAVE_NOT_AVAILABLE);
@@ -683,7 +679,7 @@ public class Controller implements Initializable {
         switch (workMode) {
             case Config.WORK_MODE_CHECK:
                 btnSwitchWorkMode.setText(I18N.WORK_CHECK);
-                setViewMode(Config.VIEW_MODE_GROUP);
+                setViewMode(Config.VIEW_MODE_INDEX);
                 break;
             case Config.WORK_MODE_LABEL:
                 btnSwitchWorkMode.setText(I18N.WORK_LABEL);
@@ -715,7 +711,6 @@ public class Controller implements Initializable {
                     loadTransLabel_Index();
                     break;
             }
-            cImagePane.update();
         }
     }
     private void loadTransLabel_Group() {

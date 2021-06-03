@@ -259,10 +259,7 @@ public class Config {
         void reset();
         void setDisable(boolean isDisable);
         void updateGroupList();
-        /**
-         * Reload all Labels will invoke CImagePane::update
-         */
-        void loadTransLabel();
+
         CTreeItem findLabelByIndex(int index);
         TreeItem<String> findGroupItemByName(String name);
 

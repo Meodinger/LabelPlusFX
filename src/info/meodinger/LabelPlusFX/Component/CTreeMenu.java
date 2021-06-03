@@ -3,17 +3,18 @@ package info.meodinger.LabelPlusFX.Component;
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile;
+import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CColor;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 import info.meodinger.LabelPlusFX.Util.CString;
 import info.meodinger.LabelPlusFX.Util.CTree;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -137,7 +138,7 @@ public class CTreeMenu {
                     config.getGroups().add(group);
                     // Update view
                     config.getControllerAccessor().updateGroupList();
-                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).addNewLayer();
+                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).addLabelLayer();
                     rootItem.getChildren().add(new TreeItem<>(group.name, new Circle(8, Color.web(group.color))));
                     // Mark change
                     config.setChanged(true);
@@ -182,8 +183,6 @@ public class CTreeMenu {
                 return;
             }
 
-            delete.setDisable(item.getChildren().size() != 0);
-
             rename.setOnAction(e -> {
                 TreeItem<String> groupItem = getItem();
                 Config config = getConfig();
@@ -219,23 +218,34 @@ public class CTreeMenu {
                 config.getGroupAt(groupId).color = CColor.toHex(color);
                 // Update view
                 ((Circle) getItem().getGraphic()).setFill(color);
-                ((CImagePane) config.getControllerAccessor().get("cImagePane")).update(groupId);
+                ((CImagePane) config.getControllerAccessor().get("cImagePane")).updateLabelLayer(groupId);
                 // Mark change
                 config.setChanged(true);
 
             });
             changeColor.setText(CColor.toHex(picker.getValue()));
 
+
+            int labelCount = 0, thisGroupId = getConfig().getGroupIdByName(getItem().getValue());
+            for (List<TransLabel> labels : getConfig().getTransMap().values()) {
+                for (TransLabel label : labels) {
+                    if (label.getGroupId() == thisGroupId) labelCount++;
+                }
+            }
+            delete.setDisable(labelCount != 0);
             delete.setOnAction(e -> {
                 TreeItem<String> groupItem = getItem();
                 Config config = getConfig();
+                int groupId = config.getGroupIdByName(groupItem.getValue());
 
                 // Edit data
-                config.getGroups().remove(config.getGroupIdByName(groupItem.getValue()));
+                for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel label : labels)
+                    if (label.getGroupId() >= groupId) label.setGroupId(label.getGroupId() - 1);
+                config.getGroups().remove(groupId);
                 // Update view
                 config.getControllerAccessor().updateGroupList();
                 groupItem.getParent().getChildren().remove(groupItem);
-                ((CImagePane) config.getControllerAccessor().get("cImagePane")).removeLayer(config.getGroupIdByName(groupItem.getValue()));
+                ((CImagePane) config.getControllerAccessor().get("cImagePane")).removeLabelLayer(groupId);
                 // Mark change
                 config.setChanged(true);
             });
@@ -282,6 +292,7 @@ public class CTreeMenu {
                     TreeItem<String> rootItem = CTree.getRootOf(labelItem);
                     rootItem.getChildren().get(prevGroupId).getChildren().remove(labelItem);
                     rootItem.getChildren().get(labelItem.meta.getGroupId()).getChildren().add(labelItem);
+                    rootItem.getChildren().get(labelItem.meta.getGroupId()).setExpanded(true);
                 }
                 // Mark change
                 config.setChanged(true);
@@ -295,12 +306,13 @@ public class CTreeMenu {
 
                 if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
                     TreeItem<String> root = CTree.getRootOf(labelItem);
+                    TransLabel label = labelItem.meta;
 
                     // Edit data
-                    config.getLabelsAt(root.getValue()).remove(labelItem.meta);
+                    config.getLabelsAt(root.getValue()).remove(label);
                     // Update view
                     labelItem.getParent().getChildren().remove(labelItem);
-                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).update(labelItem.meta.getGroupId());
+                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).updateLabelLayer(label.getGroupId());
                     // Mark change
                     config.setChanged(true);
                 }

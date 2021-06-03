@@ -258,7 +258,7 @@ public class CImagePane extends ScrollPane {
         double y = canvas.getHeight() * label.getY();
         double radius = LABEL_RADIUS;
 
-        gc.setFill(javafx.scene.paint.Color.web(config.getGroupColors().get(label.getGroupId())));
+        gc.setFill(javafx.scene.paint.Color.web(config.getGroupColorById(label.getGroupId())));
         gc.fillOval(x, y,  radius, radius);
 
         Text text = new Text(String.valueOf(label.getIndex()));
@@ -368,6 +368,7 @@ public class CImagePane extends ScrollPane {
                 config.getLabelsNow().add(newLabel);
                 recordPosition(index, new Position(event.getX(), event.getY()));
                 // Update view
+                groupItem.setExpanded(true);
                 groupItem.getChildren().add(new CTreeItem(config, groupName, newLabel));
                 drawLabel(newLabel);
                 // Mark change
@@ -377,15 +378,15 @@ public class CImagePane extends ScrollPane {
             case SECONDARY: {
                 int index = getSelectedLabel();
                 if (index != NOT_FOUND) {
-                    CTreeItem item = config.getControllerAccessor().findLabelByIndex(index);
-                    TreeItem<String> parent = item.getParent();
+                    CTreeItem labelItem = config.getControllerAccessor().findLabelByIndex(index);
+                    TreeItem<String> parent = labelItem.getParent();
 
                     // Edit data
-                    config.getLabelsNow().remove(item.meta);
+                    config.getLabelsNow().remove(labelItem.meta);
                     updatePositions();
                     // Update view
-                    parent.getChildren().remove(item);
-                    update(item.meta.getGroupId());
+                    parent.getChildren().remove(labelItem);
+                    updateLabelLayer(labelItem.meta.getGroupId());
                     // Mark change
                     config.setChanged(true);
                 }
@@ -447,17 +448,17 @@ public class CImagePane extends ScrollPane {
         setupLabels();
     }
 
-    public void addNewLayer() {
+    public void addLabelLayer() {
         Canvas layer = new Canvas(getViewWidth(), getViewWidth());
         root.getChildren().add(layer);
         layers.add(layer);
         textLayer.toFront();
     }
-    public void removeLayer(int index) {
-        root.getChildren().remove(index);
+    public void removeLabelLayer(int index) {
+        root.getChildren().remove(index + 1); // Bottom is ImageView
         layers.remove(index);
     }
-    public void update(int groupId) {
+    public void updateLabelLayer(int groupId) {
         if (groupId == TEXT_LAYER){
             if (config.getWorkMode() == Config.WORK_MODE_LABEL) {
                 cleatText();
@@ -467,7 +468,7 @@ public class CImagePane extends ScrollPane {
             updateLayer(groupId);
         }
     }
-    public void moveTo(int index) {
+    public void moveToLabel(int index) {
         if (index != NOT_FOUND) {
             setVvalue(0);
             setHvalue(0);

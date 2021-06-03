@@ -19,7 +19,7 @@ public class Resources {
     }
     public static void init() {
         ICON = Resources.class.getResourceAsStream(getResource("icon.png"));
-        PS_Script_Stream = Resources.class.getResourceAsStream(getResource("Meo_PS_Script.jsx"));
+        PS_Script_Stream = Resources.class.getResourceAsStream(getResource("Meo_PS_Script"));
         PS_Template_Stream_CN = Resources.class.getResourceAsStream(getResource("zh.psd"));
         PS_Template_Stream_EN = Resources.class.getResourceAsStream(getResource("en.psd"));
     }

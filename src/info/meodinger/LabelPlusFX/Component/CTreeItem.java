@@ -64,7 +64,7 @@ public class CTreeItem extends TreeItem<String> {
     public void update() {
         setValue(genHead() + ":  " + meta.getText().replaceAll("\n", " "));
         if (config.getViewMode() == Config.VIEW_MODE_INDEX){
-            setGraphic(new Circle(8, Color.web(config.getGroupColors().get(config.getGroupIdByName(getGroupName())))));
+            setGraphic(new Circle(8, Color.web(config.getGroupColorByName(getGroupName()))));
         }
     }
 

@@ -64,7 +64,6 @@ public class Config {
         setCurrentGroupId(0);
         setCurrentPicName(null);
         controllerAccessor.reset();
-        controllerAccessor.setDisable(true);
     }
 
     @Override
@@ -148,6 +147,10 @@ public class Config {
         return sorted;
     }
 
+    public int getGroupCount() {
+        return transFile.getGroup().size();
+    }
+
     public List<String> getGroupNames() {
         ArrayList<String> list = new ArrayList<>();
         for (MeoTransFile.Group group : transFile.getGroup()) {
@@ -155,17 +158,6 @@ public class Config {
         }
         return list;
     }
-    public List<String> getGroupColors() {
-        ArrayList<String> list = new ArrayList<>();
-        for (MeoTransFile.Group group : transFile.getGroup()) {
-            list.add(group.color);
-        }
-        return list;
-    }
-    public int getGroupCount() {
-        return transFile.getGroup().size();
-    }
-
     public int getGroupIdByName(String name) {
         int size = getGroupCount();
         for (int i = 0; i < size; i++) {
@@ -180,11 +172,29 @@ public class Config {
         return null;
     }
 
-    public String getBakFolder() {
-        return getFileFolder() + File.separator + "bak";
+    public List<String> getGroupColors() {
+        ArrayList<String> list = new ArrayList<>();
+        for (MeoTransFile.Group group : transFile.getGroup()) {
+            list.add(group.color);
+        }
+        return list;
     }
+    public String getGroupColorById(int groupId) {
+        if (groupId >= 0 && groupId < getGroupCount()) {
+            return getGroupColors().get(groupId);
+        }
+        return null;
+    }
+    public String getGroupColorByName(String name) {
+        int groupId = getGroupIdByName(name);
+        return getGroupColors().get(groupId);
+    }
+
     public String getFileFolder() {
         return new File(filePath).getParent();
+    }
+    public String getBakFolder() {
+        return getFileFolder() + File.separator + "bak";
     }
     public String getPicPathOf(String picName) {
         return getFileFolder() + File.separator + picName;
@@ -257,7 +267,6 @@ public class Config {
     public interface ControllerAccessor {
         void close();
         void reset();
-        void setDisable(boolean isDisable);
         void updateGroupList();
 
         CTreeItem findLabelByIndex(int index);

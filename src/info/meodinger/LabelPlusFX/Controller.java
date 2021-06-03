@@ -115,7 +115,7 @@ public class Controller implements Initializable {
                 if (item.getClass() == CTreeItem.class) {
                     // Label
                     int index = ((CTreeItem) item).meta.getIndex();
-                    cImagePane.moveTo(index);
+                    cImagePane.moveToLabel(index);
                 }
             }
         }
@@ -201,11 +201,6 @@ public class Controller implements Initializable {
             }
 
             @Override
-            public void setDisable(boolean isDisable) {
-                Controller.this.setDisable(isDisable);
-            }
-
-            @Override
             public void updateGroupList() {
                 Controller.this.updateGroupList();
             }
@@ -276,14 +271,14 @@ public class Controller implements Initializable {
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentPicName(newValue);
             loadTransLabel();
-            cImagePane.update();
+            if (newValue != null) cImagePane.update();
         });
 
         // Update text layer
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentGroupId(config.getGroupIdByName(newValue));
             config.setCurrentGroupName(newValue);
-            cImagePane.update(CImagePane.TEXT_LAYER);
+            cImagePane.updateLabelLayer(CImagePane.TEXT_LAYER);
         });
 
         // Bind view scale and slider value
@@ -439,6 +434,7 @@ public class Controller implements Initializable {
         // cGroupBox.reset will be invoked by cGroupBox.setList
         // cSlider will reset with cImagePane through listener
         cImagePane.reset();
+        setDisable(true);
     }
     private void updateGroupList() {
         cGroupBox.setList(config.getGroupNames());

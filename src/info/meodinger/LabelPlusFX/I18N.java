@@ -39,7 +39,7 @@ public class I18N {
     public static String ABOUT = "关于";
     public static String ABOUT_CONTENT = "Label Plus FX for version [1,0]\n" +
             "Author: Meodinger(meodinger@qq.com)\n" +
-            "Version: 1.0.3 Bugfix 200602\n" +
+            "Version: 1.0.3 Bugfix 210603\n" +
             "Java Version: " + System.getProperty("java.version");
 
     public static String ERROR = "错误";

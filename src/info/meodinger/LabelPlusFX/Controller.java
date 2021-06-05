@@ -39,10 +39,9 @@ public class Controller implements Initializable {
     private final FileChooser.ExtensionFilter meoFilter;
     private final FileChooser.ExtensionFilter lpFilter;
     private final FileChooser.ExtensionFilter packFilter;
-    private final FileChooser newChooser;
-    private final FileChooser openChooser;
-    private final FileChooser saveChooser;
+    private final FileChooser fileChooser;
     private final FileChooser exportChooser;
+    private final FileChooser exportPackChooser;
     private final TransFileLoader.MeoFileLoader loaderMeo;
     private final TransFileLoader.LPFileLoader loaderLP;
     private final TransFileExporter.MeoFileExporter exporterMeo;
@@ -174,10 +173,9 @@ public class Controller implements Initializable {
         this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + Config.EXTENSION_LP);
         this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + Config.EXTENSION_PACK);
 
-        this.newChooser = new FileChooser();
-        this.openChooser = new FileChooser();
-        this.saveChooser = new FileChooser();
+        this.fileChooser = new FileChooser();
         this.exportChooser = new FileChooser();
+        this.exportPackChooser = new FileChooser();
 
         this.meoPackager = new MeoPackager(config);
 
@@ -233,17 +231,13 @@ public class Controller implements Initializable {
     }
 
     private void init() {
-        newChooser.setTitle(I18N.NEW_TRANSLATION);
-        newChooser.getExtensionFilters().addAll(meoFilter, lpFilter);
-
-        openChooser.setTitle(I18N.OPEN_TRANSLATION);
-        openChooser.getExtensionFilters().addAll(meoFilter, lpFilter);
-
-        saveChooser.setTitle(I18N.SAVE_TRANSLATION);
-        saveChooser.getExtensionFilters().addAll(meoFilter, lpFilter);
+        fileChooser.setTitle(I18N.OPEN_TRANSLATION);
+        fileChooser.getExtensionFilters().addAll(meoFilter, lpFilter);
 
         exportChooser.setTitle(I18N.EXPORT_TRANSLATION);
-        exportChooser.getExtensionFilters().add(packFilter);
+
+        exportPackChooser.setTitle(I18N.EXPORT_TRANS_PACK);
+        exportPackChooser.getExtensionFilters().add(packFilter);
     }
 
     @Override
@@ -472,7 +466,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void newTranslation() {
-        File file = newChooser.showSaveDialog(config.stage);
+        File file = fileChooser.showSaveDialog(config.stage);
         if (file == null) return;
         trySave();
         config.initialize();
@@ -531,7 +525,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void openTranslation() {
-        File file = openChooser.showOpenDialog(config.stage);
+        File file = fileChooser.showOpenDialog(config.stage);
         if (file == null) return;
         trySave();
         config.initialize();
@@ -584,7 +578,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void saveAsTranslation() {
-        File file = saveChooser.showSaveDialog(config.stage);
+        File file = fileChooser.showSaveDialog(config.stage);
         if (file == null) return;
 
         config.setFilePath(file.getPath());
@@ -638,7 +632,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void exportTransPack() {
-        File file = exportChooser.showSaveDialog(config.stage);
+        File file = exportPackChooser.showSaveDialog(config.stage);
         if (file == null) return;
 
         if (meoPackager.packMeo(file.getPath())) {

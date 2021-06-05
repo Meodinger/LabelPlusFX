@@ -14,6 +14,7 @@ public class I18N {
     public static String OPEN_TRANSLATION = "打开翻译文件";
     public static String SAVE_TRANSLATION = "保存翻译文件";
     public static String EXPORT_TRANSLATION = "导出翻译文件";
+    public static String EXPORT_TRANS_PACK = "导出翻译图包";
 
     public static String MEO_TRANS_FILE = "喵版翻译文件";
     public static String LP_TRANS_FILE = "原版翻译文件";

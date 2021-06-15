@@ -3,11 +3,12 @@ package info.meodinger.LabelPlusFX;
 import info.meodinger.LabelPlusFX.Component.CTreeItem;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
+
+import javafx.application.Application;
 import javafx.scene.control.TreeItem;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -35,6 +36,7 @@ public class Config {
     public static final int AUTO_SAVE_DELAY = 5 * 60 * 1000;
     public static final int AUTO_SAVE_PERIOD = 3 * 60 * 1000;
 
+    public final Application application;
     public final Stage stage;
 
     private MeoTransFile transFile;
@@ -47,7 +49,8 @@ public class Config {
     private String currentGroupName;
     private String currentPicName;
 
-    public Config(Stage stage) {
+    public Config(Application application, Stage stage) {
+        this.application = application;
         this.stage = stage;
 
         this.workMode = WORK_MODE_CHECK;
@@ -267,6 +270,7 @@ public class Config {
     public interface ControllerAccessor {
         void close();
         void reset();
+        void updatePane();
         void updateGroupList();
 
         CTreeItem findLabelByIndex(int index);

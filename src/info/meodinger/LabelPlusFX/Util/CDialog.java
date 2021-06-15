@@ -1,12 +1,20 @@
 package info.meodinger.LabelPlusFX.Util;
 
 import info.meodinger.LabelPlusFX.I18N;
+
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.*;
+import javafx.stage.Window;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,6 +36,10 @@ public class CDialog {
         dialog.setTitle("");
         dialog.setContentText("");
         dialog.setDialogPane(new DialogPane());
+    }
+
+    public static void initOwner(Window window) {
+        dialog.initOwner(window);
     }
 
     public static Optional<ButtonType> showException(Exception e) {
@@ -66,6 +78,23 @@ public class CDialog {
         dialog.getDialogPane().getButtonTypes().add(new ButtonType(I18N.OK, ButtonBar.ButtonData.OK_DONE));
         return dialog.showAndWait();
     }
+    public static Optional<ButtonType> showInfoWithLink(String title, String info, String linkText, EventHandler<ActionEvent> handler) {
+        initDialog();
+        dialog.setTitle(title);
+        dialog.getDialogPane().getButtonTypes().add(new ButtonType(I18N.OK, ButtonBar.ButtonData.OK_DONE));
+
+        Label label = new Label(info);
+        Separator separator = new Separator();
+        Hyperlink hyperlink = new Hyperlink(linkText);
+
+        separator.setPadding(new Insets(8 , 0, 8, 0));
+        hyperlink.setOnAction(handler);
+
+        VBox content = new VBox(label, separator, hyperlink);
+        dialog.getDialogPane().setContent(content);
+
+        return dialog.showAndWait();
+    }
 
     public static Optional<ButtonType> showAlert(String alert) {
         return showAlert(I18N.ALERT, alert);
@@ -102,24 +131,33 @@ public class CDialog {
         return dialog.showAndWait();
     }
 
-    public static <T> Optional<T> showChoice(String title, String msg, List<T> choices) {
+    /**
+     *  For specific usage
+     */
+
+    public static <T> Optional<T> showChoice(Window owner, String title, String msg, List<T> choices) {
         ChoiceDialog<T> dialog = new ChoiceDialog<>(choices.get(0), choices);
+        dialog.initOwner(owner);
         dialog.setTitle(title);
         dialog.setContentText(msg);
 
         return dialog.showAndWait();
     }
 
-    public static Optional<String> showInput(String title, String msg, String placeholder) {
+    public static Optional<String> showInput(Window owner, String title, String msg, String placeholder) {
         TextInputDialog dialog = new TextInputDialog(placeholder);
+        dialog.initOwner(owner);
         dialog.setTitle(title);
         dialog.setHeaderText(msg);
 
         return dialog.showAndWait();
     }
 
-    public static <T> Optional<List<T>> showListChoose(String title, List<T> list) {
+    public static <T> Optional<List<T>> showListChoose(Window owner, String title, List<T> list) {
         Dialog<List<T>> dialog = new Dialog<>();
+        dialog.initOwner(owner);
+        dialog.setTitle(title);
+
         ListView<T> left = new ListView<>();
         ListView<T> right = new ListView<>();
         left.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

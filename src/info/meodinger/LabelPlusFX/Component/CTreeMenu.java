@@ -187,7 +187,7 @@ public class CTreeMenu {
                 TreeItem<String> groupItem = getItem();
                 Config config = getConfig();
 
-                Optional<String> result = CDialog.showInput(I18N.TITLE_RENAME, I18N.CONTENT_RENAME, groupItem.getValue());
+                Optional<String> result = CDialog.showInput(config.stage, I18N.TITLE_RENAME, I18N.CONTENT_RENAME, groupItem.getValue());
 
                 if (result.isPresent() && !CString.isBlank(result.get())) {
                     String name = result.get().trim().replaceAll(" ", "_");
@@ -283,7 +283,7 @@ public class CTreeMenu {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 Config config = getConfig();
                 int prevGroupId = labelItem.meta.getGroupId();
-                Optional<String> result = CDialog.showChoice(I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, config.getGroupNames());
+                Optional<String> result = CDialog.showChoice(config.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, config.getGroupNames());
 
                 // Edit data
                 result.ifPresent(labelItem::setGroupName);
@@ -298,6 +298,9 @@ public class CTreeMenu {
                 config.setChanged(true);
             });
 
+            /*
+             * Please also edit `CImagePane#handleLabelMode#SECONDARY`
+             */
             delete.setOnAction(e -> {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 Config config = getConfig();
@@ -305,14 +308,15 @@ public class CTreeMenu {
                 Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABEL, labelItem.getValue());
 
                 if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
-                    TreeItem<String> root = CTree.getRootOf(labelItem);
                     TransLabel label = labelItem.meta;
 
                     // Edit data
-                    config.getLabelsAt(root.getValue()).remove(label);
+                    for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel l : labels)
+                        if (l.getIndex() > label.getIndex()) l.setIndex(l.getIndex() - 1);
+                    config.getLabelsNow().remove(label);
                     // Update view
                     labelItem.getParent().getChildren().remove(labelItem);
-                    ((CImagePane) config.getControllerAccessor().get("cImagePane")).updateLabelLayer(label.getGroupId());
+                    config.getControllerAccessor().updatePane();
                     // Mark change
                     config.setChanged(true);
                 }

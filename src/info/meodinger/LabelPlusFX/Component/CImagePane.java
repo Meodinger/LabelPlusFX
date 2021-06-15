@@ -2,8 +2,10 @@ package info.meodinger.LabelPlusFX.Component;
 
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
+import info.meodinger.LabelPlusFX.Util.CAccelerator;
 import info.meodinger.LabelPlusFX.Util.CColor;
 import info.meodinger.LabelPlusFX.Util.CDialog;
+
 import javafx.beans.property.*;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -14,7 +16,6 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -187,8 +188,9 @@ public class CImagePane extends ScrollPane {
             }
         });
 
-        container.addEventHandler(ScrollEvent.SCROLL, event -> {
-            if (event.isControlDown() || event.isAltDown()) {
+        container.setOnScroll(event -> {
+            updateLabelLayer(TEXT_LAYER);
+            if (CAccelerator.isControlDown(event) || event.isAltDown()) {
                 setScale(getScale() + (event.getDeltaY() / 400));
             }
         });
@@ -308,13 +310,11 @@ public class CImagePane extends ScrollPane {
 
     private void initPositions() {
         positions.clear();
-        List<TransLabel> labels = config.getLabelsNow();
-        int maxIndex = 0;
-        for (TransLabel label : labels) maxIndex = Math.max(maxIndex, label.getIndex());
-        for (int i = -1; i < maxIndex; i++) positions.add(null);
-
+        int size = config.getLabelsNow().size();
+        for (int i = -1; i < size; i++) positions.add(null);
     }
     private void recordPosition(int index, Position position) {
+        // Though the app chooses to let indexes in order, we also support unique index like `114514`
         if (index >= positions.size()) {
             int enLargeSize = index - positions.size() + 1;
             for (int i = 0; i < enLargeSize; i++) {
@@ -325,15 +325,16 @@ public class CImagePane extends ScrollPane {
     }
     private int getIndexOf(Position position) {
         int size = positions.size();
+        int index = NOT_FOUND;
         for (int i = 0; i < size; i++) {
             Position p = positions.get(i);
             if (p != null) {
                 if ((position.x >= p.x && position.x <= p.x + LABEL_RADIUS) && (position.y >= p.y && position.y <= p.y + LABEL_RADIUS)) {
-                    return i;
+                    index = i;
                 }
             }
         }
-        return NOT_FOUND;
+        return index;
     }
 
     private void handleCheckMode(MouseEvent event) {
@@ -379,14 +380,14 @@ public class CImagePane extends ScrollPane {
                 int index = getSelectedLabel();
                 if (index != NOT_FOUND) {
                     CTreeItem labelItem = config.getControllerAccessor().findLabelByIndex(index);
-                    TreeItem<String> parent = labelItem.getParent();
 
                     // Edit data
+                    for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel l : labels)
+                        if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
                     config.getLabelsNow().remove(labelItem.meta);
-                    updatePositions();
                     // Update view
-                    parent.getChildren().remove(labelItem);
-                    updateLabelLayer(labelItem.meta.getGroupId());
+                    labelItem.getParent().getChildren().remove(labelItem);
+                    update();
                     // Mark change
                     config.setChanged(true);
                 }
@@ -454,9 +455,9 @@ public class CImagePane extends ScrollPane {
         layers.add(layer);
         textLayer.toFront();
     }
-    public void removeLabelLayer(int index) {
-        root.getChildren().remove(index + 1); // Bottom is ImageView
-        layers.remove(index);
+    public void removeLabelLayer(int groupId) {
+        root.getChildren().remove(groupId + 1); // Bottom is ImageView
+        layers.remove(groupId);
     }
     public void updateLabelLayer(int groupId) {
         if (groupId == TEXT_LAYER){

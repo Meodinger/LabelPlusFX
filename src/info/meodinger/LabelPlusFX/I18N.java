@@ -32,16 +32,21 @@ public class I18N {
 
     public static String HINT = "帮助";
     public static String HINT_CONTENT = "图片可以任意拖动\n" +
-            "Alt/Ctrl + 滚轮 -> 图片缩放\n" +
+            "Alt/Ctrl/Meta + 滚轮 -> 图片缩放\n" +
             "标号模式：数字键 -> 更改分组\n" +
             "标号模式：鼠标左键 -> 放置标号\n" +
             "标号模式：鼠标右键 -> 移除标号\n" +
             "录入审查：点击标号 -> 快速修改";
+    public static String HINT_LINK = "更多用法请点击此处";
+    public static String HINT_LINK_URL = "https://www.kdocs.cn/l/cpRyDN2Perkb";
+
     public static String ABOUT = "关于";
     public static String ABOUT_CONTENT = "Label Plus FX for version [1,0]\n" +
             "Author: Meodinger(meodinger@qq.com)\n" +
-            "Version: 1.0.3 Bugfix 210603\n" +
+            "Version: 1.0.5 Bugfix 210615\n" +
             "Java Version: " + System.getProperty("java.version");
+    public static String ABOUT_LINK = "Github Repository";
+    public static String ABOUT_LINK_URL = "https://github.com/Meodinger/LabelPlusFX";
 
     public static String ERROR = "错误";
     public static String INFO = "信息";
@@ -116,6 +121,7 @@ public class I18N {
             OPEN_TRANSLATION = "Open Translation File";
             SAVE_TRANSLATION = "Save Translation File";
             EXPORT_TRANSLATION = "Export Translation Pack";
+            EXPORT_TRANS_PACK = "Export Trans File Pack";
 
             MEO_TRANS_FILE = "MeoTransFile";
             LP_TRANS_FILE = "LabelPlusFile";
@@ -133,11 +139,12 @@ public class I18N {
 
             HINT = "Hint";
             HINT_CONTENT = "Pic can be dragged\n" +
-                    "Alt/Ctrl + MouseScroll -> Scale pic\n" +
+                    "Alt/Ctrl/Meta + MouseScroll -> Scale pic\n" +
                     "(Label Mode) Number Key -> Change Group\n" +
                     "(Label Mode) Left Click -> Place Label\n" +
                     "(Label Mode) Right Click -> Remove Label\n" +
                     "(Check|Input) Click Label -> Quick Edit";
+            HINT_LINK = "Click this for more information";
             ABOUT = "About";
 
             ERROR = "Error";

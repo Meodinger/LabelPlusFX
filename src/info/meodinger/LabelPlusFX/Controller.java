@@ -8,10 +8,11 @@ import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile.Group;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
+import info.meodinger.LabelPlusFX.Util.CAccelerator;
 import info.meodinger.LabelPlusFX.Util.CDialog;
-
 import info.meodinger.LabelPlusFX.Util.CString;
 import info.meodinger.LabelPlusFX.Util.CTree;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.*;
@@ -39,14 +40,15 @@ public class Controller implements Initializable {
     private final FileChooser.ExtensionFilter meoFilter;
     private final FileChooser.ExtensionFilter lpFilter;
     private final FileChooser.ExtensionFilter packFilter;
-    private final FileChooser fileChooser;
-    private final FileChooser exportChooser;
-    private final FileChooser exportPackChooser;
+    private final CFileChooser fileChooser;
+    private final CFileChooser exportChooser;
+    private final CFileChooser exportPackChooser;
     private final TransFileLoader.MeoFileLoader loaderMeo;
     private final TransFileLoader.LPFileLoader loaderLP;
     private final TransFileExporter.MeoFileExporter exporterMeo;
     private final TransFileExporter.LPFileExporter exporterLP;
     private final MeoPackager meoPackager;
+    private final CTreeMenu menu;
 
     private class TransLabelTextListener implements ChangeListener<String> {
         private CTreeItem targetItem;
@@ -71,7 +73,6 @@ public class Controller implements Initializable {
     }
     private final TransLabelTextListener textListener = new TransLabelTextListener();
 
-
     private abstract class TreeItemListener<T extends Event> implements EventHandler<T> {
         public TreeItem<String> getItem(T event) {
             int shift = 0;
@@ -92,15 +93,9 @@ public class Controller implements Initializable {
         @Override
         public void handle(T event) {
             TreeItem<String> item = getItem(event);
-
-            if (item != null) {
-                if (item.getClass() == CTreeItem.class) {
-                    // Label
-                    textListener.retargetTo((CTreeItem) item);
-                } else {
-                    // Other
-                    textListener.retargetTo(null);
-                }
+            if (item != null && item.getClass() == CTreeItem.class) {
+                // Label
+                textListener.retargetTo((CTreeItem) item);
             } else {
                 textListener.retargetTo(null);
             }
@@ -110,17 +105,95 @@ public class Controller implements Initializable {
         @Override
         public void handle(T event) {
             TreeItem<String> item = getItem(event);
-            if (item != null) {
-                if (item.getClass() == CTreeItem.class) {
-                    // Label
-                    int index = ((CTreeItem) item).meta.getIndex();
-                    cImagePane.moveToLabel(index);
-                }
+            if (item != null && item.getClass() == CTreeItem.class) {
+                // Label
+                int index = ((CTreeItem) item).meta.getIndex();
+                cImagePane.moveToLabel(index);
             }
         }
     }
 
-    private final CTreeMenu menu;
+    private class ArrowKeyListener implements EventHandler<KeyEvent> {
+        @Override
+        public void handle(KeyEvent event) {
+            if (CAccelerator.isControlDown(event) && event.getCode().isArrowKey()) {
+                switch (event.getCode()) {
+                    case UP:
+                    case DOWN:
+                        int shift, index;
+
+                        // Shift
+                        if (event.getCode() == KeyCode.UP) shift = -1;
+                        else shift = 1;
+
+                        index = vTree.getSelectionModel().getSelectedIndex() + shift;
+                        TreeItem<String> item = vTree.getTreeItem(index);
+                        if (item != null) {
+                            if (item.getClass() == CTreeItem.class) {
+                                // Label
+                                vTree.getSelectionModel().select(index);
+                                textListener.retargetTo((CTreeItem) item);
+                                cImagePane.moveToLabel(((CTreeItem) item).meta.getIndex());
+                                return;
+                            } else if (item.getParent() != null) {
+                                // Group
+                                item.setExpanded(true);
+                                index = index + shift;
+                            } else {
+                                // Root
+                                CTree.expandAll(item);
+                                if (config.getViewMode() == Config.VIEW_MODE_GROUP) index++;
+                                while (vTree.getTreeItem(index).getChildren().size() == 0) {
+                                    index++;
+                                    if (vTree.getTreeItem(index) == null) break;
+                                }
+                                index = index + shift;
+                            }
+
+                            vTree.getSelectionModel().select(index);
+                            item = vTree.getTreeItem(index);
+                            if (item.getClass() == CTreeItem.class) {
+                                // Label
+                                textListener.retargetTo((CTreeItem) item);
+                                cImagePane.moveToLabel(((CTreeItem) item).meta.getIndex());
+                            } else {
+                                textListener.retargetTo(null);
+                            }
+                        }
+                        break;
+                    case LEFT:
+                        cPicBox.back();
+                        break;
+                    case RIGHT:
+                        cPicBox.next();
+                        break;
+                }
+            }
+        }
+    }
+    private final ArrowKeyListener arrowKeyListener = new ArrowKeyListener();
+
+    private final ContextMenu symbolMenu = new ContextMenu() {
+
+        MenuItem createSymbolItem(String symbol, boolean displayable) {
+            int radius = 6;
+            return new MenuItem(symbol, displayable ? new Circle(radius, Color.GREEN) : new Circle(radius, Color.RED));
+        }
+
+        {
+            getItems().addAll(
+                    createSymbolItem("◎", true),
+                    createSymbolItem("★", true),
+                    createSymbolItem("☆", true),
+                    createSymbolItem("♡", false),
+                    createSymbolItem("♥", false),
+                    createSymbolItem("♢", false),
+                    createSymbolItem("♦", false),
+                    createSymbolItem("♪", false)
+            );
+            getItems().forEach(item -> item.setOnAction(event -> tTransText.insertText(tTransText.getCaretPosition(), ((MenuItem) event.getSource()).getText())));
+        }
+    };
 
     private final class AutoBack extends TimerTask {
         @Override
@@ -173,9 +246,9 @@ public class Controller implements Initializable {
         this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + Config.EXTENSION_LP);
         this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + Config.EXTENSION_PACK);
 
-        this.fileChooser = new FileChooser();
-        this.exportChooser = new FileChooser();
-        this.exportPackChooser = new FileChooser();
+        this.fileChooser = new CFileChooser();
+        this.exportChooser = new CFileChooser();
+        this.exportPackChooser = new CFileChooser();
 
         this.meoPackager = new MeoPackager(config);
 
@@ -196,6 +269,11 @@ public class Controller implements Initializable {
             @Override
             public void reset() {
                 Controller.this.reset();
+            }
+
+            @Override
+            public void updatePane() {
+                Controller.this.cImagePane.update();
             }
 
             @Override
@@ -232,7 +310,8 @@ public class Controller implements Initializable {
 
     private void init() {
         fileChooser.setTitle(I18N.OPEN_TRANSLATION);
-        fileChooser.getExtensionFilters().addAll(meoFilter, lpFilter);
+        fileChooser.getExtensionFilters().add(meoFilter);
+        fileChooser.getExtensionFilters().add(lpFilter);
 
         exportChooser.setTitle(I18N.EXPORT_TRANSLATION);
 
@@ -261,14 +340,14 @@ public class Controller implements Initializable {
         config.stage.widthProperty().addListener(stageSizeListener);
         config.stage.widthProperty().addListener(stageSizeListener);
 
-        // Reload when change pic
+        // Reload labels and Repaint pane when change pic
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentPicName(newValue);
             loadTransLabel();
             if (newValue != null) cImagePane.update();
         });
 
-        // Update text layer
+        // Update text layer when change group
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentGroupId(config.getGroupIdByName(newValue));
             config.setCurrentGroupName(newValue);
@@ -316,53 +395,18 @@ public class Controller implements Initializable {
         });
 
         // Bind Arrow KeyEvent with Label change and Pic change
+        tTransText.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener);
+        cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener);
+
+        // Bind Alt/Meta+A with special symbols (Render Menu in )
         tTransText.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (event.isControlDown() && event.getCode().isArrowKey()) {
-                switch (event.getCode()) {
-                    case UP:
-                    case DOWN:
-                        int shift, index;
+            if ((event.isAltDown() || event.isMetaDown()) && event.getCode() == KeyCode.A) {
+                double x = config.stage.getX() + pRight.getWidth() * 2;
+                double y = config.stage.getY() + pText.getScene().getHeight() - pText.getHeight() + 40;
 
-                        // Shift edit
-                        if (event.getCode() == KeyCode.UP) shift = -1;
-                        else shift = 1;
-
-                        index = vTree.getSelectionModel().getSelectedIndex() + shift;
-                        TreeItem<String> item = vTree.getTreeItem(index);
-
-                        if (item != null) {
-                            if (item.getClass() == CTreeItem.class) {
-                                // Label
-                            } else if (item.getParent() != null) {
-                                // Group
-                                item.setExpanded(true);
-                                index = index + shift;
-
-                            } else {
-                                // Root
-                                CTree.expandAll(item);
-                                if (config.getViewMode() == Config.VIEW_MODE_GROUP) index++;
-                                while (vTree.getTreeItem(index).getChildren().size() == 0) {
-                                    index++;
-                                    if (vTree.getTreeItem(index) == null) break;
-                                }
-                                index = index + shift;
-                            }
-                            vTree.getSelectionModel().select(index);
-                            vTree.fireEvent(event);
-                        }
-                        break;
-                    case LEFT:
-                        cPicBox.back();
-                        break;
-                    case RIGHT:
-                        cPicBox.next();
-                        break;
-                }
+                symbolMenu.show(tTransText, x, y);
             }
-
         });
-
     }
 
     private void setText() {
@@ -500,7 +544,7 @@ public class Controller implements Initializable {
                 }
             }
         }
-        Optional<List<String>> listResult = CDialog.showListChoose(I18N.CHOOSE_PICS_TITLE, potentialFiles);
+        Optional<List<String>> listResult = CDialog.showListChoose(config.stage, I18N.CHOOSE_PICS_TITLE, potentialFiles);
         if (listResult.isPresent()) {
             List<String> picList = listResult.get();
             for (String pic : picList) {
@@ -641,10 +685,20 @@ public class Controller implements Initializable {
     }
 
     @FXML public void hint() {
-        CDialog.showInfo(I18N.HINT, I18N.HINT_CONTENT);
+        CDialog.showInfoWithLink(
+                I18N.HINT,
+                I18N.HINT_CONTENT,
+                I18N.HINT_LINK,
+                event -> config.application.getHostServices().showDocument(I18N.HINT_LINK_URL)
+        );
     }
     @FXML public void about() {
-        CDialog.showInfo(I18N.ABOUT, I18N.ABOUT_CONTENT);
+        CDialog.showInfoWithLink(
+                I18N.ABOUT,
+                I18N.ABOUT_CONTENT,
+                I18N.ABOUT_LINK,
+                event -> config.application.getHostServices().showDocument(I18N.ABOUT_LINK_URL)
+        );
     }
 
     private void setViewMode(int viewMode) {

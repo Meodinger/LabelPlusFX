@@ -363,15 +363,13 @@ public class CImagePane extends ScrollPane {
 
                 String groupName = config.getGroupNameById(groupId);
                 TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
-                TreeItem<String> groupItem = config.getControllerAccessor().findGroupItemByName(groupName);
 
                 // Edit data
                 config.getLabelsNow().add(newLabel);
                 recordPosition(index, new Position(event.getX(), event.getY()));
                 // Update view
-                groupItem.setExpanded(true);
-                groupItem.getChildren().add(new CTreeItem(config, groupName, newLabel));
                 drawLabel(newLabel);
+                config.getControllerAccessor().updateTree();
                 // Mark change
                 config.setChanged(true);
                 break;
@@ -382,12 +380,12 @@ public class CImagePane extends ScrollPane {
                     CTreeItem labelItem = config.getControllerAccessor().findLabelByIndex(index);
 
                     // Edit data
-                    for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel l : labels)
+                    for (TransLabel l : config.getLabelsNow())
                         if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
                     config.getLabelsNow().remove(labelItem.meta);
                     // Update view
-                    labelItem.getParent().getChildren().remove(labelItem);
                     update();
+                    config.getControllerAccessor().updateTree();
                     // Mark change
                     config.setChanged(true);
                 }

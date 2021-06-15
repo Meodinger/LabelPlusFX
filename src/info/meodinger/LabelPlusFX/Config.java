@@ -5,7 +5,6 @@ import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 
 import javafx.application.Application;
-import javafx.scene.control.TreeItem;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -271,10 +270,10 @@ public class Config {
         void close();
         void reset();
         void updatePane();
+        void updateTree();
         void updateGroupList();
 
         CTreeItem findLabelByIndex(int index);
-        TreeItem<String> findGroupItemByName(String name);
 
         Object get(String field);
     }

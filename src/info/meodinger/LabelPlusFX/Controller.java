@@ -277,6 +277,11 @@ public class Controller implements Initializable {
             }
 
             @Override
+            public void updateTree() {
+                Controller.this.loadTransLabel();
+            }
+
+            @Override
             public void updateGroupList() {
                 Controller.this.updateGroupList();
             }
@@ -284,11 +289,6 @@ public class Controller implements Initializable {
             @Override
             public CTreeItem findLabelByIndex(int index) {
                 return Controller.this.findLabelItemByIndex(index);
-            }
-
-            @Override
-            public TreeItem<String> findGroupItemByName(String name) {
-                return Controller.this.findGroupItemByName(name);
             }
 
             @Override
@@ -332,8 +332,13 @@ public class Controller implements Initializable {
         vTree.setCellFactory(view -> new CTreeCell(config, menu));
 
         // Accelerator
-        mSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
-        mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        if (CAccelerator.isMac) {
+            mSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN));
+            mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN, KeyCombination.SHIFT_DOWN));
+        } else {
+            mSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+            mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
+        }
 
         // Fix width ratio
         ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> pRight.setPrefWidth(config.stage.getWidth() / 3);
@@ -740,9 +745,6 @@ public class Controller implements Initializable {
         setWorkMode(workMode);
     }
 
-    /**
-     *  Reload all Labels will invoke CImagePane::update
-     */
     private void loadTransLabel() {
         textListener.retargetTo(null);
 
@@ -756,6 +758,7 @@ public class Controller implements Initializable {
                     break;
             }
         }
+        CTree.expandAll(vTree.getRoot());
     }
     private void loadTransLabel_Group() {
         List<TransLabel> labels = config.getLabelsNow();
@@ -810,16 +813,6 @@ public class Controller implements Initializable {
                 if (itemResult.isPresent()) {
                     return (CTreeItem) itemResult.get();
                 }
-            }
-        }
-        return null;
-    }
-    private TreeItem<String> findGroupItemByName(String name) {
-        if (name != null && config.getViewMode() == Config.VIEW_MODE_GROUP) {
-            TreeItem<String> root = vTree.getRoot();
-            Optional<TreeItem<String>> itemResult = root.getChildren().stream().filter(e -> e.getValue().equals(name)).findFirst();
-            if (itemResult.isPresent()) {
-                return itemResult.get();
             }
         }
         return null;

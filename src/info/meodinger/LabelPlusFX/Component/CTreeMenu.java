@@ -311,12 +311,12 @@ public class CTreeMenu {
                     TransLabel label = labelItem.meta;
 
                     // Edit data
-                    for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel l : labels)
+                    for (TransLabel l : config.getLabelsNow())
                         if (l.getIndex() > label.getIndex()) l.setIndex(l.getIndex() - 1);
                     config.getLabelsNow().remove(label);
                     // Update view
-                    labelItem.getParent().getChildren().remove(labelItem);
                     config.getControllerAccessor().updatePane();
+                    config.getControllerAccessor().updateTree();
                     // Mark change
                     config.setChanged(true);
                 }

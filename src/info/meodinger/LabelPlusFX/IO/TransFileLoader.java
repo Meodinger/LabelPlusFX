@@ -12,6 +12,7 @@ import info.meodinger.LabelPlusFX.Util.CString;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -57,10 +58,6 @@ public abstract class TransFileLoader {
         }
 
         private void readHead() throws IOException {
-            // Remove BOM (EF BB BF)
-            char[] bom = new char[3];
-            int bytes = reader.read(bom, 0, 1);
-
             // Version
             line = reader.readLine();
             String[] v = line.split(LPTransFile.SPLIT);
@@ -140,7 +137,14 @@ public abstract class TransFileLoader {
 
         private String parseText(StringBuilder text, String... stopMarks) throws IOException {
             while (!CString.isBlank(line = reader.readLine())) {
+                for (String mark : stopMarks) {
+                    if (line.startsWith(mark)) {
+                        reader.reset();
+                        return text.toString();
+                    }
+                }
                 text.append(line).append("\n");
+                reader.mark(AHEAD_LIMIT);
             }
 
             // Mark on potential text end
@@ -180,6 +184,19 @@ public abstract class TransFileLoader {
         public boolean load(File file) {
             try {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+
+                // Remove BOM (EF BB BF)
+                int bytes;
+                byte[] bom = new byte[] {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+                byte[] buf = new byte[3];
+                FileInputStream in = new FileInputStream(file);
+                bytes = in.read(buf, 0, 3);
+
+                if (bytes != 3) throw new IOException("Unexpected EOF");
+                if (Arrays.equals(buf, bom)) {
+                    char[] chars = new char[3];
+                    reader.read(chars, 0, 1);
+                }
 
                 readHead();
                 readComment();

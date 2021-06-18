@@ -25,8 +25,10 @@ public class I18N {
     public static String SAVE = "保存";
     public static String NOT_SAVE = "不保存";
     public static String SAVED_SUCCESSFULLY = "保存成功";
+    public static String SAVE_FAILED = "保存失败";
     public static String EXPORTED_SUCCESSFULLY = "导出成功";
     public static String EXPORTED_PACK_SUCCESSFULLY = "导出图包成功";
+    public static String BAK_FAILED = "备份失败";
     public static String BAK_FILE_DELETED_FAILED = "备份文件清理失败";
     public static String AUTO_SAVE_NOT_AVAILABLE = "自动保存不可用";
 
@@ -67,7 +69,7 @@ public class I18N {
     public static String REMOVE_ALL_PIC = "<<";
 
     public static String TOO_MANY_GROUPS = "分组太多了！";
-    public static String GROUP_NAME_ALREADY_EXISTS = "已经存在同名分组";
+    public static String SAME_GROUP_NAME = "存在同名分组";
 
     public static String FORMAT_TOO_MANY_GROUPS = "%d个分组对于原版LP来说太多了！";
     public static String FORMAT_UNEXPECTED_STRING = "出现了意料之外的文本：%s";
@@ -75,7 +77,7 @@ public class I18N {
     public static String FORMAT_REPEATED_LABEL_INDEX = "Label的ID重复了：%d";
     public static String FORMAT_INVALID_LABEL_INDEX = "出现了意料之外的LabelID：%d";
     public static String FORMAT_NEW_GROUP_NAME = "新分组%d";
-    public static String FORMAT_BAK_FILE_PATH = "备份文件位于: %s";
+    public static String FORMAT_SAVE_FAILED_BAK_PATH = "保存失败！\n备份文件位于: %s";
 
     public static String MENU_ITEM_ADD_GROUP = "添加分组";
     public static String MENU_ITEM_RENAME = "重命名";
@@ -132,8 +134,10 @@ public class I18N {
             SAVE = "Save";
             NOT_SAVE = "Not Save";
             SAVED_SUCCESSFULLY = "Saved successfully";
+            SAVE_FAILED = "Save failed";
             EXPORT_TRANSLATION = "Exported Successfully";
             EXPORTED_PACK_SUCCESSFULLY = "Exported PicPack Successfully";
+            BAK_FAILED = "Bak failed";
             BAK_FILE_DELETED_FAILED = "Bak file remove failed";
             AUTO_SAVE_NOT_AVAILABLE = "Auto save not available";
 
@@ -162,7 +166,7 @@ public class I18N {
             PICS_SELECTED = "Pics ready to load";
 
             TOO_MANY_GROUPS = "Too Many Groups";
-            GROUP_NAME_ALREADY_EXISTS = "Group name already exists";
+            SAME_GROUP_NAME = "Groups with same name";
 
             FORMAT_TOO_MANY_GROUPS = "More than 9 groups (got %d) in this translation";
             FORMAT_UNEXPECTED_STRING = "Unexpected String: %s";
@@ -170,7 +174,7 @@ public class I18N {
             FORMAT_REPEATED_LABEL_INDEX = "Label index repeat: %d";
             FORMAT_INVALID_LABEL_INDEX = "Label index invalid: %d";
             FORMAT_NEW_GROUP_NAME = "New_Group_%d";
-            FORMAT_BAK_FILE_PATH = "Bak file path is: %s";
+            FORMAT_SAVE_FAILED_BAK_PATH = "Save Failed!\nBak file path is: %s";
 
             TITLE_ADD_GROUP = "Add Group";
             TITLE_RENAME = "New Name";

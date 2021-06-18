@@ -3,6 +3,7 @@ package info.meodinger.LabelPlusFX.Type;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
+
 import java.util.ArrayList;
 import java.util.List;
 

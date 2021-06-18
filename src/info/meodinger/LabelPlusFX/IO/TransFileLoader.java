@@ -1,6 +1,5 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import com.alibaba.fastjson.JSON;
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.*;
@@ -9,6 +8,7 @@ import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 import info.meodinger.LabelPlusFX.Util.CString;
 
+import com.alibaba.fastjson.JSON;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

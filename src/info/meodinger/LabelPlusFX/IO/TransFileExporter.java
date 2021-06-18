@@ -1,7 +1,5 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
@@ -9,6 +7,8 @@ import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -44,6 +44,29 @@ public abstract class TransFileExporter {
 
         public LPFileExporter(Config config) {
             super(config);
+        }
+
+        private boolean validate() {
+
+            // Group count validate
+            int groupCount = transFile.getGroup().size();
+            if (groupCount > 9) {
+                CDialog.showInfo(String.format(I18N.FORMAT_TOO_MANY_GROUPS, groupCount));
+                return false;
+            }
+
+            // Group name validate
+            List<MeoTransFile.Group> groups = transFile.getGroup();
+            Set<String> groupNames = new HashSet<>();
+            for (MeoTransFile.Group group : groups) {
+                groupNames.add(group.name);
+            }
+            if (groupNames.size() < groups.size()) {
+                CDialog.showInfo(I18N.SAME_GROUP_NAME);
+                return false;
+            }
+
+            return true;
         }
 
         private String exportVersion() {
@@ -97,11 +120,7 @@ public abstract class TransFileExporter {
         public boolean export(File file) {
             transFile = getCopyOfTransFile();
 
-            int groupCount = transFile.getGroup().size();
-            if (groupCount > 9) {
-                CDialog.showInfo(String.format(I18N.FORMAT_TOO_MANY_GROUPS, groupCount));
-                return false;
-            }
+            if (!validate()) return false;
 
             StringBuilder builder = new StringBuilder();
 

@@ -12,7 +12,6 @@ import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -47,6 +46,7 @@ public class CImagePane extends ScrollPane {
     private final static int DISPLAY_INSET = 10;
     private final static int SHIFT = 20;
     private final static double LINE_HEIGHT_RATIO = 0.5;
+    private final static String LABEL_ALPHA = "AA";
 
     private final static int LABEL_FONT_SIZE = 32;
     private final static javafx.scene.text.Font LABEL_FONT = new javafx.scene.text.Font(LABEL_FONT_SIZE);
@@ -54,7 +54,6 @@ public class CImagePane extends ScrollPane {
     private final static int DISPLAY_FONT_SIZE = 28;
     private final static javafx.scene.text.Font DISPLAY_FONT = new Font(DISPLAY_FONT_SIZE);
 
-    public final static int TEXT_LAYER = -1;
     public final static int NOT_FOUND = -1;
 
     /**
@@ -189,7 +188,7 @@ public class CImagePane extends ScrollPane {
         });
 
         container.setOnScroll(event -> {
-            updateLabelLayer(TEXT_LAYER);
+            updateTextLayer();
             if (CAccelerator.isControlDown(event) || event.isAltDown()) {
                 setScale(getScale() + (event.getDeltaY() / 400));
             }
@@ -260,7 +259,9 @@ public class CImagePane extends ScrollPane {
         double y = canvas.getHeight() * label.getY();
         double radius = LABEL_RADIUS;
 
-        gc.setFill(javafx.scene.paint.Color.web(config.getGroupColorById(label.getGroupId())));
+        String alpha = config.getWorkMode() == Config.WORK_MODE_LABEL ? "FF" : LABEL_ALPHA;
+        String colorWeb = config.getGroupColorById(label.getGroupId()) + alpha;
+        gc.setFill(Color.web(colorWeb));
         gc.fillOval(x, y,  radius, radius);
 
         Text text = new Text(String.valueOf(label.getIndex()));
@@ -446,6 +447,10 @@ public class CImagePane extends ScrollPane {
         setupLayers(config.getGroupCount());
         setupLabels();
     }
+    public void relocate() {
+        root.setLayoutX(0);
+        root.setLayoutY(0);
+    }
 
     public void addLabelLayer() {
         Canvas layer = new Canvas(getViewWidth(), getViewWidth());
@@ -458,13 +463,14 @@ public class CImagePane extends ScrollPane {
         layers.remove(groupId);
     }
     public void updateLabelLayer(int groupId) {
-        if (groupId == TEXT_LAYER){
-            if (config.getWorkMode() == Config.WORK_MODE_LABEL) {
-                cleatText();
-            }
-        } else if (groupId < layers.size()) {
+        if (groupId < layers.size()) {
             updatePositions();
             updateLayer(groupId);
+        }
+    }
+    public void updateTextLayer() {
+        if (config.getWorkMode() == Config.WORK_MODE_LABEL) {
+            cleatText();
         }
     }
     public void moveToLabel(int index) {

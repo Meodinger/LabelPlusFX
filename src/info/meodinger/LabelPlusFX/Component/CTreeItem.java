@@ -2,6 +2,7 @@ package info.meodinger.LabelPlusFX.Component;
 
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Node;

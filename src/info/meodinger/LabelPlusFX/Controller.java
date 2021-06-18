@@ -152,6 +152,8 @@ public class Controller implements Initializable {
 
                             vTree.getSelectionModel().select(index);
                             item = vTree.getTreeItem(index);
+                            if (item == null) return;
+
                             if (item.getClass() == CTreeItem.class) {
                                 // Label
                                 textListener.retargetTo((CTreeItem) item);
@@ -177,7 +179,9 @@ public class Controller implements Initializable {
 
         MenuItem createSymbolItem(String symbol, boolean displayable) {
             int radius = 6;
-            return new MenuItem(symbol, displayable ? new Circle(radius, Color.GREEN) : new Circle(radius, Color.RED));
+            MenuItem item = new MenuItem(symbol, displayable ? new Circle(radius, Color.GREEN) : new Circle(radius, Color.RED));
+            item.setStyle("-fx-font-family: \"Segoe UI Symbol\"");
+            return item;
         }
 
         {
@@ -206,8 +210,6 @@ public class Controller implements Initializable {
 
 
     @FXML private BorderPane main;
-
-    // @FXML private Label lbInfo;
 
     @FXML private TextArea tTransText;
 
@@ -274,6 +276,21 @@ public class Controller implements Initializable {
             @Override
             public void updatePane() {
                 Controller.this.cImagePane.update();
+            }
+
+            @Override
+            public void addLabelLayer() {
+                Controller.this.cImagePane.addLabelLayer();
+            }
+
+            @Override
+            public void updateLabelLayer(int index) {
+                Controller.this.cImagePane.updateLabelLayer(index);
+            }
+
+            @Override
+            public void removeLabelLayer(int index) {
+                Controller.this.cImagePane.removeLabelLayer(index);
             }
 
             @Override
@@ -349,14 +366,25 @@ public class Controller implements Initializable {
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentPicName(newValue);
             loadTransLabel();
-            if (newValue != null) cImagePane.update();
+            if (newValue != null) {
+                cImagePane.update();
+                cImagePane.relocate();
+            }
+            if (config.getLabelsNow().size() > 0) {
+                CTreeItem item = findLabelItemByIndex(config.getLabelsNow().get(0).getIndex());
+                if (item != null) {
+                    vTree.getSelectionModel().select(item);
+                    textListener.retargetTo(item);
+                    cImagePane.moveToLabel(item.meta.getIndex());
+                }
+            }
         });
 
         // Update text layer when change group
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             config.setCurrentGroupId(config.getGroupIdByName(newValue));
             config.setCurrentGroupName(newValue);
-            cImagePane.updateLabelLayer(CImagePane.TEXT_LAYER);
+            cImagePane.updateTextLayer();
         });
 
         // Bind view scale and slider value
@@ -607,23 +635,24 @@ public class Controller implements Initializable {
 
         File ori = new File(config.getFilePath());
         File bak = new File(config.getFilePath() + Config.EXTENSION_BAK);
+        boolean backed = false;
 
         try (FileChannel input = new FileInputStream(ori).getChannel();
              FileChannel output = new FileOutputStream(bak).getChannel()
         ) {
             output.transferFrom(input, 0, input.size());
+            backed = true;
         } catch (Exception e) {
-            CDialog.showException(e);
+            CDialog.showException(new Exception(I18N.BAK_FAILED, e));
         }
 
         if (exporter.export()) {
             config.setChanged(false);
-            CDialog.showInfo(I18N.SAVED_SUCCESSFULLY);
-            if (!bak.delete()) {
+            if (backed && !bak.delete()) {
                 CDialog.showAlert(I18N.BAK_FILE_DELETED_FAILED);
             }
         } else {
-            CDialog.showInfo(String.format(I18N.FORMAT_BAK_FILE_PATH, bak.getPath()));
+            CDialog.showInfo(String.format(I18N.FORMAT_SAVE_FAILED_BAK_PATH, bak.getPath()));
         }
     }
     @FXML public void saveAsTranslation() {
@@ -644,6 +673,7 @@ public class Controller implements Initializable {
             CDialog.showInfo(I18N.SAVED_SUCCESSFULLY);
         } else {
             config.setFilePath(null);
+            CDialog.showAlert(I18N.SAVE_FAILED);
         }
     }
     @FXML public void close() {
@@ -738,6 +768,10 @@ public class Controller implements Initializable {
                 setViewMode(Config.VIEW_MODE_INDEX);
                 btnSwitchWorkMode.setText(I18N.WORK_INPUT);
                 break;
+        }
+        int count = config.getGroupCount();
+        for (int i = 0; i < count; i++) {
+            cImagePane.updateLabelLayer(i);
         }
     }
     @FXML public void switchWorkMode() {

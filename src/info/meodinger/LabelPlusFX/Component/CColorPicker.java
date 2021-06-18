@@ -1,8 +1,9 @@
 package info.meodinger.LabelPlusFX.Component;
 
-import com.sun.javafx.scene.control.skin.ColorPickerSkin;
 import info.meodinger.LabelPlusFX.Util.CColor;
 import info.meodinger.LabelPlusFX.Util.CString;
+
+import com.sun.javafx.scene.control.skin.ColorPickerSkin;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;

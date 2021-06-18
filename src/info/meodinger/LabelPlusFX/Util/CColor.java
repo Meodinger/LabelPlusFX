@@ -1,6 +1,5 @@
 package info.meodinger.LabelPlusFX.Util;
 
-
 import javafx.scene.paint.Color;
 
 /**

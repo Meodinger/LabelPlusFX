@@ -1,13 +1,13 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.Resources;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CZip;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;

@@ -2,6 +2,7 @@ package info.meodinger.LabelPlusFX.Component;
 
 import info.meodinger.LabelPlusFX.Config;
 import info.meodinger.LabelPlusFX.Util.CTree;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;

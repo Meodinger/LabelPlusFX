@@ -215,6 +215,9 @@ public class Config {
     public boolean isMeoFile() {
         return getFilePath().endsWith(EXTENSION_MEO);
     }
+    public boolean isLPFile() {
+        return !isMeoFile();
+    }
 
     public void setChanged(boolean changed) {
         isChanged = changed;
@@ -269,7 +272,12 @@ public class Config {
     public interface ControllerAccessor {
         void close();
         void reset();
+
         void updatePane();
+        void addLabelLayer();
+        void updateLabelLayer(int index);
+        void removeLabelLayer(int index);
+
         void updateTree();
         void updateGroupList();
 

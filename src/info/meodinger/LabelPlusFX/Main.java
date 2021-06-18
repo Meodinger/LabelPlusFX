@@ -1,6 +1,7 @@
 package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Util.CDialog;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

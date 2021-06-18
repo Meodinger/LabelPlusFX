@@ -93,7 +93,7 @@ public class CTreeMenu {
             hBox.setAlignment(Pos.CENTER);
             dialog.getDialogPane().setContent(hBox);
             dialog.setResultConverter((type) -> {
-                if (type.getButtonData() == ButtonBar.ButtonData.APPLY){
+                if (type.getButtonData() == ButtonBar.ButtonData.OK_DONE){
                     return new TransFile.MeoTransFile.Group(
                             nameField.getText().trim().replaceAll(" ", "_"),
                             CColor.toHex(colorPicker.getValue())

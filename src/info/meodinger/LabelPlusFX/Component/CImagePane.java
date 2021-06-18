@@ -277,6 +277,9 @@ public class CImagePane extends ScrollPane {
         recordPosition(label.getIndex(), new Position(x, y));
     }
     private void drawText(String text, MouseEvent event) {
+        drawText(text, Color.BLACK, event);
+    }
+    private void drawText(String text, Color textColor, MouseEvent event) {
         GraphicsContext gc = textLayer.getGraphicsContext2D();
         int lineCount = text.length() - text.replaceAll("\n", "").length() + 1;
         Text t = new Text(text);
@@ -302,7 +305,7 @@ public class CImagePane extends ScrollPane {
         gc.fillRect(x, y, w, h);
         gc.setStroke(Color.DARKGRAY);
         gc.strokeRect(x, y, w, h);
-        gc.setFill(Color.BLACK);
+        gc.setFill(textColor);
         gc.fillText(text, X, Y);
     }
     private void cleatText() {
@@ -353,7 +356,7 @@ public class CImagePane extends ScrollPane {
     }
     private void handleLabelMode(MouseEvent event) {
         cleatText();
-        drawText(config.getCurrentGroupName(), event);
+        drawText(config.getCurrentGroupName(),Color.web(config.getGroupColorById(config.getCurrentGroupId())) , event);
 
         switch (event.getButton()) {
             case PRIMARY: {
@@ -362,7 +365,6 @@ public class CImagePane extends ScrollPane {
                 int groupId = config.getCurrentGroupId();
                 int index = positions.size();
 
-                String groupName = config.getGroupNameById(groupId);
                 TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
 
                 // Edit data

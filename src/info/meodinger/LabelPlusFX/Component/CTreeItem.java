@@ -50,16 +50,7 @@ public class CTreeItem extends TreeItem<String> {
     }
 
     private String genHead() {
-        String head = "";
-        switch (config.getViewMode()) {
-            case Config.VIEW_MODE_GROUP:
-                head = String.format("%02d", meta.getIndex());
-                break;
-            case Config.VIEW_MODE_INDEX:
-                head = String.format("%02d - %8s", meta.getIndex(), getGroupName());
-                break;
-        }
-        return head;
+        return String.format("%02d", meta.getIndex());
     }
 
     public void update() {

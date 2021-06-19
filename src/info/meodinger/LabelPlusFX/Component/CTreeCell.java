@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.Component;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.Util.CTree;
 
 import javafx.geometry.Pos;
@@ -14,12 +14,12 @@ import javafx.scene.control.TreeItem;
  */
 public class CTreeCell extends TreeCell<String> {
 
-    private final Config config;
+    private final int mode;
     private final CTreeMenu menu;
 
-    public CTreeCell(Config config, CTreeMenu menu) {
+    public CTreeCell(int mode, CTreeMenu menu) {
         super();
-        this.config = config;
+        this.mode = mode;
         this.menu = menu;
         init();
     }
@@ -53,7 +53,7 @@ public class CTreeCell extends TreeCell<String> {
                     setContextMenu(menu.groupMenu);
                 } else {
                     // Root
-                    if (config.getViewMode() == Config.VIEW_MODE_GROUP) {
+                    if (mode == State.VIEW_MODE_GROUP) {
                         menu.rootMenu.init(i);
                         setContextMenu(menu.rootMenu);
                     } else {

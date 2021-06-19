@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.*;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
@@ -22,10 +22,10 @@ import java.util.HashMap;
  */
 public abstract class TransFileLoader {
 
-    private final Config config;
+    private final State state;
 
-    private TransFileLoader(Config config) {
-        this.config = config;
+    private TransFileLoader(State state) {
+        this.state = state;
     }
 
     public abstract boolean load(File file);
@@ -33,7 +33,7 @@ public abstract class TransFileLoader {
         return load(new File(path));
     }
     public void setTransFile(MeoTransFile transFile) {
-        config.setTransFile(transFile);
+        state.setTransFile(transFile);
     }
 
 
@@ -45,8 +45,8 @@ public abstract class TransFileLoader {
         private BufferedReader reader;
         private String line;
 
-        public LPFileLoader(Config config) {
-            super(config);
+        public LPFileLoader(State state) {
+            super(state);
             init();
         }
 
@@ -96,7 +96,7 @@ public abstract class TransFileLoader {
         }
 
         public String parsePicHead() {
-            return CString.strip(line.replace(LPTransFile.PIC_START, "").replace(LPTransFile.PIC_END, ""));
+            return line.replace(LPTransFile.PIC_START, "").replace(LPTransFile.PIC_END, "");
         }
 
         public ArrayList<TransLabel> parsePicBody() throws IOException {
@@ -121,7 +121,7 @@ public abstract class TransFileLoader {
             String[] s = line.split(LPTransFile.LABEL_END);
             String[] props = s[1].replace(LPTransFile.PROP_START, "").replace(LPTransFile.PROP_END, "").split(LPTransFile.SPLIT);
 
-            int index = Integer.parseInt(CString.strip(s[0].replace(LPTransFile.LABEL_START, "")));
+            int index = Integer.parseInt(s[0].replace(LPTransFile.LABEL_START, ""));
             double x = Double.parseDouble(props[0]);
             double y = Double.parseDouble(props[1]);
             int groupId = Integer.parseInt(props[2]) - 1;
@@ -217,8 +217,8 @@ public abstract class TransFileLoader {
 
     public static class MeoFileLoader extends TransFileLoader{
 
-        public MeoFileLoader(Config config) {
-            super(config);
+        public MeoFileLoader(State state) {
+            super(state);
         }
 
         @Override

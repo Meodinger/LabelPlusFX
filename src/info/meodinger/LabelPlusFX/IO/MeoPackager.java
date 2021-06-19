@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.Resources;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
@@ -22,10 +22,10 @@ import java.util.TreeMap;
  */
 public class MeoPackager {
 
-    private final Config config;
+    private final State state;
 
-    public MeoPackager(Config config) {
-        this.config = config;
+    public MeoPackager(State state) {
+        this.state = state;
     }
 
     public boolean packMeo(String path) {
@@ -41,7 +41,7 @@ public class MeoPackager {
             zip.zip(template_CN, "/ps_script_res/zh.psd");
             zip.zip(template_EN, "/ps_script_res/en.psd");
 
-            TransFile.MeoTransFile transFile = config.getTransFile().clone();
+            TransFile.MeoTransFile transFile = state.getTransFile().clone();
             Map<String, List<TransLabel>> sort = new TreeMap<>(Comparator.naturalOrder());
             sort.putAll(transFile.getTransMap());
             transFile.setTransMap(sort);
@@ -52,8 +52,8 @@ public class MeoPackager {
             InputStream contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
             zip.zip(contentStream, "/images/" + "translation.json");
 
-            for (String picName : config.getSortedPicSet()) {
-                File pic = new File(config.getPicPathOf(picName));
+            for (String picName : state.getSortedPicList()) {
+                File pic = new File(state.getPicPathOf(picName));
                 zip.zip(pic, "/images/" + picName);
             }
 

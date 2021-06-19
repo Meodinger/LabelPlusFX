@@ -18,14 +18,14 @@ public class Main extends Application {
         Resources.init();
     }
 
-    private Config config;
+    private State state;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        config = new Config(this, primaryStage);
+        state = new State(this, primaryStage);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Window.fxml"));
-        loader.setControllerFactory(Controller -> new Controller(config));
+        loader.setControllerFactory(Controller -> new Controller(state));
         Parent root = loader.load();
         Scene scene = new Scene(root, 900, 600);
 
@@ -34,7 +34,7 @@ public class Main extends Application {
             if(event.isAltDown()) event.consume();
         });
 
-        primaryStage.setOnCloseRequest(e -> config.getControllerAccessor().close());
+        primaryStage.setOnCloseRequest(e -> state.getControllerAccessor().close());
         primaryStage.setTitle(I18N.WINDOW_TITLE);
         primaryStage.getIcons().add(new Image(Resources.ICON));
         primaryStage.setScene(scene);

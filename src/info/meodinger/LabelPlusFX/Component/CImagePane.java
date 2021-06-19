@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.Component;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CAccelerator;
 import info.meodinger.LabelPlusFX.Util.CColor;
@@ -44,9 +44,16 @@ public class CImagePane extends ScrollPane {
 
     private final static int LABEL_RADIUS = 40;
     private final static int DISPLAY_INSET = 10;
+    private final static String ALPHA = "80";
+
+    /**
+     * X shift for text & shape display
+     */
     private final static int SHIFT = 20;
+    /**
+     * Ratio for padding height of text line
+     */
     private final static double LINE_HEIGHT_RATIO = 0.5;
-    private final static String LABEL_ALPHA = "AA";
 
     private final static int LABEL_FONT_SIZE = 32;
     private final static javafx.scene.text.Font LABEL_FONT = new javafx.scene.text.Font(LABEL_FONT_SIZE);
@@ -68,7 +75,7 @@ public class CImagePane extends ScrollPane {
     private final List<Canvas> layers;
     private final Canvas textLayer;
 
-    private Config config;
+    private State state;
     private double shiftX = 0;
     private double shiftY = 0;
     private double maxScale = NOT_FOUND;
@@ -101,8 +108,8 @@ public class CImagePane extends ScrollPane {
         render();
     }
 
-    public void setConfig(Config config) {
-        this.config = config;
+    public void setConfig(State state) {
+        this.state = state;
     }
 
     private void init() {
@@ -126,36 +133,36 @@ public class CImagePane extends ScrollPane {
             root.setLayoutY(nY);
         });
         root.setOnMouseReleased(event -> {
-            switch (config.getWorkMode()) {
-                case Config.WORK_MODE_CHECK:
-                case Config.WORK_MODE_INPUT:
+            switch (state.getWorkMode()) {
+                case State.WORK_MODE_CHECK:
+                case State.WORK_MODE_INPUT:
                     root.setCursor(Cursor.DEFAULT);
                     break;
-                case Config.WORK_MODE_LABEL:
+                case State.WORK_MODE_LABEL:
                     root.setCursor(Cursor.CROSSHAIR);
                     break;
             }
         });
 
         root.setOnMouseEntered(event -> {
-            switch (config.getWorkMode()) {
-                case Config.WORK_MODE_LABEL:
+            switch (state.getWorkMode()) {
+                case State.WORK_MODE_LABEL:
                     root.setCursor(Cursor.CROSSHAIR);
                     break;
-                case Config.WORK_MODE_CHECK:
-                case Config.WORK_MODE_INPUT:
+                case State.WORK_MODE_CHECK:
+                case State.WORK_MODE_INPUT:
                     root.setCursor(Cursor.DEFAULT);
                     break;
             }
         });
         root.setOnMouseMoved(event -> {
-            switch (config.getWorkMode()) {
-                case Config.WORK_MODE_INPUT:
-                case Config.WORK_MODE_CHECK:
+            switch (state.getWorkMode()) {
+                case State.WORK_MODE_INPUT:
+                case State.WORK_MODE_CHECK:
                     handleCheckMode(event);
                     root.setCursor(Cursor.DEFAULT);
                     break;
-                case Config.WORK_MODE_LABEL:
+                case State.WORK_MODE_LABEL:
                     handleLabelMode(event);
                     root.setCursor(Cursor.CROSSHAIR);
                     break;
@@ -174,13 +181,13 @@ public class CImagePane extends ScrollPane {
             setSelectedLabel(index);
 
             if (event.isStillSincePress()) {
-                switch (config.getWorkMode()) {
-                    case Config.WORK_MODE_CHECK:
+                switch (state.getWorkMode()) {
+                    case State.WORK_MODE_CHECK:
                         break;
-                    case Config.WORK_MODE_LABEL:
+                    case State.WORK_MODE_LABEL:
                         handleLabelMode(event);
                         break;
-                    case Config.WORK_MODE_INPUT:
+                    case State.WORK_MODE_INPUT:
                         handleInputMode(event);
                         break;
                 }
@@ -220,7 +227,7 @@ public class CImagePane extends ScrollPane {
 
     private void setupImage() {
         try {
-            setImage(new Image(String.valueOf(new File(config.getCurrentPicPath()).toURI().toURL())));
+            setImage(new Image(String.valueOf(new File(state.getCurrentPicPath()).toURI().toURL())));
         } catch (IOException e) {
             CDialog.showException(e);
         }
@@ -246,7 +253,7 @@ public class CImagePane extends ScrollPane {
         textLayer.toFront();
     }
     private void setupLabels() {
-        List<TransLabel> labels = config.getLabelsNow();
+        List<TransLabel> labels = state.getLabelsNow();
         for (TransLabel label : labels) {
             drawLabel(label);
         }
@@ -259,8 +266,8 @@ public class CImagePane extends ScrollPane {
         double y = canvas.getHeight() * label.getY();
         double radius = LABEL_RADIUS;
 
-        String alpha = config.getWorkMode() == Config.WORK_MODE_LABEL ? "FF" : LABEL_ALPHA;
-        String colorWeb = config.getGroupColorById(label.getGroupId()) + alpha;
+        String alpha = state.getWorkMode() == State.WORK_MODE_LABEL ? "FF" : ALPHA;
+        String colorWeb = state.getGroupColorById(label.getGroupId()) + alpha;
         gc.setFill(Color.web(colorWeb));
         gc.fillOval(x, y,  radius, radius);
 
@@ -287,26 +294,27 @@ public class CImagePane extends ScrollPane {
 
         double textWidth = t.getBoundsInLocal().getWidth(), textHeight = t.getBoundsInLocal().getHeight();
         double w = textWidth + 2 * DISPLAY_INSET, h = textHeight + 2 * DISPLAY_INSET;
-        double x = event.getX() + (SHIFT - DISPLAY_INSET);
-        double X = event.getX() + SHIFT;
-        double y = event.getY() - (textHeight / lineCount);
-        double Y = event.getY();
 
-        if (x + w > getViewWidth()) {
-            x = x - w - SHIFT + DISPLAY_INSET;
-            X = X - w - SHIFT + DISPLAY_INSET;
+        double x_shape = event.getX() + (SHIFT - DISPLAY_INSET);
+        double y_shape = event.getY() - (textHeight / lineCount);
+        double x_text = event.getX() + SHIFT;
+        double y_text = event.getY();
+
+        if (x_shape + w > getViewWidth()) {
+            x_shape = x_shape - w - SHIFT + DISPLAY_INSET;
+            x_text = x_text - w - SHIFT + DISPLAY_INSET;
         }
-        if (y - textHeight / lineCount < 0) {
-            y = y + textHeight / lineCount;
-            Y = Y + textHeight / lineCount;
+        if (y_shape - textHeight / lineCount < 0) {
+            y_shape = y_shape + textHeight / lineCount;
+            y_text = y_text + textHeight / lineCount;
         }
 
-        gc.setFill(Color.web(CColor.toHex(Color.WHEAT) + "C0"));
-        gc.fillRect(x, y, w, h);
+        gc.setFill(Color.web(CColor.toHex(Color.WHEAT) + ALPHA));
+        gc.fillRect(x_shape, y_shape, w, h);
         gc.setStroke(Color.DARKGRAY);
-        gc.strokeRect(x, y, w, h);
+        gc.strokeRect(x_shape, y_shape, w, h);
         gc.setFill(textColor);
-        gc.fillText(text, X, Y);
+        gc.fillText(text, x_text, y_text);
     }
     private void cleatText() {
         textLayer.getGraphicsContext2D().clearRect(0, 0, textLayer.getWidth(), textLayer.getHeight());
@@ -314,14 +322,14 @@ public class CImagePane extends ScrollPane {
 
     private void initPositions() {
         positions.clear();
-        int size = config.getLabelsNow().size();
+        int size = state.getLabelsNow().size();
         for (int i = -1; i < size; i++) positions.add(null);
     }
     private void recordPosition(int index, Position position) {
         // Though the app chooses to let indexes in order, we also support unique index like `114514`
         if (index >= positions.size()) {
-            int enLargeSize = index - positions.size() + 1;
-            for (int i = 0; i < enLargeSize; i++) {
+            int enlargeSize = index - positions.size() + 1;
+            for (int i = 0; i < enlargeSize; i++) {
                 positions.add(null);
             }
         }
@@ -345,7 +353,7 @@ public class CImagePane extends ScrollPane {
         cleatText();
         int index = getIndexOf(new Position(event.getX(), event.getY()));
         if (index != NOT_FOUND) {
-            List<TransLabel> labels = config.getLabelsNow();
+            List<TransLabel> labels = state.getLabelsNow();
             Optional<TransLabel> result = labels.stream().filter(e -> e.getIndex() == index).findFirst();
             if (result.isPresent()) {
                 TransLabel label = result.get();
@@ -356,41 +364,41 @@ public class CImagePane extends ScrollPane {
     }
     private void handleLabelMode(MouseEvent event) {
         cleatText();
-        drawText(config.getCurrentGroupName(),Color.web(config.getGroupColorById(config.getCurrentGroupId())) , event);
+        drawText(state.getCurrentGroupName(),Color.web(state.getGroupColorById(state.getCurrentGroupId())) , event);
 
         switch (event.getButton()) {
             case PRIMARY: {
                 double x_percent = event.getX() / getViewWidth();
                 double y_percent = event.getY() / getViewHeight();
-                int groupId = config.getCurrentGroupId();
+                int groupId = state.getCurrentGroupId();
                 int index = positions.size();
 
                 TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
 
                 // Edit data
-                config.getLabelsNow().add(newLabel);
+                state.getLabelsNow().add(newLabel);
                 recordPosition(index, new Position(event.getX(), event.getY()));
                 // Update view
                 drawLabel(newLabel);
-                config.getControllerAccessor().updateTree();
+                state.getControllerAccessor().updateTree();
                 // Mark change
-                config.setChanged(true);
+                state.setChanged(true);
                 break;
             }
             case SECONDARY: {
                 int index = getSelectedLabel();
                 if (index != NOT_FOUND) {
-                    CTreeItem labelItem = config.getControllerAccessor().findLabelByIndex(index);
+                    CTreeItem labelItem = state.getControllerAccessor().findLabelByIndex(index);
 
                     // Edit data
-                    for (TransLabel l : config.getLabelsNow())
+                    for (TransLabel l : state.getLabelsNow())
                         if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
-                    config.getLabelsNow().remove(labelItem.meta);
+                    state.getLabelsNow().remove(labelItem.meta);
                     // Update view
-                    update();
-                    config.getControllerAccessor().updateTree();
+                    updateLabelLayer(labelItem.meta.getGroupId());
+                    state.getControllerAccessor().updateTree();
                     // Mark change
-                    config.setChanged(true);
+                    state.setChanged(true);
                 }
                 break;
             }
@@ -399,7 +407,7 @@ public class CImagePane extends ScrollPane {
     private void handleInputMode(MouseEvent event) { }
 
     private void updatePositions() {
-        List<TransLabel> labels = config.getLabelsNow();
+        List<TransLabel> labels = state.getLabelsNow();
 
         int size = positions.size();
         out: for (int i = 0; i < size; i++) {
@@ -414,7 +422,7 @@ public class CImagePane extends ScrollPane {
         }
     }
     private void updateLayer(int index) {
-        List<TransLabel> labels = config.getLabelsNow();
+        List<TransLabel> labels = state.getLabelsNow();
         GraphicsContext gc = getGraphicsContextAt(index);
         Canvas layer = gc.getCanvas();
 
@@ -446,7 +454,7 @@ public class CImagePane extends ScrollPane {
     public void update() {
         initPositions();
         setupImage();
-        setupLayers(config.getGroupCount());
+        setupLayers(state.getGroupCount());
         setupLabels();
     }
     public void relocate() {
@@ -471,7 +479,7 @@ public class CImagePane extends ScrollPane {
         }
     }
     public void updateTextLayer() {
-        if (config.getWorkMode() == Config.WORK_MODE_LABEL) {
+        if (state.getWorkMode() == State.WORK_MODE_LABEL) {
             cleatText();
         }
     }

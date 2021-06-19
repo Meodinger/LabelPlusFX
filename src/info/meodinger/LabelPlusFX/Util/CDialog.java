@@ -2,7 +2,6 @@ package info.meodinger.LabelPlusFX.Util;
 
 import info.meodinger.LabelPlusFX.I18N;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -175,11 +174,12 @@ public class CDialog {
             btn.setPrefWidth(40);
             btn.setPrefHeight(40);
         }
+
         add.setOnAction(event -> {
-            ObservableList<T> selectedItems = left.getSelectionModel().getSelectedItems();
-            for (T s: selectedItems) {
-                left.getItems().remove(s);
-                right.getItems().add(s);
+            List<T> selectedItems = new ArrayList<>(left.getSelectionModel().getSelectedItems());
+            for (T item: selectedItems) {
+                right.getItems().add(item);
+                left.getItems().remove(item);
             }
         });
         addAll.setOnAction(event -> {
@@ -187,16 +187,17 @@ public class CDialog {
             left.getItems().clear();
         });
         remove.setOnAction(event -> {
-            ObservableList<T> selectedItems = right.getSelectionModel().getSelectedItems();
-            for (T s: selectedItems) {
-                right.getItems().remove(s);
-                left.getItems().add(s);
+            List<T> selectedItems = new ArrayList<>(left.getSelectionModel().getSelectedItems());
+            for (T item: selectedItems) {
+                left.getItems().add(item);
+                right.getItems().remove(item);
             }
         });
         removeAll.setOnAction(event -> {
             left.getItems().addAll(right.getItems());
             right.getItems().clear();
         });
+
         GridPane pane = new GridPane();
         pane.add(new Label(I18N.PICS_POTENTIAL), 0, 0);
         pane.add(new Label(I18N.PICS_SELECTED), 2, 0);

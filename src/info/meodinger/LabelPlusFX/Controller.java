@@ -1,9 +1,7 @@
 package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Component.*;
-import info.meodinger.LabelPlusFX.IO.MeoPackager;
-import info.meodinger.LabelPlusFX.IO.TransFileExporter;
-import info.meodinger.LabelPlusFX.IO.TransFileLoader;
+import info.meodinger.LabelPlusFX.IO.*;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile.Group;
@@ -36,7 +34,7 @@ import java.util.*;
 
 public class Controller implements Initializable {
 
-    private final Config config;
+    private final State state;
     private final FileChooser.ExtensionFilter meoFilter;
     private final FileChooser.ExtensionFilter lpFilter;
     private final FileChooser.ExtensionFilter packFilter;
@@ -67,51 +65,11 @@ public class Controller implements Initializable {
         public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
             if (targetItem != null) {
                 targetItem.setText(newValue);
-                config.setChanged(true);
+                state.setChanged(true);
             }
         }
     }
     private final TransLabelTextListener textListener = new TransLabelTextListener();
-
-    private abstract class TreeItemListener<T extends Event> implements EventHandler<T> {
-        public TreeItem<String> getItem(T event) {
-            int shift = 0;
-
-            // Shift edit
-            if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                KeyEvent keyEvent = (KeyEvent) event;
-                if (keyEvent.getCode() == KeyCode.UP) shift = -1;
-                else if (keyEvent.getCode() == KeyCode.DOWN) shift = 1;
-                else shift = 0;
-            }
-
-            int index = vTree.getSelectionModel().getSelectedIndex() + shift;
-            return vTree.getTreeItem(index);
-        }
-    }
-    private class TreeItemListener4Text<T extends Event> extends TreeItemListener<T> {
-        @Override
-        public void handle(T event) {
-            TreeItem<String> item = getItem(event);
-            if (item != null && item.getClass() == CTreeItem.class) {
-                // Label
-                textListener.retargetTo((CTreeItem) item);
-            } else {
-                textListener.retargetTo(null);
-            }
-        }
-    }
-    private class TreeItemListener4Label<T extends Event> extends TreeItemListener<T> {
-        @Override
-        public void handle(T event) {
-            TreeItem<String> item = getItem(event);
-            if (item != null && item.getClass() == CTreeItem.class) {
-                // Label
-                int index = ((CTreeItem) item).meta.getIndex();
-                cImagePane.moveToLabel(index);
-            }
-        }
-    }
 
     private class ArrowKeyListener implements EventHandler<KeyEvent> {
         @Override
@@ -127,6 +85,8 @@ public class Controller implements Initializable {
                         else shift = 1;
 
                         index = vTree.getSelectionModel().getSelectedIndex() + shift;
+                        vTree.getSelectionModel().clearSelection();
+
                         TreeItem<String> item = vTree.getTreeItem(index);
                         if (item != null) {
                             if (item.getClass() == CTreeItem.class) {
@@ -142,7 +102,7 @@ public class Controller implements Initializable {
                             } else {
                                 // Root
                                 CTree.expandAll(item);
-                                if (config.getViewMode() == Config.VIEW_MODE_GROUP) index++;
+                                if (state.getViewMode() == State.VIEW_MODE_GROUP) index++;
                                 while (vTree.getTreeItem(index).getChildren().size() == 0) {
                                     index++;
                                     if (vTree.getTreeItem(index) == null) break;
@@ -241,28 +201,28 @@ public class Controller implements Initializable {
     @FXML private MenuItem mAbout;
     @FXML private MenuItem mHint;
 
-    public Controller(Config config) {
-        this.config = config;
+    public Controller(State state) {
+        this.state = state;
 
-        this.meoFilter = new FileChooser.ExtensionFilter(I18N.MEO_TRANS_FILE, "*" + Config.EXTENSION_MEO);
-        this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + Config.EXTENSION_LP);
-        this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + Config.EXTENSION_PACK);
+        this.meoFilter = new FileChooser.ExtensionFilter(I18N.MEO_TRANS_FILE, "*" + State.EXTENSION_MEO);
+        this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + State.EXTENSION_LP);
+        this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + State.EXTENSION_PACK);
 
         this.fileChooser = new CFileChooser();
         this.exportChooser = new CFileChooser();
         this.exportPackChooser = new CFileChooser();
 
-        this.meoPackager = new MeoPackager(config);
+        this.meoPackager = new MeoPackager(state);
 
-        this.loaderMeo = new TransFileLoader.MeoFileLoader(config);
-        this.loaderLP = new TransFileLoader.LPFileLoader(config);
-        this.exporterMeo = new TransFileExporter.MeoFileExporter(config);
-        this.exporterLP = new TransFileExporter.LPFileExporter(config);
+        this.loaderMeo = new TransFileLoader.MeoFileLoader(state);
+        this.loaderLP = new TransFileLoader.LPFileLoader(state);
+        this.exporterMeo = new TransFileExporter.MeoFileExporter(state);
+        this.exporterLP = new TransFileExporter.LPFileExporter(state);
 
-        this.menu = new CTreeMenu(config);
+        this.menu = new CTreeMenu(state);
         this.timer = new Timer();
 
-        config.setControllerAccessor(new Config.ControllerAccessor() {
+        state.setControllerAccessor(new State.ControllerAccessor() {
             @Override
             public void close() {
                 Controller.this.close();
@@ -342,11 +302,10 @@ public class Controller implements Initializable {
         setDisable(true);
 
         // Initialize
-        cImagePane.setConfig(config);
+        menu.treeMenu.init(vTree);
+        cImagePane.setConfig(state);
         cImagePane.setMinScale(cSlider.getMinScale());
         cImagePane.setMaxScale(cSlider.getMaxScale());
-        vTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        vTree.setCellFactory(view -> new CTreeCell(config, menu));
 
         // Accelerator
         if (CAccelerator.isMac) {
@@ -358,20 +317,20 @@ public class Controller implements Initializable {
         }
 
         // Fix width ratio
-        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> pRight.setPrefWidth(config.stage.getWidth() / 3);
-        config.stage.widthProperty().addListener(stageSizeListener);
-        config.stage.widthProperty().addListener(stageSizeListener);
+        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> pRight.setPrefWidth(state.stage.getWidth() / 3);
+        state.stage.widthProperty().addListener(stageSizeListener);
+        state.stage.widthProperty().addListener(stageSizeListener);
 
         // Reload labels and Repaint pane when change pic
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            config.setCurrentPicName(newValue);
+            state.setCurrentPicName(newValue);
             loadTransLabel();
             if (newValue != null) {
                 cImagePane.update();
                 cImagePane.relocate();
             }
-            if (config.getLabelsNow().size() > 0) {
-                CTreeItem item = findLabelItemByIndex(config.getLabelsNow().get(0).getIndex());
+            if (state.getLabelsNow().size() > 0) {
+                CTreeItem item = findLabelItemByIndex(state.getLabelsNow().get(0).getIndex());
                 if (item != null) {
                     vTree.getSelectionModel().select(item);
                     textListener.retargetTo(item);
@@ -382,9 +341,16 @@ public class Controller implements Initializable {
 
         // Update text layer when change group
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            config.setCurrentGroupId(config.getGroupIdByName(newValue));
-            config.setCurrentGroupName(newValue);
+            state.setCurrentGroupId(state.getGroupIdByName(newValue));
+            state.setCurrentGroupName(newValue);
             cImagePane.updateTextLayer();
+        });
+
+        // Update tree menu state when requested
+        vTree.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+            if (state.getViewMode() == State.VIEW_MODE_INDEX) {
+                menu.treeMenu.update();
+            }
         });
 
         // Bind view scale and slider value
@@ -397,16 +363,49 @@ public class Controller implements Initializable {
             if (item != null) {
                 if (item.getParent() != null && item.getClass() != CTreeItem.class) {
                     textListener.retargetTo(null);
-                    cGroupBox.moveTo(config.getGroupIdByName(item.getValue()));
+                    cGroupBox.moveTo(state.getGroupIdByName(item.getValue()));
                 }
             }
         });
 
         // Bind Text and Tree
         tTransText.textProperty().addListener(textListener);
-        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Text<>());
-        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Text<>());
-        vTree.addEventHandler(ScrollToEvent.ANY, new TreeItemListener4Text<>());
+        vTree.addEventHandler(ScrollToEvent.ANY, event -> {
+            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
+            if (item != null && item.getClass() == CTreeItem.class) {
+                // Label
+                textListener.retargetTo((CTreeItem) item);
+            } else {
+                textListener.retargetTo(null);
+            }
+        });
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED,  event -> {
+            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
+            if (item != null && item.getClass() == CTreeItem.class) {
+                // Label
+                textListener.retargetTo((CTreeItem) item);
+            } else {
+                textListener.retargetTo(null);
+            }
+        });
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode().isArrowKey()) {
+
+                // Shift edit
+                int shift = 0;
+                if (event.getCode() == KeyCode.UP) shift = -1;
+                else if (event.getCode() == KeyCode.DOWN) shift = 1;
+
+                TreeItem<String> item = vTree.getTreeItem(vTree.getSelectionModel().getSelectedIndex() + shift);
+
+                if (item != null && item.getClass() == CTreeItem.class) {
+                    // Label
+                    textListener.retargetTo((CTreeItem) item);
+                } else {
+                    textListener.retargetTo(null);
+                }
+            }
+        });
 
         // Bind Label Graphic and Tree
         cImagePane.selectedLabelProperty().addListener((observable, oldValue, newValue) -> {
@@ -417,8 +416,31 @@ public class Controller implements Initializable {
                 vTree.scrollTo(vTree.getRow(item));
             }
         });
-        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, new TreeItemListener4Label<>());
-        vTree.addEventHandler(KeyEvent.KEY_PRESSED, new TreeItemListener4Label<>());
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getClickCount() < 2) return;
+
+            TreeItem<String> item = vTree.getSelectionModel().getSelectedItem();
+            if (item != null && item.getClass() == CTreeItem.class) {
+                int index = ((CTreeItem) item).meta.getIndex();
+                cImagePane.moveToLabel(index);
+            }
+        });
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode().isArrowKey()) {
+
+                // Shift edit
+                int shift = 0;
+                if (event.getCode() == KeyCode.UP) shift = -1;
+                else if (event.getCode() == KeyCode.DOWN) shift = 1;
+
+                TreeItem<String> item = vTree.getTreeItem(vTree.getSelectionModel().getSelectedIndex() + shift);
+
+                if (item != null && item.getClass() == CTreeItem.class) {
+                    int index = ((CTreeItem) item).meta.getIndex();
+                    cImagePane.moveToLabel(index);
+                }
+            }
+        });
 
         // Bind number input with group selection
         cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
@@ -434,8 +456,8 @@ public class Controller implements Initializable {
         // Bind Alt/Meta+A with special symbols (Render Menu in )
         tTransText.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if ((event.isAltDown() || event.isMetaDown()) && event.getCode() == KeyCode.A) {
-                double x = config.stage.getX() + pRight.getWidth() * 2;
-                double y = config.stage.getY() + pText.getScene().getHeight() - pText.getHeight() + 40;
+                double x = state.stage.getX() + pRight.getWidth() * 2;
+                double y = state.stage.getY() + pText.getScene().getHeight() - pText.getHeight() + 40;
 
                 symbolMenu.show(tTransText, x, y);
             }
@@ -508,31 +530,31 @@ public class Controller implements Initializable {
         setDisable(true);
     }
     private void updateGroupList() {
-        cGroupBox.setList(config.getGroupNames());
+        cGroupBox.setList(state.getGroupNames());
     }
 
     private void silentBak() {
-        File bak = new File(config.getBakFolder() + File.separator + new Date().getTime() + Config.EXTENSION_BAK);
+        File bak = new File(state.getBakFolder() + File.separator + new Date().getTime() + State.EXTENSION_BAK);
         exporterMeo.export(bak);
     }
     private void prepare() {
-        cPicBox.setList(new ArrayList<>(config.getSortedPicSet()));
+        cPicBox.setList(state.getSortedPicList());
         updateGroupList();
         setDisable(false);
 
         if (task != null) {
             task.cancel();
         }
-        File bakDir = new File(config.getBakFolder());
+        File bakDir = new File(state.getBakFolder());
         if ((bakDir.exists() && bakDir.isDirectory()) || bakDir.mkdir()) {
             task = new AutoBack();
-            timer.schedule(task, Config.AUTO_SAVE_DELAY , Config.AUTO_SAVE_PERIOD);
+            timer.schedule(task, State.AUTO_SAVE_DELAY , State.AUTO_SAVE_PERIOD);
         } else {
             CDialog.showAlert(I18N.AUTO_SAVE_NOT_AVAILABLE);
         }
     }
     private void trySave() {
-        if (config.getFilePath() != null && CString.isBlank(config.getFilePath()) && config.isChanged()) {
+        if (state.getFilePath() != null && CString.isBlank(state.getFilePath()) && state.isChanged()) {
             Optional<ButtonType> result = CDialog.showAlert(I18N.EXIT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
             if (result.isPresent()) {
                 ButtonBar.ButtonData data = result.get().getButtonData();
@@ -543,10 +565,10 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void newTranslation() {
-        File file = fileChooser.showSaveDialog(config.stage);
+        File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
         trySave();
-        config.initialize();
+        state.initialize();
 
         MeoTransFile transFile = new MeoTransFile();
         transFile.setVersion(new int[]{1, 0});
@@ -568,7 +590,7 @@ public class Controller implements Initializable {
                 List<File> files = new ArrayList<>(Arrays.asList(listFiles));
                 for (File f : files) {
                     if (f.isFile()) {
-                        for (String extension : Config.PIC_EXTENSIONS) {
+                        for (String extension : State.PIC_EXTENSIONS) {
                             if (f.getName().endsWith(extension)) {
                                 potentialFiles.add(f.getName());
                             }
@@ -577,7 +599,7 @@ public class Controller implements Initializable {
                 }
             }
         }
-        Optional<List<String>> listResult = CDialog.showListChoose(config.stage, I18N.CHOOSE_PICS_TITLE, potentialFiles);
+        Optional<List<String>> listResult = CDialog.showListChoose(state.stage, I18N.CHOOSE_PICS_TITLE, potentialFiles);
         if (listResult.isPresent()) {
             List<String> picList = listResult.get();
             for (String pic : picList) {
@@ -585,11 +607,11 @@ public class Controller implements Initializable {
             }
             transFile.setTransMap(transMap);
 
-            config.setTransFile(transFile);
-            config.setFilePath(file.getPath());
+            state.setTransFile(transFile);
+            state.setFilePath(file.getPath());
 
             TransFileExporter exporter;
-            if (config.isMeoFile()) {
+            if (state.isMeoFile()) {
                 exporter = exporterMeo;
             } else {
                 exporter = exporterLP;
@@ -597,19 +619,19 @@ public class Controller implements Initializable {
             if (exporter.export()) {
                 prepare();
             } else {
-                config.initialize();
+                state.initialize();
             }
         }
     }
     @FXML public void openTranslation() {
-        File file = fileChooser.showOpenDialog(config.stage);
+        File file = fileChooser.showOpenDialog(state.stage);
         if (file == null) return;
         trySave();
-        config.initialize();
+        state.initialize();
 
-        config.setFilePath(file.getPath());
+        state.setFilePath(file.getPath());
         TransFileLoader loader;
-        if (config.isMeoFile()) {
+        if (state.isMeoFile()) {
             loader = loaderMeo;
         } else {
             loader = loaderLP;
@@ -617,24 +639,24 @@ public class Controller implements Initializable {
         if (loader.load(file)) {
             prepare();
         } else {
-            config.initialize();
+            state.initialize();
         }
     }
     @FXML public void saveTranslation() {
-        if (config.getFilePath() == null || CString.isBlank(config.getFilePath())) {
+        if (state.getFilePath() == null || CString.isBlank(state.getFilePath())) {
             saveAsTranslation();
             return;
         }
 
         TransFileExporter exporter;
-        if (config.isMeoFile()) {
+        if (state.isMeoFile()) {
             exporter = exporterMeo;
         } else {
             exporter = exporterLP;
         }
 
-        File ori = new File(config.getFilePath());
-        File bak = new File(config.getFilePath() + Config.EXTENSION_BAK);
+        File ori = new File(state.getFilePath());
+        File bak = new File(state.getFilePath() + State.EXTENSION_BAK);
         boolean backed = false;
 
         try (FileChannel input = new FileInputStream(ori).getChannel();
@@ -647,7 +669,7 @@ public class Controller implements Initializable {
         }
 
         if (exporter.export()) {
-            config.setChanged(false);
+            state.setChanged(false);
             if (backed && !bak.delete()) {
                 CDialog.showAlert(I18N.BAK_FILE_DELETED_FAILED);
             }
@@ -656,28 +678,28 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void saveAsTranslation() {
-        File file = fileChooser.showSaveDialog(config.stage);
+        File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
 
-        config.setFilePath(file.getPath());
+        state.setFilePath(file.getPath());
         TransFileExporter exporter;
-        if (config.isMeoFile()) {
+        if (state.isMeoFile()) {
             exporter = exporterMeo;
         } else {
             exporter = exporterLP;
         }
 
         if (exporter.export(file)) {
-            config.setFilePath(file.getPath());
-            config.setChanged(false);
+            state.setFilePath(file.getPath());
+            state.setChanged(false);
             CDialog.showInfo(I18N.SAVED_SUCCESSFULLY);
         } else {
-            config.setFilePath(null);
+            state.setFilePath(null);
             CDialog.showAlert(I18N.SAVE_FAILED);
         }
     }
     @FXML public void close() {
-        if (!config.isChanged()) System.exit(0);
+        if (!state.isChanged()) System.exit(0);
 
         Optional<ButtonType> result = CDialog.showAlert(I18N.EXIT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
 
@@ -704,14 +726,14 @@ public class Controller implements Initializable {
             exporter = exporterMeo;
         }
 
-        File file = exportChooser.showSaveDialog(config.stage);
+        File file = exportChooser.showSaveDialog(state.stage);
         if (file == null) return;
         if (exporter.export(file)) {
             CDialog.showInfo(I18N.EXPORTED_SUCCESSFULLY);
         }
     }
     @FXML public void exportTransPack() {
-        File file = exportPackChooser.showSaveDialog(config.stage);
+        File file = exportPackChooser.showSaveDialog(state.stage);
         if (file == null) return;
 
         if (meoPackager.packMeo(file.getPath())) {
@@ -724,7 +746,7 @@ public class Controller implements Initializable {
                 I18N.HINT,
                 I18N.HINT_CONTENT,
                 I18N.HINT_LINK,
-                event -> config.application.getHostServices().showDocument(I18N.HINT_LINK_URL)
+                event -> state.application.getHostServices().showDocument(I18N.HINT_LINK_URL)
         );
     }
     @FXML public void about() {
@@ -732,62 +754,68 @@ public class Controller implements Initializable {
                 I18N.ABOUT,
                 I18N.ABOUT_CONTENT,
                 I18N.ABOUT_LINK,
-                event -> config.application.getHostServices().showDocument(I18N.ABOUT_LINK_URL)
+                event -> state.application.getHostServices().showDocument(I18N.ABOUT_LINK_URL)
         );
     }
 
     private void setViewMode(int viewMode) {
-        config.setViewMode(viewMode);
+        state.setViewMode(viewMode);
         switch (viewMode) {
-            case Config.VIEW_MODE_GROUP:
+            case State.VIEW_MODE_GROUP:
                 btnSwitchViewMode.setText(I18N.VIEW_GROUP);
                 break;
-            case Config.VIEW_MODE_INDEX:
+            case State.VIEW_MODE_INDEX:
                 btnSwitchViewMode.setText(I18N.VIEW_INDEX);
                 break;
         }
         loadTransLabel();
     }
     @FXML public void switchViewMode() {
-        int viewMode = (config.getViewMode() + 1) % 2;
+        int viewMode = (state.getViewMode() + 1) % 2;
         setViewMode(viewMode);
     }
 
     private void setWorkMode(int workMode) {
-        config.setWorkMode(workMode);
+        state.setWorkMode(workMode);
         switch (workMode) {
-            case Config.WORK_MODE_CHECK:
+            case State.WORK_MODE_CHECK:
                 btnSwitchWorkMode.setText(I18N.WORK_CHECK);
-                setViewMode(Config.VIEW_MODE_INDEX);
+                setViewMode(State.VIEW_MODE_INDEX);
                 break;
-            case Config.WORK_MODE_LABEL:
+            case State.WORK_MODE_LABEL:
                 btnSwitchWorkMode.setText(I18N.WORK_LABEL);
-                setViewMode(Config.VIEW_MODE_GROUP);
+                setViewMode(State.VIEW_MODE_GROUP);
                 break;
-            case Config.WORK_MODE_INPUT:
-                setViewMode(Config.VIEW_MODE_INDEX);
+            case State.WORK_MODE_INPUT:
+                setViewMode(State.VIEW_MODE_INDEX);
                 btnSwitchWorkMode.setText(I18N.WORK_INPUT);
                 break;
         }
-        int count = config.getGroupCount();
+        int count = state.getGroupCount();
         for (int i = 0; i < count; i++) {
             cImagePane.updateLabelLayer(i);
         }
     }
     @FXML public void switchWorkMode() {
-        int workMode = (config.getWorkMode() + 1) % 3;
+        int workMode = (state.getWorkMode() + 1) % 3;
         setWorkMode(workMode);
     }
 
     private void loadTransLabel() {
         textListener.retargetTo(null);
 
-        if (config.getTransFile() != null) {
-            switch (config.getViewMode()) {
-                case Config.VIEW_MODE_GROUP:
+        if (state.getTransFile() != null) {
+            switch (state.getViewMode()) {
+                case State.VIEW_MODE_GROUP:
+                    vTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+                    vTree.setCellFactory(view -> new CTreeCell(State.VIEW_MODE_GROUP, menu));
+                    vTree.setContextMenu(null);
                     loadTransLabel_Group();
                     break;
-                case Config.VIEW_MODE_INDEX:
+                case State.VIEW_MODE_INDEX:
+                    vTree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                    vTree.setCellFactory(null);
+                    vTree.setContextMenu(menu.treeMenu);
                     loadTransLabel_Index();
                     break;
             }
@@ -795,11 +823,11 @@ public class Controller implements Initializable {
         CTree.expandAll(vTree.getRoot());
     }
     private void loadTransLabel_Group() {
-        List<TransLabel> labels = config.getLabelsNow();
+        List<TransLabel> labels = state.getLabelsNow();
 
-        TreeItem<String> root = new TreeItem<>(config.getCurrentPicName());
+        TreeItem<String> root = new TreeItem<>(state.getCurrentPicName());
         ArrayList<TreeItem<String>> groups = new ArrayList<>();
-        for (TransFile.MeoTransFile.Group group : config.getGroups()) {
+        for (TransFile.MeoTransFile.Group group : state.getGroups()) {
             Node node = new Circle(8, Color.web(group.color));
             TreeItem<String> item = new TreeItem<>(group.name, node);
             groups.add(item);
@@ -807,7 +835,7 @@ public class Controller implements Initializable {
         }
         for (TransLabel label : labels) {
             TreeItem<String> group = groups.get(label.getGroupId());
-            CTreeItem item = new CTreeItem(config, group.getValue(), label);
+            CTreeItem item = new CTreeItem(state, group.getValue(), label);
 
             group.getChildren().add(item);
         }
@@ -816,14 +844,14 @@ public class Controller implements Initializable {
         vTree.setRoot(root);
     }
     private void loadTransLabel_Index() {
-        List<TransLabel> labels = config.getLabelsNow();
-        List<TransFile.MeoTransFile.Group> groups = config.getGroups();
+        List<TransLabel> labels = state.getLabelsNow();
+        List<TransFile.MeoTransFile.Group> groups = state.getGroups();
 
-        TreeItem<String> root = new TreeItem<>(config.getCurrentPicName());
+        TreeItem<String> root = new TreeItem<>(state.getCurrentPicName());
         for (TransLabel label : labels) {
             TransFile.MeoTransFile.Group group = groups.get(label.getGroupId());
             Node node = new Circle(8, Color.web(group.color));
-            CTreeItem item = new CTreeItem(config, group.name, label, node);
+            CTreeItem item = new CTreeItem(state, group.name, label, node);
 
             root.getChildren().add(item);
         }
@@ -833,12 +861,12 @@ public class Controller implements Initializable {
     }
     private CTreeItem findLabelItemByIndex(int index) {
         if (index != CImagePane.NOT_FOUND) {
-            List<TransLabel> labels = config.getLabelsNow();
+            List<TransLabel> labels = state.getLabelsNow();
             Optional<TransLabel> labelResult = labels.stream().filter(e -> e.getIndex() == index).findFirst();
             if (labelResult.isPresent()) {
                 TransLabel label = labelResult.get();
                 TreeItem<String> whereToSearch;
-                if (config.getViewMode() == Config.VIEW_MODE_GROUP) {
+                if (state.getViewMode() == State.VIEW_MODE_GROUP) {
                     whereToSearch = vTree.getRoot().getChildren().get(label.getGroupId());
                 } else {
                     whereToSearch = vTree.getRoot();

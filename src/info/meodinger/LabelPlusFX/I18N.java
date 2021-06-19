@@ -45,7 +45,7 @@ public class I18N {
     public static String ABOUT = "关于";
     public static String ABOUT_CONTENT = "Label Plus FX for version [1,0]\n" +
             "Author: Meodinger(meodinger@qq.com)\n" +
-            "Version: 1.0.5 Bugfix 210615\n" +
+            "Version: 1.0.5 Bugfix 210618\n" +
             "Java Version: " + System.getProperty("java.version");
     public static String ABOUT_LINK = "Github Repository";
     public static String ABOUT_LINK_URL = "https://github.com/Meodinger/LabelPlusFX";
@@ -93,6 +93,7 @@ public class I18N {
     public static String CONTENT_RENAME = "请输入分组的新<名称>";
     public static String CONTENT_MOVE_TO = "选择这个Label的分组";
     public static String CONTENT_DELETE_LABEL = "确定要删除这个Label么？";
+    public static String CONTENT_DELETE_LABELS = "确定要删除这些Label么？";
 
     public static String MM_FILE = "文件";
     public static String M_NEW = "新建翻译";
@@ -190,6 +191,7 @@ public class I18N {
             CONTENT_RENAME = "Enter the new <name> for the Group";
             CONTENT_MOVE_TO = "Select Group of this Label";
             CONTENT_DELETE_LABEL = "Are your sue to delete this label?";
+            CONTENT_DELETE_LABELS = "Are your sue to delete these labels?";
 
             MM_FILE = "File";
             M_NEW = "New File";

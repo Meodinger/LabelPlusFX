@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.Component;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
@@ -8,6 +8,7 @@ import info.meodinger.LabelPlusFX.Util.CColor;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 import info.meodinger.LabelPlusFX.Util.CString;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -27,21 +28,23 @@ public class CTreeMenu {
     public final TargetMenu rootMenu;
     public final TargetMenu groupMenu;
     public final TargetMenu labelMenu;
+    public final TreeMenu treeMenu;
 
-    public CTreeMenu(Config config) {
-        rootMenu = new RootMenu(config);
-        groupMenu = new GroupMenu(config);
-        labelMenu = new LabelMenu(config);
+    public CTreeMenu(State state) {
+        rootMenu = new RootMenu(state);
+        groupMenu = new GroupMenu(state);
+        labelMenu = new LabelMenu(state);
+        treeMenu = new TreeMenu(state);
     }
 
     public abstract static class TargetMenu extends ContextMenu {
 
-        private final Config config;
+        private final State state;
         private TreeItem<String> item;
 
-        public TargetMenu(Config config) {
+        public TargetMenu(State state) {
             super();
-            this.config = config;
+            this.state = state;
             render();
         }
 
@@ -53,8 +56,8 @@ public class CTreeMenu {
             return item;
         }
 
-        public Config getConfig() {
-            return config;
+        public State getState() {
+            return state;
         }
 
         protected abstract void render();
@@ -68,8 +71,8 @@ public class CTreeMenu {
         private CColorPicker colorPicker;
         private TextField nameField;
 
-        public RootMenu(Config config) {
-            super(config);
+        public RootMenu(State state) {
+            super(state);
         }
 
         @Override
@@ -114,9 +117,9 @@ public class CTreeMenu {
 
             addGroup.setOnAction(e -> {
                 TreeItem<String> rootItem = getItem();
-                Config config = getConfig();
+                State state = getState();
 
-                int newGroupId = config.getGroupCount();
+                int newGroupId = state.getGroupCount();
                 nameField.setText(String.format(I18N.FORMAT_NEW_GROUP_NAME, newGroupId + 1));
                 Color color;
                 if (newGroupId < 9) {
@@ -135,13 +138,13 @@ public class CTreeMenu {
                     TransFile.MeoTransFile.Group group = result.get();
 
                     // Edit data
-                    config.getGroups().add(group);
+                    state.getGroups().add(group);
                     // Update view
-                    config.getControllerAccessor().updateGroupList();
-                    config.getControllerAccessor().addLabelLayer();
+                    state.getControllerAccessor().updateGroupList();
+                    state.getControllerAccessor().addLabelLayer();
                     rootItem.getChildren().add(new TreeItem<>(group.name, new Circle(8, Color.web(group.color))));
                     // Mark change
-                    config.setChanged(true);
+                    state.setChanged(true);
                 }
             });
         }
@@ -151,8 +154,8 @@ public class CTreeMenu {
         private MenuItem rename, changeColor, delete;
         private CColorPicker picker;
 
-        public GroupMenu(Config config) {
-            super(config);
+        public GroupMenu(State state) {
+            super(state);
         }
 
         @Override
@@ -185,49 +188,49 @@ public class CTreeMenu {
 
             rename.setOnAction(e -> {
                 TreeItem<String> groupItem = getItem();
-                Config config = getConfig();
+                State state = getState();
 
-                Optional<String> result = CDialog.showInput(config.stage, I18N.TITLE_RENAME, I18N.CONTENT_RENAME, groupItem.getValue());
+                Optional<String> result = CDialog.showInput(state.stage, I18N.TITLE_RENAME, I18N.CONTENT_RENAME, groupItem.getValue());
 
                 if (result.isPresent() && !CString.isBlank(result.get())) {
                     String name = result.get().trim().replaceAll(" ", "_");
-                    int groupId = config.getGroupIdByName(groupItem.getValue());
+                    int groupId = state.getGroupIdByName(groupItem.getValue());
 
-                    if (config.isLPFile() && config.getGroupNames().contains(name)) {
+                    if (state.isLPFile() && state.getGroupNames().contains(name)) {
                         CDialog.showAlert(I18N.SAME_GROUP_NAME);
                         return;
                     }
 
                     // Edit data
-                    config.getGroupAt(groupId).name = name;
+                    state.getGroupAt(groupId).name = name;
                     // Update view
-                    config.getControllerAccessor().updateGroupList();
+                    state.getControllerAccessor().updateGroupList();
                     groupItem.setValue(name);
                     // Mark change
-                    config.setChanged(true);
+                    state.setChanged(true);
                 }
             });
 
             picker.setValue((Color) ((Circle) getItem().getGraphic()).getFill());
             picker.setOnAction(e -> {
-                Config config = getConfig();
+                State state = getState();
                 Color color = ((ColorPicker) e.getSource()).getValue();
-                int groupId = config.getGroupIdByName(getItem().getValue());
+                int groupId = state.getGroupIdByName(getItem().getValue());
 
                 // Edit data
-                config.getGroupAt(groupId).color = CColor.toHex(color);
+                state.getGroupAt(groupId).color = CColor.toHex(color);
                 // Update view
                 ((Circle) getItem().getGraphic()).setFill(color);
-                config.getControllerAccessor().updateLabelLayer(groupId);
+                state.getControllerAccessor().updateLabelLayer(groupId);
                 // Mark change
-                config.setChanged(true);
+                state.setChanged(true);
 
             });
             changeColor.setText(CColor.toHex(picker.getValue()));
 
 
-            int labelCount = 0, thisGroupId = getConfig().getGroupIdByName(getItem().getValue());
-            for (List<TransLabel> labels : getConfig().getTransMap().values()) {
+            int labelCount = 0, thisGroupId = getState().getGroupIdByName(getItem().getValue());
+            for (List<TransLabel> labels : getState().getTransMap().values()) {
                 for (TransLabel label : labels) {
                     if (label.getGroupId() == thisGroupId) labelCount++;
                 }
@@ -235,19 +238,19 @@ public class CTreeMenu {
             delete.setDisable(labelCount != 0);
             delete.setOnAction(e -> {
                 TreeItem<String> groupItem = getItem();
-                Config config = getConfig();
-                int groupId = config.getGroupIdByName(groupItem.getValue());
+                State state = getState();
+                int groupId = state.getGroupIdByName(groupItem.getValue());
 
                 // Edit data
-                for (List<TransLabel> labels : config.getTransMap().values()) for (TransLabel label : labels)
+                for (List<TransLabel> labels : state.getTransMap().values()) for (TransLabel label : labels)
                     if (label.getGroupId() >= groupId) label.setGroupId(label.getGroupId() - 1);
-                config.getGroups().remove(groupId);
+                state.getGroups().remove(groupId);
                 // Update view
-                config.getControllerAccessor().updateGroupList();
                 groupItem.getParent().getChildren().remove(groupItem);
-                config.getControllerAccessor().removeLabelLayer(groupId);
+                state.getControllerAccessor().updateGroupList();
+                state.getControllerAccessor().removeLabelLayer(groupId);
                 // Mark change
-                config.setChanged(true);
+                state.setChanged(true);
             });
         }
     }
@@ -255,8 +258,8 @@ public class CTreeMenu {
 
         private MenuItem editGroup, delete;
 
-        public LabelMenu(Config config) {
-            super(config);
+        public LabelMenu(State state) {
+            super(state);
         }
 
         @Override
@@ -281,18 +284,20 @@ public class CTreeMenu {
 
             editGroup.setOnAction(e -> {
                 CTreeItem labelItem = (CTreeItem) getItem();
-                Config config = getConfig();
+                State state = getState();
                 int prevGroupId = labelItem.meta.getGroupId();
-                Optional<String> result = CDialog.showChoice(config.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, config.getGroupNames());
+                Optional<String> result = CDialog.showChoice(state.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, state.getGroupNames());
 
-                // Edit data
-                result.ifPresent(labelItem::setGroupName);
-                // Update view
-                config.getControllerAccessor().updateLabelLayer(prevGroupId);
-                config.getControllerAccessor().updateLabelLayer(labelItem.meta.getGroupId());
-                config.getControllerAccessor().updateTree();
-                // Mark change
-                config.setChanged(true);
+                if (result.isPresent()) {
+                    // Edit data
+                    labelItem.setGroupName(result.get());
+                    // Update view
+                    state.getControllerAccessor().updateLabelLayer(prevGroupId);
+                    state.getControllerAccessor().updateLabelLayer(labelItem.meta.getGroupId());
+                    state.getControllerAccessor().updateTree();
+                    // Mark change
+                    state.setChanged(true);
+                }
             });
 
             /*
@@ -300,25 +305,108 @@ public class CTreeMenu {
              */
             delete.setOnAction(e -> {
                 CTreeItem labelItem = (CTreeItem) getItem();
-                Config config = getConfig();
+                State state = getState();
 
                 Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABEL, labelItem.getValue());
 
                 if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
-                    TransLabel label = labelItem.meta;
 
                     // Edit data
-                    for (TransLabel l : config.getLabelsNow())
-                        if (l.getIndex() > label.getIndex()) l.setIndex(l.getIndex() - 1);
-                    config.getLabelsNow().remove(label);
+                    for (TransLabel l : state.getLabelsNow())
+                        if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
+                    state.getLabelsNow().remove(labelItem.meta);
                     // Update view
-                    config.getControllerAccessor().updatePane();
-                    config.getControllerAccessor().updateTree();
+                    state.getControllerAccessor().updateLabelLayer(labelItem.meta.getGroupId()); // Also update positions
+                    state.getControllerAccessor().updateTree();
                     // Mark change
-                    config.setChanged(true);
+                    state.setChanged(true);
                 }
             });
         }
     }
+
+    public static class TreeMenu extends ContextMenu {
+
+        private final State state;
+        private MenuItem editGroup, delete;
+        private TreeView<String> view;
+
+        public TreeMenu(State state) {
+            super();
+            this.state = state;
+            render();
+        }
+
+        private void render() {
+            editGroup = new MenuItem(I18N.MENU_ITEM_MOVE_TO);
+            delete = new MenuItem(I18N.MENU_ITEM_DELETE);
+
+            getItems().add(editGroup);
+            getItems().add(new SeparatorMenuItem());
+            getItems().add(delete);
+        }
+
+        public void init(TreeView<String> treeView) {
+            view = treeView;
+
+            editGroup.setOnAction(e -> {
+                ObservableList<TreeItem<String>> selectedItems = view.getSelectionModel().getSelectedItems();
+
+                Optional<String> result = CDialog.showChoice(state.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, state.getGroupNames());
+
+                // Edit data
+                if (result.isPresent()) {
+                    String name = result.get();
+                    for (TreeItem<String> item : selectedItems) {
+                        ((CTreeItem) item).setGroupName(name);
+                    }
+                }
+                // Update view
+                state.getControllerAccessor().updatePane();
+                state.getControllerAccessor().updateTree();
+                // Mark change
+                state.setChanged(true);
+            });
+
+            delete.setOnAction(e -> {
+                ObservableList<TreeItem<String >> selectedItems = view.getSelectionModel().getSelectedItems();
+
+                Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABELS);
+
+                if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
+                    // Edit data
+                    for (TreeItem<String> item : selectedItems) {
+                        TransLabel label = ((CTreeItem) item).meta;
+                        for (TransLabel l : state.getLabelsNow())
+                            if (l.getIndex() > label.getIndex()) l.setIndex(l.getIndex() - 1);
+                        state.getLabelsNow().remove(label);
+                    }
+                    // Update view
+                    state.getControllerAccessor().updatePane(); // Also update positions
+                    state.getControllerAccessor().updateTree();
+                    // Mark change
+                    state.setChanged(true);
+                }
+            });
+        }
+
+        public void update() {
+            editGroup.setDisable(true);
+            delete.setDisable(true);
+
+            ObservableList<TreeItem<String>> selectedItems = view.getSelectionModel().getSelectedItems();
+
+            if (selectedItems.size() == 0) return;
+            for (TreeItem<String> item : selectedItems) {
+                if (item.getClass() != CTreeItem.class) {
+                    return;
+                }
+            }
+
+            editGroup.setDisable(false);
+            delete.setDisable(false);
+        }
+    }
+
 
 }

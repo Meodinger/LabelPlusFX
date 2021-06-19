@@ -1,5 +1,8 @@
 package info.meodinger.LabelPlusFX.Util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Meodinger
  * Date: 2021/5/29
@@ -23,6 +26,10 @@ public class CString {
         return repeat(String.valueOf(c), n);
     }
 
+    public static <T> int lengthOf(T t) {
+        return String.valueOf(t).length();
+    }
+
     public static boolean isWhiteSpace(char c) {
         for (char w : WHITE_SPACE_ARRAY) {
             if (c == w) return true;
@@ -42,24 +49,44 @@ public class CString {
         return whiteCount == chars.length;
     }
 
-    public static String strip(String str) {
-        if (str == null) return null;
+    public static boolean isDigit(String str) {
         char[] chars = str.toCharArray();
+        for (char c : chars) {
+            if (c < '0' || c > '9') return false;
+        }
+        return true;
+    }
 
-        int left = 0, right = 0;
-        for (int i = 0; i < chars.length; i ++) {
-            if (!isWhiteSpace(chars[i])) {
-                left = i;
-                break;
+    public static List<String> trimSame(List<String> strings) {
+        ArrayList<String> trimmed = new ArrayList<>();
+
+        if (strings == null) return null;
+        if (strings.isEmpty()) return trimmed;
+
+        char[] example = strings.get(0).toCharArray();
+        int head = example.length, tail = example.length;
+        for (int i = 1; i < strings.size(); i++) {
+            char[] chars = strings.get(i).toCharArray();
+            int range = Math.min(example.length, chars.length);
+
+            for (int j = 0; j < range; j++) {
+                if (chars[j] != example[j]) {
+                    head = Math.min(j, head);
+                    break;
+                }
+            }
+            for (int j = 0; j < range; j++) {
+                if (chars[chars.length - j - 1] != example[example.length - j - 1]) {
+                    tail = Math.min(j, tail);
+                    break;
+                }
             }
         }
-        for (int i = chars.length - 1; i > 0; i --) {
-            if (!isWhiteSpace(chars[i])) {
-                right = i;
-                break;
-            }
-        }
-        return str.substring(0, right + 1).substring(left);
 
+        trimmed.add(strings.get(0).substring(0, head));
+        trimmed.add(strings.get(0).substring(strings.get(0).length() - tail));
+        for (String string : strings) trimmed.add(string.substring(head, string.length() - tail));
+
+        return trimmed;
     }
 }

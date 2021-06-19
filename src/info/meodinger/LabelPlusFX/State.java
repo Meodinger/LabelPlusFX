@@ -3,6 +3,7 @@ package info.meodinger.LabelPlusFX;
 import info.meodinger.LabelPlusFX.Component.CTreeItem;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
+import info.meodinger.LabelPlusFX.Util.CString;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -15,7 +16,7 @@ import java.util.*;
  * Date: 2021/5/18
  * Location: info.meodinger.LabelPlusFX
  */
-public class Config {
+public class State {
 
     public static final String[] PIC_EXTENSIONS = new String[] {
             ".png", ".jpg", ".jpeg"
@@ -48,7 +49,7 @@ public class Config {
     private String currentGroupName;
     private String currentPicName;
 
-    public Config(Application application, Stage stage) {
+    public State(Application application, Stage stage) {
         this.application = application;
         this.stage = stage;
 
@@ -143,10 +144,41 @@ public class Config {
     }
 
 
-    public Set<String> getSortedPicSet() {
+    public List<String> getSortedPicList() {
+
+        List<String> trimmed = CString.trimSame(new ArrayList<>(transFile.getTransMap().keySet()));
+        if (trimmed != null && trimmed.size() > 2) {
+            boolean canCastToNumberList = true;
+            for (int i = 2; i < trimmed.size(); i++) {
+                if (!CString.isDigit(trimmed.get(i))) {
+                    canCastToNumberList = false;
+                    break;
+                }
+            }
+            if (canCastToNumberList) {
+                Map<Integer, Integer> map = new HashMap<>();
+                List<Integer> integerList = new ArrayList<>();
+                for (int i = 2; i < trimmed.size(); i++) {
+                    int num = Integer.parseInt(trimmed.get(i));
+                    integerList.add(num);
+                    map.put(num, i);
+                }
+                integerList.sort(Comparator.naturalOrder());
+
+                int numberLength, complementLength;
+                ArrayList<String> list = new ArrayList<>();
+                for (Integer integer : integerList) {
+                    numberLength = CString.lengthOf(integer);
+                    complementLength = trimmed.get(map.get(integer)).length() - numberLength;
+                    list.add(trimmed.get(0) + CString.repeat('0', complementLength) + integer + trimmed.get(1));
+                }
+                return list;
+            }
+        }
+
         Set<String> sorted = new TreeSet<>(Comparator.naturalOrder());
         sorted.addAll(transFile.getTransMap().keySet());
-        return sorted;
+        return new ArrayList<>(sorted);
     }
 
     public int getGroupCount() {

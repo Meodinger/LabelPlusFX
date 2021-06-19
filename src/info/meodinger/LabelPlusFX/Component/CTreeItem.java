@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.Component;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -19,20 +19,20 @@ public class CTreeItem extends TreeItem<String> {
 
     public final TransLabel meta;
 
-    private final Config config;
+    private final State state;
     private final StringProperty groupName;
     private final StringProperty text;
 
-    public CTreeItem(Config config, String groupName, TransLabel meta) {
-        this.config = config;
+    public CTreeItem(State state, String groupName, TransLabel meta) {
+        this.state = state;
         this.groupName = new SimpleStringProperty(groupName);
         this.text = new SimpleStringProperty(meta.getText());
         this.meta = meta;
         init();
     }
 
-    public CTreeItem(Config config, String groupName, TransLabel meta, Node node) {
-        this(config, groupName, meta);
+    public CTreeItem(State state, String groupName, TransLabel meta, Node node) {
+        this(state, groupName, meta);
         setGraphic(node);
     }
 
@@ -44,7 +44,7 @@ public class CTreeItem extends TreeItem<String> {
             update();
         });
         groupNameProperty().addListener((observableValue, oldValue, newValue) -> {
-            meta.setGroupId(config.getGroupIdByName(newValue));
+            meta.setGroupId(state.getGroupIdByName(newValue));
             update();
         });
     }
@@ -55,8 +55,8 @@ public class CTreeItem extends TreeItem<String> {
 
     public void update() {
         setValue(genHead() + ":  " + meta.getText().replaceAll("\n", " "));
-        if (config.getViewMode() == Config.VIEW_MODE_INDEX){
-            setGraphic(new Circle(8, Color.web(config.getGroupColorByName(getGroupName()))));
+        if (state.getViewMode() == State.VIEW_MODE_INDEX){
+            setGraphic(new Circle(8, Color.web(state.getGroupColorByName(getGroupName()))));
         }
     }
 

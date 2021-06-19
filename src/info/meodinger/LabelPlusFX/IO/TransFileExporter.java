@@ -1,6 +1,6 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import info.meodinger.LabelPlusFX.Config;
+import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
@@ -20,10 +20,10 @@ import java.util.*;
  */
 public abstract class TransFileExporter {
 
-    private final Config config;
+    private final State state;
 
-    private TransFileExporter(Config config) {
-        this.config = config;
+    private TransFileExporter(State state) {
+        this.state = state;
     }
 
     public abstract boolean export(File file);
@@ -31,10 +31,10 @@ public abstract class TransFileExporter {
         return export(new File(path));
     }
     public boolean export() {
-        return export(config.getFilePath());
+        return export(state.getFilePath());
     }
     public MeoTransFile getCopyOfTransFile() {
-        return config.getTransFile().clone();
+        return state.getTransFile().clone();
     }
 
 
@@ -42,8 +42,8 @@ public abstract class TransFileExporter {
 
         private MeoTransFile transFile;
 
-        public LPFileExporter(Config config) {
-            super(config);
+        public LPFileExporter(State state) {
+            super(state);
         }
 
         private boolean validate() {
@@ -86,7 +86,7 @@ public abstract class TransFileExporter {
         private String exportTranslation() {
             StringBuilder tBuilder = new StringBuilder();
 
-            for (String picName : super.config.getSortedPicSet()) {
+            for (String picName : super.state.getSortedPicList()) {
                 tBuilder.append(buildPic(picName));
             }
             return tBuilder.toString();
@@ -157,8 +157,8 @@ public abstract class TransFileExporter {
 
     public static class MeoFileExporter extends TransFileExporter {
 
-        public MeoFileExporter(Config config) {
-            super(config);
+        public MeoFileExporter(State state) {
+            super(state);
         }
 
         @Override

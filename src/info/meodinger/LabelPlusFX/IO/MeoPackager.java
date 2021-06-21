@@ -35,8 +35,9 @@ public class MeoPackager {
         InputStream template_CN = Resources.PS_Template_Stream_CN;
         InputStream template_EN = Resources.PS_Template_Stream_EN;
 
-        CZip zip = new CZip(path);
         try {
+            CZip zip = new CZip(path);
+
             zip.zip(script, "/Meo_PS_Script.jsx");
             zip.zip(template_CN, "/ps_script_res/zh.psd");
             zip.zip(template_EN, "/ps_script_res/en.psd");

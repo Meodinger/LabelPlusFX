@@ -25,13 +25,16 @@ public class State {
     public static final String EXTENSION_LP = ".txt";
     public static final String EXTENSION_PACK = ".zip";
     public static final String EXTENSION_BAK = ".bak";
+    public static final String FOLDER_NAME_BAK = "bak";
 
     public static final int WORK_MODE_CHECK = 0;
     public static final int WORK_MODE_LABEL = 1;
     public static final int WORK_MODE_INPUT = 2;
+    public static final int WORK_MODE_DEFAULT = WORK_MODE_CHECK;
 
     public static final int VIEW_MODE_GROUP = 0;
     public static final int VIEW_MODE_INDEX = 1;
+    public static final int VIEW_MODE_DEFAULT = VIEW_MODE_INDEX;
 
     public static final int AUTO_SAVE_DELAY = 5 * 60 * 1000;
     public static final int AUTO_SAVE_PERIOD = 3 * 60 * 1000;
@@ -46,15 +49,14 @@ public class State {
     private int workMode;
     private int viewMode;
     private int currentGroupId;
-    private String currentGroupName;
     private String currentPicName;
 
     public State(Application application, Stage stage) {
         this.application = application;
         this.stage = stage;
 
-        this.workMode = WORK_MODE_CHECK;
-        this.viewMode = VIEW_MODE_GROUP;
+        this.workMode = WORK_MODE_DEFAULT;
+        this.viewMode = VIEW_MODE_DEFAULT;
         this.isChanged = false;
     }
 
@@ -63,7 +65,8 @@ public class State {
         setFilePath(null);
         setChanged(false);
 
-        setViewMode(VIEW_MODE_GROUP);
+        setWorkMode(WORK_MODE_DEFAULT);
+        setViewMode(VIEW_MODE_DEFAULT);
         setCurrentGroupId(0);
         setCurrentPicName(null);
         controllerAccessor.reset();
@@ -123,7 +126,7 @@ public class State {
      * @return Origin Reference
      */
     public List<MeoTransFile.Group> getGroups() {
-        return transFile.getGroup();
+        return transFile.getGroupList();
     }
 
     /**
@@ -143,6 +146,13 @@ public class State {
         return getGroupAt(currentGroupId);
     }
 
+    public String getComment() {
+        return transFile.getComment();
+    }
+
+    public void setComment(String comment) {
+        transFile.setComment(comment);
+    }
 
     public List<String> getSortedPicList() {
 
@@ -182,12 +192,12 @@ public class State {
     }
 
     public int getGroupCount() {
-        return transFile.getGroup().size();
+        return transFile.getGroupList().size();
     }
 
     public List<String> getGroupNames() {
         ArrayList<String> list = new ArrayList<>();
-        for (MeoTransFile.Group group : transFile.getGroup()) {
+        for (MeoTransFile.Group group : transFile.getGroupList()) {
             list.add(group.name);
         }
         return list;
@@ -195,7 +205,7 @@ public class State {
     public int getGroupIdByName(String name) {
         int size = getGroupCount();
         for (int i = 0; i < size; i++) {
-            if (transFile.getGroup().get(i).name.equals(name)) return i;
+            if (transFile.getGroupList().get(i).name.equals(name)) return i;
         }
         return -1;
     }
@@ -208,10 +218,13 @@ public class State {
 
     public List<String> getGroupColors() {
         ArrayList<String> list = new ArrayList<>();
-        for (MeoTransFile.Group group : transFile.getGroup()) {
+        for (MeoTransFile.Group group : transFile.getGroupList()) {
             list.add(group.color);
         }
         return list;
+    }
+    public String getGroupColorByName(String name) {
+        return getGroupColorById(getGroupIdByName(name));
     }
     public String getGroupColorById(int groupId) {
         if (groupId >= 0 && groupId < getGroupCount()) {
@@ -219,16 +232,12 @@ public class State {
         }
         return null;
     }
-    public String getGroupColorByName(String name) {
-        int groupId = getGroupIdByName(name);
-        return getGroupColors().get(groupId);
-    }
 
     public String getFileFolder() {
         return new File(filePath).getParent();
     }
     public String getBakFolder() {
-        return getFileFolder() + File.separator + "bak";
+        return getFileFolder() + File.separator + FOLDER_NAME_BAK;
     }
     public String getPicPathOf(String picName) {
         return getFileFolder() + File.separator + picName;
@@ -278,12 +287,8 @@ public class State {
     public int getCurrentGroupId() {
         return currentGroupId;
     }
-
-    public void setCurrentGroupName(String currentGroupName) {
-        this.currentGroupName = currentGroupName;
-    }
     public String getCurrentGroupName() {
-        return currentGroupName;
+        return getGroupNameById(currentGroupId);
     }
 
     public void setCurrentPicName(String currentPicName) {

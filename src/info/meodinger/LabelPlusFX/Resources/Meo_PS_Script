@@ -1,10 +1,4 @@
-﻿/*!
- * LabelPlus PS-Script for LabelPlusFX
- * Home Page: https://github.com/Meodinger/LabelPlusFX
- * Author: Noodlefighter, Meodinger
- * Released under GPL-2.0 License.
-*/
-var __extends = (this && this.__extends) || (function () {
+﻿var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -21,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var I18n;
 (function (I18n) {
-    I18n.APP_NAME = "LabelPlus Script";
+    I18n.APP_NAME = "LabelPlusFX Script";
     I18n.BUTTON_RUN = "导入";
     I18n.BUTTON_CANCEL = "关闭";
     I18n.BUTTON_LOAD = "加载配置";
@@ -9123,8 +9117,8 @@ var LabelPlus;
         f.close();
         var meoFile = data;
         var groups = [];
-        for (var i = 0; i < meoFile.group.length; i++) {
-            groups.push(meoFile.group[i].name);
+        for (var i = 0; i < meoFile.groupList.length; i++) {
+            groups.push(meoFile.groupList[i].name);
         }
         var label_dict = {};
         for (var picName in meoFile.transMap) {

@@ -137,6 +137,13 @@ public class Controller implements Initializable {
 
     private final ContextMenu symbolMenu = new ContextMenu() {
 
+        private final String[] symbolList = new String[] {
+                "◎", "★", "☆", "～", "♡", "♥", "♢", "♦", "♪"
+        };
+        private final boolean[] displayableList = new boolean[] {
+                true, true, true, true, false, false, false, false, false
+        };
+
         MenuItem createSymbolItem(String symbol, boolean displayable) {
             int radius = 6;
             MenuItem item = new MenuItem(symbol, displayable ? new Circle(radius, Color.GREEN) : new Circle(radius, Color.RED));
@@ -145,16 +152,10 @@ public class Controller implements Initializable {
         }
 
         {
-            getItems().addAll(
-                    createSymbolItem("◎", true),
-                    createSymbolItem("★", true),
-                    createSymbolItem("☆", true),
-                    createSymbolItem("♡", false),
-                    createSymbolItem("♥", false),
-                    createSymbolItem("♢", false),
-                    createSymbolItem("♦", false),
-                    createSymbolItem("♪", false)
-            );
+            int length = symbolList.length;
+            for (int i = 0; i< length; i++) {
+                getItems().add(createSymbolItem(symbolList[i], displayableList[i]));
+            }
             getItems().forEach(item -> item.setOnAction(event -> tTransText.insertText(tTransText.getCaretPosition(), ((MenuItem) event.getSource()).getText())));
         }
     };
@@ -162,7 +163,9 @@ public class Controller implements Initializable {
     private final class AutoBack extends TimerTask {
         @Override
         public void run() {
-            Controller.this.silentBak();
+            if (state.isChanged()) {
+                Controller.this.silentBak();
+            }
         }
     }
     private final Timer timer;
@@ -197,6 +200,7 @@ public class Controller implements Initializable {
     @FXML private MenuItem mExportAsLp;
     @FXML private MenuItem mExportAsMeo;
     @FXML private MenuItem mExportAsMeoPack;
+    @FXML private MenuItem mEditComment;
     @FXML private Menu mmAbout;
     @FXML private MenuItem mAbout;
     @FXML private MenuItem mHint;
@@ -342,11 +346,10 @@ public class Controller implements Initializable {
         // Update text layer when change group
         cGroupBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             state.setCurrentGroupId(state.getGroupIdByName(newValue));
-            state.setCurrentGroupName(newValue);
             cImagePane.updateTextLayer();
         });
 
-        // Update tree menu state when requested
+        // Update tree menu state when requested in view mode INDEX_MODE
         vTree.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
             if (state.getViewMode() == State.VIEW_MODE_INDEX) {
                 menu.treeMenu.update();
@@ -449,6 +452,22 @@ public class Controller implements Initializable {
             }
         });
 
+        // Bind Tab with work mode switch
+        cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                switchWorkMode();
+                event.consume();
+            }
+        });
+
+        // Bind Tab with view mode switch
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                switchViewMode();
+                event.consume();
+            }
+        });
+
         // Bind Arrow KeyEvent with Label change and Pic change
         tTransText.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener);
         cImagePane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener);
@@ -475,6 +494,7 @@ public class Controller implements Initializable {
         mExportAsLp.setText(I18N.M_E_LP);
         mExportAsMeo.setText(I18N.M_E_MEO);
         mExportAsMeoPack.setText(I18N.M_E_MEO_P);
+        mEditComment.setText(I18N.M_E_COMMENT);
         mmAbout.setText(I18N.MM_ABOUT);
         mHint.setText(I18N.M_HINT);
         mAbout.setText(I18N.M_ABOUT);
@@ -496,6 +516,7 @@ public class Controller implements Initializable {
         mExportAsLp.setDisable(true);
         mExportAsMeo.setDisable(true);
         mExportAsMeoPack.setDisable(true);
+        mEditComment.setDisable(true);
         btnSwitchViewMode.setDisable(true);
         btnSwitchWorkMode.setDisable(true);
         tTransText.setDisable(true);
@@ -510,6 +531,7 @@ public class Controller implements Initializable {
         mExportAsLp.setDisable(false);
         mExportAsMeo.setDisable(false);
         mExportAsMeoPack.setDisable(false);
+        mEditComment.setDisable(false);
         btnSwitchViewMode.setDisable(false);
         btnSwitchWorkMode.setDisable(false);
         tTransText.setDisable(false);
@@ -579,7 +601,7 @@ public class Controller implements Initializable {
             Group group = new Group(String.format(I18N.FORMAT_NEW_GROUP_NAME, i + 1), MeoTransFile.DEFAULT_COLOR_LIST[i]);
             groups.add(group);
         }
-        transFile.setGroup(groups);
+        transFile.setGroupList(groups);
 
         Map<String, List<TransLabel>> transMap = new HashMap<>();
         ArrayList<String> potentialFiles = new ArrayList<>();
@@ -587,8 +609,7 @@ public class Controller implements Initializable {
         if (dir.isDirectory() && dir.listFiles() != null) {
             File[] listFiles = dir.listFiles();
             if (listFiles != null) {
-                List<File> files = new ArrayList<>(Arrays.asList(listFiles));
-                for (File f : files) {
+                for (File f : listFiles) {
                     if (f.isFile()) {
                         for (String extension : State.PIC_EXTENSIONS) {
                             if (f.getName().endsWith(extension)) {
@@ -739,6 +760,10 @@ public class Controller implements Initializable {
         if (meoPackager.packMeo(file.getPath())) {
             CDialog.showInfo(I18N.EXPORTED_PACK_SUCCESSFULLY);
         }
+    }
+    @FXML public void setComment() {
+        Optional<String> result = CDialog.showInputArea(state.stage, I18N.TITLE_EDIT_COMMENT, state.getComment());
+        result.ifPresent(state::setComment);
     }
 
     @FXML public void hint() {

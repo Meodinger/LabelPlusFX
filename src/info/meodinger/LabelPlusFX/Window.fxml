@@ -31,6 +31,8 @@
                 <MenuItem fx:id="mExportAsLp" mnemonicParsing="false" onAction="#exportTransFile"/>
                 <MenuItem fx:id="mExportAsMeo" mnemonicParsing="false" onAction="#exportTransFile"/>
                 <MenuItem fx:id="mExportAsMeoPack" mnemonicParsing="false" onAction="#exportTransPack"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem fx:id="mEditComment" mnemonicParsing="false" onAction="#setComment"/>
             </Menu>
             <Menu fx:id="mmAbout" mnemonicParsing="false">
                 <MenuItem fx:id="mHint" mnemonicParsing="false" onAction="#hint"/>

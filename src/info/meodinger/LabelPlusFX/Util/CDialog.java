@@ -41,6 +41,11 @@ public class CDialog {
         dialog.initOwner(window);
     }
 
+    /**
+     * Show stack trace in expandable content
+     * @param e Exception to print
+     * @return ButtonType.OK?
+     */
     public static Optional<ButtonType> showException(Exception e) {
 
         // Create expandable Exception.
@@ -62,25 +67,44 @@ public class CDialog {
         dialog.setTitle(I18N.ERROR);
         dialog.setHeaderText(e.getClass().toString());
         dialog.setContentText(e.getMessage());
-        dialog.getDialogPane().getButtonTypes().add(new ButtonType(I18N.OK, ButtonBar.ButtonData.OK_DONE));
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
         dialog.getDialogPane().setExpandableContent(expContent);
         return dialog.showAndWait();
     }
 
+    /**
+     * Show information
+     * @param info Info to show
+     * @return ButtonType.OK?
+     */
     public static Optional<ButtonType> showInfo(String info) {
         return showInfo(I18N.INFO, info);
     }
+    /**
+     * Show information with specific title
+     * @param title Dialog title
+     * @param info Info to show
+     * @return ButtonType.OK?
+     */
     public static Optional<ButtonType> showInfo(String title, String info) {
         initDialog();
         dialog.setTitle(title);
         dialog.setContentText(info);
-        dialog.getDialogPane().getButtonTypes().add(new ButtonType(I18N.OK, ButtonBar.ButtonData.OK_DONE));
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
         return dialog.showAndWait();
     }
+    /**
+     * Show information with specific title and link
+     * @param title Dialog title
+     * @param info Info to show
+     * @param linkText Text for hyperlink
+     * @param handler Handler for action of link
+     * @return ButtonType.OK?
+     */
     public static Optional<ButtonType> showInfoWithLink(String title, String info, String linkText, EventHandler<ActionEvent> handler) {
         initDialog();
         dialog.setTitle(title);
-        dialog.getDialogPane().getButtonTypes().add(new ButtonType(I18N.OK, ButtonBar.ButtonData.OK_DONE));
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
         Label label = new Label(info);
         Separator separator = new Separator();
@@ -95,12 +119,31 @@ public class CDialog {
         return dialog.showAndWait();
     }
 
+    /**
+     * Show alert
+     * @param alert Alert to show
+     * @return ButtonType? with ButtonDate YES | NO
+     */
     public static Optional<ButtonType> showAlert(String alert) {
         return showAlert(I18N.ALERT, alert);
     }
+    /**
+     * Show alert with specific title
+     * @param title Dialog title
+     * @param alert Alert to show
+     * @return ButtonType? with ButtonDate YES | NO
+     */
     public static Optional<ButtonType> showAlert(String title, String alert) {
         return showAlert(title, alert, I18N.YES, I18N.NO);
     }
+    /**
+     * Show alert with specific title and yes/no text
+     * @param title Dialog title
+     * @param alert Alert to show
+     * @param yes Text for ButtonType with ButtonData.YES
+     * @param no  Text for ButtonType with ButtonData.NO
+     * @return ButtonType? with ButtonDate YES | NO
+     */
     public static Optional<ButtonType> showAlert(String title, String alert, String yes, String no) {
         initDialog();
         dialog.setTitle(title);
@@ -112,21 +155,36 @@ public class CDialog {
         return dialog.showAndWait();
     }
 
+    /**
+     * Show message for confirm
+     * @param msg Message to show
+     * @return ButtonType?.YES | NO
+     */
     public static Optional<ButtonType> showConfirm(String msg) {
         return showConfirm(I18N.CONFIRM, msg);
     }
+    /**
+     * Show message for confirm with specific title
+     * @param title Dialog title
+     * @param msg Message to show
+     * @return ButtonType?.YES | NO
+     */
     public static Optional<ButtonType> showConfirm(String title, String msg) {
         return showConfirm(title, null, msg);
     }
+    /**
+     * Show message for confirm
+     * @param title Dialog title
+     * @param header Dialog header text
+     * @param msg Message to show
+     * @return ButtonType?.YES | NO
+     */
     public static Optional<ButtonType> showConfirm(String title, String header, String msg) {
         initDialog();
         dialog.setTitle(title);
         dialog.setHeaderText(header);
         dialog.setContentText(msg);
-        dialog.getDialogPane().getButtonTypes().addAll(
-                new ButtonType(I18N.YES, ButtonBar.ButtonData.YES),
-                new ButtonType(I18N.NO, ButtonBar.ButtonData.NO)
-        );
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
         return dialog.showAndWait();
     }
 
@@ -148,6 +206,22 @@ public class CDialog {
         dialog.initOwner(owner);
         dialog.setTitle(title);
         dialog.setHeaderText(msg);
+
+        return dialog.showAndWait();
+    }
+
+    public static Optional<String> showInputArea(Window owner, String title, String placeholder) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.initOwner(owner);
+        dialog.setTitle(title);
+
+        TextArea textArea = new TextArea(placeholder);
+        dialog.getDialogPane().setContent(new HBox(textArea));
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == ButtonType.OK) return textArea.getText();
+            return placeholder;
+        });
 
         return dialog.showAndWait();
     }

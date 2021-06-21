@@ -53,7 +53,7 @@ public abstract class TransFileLoader {
         public void init() {
             transFile = new LPTransFile();
             transFile.setTransMap(new HashMap<>());
-            transFile.setGroup(new ArrayList<>());
+            transFile.setGroupList(new ArrayList<>());
             reader = null;
         }
 
@@ -73,8 +73,8 @@ public abstract class TransFileLoader {
             // Group Info and Separator
             int count = 0;
             while (!(line = reader.readLine()).equals(LPTransFile.SEPARATOR) && count < 9) {
-                if (transFile.getGroup().contains(line)) throw new IOException(String.format(I18N.FORMAT_REPEATED_GROUP_NAME, line));
-                transFile.getGroup().add(line);
+                if (transFile.getGroupList().contains(line)) throw new IOException(String.format(I18N.FORMAT_REPEATED_GROUP_NAME, line));
+                transFile.getGroupList().add(line);
                 count++;
             }
             if (!line.equals(LPTransFile.SEPARATOR)) throw new IOException(I18N.TOO_MANY_GROUPS);

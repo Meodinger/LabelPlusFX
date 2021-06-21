@@ -371,7 +371,7 @@ public class CImagePane extends ScrollPane {
                 double x_percent = event.getX() / getViewWidth();
                 double y_percent = event.getY() / getViewHeight();
                 int groupId = state.getCurrentGroupId();
-                int index = positions.size();
+                int index = state.getLabelsNow().size() + 1;
 
                 TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
 

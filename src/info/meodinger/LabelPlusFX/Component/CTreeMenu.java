@@ -309,7 +309,7 @@ public class CTreeMenu {
 
                 Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABEL, labelItem.getValue());
 
-                if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
+                if (result.isPresent() && result.get() == ButtonType.YES) {
 
                     // Edit data
                     for (TransLabel l : state.getLabelsNow())
@@ -373,7 +373,7 @@ public class CTreeMenu {
 
                 Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABELS);
 
-                if (result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES) {
+                if (result.isPresent() && result.get() == ButtonType.YES) {
                     // Edit data
                     for (TreeItem<String> item : selectedItems) {
                         TransLabel label = ((CTreeItem) item).meta;

@@ -15,7 +15,7 @@ public abstract class TransFile<T> {
 
     private int[] version;
     private String comment;
-    private List<T> group;
+    private List<T> groupList;
     private Map<String, List<TransLabel>> transMap;
 
     public int[] getVersion() {
@@ -24,8 +24,8 @@ public abstract class TransFile<T> {
     public String getComment() {
         return comment;
     }
-    public List<T> getGroup() {
-        return group;
+    public List<T> getGroupList() {
+        return groupList;
     }
     public Map<String, List<TransLabel>> getTransMap() {
         return transMap;
@@ -37,8 +37,8 @@ public abstract class TransFile<T> {
     public void setComment(String comment) {
         this.comment = comment;
     }
-    public void setGroup(List<T> group) {
-        this.group = group;
+    public void setGroupList(List<T> groupList) {
+        this.groupList = groupList;
     }
     public void setTransMap(Map<String, List<TransLabel>> transMap) {
         this.transMap = transMap;
@@ -73,7 +73,7 @@ public abstract class TransFile<T> {
             MeoTransFile translation = new MeoTransFile();
 
             translation.setVersion(this.getVersion().clone());
-            translation.setGroup(new ArrayList<>(this.getGroup()));
+            translation.setGroupList(new ArrayList<>(this.getGroupList()));
             translation.setComment(this.getComment());
             translation.setTransMap(new HashMap<>(this.getTransMap()));
 

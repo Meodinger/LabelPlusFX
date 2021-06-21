@@ -49,14 +49,14 @@ public abstract class TransFileExporter {
         private boolean validate() {
 
             // Group count validate
-            int groupCount = transFile.getGroup().size();
+            int groupCount = transFile.getGroupList().size();
             if (groupCount > 9) {
                 CDialog.showInfo(String.format(I18N.FORMAT_TOO_MANY_GROUPS, groupCount));
                 return false;
             }
 
             // Group name validate
-            List<MeoTransFile.Group> groups = transFile.getGroup();
+            List<MeoTransFile.Group> groups = transFile.getGroupList();
             Set<String> groupNames = new HashSet<>();
             for (MeoTransFile.Group group : groups) {
                 groupNames.add(group.name);
@@ -75,7 +75,7 @@ public abstract class TransFileExporter {
         }
 
         private String exportGroup() {
-            List<MeoTransFile.Group> group = transFile.getGroup();
+            List<MeoTransFile.Group> group = transFile.getGroupList();
             StringBuilder gBuilder = new StringBuilder();
             for (MeoTransFile.Group g : group) {
                 gBuilder.append(g.name).append("\n");

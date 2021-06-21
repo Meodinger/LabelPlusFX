@@ -15,7 +15,7 @@ import java.util.List;
 public class Convertor {
 
     public static MeoTransFile lp2meo(LPTransFile translation) {
-        List<String> groupListLP = translation.getGroup();
+        List<String> groupListLP = translation.getGroupList();
 
         assert groupListLP.size() <= 9;
         ArrayList<MeoTransFile.Group> gList = new ArrayList<>();
@@ -26,7 +26,7 @@ public class Convertor {
         MeoTransFile meo = new MeoTransFile();
         meo.setVersion(translation.getVersion());
         meo.setComment(translation.getComment());
-        meo.setGroup(gList);
+        meo.setGroupList(gList);
         meo.setTransMap(translation.getTransMap());
 
         return meo;
@@ -34,9 +34,9 @@ public class Convertor {
 
     public static LPTransFile meo2lp(MeoTransFile translation) throws ConvException {
 
-        if (translation.getGroup().size() > 9) throw new ConvException(translation.getGroup().size());
+        if (translation.getGroupList().size() > 9) throw new ConvException(translation.getGroupList().size());
 
-        List<MeoTransFile.Group> groupListMeo = translation.getGroup();
+        List<MeoTransFile.Group> groupListMeo = translation.getGroupList();
         ArrayList<String> gList = new ArrayList<>();
         for (MeoTransFile.Group group : groupListMeo) {
             gList.add(group.name);
@@ -45,7 +45,7 @@ public class Convertor {
         LPTransFile lp = new LPTransFile();
         lp.setVersion(translation.getVersion());
         lp.setComment(translation.getComment());
-        lp.setGroup(gList);
+        lp.setGroupList(gList);
         lp.setTransMap(translation.getTransMap());
 
         return lp;

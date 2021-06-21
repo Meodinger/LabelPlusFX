@@ -11,7 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 
-public class Main extends Application {
+public class LabelPlusFX extends Application {
 
     static {
         I18N.init();

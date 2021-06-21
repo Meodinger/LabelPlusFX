@@ -1,6 +1,7 @@
 package info.meodinger.LabelPlusFX.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,6 +51,8 @@ public class CString {
     }
 
     public static boolean isDigit(String str) {
+        if (str == null) return false;
+
         char[] chars = str.toCharArray();
         for (char c : chars) {
             if (c < '0' || c > '9') return false;
@@ -58,10 +61,12 @@ public class CString {
     }
 
     public static List<String> trimSame(List<String> strings) {
-        ArrayList<String> trimmed = new ArrayList<>();
 
         if (strings == null) return null;
-        if (strings.isEmpty()) return trimmed;
+        if (strings.isEmpty()) return Arrays.asList("", "");
+        if (strings.size() == 1) return Arrays.asList("", "", strings.get(0));
+
+        ArrayList<String> trimmed = new ArrayList<>();
 
         char[] example = strings.get(0).toCharArray();
         int head = example.length, tail = example.length;

@@ -35,7 +35,7 @@ public class I18N {
     public static String HINT = "帮助";
     public static String HINT_CONTENT = "图片可以任意拖动\n" +
             "Alt/Ctrl/Meta + 滚轮 -> 图片缩放\n" +
-            "标号模式：数字键 -> 更改分组\n" +
+            "标号模式：数字按键 -> 更改分组\n" +
             "标号模式：鼠标左键 -> 放置标号\n" +
             "标号模式：鼠标右键 -> 移除标号\n" +
             "录入审查：点击标号 -> 快速修改";
@@ -43,10 +43,10 @@ public class I18N {
     public static String HINT_LINK_URL = "https://www.kdocs.cn/l/cpRyDN2Perkb";
 
     public static String ABOUT = "关于";
-    public static String ABOUT_CONTENT = "Label Plus FX for version [1,0]\n" +
-            "Author: Meodinger(meodinger@qq.com)\n" +
-            "Version: 1.0.5 Bugfix 210618\n" +
-            "Java Version: " + System.getProperty("java.version");
+    public static String ABOUT_CONTENT = "Label Plus FX for LabelPlus version [1,0]\n\n" +
+            "Version: 1.1.0\n" +
+            "Author: Meodinger\n" +
+            "Email: meodinger@qq.com\n";
     public static String ABOUT_LINK = "Github Repository";
     public static String ABOUT_LINK_URL = "https://github.com/Meodinger/LabelPlusFX";
 
@@ -88,6 +88,7 @@ public class I18N {
     public static String TITLE_RENAME = "新名称";
     public static String TITLE_MOVE_TO = "选择分组";
     public static String TITLE_DELETE_LABEL = "删除Label";
+    public static String TITLE_EDIT_COMMENT = "编辑注释";
 
     public static String CONTENT_ADD_GROUP = "请输入分组<名称>，并选择一个<颜色>";
     public static String CONTENT_RENAME = "请输入分组的新<名称>";
@@ -105,6 +106,7 @@ public class I18N {
     public static String M_E_LP = "导出为LP格式文本";
     public static String M_E_MEO = "导出为Meo格式文本";
     public static String M_E_MEO_P = "导出为包含图片的压缩包";
+    public static String M_E_COMMENT = "编辑注释";
     public static String MM_ABOUT = "关于";
     public static String M_HINT = "帮助";
     public static String M_ABOUT = "关于";
@@ -181,6 +183,7 @@ public class I18N {
             TITLE_RENAME = "New Name";
             TITLE_MOVE_TO = "Select Group";
             TITLE_DELETE_LABEL = "Delete Label";
+            TITLE_EDIT_COMMENT = "Edit Comment";
 
             MENU_ITEM_ADD_GROUP = "Add Group";
             MENU_ITEM_RENAME = "Rename";
@@ -203,6 +206,7 @@ public class I18N {
             M_E_LP = "As LP File";
             M_E_MEO = "AS Meo File";
             M_E_MEO_P = "As Meo Pack with pics";
+            M_E_COMMENT = "Edit comment";
             MM_ABOUT = "About";
             M_HINT = "Hint";
             M_ABOUT = "About";

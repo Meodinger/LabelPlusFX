@@ -14,12 +14,13 @@ public class CZip {
     private final ZipOutputStream zip;
 
     public CZip(String zipFilePath) {
-        ZipOutputStream zipOutputStream = null;
+        ZipOutputStream zipOutputStream;
         try {
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(zipFilePath));
             zipOutputStream = new ZipOutputStream(bufferedOutputStream);
         } catch (IOException e) {
             CDialog.showException(e);
+            throw new RuntimeException("Abort");
         }
         this.zip = zipOutputStream;
     }

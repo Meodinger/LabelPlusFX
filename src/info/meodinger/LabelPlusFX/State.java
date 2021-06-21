@@ -122,6 +122,14 @@ public class State {
     }
 
     /**
+     * Get Label by index at current pic
+     * @return Origin Reference
+     */
+    public TransLabel getLabelAt(int index) {
+        return getLabelsNow().get(index - 1);
+    }
+
+    /**
      * Get groups
      * @return Origin Reference
      */

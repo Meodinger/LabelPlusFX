@@ -35,10 +35,13 @@ import java.util.*;
 public class Controller implements Initializable {
 
     private final State state;
+    private final FileChooser.ExtensionFilter fileFilter;
     private final FileChooser.ExtensionFilter meoFilter;
     private final FileChooser.ExtensionFilter lpFilter;
+    private final FileChooser.ExtensionFilter bakFilter;
     private final FileChooser.ExtensionFilter packFilter;
     private final CFileChooser fileChooser;
+    private final CFileChooser bakChooser;
     private final CFileChooser exportChooser;
     private final CFileChooser exportPackChooser;
     private final TransFileLoader.MeoFileLoader loaderMeo;
@@ -195,6 +198,7 @@ public class Controller implements Initializable {
     @FXML private MenuItem mOpen;
     @FXML private MenuItem mSave;
     @FXML private MenuItem mSaveAs;
+    @FXML private MenuItem mBakRecover;
     @FXML private MenuItem mClose;
     @FXML private Menu mmExport;
     @FXML private MenuItem mExportAsLp;
@@ -208,11 +212,14 @@ public class Controller implements Initializable {
     public Controller(State state) {
         this.state = state;
 
+        this.fileFilter = new FileChooser.ExtensionFilter(I18N.TRANS_FILE, "*" + State.EXTENSION_MEO, "*" + State.EXTENSION_LP);
         this.meoFilter = new FileChooser.ExtensionFilter(I18N.MEO_TRANS_FILE, "*" + State.EXTENSION_MEO);
         this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + State.EXTENSION_LP);
+        this.bakFilter = new FileChooser.ExtensionFilter(I18N.BAK_FILE, "*" + State.EXTENSION_BAK);
         this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + State.EXTENSION_PACK);
 
         this.fileChooser = new CFileChooser();
+        this.bakChooser = new CFileChooser();
         this.exportChooser = new CFileChooser();
         this.exportPackChooser = new CFileChooser();
 
@@ -290,9 +297,12 @@ public class Controller implements Initializable {
     }
 
     private void init() {
-        fileChooser.setTitle(I18N.OPEN_TRANSLATION);
+        fileChooser.getExtensionFilters().add(fileFilter);
         fileChooser.getExtensionFilters().add(meoFilter);
         fileChooser.getExtensionFilters().add(lpFilter);
+
+        bakChooser.setTitle(I18N.CHOOSE_BAK_FILE);
+        bakChooser.getExtensionFilters().add(bakFilter);
 
         exportChooser.setTitle(I18N.EXPORT_TRANSLATION);
 
@@ -333,7 +343,7 @@ public class Controller implements Initializable {
                 cImagePane.update();
                 cImagePane.relocate();
             }
-            if (state.getLabelsNow().size() > 0) {
+            if (state.getTransFile() != null && state.getLabelsNow().size() > 0) {
                 CTreeItem item = findLabelItemByIndex(state.getLabelsNow().get(0).getIndex());
                 if (item != null) {
                     vTree.getSelectionModel().select(item);
@@ -489,6 +499,7 @@ public class Controller implements Initializable {
         mOpen.setText(I18N.M_OPEN);
         mSave.setText(I18N.M_SAVE);
         mSaveAs.setText(I18N.M_SAVE_AS);
+        mBakRecover.setText(I18N.M_BAK_RECOVERY);
         mClose.setText(I18N.M_CLOSE);
         mmExport.setText(I18N.MM_EXPORT);
         mExportAsLp.setText(I18N.M_E_LP);
@@ -587,6 +598,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void newTranslation() {
+        fileChooser.setTitle(I18N.NEW_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
         trySave();
@@ -645,6 +657,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void openTranslation() {
+        fileChooser.setTitle(I18N.OPEN_TRANSLATION);
         File file = fileChooser.showOpenDialog(state.stage);
         if (file == null) return;
         trySave();
@@ -699,6 +712,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void saveAsTranslation() {
+        fileChooser.setTitle(I18N.SAVE_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
 
@@ -717,6 +731,50 @@ public class Controller implements Initializable {
         } else {
             state.setFilePath(null);
             CDialog.showAlert(I18N.SAVE_FAILED);
+        }
+    }
+    @FXML public void bakRecovery() {
+        File file = bakChooser.showOpenDialog(state.stage);
+        if (file == null) return;
+
+        trySave();
+        state.initialize();
+
+        if (file.getParentFile().getName().equals(State.FOLDER_NAME_BAK)) {
+            String projectFolder = file.getParentFile().getParentFile().getAbsolutePath();
+            File recovered = new File(projectFolder + File.separator + file.getName().replace(State.EXTENSION_BAK, State.EXTENSION_MEO));
+
+            state.setFilePath(recovered.getPath());
+            if (loaderMeo.load(file)) {
+                if (exporterMeo.export(recovered)) {
+                    prepare();
+                } else {
+                    state.initialize();
+                }
+            } else {
+                state.initialize();
+            }
+        } else {
+            fileChooser.setTitle(I18N.SAVE_TRANSLATION);
+            File recovered = fileChooser.showSaveDialog(state.stage);
+            if (recovered == null) return;
+
+            state.setFilePath(recovered.getPath());
+            if (loaderMeo.load(file)) {
+                TransFileExporter exporter;
+                if (state.isMeoFile()) {
+                    exporter = exporterMeo;
+                } else {
+                    exporter = exporterLP;
+                }
+                if (exporter.export()) {
+                    prepare();
+                } else {
+                    state.initialize();
+                }
+            } else {
+                state.initialize();
+            }
         }
     }
     @FXML public void close() {

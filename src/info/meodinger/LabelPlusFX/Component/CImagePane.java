@@ -9,6 +9,7 @@ import info.meodinger.LabelPlusFX.Util.CDialog;
 import javafx.beans.property.*;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
@@ -26,6 +27,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Author: Meodinger
@@ -118,19 +121,61 @@ public class CImagePane extends ScrollPane {
 
         scaleProperty().addListener((observable, oldValue, newValue) -> resize());
 
+        // Label mode draggable
+        AtomicBoolean isLabel = new AtomicBoolean(false);
+        AtomicInteger labelIndex = new AtomicInteger(NOT_FOUND);
+        AtomicInteger labelGroupId = new AtomicInteger(NOT_FOUND);
+        root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            if (state.getWorkMode() == State.WORK_MODE_LABEL) {
+                int index = getIndexOf(new Position(event.getX(), event.getY()));
+                if (index != NOT_FOUND) {
+                    event.consume();
+                    isLabel.set(true);
+                    labelIndex.set(index);
+                    labelGroupId.set(state.getLabelAt(index).getGroupId());
+                    return;
+                }
+            }
+
+            isLabel.set(false);
+            labelIndex.set(NOT_FOUND);
+            labelGroupId.set(NOT_FOUND);
+        });
+        root.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            if (isLabel.get()) {
+                event.consume();
+                if (event.getX() < 0 || event.getX() + LABEL_RADIUS > getViewWidth()) return;
+                if (event.getY() < 0 || event.getY() + LABEL_RADIUS > getViewHeight()) return;
+
+                cleatText();
+                double x_percent = event.getX() / getViewWidth();
+                double y_percent = event.getY() / getViewHeight();
+                TransLabel label = state.getLabelAt(labelIndex.get());
+
+                label.setX(x_percent);
+                label.setY(y_percent);
+
+                updateLabelLayer(labelGroupId.get());
+            }
+        });
+
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx; nLy = (Ly - Sy) + nSy
         root.setOnMousePressed(event -> {
-            shiftX = root.getLayoutX() - event.getSceneX();
-            shiftY = root.getLayoutY() - event.getSceneY();
-            root.setCursor(javafx.scene.Cursor.MOVE);
+            if (!event.isConsumed()) {
+                shiftX = root.getLayoutX() - event.getSceneX();
+                shiftY = root.getLayoutY() - event.getSceneY();
+                root.setCursor(javafx.scene.Cursor.MOVE);
+            }
         });
         root.setOnMouseDragged(event -> {
-            double nX = event.getSceneX() + shiftX;
-            double nY = event.getSceneY() + shiftY;
-            root.setLayoutX(nX);
-            root.setLayoutY(nY);
+            if (!event.isConsumed()) {
+                double nX = event.getSceneX() + shiftX;
+                double nY = event.getSceneY() + shiftY;
+                root.setLayoutX(nX);
+                root.setLayoutY(nY);
+            }
         });
         root.setOnMouseReleased(event -> {
             switch (state.getWorkMode()) {
@@ -199,6 +244,10 @@ public class CImagePane extends ScrollPane {
             if (CAccelerator.isControlDown(event) || event.isAltDown()) {
                 setScale(getScale() + (event.getDeltaY() / 400));
             }
+        });
+        container.setOnZoom(event -> {
+            updateTextLayer();
+            setScale(event.getZoomFactor());
         });
 
     }
@@ -479,8 +528,15 @@ public class CImagePane extends ScrollPane {
         }
     }
     public void updateTextLayer() {
-        if (state.getWorkMode() == State.WORK_MODE_LABEL) {
-            cleatText();
+        switch (state.getWorkMode()) {
+            case State.WORK_MODE_CHECK:
+            case State.WORK_MODE_INPUT: {
+                break;
+            }
+            case State.WORK_MODE_LABEL: {
+                cleatText();
+                break;
+            }
         }
     }
     public void moveToLabel(int index) {

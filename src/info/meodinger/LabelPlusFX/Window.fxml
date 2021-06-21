@@ -25,6 +25,8 @@
                 <MenuItem fx:id="mSave" mnemonicParsing="false" onAction="#saveTranslation"/>
                 <MenuItem fx:id="mSaveAs" mnemonicParsing="false" onAction="#saveAsTranslation"/>
                 <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem fx:id="mBakRecover" mnemonicParsing="false" onAction="#bakRecovery"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem fx:id="mClose" mnemonicParsing="false" onAction="#close"/>
             </Menu>
             <Menu fx:id="mmExport" mnemonicParsing="false">

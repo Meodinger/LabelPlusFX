@@ -13,11 +13,14 @@ public class I18N {
     public static String NEW_TRANSLATION = "新建翻译文件";
     public static String OPEN_TRANSLATION = "打开翻译文件";
     public static String SAVE_TRANSLATION = "保存翻译文件";
+    public static String CHOOSE_BAK_FILE = "选择备份文件";
     public static String EXPORT_TRANSLATION = "导出翻译文件";
     public static String EXPORT_TRANS_PACK = "导出翻译图包";
 
+    public static String TRANS_FILE = "翻译文件";
     public static String MEO_TRANS_FILE = "喵版翻译文件";
     public static String LP_TRANS_FILE = "原版翻译文件";
+    public static String BAK_FILE = "备份文件";
     public static String PACK_FILE = "图包文件";
 
     public static String EXIT = "退出";
@@ -44,7 +47,7 @@ public class I18N {
 
     public static String ABOUT = "关于";
     public static String ABOUT_CONTENT = "Label Plus FX for LabelPlus version [1,0]\n\n" +
-            "Version: 1.1.0\n" +
+            "Version: 1.1.1\n" +
             "Author: Meodinger\n" +
             "Email: meodinger@qq.com\n";
     public static String ABOUT_LINK = "Github Repository";
@@ -101,6 +104,7 @@ public class I18N {
     public static String M_OPEN = "打开";
     public static String M_SAVE = "保存";
     public static String M_SAVE_AS = "另存为";
+    public static String M_BAK_RECOVERY = "从备份中恢复";
     public static String M_CLOSE = "关闭";
     public static String MM_EXPORT = "导出";
     public static String M_E_LP = "导出为LP格式文本";
@@ -125,11 +129,14 @@ public class I18N {
             NEW_TRANSLATION = "New Translation File";
             OPEN_TRANSLATION = "Open Translation File";
             SAVE_TRANSLATION = "Save Translation File";
+            CHOOSE_BAK_FILE = "Choose Backup file";
             EXPORT_TRANSLATION = "Export Translation Pack";
             EXPORT_TRANS_PACK = "Export Trans File Pack";
 
+            TRANS_FILE = "Translation File";
             MEO_TRANS_FILE = "MeoTransFile";
             LP_TRANS_FILE = "LabelPlusFile";
+            BAK_FILE = "Backup File";
             PACK_FILE = "PicPackFile";
 
             EXIT = "Exit";
@@ -201,6 +208,7 @@ public class I18N {
             M_OPEN = "Open";
             M_SAVE = "Save";
             M_SAVE_AS = "Save As";
+            M_BAK_RECOVERY = "Recover form Backup";
             M_CLOSE = "Close";
             MM_EXPORT = "Export";
             M_E_LP = "As LP File";

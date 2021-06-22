@@ -77,7 +77,7 @@ public abstract class TransFileLoader {
                 transFile.getGroupList().add(line);
                 count++;
             }
-            if (!line.equals(LPTransFile.SEPARATOR)) throw new IOException(I18N.TOO_MANY_GROUPS);
+            if (!line.equals(LPTransFile.SEPARATOR)) throw new IOException(I18N.EXPORTER_TOO_MANY_GROUPS);
         }
 
         private void readComment() throws IOException{

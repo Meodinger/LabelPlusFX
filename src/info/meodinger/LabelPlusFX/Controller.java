@@ -212,11 +212,11 @@ public class Controller implements Initializable {
     public Controller(State state) {
         this.state = state;
 
-        this.fileFilter = new FileChooser.ExtensionFilter(I18N.TRANS_FILE, "*" + State.EXTENSION_MEO, "*" + State.EXTENSION_LP);
-        this.meoFilter = new FileChooser.ExtensionFilter(I18N.MEO_TRANS_FILE, "*" + State.EXTENSION_MEO);
-        this.lpFilter = new FileChooser.ExtensionFilter(I18N.LP_TRANS_FILE, "*" + State.EXTENSION_LP);
-        this.bakFilter = new FileChooser.ExtensionFilter(I18N.BAK_FILE, "*" + State.EXTENSION_BAK);
-        this.packFilter = new FileChooser.ExtensionFilter(I18N.PACK_FILE, "*" + State.EXTENSION_PACK);
+        this.fileFilter = new FileChooser.ExtensionFilter(I18N.FILE_TRANSLATION, "*" + State.EXTENSION_MEO, "*" + State.EXTENSION_LP);
+        this.meoFilter = new FileChooser.ExtensionFilter(I18N.FILE_MEO_TRANSLATION, "*" + State.EXTENSION_MEO);
+        this.lpFilter = new FileChooser.ExtensionFilter(I18N.FILE_LP_TRANSLATION, "*" + State.EXTENSION_LP);
+        this.bakFilter = new FileChooser.ExtensionFilter(I18N.FILE_BACKUP, "*" + State.EXTENSION_BAK);
+        this.packFilter = new FileChooser.ExtensionFilter(I18N.FILE_PIC_PACK, "*" + State.EXTENSION_PACK);
 
         this.fileChooser = new CFileChooser();
         this.bakChooser = new CFileChooser();
@@ -301,12 +301,12 @@ public class Controller implements Initializable {
         fileChooser.getExtensionFilters().add(meoFilter);
         fileChooser.getExtensionFilters().add(lpFilter);
 
-        bakChooser.setTitle(I18N.CHOOSE_BAK_FILE);
+        bakChooser.setTitle(I18N.CHOOSER_BAK_FILE);
         bakChooser.getExtensionFilters().add(bakFilter);
 
-        exportChooser.setTitle(I18N.EXPORT_TRANSLATION);
+        exportChooser.setTitle(I18N.CHOOSER_EXPORT_TRANSLATION);
 
-        exportPackChooser.setTitle(I18N.EXPORT_TRANS_PACK);
+        exportPackChooser.setTitle(I18N.CHOOSER_EXPORT_TRANS_PACK);
         exportPackChooser.getExtensionFilters().add(packFilter);
     }
 
@@ -425,6 +425,7 @@ public class Controller implements Initializable {
             int index = (int) newValue;
             if (index != CImagePane.NOT_FOUND) {
                 CTreeItem item = findLabelItemByIndex(index);
+                vTree.getSelectionModel().clearSelection();
                 vTree.getSelectionModel().select(item);
                 vTree.scrollTo(vTree.getRow(item));
             }
@@ -583,7 +584,7 @@ public class Controller implements Initializable {
             task = new AutoBack();
             timer.schedule(task, State.AUTO_SAVE_DELAY , State.AUTO_SAVE_PERIOD);
         } else {
-            CDialog.showAlert(I18N.AUTO_SAVE_NOT_AVAILABLE);
+            CDialog.showAlert(I18N.ALERT_AUTO_SAVE_NOT_AVAILABLE);
         }
     }
     private void trySave() {
@@ -598,7 +599,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void newTranslation() {
-        fileChooser.setTitle(I18N.NEW_TRANSLATION);
+        fileChooser.setTitle(I18N.CHOOSER_NEW_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
         trySave();
@@ -657,7 +658,7 @@ public class Controller implements Initializable {
         }
     }
     @FXML public void openTranslation() {
-        fileChooser.setTitle(I18N.OPEN_TRANSLATION);
+        fileChooser.setTitle(I18N.CHOOSER_OPEN_TRANSLATION);
         File file = fileChooser.showOpenDialog(state.stage);
         if (file == null) return;
         trySave();
@@ -678,6 +679,7 @@ public class Controller implements Initializable {
     }
     @FXML public void saveTranslation() {
         if (state.getFilePath() == null || CString.isBlank(state.getFilePath())) {
+            // Actually this never happen
             saveAsTranslation();
             return;
         }
@@ -699,22 +701,26 @@ public class Controller implements Initializable {
             output.transferFrom(input, 0, input.size());
             backed = true;
         } catch (Exception e) {
-            CDialog.showException(new Exception(I18N.BAK_FAILED, e));
+            CDialog.showException(new Exception(I18N.ALERT_BAK_FAILED, e));
         }
 
         if (exporter.export()) {
             state.setChanged(false);
             if (backed && !bak.delete()) {
-                CDialog.showAlert(I18N.BAK_FILE_DELETED_FAILED);
+                CDialog.showAlert(I18N.ALERT_BAK_FILE_DELETE_FAILED);
             }
         } else {
             CDialog.showInfo(String.format(I18N.FORMAT_SAVE_FAILED_BAK_PATH, bak.getPath()));
         }
     }
     @FXML public void saveAsTranslation() {
-        fileChooser.setTitle(I18N.SAVE_TRANSLATION);
+        fileChooser.setTitle(I18N.CHOOSER_SAVE_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
+        if (!file.getParent().equals(state.getFileFolder())) {
+            Optional<ButtonType> result = CDialog.showAlert(I18N.DIALOG_CONTENT_SAVE_AS_ALERT);
+            if (!(result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES)) return;
+        }
 
         state.setFilePath(file.getPath());
         TransFileExporter exporter;
@@ -727,10 +733,10 @@ public class Controller implements Initializable {
         if (exporter.export(file)) {
             state.setFilePath(file.getPath());
             state.setChanged(false);
-            CDialog.showInfo(I18N.SAVED_SUCCESSFULLY);
+            CDialog.showInfo(I18N.INFO_SAVED_SUCCESSFULLY);
         } else {
             state.setFilePath(null);
-            CDialog.showAlert(I18N.SAVE_FAILED);
+            CDialog.showAlert(I18N.ALERT_SAVE_FAILED);
         }
     }
     @FXML public void bakRecovery() {
@@ -755,7 +761,7 @@ public class Controller implements Initializable {
                 state.initialize();
             }
         } else {
-            fileChooser.setTitle(I18N.SAVE_TRANSLATION);
+            fileChooser.setTitle(I18N.CHOOSER_RECOVERY);
             File recovered = fileChooser.showSaveDialog(state.stage);
             if (recovered == null) return;
 
@@ -808,7 +814,9 @@ public class Controller implements Initializable {
         File file = exportChooser.showSaveDialog(state.stage);
         if (file == null) return;
         if (exporter.export(file)) {
-            CDialog.showInfo(I18N.EXPORTED_SUCCESSFULLY);
+            CDialog.showInfo(I18N.INFO_EXPORTED_SUCCESSFULLY);
+        } else {
+            CDialog.showAlert(I18N.ALERT_EXPORT_FAILED);
         }
     }
     @FXML public void exportTransPack() {
@@ -816,11 +824,13 @@ public class Controller implements Initializable {
         if (file == null) return;
 
         if (meoPackager.packMeo(file.getPath())) {
-            CDialog.showInfo(I18N.EXPORTED_PACK_SUCCESSFULLY);
+            CDialog.showInfo(I18N.INFO_EXPORTED_PACK_SUCCESSFULLY);
+        } else {
+            CDialog.showAlert(I18N.ALERT_EXPORT_FAILED);
         }
     }
     @FXML public void setComment() {
-        Optional<String> result = CDialog.showInputArea(state.stage, I18N.TITLE_EDIT_COMMENT, state.getComment());
+        Optional<String> result = CDialog.showInputArea(state.stage, I18N.DIALOG_TITLE_EDIT_COMMENT, state.getComment());
         result.ifPresent(state::setComment);
     }
 
@@ -841,6 +851,7 @@ public class Controller implements Initializable {
         );
     }
 
+    // Also reload transLabels
     private void setViewMode(int viewMode) {
         state.setViewMode(viewMode);
         switch (viewMode) {
@@ -884,6 +895,7 @@ public class Controller implements Initializable {
         setWorkMode(workMode);
     }
 
+    // Also retarget textListener to null
     private void loadTransLabel() {
         textListener.retargetTo(null);
 

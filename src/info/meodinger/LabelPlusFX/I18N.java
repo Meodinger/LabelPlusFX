@@ -10,30 +10,29 @@ import java.util.Locale;
 public class I18N {
     public static String WINDOW_TITLE = "Label Plus FX";
 
-    public static String NEW_TRANSLATION = "新建翻译文件";
-    public static String OPEN_TRANSLATION = "打开翻译文件";
-    public static String SAVE_TRANSLATION = "保存翻译文件";
-    public static String CHOOSE_BAK_FILE = "选择备份文件";
-    public static String EXPORT_TRANSLATION = "导出翻译文件";
-    public static String EXPORT_TRANS_PACK = "导出翻译图包";
+    public static String CHOOSER_NEW_TRANSLATION = "新建翻译文件";
+    public static String CHOOSER_OPEN_TRANSLATION = "打开翻译文件";
+    public static String CHOOSER_SAVE_TRANSLATION = "保存翻译文件";
+    public static String CHOOSER_BAK_FILE = "选择备份文件";
+    public static String CHOOSER_RECOVERY = "请选择恢复位置";
+    public static String CHOOSER_EXPORT_TRANSLATION = "导出翻译文件";
+    public static String CHOOSER_EXPORT_TRANS_PACK = "导出翻译图包";
 
-    public static String TRANS_FILE = "翻译文件";
-    public static String MEO_TRANS_FILE = "喵版翻译文件";
-    public static String LP_TRANS_FILE = "原版翻译文件";
-    public static String BAK_FILE = "备份文件";
-    public static String PACK_FILE = "图包文件";
+    public static String FILE_TRANSLATION = "翻译文件";
+    public static String FILE_MEO_TRANSLATION = "喵版翻译文件";
+    public static String FILE_LP_TRANSLATION = "原版翻译文件";
+    public static String FILE_BACKUP = "备份文件";
+    public static String FILE_PIC_PACK = "图包文件";
 
-    public static String EXIT = "退出";
-    public static String SAVE_QUES = "是否保存？";
-    public static String SAVE = "保存";
-    public static String NOT_SAVE = "不保存";
-    public static String SAVED_SUCCESSFULLY = "保存成功";
-    public static String SAVE_FAILED = "保存失败";
-    public static String EXPORTED_SUCCESSFULLY = "导出成功";
-    public static String EXPORTED_PACK_SUCCESSFULLY = "导出图包成功";
-    public static String BAK_FAILED = "备份失败";
-    public static String BAK_FILE_DELETED_FAILED = "备份文件清理失败";
-    public static String AUTO_SAVE_NOT_AVAILABLE = "自动保存不可用";
+    public static String INFO_SAVED_SUCCESSFULLY = "保存成功";
+    public static String INFO_EXPORTED_SUCCESSFULLY = "导出成功";
+    public static String INFO_EXPORTED_PACK_SUCCESSFULLY = "导出图包成功";
+
+    public static String ALERT_SAVE_FAILED = "保存失败";
+    public static String ALERT_EXPORT_FAILED = "导出失败";
+    public static String ALERT_BAK_FAILED = "备份失败";
+    public static String ALERT_BAK_FILE_DELETE_FAILED = "备份文件清理失败";
+    public static String ALERT_AUTO_SAVE_NOT_AVAILABLE = "自动保存不可用";
 
     public static String HINT = "帮助";
     public static String HINT_CONTENT = "图片可以任意拖动\n" +
@@ -62,6 +61,10 @@ public class I18N {
     public static String NO = "否";
     public static String SUBMIT = "提交";
     public static String CANCEL = "取消";
+    public static String EXIT = "退出";
+    public static String SAVE_QUES = "是否保存？";
+    public static String SAVE = "保存";
+    public static String NOT_SAVE = "不保存";
 
     public static String CHOOSE_PICS_TITLE = "添加图片";
     public static String PICS_POTENTIAL = "检测到的图片的文件";
@@ -71,8 +74,8 @@ public class I18N {
     public static String REMOVE_PIC = "<";
     public static String REMOVE_ALL_PIC = "<<";
 
-    public static String TOO_MANY_GROUPS = "分组太多了！";
-    public static String SAME_GROUP_NAME = "存在同名分组";
+    public static String EXPORTER_TOO_MANY_GROUPS = "分组太多了！";
+    public static String EXPORTER_SAME_GROUP_NAME = "存在同名分组";
 
     public static String FORMAT_TOO_MANY_GROUPS = "%d个分组对于原版LP来说太多了！";
     public static String FORMAT_UNEXPECTED_STRING = "出现了意料之外的文本：%s";
@@ -87,17 +90,21 @@ public class I18N {
     public static String MENU_ITEM_MOVE_TO = "移动到…";
     public static String MENU_ITEM_DELETE = "删除";
 
-    public static String TITLE_ADD_GROUP = "添加分组";
-    public static String TITLE_RENAME = "新名称";
-    public static String TITLE_MOVE_TO = "选择分组";
-    public static String TITLE_DELETE_LABEL = "删除Label";
-    public static String TITLE_EDIT_COMMENT = "编辑注释";
+    public static String DIALOG_TITLE_ADD_GROUP = "添加分组";
+    public static String DIALOG_TITLE_RENAME = "新名称";
+    public static String DIALOG_TITLE_MOVE_TO = "选择分组";
+    public static String DIALOG_TITLE_DELETE_LABEL = "删除Label";
+    public static String DIALOG_TITLE_EDIT_COMMENT = "编辑注释";
 
-    public static String CONTENT_ADD_GROUP = "请输入分组<名称>，并选择一个<颜色>";
-    public static String CONTENT_RENAME = "请输入分组的新<名称>";
-    public static String CONTENT_MOVE_TO = "选择这个Label的分组";
-    public static String CONTENT_DELETE_LABEL = "确定要删除这个Label么？";
-    public static String CONTENT_DELETE_LABELS = "确定要删除这些Label么？";
+    public static String DIALOG_CONTENT_ADD_GROUP = "请输入分组<名称>，并选择一个<颜色>";
+    public static String DIALOG_CONTENT_RENAME = "请输入分组的新<名称>";
+    public static String DIALOG_CONTENT_MOVE_TO = "选择这个Label的分组";
+    public static String DIALOG_CONTENT_DELETE_LABEL = "确定要删除这个Label么？";
+    public static String DIALOG_CONTENT_DELETE_LABELS = "确定要删除这些Label么？";
+    public static String DIALOG_CONTENT_SAVE_AS_ALERT = "你正在将翻译文件另存到非当前项目文件夹\n" +
+            "此操作可能导致加载图片失败！\n" +
+            "如果想换一种格式保存翻译文件，请使用“导出”。\n" +
+            "选择“是”以继续";
 
     public static String MM_FILE = "文件";
     public static String M_NEW = "新建翻译";
@@ -109,7 +116,7 @@ public class I18N {
     public static String MM_EXPORT = "导出";
     public static String M_E_LP = "导出为LP格式文本";
     public static String M_E_MEO = "导出为Meo格式文本";
-    public static String M_E_MEO_P = "导出为包含图片的压缩包";
+    public static String M_E_MEO_P = "导出包含图片的压缩包";
     public static String M_E_COMMENT = "编辑注释";
     public static String MM_ABOUT = "关于";
     public static String M_HINT = "帮助";
@@ -126,30 +133,29 @@ public class I18N {
         String lang = locale.getLanguage();
         if (!(lang.equals(Locale.SIMPLIFIED_CHINESE.getLanguage()) || lang.equals(Locale.TRADITIONAL_CHINESE.getLanguage()))) {
 
-            NEW_TRANSLATION = "New Translation File";
-            OPEN_TRANSLATION = "Open Translation File";
-            SAVE_TRANSLATION = "Save Translation File";
-            CHOOSE_BAK_FILE = "Choose Backup file";
-            EXPORT_TRANSLATION = "Export Translation Pack";
-            EXPORT_TRANS_PACK = "Export Trans File Pack";
+            CHOOSER_NEW_TRANSLATION = "New Translation File";
+            CHOOSER_OPEN_TRANSLATION = "Open Translation File";
+            CHOOSER_SAVE_TRANSLATION = "Save Translation File";
+            CHOOSER_BAK_FILE = "Choose Backup file";
+            CHOOSER_RECOVERY = "Choose Recovery Location";
+            CHOOSER_EXPORT_TRANSLATION = "Export Translation Pack";
+            CHOOSER_EXPORT_TRANS_PACK = "Export Trans File Pack";
 
-            TRANS_FILE = "Translation File";
-            MEO_TRANS_FILE = "MeoTransFile";
-            LP_TRANS_FILE = "LabelPlusFile";
-            BAK_FILE = "Backup File";
-            PACK_FILE = "PicPackFile";
+            FILE_TRANSLATION = "Translation File";
+            FILE_MEO_TRANSLATION = "MeoTransFile";
+            FILE_LP_TRANSLATION = "LabelPlusFile";
+            FILE_BACKUP = "Backup File";
+            FILE_PIC_PACK = "PicPackFile";
 
-            EXIT = "Exit";
-            SAVE_QUES = "Save?";
-            SAVE = "Save";
-            NOT_SAVE = "Not Save";
-            SAVED_SUCCESSFULLY = "Saved successfully";
-            SAVE_FAILED = "Save failed";
-            EXPORT_TRANSLATION = "Exported Successfully";
-            EXPORTED_PACK_SUCCESSFULLY = "Exported PicPack Successfully";
-            BAK_FAILED = "Bak failed";
-            BAK_FILE_DELETED_FAILED = "Bak file remove failed";
-            AUTO_SAVE_NOT_AVAILABLE = "Auto save not available";
+            INFO_SAVED_SUCCESSFULLY = "Saved successfully";
+            INFO_EXPORTED_SUCCESSFULLY = "Exported Successfully";
+            INFO_EXPORTED_PACK_SUCCESSFULLY = "Exported PicPack Successfully";
+
+            ALERT_SAVE_FAILED = "Save failed";
+            ALERT_EXPORT_FAILED = "Export failed";
+            ALERT_BAK_FAILED = "Backup failed";
+            ALERT_BAK_FILE_DELETE_FAILED = "Bak file remove failed";
+            ALERT_AUTO_SAVE_NOT_AVAILABLE = "Auto save not available";
 
             HINT = "Hint";
             HINT_CONTENT = "Pic can be dragged\n" +
@@ -170,13 +176,17 @@ public class I18N {
             NO = "No";
             SUBMIT = "Submit";
             CANCEL = "Cancel";
+            EXIT = "Exit";
+            SAVE_QUES = "Save?";
+            SAVE = "Save";
+            NOT_SAVE = "Not Save";
 
             CHOOSE_PICS_TITLE = "Add Pics";
             PICS_POTENTIAL = "Potential Pics";
             PICS_SELECTED = "Pics ready to load";
 
-            TOO_MANY_GROUPS = "Too Many Groups";
-            SAME_GROUP_NAME = "Groups with same name";
+            EXPORTER_TOO_MANY_GROUPS = "Too Many Groups";
+            EXPORTER_SAME_GROUP_NAME = "Groups with same name";
 
             FORMAT_TOO_MANY_GROUPS = "More than 9 groups (got %d) in this translation";
             FORMAT_UNEXPECTED_STRING = "Unexpected String: %s";
@@ -186,22 +196,27 @@ public class I18N {
             FORMAT_NEW_GROUP_NAME = "New_Group_%d";
             FORMAT_SAVE_FAILED_BAK_PATH = "Save Failed!\nBak file path is: %s";
 
-            TITLE_ADD_GROUP = "Add Group";
-            TITLE_RENAME = "New Name";
-            TITLE_MOVE_TO = "Select Group";
-            TITLE_DELETE_LABEL = "Delete Label";
-            TITLE_EDIT_COMMENT = "Edit Comment";
+            DIALOG_TITLE_ADD_GROUP = "Add Group";
+            DIALOG_TITLE_RENAME = "New Name";
+            DIALOG_TITLE_MOVE_TO = "Select Group";
+            DIALOG_TITLE_DELETE_LABEL = "Delete Label";
+            DIALOG_TITLE_EDIT_COMMENT = "Edit Comment";
 
             MENU_ITEM_ADD_GROUP = "Add Group";
             MENU_ITEM_RENAME = "Rename";
             MENU_ITEM_MOVE_TO = "Move to ...";
             MENU_ITEM_DELETE = "Delete";
 
-            CONTENT_ADD_GROUP = "Enter the <name> and choose a <color>";
-            CONTENT_RENAME = "Enter the new <name> for the Group";
-            CONTENT_MOVE_TO = "Select Group of this Label";
-            CONTENT_DELETE_LABEL = "Are your sue to delete this label?";
-            CONTENT_DELETE_LABELS = "Are your sue to delete these labels?";
+            DIALOG_CONTENT_ADD_GROUP = "Enter the <name> and choose a <color>";
+            DIALOG_CONTENT_RENAME = "Enter the new <name> for the Group";
+            DIALOG_CONTENT_MOVE_TO = "Select Group of this Label";
+            DIALOG_CONTENT_DELETE_LABEL = "Are your sue to delete this label?";
+            DIALOG_CONTENT_DELETE_LABELS = "Are your sue to delete these labels?";
+            DIALOG_CONTENT_SAVE_AS_ALERT = "You are saving translation to non-project folder\n" +
+                    "This may cause load pic fail!\n" +
+                    "If you want to save translation as the other format\n" +
+                    "Please use `Export`\n" +
+                    "Click YES to continue";
 
             MM_FILE = "File";
             M_NEW = "New File";

@@ -9,7 +9,6 @@ import info.meodinger.LabelPlusFX.Util.CDialog;
 import javafx.beans.property.*;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;

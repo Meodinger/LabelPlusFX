@@ -129,8 +129,8 @@ public class CTreeMenu {
                 }
                 colorPicker.setValue(color);
 
-                dialog.setTitle(I18N.TITLE_ADD_GROUP);
-                dialog.setHeaderText(I18N.CONTENT_ADD_GROUP);
+                dialog.setTitle(I18N.DIALOG_TITLE_ADD_GROUP);
+                dialog.setHeaderText(I18N.DIALOG_CONTENT_ADD_GROUP);
                 dialog.setResult(null);
 
                 Optional<TransFile.MeoTransFile.Group> result = dialog.showAndWait();
@@ -190,14 +190,14 @@ public class CTreeMenu {
                 TreeItem<String> groupItem = getItem();
                 State state = getState();
 
-                Optional<String> result = CDialog.showInput(state.stage, I18N.TITLE_RENAME, I18N.CONTENT_RENAME, groupItem.getValue());
+                Optional<String> result = CDialog.showInput(state.stage, I18N.DIALOG_TITLE_RENAME, I18N.DIALOG_CONTENT_RENAME, groupItem.getValue());
 
                 if (result.isPresent() && !CString.isBlank(result.get())) {
                     String name = result.get().trim().replaceAll(" ", "_");
                     int groupId = state.getGroupIdByName(groupItem.getValue());
 
                     if (state.isLPFile() && state.getGroupNames().contains(name)) {
-                        CDialog.showAlert(I18N.SAME_GROUP_NAME);
+                        CDialog.showAlert(I18N.EXPORTER_SAME_GROUP_NAME);
                         return;
                     }
 
@@ -286,7 +286,7 @@ public class CTreeMenu {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 State state = getState();
                 int prevGroupId = labelItem.meta.getGroupId();
-                Optional<String> result = CDialog.showChoice(state.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, state.getGroupNames());
+                Optional<String> result = CDialog.showChoice(state.stage, I18N.DIALOG_TITLE_MOVE_TO, I18N.DIALOG_CONTENT_MOVE_TO, state.getGroupNames());
 
                 if (result.isPresent()) {
                     // Edit data
@@ -307,7 +307,7 @@ public class CTreeMenu {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 State state = getState();
 
-                Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABEL, labelItem.getValue());
+                Optional<ButtonType> result = CDialog.showConfirm(I18N.DIALOG_TITLE_DELETE_LABEL, I18N.DIALOG_CONTENT_DELETE_LABEL, labelItem.getValue());
 
                 if (result.isPresent() && result.get() == ButtonType.YES) {
 
@@ -352,7 +352,7 @@ public class CTreeMenu {
             editGroup.setOnAction(e -> {
                 ObservableList<TreeItem<String>> selectedItems = view.getSelectionModel().getSelectedItems();
 
-                Optional<String> result = CDialog.showChoice(state.stage, I18N.TITLE_MOVE_TO, I18N.CONTENT_MOVE_TO, state.getGroupNames());
+                Optional<String> result = CDialog.showChoice(state.stage, I18N.DIALOG_TITLE_MOVE_TO, I18N.DIALOG_CONTENT_MOVE_TO, state.getGroupNames());
 
                 // Edit data
                 if (result.isPresent()) {
@@ -371,7 +371,7 @@ public class CTreeMenu {
             delete.setOnAction(e -> {
                 ObservableList<TreeItem<String >> selectedItems = view.getSelectionModel().getSelectedItems();
 
-                Optional<ButtonType> result = CDialog.showConfirm(I18N.TITLE_DELETE_LABEL, I18N.CONTENT_DELETE_LABELS);
+                Optional<ButtonType> result = CDialog.showConfirm(I18N.DIALOG_TITLE_DELETE_LABEL, I18N.DIALOG_CONTENT_DELETE_LABELS);
 
                 if (result.isPresent() && result.get() == ButtonType.YES) {
                     // Edit data

@@ -62,7 +62,7 @@ public abstract class TransFileExporter {
                 groupNames.add(group.name);
             }
             if (groupNames.size() < groups.size()) {
-                CDialog.showInfo(I18N.SAME_GROUP_NAME);
+                CDialog.showInfo(I18N.EXPORTER_SAME_GROUP_NAME);
                 return false;
             }
 

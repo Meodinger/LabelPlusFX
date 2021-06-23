@@ -1,6 +1,6 @@
 {
   "comment": "Default Comment\nYou can edit me",
-  "group": [
+  "groupList": [
     {
       "color": "FF0000",
       "name": "分组1"

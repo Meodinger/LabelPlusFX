@@ -572,6 +572,7 @@ public class Controller implements Initializable {
         exporterMeo.export(bak);
     }
     private void prepare() {
+        state.stage.setTitle(I18N.WINDOW_TITLE + " - " + new File(state.getFilePath()).getName());
         cPicBox.setList(state.getSortedPicList());
         updateGroupList();
         setDisable(false);

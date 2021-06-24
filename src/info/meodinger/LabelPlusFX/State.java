@@ -65,6 +65,7 @@ public class State {
         setFilePath(null);
         setChanged(false);
 
+        stage.setTitle(I18N.WINDOW_TITLE);
         setWorkMode(WORK_MODE_DEFAULT);
         setViewMode(VIEW_MODE_DEFAULT);
         setCurrentGroupId(0);

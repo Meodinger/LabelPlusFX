@@ -175,15 +175,11 @@ public class Controller implements Initializable {
     private AutoBack task = null;
 
 
-    @FXML private BorderPane main;
-
     @FXML private TextArea tTransText;
 
     @FXML private Button btnSwitchViewMode;
     @FXML private Button btnSwitchWorkMode;
 
-    @FXML private SplitPane pRight;
-    @FXML private AnchorPane pTree;
     @FXML private AnchorPane pText;
 
     @FXML private TreeView<String> vTree;
@@ -329,11 +325,6 @@ public class Controller implements Initializable {
             mSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
             mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
         }
-
-        // Fix width ratio
-        ChangeListener<Number> stageSizeListener = (observable, oldValue, newValue) -> pRight.setPrefWidth(state.stage.getWidth() / 3);
-        state.stage.widthProperty().addListener(stageSizeListener);
-        state.stage.widthProperty().addListener(stageSizeListener);
 
         // Reload labels and Repaint pane when change pic
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -486,7 +477,7 @@ public class Controller implements Initializable {
         // Bind Alt/Meta+A with special symbols (Render Menu in )
         tTransText.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if ((event.isAltDown() || event.isMetaDown()) && event.getCode() == KeyCode.A) {
-                double x = state.stage.getX() + pRight.getWidth() * 2;
+                double x = state.stage.getX() + pText.getScene().getWidth() - pText.getWidth() * 0.9;
                 double y = state.stage.getY() + pText.getScene().getHeight() - pText.getHeight() + 40;
 
                 symbolMenu.show(tTransText, x, y);

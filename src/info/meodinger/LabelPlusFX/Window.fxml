@@ -14,7 +14,7 @@
 
 <?import info.meodinger.LabelPlusFX.Component.*?>
 
-<BorderPane fx:id="main" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="600.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="info.meodinger.LabelPlusFX.Controller">
     <top>
@@ -43,42 +43,42 @@
         </MenuBar>
     </top>
     <center>
-        <BorderPane>
-            <center>
-                <CImagePane fx:id="cImagePane" scale="1.0" prefWidth="600.0"/>
-            </center>
-            <bottom>
-                <HBox alignment="CENTER_RIGHT" prefWidth="600.0" BorderPane.alignment="CENTER">
-                    <CLabelSlider fx:id="cSlider" minScale="0.2" maxScale="2" scale="1"/>
-                    <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
-                    <CComboBox fx:id="cPicBox"/>
-                </HBox>
-            </bottom>
-        </BorderPane>
-    </center>
-    <right>
-        <SplitPane fx:id="pRight" dividerPositions="0.7" orientation="VERTICAL" prefWidth="300.0" BorderPane.alignment="CENTER">
-            <AnchorPane fx:id="pTree">
-                <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <top>
-                        <HBox alignment="CENTER_RIGHT" prefWidth="300.0" BorderPane.alignment="CENTER">
-                            <Button fx:id="btnSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode" text="Check Mode"/>
-                            <CComboBox fx:id="cGroupBox" />
-                            <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="btnSwitchViewMode" mnemonicParsing="false" onAction="#switchViewMode" text="Group Mode"/>
-                        </HBox>
-                    </top>
-                    <center>
-                        <TreeView fx:id="vTree"/>
-                    </center>
-                </BorderPane>
-            </AnchorPane>
-            <AnchorPane fx:id="pText">
-                <TextArea fx:id="tTransText"
-                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-            </AnchorPane>
+        <SplitPane dividerPositions="0.7">
+            <BorderPane>
+                <center>
+                    <CImagePane fx:id="cImagePane" scale="1.0"/>
+                </center>
+                <bottom>
+                    <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER">
+                        <CLabelSlider fx:id="cSlider" minScale="0.2" maxScale="2" scale="1"/>
+                        <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
+                        <CComboBox fx:id="cPicBox"/>
+                    </HBox>
+                </bottom>
+            </BorderPane>
+            <SplitPane dividerPositions="0.7" orientation="VERTICAL">
+                <AnchorPane>
+                    <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <top>
+                            <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER">
+                                <Button fx:id="btnSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode" text="Check Mode"/>
+                                <CComboBox fx:id="cGroupBox" />
+                                <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="btnSwitchViewMode" mnemonicParsing="false" onAction="#switchViewMode" text="Group Mode"/>
+                            </HBox>
+                        </top>
+                        <center>
+                            <TreeView fx:id="vTree"/>
+                        </center>
+                    </BorderPane>
+                </AnchorPane>
+                <AnchorPane fx:id="pText">
+                    <TextArea fx:id="tTransText"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                </AnchorPane>
+            </SplitPane>
         </SplitPane>
-    </right>
+    </center>
 </BorderPane>

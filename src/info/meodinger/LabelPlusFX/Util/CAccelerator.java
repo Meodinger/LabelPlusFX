@@ -19,13 +19,15 @@ public class CAccelerator {
     public static boolean isMac = OS.contains("mac");
 
     public static boolean isControlDown(GestureEvent event) {
+        if (event.isControlDown()) return true;
         if (isMac) return event.isMetaDown();
-        return event.isControlDown();
+        return false;
     }
 
     public static boolean isControlDown(KeyEvent event) {
+        if (event.isControlDown()) return true;
         if (isMac) return event.isMetaDown();
-        return event.isControlDown();
+        return false;
     }
 
 }

@@ -244,11 +244,6 @@ public class CImagePane extends ScrollPane {
                 setScale(getScale() + (event.getDeltaY() / 400));
             }
         });
-        container.setOnZoom(event -> {
-            updateTextLayer();
-            setScale(event.getZoomFactor());
-        });
-
     }
     private void render() {
 

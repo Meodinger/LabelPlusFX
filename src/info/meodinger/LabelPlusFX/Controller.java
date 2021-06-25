@@ -89,6 +89,7 @@ public class Controller implements Initializable {
 
                         index = vTree.getSelectionModel().getSelectedIndex() + shift;
                         vTree.getSelectionModel().clearSelection();
+                        // if item == null (to the end), vTree select nothing, return to top
 
                         TreeItem<String> item = vTree.getTreeItem(index);
                         if (item != null) {
@@ -127,7 +128,7 @@ public class Controller implements Initializable {
                         }
                         break;
                     case LEFT:
-                        cPicBox.back();
+                        cPicBox.prev();
                         break;
                     case RIGHT:
                         cPicBox.next();
@@ -180,6 +181,8 @@ public class Controller implements Initializable {
     @FXML private Button btnSwitchViewMode;
     @FXML private Button btnSwitchWorkMode;
 
+    @FXML private SplitPane pMain;
+    @FXML private SplitPane pRight;
     @FXML private AnchorPane pText;
 
     @FXML private TreeView<String> vTree;
@@ -316,6 +319,7 @@ public class Controller implements Initializable {
         cImagePane.setConfig(state);
         cImagePane.setMinScale(cSlider.getMinScale());
         cImagePane.setMaxScale(cSlider.getMaxScale());
+        cPicBox.setWrapped(true);
 
         // Accelerator
         if (CAccelerator.isMac) {
@@ -333,13 +337,13 @@ public class Controller implements Initializable {
             if (newValue != null) {
                 cImagePane.update();
                 cImagePane.relocate();
-            }
-            if (state.getTransFile() != null && state.getLabelsNow().size() > 0) {
-                CTreeItem item = findLabelItemByIndex(state.getLabelsNow().get(0).getIndex());
-                if (item != null) {
-                    vTree.getSelectionModel().select(item);
-                    textListener.retargetTo(item);
-                    cImagePane.moveToLabel(item.meta.getIndex());
+                if (state.getLabelsNow().size() > 0) {
+                    CTreeItem item = findLabelItemByIndex(state.getLabelsNow().get(0).getIndex());
+                    if (item != null) {
+                        vTree.getSelectionModel().select(item);
+                        textListener.retargetTo(item);
+                        cImagePane.moveToLabel(item.meta.getIndex());
+                    }
                 }
             }
         });
@@ -665,6 +669,19 @@ public class Controller implements Initializable {
         }
         if (loader.load(file)) {
             prepare();
+
+            // Show info if comment not in default list
+            String comment = state.getComment().trim();
+            boolean isModified = true;
+            for (String defaultComment : TransFile.DEFAULT_COMMENT_LIST) {
+                if (comment.equals(defaultComment)) {
+                    isModified = false;
+                    break;
+                }
+            }
+            if (isModified) {
+                CDialog.showConfirm(I18N.INFO, I18N.DIALOG_CONTENT_MODIFIED_COMMENT, comment);
+            }
         } else {
             state.initialize();
         }

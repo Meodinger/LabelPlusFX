@@ -19,6 +19,7 @@ public class CComboBox<T> extends HBox {
     private final Button back, next;
 
     private int index;
+    private boolean isWrapped;
 
     public CComboBox() {
         super();
@@ -26,7 +27,9 @@ public class CComboBox<T> extends HBox {
         this.comboBox = new ComboBox<>();
         this.back = new Button("<");
         this.next = new Button(">");
+
         this.index = 0;
+        this.isWrapped = false;
 
         init();
         render();
@@ -35,7 +38,7 @@ public class CComboBox<T> extends HBox {
     private void init() {
         comboBox.valueProperty().addListener((observableValue, oldValue, newValue) -> index = comboBox.getItems().indexOf(newValue));
 
-        back.setOnMouseClicked(e -> back());
+        back.setOnMouseClicked(e -> prev());
         next.setOnMouseClicked(e -> next());
     }
     private void render() {
@@ -56,19 +59,35 @@ public class CComboBox<T> extends HBox {
         comboBox.getItems().addAll(list);
         if (list.size() > 0) comboBox.setValue(comboBox.getItems().get(0));
     }
+    public int getListSize() {
+        return comboBox.getItems().size();
+    }
 
-    public void back() {
+    public void setWrapped(boolean wrapped) {
+        isWrapped = wrapped;
+    }
+    public boolean isWrapped() {
+        return isWrapped;
+    }
+
+    public void prev() {
+        if (isWrapped) {
+            if (index <= 0) index += getListSize();
+        }
         if (index > 0) {
             comboBox.setValue(comboBox.getItems().get(--index));
         }
     }
     public void next() {
-        if (index < comboBox.getItems().size() - 1) {
+        if (isWrapped) {
+            if (index >= getListSize() - 1) index -= getListSize();
+        }
+        if (index < getListSize() - 1) {
             comboBox.setValue(comboBox.getItems().get(++index));
         }
     }
     public void moveTo(int index) {
-        if (index >= 0 && index < comboBox.getItems().size()) {
+        if (index >= 0 && index < getListSize()) {
             comboBox.setValue(comboBox.getItems().get(index));
         }
     }

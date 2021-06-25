@@ -43,25 +43,25 @@
         </MenuBar>
     </top>
     <center>
-        <SplitPane dividerPositions="0.7">
+        <SplitPane fx:id="pMain" dividerPositions="0.7">
             <BorderPane>
                 <center>
                     <CImagePane fx:id="cImagePane" scale="1.0"/>
                 </center>
                 <bottom>
-                    <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER">
+                    <HBox alignment="CENTER_RIGHT">
                         <CLabelSlider fx:id="cSlider" minScale="0.2" maxScale="2" scale="1"/>
                         <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
                         <CComboBox fx:id="cPicBox"/>
                     </HBox>
                 </bottom>
             </BorderPane>
-            <SplitPane dividerPositions="0.7" orientation="VERTICAL">
+            <SplitPane fx:id="pRight" dividerPositions="0.7" orientation="VERTICAL">
                 <AnchorPane>
                     <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <top>
-                            <HBox alignment="CENTER_RIGHT" BorderPane.alignment="CENTER">
+                            <HBox alignment="CENTER_RIGHT">
                                 <Button fx:id="btnSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode" text="Check Mode"/>
                                 <CComboBox fx:id="cGroupBox" />
                                 <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>

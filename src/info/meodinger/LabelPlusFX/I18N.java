@@ -96,6 +96,7 @@ public class I18N {
     public static String DIALOG_TITLE_DELETE_LABEL = "删除Label";
     public static String DIALOG_TITLE_EDIT_COMMENT = "编辑注释";
 
+    public static String DIALOG_CONTENT_MODIFIED_COMMENT = "文件默认注释已被编辑，其内容如下：";
     public static String DIALOG_CONTENT_ADD_GROUP = "请输入分组<名称>，并选择一个<颜色>";
     public static String DIALOG_CONTENT_RENAME = "请输入分组的新<名称>";
     public static String DIALOG_CONTENT_MOVE_TO = "选择这个Label的分组";
@@ -207,6 +208,7 @@ public class I18N {
             MENU_ITEM_MOVE_TO = "Move to ...";
             MENU_ITEM_DELETE = "Delete";
 
+            DIALOG_CONTENT_MODIFIED_COMMENT = "File comment modified. Content is:";
             DIALOG_CONTENT_ADD_GROUP = "Enter the <name> and choose a <color>";
             DIALOG_CONTENT_RENAME = "Enter the new <name> for the Group";
             DIALOG_CONTENT_MOVE_TO = "Select Group of this Label";

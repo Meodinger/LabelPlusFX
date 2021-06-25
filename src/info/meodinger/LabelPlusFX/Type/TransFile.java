@@ -12,6 +12,9 @@ import java.util.*;
 public abstract class TransFile<T> {
 
     public static final String DEFAULT_COMMENT = "Default Comment\nYou can edit me";
+    public static final String[] DEFAULT_COMMENT_LIST = {
+            DEFAULT_COMMENT, "由 MoeFlow.com 导出"
+    };
 
     private int[] version;
     private String comment;

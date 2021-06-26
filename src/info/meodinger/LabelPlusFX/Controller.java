@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.*;
+import java.util.function.Function;
 
 public class Controller implements Initializable {
 
@@ -315,6 +316,8 @@ public class Controller implements Initializable {
         setDisable(true);
 
         // Initialize
+        pMain.setDividerPositions(0.63);
+        pRight.setDividerPositions(0.6);
         menu.treeMenu.init(vTree);
         cImagePane.setConfig(state);
         cImagePane.setMinScale(cSlider.getMinScale());
@@ -329,6 +332,15 @@ public class Controller implements Initializable {
             mSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
             mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
         }
+
+        // Fix split ratio
+        ChangeListener<Number> geometryListener = (observable, oldValue, newValue) -> {
+            Function<Double, Double> debounce = input -> ((double) ((int) (input * 100 + 0.2))) / 100;
+            pMain.setDividerPositions(debounce.apply(pMain.getDividerPositions()[0]));
+            pRight.setDividerPositions(debounce.apply(pRight.getDividerPositions()[0]));
+        };
+        state.stage.widthProperty().addListener(geometryListener);
+        state.stage.heightProperty().addListener(geometryListener);
 
         // Reload labels and Repaint pane when change pic
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {

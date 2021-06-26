@@ -29,7 +29,7 @@ public class LabelPlusFX extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root, 900, 600);
 
-        // Global event catch
+        // Global event catch, prevent mnemonic parsing
         scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             if(event.isAltDown()) event.consume();
         });

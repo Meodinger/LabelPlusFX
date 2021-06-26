@@ -3,13 +3,13 @@ package info.meodinger.LabelPlusFX.Component;
 import info.meodinger.LabelPlusFX.Util.CColor;
 import info.meodinger.LabelPlusFX.Util.CString;
 
-import com.sun.javafx.scene.control.skin.ColorPickerSkin;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import javafx.scene.control.skin.ColorPickerSkin;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;

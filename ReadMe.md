@@ -70,8 +70,8 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* [JDK 1.8](https://java.com/download/manual.jsp)
-* [FastJson](https://github.com/alibaba/fastjson)
+* [Liberica JDK 11 (Full)](bell-sw.com/pages/downloads/#/java-11-current)
+* [FastJson 1.2.76](https://github.com/alibaba/fastjson)
 
 
 ### Installation

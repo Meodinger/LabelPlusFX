@@ -43,7 +43,7 @@
         </MenuBar>
     </top>
     <center>
-        <SplitPane fx:id="pMain" dividerPositions="0.7">
+        <SplitPane fx:id="pMain" dividerPositions="0.6">
             <BorderPane>
                 <center>
                     <CImagePane fx:id="cImagePane" scale="1.0"/>
@@ -56,7 +56,7 @@
                     </HBox>
                 </bottom>
             </BorderPane>
-            <SplitPane fx:id="pRight" dividerPositions="0.7" orientation="VERTICAL">
+            <SplitPane fx:id="pRight" dividerPositions="0.6" orientation="VERTICAL">
                 <AnchorPane>
                     <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

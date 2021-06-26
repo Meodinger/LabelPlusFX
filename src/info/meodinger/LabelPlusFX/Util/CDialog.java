@@ -8,10 +8,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.*;
 import javafx.stage.Window;
 
@@ -245,8 +241,8 @@ public class CDialog {
         vBox.setAlignment(Pos.CENTER);
         for (Node b : vBox.getChildren()) {
             Button btn = (Button) b;
-            btn.setPrefWidth(40);
-            btn.setPrefHeight(40);
+            btn.setPrefWidth(48);
+            btn.setPrefHeight(48);
         }
 
         add.setOnAction(event -> {

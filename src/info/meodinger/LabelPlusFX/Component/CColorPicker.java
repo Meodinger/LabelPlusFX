@@ -8,7 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.TextField;
 import javafx.scene.control.skin.ColorPickerSkin;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
@@ -71,7 +70,7 @@ public class CColorPicker extends ColorPicker {
 
             switch (length) {
                 case 1:
-                    colorHex = CString.repeat(colorHex, 6);
+                    colorHex = colorHex.repeat(6);
                     break;
                 case 3:
                     StringBuilder builder = new StringBuilder();

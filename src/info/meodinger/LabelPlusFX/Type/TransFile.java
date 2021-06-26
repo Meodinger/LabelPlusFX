@@ -59,7 +59,7 @@ public abstract class TransFile<T> {
 
     public static class MeoTransFile extends TransFile<MeoTransFile.Group> {
 
-        public static String[] DEFAULT_COLOR_LIST = {
+        public final static String[] DEFAULT_COLOR_LIST = {
                 "FF0000",
                 "0000FF",
                 "008000",

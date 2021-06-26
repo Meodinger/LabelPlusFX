@@ -11,20 +11,12 @@ import java.util.List;
  */
 public class CString {
 
-    public static char[] WHITE_SPACE_ARRAY = new char[] {
+    public final static char[] WHITE_SPACE_ARRAY = new char[] {
       ' ', '\0', '\b', '\f', '\n', '\r', '\t'
     };
 
-    public static String repeat(String str, int n) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            builder.append(str);
-        }
-        return builder.toString();
-    }
-
     public static String repeat(char c, int n) {
-        return repeat(String.valueOf(c), n);
+        return String.valueOf(c).repeat(n);
     }
 
     public static <T> int lengthOf(T t) {

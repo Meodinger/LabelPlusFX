@@ -16,7 +16,7 @@ public class CAccelerator {
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
-    public static boolean isMac = OS.contains("mac");
+    public static final boolean isMac = OS.contains("mac");
 
     public static boolean isControlDown(GestureEvent event) {
         if (event.isControlDown()) return true;

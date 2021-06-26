@@ -519,7 +519,7 @@ public class Controller implements Initializable {
         mAbout.setText(I18N.M_ABOUT);
 
         btnSwitchWorkMode.setText(I18N.WORK_CHECK);
-        btnSwitchViewMode.setText(I18N.VIEW_GROUP);
+        btnSwitchViewMode.setText(I18N.VIEW_INDEX);
     }
 
     private void setDisable(boolean isDisable) {
@@ -568,6 +568,8 @@ public class Controller implements Initializable {
         // cGroupBox.reset will be invoked by cGroupBox.setList
         // cSlider will reset with cImagePane through listener
         cImagePane.reset();
+        btnSwitchWorkMode.setText(I18N.WORK_CHECK);
+        btnSwitchViewMode.setText(I18N.VIEW_INDEX);
         setDisable(true);
     }
     private void updateGroupList() {

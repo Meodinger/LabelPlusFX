@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Author: Meodinger
@@ -63,6 +64,7 @@ public class CImagePane extends ScrollPane {
     private final static int DISPLAY_FONT_SIZE = 28;
     private final static javafx.scene.text.Font DISPLAY_FONT = new Font(DISPLAY_FONT_SIZE);
 
+    private final static int TEXT_LAYER = -1;
     public final static int NOT_FOUND = -1;
 
     /**
@@ -84,7 +86,7 @@ public class CImagePane extends ScrollPane {
     private double minScale = NOT_FOUND;
 
     private static class Position {
-        double x,y;
+        final double x, y;
         Position(double x, double y) {
             this.x = x;
             this.y = y;
@@ -118,46 +120,7 @@ public class CImagePane extends ScrollPane {
 
         textLayer.getGraphicsContext2D().setFont(DISPLAY_FONT);
 
-        scaleProperty().addListener((observable, oldValue, newValue) -> resize());
-
-        // Label mode draggable
-        AtomicBoolean isLabel = new AtomicBoolean(false);
-        AtomicInteger labelIndex = new AtomicInteger(NOT_FOUND);
-        AtomicInteger labelGroupId = new AtomicInteger(NOT_FOUND);
-        root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
-            if (state.getWorkMode() == State.WORK_MODE_LABEL) {
-                int index = getIndexOf(new Position(event.getX(), event.getY()));
-                if (index != NOT_FOUND) {
-                    event.consume();
-                    isLabel.set(true);
-                    labelIndex.set(index);
-                    labelGroupId.set(state.getLabelAt(index).getGroupId());
-                    return;
-                }
-            }
-
-            isLabel.set(false);
-            labelIndex.set(NOT_FOUND);
-            labelGroupId.set(NOT_FOUND);
-        });
-        root.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
-            if (isLabel.get()) {
-                event.consume();
-                if (event.getX() < 0 || event.getX() + LABEL_RADIUS > getViewWidth()) return;
-                if (event.getY() < 0 || event.getY() + LABEL_RADIUS > getViewHeight()) return;
-
-                cleatText();
-                double x_percent = event.getX() / getViewWidth();
-                double y_percent = event.getY() / getViewHeight();
-                TransLabel label = state.getLabelAt(labelIndex.get());
-
-                label.setX(x_percent);
-                label.setY(y_percent);
-
-                updateLabelLayer(labelGroupId.get());
-            }
-        });
-
+        // Drag
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx; nLy = (Ly - Sy) + nSy
@@ -188,6 +151,7 @@ public class CImagePane extends ScrollPane {
             }
         });
 
+        // Cursor
         root.setOnMouseEntered(event -> {
             switch (state.getWorkMode()) {
                 case State.WORK_MODE_LABEL:
@@ -203,11 +167,9 @@ public class CImagePane extends ScrollPane {
             switch (state.getWorkMode()) {
                 case State.WORK_MODE_INPUT:
                 case State.WORK_MODE_CHECK:
-                    handleCheckMode(event);
                     root.setCursor(Cursor.DEFAULT);
                     break;
                 case State.WORK_MODE_LABEL:
-                    handleLabelMode(event);
                     root.setCursor(Cursor.CROSSHAIR);
                     break;
             }
@@ -220,28 +182,78 @@ public class CImagePane extends ScrollPane {
             cleatText();
         });
 
+        // SelectedLabelProperty
         root.setOnMouseClicked(event -> {
             int index = getIndexOf(new Position(event.getX(), event.getY()));
             setSelectedLabel(index);
-
-            if (event.isStillSincePress()) {
-                switch (state.getWorkMode()) {
-                    case State.WORK_MODE_CHECK:
-                        break;
-                    case State.WORK_MODE_LABEL:
-                        handleLabelMode(event);
-                        break;
-                    case State.WORK_MODE_INPUT:
-                        handleInputMode(event);
-                        break;
-                }
-            }
         });
 
+        // Handle
+        Consumer<MouseEvent> handler = (event) -> {
+            switch (state.getWorkMode()) {
+                case State.WORK_MODE_CHECK:
+                    handleCheckMode(event);
+                    break;
+                case State.WORK_MODE_LABEL:
+                    handleLabelMode(event);
+                    break;
+                case State.WORK_MODE_INPUT:
+                    handleInputMode(event);
+                    break;
+            }
+        };
+        root.addEventHandler(MouseEvent.MOUSE_MOVED, handler::accept);
+        root.addEventHandler(MouseEvent.MOUSE_CLICKED, handler::accept);
+
+        // Scale
         container.setOnScroll(event -> {
-            updateTextLayer();
+            updateLayer(TEXT_LAYER);
             if (CAccelerator.isControlDown(event) || event.isAltDown()) {
                 setScale(getScale() + (event.getDeltaY() / 400));
+            }
+        });
+        scaleProperty().addListener((observable, oldValue, newValue) -> {
+            container.setPrefSize(
+                    Math.max(root.getBoundsInParent().getMaxX(), getViewportBounds().getWidth()),
+                    Math.max(root.getBoundsInParent().getMaxY(), getViewportBounds().getHeight())
+            );
+
+            root.setScaleX(getScale());
+            root.setScaleY(getScale());
+        });
+
+        // Draggable Label
+        AtomicBoolean isLabel = new AtomicBoolean(false);
+        AtomicInteger labelIndex = new AtomicInteger(NOT_FOUND);
+        root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            if (state.getWorkMode() == State.WORK_MODE_LABEL) {
+                int index = getIndexOf(new Position(event.getX(), event.getY()));
+                if (index != NOT_FOUND) {
+                    event.consume();
+                    isLabel.set(true);
+                    labelIndex.set(index);
+                    return;
+                }
+            }
+
+            isLabel.set(false);
+            labelIndex.set(NOT_FOUND);
+        });
+        root.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            if (isLabel.get()) {
+                event.consume();
+                if (event.getX() < 0 || event.getX() + LABEL_RADIUS > getViewWidth()) return;
+                if (event.getY() < 0 || event.getY() + LABEL_RADIUS > getViewHeight()) return;
+
+                cleatText();
+                double x_percent = event.getX() / getViewWidth();
+                double y_percent = event.getY() / getViewHeight();
+                TransLabel label = state.getLabelAt(labelIndex.get());
+
+                label.setX(x_percent);
+                label.setY(y_percent);
+
+                updateLayer(label.getGroupId());
             }
         });
     }
@@ -299,6 +311,7 @@ public class CImagePane extends ScrollPane {
         List<TransLabel> labels = state.getLabelsNow();
         for (TransLabel label : labels) {
             drawLabel(label);
+            recordPosition(label);
         }
     }
 
@@ -323,8 +336,6 @@ public class CImagePane extends ScrollPane {
         gc.setFill(Color.WHITE);
         gc.setFont(LABEL_FONT);
         gc.fillText(String.valueOf(label.getIndex()), X, Y);
-
-        recordPosition(label.getIndex(), new Position(x, y));
     }
     private void drawText(String text, MouseEvent event) {
         drawText(text, Color.BLACK, event);
@@ -368,6 +379,12 @@ public class CImagePane extends ScrollPane {
         int size = state.getLabelsNow().size();
         for (int i = -1; i < size; i++) positions.add(null);
     }
+    private void recordPosition(TransLabel label) {
+        recordPosition(
+                label.getIndex(),
+                new Position(label.getX() * getViewWidth(), label.getY() * getViewHeight())
+        );
+    }
     private void recordPosition(int index, Position position) {
         // Though the app chooses to let indexes in order, we also support unique index like `114514`
         if (index >= positions.size()) {
@@ -377,6 +394,9 @@ public class CImagePane extends ScrollPane {
             }
         }
         positions.set(index, position);
+    }
+    private void removePosition(int index) {
+        recordPosition(index, null);
     }
     private int getIndexOf(Position position) {
         int size = positions.size();
@@ -393,15 +413,17 @@ public class CImagePane extends ScrollPane {
     }
 
     private void handleCheckMode(MouseEvent event) {
-        cleatText();
-        int index = getIndexOf(new Position(event.getX(), event.getY()));
-        if (index != NOT_FOUND) {
-            List<TransLabel> labels = state.getLabelsNow();
-            Optional<TransLabel> result = labels.stream().filter(e -> e.getIndex() == index).findFirst();
-            if (result.isPresent()) {
-                TransLabel label = result.get();
-                String text = label.getText();
-                drawText(text, event);
+        if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
+            cleatText();
+            int index = getIndexOf(new Position(event.getX(), event.getY()));
+            if (index != NOT_FOUND) {
+                List<TransLabel> labels = state.getLabelsNow();
+                Optional<TransLabel> result = labels.stream().filter(e -> e.getIndex() == index).findFirst();
+                if (result.isPresent()) {
+                    TransLabel label = result.get();
+                    String text = label.getText();
+                    drawText(text, event);
+                }
             }
         }
     }
@@ -409,62 +431,81 @@ public class CImagePane extends ScrollPane {
         cleatText();
         drawText(state.getCurrentGroupName(),Color.web(state.getGroupColorById(state.getCurrentGroupId())) , event);
 
-        switch (event.getButton()) {
-            case PRIMARY: {
-                double x_percent = event.getX() / getViewWidth();
-                double y_percent = event.getY() / getViewHeight();
-                int groupId = state.getCurrentGroupId();
-                int index = state.getLabelsNow().size() + 1;
+        if (event.getEventType() == MouseEvent.MOUSE_CLICKED && event.isStillSincePress()) {
+            switch (event.getButton()) {
+                case PRIMARY: {
+                    double x_percent = event.getX() / getViewWidth();
+                    double y_percent = event.getY() / getViewHeight();
+                    int groupId = state.getCurrentGroupId();
+                    int index = state.getLabelsNow().size() + 1;
 
-                TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
-
-                // Edit data
-                state.getLabelsNow().add(newLabel);
-                recordPosition(index, new Position(event.getX(), event.getY()));
-                // Update view
-                drawLabel(newLabel);
-                state.getControllerAccessor().updateTree();
-                // Mark change
-                state.setChanged(true);
-                break;
-            }
-            case SECONDARY: {
-                int index = getSelectedLabel();
-                if (index != NOT_FOUND) {
-                    CTreeItem labelItem = state.getControllerAccessor().findLabelByIndex(index);
+                    TransLabel newLabel = new TransLabel(index, x_percent, y_percent, groupId, "");
 
                     // Edit data
-                    for (TransLabel l : state.getLabelsNow())
-                        if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
-                    state.getLabelsNow().remove(labelItem.meta);
+                    state.getLabelsNow().add(newLabel);
+                    recordPosition(newLabel);
                     // Update view
-                    updateLabelLayer(labelItem.meta.getGroupId());
+                    drawLabel(newLabel);
                     state.getControllerAccessor().updateTree();
                     // Mark change
                     state.setChanged(true);
+                    break;
                 }
-                break;
+                case SECONDARY: {
+                    int index = getIndexOf(new Position(event.getX(), event.getY()));
+                    if (index != NOT_FOUND) {
+                        CTreeItem labelItem = state.getControllerAccessor().findLabelByIndex(index);
+                        TransLabel label = labelItem.meta;
+
+                        // Edit data
+                        for (TransLabel l : state.getLabelsNow())
+                            if (l.getIndex() > label.getIndex()) l.setIndex(l.getIndex() - 1);
+                        state.getLabelsNow().remove(label);
+                        cleanUpPositions();
+                        // Update view
+                        for (int i = 0; i < state.getGroupCount(); i++) updateLayer(i);
+                        state.getControllerAccessor().updateTree();
+                        // Mark change
+                        state.setChanged(true);
+                    }
+                    break;
+                }
             }
         }
     }
-    private void handleInputMode(MouseEvent event) { }
+    private void handleInputMode(MouseEvent event) {
+        handleCheckMode(event);
+    }
 
-    private void updatePositions() {
+    private void cleanUpPositions() {
         List<TransLabel> labels = state.getLabelsNow();
 
         int size = positions.size();
         out: for (int i = 0; i < size; i++) {
             if (positions.get(i) != null) {
-                for (TransLabel l : labels) {
-                    if (l.getIndex() == i) {
+                for (TransLabel label : labels) {
+                    if (label.getIndex() == i) {
                         continue out;
                     }
                 }
-                positions.set(i, null);
+                removePosition(i);
             }
         }
     }
     private void updateLayer(int index) {
+        if (index == TEXT_LAYER) {
+            switch (state.getWorkMode()) {
+                case State.WORK_MODE_CHECK:
+                case State.WORK_MODE_INPUT: {
+                    return;
+                }
+                case State.WORK_MODE_LABEL: {
+                    cleatText();
+                    return;
+                }
+            }
+        }
+
         List<TransLabel> labels = state.getLabelsNow();
         GraphicsContext gc = getGraphicsContextAt(index);
         Canvas layer = gc.getCanvas();
@@ -473,10 +514,7 @@ public class CImagePane extends ScrollPane {
         for (TransLabel label : labels) {
             if (label.getGroupId() == index) {
                 drawLabel(label);
-                recordPosition(label.getIndex(), new Position(
-                        getViewWidth() * label.getX(),
-                        getViewHeight() * label.getY()
-                ));
+                recordPosition(label);
             }
         }
     }
@@ -485,15 +523,6 @@ public class CImagePane extends ScrollPane {
         return layers.get(index).getGraphicsContext2D();
     }
 
-    public void resize() {
-        container.setPrefSize(
-                Math.max(root.getBoundsInParent().getMaxX(), getViewportBounds().getWidth()),
-                Math.max(root.getBoundsInParent().getMaxY(), getViewportBounds().getHeight())
-        );
-
-        root.setScaleX(getScale());
-        root.setScaleY(getScale());
-    }
     public void update() {
         initPositions();
         setupImage();
@@ -517,21 +546,12 @@ public class CImagePane extends ScrollPane {
     }
     public void updateLabelLayer(int groupId) {
         if (groupId < layers.size()) {
-            updatePositions();
+            cleanUpPositions();
             updateLayer(groupId);
         }
     }
     public void updateTextLayer() {
-        switch (state.getWorkMode()) {
-            case State.WORK_MODE_CHECK:
-            case State.WORK_MODE_INPUT: {
-                break;
-            }
-            case State.WORK_MODE_LABEL: {
-                cleatText();
-                break;
-            }
-        }
+        updateLayer(TEXT_LAYER);
     }
     public void moveToLabel(int index) {
         if (index != NOT_FOUND) {

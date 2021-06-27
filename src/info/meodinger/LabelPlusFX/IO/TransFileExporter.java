@@ -7,8 +7,6 @@ import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -33,14 +31,11 @@ public abstract class TransFileExporter {
     public boolean export() {
         return export(state.getFilePath());
     }
-    public MeoTransFile getCopyOfTransFile() {
-        return state.getTransFile().clone();
+    public State getState() {
+        return state;
     }
 
-
     public static class LPFileExporter extends TransFileExporter {
-
-        private MeoTransFile transFile;
 
         public LPFileExporter(State state) {
             super(state);
@@ -49,14 +44,14 @@ public abstract class TransFileExporter {
         private boolean validate() {
 
             // Group count validate
-            int groupCount = transFile.getGroupList().size();
+            int groupCount = getState().getGroupCount();
             if (groupCount > 9) {
                 CDialog.showInfo(String.format(I18N.FORMAT_TOO_MANY_GROUPS, groupCount));
                 return false;
             }
 
             // Group name validate
-            List<MeoTransFile.Group> groups = transFile.getGroupList();
+            List<MeoTransFile.Group> groups = getState().getGroupList();
             Set<String> groupNames = new HashSet<>();
             for (MeoTransFile.Group group : groups) {
                 groupNames.add(group.name);
@@ -70,12 +65,12 @@ public abstract class TransFileExporter {
         }
 
         private String exportVersion() {
-            int[] version = transFile.getVersion();
+            int[] version = getState().getVersion();
             return version[0] + LPTransFile.SPLIT + version[1];
         }
 
         private String exportGroup() {
-            List<MeoTransFile.Group> group = transFile.getGroupList();
+            List<MeoTransFile.Group> group = getState().getGroupList();
             StringBuilder gBuilder = new StringBuilder();
             for (MeoTransFile.Group g : group) {
                 gBuilder.append(g.name).append("\n");
@@ -86,7 +81,7 @@ public abstract class TransFileExporter {
         private String exportTranslation() {
             StringBuilder tBuilder = new StringBuilder();
 
-            for (String picName : super.state.getSortedPicList()) {
+            for (String picName : getState().getSortedPicList()) {
                 tBuilder.append(buildPic(picName));
             }
             return tBuilder.toString();
@@ -97,7 +92,7 @@ public abstract class TransFileExporter {
 
             builder.append(LPTransFile.PIC_START).append(picName).append(LPTransFile.PIC_END).append("\n");
 
-            List<TransLabel> tList = transFile.getTransMap().get(picName);
+            List<TransLabel> tList = getState().getTransMap().get(picName);
             for (TransLabel label : tList) {
                 builder.append(buildLabel(label)).append("\n");
             }
@@ -118,8 +113,6 @@ public abstract class TransFileExporter {
 
         @Override
         public boolean export(File file) {
-            transFile = getCopyOfTransFile();
-
             if (!validate()) return false;
 
             StringBuilder builder = new StringBuilder();
@@ -132,7 +125,7 @@ public abstract class TransFileExporter {
                     .append(LPTransFile.SEPARATOR).append("\n")
                     .append(gString).append("\n")
                     .append(LPTransFile.SEPARATOR).append("\n")
-                    .append(transFile.getComment()).append("\n")
+                    .append(getState().getComment()).append("\n")
                     .append("\n").append("\n")
                     .append(tString);
 
@@ -164,16 +157,7 @@ public abstract class TransFileExporter {
         @Override
         public boolean export(File file) {
             try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-                MeoTransFile transFile = getCopyOfTransFile();
-
-                Map<String, List<TransLabel>> sort = new TreeMap<>(Comparator.naturalOrder());
-                sort.putAll(transFile.getTransMap());
-                transFile.setTransMap(sort);
-
-                writer.write(JSON.toJSONString(transFile,
-                        SerializerFeature.WriteMapNullValue,
-                        SerializerFeature.PrettyFormat
-                ));
+                writer.write(MeoTransFile.toJsonString(getState().getTransFile()));
 
                 return true;
             } catch (Exception e) {

@@ -3,7 +3,6 @@ package info.meodinger.LabelPlusFX;
 import info.meodinger.LabelPlusFX.Component.CTreeItem;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
-import info.meodinger.LabelPlusFX.Util.CString;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -16,7 +15,7 @@ import java.util.*;
  * Date: 2021/5/18
  * Location: info.meodinger.LabelPlusFX
  */
-public class State {
+public final class State {
 
     public static final String[] PIC_EXTENSIONS = new String[] {
             ".png", ".jpg", ".jpeg"
@@ -134,7 +133,7 @@ public class State {
      * Get groups
      * @return Origin Reference
      */
-    public List<MeoTransFile.Group> getGroups() {
+    public List<MeoTransFile.Group> getGroupList() {
         return transFile.getGroupList();
     }
 
@@ -144,7 +143,7 @@ public class State {
      * @return Origin Reference
      */
     public MeoTransFile.Group getGroupAt(int groupId) {
-        return getGroups().get(groupId);
+        return getGroupList().get(groupId);
     }
 
     /**
@@ -163,41 +162,17 @@ public class State {
         transFile.setComment(comment);
     }
 
+    public int[] getVersion() {
+        return transFile.getVersion();
+    }
+
+    public void setVersion(int[] version) {
+        if (version.length != 2) throw new IllegalArgumentException(String.format(I18N.FORMAT_INVALID_VERSION, version.length));
+        transFile.setVersion(version);
+    }
+
     public List<String> getSortedPicList() {
-
-        List<String> trimmed = CString.trimSame(new ArrayList<>(transFile.getTransMap().keySet()));
-        if (trimmed != null && trimmed.size() > 2) {
-            boolean canCastToNumberList = true;
-            for (int i = 2; i < trimmed.size(); i++) {
-                if (!CString.isDigit(trimmed.get(i))) {
-                    canCastToNumberList = false;
-                    break;
-                }
-            }
-            if (canCastToNumberList) {
-                Map<Integer, Integer> map = new HashMap<>();
-                List<Integer> integerList = new ArrayList<>();
-                for (int i = 2; i < trimmed.size(); i++) {
-                    int num = Integer.parseInt(trimmed.get(i));
-                    integerList.add(num);
-                    map.put(num, i);
-                }
-                integerList.sort(Comparator.naturalOrder());
-
-                int numberLength, complementLength;
-                ArrayList<String> list = new ArrayList<>();
-                for (Integer integer : integerList) {
-                    numberLength = CString.lengthOf(integer);
-                    complementLength = trimmed.get(map.get(integer)).length() - numberLength;
-                    list.add(trimmed.get(0) + CString.repeat('0', complementLength) + integer + trimmed.get(1));
-                }
-                return list;
-            }
-        }
-
-        Set<String> sorted = new TreeSet<>(Comparator.naturalOrder());
-        sorted.addAll(transFile.getTransMap().keySet());
-        return new ArrayList<>(sorted);
+        return MeoTransFile.getSortedPicList(transFile);
     }
 
     public int getGroupCount() {
@@ -319,12 +294,13 @@ public class State {
         void close();
         void reset();
 
-        void updatePane();
         void addLabelLayer();
         void updateLabelLayer(int index);
         void removeLabelLayer(int index);
+        void updateLabelLayers();
 
         void updateTree();
+
         void updateGroupList();
 
         CTreeItem findLabelByIndex(int index);

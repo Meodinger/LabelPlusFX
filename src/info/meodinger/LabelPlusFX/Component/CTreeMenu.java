@@ -138,7 +138,7 @@ public class CTreeMenu {
                     TransFile.MeoTransFile.Group group = result.get();
 
                     // Edit data
-                    state.getGroups().add(group);
+                    state.getGroupList().add(group);
                     // Update view
                     state.getControllerAccessor().updateGroupList();
                     state.getControllerAccessor().addLabelLayer();
@@ -244,7 +244,7 @@ public class CTreeMenu {
                 // Edit data
                 for (List<TransLabel> labels : state.getTransMap().values()) for (TransLabel label : labels)
                     if (label.getGroupId() >= groupId) label.setGroupId(label.getGroupId() - 1);
-                state.getGroups().remove(groupId);
+                state.getGroupList().remove(groupId);
                 // Update view
                 groupItem.getParent().getChildren().remove(groupItem);
                 state.getControllerAccessor().updateGroupList();
@@ -300,9 +300,6 @@ public class CTreeMenu {
                 }
             });
 
-            /*
-             * Please also edit `CImagePane#handleLabelMode#SECONDARY`
-             */
             delete.setOnAction(e -> {
                 CTreeItem labelItem = (CTreeItem) getItem();
                 State state = getState();
@@ -316,7 +313,7 @@ public class CTreeMenu {
                         if (l.getIndex() > labelItem.meta.getIndex()) l.setIndex(l.getIndex() - 1);
                     state.getLabelsNow().remove(labelItem.meta);
                     // Update view
-                    state.getControllerAccessor().updateLabelLayer(labelItem.meta.getGroupId()); // Also update positions
+                    state.getControllerAccessor().updateLabelLayers();
                     state.getControllerAccessor().updateTree();
                     // Mark change
                     state.setChanged(true);
@@ -362,7 +359,7 @@ public class CTreeMenu {
                     }
                 }
                 // Update view
-                state.getControllerAccessor().updatePane();
+                state.getControllerAccessor().updateLabelLayers();
                 state.getControllerAccessor().updateTree();
                 // Mark change
                 state.setChanged(true);
@@ -382,7 +379,7 @@ public class CTreeMenu {
                         state.getLabelsNow().remove(label);
                     }
                     // Update view
-                    state.getControllerAccessor().updatePane(); // Also update positions
+                    state.getControllerAccessor().updateLabelLayers();
                     state.getControllerAccessor().updateTree();
                     // Mark change
                     state.setChanged(true);
@@ -407,6 +404,4 @@ public class CTreeMenu {
             delete.setDisable(false);
         }
     }
-
-
 }

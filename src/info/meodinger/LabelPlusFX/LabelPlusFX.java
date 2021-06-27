@@ -6,7 +6,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
@@ -15,7 +14,6 @@ public class LabelPlusFX extends Application {
 
     static {
         I18N.init();
-        Resources.init();
     }
 
     private State state;
@@ -36,7 +34,7 @@ public class LabelPlusFX extends Application {
 
         primaryStage.setOnCloseRequest(e -> state.getControllerAccessor().close());
         primaryStage.setTitle(I18N.WINDOW_TITLE);
-        primaryStage.getIcons().add(new Image(Resources.ICON));
+        primaryStage.getIcons().add(Resources.ICON);
         primaryStage.setScene(scene);
         primaryStage.show();
 

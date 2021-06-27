@@ -46,7 +46,7 @@ public class I18N {
 
     public static String ABOUT = "关于";
     public static String ABOUT_CONTENT = "Label Plus FX for LabelPlus version [1,0]\n\n" +
-            "Version: 1.1.1\n" +
+            "Version: 1.1.2 (21-06-28)\n" +
             "Author: Meodinger\n" +
             "Email: meodinger@qq.com\n";
     public static String ABOUT_LINK = "Github Repository";
@@ -84,6 +84,7 @@ public class I18N {
     public static String FORMAT_INVALID_LABEL_INDEX = "出现了意料之外的LabelID：%d";
     public static String FORMAT_NEW_GROUP_NAME = "新分组%d";
     public static String FORMAT_SAVE_FAILED_BAK_PATH = "保存失败！\n备份文件位于: %s";
+    public static String FORMAT_INVALID_VERSION = "版本号格式错误！需要 2 个整数，得到了 %d 个";
 
     public static String MENU_ITEM_ADD_GROUP = "添加分组";
     public static String MENU_ITEM_RENAME = "重命名";
@@ -196,6 +197,7 @@ public class I18N {
             FORMAT_INVALID_LABEL_INDEX = "Label index invalid: %d";
             FORMAT_NEW_GROUP_NAME = "New_Group_%d";
             FORMAT_SAVE_FAILED_BAK_PATH = "Save Failed!\nBak file path is: %s";
+            FORMAT_INVALID_VERSION = "Invalid Version! Expected 2, got %s";
 
             DIALOG_TITLE_ADD_GROUP = "Add Group";
             DIALOG_TITLE_RENAME = "New Name";

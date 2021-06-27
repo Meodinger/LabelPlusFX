@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 public class CColor {
 
     public static String toHex(Color color) {
+        if (color == null) return "";
         return color.toString().substring(2, 8).toUpperCase();
     }
 

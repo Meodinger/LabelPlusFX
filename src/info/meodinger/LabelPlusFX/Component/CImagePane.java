@@ -47,7 +47,9 @@ public class CImagePane extends ScrollPane {
 
     private final static int LABEL_RADIUS = 40;
     private final static int DISPLAY_INSET = 10;
-    private final static String ALPHA = "80";
+    private final static String FF = "FF";
+    private final static String LABEL_ALPHA = "80";
+    private final static String TEXT_ALPHA = "A0";
 
     /**
      * X shift for text & shape display
@@ -59,10 +61,10 @@ public class CImagePane extends ScrollPane {
     private final static double LINE_HEIGHT_RATIO = 0.5;
 
     private final static int LABEL_FONT_SIZE = 32;
-    private final static javafx.scene.text.Font LABEL_FONT = new javafx.scene.text.Font(LABEL_FONT_SIZE);
+    private final static Font LABEL_FONT = new Font(LABEL_FONT_SIZE);
 
     private final static int DISPLAY_FONT_SIZE = 28;
-    private final static javafx.scene.text.Font DISPLAY_FONT = new Font(DISPLAY_FONT_SIZE);
+    private final static Font DISPLAY_FONT = new Font(DISPLAY_FONT_SIZE);
 
     private final static int TEXT_LAYER = -1;
     public final static int NOT_FOUND = -1;
@@ -322,7 +324,7 @@ public class CImagePane extends ScrollPane {
         double y = canvas.getHeight() * label.getY();
         double radius = LABEL_RADIUS;
 
-        String alpha = state.getWorkMode() == State.WORK_MODE_LABEL ? "FF" : ALPHA;
+        String alpha = state.getWorkMode() == State.WORK_MODE_LABEL ? FF : LABEL_ALPHA;
         String colorWeb = state.getGroupColorById(label.getGroupId()) + alpha;
         gc.setFill(Color.web(colorWeb));
         gc.fillOval(x, y,  radius, radius);
@@ -363,7 +365,7 @@ public class CImagePane extends ScrollPane {
             y_text = y_text + textHeight / lineCount;
         }
 
-        gc.setFill(Color.web(CColor.toHex(Color.WHEAT) + ALPHA));
+        gc.setFill(Color.web(CColor.toHex(Color.WHEAT) + TEXT_ALPHA));
         gc.fillRect(x_shape, y_shape, w, h);
         gc.setStroke(Color.DARKGRAY);
         gc.strokeRect(x_shape, y_shape, w, h);
@@ -550,6 +552,12 @@ public class CImagePane extends ScrollPane {
             updateLayer(groupId);
         }
     }
+    public void updateLabelLayers() {
+        cleanUpPositions();
+        for (int i = 0; i < state.getGroupCount(); i++) {
+            updateLayer(i);
+        }
+    }
     public void updateTextLayer() {
         updateLayer(TEXT_LAYER);
     }
@@ -578,10 +586,10 @@ public class CImagePane extends ScrollPane {
         }
     }
 
-    public double getViewWidth() {
+    private double getViewWidth() {
         return getImage().getWidth();
     }
-    public double getViewHeight() {
+    private double getViewHeight() {
         return getImage().getHeight();
     }
     public Image getImage() {

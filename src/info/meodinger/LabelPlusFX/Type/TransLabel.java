@@ -13,6 +13,9 @@ public class TransLabel {
     private int groupId;
     private String text;
 
+    // For jackson
+    public TransLabel() {}
+
     public TransLabel(int index, double x, double y, int groupId, String text) {
         this.index = index;
         this.x = x;

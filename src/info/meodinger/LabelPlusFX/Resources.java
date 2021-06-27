@@ -1,5 +1,7 @@
 package info.meodinger.LabelPlusFX;
 
+import javafx.scene.image.Image;
+
 import java.io.InputStream;
 
 /**
@@ -9,7 +11,11 @@ import java.io.InputStream;
  */
 public class Resources {
 
-    public static InputStream ICON;
+    static {
+        ICON = new Image(Resources.class.getResourceAsStream(getResource("icon.png")));
+    }
+
+    public static Image ICON;
     public static InputStream PS_Script_Stream;
     public static InputStream PS_Template_Stream_CN;
     public static InputStream PS_Template_Stream_EN;
@@ -17,8 +23,7 @@ public class Resources {
     private static String getResource(String name) {
         return "Resources/" + name;
     }
-    public static void init() {
-        ICON = Resources.class.getResourceAsStream(getResource("icon.png"));
+    public static void reload() {
         PS_Script_Stream = Resources.class.getResourceAsStream(getResource("Meo_PS_Script"));
         PS_Template_Stream_CN = Resources.class.getResourceAsStream(getResource("zh.psd"));
         PS_Template_Stream_EN = Resources.class.getResourceAsStream(getResource("en.psd"));

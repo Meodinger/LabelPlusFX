@@ -142,11 +142,26 @@ public class Controller implements Initializable {
 
     private final ContextMenu symbolMenu = new ContextMenu() {
 
-        private final String[] symbolList = new String[] {
-                "◎", "★", "☆", "～", "♡", "♥", "♢", "♦", "♪"
-        };
-        private final boolean[] displayableList = new boolean[] {
-                true, true, true, true, false, false, false, false, false
+        class Symbol {
+            final String symbol;
+            final boolean isDisplayable;
+            Symbol(String symbol, boolean isDisplayable) {
+                this.symbol = symbol;
+                this.isDisplayable = isDisplayable;
+            }
+        }
+
+        final Symbol[] symbols = new Symbol[] {
+                new Symbol("※", true),
+                new Symbol("◎", true),
+                new Symbol("★", true),
+                new Symbol("☆", true),
+                new Symbol("～", true),
+                new Symbol("♡", false),
+                new Symbol("♥", false),
+                new Symbol("♢", false),
+                new Symbol("♦", false),
+                new Symbol("♪", false)
         };
 
         MenuItem createSymbolItem(String symbol, boolean displayable) {
@@ -157,10 +172,7 @@ public class Controller implements Initializable {
         }
 
         {
-            int length = symbolList.length;
-            for (int i = 0; i< length; i++) {
-                getItems().add(createSymbolItem(symbolList[i], displayableList[i]));
-            }
+            for (Symbol symbol : symbols) getItems().add(createSymbolItem(symbol.symbol, symbol.isDisplayable));
             getItems().forEach(item -> item.setOnAction(event -> tTransText.insertText(tTransText.getCaretPosition(), ((MenuItem) event.getSource()).getText())));
         }
     };
@@ -245,11 +257,6 @@ public class Controller implements Initializable {
             }
 
             @Override
-            public void updatePane() {
-                Controller.this.cImagePane.update();
-            }
-
-            @Override
             public void addLabelLayer() {
                 Controller.this.cImagePane.addLabelLayer();
             }
@@ -262,6 +269,11 @@ public class Controller implements Initializable {
             @Override
             public void removeLabelLayer(int index) {
                 Controller.this.cImagePane.removeLabelLayer(index);
+            }
+
+            @Override
+            public void updateLabelLayers() {
+                Controller.this.cImagePane.updateLabelLayers();
             }
 
             @Override
@@ -775,7 +787,7 @@ public class Controller implements Initializable {
 
             state.setFilePath(recovered.getPath());
             if (loaderMeo.load(file)) {
-                if (exporterMeo.export(recovered)) {
+                if (exporterMeo.export()) {
                     prepare();
                 } else {
                     state.initialize();
@@ -945,7 +957,7 @@ public class Controller implements Initializable {
 
         TreeItem<String> root = new TreeItem<>(state.getCurrentPicName());
         ArrayList<TreeItem<String>> groups = new ArrayList<>();
-        for (TransFile.MeoTransFile.Group group : state.getGroups()) {
+        for (TransFile.MeoTransFile.Group group : state.getGroupList()) {
             Node node = new Circle(8, Color.web(group.color));
             TreeItem<String> item = new TreeItem<>(group.name, node);
             groups.add(item);
@@ -963,7 +975,7 @@ public class Controller implements Initializable {
     }
     private void loadTransLabel_Index() {
         List<TransLabel> labels = state.getLabelsNow();
-        List<TransFile.MeoTransFile.Group> groups = state.getGroups();
+        List<TransFile.MeoTransFile.Group> groups = state.getGroupList();
 
         TreeItem<String> root = new TreeItem<>(state.getCurrentPicName());
         for (TransLabel label : labels) {

@@ -8,7 +8,7 @@ import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 import info.meodinger.LabelPlusFX.Util.CString;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -224,7 +224,9 @@ public abstract class TransFileLoader {
         @Override
         public boolean load(File file) {
             try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(file))) {
-                setTransFile(JSON.parseObject(is, MeoTransFile.class));
+                ObjectMapper mapper = new ObjectMapper();
+                MeoTransFile transFile = mapper.readValue(is, MeoTransFile.class);
+                setTransFile(transFile);
                 return true;
             } catch (Exception e) {
                 CDialog.showException(e);

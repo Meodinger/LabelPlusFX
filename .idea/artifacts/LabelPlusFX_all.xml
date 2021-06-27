@@ -1,0 +1,33 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="LabelPlusFX_all">
+    <output-path>$PROJECT_DIR$/out/artifacts/LabelPlusFX_all</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="info.meodinger.LabelPlusFX.LabelPlusFX" />
+        <option name="description" value="" />
+        <option name="height" value="600" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="icons">
+          <JavaFxApplicationIcons>
+            <option name="linuxIcon" value="$PROJECT_DIR$/sample/cat.png" />
+            <option name="macIcon" value="$PROJECT_DIR$/sample/cat.icns" />
+            <option name="windowsIcon" value="$PROJECT_DIR$/sample/cat.ico" />
+          </JavaFxApplicationIcons>
+        </option>
+        <option name="nativeBundle" value="all" />
+        <option name="title" value="LabelPlusFX" />
+        <option name="vendor" value="Meodinger" />
+        <option name="version" value="1.1.2" />
+        <option name="width" value="900" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="LabelPlusFX.jar">
+        <element id="module-output" name="LabelPlusFX" />
+      </element>
+      <element id="library" level="project" name="jackson-annotations-2.12.3" />
+      <element id="library" level="project" name="jackson-core-2.12.3" />
+      <element id="library" level="project" name="jackson-databind-2.12.3" />
+    </root>
+  </artifact>
+</component>

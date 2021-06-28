@@ -343,14 +343,7 @@ public class Controller implements Initializable {
         cImagePane.setMinScale(cSlider.getMinScale());
         cImagePane.setMaxScale(cSlider.getMaxScale());
         cPicBox.setWrapped(true);
-        mOpenRecent.getItems().clear();
-        for (String path : RecentFiles.Instance.getAll()) {
-            MenuItem item = new MenuItem(path);
-            item.setOnAction(event -> {
-                // TODO: open
-            });
-            mOpenRecent.getItems().add(item);
-        }
+        updateRecentFiles();
 
         // Accelerator
         if (CAccelerator.isMac) {
@@ -376,12 +369,6 @@ public class Controller implements Initializable {
         });
         pRight.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
             Config.Instance.get(Config.RightDivider).set(newValue);
-        });
-
-        // Update recent files
-        ObservableList<String> list = FXCollections.observableList(RecentFiles.Instance.getAll());
-        list.addListener((ListChangeListener<String>) change -> {
-            System.out.println(change);
         });
 
         // Reload labels and Repaint pane when change pic
@@ -618,6 +605,14 @@ public class Controller implements Initializable {
     private void updateGroupList() {
         cGroupBox.setList(state.getGroupNames());
     }
+    private void updateRecentFiles() {
+        mOpenRecent.getItems().clear();
+        for (String path : RecentFiles.Instance.getAll()) {
+            MenuItem item = new MenuItem(path);
+            item.setOnAction(event -> open(new File(path)));
+            mOpenRecent.getItems().add(item);
+        }
+    }
 
     private void silentBak() {
         File bak = new File(state.getBakFolder() + File.separator + new Date().getTime() + State.EXTENSION_BAK);
@@ -632,14 +627,7 @@ public class Controller implements Initializable {
 
         // update recent files
         RecentFiles.Instance.add(state.getFilePath());
-        mOpenRecent.getItems().clear();
-        for (String path : RecentFiles.Instance.getAll()) {
-            MenuItem item = new MenuItem(path);
-            item.setOnAction(event -> {
-               // TODO: open
-            });
-            mOpenRecent.getItems().add(item);
-        }
+        updateRecentFiles();
 
         // auto backup
         if (task != null) {
@@ -676,7 +664,7 @@ public class Controller implements Initializable {
     private void open(File file) {
         state.initialize();
 
-        // Choose exporter
+        // Choose loader
         TransFileLoader loader;
         if (State.isMeoFile(file.getPath())) {
             loader = loaderMeo;

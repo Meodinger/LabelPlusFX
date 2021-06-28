@@ -15,12 +15,21 @@ import java.util.List;
  */
 public class CFileChooser {
 
+    public static final ObjectProperty<File> lastDirectory = new SimpleObjectProperty<>(new File(System.getProperty("user.home")));
+    public void setLastDirectory(File file) {
+        recordLastDirectory(file);
+    }
+    private static void recordLastDirectory(File file) {
+        if (file != null) {
+            if (file.isDirectory()) lastDirectory.set(file);
+            else lastDirectory.set(file.getParentFile());
+        }
+    }
+
     private final FileChooser chooser;
-    private final ObjectProperty<File> lastDirectory;
 
     public CFileChooser() {
         this.chooser = new FileChooser();
-        this.lastDirectory = new SimpleObjectProperty<>(null);
 
         this.chooser.initialDirectoryProperty().bind(lastDirectory);
     }
@@ -30,18 +39,10 @@ public class CFileChooser {
         recordLastDirectory(file);
         return file;
     }
-
     public File showSaveDialog(Window owner) {
         File file = chooser.showSaveDialog(owner);
         recordLastDirectory(file);
         return file;
-    }
-
-    private void recordLastDirectory(File file) {
-        if (file != null) {
-            if (file.isDirectory()) lastDirectory.set(file);
-            else lastDirectory.set(file.getParentFile());
-        }
     }
 
     public void setTitle(String title) {

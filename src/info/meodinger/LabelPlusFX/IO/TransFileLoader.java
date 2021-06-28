@@ -22,18 +22,9 @@ import java.util.HashMap;
  */
 public abstract class TransFileLoader {
 
-    private final State state;
-
-    private TransFileLoader(State state) {
-        this.state = state;
-    }
-
-    public abstract boolean load(File file);
-    public boolean load(String path) {
-        return load(new File(path));
-    }
-    public void setTransFile(MeoTransFile transFile) {
-        state.setTransFile(transFile);
+    public abstract boolean load(File file, State state);
+    public boolean load(String path, State state) {
+        return load(new File(path), state);
     }
 
 
@@ -45,8 +36,7 @@ public abstract class TransFileLoader {
         private BufferedReader reader;
         private String line;
 
-        public LPFileLoader(State state) {
-            super(state);
+        public LPFileLoader() {
             init();
         }
 
@@ -181,7 +171,7 @@ public abstract class TransFileLoader {
         }
 
         @Override
-        public boolean load(File file) {
+        public boolean load(File file, State state) {
             try {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
 
@@ -202,7 +192,7 @@ public abstract class TransFileLoader {
                 readComment();
                 readContent();
 
-                setTransFile(Convertor.lp2meo(transFile));
+                state.setTransFile(Convertor.lp2meo(transFile));
                 reader.close();
                 return true;
             } catch (Exception e) {
@@ -217,16 +207,12 @@ public abstract class TransFileLoader {
 
     public static class MeoFileLoader extends TransFileLoader{
 
-        public MeoFileLoader(State state) {
-            super(state);
-        }
-
         @Override
-        public boolean load(File file) {
+        public boolean load(File file, State state) {
             try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(file))) {
                 ObjectMapper mapper = new ObjectMapper();
                 MeoTransFile transFile = mapper.readValue(is, MeoTransFile.class);
-                setTransFile(transFile);
+                state.setTransFile(transFile);
                 return true;
             } catch (Exception e) {
                 CDialog.showException(e);

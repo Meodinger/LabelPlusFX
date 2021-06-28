@@ -1,4 +1,4 @@
-package info.meodinger.LabelPlusFX.Property;
+package info.meodinger.LabelPlusFX.IO;
 
 import info.meodinger.LabelPlusFX.Options;
 import info.meodinger.LabelPlusFX.Util.CDialog;

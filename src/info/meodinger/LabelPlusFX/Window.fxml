@@ -22,7 +22,7 @@
             <Menu fx:id="mmFile" mnemonicParsing="false">
                 <MenuItem fx:id="mNew" mnemonicParsing="false" onAction="#newTranslation" />
                 <MenuItem fx:id="mOpen" mnemonicParsing="false" onAction="#openTranslation"/>
-                <MenuItem fx:id="mOpenRecent" mnemonicParsing="false"/>
+                <Menu fx:id="mOpenRecent" mnemonicParsing="false"/>
                 <MenuItem fx:id="mSave" mnemonicParsing="false" onAction="#saveTranslation"/>
                 <MenuItem fx:id="mSaveAs" mnemonicParsing="false" onAction="#saveAsTranslation"/>
                 <SeparatorMenuItem mnemonicParsing="false"/>

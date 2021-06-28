@@ -3,6 +3,7 @@ package info.meodinger.LabelPlusFX.Type;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 import info.meodinger.LabelPlusFX.Util.CString;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -15,6 +16,7 @@ import java.util.*;
  */
 public abstract class TransFile<T> {
 
+    public static final int[] DEFAULT_VERSION = new int[] {1, 0};
     public static final String DEFAULT_COMMENT = "Default Comment\nYou can edit me";
     public static final String[] DEFAULT_COMMENT_LIST = {
             DEFAULT_COMMENT, "由 MoeFlow.com 导出", "由MoeTra.com导出"
@@ -22,6 +24,7 @@ public abstract class TransFile<T> {
 
     private int[] version;
     private String comment;
+    @JsonAlias({"group", "groups"})
     private List<T> groupList;
     private Map<String, List<TransLabel>> transMap;
 

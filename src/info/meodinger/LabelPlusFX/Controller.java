@@ -3,6 +3,7 @@ package info.meodinger.LabelPlusFX;
 import info.meodinger.LabelPlusFX.Component.*;
 import info.meodinger.LabelPlusFX.IO.*;
 import info.meodinger.LabelPlusFX.Property.Config;
+import info.meodinger.LabelPlusFX.IO.RecentFiles;
 import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
@@ -15,6 +16,9 @@ import info.meodinger.LabelPlusFX.Util.CTree;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -210,7 +214,7 @@ public class Controller implements Initializable {
     @FXML private Menu mmFile;
     @FXML private MenuItem mNew;
     @FXML private MenuItem mOpen;
-    @FXML private MenuItem mOpenRecent;
+    @FXML private Menu mOpenRecent;
     @FXML private MenuItem mSave;
     @FXML private MenuItem mSaveAs;
     @FXML private MenuItem mBakRecover;
@@ -240,10 +244,10 @@ public class Controller implements Initializable {
 
         this.meoPackager = new MeoPackager(state);
 
-        this.loaderMeo = new TransFileLoader.MeoFileLoader(state);
-        this.loaderLP = new TransFileLoader.LPFileLoader(state);
-        this.exporterMeo = new TransFileExporter.MeoFileExporter(state);
-        this.exporterLP = new TransFileExporter.LPFileExporter(state);
+        this.loaderMeo = new TransFileLoader.MeoFileLoader();
+        this.loaderLP = new TransFileLoader.LPFileLoader();
+        this.exporterMeo = new TransFileExporter.MeoFileExporter();
+        this.exporterLP = new TransFileExporter.LPFileExporter();
 
         this.menu = new CTreeMenu(state);
         this.timer = new Timer();
@@ -315,6 +319,7 @@ public class Controller implements Initializable {
         fileChooser.getExtensionFilters().add(fileFilter);
         fileChooser.getExtensionFilters().add(meoFilter);
         fileChooser.getExtensionFilters().add(lpFilter);
+        fileChooser.setLastDirectory(new File(RecentFiles.Instance.getLastOpenFile()).getParentFile());
 
         bakChooser.setTitle(I18N.CHOOSER_BAK_FILE);
         bakChooser.getExtensionFilters().add(bakFilter);
@@ -338,6 +343,14 @@ public class Controller implements Initializable {
         cImagePane.setMinScale(cSlider.getMinScale());
         cImagePane.setMaxScale(cSlider.getMaxScale());
         cPicBox.setWrapped(true);
+        mOpenRecent.getItems().clear();
+        for (String path : RecentFiles.Instance.getAll()) {
+            MenuItem item = new MenuItem(path);
+            item.setOnAction(event -> {
+                // TODO: open
+            });
+            mOpenRecent.getItems().add(item);
+        }
 
         // Accelerator
         if (CAccelerator.isMac) {
@@ -363,6 +376,12 @@ public class Controller implements Initializable {
         });
         pRight.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
             Config.Instance.get(Config.RightDivider).set(newValue);
+        });
+
+        // Update recent files
+        ObservableList<String> list = FXCollections.observableList(RecentFiles.Instance.getAll());
+        list.addListener((ListChangeListener<String>) change -> {
+            System.out.println(change);
         });
 
         // Reload labels and Repaint pane when change pic
@@ -602,14 +621,27 @@ public class Controller implements Initializable {
 
     private void silentBak() {
         File bak = new File(state.getBakFolder() + File.separator + new Date().getTime() + State.EXTENSION_BAK);
-        exporterMeo.export(bak);
+        exporterMeo.export(bak, state.getTransFile());
     }
     private void prepare() {
+        // initialize workspace
         state.stage.setTitle(I18N.WINDOW_TITLE + " - " + new File(state.getFilePath()).getName());
         cPicBox.setList(state.getSortedPicList());
         updateGroupList();
         setDisable(false);
 
+        // update recent files
+        RecentFiles.Instance.add(state.getFilePath());
+        mOpenRecent.getItems().clear();
+        for (String path : RecentFiles.Instance.getAll()) {
+            MenuItem item = new MenuItem(path);
+            item.setOnAction(event -> {
+               // TODO: open
+            });
+            mOpenRecent.getItems().add(item);
+        }
+
+        // auto backup
         if (task != null) {
             task.cancel();
         }
@@ -621,98 +653,40 @@ public class Controller implements Initializable {
             CDialog.showAlert(I18N.ALERT_AUTO_SAVE_NOT_AVAILABLE);
         }
     }
-    private boolean trySave() {
-        if (!CString.isBlank(state.getFilePath()) && state.isChanged()) {
-            Optional<ButtonType> result = CDialog.showAlert(I18N.ALERT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
-            if (result.isPresent()) {
-                ButtonBar.ButtonData data = result.get().getButtonData();
-                if (data == ButtonBar.ButtonData.YES) {
-                    saveTranslation();
-                    return true;
-                }
+    private boolean stayHere() {
+        // Not open
+        if (state.getTransFile() == null) return false;
+        // Opened but saved
+        if (!CString.isBlank(state.getFilePath()) && !state.isChanged()) return false;
+
+        // Not Saved
+        Optional<ButtonType> result = CDialog.showAlert(I18N.ALERT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
+        // Clicked buttons
+        if (result.isPresent()) {
+            ButtonBar.ButtonData data = result.get().getButtonData();
+            if (data == ButtonBar.ButtonData.YES) {
+                saveTranslation();
             }
+            return false;
         }
-        return false;
+        // Closed dialog
+        return true;
     }
-    @FXML public void newTranslation() {
-        fileChooser.setTitle(I18N.CHOOSER_NEW_TRANSLATION);
-        File file = fileChooser.showSaveDialog(state.stage);
-        if (file == null) return;
 
-        if (!trySave()) return;
-
+    private void open(File file) {
         state.initialize();
 
-        MeoTransFile transFile = new MeoTransFile();
-        transFile.setVersion(new int[]{1, 0});
-        transFile.setComment(TransFile.DEFAULT_COMMENT);
-
-        List<Group> groups = new ArrayList<>();
-        List<String> nameList = Settings.Instance.get(Settings.DefaultGroupList).asList();
-        List<String> colorList = Settings.Instance.get(Settings.DefaultColorList).asList();
-        for (int i = 0; i < nameList.size(); i++) {
-            groups.add(new Group(nameList.get(i), colorList.get(i)));
-        }
-        transFile.setGroupList(groups);
-
-        Map<String, List<TransLabel>> transMap = new HashMap<>();
-        ArrayList<String> potentialFiles = new ArrayList<>();
-        File dir = file.getParentFile();
-        if (dir.isDirectory() && dir.listFiles() != null) {
-            File[] listFiles = dir.listFiles();
-            if (listFiles != null) {
-                for (File f : listFiles) {
-                    if (f.isFile()) {
-                        for (String extension : State.PIC_EXTENSIONS) {
-                            if (f.getName().endsWith(extension)) {
-                                potentialFiles.add(f.getName());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Optional<List<String>> listResult = CDialog.showListChoose(state.stage, I18N.CHOOSE_PICS_TITLE, potentialFiles);
-        if (listResult.isPresent()) {
-            List<String> picList = listResult.get();
-            for (String pic : picList) {
-                transMap.put(pic, new ArrayList<>());
-            }
-            transFile.setTransMap(transMap);
-
-            state.setTransFile(transFile);
-            state.setFilePath(file.getPath());
-
-            TransFileExporter exporter;
-            if (state.isMeoFile()) {
-                exporter = exporterMeo;
-            } else {
-                exporter = exporterLP;
-            }
-            if (exporter.export()) {
-                prepare();
-            } else {
-                state.initialize();
-            }
-        }
-    }
-    @FXML public void openTranslation() {
-        fileChooser.setTitle(I18N.CHOOSER_OPEN_TRANSLATION);
-        File file = fileChooser.showOpenDialog(state.stage);
-        if (file == null) return;
-
-        if (!trySave()) return;
-
-        state.initialize();
-
-        state.setFilePath(file.getPath());
+        // Choose exporter
         TransFileLoader loader;
-        if (state.isMeoFile()) {
+        if (State.isMeoFile(file.getPath())) {
             loader = loaderMeo;
         } else {
             loader = loaderLP;
         }
-        if (loader.load(file)) {
+        if (loader.load(file, state)) {
+            // update state
+            state.setFilePath(file.getPath());
+
             prepare();
 
             // Show info if comment not in default list
@@ -728,114 +702,173 @@ public class Controller implements Initializable {
                 CDialog.showConfirm(I18N.INFO, I18N.DIALOG_CONTENT_MODIFIED_COMMENT, comment);
             }
         } else {
-            state.initialize();
+            CDialog.showAlert(I18N.ALERT_OPEN_FAILED);
         }
     }
-    @FXML public void saveTranslation() {
-        if (state.getFilePath() == null || CString.isBlank(state.getFilePath())) {
-            // Actually this never happen
-            saveAsTranslation();
-            return;
+    private void save(File file, boolean silent) {
+
+        // Check folder
+        if (!silent) if (!file.getParent().equals(state.getFileFolder())) {
+            Optional<ButtonType> result = CDialog.showAlert(I18N.DIALOG_CONTENT_SAVE_AS_ALERT);
+            if (!(result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES)) return;
         }
 
+        // Backup if overwrite
+        boolean backed = false;
+        File ori ,bak = null;
+        if (state.getFilePath() != null && state.getFilePath().equals(file.getPath())) {
+            ori = new File(state.getFilePath());
+            bak = new File(state.getFilePath() + State.EXTENSION_BAK);
+
+            try (FileChannel input = new FileInputStream(ori).getChannel();
+                 FileChannel output = new FileOutputStream(bak).getChannel()
+            ) {
+                output.transferFrom(input, 0, input.size());
+                backed = true;
+            } catch (Exception e) {
+                CDialog.showException(new Exception(I18N.ALERT_BAK_FAILED, e));
+            }
+        }
+
+        // Choose exporter
         TransFileExporter exporter;
-        if (state.isMeoFile()) {
+        if (State.isMeoFile(file.getPath())) {
             exporter = exporterMeo;
         } else {
             exporter = exporterLP;
         }
 
-        File ori = new File(state.getFilePath());
-        File bak = new File(state.getFilePath() + State.EXTENSION_BAK);
-        boolean backed = false;
-
-        try (FileChannel input = new FileInputStream(ori).getChannel();
-             FileChannel output = new FileOutputStream(bak).getChannel()
-        ) {
-            output.transferFrom(input, 0, input.size());
-            backed = true;
-        } catch (Exception e) {
-            CDialog.showException(new Exception(I18N.ALERT_BAK_FAILED, e));
-        }
-
-        if (exporter.export()) {
+        // Export
+        if (exporter.export(file, state.getTransFile())) {
+            state.setFilePath(file.getPath());
             state.setChanged(false);
+
+            if (!silent) CDialog.showInfo(I18N.INFO_SAVED_SUCCESSFULLY);
+
+            // Remove backup
             if (backed && !bak.delete()) {
                 CDialog.showAlert(I18N.ALERT_BAK_FILE_DELETE_FAILED);
             }
         } else {
-            CDialog.showInfo(String.format(I18N.FORMAT_SAVE_FAILED_BAK_PATH, bak.getPath()));
+            if (backed) {
+                CDialog.showInfo(String.format(I18N.FORMAT_SAVE_FAILED_BAK_PATH, bak.getPath()));
+            } else {
+                CDialog.showAlert(I18N.ALERT_SAVE_FAILED);
+            }
+        }
+    }
+    @FXML public void newTranslation() {
+        fileChooser.setTitle(I18N.CHOOSER_NEW_TRANSLATION);
+        File file = fileChooser.showSaveDialog(state.stage);
+        if (file == null) return;
+
+        if (stayHere()) return;
+
+        state.initialize();
+
+        // Choose pics
+        ArrayList<String> pics, potentialPics = new ArrayList<>();
+        File dir = file.getParentFile();
+        if (dir.isDirectory() && dir.listFiles() != null) {
+            File[] listFiles = dir.listFiles();
+            if (listFiles != null) {
+                for (File f : listFiles) {
+                    if (f.isFile()) {
+                        for (String extension : State.PIC_EXTENSIONS) {
+                            if (f.getName().endsWith(extension)) {
+                                potentialPics.add(f.getName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Optional<List<String>> result = CDialog.showListChoose(state.stage, I18N.CHOOSE_PICS_TITLE, potentialPics);
+        if (result.isPresent()) {
+            pics = new ArrayList<>(result.get());
+        } else {
+            // Stop when not choose pics
+            return;
+        }
+
+        // Prepare new TransFile
+        MeoTransFile transFile = new MeoTransFile();
+        // set version
+        transFile.setVersion(TransFile.DEFAULT_VERSION);
+        // set comment
+        transFile.setComment(TransFile.DEFAULT_COMMENT);
+        // set groupList
+        List<Group> groupList = new ArrayList<>();
+        List<String> nameList = Settings.Instance.get(Settings.DefaultGroupList).asList();
+        List<String> colorList = Settings.Instance.get(Settings.DefaultColorList).asList();
+        for (int i = 0; i < nameList.size(); i++) groupList.add(new Group(nameList.get(i), colorList.get(i)));
+        transFile.setGroupList(groupList);
+        // set TransMap
+        Map<String, List<TransLabel>> transMap = new HashMap<>();
+        for (String pic : pics) transMap.put(pic, new ArrayList<>());
+        transFile.setTransMap(transMap);
+
+        // Export to file
+        TransFileExporter exporter;
+        if (State.isMeoFile(file.getPath())) {
+            exporter = exporterMeo;
+        } else {
+            exporter = exporterLP;
+        }
+        if (exporter.export(file, transFile)) {
+            open(file);
+        }
+    }
+    @FXML public void openTranslation() {
+        fileChooser.setTitle(I18N.CHOOSER_OPEN_TRANSLATION);
+        File file = fileChooser.showOpenDialog(state.stage);
+        if (file == null) return;
+
+        if (stayHere()) return;
+
+        open(file);
+    }
+    @FXML public void saveTranslation() {
+        if (CString.isBlank(state.getFilePath())) {
+            // Actually this never happen
+            saveAsTranslation();
+        } else {
+            save(new File(state.getFilePath()), true);
         }
     }
     @FXML public void saveAsTranslation() {
         fileChooser.setTitle(I18N.CHOOSER_SAVE_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
-        if (file == null) return;
-        if (!file.getParent().equals(state.getFileFolder())) {
-            Optional<ButtonType> result = CDialog.showAlert(I18N.DIALOG_CONTENT_SAVE_AS_ALERT);
-            if (!(result.isPresent() && result.get().getButtonData() == ButtonBar.ButtonData.YES)) return;
-        }
-
-        state.setFilePath(file.getPath());
-        TransFileExporter exporter;
-        if (state.isMeoFile()) {
-            exporter = exporterMeo;
-        } else {
-            exporter = exporterLP;
-        }
-
-        if (exporter.export(file)) {
-            state.setFilePath(file.getPath());
-            state.setChanged(false);
-            CDialog.showInfo(I18N.INFO_SAVED_SUCCESSFULLY);
-        } else {
-            state.setFilePath(null);
-            CDialog.showAlert(I18N.ALERT_SAVE_FAILED);
-        }
+        if (file != null) save(file, false);
     }
     @FXML public void bakRecovery() {
         File file = bakChooser.showOpenDialog(state.stage);
         if (file == null) return;
 
-        if (!trySave()) return;
+        if (stayHere()) return;
 
         state.initialize();
 
+        File recovered;
         if (file.getParentFile().getName().equals(State.FOLDER_NAME_BAK)) {
-            String projectFolder = file.getParentFile().getParentFile().getAbsolutePath();
-            File recovered = new File(projectFolder + File.separator + file.getName().replace(State.EXTENSION_BAK, State.EXTENSION_MEO));
-
-            state.setFilePath(recovered.getPath());
-            if (loaderMeo.load(file)) {
-                if (exporterMeo.export()) {
-                    prepare();
-                } else {
-                    state.initialize();
-                }
-            } else {
-                state.initialize();
-            }
+            // In a project
+            recovered = new File(
+                    file.getParentFile().getParentFile().getAbsolutePath() +
+                             File.separator +
+                             file.getName().replace(State.EXTENSION_BAK, State.EXTENSION_MEO)
+            );
         } else {
             fileChooser.setTitle(I18N.CHOOSER_RECOVERY);
-            File recovered = fileChooser.showSaveDialog(state.stage);
+            recovered = fileChooser.showSaveDialog(state.stage);
             if (recovered == null) return;
+        }
 
-            state.setFilePath(recovered.getPath());
-            if (loaderMeo.load(file)) {
-                TransFileExporter exporter;
-                if (state.isMeoFile()) {
-                    exporter = exporterMeo;
-                } else {
-                    exporter = exporterLP;
-                }
-                if (exporter.export()) {
-                    prepare();
-                } else {
-                    state.initialize();
-                }
-            } else {
-                state.initialize();
-            }
+        // load
+        if (loaderMeo.load(file, state)) {
+            save(recovered, true);
+            prepare();
+        } else {
+            CDialog.showAlert(I18N.ALERT_OPEN_FAILED);
         }
     }
     @FXML public void close() {
@@ -868,7 +901,7 @@ public class Controller implements Initializable {
 
         File file = exportChooser.showSaveDialog(state.stage);
         if (file == null) return;
-        if (exporter.export(file)) {
+        if (exporter.export(file, state.getTransFile())) {
             CDialog.showInfo(I18N.INFO_EXPORTED_SUCCESSFULLY);
         } else {
             CDialog.showAlert(I18N.ALERT_EXPORT_FAILED);

@@ -1,6 +1,5 @@
 package info.meodinger.LabelPlusFX.IO;
 
-import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
@@ -18,40 +17,26 @@ import java.util.*;
  */
 public abstract class TransFileExporter {
 
-    private final State state;
-
-    private TransFileExporter(State state) {
-        this.state = state;
-    }
-
-    public abstract boolean export(File file);
-    public boolean export(String path) {
-        return export(new File(path));
-    }
-    public boolean export() {
-        return export(state.getFilePath());
-    }
-    public State getState() {
-        return state;
+    public abstract boolean export(File file, MeoTransFile transFile);
+    public boolean export(String path, MeoTransFile transFile) {
+        return export(new File(path), transFile);
     }
 
     public static class LPFileExporter extends TransFileExporter {
 
-        public LPFileExporter(State state) {
-            super(state);
-        }
+        private MeoTransFile transFile;
 
         private boolean validate() {
 
             // Group count validate
-            int groupCount = getState().getGroupCount();
+            int groupCount = transFile.getGroupList().size();
             if (groupCount > 9) {
                 CDialog.showInfo(String.format(I18N.FORMAT_TOO_MANY_GROUPS, groupCount));
                 return false;
             }
 
             // Group name validate
-            List<MeoTransFile.Group> groups = getState().getGroupList();
+            List<MeoTransFile.Group> groups = transFile.getGroupList();
             Set<String> groupNames = new HashSet<>();
             for (MeoTransFile.Group group : groups) {
                 groupNames.add(group.name);
@@ -65,12 +50,12 @@ public abstract class TransFileExporter {
         }
 
         private String exportVersion() {
-            int[] version = getState().getVersion();
+            int[] version = transFile.getVersion();
             return version[0] + LPTransFile.SPLIT + version[1];
         }
 
         private String exportGroup() {
-            List<MeoTransFile.Group> group = getState().getGroupList();
+            List<MeoTransFile.Group> group = transFile.getGroupList();
             StringBuilder gBuilder = new StringBuilder();
             for (MeoTransFile.Group g : group) {
                 gBuilder.append(g.name).append("\n");
@@ -81,7 +66,7 @@ public abstract class TransFileExporter {
         private String exportTranslation() {
             StringBuilder tBuilder = new StringBuilder();
 
-            for (String picName : getState().getSortedPicList()) {
+            for (String picName : MeoTransFile.getSortedPicList(transFile)) {
                 tBuilder.append(buildPic(picName));
             }
             return tBuilder.toString();
@@ -92,7 +77,7 @@ public abstract class TransFileExporter {
 
             builder.append(LPTransFile.PIC_START).append(picName).append(LPTransFile.PIC_END).append("\n");
 
-            List<TransLabel> tList = getState().getTransMap().get(picName);
+            List<TransLabel> tList = transFile.getTransMap().get(picName);
             for (TransLabel label : tList) {
                 builder.append(buildLabel(label)).append("\n");
             }
@@ -112,7 +97,9 @@ public abstract class TransFileExporter {
         }
 
         @Override
-        public boolean export(File file) {
+        public boolean export(File file, MeoTransFile transFile) {
+            this.transFile = transFile;
+
             if (!validate()) return false;
 
             StringBuilder builder = new StringBuilder();
@@ -125,7 +112,7 @@ public abstract class TransFileExporter {
                     .append(LPTransFile.SEPARATOR).append("\n")
                     .append(gString).append("\n")
                     .append(LPTransFile.SEPARATOR).append("\n")
-                    .append(getState().getComment()).append("\n")
+                    .append(transFile.getComment()).append("\n")
                     .append("\n").append("\n")
                     .append(tString);
 
@@ -150,14 +137,10 @@ public abstract class TransFileExporter {
 
     public static class MeoFileExporter extends TransFileExporter {
 
-        public MeoFileExporter(State state) {
-            super(state);
-        }
-
         @Override
-        public boolean export(File file) {
+        public boolean export(File file, MeoTransFile transFile) {
             try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-                writer.write(MeoTransFile.toJsonString(getState().getTransFile()));
+                writer.write(MeoTransFile.toJsonString(transFile));
 
                 return true;
             } catch (Exception e) {

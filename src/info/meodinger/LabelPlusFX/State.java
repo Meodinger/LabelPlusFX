@@ -238,10 +238,16 @@ public final class State {
     }
 
     public boolean isMeoFile() {
-        return getFilePath().endsWith(EXTENSION_MEO);
+        return isMeoFile(getFilePath());
     }
     public boolean isLPFile() {
-        return !isMeoFile();
+        return isLPFile(getFilePath());
+    }
+    public static boolean isMeoFile(String filePath) {
+        return filePath.endsWith(EXTENSION_MEO);
+    }
+    public static boolean isLPFile(String filePath) {
+        return !isMeoFile(filePath);
     }
 
     public void setChanged(boolean changed) {

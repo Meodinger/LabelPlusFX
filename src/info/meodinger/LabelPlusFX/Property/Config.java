@@ -11,7 +11,7 @@ import java.util.Arrays;
  * Date: 2021/6/28
  * Location: info.meodinger.LabelPlusFX.Property
  */
-public class Config extends AbstractProperties {
+public final class Config extends AbstractProperties {
 
     public static final Key MainDivider = new Key("MainDivider");
     public static final Key RightDivider = new Key("RightDivider");

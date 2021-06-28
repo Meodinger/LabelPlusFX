@@ -28,6 +28,7 @@ public class I18N {
     public static String INFO_EXPORTED_SUCCESSFULLY = "导出成功";
     public static String INFO_EXPORTED_PACK_SUCCESSFULLY = "导出图包成功";
 
+    public static String ALERT_OPEN_FAILED = "打开失败";
     public static String ALERT_SAVE_FAILED = "保存失败";
     public static String ALERT_EXPORT_FAILED = "导出失败";
     public static String ALERT_BAK_FAILED = "备份失败";
@@ -154,6 +155,7 @@ public class I18N {
             INFO_EXPORTED_SUCCESSFULLY = "Exported Successfully";
             INFO_EXPORTED_PACK_SUCCESSFULLY = "Exported PicPack Successfully";
 
+            ALERT_OPEN_FAILED = "Open failed";
             ALERT_SAVE_FAILED = "Save failed";
             ALERT_EXPORT_FAILED = "Export failed";
             ALERT_BAK_FAILED = "Backup failed";

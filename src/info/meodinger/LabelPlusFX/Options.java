@@ -1,7 +1,7 @@
 package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Property.Config;
-import info.meodinger.LabelPlusFX.Property.RecentFiles;
+import info.meodinger.LabelPlusFX.IO.RecentFiles;
 import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.Util.CDialog;
 

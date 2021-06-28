@@ -2,6 +2,7 @@ package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Component.*;
 import info.meodinger.LabelPlusFX.IO.*;
+import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile.Group;
@@ -329,8 +330,8 @@ public class Controller implements Initializable {
         setDisable(true);
 
         // Initialize
-        pMain.setDividerPositions(0.63);
-        pRight.setDividerPositions(0.6);
+        pMain.setDividerPositions(Settings.Instance.get(Settings.Key.MainDivider).asDouble());
+        pRight.setDividerPositions(Settings.Instance.get(Settings.Key.RightDivider).asDouble());
         menu.treeMenu.init(vTree);
         cImagePane.setConfig(state);
         cImagePane.setMinScale(cSlider.getMinScale());
@@ -346,7 +347,7 @@ public class Controller implements Initializable {
             mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
         }
 
-        // Fix split ratio
+        // Fix split ratio, update Settings
         ChangeListener<Number> geometryListener = (observable, oldValue, newValue) -> {
             Function<Double, Double> debounce = input -> ((double) ((int) (input * 100 + 0.2))) / 100;
             pMain.setDividerPositions(debounce.apply(pMain.getDividerPositions()[0]));
@@ -611,22 +612,26 @@ public class Controller implements Initializable {
             CDialog.showAlert(I18N.ALERT_AUTO_SAVE_NOT_AVAILABLE);
         }
     }
-    private void trySave() {
-        if (state.getFilePath() != null && CString.isBlank(state.getFilePath()) && state.isChanged()) {
-            Optional<ButtonType> result = CDialog.showAlert(I18N.EXIT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
+    private boolean trySave() {
+        if (!CString.isBlank(state.getFilePath()) && state.isChanged()) {
+            Optional<ButtonType> result = CDialog.showAlert(I18N.ALERT, I18N.SAVE_QUES, I18N.SAVE, I18N.NOT_SAVE);
             if (result.isPresent()) {
                 ButtonBar.ButtonData data = result.get().getButtonData();
                 if (data == ButtonBar.ButtonData.YES) {
                     saveTranslation();
+                    return true;
                 }
             }
         }
+        return false;
     }
     @FXML public void newTranslation() {
         fileChooser.setTitle(I18N.CHOOSER_NEW_TRANSLATION);
         File file = fileChooser.showSaveDialog(state.stage);
         if (file == null) return;
-        trySave();
+
+        if (!trySave()) return;
+
         state.initialize();
 
         MeoTransFile transFile = new MeoTransFile();
@@ -634,9 +639,10 @@ public class Controller implements Initializable {
         transFile.setComment(TransFile.DEFAULT_COMMENT);
 
         List<Group> groups = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            Group group = new Group(String.format(I18N.FORMAT_NEW_GROUP_NAME, i + 1), MeoTransFile.DEFAULT_COLOR_LIST[i]);
-            groups.add(group);
+        List<String> nameList = Settings.Instance.get(Settings.Key.DefaultGroupList).asList();
+        List<String> colorList = Settings.Instance.get(Settings.Key.DefaultColorList).asList();
+        for (int i = 0; i < nameList.size(); i++) {
+            groups.add(new Group(nameList.get(i), colorList.get(i)));
         }
         transFile.setGroupList(groups);
 
@@ -685,7 +691,9 @@ public class Controller implements Initializable {
         fileChooser.setTitle(I18N.CHOOSER_OPEN_TRANSLATION);
         File file = fileChooser.showOpenDialog(state.stage);
         if (file == null) return;
-        trySave();
+
+        if (!trySave()) return;
+
         state.initialize();
 
         state.setFilePath(file.getPath());
@@ -780,7 +788,8 @@ public class Controller implements Initializable {
         File file = bakChooser.showOpenDialog(state.stage);
         if (file == null) return;
 
-        trySave();
+        if (!trySave()) return;
+
         state.initialize();
 
         if (file.getParentFile().getName().equals(State.FOLDER_NAME_BAK)) {

@@ -1,5 +1,6 @@
 package info.meodinger.LabelPlusFX.Component;
 
+import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.State;
 import info.meodinger.LabelPlusFX.I18N;
 import info.meodinger.LabelPlusFX.Type.TransFile;
@@ -123,7 +124,7 @@ public class CTreeMenu {
                 nameField.setText(String.format(I18N.FORMAT_NEW_GROUP_NAME, newGroupId + 1));
                 Color color;
                 if (newGroupId < 9) {
-                    color = Color.web(TransFile.MeoTransFile.DEFAULT_COLOR_LIST[newGroupId]);
+                    color = Color.web(Settings.Instance.get(Settings.Key.DefaultColorList).asList().get(newGroupId));
                 } else {
                     color = Color.WHITE;
                 }

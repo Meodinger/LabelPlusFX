@@ -59,6 +59,7 @@ public class CDialog {
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
         expContent.setPrefHeight(400);
+        expContent.setPrefWidth(800);
 
         initDialog();
         dialog.setTitle(I18N.ERROR);

@@ -69,18 +69,6 @@ public abstract class TransFile<T> {
 
     public static class MeoTransFile extends TransFile<MeoTransFile.Group> {
 
-        public final static String[] DEFAULT_COLOR_LIST = {
-                "FF0000",
-                "0000FF",
-                "008000",
-                "1E90FF",
-                "FFD700",
-                "FF00FF",
-                "A0522D",
-                "FF4500",
-                "9400D3"
-        };
-
         @Override
         public MeoTransFile clone() {
             MeoTransFile translation = new MeoTransFile();

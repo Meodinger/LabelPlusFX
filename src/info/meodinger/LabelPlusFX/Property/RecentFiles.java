@@ -1,4 +1,4 @@
-package info.meodinger.LabelPlusFX.IO;
+package info.meodinger.LabelPlusFX.Property;
 
 import info.meodinger.LabelPlusFX.Options;
 import info.meodinger.LabelPlusFX.Util.CDialog;
@@ -20,9 +20,12 @@ import java.util.List;
 public final class RecentFiles {
 
     private static final int MAX_SIZE = 10;
-    private final List<String> list = new LinkedList<>();
 
-    private RecentFiles() {}
+    private final List<String> list;
+
+    private RecentFiles() {
+        this.list = new LinkedList<>();
+    }
     public static final RecentFiles Instance = new RecentFiles();
 
     public void load() {

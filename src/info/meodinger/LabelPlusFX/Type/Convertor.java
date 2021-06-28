@@ -1,6 +1,7 @@
 package info.meodinger.LabelPlusFX.Type;
 
 import info.meodinger.LabelPlusFX.I18N;
+import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.Type.TransFile.LPTransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 
@@ -20,7 +21,10 @@ public class Convertor {
         assert groupListLP.size() <= 9;
         ArrayList<MeoTransFile.Group> gList = new ArrayList<>();
         for (int i = 0; i < groupListLP.size(); i++) {
-            gList.add(new MeoTransFile.Group(groupListLP.get(i), MeoTransFile.DEFAULT_COLOR_LIST[i]));
+            gList.add(new MeoTransFile.Group(
+                    groupListLP.get(i),
+                    Settings.Instance.get(Settings.Key.DefaultColorList).asList().get(i)
+            ));
         }
 
         MeoTransFile meo = new MeoTransFile();

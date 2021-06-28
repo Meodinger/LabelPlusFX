@@ -1,6 +1,7 @@
 package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Component.CTreeItem;
+import info.meodinger.LabelPlusFX.IO.RecentFiles;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
 import info.meodinger.LabelPlusFX.Type.TransLabel;
 
@@ -40,6 +41,8 @@ public final class State {
 
     public final Application application;
     public final Stage stage;
+    public final RecentFiles recentFiles;
+    public final Settings settings;
 
     private MeoTransFile transFile;
     private String filePath;
@@ -53,6 +56,8 @@ public final class State {
     public State(Application application, Stage stage) {
         this.application = application;
         this.stage = stage;
+        this.recentFiles = RecentFiles.Instance;
+        this.settings = Settings.Instance;
 
         this.workMode = WORK_MODE_DEFAULT;
         this.viewMode = VIEW_MODE_DEFAULT;

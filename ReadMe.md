@@ -71,7 +71,6 @@ To get a local copy up and running follow these simple steps.
 ### Prerequisites
 
 * [Liberica JDK 11 (Full)](bell-sw.com/pages/downloads/#/java-11-current)
-* [FastJson 1.2.76](https://github.com/alibaba/fastjson)
 
 
 ### Installation

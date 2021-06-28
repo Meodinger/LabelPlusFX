@@ -58,6 +58,7 @@ public class CDialog {
         textArea.prefHeightProperty().bind(expContent.heightProperty());
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
+        expContent.setPrefHeight(400);
 
         initDialog();
         dialog.setTitle(I18N.ERROR);

@@ -14,6 +14,7 @@ public class LabelPlusFX extends Application {
 
     static {
         I18N.init();
+        Options.init();
     }
 
     private State state;

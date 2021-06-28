@@ -111,6 +111,7 @@ public class I18N {
     public static String MM_FILE = "文件";
     public static String M_NEW = "新建翻译";
     public static String M_OPEN = "打开";
+    public static String M_OPEN_RECENT = "最近打开的文件";
     public static String M_SAVE = "保存";
     public static String M_SAVE_AS = "另存为";
     public static String M_BAK_RECOVERY = "从备份中恢复";
@@ -225,6 +226,7 @@ public class I18N {
             MM_FILE = "File";
             M_NEW = "New File";
             M_OPEN = "Open";
+            M_OPEN_RECENT = "Open Recent";
             M_SAVE = "Save";
             M_SAVE_AS = "Save As";
             M_BAK_RECOVERY = "Recover form Backup";

@@ -208,6 +208,7 @@ public class Controller implements Initializable {
     @FXML private Menu mmFile;
     @FXML private MenuItem mNew;
     @FXML private MenuItem mOpen;
+    @FXML private MenuItem mOpenRecent;
     @FXML private MenuItem mSave;
     @FXML private MenuItem mSaveAs;
     @FXML private MenuItem mBakRecover;
@@ -517,6 +518,7 @@ public class Controller implements Initializable {
         mmFile.setText(I18N.MM_FILE);
         mNew.setText(I18N.M_NEW);
         mOpen.setText(I18N.M_OPEN);
+        mOpenRecent.setText(I18N.M_OPEN_RECENT);
         mSave.setText(I18N.M_SAVE);
         mSaveAs.setText(I18N.M_SAVE_AS);
         mBakRecover.setText(I18N.M_BAK_RECOVERY);

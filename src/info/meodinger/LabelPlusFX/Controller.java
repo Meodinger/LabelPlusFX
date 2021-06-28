@@ -2,6 +2,7 @@ package info.meodinger.LabelPlusFX;
 
 import info.meodinger.LabelPlusFX.Component.*;
 import info.meodinger.LabelPlusFX.IO.*;
+import info.meodinger.LabelPlusFX.Property.Config;
 import info.meodinger.LabelPlusFX.Property.Settings;
 import info.meodinger.LabelPlusFX.Type.TransFile;
 import info.meodinger.LabelPlusFX.Type.TransFile.MeoTransFile;
@@ -330,8 +331,8 @@ public class Controller implements Initializable {
         setDisable(true);
 
         // Initialize
-        pMain.setDividerPositions(Settings.Instance.get(Settings.Key.MainDivider).asDouble());
-        pRight.setDividerPositions(Settings.Instance.get(Settings.Key.RightDivider).asDouble());
+        pMain.setDividerPositions(Config.Instance.get(Config.MainDivider).asDouble());
+        pRight.setDividerPositions(Config.Instance.get(Config.RightDivider).asDouble());
         menu.treeMenu.init(vTree);
         cImagePane.setConfig(state);
         cImagePane.setMinScale(cSlider.getMinScale());
@@ -639,8 +640,8 @@ public class Controller implements Initializable {
         transFile.setComment(TransFile.DEFAULT_COMMENT);
 
         List<Group> groups = new ArrayList<>();
-        List<String> nameList = Settings.Instance.get(Settings.Key.DefaultGroupList).asList();
-        List<String> colorList = Settings.Instance.get(Settings.Key.DefaultColorList).asList();
+        List<String> nameList = Settings.Instance.get(Settings.DefaultGroupList).asList();
+        List<String> colorList = Settings.Instance.get(Settings.DefaultColorList).asList();
         for (int i = 0; i < nameList.size(); i++) {
             groups.add(new Group(nameList.get(i), colorList.get(i)));
         }

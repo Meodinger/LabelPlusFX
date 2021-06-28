@@ -23,7 +23,7 @@ public class Convertor {
         for (int i = 0; i < groupListLP.size(); i++) {
             gList.add(new MeoTransFile.Group(
                     groupListLP.get(i),
-                    Settings.Instance.get(Settings.Key.DefaultColorList).asList().get(i)
+                    Settings.Instance.get(Settings.DefaultColorList).asList().get(i)
             ));
         }
 

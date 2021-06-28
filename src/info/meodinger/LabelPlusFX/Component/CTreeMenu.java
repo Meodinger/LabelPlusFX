@@ -124,7 +124,7 @@ public class CTreeMenu {
                 nameField.setText(String.format(I18N.FORMAT_NEW_GROUP_NAME, newGroupId + 1));
                 Color color;
                 if (newGroupId < 9) {
-                    color = Color.web(Settings.Instance.get(Settings.Key.DefaultColorList).asList().get(newGroupId));
+                    color = Color.web(Settings.Instance.get(Settings.DefaultColorList).asList().get(newGroupId));
                 } else {
                     color = Color.WHITE;
                 }

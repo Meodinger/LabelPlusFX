@@ -28,11 +28,11 @@ public final class Settings extends AbstractProperties {
 
     @Override
     public void load() {
-        AbstractProperties.load(Options.settings, properties);
+        AbstractProperties.load(Options.settings, this);
     }
 
     @Override
     public void save() {
-        AbstractProperties.save(Options.settings, properties);
+        AbstractProperties.save(Options.settings, this);
     }
 }

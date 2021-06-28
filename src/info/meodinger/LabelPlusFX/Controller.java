@@ -348,7 +348,7 @@ public class Controller implements Initializable {
             mSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN));
         }
 
-        // Fix split ratio, update Settings
+        // Fix split ratio when resize
         ChangeListener<Number> geometryListener = (observable, oldValue, newValue) -> {
             Function<Double, Double> debounce = input -> ((double) ((int) (input * 100 + 0.2))) / 100;
             pMain.setDividerPositions(debounce.apply(pMain.getDividerPositions()[0]));
@@ -356,6 +356,14 @@ public class Controller implements Initializable {
         };
         state.stage.widthProperty().addListener(geometryListener);
         state.stage.heightProperty().addListener(geometryListener);
+
+        // Update Config
+        pMain.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            Config.Instance.get(Config.MainDivider).set(newValue);
+        });
+        pRight.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            Config.Instance.get(Config.RightDivider).set(newValue);
+        });
 
         // Reload labels and Repaint pane when change pic
         cPicBox.valueProperty().addListener((observable, oldValue, newValue) -> {

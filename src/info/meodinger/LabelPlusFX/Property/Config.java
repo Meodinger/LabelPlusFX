@@ -27,11 +27,11 @@ public class Config extends AbstractProperties {
 
     @Override
     public void load() {
-        AbstractProperties.load(Options.config, properties);
+        AbstractProperties.load(Options.config, this);
     }
 
     @Override
     public void save() {
-        AbstractProperties.save(Options.config, properties);
+        AbstractProperties.save(Options.config, this);
     }
 }

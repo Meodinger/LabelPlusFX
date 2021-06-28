@@ -49,6 +49,7 @@ public final class Options {
             Config.Instance.save();
         }
         Config.Instance.load();
+        Runtime.getRuntime().addShutdownHook(new Thread(Config.Instance::save));
     }
     private static void initSettings() throws IOException {
         if (Files.notExists(settings)) {

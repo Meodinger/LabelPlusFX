@@ -30,7 +30,7 @@ public abstract class AbstractProperties {
         throw new IllegalStateException("Property not found");
     }
 
-    protected static void load(Path path, List<Property> properties) {
+    protected static void load(Path path, AbstractProperties instance) {
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             List<Property> all = new ArrayList<>();
 
@@ -43,15 +43,15 @@ public abstract class AbstractProperties {
                 all.add(new Property(props[0], props[1]));
             }
 
-            properties.clear();
-            properties.addAll(all);
+            instance.properties.clear();
+            instance.properties.addAll(all);
         } catch (Exception e) {
             CDialog.showException(e);
         }
     }
-    protected static void save(Path path, List<Property> properties) {
+    protected static void save(Path path, AbstractProperties instance) {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-            for (Property property : properties) {
+            for (Property property : instance.properties) {
                 writer.write(property.key + Property.KEY_VALUE_SEPARATOR + property.asString());
                 writer.newLine();
             }

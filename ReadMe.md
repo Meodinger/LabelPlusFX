@@ -88,7 +88,7 @@ To get a local copy up and running follow these simple steps.
 
 Label Plus FX's function design based on [LabelPlus](https://noodlefighter.com/label_plus/)
 
-_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/cpRyDN2Perkb)_
+_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y)_
 
 
 

@@ -52,6 +52,7 @@ class CColorPicker : ColorPicker() {
         colorHexProperty.addListener { _, _, newValue ->
             when (newValue.length) {
                 1 -> value = Color.web(newValue.repeat(6))
+                2 -> value = Color.web(newValue.repeat(3))
                 3 -> {
                     val builder = StringBuilder()
                     for (c in newValue.toCharArray()) {
@@ -59,7 +60,7 @@ class CColorPicker : ColorPicker() {
                     }
                     value = Color.web(builder.toString())
                 }
-                6, 8 -> value = Color.web(newValue)
+                6 -> value = Color.web(newValue)
             }
         }
     }

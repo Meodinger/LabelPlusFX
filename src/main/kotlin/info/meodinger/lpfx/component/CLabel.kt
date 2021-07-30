@@ -2,15 +2,12 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.platform.MonoType
 
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.VPos
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.text.*
-
 
 /**
  * Author: Meodinger
@@ -30,38 +27,35 @@ class CLabel(index: Int, radius: Double, color: Color) : Region() {
     private val text = Text(index.toString())
 
     val indexProperty = SimpleIntegerProperty(index)
-    val radiusProperty = SimpleDoubleProperty(radius)
-    val colorProperty = SimpleObjectProperty(color)
+    val radiusProperty = circle.radiusProperty()
+    val colorProperty = circle.fillProperty()
 
     var index: Int
         get() = indexProperty.value
         set(value) {
             indexProperty.value = value
-            text.text = value.toString()
             update(radius, value)
         }
     var radius: Double
         get() = radiusProperty.value
         set(value) {
             radiusProperty.value = value
-            circle.radius = value
             update(value, index)
         }
     var color: Color
-        get() = colorProperty.value
+        get() = colorProperty.value as Color
         set(value) {
             colorProperty.value = value
-            circle.fill = value
         }
 
     init {
-        setPrefSize(radius, radius)
-
+        indexProperty.addListener { _, _, newValue -> text.text = newValue.toString() }
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
-        text.textOrigin = VPos.CENTER // avoid edit layoutY
-        update(radius, index)
+        text.textOrigin = VPos.CENTER // to avoid edit layoutY
 
+        setPrefSize(radius, radius)
+        update(radius, index)
         children.setAll(circle, text)
     }
 
@@ -74,9 +68,9 @@ class CLabel(index: Int, radius: Double, color: Color) : Region() {
     private fun update(radius: Double, index: Int) {
 
         // Font size vary from 1.8R to 1.3R
-        // 0..9 -> 1.8R
+        // 0..9 -> 1.7R
         // 10.. -> 1.3R
-        val r = if (index < 10) 1.8 * radius else 1.3 * radius
+        val r = if (index < 10) 1.7 * radius else 1.3 * radius
         text.font = Font.font(MonoType, FontWeight.BOLD, r)
 
         // Layout 0,0 is the center of the circle

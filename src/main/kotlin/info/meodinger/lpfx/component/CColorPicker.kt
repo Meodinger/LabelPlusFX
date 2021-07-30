@@ -15,7 +15,6 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import java.util.stream.Collectors
 
-
 /**
  * Author: Meodinger
  * Date: 2021/7/29
@@ -42,8 +41,8 @@ class CColorPicker : ColorPicker() {
         }
         colorHexField.onKeyReleased = EventHandler { event ->
             if (event.code == KeyCode.ENTER) {
-                this.fireEvent(ActionEvent())
-                this.hide()
+                fireEvent(ActionEvent())
+                hide()
             }
         }
 

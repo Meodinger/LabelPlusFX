@@ -1,6 +1,5 @@
 package info.meodinger.lpfx.component
 
-import javafx.event.EventHandler
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
@@ -22,9 +21,9 @@ class CComboBox<T> : HBox() {
     var isWrapped = false
 
     init {
-        comboBox.valueProperty().addListener { _, _, newValue -> comboBox.items.indexOf(newValue) }
-        back.onMouseClicked = EventHandler { back() }
-        next.onMouseClicked = EventHandler { next() }
+        comboBox.valueProperty().addListener { _, _, newValue -> index = comboBox.items.indexOf(newValue) }
+        back.setOnMouseClicked { back() }
+        next.setOnMouseClicked { next() }
 
         comboBox.prefWidth = 150.0
         back.textAlignment = TextAlignment.CENTER

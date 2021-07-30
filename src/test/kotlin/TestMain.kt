@@ -9,5 +9,5 @@ import event.*
  * Location:
  */
 fun main(vararg args: String) {
-    Application.launch(Label::class.java, *args)
+    Application.launch(ComboBox::class.java, *args)
 }

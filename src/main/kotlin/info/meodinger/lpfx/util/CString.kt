@@ -10,20 +10,19 @@ import java.util.*
  * Location: info.meodinger.lpfx.util
  */
 
-fun isBlank(str: String?): Boolean {
-    if (str == null) return true
-    if (str.isEmpty()) return true
+fun String.isBlank(): Boolean {
+    if (this.isEmpty()) return true
 
-    val chars = str.toCharArray()
+    val chars = this.toCharArray()
     var whiteCount = 0
     for (c in chars) {
-        if (isWhiteSpace(c)) whiteCount++
+        if (c.isWhiteSpace()) whiteCount++
     }
     return whiteCount == chars.size
 }
 
-fun isDigit(str: String): Boolean {
-    val chars = str.toCharArray()
+fun String.isDigit(): Boolean {
+    val chars = this.toCharArray()
     for (c in chars) {
         if (c !in '0'..'9') return false
     }

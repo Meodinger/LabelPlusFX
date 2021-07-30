@@ -5,17 +5,18 @@ package info.meodinger.lpfx.util.char
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-fun repeat(c: Char, n: Int): String {
-    return c.toString().repeat(n)
+fun Char.repeat(n: Int): String {
+    return this.toString().repeat(n)
 }
 
-val WHITE_SPACE_ARRAY = charArrayOf(
-    ' ', '\u0000', '\b', '\u000C', '\n', '\r', '\t'
-)
+val Char.Companion.WHITE_SPACE_ARRAY : CharArray
+    get() = charArrayOf(
+        ' ', '\u0000', '\b', '\u000C', '\n', '\r', '\t'
+    )
 
-fun isWhiteSpace(c: Char): Boolean {
-    for (w in WHITE_SPACE_ARRAY) {
-        if (c == w) return true
+fun Char.isWhiteSpace(): Boolean {
+    for (w in Char.WHITE_SPACE_ARRAY) {
+        if (this == w) return true
     }
     return false
 }

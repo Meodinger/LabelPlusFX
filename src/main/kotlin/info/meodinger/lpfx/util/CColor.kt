@@ -7,6 +7,6 @@ import javafx.scene.paint.Color
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-fun toHex(color: Color): String {
-    return color.toString().substring(2, 8).uppercase()
+fun Color.toHex(): String {
+    return this.toString().substring(2, 8).uppercase()
 }

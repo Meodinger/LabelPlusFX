@@ -7,21 +7,18 @@ import javafx.scene.control.TreeItem
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-fun <T> getRootOf(item: TreeItem<T>?): TreeItem<T>? {
-    if (item == null) return null
+val <T> TreeItem<T>.root: TreeItem<T>
+    get() {
+        var root: TreeItem<T> = this
+        while (root.parent != null) root = root.parent
+        return root
+    }
 
-    var root: TreeItem<T> = item
-    while (root.parent != null) root = root.parent
-    return root
-}
-
-fun expandAll(item: TreeItem<*>?) {
-    if (item == null) return
-
-    if (item.children.size > 0) {
-        item.isExpanded = true
-        for (i in item.children) {
-            expandAll(i)
+fun TreeItem<*>.expandAll() {
+    if (this.children.size > 0) {
+        this.isExpanded = true
+        for (i in this.children) {
+            i.expandAll()
         }
     }
 }

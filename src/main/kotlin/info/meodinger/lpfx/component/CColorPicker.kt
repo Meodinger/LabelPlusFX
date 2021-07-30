@@ -2,6 +2,7 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.char.repeat
+
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -45,8 +46,8 @@ class CColorPicker : ColorPicker() {
             }
         }
 
-        setOnShown { colorHexProperty.set(toHex(value)) }
-        setOnHidden { colorHexProperty.set(toHex(value)) }
+        setOnShown { colorHexProperty.set(value.toHex()) }
+        setOnHidden { colorHexProperty.set(value.toHex()) }
 
         colorHexProperty.addListener { _, _, newValue ->
             when (newValue.length) {
@@ -54,7 +55,7 @@ class CColorPicker : ColorPicker() {
                 3 -> {
                     val builder = StringBuilder()
                     for (c in newValue.toCharArray()) {
-                        builder.append(repeat(c, 2))
+                        builder.append(c.repeat(2))
                     }
                     value = Color.web(builder.toString())
                 }

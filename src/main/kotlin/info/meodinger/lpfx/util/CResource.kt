@@ -29,6 +29,4 @@ val TEMPLATE_EN = loadFile("/file/en.psd")
 val TEMPLATE_ZH = loadFile("/file/zh.psd")
 
 val I18N = ResourceBundle.getBundle("info.meodinger.lpfx.Lang")!!
-operator fun ResourceBundle.get(key: String): String {
-    return this.getString(key)
-}
+operator fun ResourceBundle.get(key: String): String = this.getString(key)

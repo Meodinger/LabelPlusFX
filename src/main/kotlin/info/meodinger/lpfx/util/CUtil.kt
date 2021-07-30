@@ -9,4 +9,3 @@ fun <T> lengthOf(t: T): Int {
     return t.toString().length
 }
 
-const val LINE_HEIGHT_RATIO = 0.5

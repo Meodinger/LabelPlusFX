@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.util
 
 import info.meodinger.lpfx.util.dialog.showException
+
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -48,6 +49,13 @@ class CZip(zipFilePath: String) {
         }
         input.close()
 
+        zip.closeEntry()
+    }
+
+    @Throws(IOException::class)
+    fun zip(bytes: ByteArray, path: String) {
+        zip.putNextEntry(ZipEntry(path))
+        zip.write(bytes)
         zip.closeEntry()
     }
 

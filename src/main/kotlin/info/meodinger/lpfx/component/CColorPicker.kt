@@ -4,6 +4,7 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.char.repeat
 
 import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
@@ -39,15 +40,12 @@ class CColorPicker : ColorPicker() {
             }
             change
         }
-        colorHexField.setOnKeyReleased { event ->
+        colorHexField.onKeyReleased = EventHandler { event ->
             if (event.code == KeyCode.ENTER) {
                 this.fireEvent(ActionEvent())
                 this.hide()
             }
         }
-
-        setOnShown { colorHexProperty.set(value.toHex()) }
-        setOnHidden { colorHexProperty.set(value.toHex()) }
 
         colorHexProperty.addListener { _, _, newValue ->
             when (newValue.length) {
@@ -63,6 +61,9 @@ class CColorPicker : ColorPicker() {
                 6 -> value = Color.web(newValue)
             }
         }
+
+        addEventHandler(ON_SHOWN) { colorHexProperty.set(value.toHex()) }
+        addEventHandler(ON_HIDDEN) { colorHexProperty.set(value.toHex()) }
     }
 
     override fun createDefaultSkin(): Skin<*> {

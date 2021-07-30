@@ -1,6 +1,7 @@
 import javafx.application.Application
 
 import component.*
+import event.*
 
 /**
  * Author: Meodinger
@@ -8,5 +9,5 @@ import component.*
  * Location:
  */
 fun main(vararg args: String) {
-    Application.launch(ComboBox::class.java, *args)
+    Application.launch(Label::class.java, *args)
 }

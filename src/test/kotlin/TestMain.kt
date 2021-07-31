@@ -17,8 +17,8 @@ class App : Application() {
     override fun start(primaryStage: Stage) {
         // do nothing
         // loaderTest()
-        // exporterTest()
-        transTest()
+        exporterTest()
+        // transTest()
         exitProcess(0)
     }
 

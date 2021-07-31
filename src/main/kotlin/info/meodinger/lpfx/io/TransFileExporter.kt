@@ -6,6 +6,7 @@ import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.dialog.showInfo
+import info.meodinger.lpfx.util.using
 
 import java.io.File
 import java.io.FileOutputStream
@@ -90,26 +91,33 @@ fun exportLP(file: File, transFile: TransFile) {
         .append("\n").append("\n")
         .append(tString)
 
-    try {
-        FileOutputStream(file).use { fos ->
-            // write BOM (EF BB BF)
-            fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
-            BufferedWriter(OutputStreamWriter(fos, StandardCharsets.UTF_8)).use { writer ->
-                // write content
-                writer.write(builder.toString())
-            }
-        }
-    } catch (e: Exception) {
+    using {
+        val fos = FileOutputStream(file).autoClose()
+        val writer = BufferedWriter(OutputStreamWriter(fos, StandardCharsets.UTF_8)).autoClose()
+
+        // write BOM (EF BB BF)
+        fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
+        // write content
+        writer.write(builder.toString())
+
+        // todo: rename
+        showInfo("Export successful")
+    } catch { e : Exception ->
         showException(e)
+    } finally {
+
     }
 }
 
 fun exportMeo(file: File, transFile: TransFile) {
-    try {
-        BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).use {
-            it.write(transFile.toJsonString())
-        }
-    } catch (e: Exception) {
+    using {
+        val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
+        writer.write(transFile.toJsonString())
+
+        showInfo("Export successful")
+    } catch { e: Exception ->
         showException(e)
+    } finally {
+
     }
 }

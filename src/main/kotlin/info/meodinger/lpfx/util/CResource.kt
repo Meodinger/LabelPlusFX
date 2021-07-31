@@ -28,5 +28,6 @@ val SCRIPT = loadFile("/file/Meo_PS_Script")
 val TEMPLATE_EN = loadFile("/file/en.psd")
 val TEMPLATE_ZH = loadFile("/file/zh.psd")
 
+val INFO = ResourceBundle.getBundle("info.meodinger.lpfx.LabelPlusFX")!!
 val I18N = ResourceBundle.getBundle("info.meodinger.lpfx.Lang")!!
 operator fun ResourceBundle.get(key: String): String = this.getString(key)

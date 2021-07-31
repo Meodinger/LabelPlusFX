@@ -4,8 +4,11 @@ import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.type.TransLabel
-import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.dialog.showInfo
+import info.meodinger.lpfx.util.dialog.showAlert
+import info.meodinger.lpfx.util.dialog.showException
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.using
 
 import java.io.File
@@ -24,8 +27,7 @@ fun exportLP(file: File, transFile: TransFile) {
     // Group count validate
     val groupCount = transFile.groupList.size
     if (groupCount > 9) {
-        // todo: rename
-        showInfo("too many groups")
+        showAlert(I18N["alert.exporter.too_many_groups"])
         return
     }
 
@@ -100,8 +102,7 @@ fun exportLP(file: File, transFile: TransFile) {
         // write content
         writer.write(builder.toString())
 
-        // todo: rename
-        showInfo("Export successful")
+        showInfo(I18N["info.exported_successful"])
     } catch { e : Exception ->
         showException(e)
     } finally {
@@ -114,7 +115,7 @@ fun exportMeo(file: File, transFile: TransFile) {
         val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
         writer.write(transFile.toJsonString())
 
-        showInfo("Export successful")
+        showInfo(I18N["info.exported_successful"])
     } catch { e: Exception ->
         showException(e)
     } finally {

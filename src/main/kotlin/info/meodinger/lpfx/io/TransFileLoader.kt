@@ -6,6 +6,8 @@ import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransFile.Companion.MeoTransFile
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -26,7 +28,7 @@ fun loadLP(file: File): TransFile {
     val buf = ByteArray(3)
     val fis = FileInputStream(file)
     val len = fis.read(buf, 0, 3)
-    if (len != 3) throw IOException("Unexpected EOF")
+    if (len != 3) throw IOException(I18N["exception.unexpected_eof"])
     if (bom.contentEquals(buf)) reader.read(CharArray(3), 0, 1)
 
     val lines = reader.readLines()
@@ -67,7 +69,7 @@ fun loadLP(file: File): TransFile {
         val y = props[1].trim().toDouble()
         val groupId = props[2].trim().toInt() - 1
 
-        if (index < 0) throw IOException("invalid index")
+        if (index < 0) throw IOException(String.format(I18N["exception.invalid_index.format"], index))
 
         pointer++
         return TransLabel(index, x, y, groupId, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
@@ -93,7 +95,7 @@ fun loadLP(file: File): TransFile {
 
             for (l in transLabels) {
                 if (l.index == label.index) {
-                    throw IOException("index repeated")
+                    throw IOException(String.format(I18N["exception.repeated_index.format"], label.index))
                 }
             }
             transLabels.add(label)
@@ -118,14 +120,13 @@ fun loadLP(file: File): TransFile {
     while (lines[pointer] != LPTransFile.SEPARATOR && count < 10) {
         val group = TransGroup(lines[pointer], MeoTransFile.DEFAULT_COLOR_LIST[count - 1])
         transFile.groupList.forEach {
-            // todo: rename
-            if (it.name == group.name) throw IOException("Same Group Name")
+            if (it.name == group.name) throw IOException(String.format(I18N["exception.repeated_group_name.format"], group.name))
         }
         transFile.groupList.add(group)
         count++
         pointer++
     }
-    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException("Too Many Groups")
+    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.too_many_groups"])
     pointer++
 
     // Comment

@@ -2,6 +2,7 @@ package info.meodinger.lpfx.util.dialog
 
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Insets
@@ -59,7 +60,7 @@ fun showException(e: Exception): Optional<ButtonType>? {
     expContent.prefWidth = 800.0
 
     initDialog()
-    dialog.title = I18N["ERROR"]
+    dialog.title = I18N["common.error"]
     dialog.headerText = e.javaClass.toString()
     dialog.contentText = e.message
     dialog.dialogPane.buttonTypes.add(ButtonType.OK)
@@ -73,7 +74,7 @@ fun showException(e: Exception): Optional<ButtonType>? {
  * @return ButtonType.OK?
  */
 fun showInfo(info: String): Optional<ButtonType>? {
-    return showInfo(I18N["INFO"], info)
+    return showInfo(I18N["common.info"], info)
 }
 /**
  * Show information with specific title
@@ -119,7 +120,7 @@ fun showInfoWithLink(title: String, info: String, linkText: String, handler: Eve
  * @return ButtonType? with ButtonDate YES | NO
  */
 fun showAlert(alert: String): Optional<ButtonType>? {
-    return showAlert(I18N["ALERT"], alert)
+    return showAlert(I18N["common.alert"], alert)
 }
 /**
  * Show alert with specific title
@@ -128,7 +129,7 @@ fun showAlert(alert: String): Optional<ButtonType>? {
  * @return ButtonType? with ButtonDate YES | NO
  */
 fun showAlert(title: String, alert: String): Optional<ButtonType>? {
-    return showAlert(title, alert, I18N["YES"], I18N["NO"])
+    return showAlert(title, alert, I18N["common.yes"], I18N["common.no"])
 }
 /**
  * Show alert with specific title and yes/no text
@@ -144,7 +145,8 @@ fun showAlert(title: String, alert: String, yes: String, no: String): Optional<B
     dialog.contentText = alert
     dialog.dialogPane.buttonTypes.addAll(
         ButtonType(yes, ButtonBar.ButtonData.YES),
-        ButtonType(no, ButtonBar.ButtonData.NO)
+        ButtonType(no, ButtonBar.ButtonData.NO),
+        ButtonType(I18N["common.cancel"], ButtonBar.ButtonData.CANCEL_CLOSE)
     )
     return dialog.showAndWait()
 }
@@ -155,7 +157,7 @@ fun showAlert(title: String, alert: String, yes: String, no: String): Optional<B
  * @return ButtonType?.YES | NO
  */
 fun showConfirm(msg: String): Optional<ButtonType>? {
-    return showConfirm(I18N["CONFIRM"], msg)
+    return showConfirm(I18N["common.confirm"], msg)
 }
 /**
  * Show message for confirm with specific title
@@ -218,10 +220,10 @@ fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<
     return dialog.showAndWait()
 }
 
-fun <T> showListChoose(owner: Window?, title: String, list: List<T>): Optional<List<T>>? {
+fun <T> showListChoose(owner: Window?, list: List<T>): Optional<List<T>>? {
     val dialog = Dialog<List<T>>()
     dialog.initOwner(owner)
-    dialog.title = title
+    dialog.title = I18N["dialog.choose.title"]
 
     val left = ListView<T>()
     val right = ListView<T>()
@@ -229,10 +231,10 @@ fun <T> showListChoose(owner: Window?, title: String, list: List<T>): Optional<L
     right.selectionModel.selectionMode = SelectionMode.MULTIPLE
     left.items.addAll(list)
 
-    val add = Button(I18N["ADD_PIC"]) // TODO: rename
-    val addAll = Button(I18N["ADD_ALL_PIC"])
-    val remove = Button(I18N["REMOVE_PIC"])
-    val removeAll = Button(I18N["REMOVE_ALL_PIC"])
+    val add = Button(I18N["dialog.choose.add"])
+    val addAll = Button(I18N["dialog.choose.add_all"])
+    val remove = Button(I18N["dialog.choose.remove"])
+    val removeAll = Button(I18N["dialog.choose.remove_all"])
     val vBox = VBox(add, addAll, remove, removeAll)
     vBox.alignment = Pos.CENTER
     for (b in vBox.children) {
@@ -258,8 +260,8 @@ fun <T> showListChoose(owner: Window?, title: String, list: List<T>): Optional<L
     removeAll.onAction = EventHandler { moverAll(right, left) }
 
     val pane = GridPane()
-    pane.add(Label(I18N["PICS_POTENTIAL"]), 0, 0)
-    pane.add(Label(I18N["PICS_SELECTED"]), 2, 0)
+    pane.add(Label(I18N["dialog.choose.potential"]), 0, 0)
+    pane.add(Label(I18N["dialog.choose.selected"]), 2, 0)
     pane.add(left, 0, 1)
     pane.add(vBox, 1, 1)
     pane.add(right, 2, 1)

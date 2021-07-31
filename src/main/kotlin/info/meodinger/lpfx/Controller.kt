@@ -32,7 +32,6 @@ class Controller : Initializable {
     @FXML private lateinit var mAbout: MenuItem
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
-        //TODO: fill
     }
 
     @FXML fun newTranslation() {}

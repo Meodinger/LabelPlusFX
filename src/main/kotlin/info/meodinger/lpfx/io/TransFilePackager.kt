@@ -5,9 +5,7 @@ import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.util.CZip
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.dialog.showInfo
-import info.meodinger.lpfx.util.resource.SCRIPT
-import info.meodinger.lpfx.util.resource.TEMPLATE_EN
-import info.meodinger.lpfx.util.resource.TEMPLATE_ZH
+import info.meodinger.lpfx.util.resource.*
 
 import java.io.File
 
@@ -31,8 +29,7 @@ fun pack(target: String, source: String, transFile: TransFile) {
         }
 
         zip.close()
-        // todo: rename
-        showInfo("Pack successful")
+        showInfo(I18N["info.exported_successful"])
     } catch (e: Exception) {
         showException(e)
     }

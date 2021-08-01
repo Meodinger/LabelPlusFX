@@ -9,33 +9,13 @@ import info.meodinger.lpfx.type.TransLabel
  * Date: 2021/7/30
  * Location: type
  */
-fun labelTest() {
-    println("Label init test: 0-0.1-0.2-0-2333")
-    val label = TransLabel(0, 0.1, 0.2, 0, "2333")
-    println(label)
-    println("Label init test: nothing")
-    println(TransLabel())
-}
-
-fun groupTest() {
-    println("Group init test: g1-ffffff")
-    val group = TransGroup("g1", "ffffff")
-    println(group)
-    println("Group init test: nothing")
-    println(TransGroup())
-    println(TransGroup())
-}
-
 fun fileTest() {
-    println("File init test: with late init")
     val file = TransFile()
     file.version = intArrayOf(1, 0)
     file.comment = TransFile.DEFAULT_COMMENT
-    file.groupList = listOf(TransGroup()).toMutableList()
-    file.transMap = mapOf("0" to listOf(TransLabel()).toMutableList()).toMutableMap()
-    println(file)
-    println("File clone test")
-    println(file)
+    file.groupList.add(TransGroup())
+    file.transMap["0"] = listOf(TransLabel()).toMutableList()
+
     val another = file.clone()
     another.version = intArrayOf(1, 2)
     another.comment = TransFile.DEFAULT_COMMENT_LIST[1]
@@ -44,5 +24,13 @@ fun fileTest() {
     another.transMap["0"]!![0].text = "Edited"
     another.transMap["0"]!!.add(TransLabel(1, 0.0, 0.0, 0, ""))
     another.transMap["1"] = listOf(TransLabel()).toMutableList()
-    println(another)
+    println("""
+        |----------
+        |TransFile clone test
+        |Version: ${!(file.version.contentEquals(another.version))}
+        |Comment: ${file.comment != another.comment}
+        |Groups: ${(file.groupList[0].name != another.groupList[0].name) && (file.groupList.size == 1)}
+        |TransMap: ${(file.transMap["0"]!![0].text != another.transMap["0"]!![0].text) && (file.transMap["0"]!!.size == 1) && (file.transMap.keys.size == 1)}
+        |----------
+        """.trimIndent())
 }

@@ -18,25 +18,25 @@ fun zipTest() {
     var startTime = Date().time
     var endTime: Long
 
-    println("Zip File")
+    print("Zip File: ")
     zip.zip(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\main\\resources\\file\\Meo_PS_Script"), "/file")
     endTime = Date().time
     println(endTime - startTime)
 
     startTime = endTime
-    println("Zip InputStream")
+    print("Zip InputStream: ")
     zip.zip(FileInputStream(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\main\\resources\\file\\Meo_PS_Script")), "/file_stream")
     endTime = Date().time
     println(endTime - startTime)
 
     startTime = endTime
-    println("Zip ByteInputStream")
+    print("Zip ByteInputStream: ")
     zip.zip(ByteArrayInputStream(SCRIPT), "/byte_stream")
     endTime = Date().time
     println(endTime - startTime)
 
     startTime = endTime
-    println("Zip ByteArray")
+    print("Zip ByteArray: ")
     zip.zip(SCRIPT, "/bytes")
     endTime = Date().time
     println(endTime - startTime)

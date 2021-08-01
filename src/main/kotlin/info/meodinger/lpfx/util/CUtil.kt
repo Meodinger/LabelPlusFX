@@ -1,6 +1,6 @@
 package info.meodinger.lpfx.util
 
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
  * Author: Meodinger
@@ -26,11 +26,12 @@ inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
 }
 
 class ResourceManager : AutoCloseable {
-    private val resourceQueue = ConcurrentLinkedQueue<AutoCloseable>()
+
+    private val resourceQueue = ConcurrentLinkedDeque<AutoCloseable>()
     var throwable: Throwable? = null
 
     fun <T: AutoCloseable> T.autoClose(): T {
-        resourceQueue.offer(this)
+        resourceQueue.addFirst(this)
         return this
     }
 

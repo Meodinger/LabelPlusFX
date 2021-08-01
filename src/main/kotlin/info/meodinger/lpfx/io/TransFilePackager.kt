@@ -4,7 +4,6 @@ import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.util.CZip
 import info.meodinger.lpfx.util.dialog.showException
-import info.meodinger.lpfx.util.dialog.showInfo
 import info.meodinger.lpfx.util.resource.*
 
 import java.io.File
@@ -14,7 +13,7 @@ import java.io.File
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
-fun pack(target: String, source: String, transFile: TransFile) {
+fun pack(target: String, source: String, transFile: TransFile): Boolean {
     try {
         val zip = CZip(target)
 
@@ -29,8 +28,9 @@ fun pack(target: String, source: String, transFile: TransFile) {
         }
 
         zip.close()
-        showInfo(I18N["info.exported_successful"])
+        return true
     } catch (e: Exception) {
         showException(e)
+        return false
     }
 }

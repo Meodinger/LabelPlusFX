@@ -22,13 +22,13 @@ import java.nio.charset.StandardCharsets
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
-fun exportLP(file: File, transFile: TransFile) {
+fun exportLP(file: File, transFile: TransFile): Boolean {
 
     // Group count validate
     val groupCount = transFile.groupList.size
     if (groupCount > 9) {
         showAlert(I18N["alert.exporter.too_many_groups"])
-        return
+        return false
     }
 
     fun buildLabel(transLabel: TransLabel): String {
@@ -101,24 +101,25 @@ fun exportLP(file: File, transFile: TransFile) {
         fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
         // write content
         writer.write(builder.toString())
-
-        showInfo(I18N["info.exported_successful"])
     } catch { e : Exception ->
         showException(e)
+        return false
     } finally {
 
     }
+
+    return true
 }
 
-fun exportMeo(file: File, transFile: TransFile) {
+fun exportMeo(file: File, transFile: TransFile): Boolean {
     using {
         val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
         writer.write(transFile.toJsonString())
-
-        showInfo(I18N["info.exported_successful"])
     } catch { e: Exception ->
         showException(e)
+        return false
     } finally {
 
     }
+    return true
 }

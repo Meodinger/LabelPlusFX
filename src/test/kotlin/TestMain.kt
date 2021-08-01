@@ -3,9 +3,10 @@ import javafx.application.Application
 import component.*
 import event.*
 import io.*
-import javafx.stage.Stage
+import options.*
 import type.*
 import util.*
+import javafx.stage.Stage
 import kotlin.system.exitProcess
 
 /**
@@ -16,9 +17,12 @@ import kotlin.system.exitProcess
 class App : Application() {
     override fun start(primaryStage: Stage) {
         // do nothing
-        // loaderTest()
+        loaderTest()
         exporterTest()
-        // transTest()
+        packTest()
+        fileTest()
+        optionsTest()
+        utilTest()
         exitProcess(0)
     }
 
@@ -26,12 +30,6 @@ class App : Application() {
 
 fun main(vararg args: String) {
     Application.launch(App::class.java, *args)
-}
-
-fun transTest() {
-    labelTest()
-    groupTest()
-    fileTest()
 }
 
 fun utilTest() {

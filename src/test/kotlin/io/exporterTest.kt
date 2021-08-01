@@ -14,10 +14,8 @@ fun exporterTest() {
     val transFile = commonTest()
 
     print("LP: ")
-    exportLP(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\sample\\export.txt"), transFile)
-    println("Done")
+    println(exportLP(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\sample\\export.txt"), transFile))
 
     print("Meo: ")
-    exportMeo(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\sample\\export.json"), transFile)
-    println("Done")
+    println(exportMeo(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\sample\\export.json"), transFile))
 }

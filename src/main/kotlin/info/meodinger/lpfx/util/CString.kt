@@ -1,6 +1,5 @@
 package info.meodinger.lpfx.util.string
 
-import info.meodinger.lpfx.util.char.isWhiteSpace
 import java.util.*
 
 
@@ -9,18 +8,6 @@ import java.util.*
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-
-fun String.isBlank(): Boolean {
-    if (this.isEmpty()) return true
-
-    val chars = this.toCharArray()
-    var whiteCount = 0
-    for (c in chars) {
-        if (c.isWhiteSpace()) whiteCount++
-    }
-    return whiteCount == chars.size
-}
-
 fun String.isDigit(): Boolean {
     val chars = this.toCharArray()
     for (c in chars) {

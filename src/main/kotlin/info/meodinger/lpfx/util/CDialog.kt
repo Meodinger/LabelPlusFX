@@ -40,7 +40,7 @@ fun initOwner(window: Window?) {
  * @param e Exception to print
  * @return ButtonType.OK?
  */
-fun showException(e: Exception): Optional<ButtonType>? {
+fun showException(e: Exception): Optional<ButtonType> {
 
     // Create expandable Exception.
     val sw = StringWriter()
@@ -73,7 +73,7 @@ fun showException(e: Exception): Optional<ButtonType>? {
  * @param info Info to show
  * @return ButtonType.OK?
  */
-fun showInfo(info: String): Optional<ButtonType>? {
+fun showInfo(info: String): Optional<ButtonType> {
     return showInfo(I18N["common.info"], info)
 }
 /**
@@ -82,7 +82,7 @@ fun showInfo(info: String): Optional<ButtonType>? {
  * @param info Info to show
  * @return ButtonType.OK?
  */
-fun showInfo(title: String, info: String): Optional<ButtonType>? {
+fun showInfo(title: String, info: String): Optional<ButtonType> {
     initDialog()
     dialog.title = title
     dialog.contentText = info
@@ -97,7 +97,7 @@ fun showInfo(title: String, info: String): Optional<ButtonType>? {
  * @param handler Handler for action of link
  * @return ButtonType.OK?
  */
-fun showInfoWithLink(title: String, info: String, linkText: String, handler: EventHandler<ActionEvent>): Optional<ButtonType>? {
+fun showInfoWithLink(title: String, info: String, linkText: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
     initDialog()
     dialog.title = title
     dialog.dialogPane.buttonTypes.add(ButtonType.OK)
@@ -119,7 +119,7 @@ fun showInfoWithLink(title: String, info: String, linkText: String, handler: Eve
  * @param alert Alert to show
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(alert: String): Optional<ButtonType>? {
+fun showAlert(alert: String): Optional<ButtonType> {
     return showAlert(I18N["common.alert"], alert)
 }
 /**
@@ -128,7 +128,7 @@ fun showAlert(alert: String): Optional<ButtonType>? {
  * @param alert Alert to show
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(title: String, alert: String): Optional<ButtonType>? {
+fun showAlert(title: String, alert: String): Optional<ButtonType> {
     return showAlert(title, alert, I18N["common.yes"], I18N["common.no"])
 }
 /**
@@ -139,7 +139,7 @@ fun showAlert(title: String, alert: String): Optional<ButtonType>? {
  * @param no  Text for ButtonType with ButtonData.NO
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(title: String, alert: String, yes: String, no: String): Optional<ButtonType>? {
+fun showAlert(title: String, alert: String, yes: String, no: String): Optional<ButtonType> {
     initDialog()
     dialog.title = title
     dialog.contentText = alert
@@ -156,7 +156,7 @@ fun showAlert(title: String, alert: String, yes: String, no: String): Optional<B
  * @param msg Message to show
  * @return ButtonType?.YES | NO
  */
-fun showConfirm(msg: String): Optional<ButtonType>? {
+fun showConfirm(msg: String): Optional<ButtonType> {
     return showConfirm(I18N["common.confirm"], msg)
 }
 /**
@@ -165,7 +165,7 @@ fun showConfirm(msg: String): Optional<ButtonType>? {
  * @param msg Message to show
  * @return ButtonType?.YES | NO
  */
-fun showConfirm(title: String, msg: String): Optional<ButtonType>? {
+fun showConfirm(title: String, msg: String): Optional<ButtonType> {
     return showConfirm(title, "", msg)
 }
 /**
@@ -175,7 +175,7 @@ fun showConfirm(title: String, msg: String): Optional<ButtonType>? {
  * @param msg Message to show
  * @return ButtonType?.YES | NO
  */
-fun showConfirm(title: String, header: String, msg: String): Optional<ButtonType>? {
+fun showConfirm(title: String, header: String, msg: String): Optional<ButtonType> {
     initDialog()
     dialog.title = title
     dialog.headerText = header
@@ -188,23 +188,24 @@ fun showConfirm(title: String, header: String, msg: String): Optional<ButtonType
  * For specific usage
  */
 
-fun <T> showChoice(owner: Window?, title: String, msg: String, choices: List<T>): Optional<T>? {
+fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<T>): Optional<T> {
     val dialog = ChoiceDialog(choices[0], choices)
     dialog.initOwner(owner)
     dialog.title = title
-    dialog.contentText = msg
+    dialog.contentText = header
     return dialog.showAndWait()
 }
 
-fun showInput(owner: Window?, title: String, msg: String, placeholder: String?): Optional<String>? {
+fun showInput(owner: Window?, title: String, header: String, placeholder: String?, formatter: TextFormatter<String>?): Optional<String> {
     val dialog = TextInputDialog(placeholder)
     dialog.initOwner(owner)
     dialog.title = title
-    dialog.headerText = msg
+    dialog.headerText = header
+    dialog.editor.textFormatter = formatter
     return dialog.showAndWait()
 }
 
-fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<String>? {
+fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<String> {
     val dialog = Dialog<String>()
     dialog.initOwner(owner)
     dialog.title = title
@@ -220,7 +221,7 @@ fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<
     return dialog.showAndWait()
 }
 
-fun <T> showListChoose(owner: Window?, list: List<T>): Optional<List<T>>? {
+fun <T> showListChoose(owner: Window?, list: List<T>): Optional<List<T>> {
     val dialog = Dialog<List<T>>()
     dialog.initOwner(owner)
     dialog.title = I18N["dialog.choose.title"]

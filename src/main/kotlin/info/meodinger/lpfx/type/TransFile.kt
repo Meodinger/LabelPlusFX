@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import info.meodinger.lpfx.util.char.repeat
-import info.meodinger.lpfx.util.lengthOf
 import info.meodinger.lpfx.util.string.isDigit
 import info.meodinger.lpfx.util.string.trimSame
 
@@ -70,7 +69,7 @@ class TransFile {
                     var complementLength: Int
                     val list = ArrayList<String>()
                     for (integer in integerList) {
-                        numberLength = lengthOf(integer)
+                        numberLength = integer.toString().length
                         complementLength = trimmed[map[integer]!!].length - numberLength
                         list.add(trimmed[0] + '0'.repeat(complementLength) + integer + trimmed[1])
                     }
@@ -124,7 +123,7 @@ class TransFile {
         val cloned = this.clone()
 
         val sorted = getSortedPicList(cloned)
-        val map: MutableMap<String, MutableList<TransLabel>> = LinkedHashMap<String, MutableList<TransLabel>>()
+        val map = LinkedHashMap<String, MutableList<TransLabel>>()
         for (key in sorted) map[key] = cloned.transMap[key]!!
         cloned.transMap = map
 

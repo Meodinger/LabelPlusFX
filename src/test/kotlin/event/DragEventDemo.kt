@@ -1,6 +1,8 @@
 package event
 
 import info.meodinger.lpfx.component.CLabel
+import info.meodinger.lpfx.util.color.toHex
+
 import javafx.application.Application
 import javafx.geometry.Insets
 import javafx.scene.Scene
@@ -23,8 +25,8 @@ class DragEventDemo : Application() {
 
     private val box = VBox()
     private val anchorPane = AnchorPane()
-    private val drag = CLabel(1, 20.0, Color.RED)
-    private val drop = CLabel(2, 20.0, Color.RED)
+    private val drag = CLabel(1, 20.0)
+    private val drop = CLabel(2, 20.0)
 
     private var shiftX = 0.0
     private var shiftY = 0.0
@@ -67,12 +69,12 @@ class DragEventDemo : Application() {
             println("enter!")
         }
         drop.setOnDragOver {
-            drop.color = Color.BLUE
+            drop.color = Color.BLUE.toHex()
             it.acceptTransferModes(TransferMode.COPY);
         }
         drop.setOnDragExited {
             println("exit!")
-            drop.color = Color.RED
+            drop.color = Color.RED.toHex()
         }
         drop.setOnDragDropped {
             println("drop!")

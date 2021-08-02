@@ -23,10 +23,11 @@ fun loadFile(fileName: String): ByteArray {
 }
 
 val ICON = loadImage("/image/icon.png")
+val INIT_IMAGE = loadImage("/image/init_image.png")
 
-val SCRIPT = loadFile("/file/Meo_PS_Script")
-val TEMPLATE_EN = loadFile("/file/en.psd")
-val TEMPLATE_ZH = loadFile("/file/zh.psd")
+val SCRIPT = loadFile("/file/script/Meo_PS_Script")
+val TEMPLATE_EN = loadFile("/file/script/ps_script_res/en.psd")
+val TEMPLATE_ZH = loadFile("/file/script/ps_script_res/zh.psd")
 
 val INFO = ResourceBundle.getBundle("info.meodinger.lpfx.LabelPlusFX")!!
 val I18N = ResourceBundle.getBundle("info.meodinger.lpfx.Lang")!!

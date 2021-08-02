@@ -25,10 +25,10 @@ class Label : Application() {
 
     private val box = VBox()
     private val anchorPane = AnchorPane()
-    private val label_1 = CLabel(1, 20.0, Color.RED)
-    private val label_2 = CLabel(2, 20.0, Color.RED)
-    private val label_3 = CLabel(3, 20.0, Color.RED)
-    private val label_4 = CLabel(4, 20.0, Color.RED)
+    private val label_1 = CLabel(1, 20.0)
+    private val label_2 = CLabel(2, 20.0)
+    private val label_3 = CLabel(3, 20.0)
+    private val label_4 = CLabel(4, 20.0)
 
     private var shiftX = 0.0
     private var shiftY = 0.0
@@ -49,13 +49,13 @@ class Label : Application() {
             shiftY = label_1.layoutY - it.sceneY
         }
         label_1.setOnMouseDragged {
-            label_1.color = Color.BLUE
+            label_1.color = Color.BLUE.toHex()
             label_1.layoutX = it.sceneX + shiftX
             label_1.layoutY = it.sceneY + shiftY
         }
         label_1.setOnMouseReleased {
             println("end!")
-            label_1.color = Color.RED
+            label_1.color = Color.RED.toHex()
         }
 
         label_2.setOnMouseClicked {
@@ -69,8 +69,8 @@ class Label : Application() {
         }
 
         label_4.setOnMouseClicked {
-            if (it.button == MouseButton.PRIMARY) label_4.color = Color.web(label_4.color.toHex() + "A0")
-            else label_4.color = Color.web(label_4.color.toHex() + "FF")
+            if (it.button == MouseButton.PRIMARY) label_4.color = label_4.color + "A0"
+            else label_4.color = label_4.color + "FF"
         }
 
         box.children.add(anchorPane)

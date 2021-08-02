@@ -5,6 +5,7 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.application.Application
 import javafx.scene.paint.Color
 import javafx.stage.Stage
@@ -17,17 +18,18 @@ import java.io.File
  */
 object State {
 
+    lateinit var application: Application
+    lateinit var stage: Stage
+
     var controllerAccessor: ControllerAccessor? = null
         set(value) {
             if (field != null) field = value
             else throw IllegalStateException(I18N["exception.accessor_already_set"])
         }
+    val accessor = controllerAccessor!!
 
-    lateinit var application: Application
-    lateinit var stage: Stage
-
-    var transFile: TransFile? = null
-    var transPath: String? = null
+    var transFile = TransFile()
+    var transPath = ""
     var currentGroupId: Int = 0
     var currentPicName: String = ""
 
@@ -36,8 +38,8 @@ object State {
     var viewMode = DefaultViewMode
 
     fun reset() {
-        transFile = null
-        transPath = null
+        transFile = TransFile()
+        transPath = ""
         currentGroupId = 0
         currentPicName = ""
         isChanged = false
@@ -45,13 +47,13 @@ object State {
         viewMode = DefaultViewMode
 
         stage.title = INFO["application.name"]
-        controllerAccessor!!.reset()
+        accessor.reset()
     }
 
     fun getGroupIdByName(name: String): Int {
-        val size = transFile!!.groupList.size
+        val size = transFile.groupList.size
         for (i in 0 until size) {
-            if (transFile!!.groupList[i].name == name) {
+            if (transFile.groupList[i].name == name) {
                 return i
             }
         }
@@ -59,13 +61,13 @@ object State {
     }
 
     fun getGroupColorByName(name: String): String {
-        for (group in transFile!!.groupList) {
+        for (group in transFile.groupList) {
             if (group.name == name) return group.color
         }
         return Color.WHITE.toHex()
     }
 
-    fun getFileFolder(): String = File(transPath!!).parent
+    fun getFileFolder(): String = File(transPath).parent
     fun getBakFolder(): String = getFileFolder() + File.separator + FOLDER_NAME_BAK
     fun getPicPathOf(picName: String): String = getFileFolder() + File.separator + picName
     fun getPicPathNow(): String = getPicPathOf(currentPicName)
@@ -86,9 +88,7 @@ object State {
         fun reset()
 
         fun addLabelLayer()
-        fun updateLabelLayer(index: Int)
         fun removeLabelLayer(index: Int)
-        fun updateLabelLayers()
 
         fun updateTree()
         fun updateGroupList()

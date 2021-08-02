@@ -39,7 +39,7 @@ class CTreeItem(val meta: TransLabel) : TreeItem<String>() {
 
     private fun update() {
         value = "${String.format("%02d",index)}: ${text.replace("\n", " ")}"
-        if (parent.graphic == null) graphic = Circle(8.0, Color.web(State.transFile!!.groupList[groupId].color))
+        if (parent.graphic == null) graphic = Circle(8.0, Color.web(State.transFile.groupList[groupId].color))
     }
 
 }

@@ -18,7 +18,8 @@ class TransFile {
 
     companion object {
         val DEFAULT_VERSION = intArrayOf(1, 0)
-        val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
+
+        const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
         val DEFAULT_COMMENT_LIST = arrayListOf(
             DEFAULT_COMMENT,
             "Default Comment\nYou can edit me",
@@ -87,7 +88,7 @@ class TransFile {
     var version: IntArray = DEFAULT_VERSION
     var comment: String = DEFAULT_COMMENT
     @JsonAlias("group", "groups")
-    var groupList: MutableList<TransGroup> = ArrayList(0)
+    var groupList: MutableList<TransGroup> = ArrayList()
     var transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
 
     override fun toString(): String = ObjectMapper().writeValueAsString(this)

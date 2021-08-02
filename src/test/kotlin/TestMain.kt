@@ -30,6 +30,8 @@ class App : Application() {
 
 fun main(vararg args: String) {
     Application.launch(App::class.java, *args)
+    //eventTest()
+    //compTest()
 }
 
 fun utilTest() {
@@ -37,7 +39,7 @@ fun utilTest() {
 }
 
 fun compTest(vararg args: String) {
-    Application.launch(ComboBox::class.java, *args)
+    Application.launch(LabelPane::class.java, *args)
 }
 
 fun eventTest(vararg args: String) {

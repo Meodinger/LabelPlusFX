@@ -43,7 +43,7 @@ object CTreeMenu {
         private val addGroupItem = MenuItem(I18N["context.add_group"])
         private val addGroupDialog = Dialog<TransGroup>()
         private val addGroupAction = { rootItem: TreeItem<String> ->
-            val newGroupId = State.transFile!!.groupList.size
+            val newGroupId = State.transFile.groupList.size
             val newColor = if (newGroupId >= 9) Color.WHITE
             else Color.web(Settings[Settings.DefaultColorList].asList()[newGroupId])
 
@@ -52,10 +52,10 @@ object CTreeMenu {
             addGroupDialog.result = null
             addGroupDialog.showAndWait().ifPresent { newGroup ->
                 // Edit data
-                State.transFile!!.groupList.add(newGroup)
+                State.transFile.groupList.add(newGroup)
                 // Update view
-                State.controllerAccessor!!.updateGroupList()
-                State.controllerAccessor!!.addLabelLayer()
+                State.accessor.updateGroupList()
+                State.accessor.addLabelLayer()
                 rootItem.children.add(TreeItem(newGroup.name, Circle(8.0, Color.web(newGroup.color))))
                 // Mark change
                 State.isChanged = true
@@ -109,7 +109,7 @@ object CTreeMenu {
                 }
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
-                for (group in State.transFile!!.groupList) {
+                for (group in State.transFile.groupList) {
                     if (group.name == newName) showAlert(I18N["context.rename_group.alert.same_name"])
                     return@ifPresent
                 }
@@ -117,9 +117,9 @@ object CTreeMenu {
                 val groupId = State.getGroupIdByName(groupItem.value)
 
                 // Edit data
-                State.transFile!!.groupList[groupId].name = newName
+                State.transFile.groupList[groupId].name = newName
                 // Update view
-                State.controllerAccessor!!.updateGroupList()
+                State.accessor.updateGroupList()
                 groupItem.value = newName
                 // Mark change
                 State.isChanged = true
@@ -133,10 +133,9 @@ object CTreeMenu {
             val groupId = State.getGroupIdByName(groupItem.value)
 
             // Edit data
-            State.transFile!!.groupList[groupId].color = newColor.toHex()
+            State.transFile.groupList[groupId].color = newColor.toHex()
             // Update view
             (groupItem.graphic as Circle).fill = newColor
-            State.controllerAccessor!!.updateLabelLayer(groupId)
             // Mark change
             State.isChanged = true
         }
@@ -146,13 +145,13 @@ object CTreeMenu {
             val groupId = State.getGroupIdByName(groupItem.value)
 
             // Edit data
-            for (labels in State.transFile!!.transMap.values) for (label in labels)
+            for (labels in State.transFile.transMap.values) for (label in labels)
                 if (label.groupId >= groupId) label.groupId = label.groupId - 1
-            State.transFile!!.groupList.removeIf { it.name == groupItem.value }
+            State.transFile.groupList.removeIf { it.name == groupItem.value }
             // Update view
             groupItem.parent.children.remove(groupItem)
-            State.controllerAccessor!!.updateGroupList()
-            State.controllerAccessor!!.removeLabelLayer(groupId)
+            State.accessor.updateGroupList()
+            State.accessor.removeLabelLayer(groupId)
             // Mark change
             State.isChanged = true
         }
@@ -184,7 +183,7 @@ object CTreeMenu {
 
                 deleteItem.isDisable = false
                 val thisGroupId = State.getGroupIdByName(target.value)
-                outer@ for (labels in State.transFile!!.transMap.values) {
+                outer@ for (labels in State.transFile.transMap.values) {
                     for (label in labels) {
                         if (label.groupId == thisGroupId) {
                             deleteItem.isDisable = true
@@ -202,9 +201,8 @@ object CTreeMenu {
         private val moveToItem = MenuItem(I18N["context.move_to"])
         private val moveToAction = { item: TreeItem<String> ->
             val labelItem = item as CTreeItem
-            val preGroupId = labelItem.groupId
             val groupNameList = ArrayList<String>()
-            for (group in State.transFile!!.groupList) groupNameList.add(group.name)
+            for (group in State.transFile.groupList) groupNameList.add(group.name)
 
             showChoice(
                 State.stage,
@@ -215,9 +213,7 @@ object CTreeMenu {
                 // Edit data
                 labelItem.groupId = State.getGroupIdByName(newGroupName)
                 // Update view
-                State.controllerAccessor!!.updateLabelLayer(preGroupId)
-                State.controllerAccessor!!.updateLabelLayer(item.groupId)
-                State.controllerAccessor!!.updateTree()
+                State.accessor.updateTree()
                 // Mark change
                 State.isChanged = true
             }
@@ -234,15 +230,14 @@ object CTreeMenu {
 
             if (result.isPresent && result.get() == ButtonType.YES) {
                 // Edit data
-                for (label in State.transFile!!.transMap[State.currentPicName]!!) {
+                for (label in State.transFile.transMap[State.currentPicName]!!) {
                     if (label.index > labelItem.index) {
                         label.index = label.index - 1
                     }
                 }
-                State.transFile!!.transMap[State.currentPicName]!!.remove(labelItem.meta)
+                State.transFile.transMap[State.currentPicName]!!.remove(labelItem.meta)
                 // Update view
-                State.controllerAccessor!!.updateLabelLayers()
-                State.controllerAccessor!!.updateTree()
+                State.accessor.updateTree()
                 // Mark change
                 State.isChanged = true
             }
@@ -274,7 +269,7 @@ object CTreeMenu {
         private val moveToAction = { view: TreeView<String> ->
             val selectedItems = view.selectionModel.selectedItems
             val groupNameList = ArrayList<String>()
-            for (group in State.transFile!!.groupList) groupNameList.add(group.name)
+            for (group in State.transFile.groupList) groupNameList.add(group.name)
 
             showChoice(
                 State.stage,
@@ -289,8 +284,7 @@ object CTreeMenu {
                     (item as CTreeItem).groupId = newGroupId
                 }
                 // Update view
-                State.controllerAccessor!!.updateLabelLayers()
-                State.controllerAccessor!!.updateTree()
+                State.accessor.updateTree()
                 // Mark change
                 State.isChanged = true
             }
@@ -308,15 +302,14 @@ object CTreeMenu {
                 // Edit data
                 for (item in selectedItems) {
                     val label = (item as CTreeItem).meta
-                    for (l in State.transFile!!.transMap[State.currentPicName]!!) {
+                    for (l in State.transFile.transMap[State.currentPicName]!!) {
                         if (l.index > label.index)
                             l.index = l.index - 1
                     }
-                    State.transFile!!.transMap[State.currentPicName]!!.remove(label)
+                    State.transFile.transMap[State.currentPicName]!!.remove(label)
                 }
                 // Update view
-                State.controllerAccessor!!.updateLabelLayers()
-                State.controllerAccessor!!.updateTree()
+                State.accessor.updateTree()
                 // Mark change
                 State.isChanged = true
             }

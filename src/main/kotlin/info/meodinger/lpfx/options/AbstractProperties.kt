@@ -4,6 +4,8 @@ import info.meodinger.lpfx.type.CProperty
 import info.meodinger.lpfx.type.CProperty.Companion.COMMENT_HEAD
 import info.meodinger.lpfx.type.CProperty.Companion.KV_SEPARATOR
 import info.meodinger.lpfx.util.dialog.showException
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -67,6 +69,6 @@ abstract class AbstractProperties {
                 return property
             }
         }
-        throw IllegalStateException("Property not found")
+        throw IllegalStateException(String.format(I18N["exception.illegal_state.property_not_found.format"], key))
     }
 }

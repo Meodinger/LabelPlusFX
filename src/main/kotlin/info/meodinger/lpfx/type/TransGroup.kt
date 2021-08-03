@@ -1,6 +1,6 @@
 package info.meodinger.lpfx.type
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 import javafx.beans.property.SimpleStringProperty
 
@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleStringProperty
  * Date: 2021/7/30
  * Location: info.meodinger.lpfx.type
  */
+@JsonIgnoreProperties("nameProperty", "colorProperty")
 class TransGroup(
     name: String = "NewGroup@${index++}",
     color: String = "66CCFF"
@@ -17,9 +18,7 @@ class TransGroup(
         private var index = 0
     }
 
-    @JsonIgnore
     val nameProperty = SimpleStringProperty(name)
-    @JsonIgnore
     val colorProperty = SimpleStringProperty(color)
 
     var name: String
@@ -32,6 +31,8 @@ class TransGroup(
         set(value) {
             colorProperty.value = value
         }
+
+    override fun toString(): String = "TransGroup(name=$name, color=$color)"
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false

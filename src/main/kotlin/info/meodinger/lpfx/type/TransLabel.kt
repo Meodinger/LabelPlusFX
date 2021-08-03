@@ -52,6 +52,8 @@ class TransLabel(
             textProperty.value = value
         }
 
+    override fun toString(): String = "TransLabel($index, $x - $y, $groupId, ${text.replace("\n", ",")})"
+
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is TransLabel) return false

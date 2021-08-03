@@ -36,32 +36,33 @@ class CLabel(
         get() = indexProperty.value
         set(value) {
             indexProperty.value = value
-            update(value, radius, color)
         }
     var radius: Double
         get() = radiusProperty.value
         set(value) {
             radiusProperty.value = value
-            update(index, value, color)
         }
     var color: String
         get() = colorProperty.value
         set(value) {
             colorProperty.value = value
-            update(index, radius, value)
         }
 
     init {
+        indexProperty.addListener { _, _, _ -> update() }
+        radiusProperty.addListener { _, _, _ -> update() }
+        colorProperty.addListener { _, _, _ -> update() }
+
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
 
         setPrefSize(radius, radius)
-        update(index, radius, color)
+        update()
         children.setAll(circle, text)
     }
 
-    private fun update(index: Int, radius: Double, color: String) {
+    private fun update() {
         text.text = index.toString()
         circle.radius = radius
         circle.fill = Color.web(color)

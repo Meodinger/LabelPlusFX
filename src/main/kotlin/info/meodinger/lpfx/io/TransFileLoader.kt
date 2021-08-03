@@ -117,26 +117,33 @@ fun loadLP(file: File): TransFile {
 
     // Group Info and Separator
     var count = 1
+    val groupList = ArrayList<TransGroup>()
     while (lines[pointer] != LPTransFile.SEPARATOR && count < 10) {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.empty_group_name"])
+
         val group = TransGroup(lines[pointer], MeoTransFile.DEFAULT_COLOR_LIST[count - 1])
-        transFile.groupList.forEach {
+
+        groupList.forEach {
             if (it.name == group.name) throw IOException(String.format(I18N["exception.repeated_group_name.format"], group.name))
         }
-        transFile.groupList.add(group)
+        groupList.add(group)
+
         count++
         pointer++
     }
     if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.too_many_groups"])
+    transFile.groupList = groupList
     pointer++
 
     // Comment
     transFile.comment = parseText(LPTransFile.PIC_START)
 
     // Content
+    val transMap = HashMap<String, MutableList<TransLabel>>()
     while (pointer < size && lines[pointer].startsWith(LPTransFile.PIC_START)) {
-        transFile.transMap[parsePicHead()] = parsePicBody()
+        transMap[parsePicHead()] = parsePicBody()
     }
+    transFile.transMap = transMap
 
     return transFile
 }

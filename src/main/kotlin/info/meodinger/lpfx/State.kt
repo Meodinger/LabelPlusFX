@@ -24,7 +24,7 @@ object State {
     var controllerAccessor: ControllerAccessor? = null
         set(value) {
             if (field != null) field = value
-            else throw IllegalStateException(I18N["exception.accessor_already_set"])
+            else throw IllegalStateException(I18N["exception.illegal_state.accessor_already_set"])
         }
     val accessor = controllerAccessor!!
 

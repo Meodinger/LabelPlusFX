@@ -5,7 +5,9 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.keyboard.isControlDown
 import info.meodinger.lpfx.util.platform.MonoType
+import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE
+import info.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -21,6 +23,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.*
@@ -72,9 +75,13 @@ class CLabelPane : ScrollPane() {
         eventType: EventType<LabelEvent>,
         val source: MouseEvent,
         val labelIndex: Int,
+        val x: Double, val y: Double,
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY = EventType<LabelEvent>(EventType.ROOT)
+            val LABEL_OTHER = EventType(LABEL_ANY, "LABEL_OTHER")
+            val LABEL_PLACE = EventType(LABEL_ANY, "LABEL_PLACE")
+            val LABEL_REMOVE = EventType(LABEL_ANY, "LABEL_REMOVE")
             val LABEL_POINTED = EventType(LABEL_ANY, "LABEL_POINTED")
             val LABEL_CLICKED = EventType(LABEL_ANY, "LABEL_CLICKED")
         }
@@ -111,7 +118,7 @@ class CLabelPane : ScrollPane() {
 
     private var shiftX = 0.0
     private var shiftY = 0.0
-    private val labels = ArrayList<CLabel?>()
+    private val labels = ArrayList<CLabel>()
 
     // ----- properties ----- //
 
@@ -120,10 +127,10 @@ class CLabelPane : ScrollPane() {
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
-    val onLabelPointedProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
-    val onLabelClickedProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
+    val colorListProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val colorListProperty = SimpleListProperty<String>()
+    val handleInputModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
+    val handleLabelModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
 
     var initScale: Double
         get() = initScaleProperty.value
@@ -164,25 +171,26 @@ class CLabelPane : ScrollPane() {
         set(value) {
             defaultCursorProperty.value = value
         }
-    var onLabelPointed: EventHandler<LabelEvent>
-        get() = onLabelPointedProperty.value
+    var colorList: MutableList<String>
+        get() = colorListProperty.value
         set(value) {
-            onLabelPointedProperty.value = value
-        }
-    var onLabelClicked: EventHandler<LabelEvent>
-        get() = onLabelClickedProperty.value
-        set(value) {
-            onLabelClickedProperty.value = value
+            // setAll not supported
+            colorListProperty.value = FXCollections.observableList(value)
         }
     var selectedLabelIndex: Int
         get() = selectedLabelIndexProperty.value
         set(value) {
             selectedLabelIndexProperty.value = value
         }
-    var colorList: MutableList<String>
-        get() = colorListProperty.value
+    var handleInputMode: EventHandler<LabelEvent>
+        get() = handleInputModeProperty.value
         set(value) {
-            colorListProperty.value = FXCollections.observableList(value)
+            handleInputModeProperty.value = value
+        }
+    var handleLabelMode: EventHandler<LabelEvent>
+        get() = handleLabelModeProperty.value
+        set(value) {
+            handleLabelModeProperty.value = value
         }
     var image: Image
         get() = view.image
@@ -208,11 +216,15 @@ class CLabelPane : ScrollPane() {
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            if (it.isConsumed) return@addEventHandler
+
             shiftX = root.layoutX -  it.sceneX
             shiftY = root.layoutY -it.sceneY
             root.cursor = Cursor.MOVE
         }
         root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            if (it.isConsumed) return@addEventHandler
+
             root.layoutX = shiftX + it.sceneX
             root.layoutY = shiftY + it.sceneY
         }
@@ -222,7 +234,7 @@ class CLabelPane : ScrollPane() {
 
         // Scale
         root.addEventHandler(ScrollEvent.SCROLL) {
-            this.clearText()
+            this.removeText()
             if (isControlDown(it) || it.isAltDown) {
                 scale += it.deltaY / 400
             }
@@ -246,7 +258,19 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
             root.cursor = defaultCursor
-            this.clearText()
+            this.removeText()
+        }
+
+        // Handle
+        root.addEventHandler(MouseEvent.MOUSE_MOVED) {
+            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+        }
+        root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            if (it.button == MouseButton.PRIMARY) {
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+            }
         }
 
         root.children.add(view)
@@ -264,6 +288,11 @@ class CLabelPane : ScrollPane() {
         setupLayers(0)
     }
 
+    fun getLabel(transLabel: TransLabel): CLabel {
+        for (label in labels) if (label.index == transLabel.index) return label
+        throw IllegalStateException(String.format(I18N["exception.illegal_state.label_not_found.format"], transLabel.index))
+    }
+
     fun setupImage(path: String) {
         try {
             image = Image(File(path).toURI().toURL().toString())
@@ -274,12 +303,12 @@ class CLabelPane : ScrollPane() {
     fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
         labelLayers.clear()
-        clearText()
+        removeText()
 
-        for (i in 0 until count) AnchorPane().also {
-            it.isPickOnBounds = false
-            root.children.add(it)
-            labelLayers.add(it)
+        for (i in 0 until count) {
+            val pane = AnchorPane().also { it.isPickOnBounds = false }
+            root.children.add(pane)
+            labelLayers.add(pane)
         }
 
         textLayer.width = imageWidth
@@ -293,6 +322,13 @@ class CLabelPane : ScrollPane() {
         }
     }
 
+    fun placeLabelLayer() {
+        val pane = AnchorPane().also { it.isPickOnBounds = false }
+        root.children.add(pane)
+        labelLayers.add(pane)
+
+        textLayer.toFront()
+    }
     fun placeLabel(transLabel: TransLabel) {
         val label = CLabel(
             transLabel.index,
@@ -300,33 +336,23 @@ class CLabelPane : ScrollPane() {
             colorList[transLabel.groupId]
         )
 
-        // Bind property
-        label.indexProperty.bind(transLabel.indexProperty)
-        label.colorProperty.bind(colorListProperty.valueAt(transLabel.groupIdProperty))
-
-        // Register label
-        while (labels.size <= label.index) {
-            labels.add(null)
-        }
-        labels[label.index] = label
-
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         label.addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            it.consume()
+
             shiftX = label.layoutX -  it.sceneX
             shiftY = label.layoutY -it.sceneY
             label.cursor = Cursor.MOVE
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            clearText()
+            it.consume()
+            removeText()
 
-            label.layoutX = shiftX + it.sceneX
-            label.layoutY = shiftY + it.sceneY
-
-            transLabel.x = it.x / imageWidth
-            transLabel.y = it.y / imageHeight
+            AnchorPane.setLeftAnchor(label, shiftX + it.sceneX)
+            AnchorPane.setTopAnchor(label, shiftY + it.sceneY)
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             label.cursor = defaultCursor
@@ -336,30 +362,56 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_ENTERED) {
             label.cursor = Cursor.HAND
         }
+        label.addEventHandler(MouseEvent.MOUSE_MOVED) {
+            label.cursor = Cursor.HAND
+        }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
             label.cursor = defaultCursor
-            this.clearText()
+            this.removeText()
         }
 
         // Selected index
         label.addEventHandler(MouseEvent.MOUSE_CLICKED) {
-             selectedLabelIndex = label.index
+             selectedLabelIndex = transLabel.index
+        }
+
+        // Text display
+        label.addEventHandler(MouseEvent.MOUSE_MOVED) {
+            placeText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
         }
 
         // Event handle
         label.setOnMouseMoved {
-            onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, label.index))
+            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y))
+            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y))
         }
         label.setOnMouseClicked {
-            onLabelClicked.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, label.index))
+            if (it.button == MouseButton.PRIMARY) {
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y))
+            } else if (it.button == MouseButton.SECONDARY) {
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y))
+            }
         }
 
         // Layout
         AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x)
         AnchorPane.setTopAnchor(label, imageHeight * transLabel.y)
         labelLayers[transLabel.groupId].children.add(label)
+
+        // Register label
+        labels.add(label)
+
+        // Bind property
+        label.indexProperty.bind(transLabel.indexProperty)
+        label.colorProperty.bind(colorListProperty.valueAt(transLabel.groupIdProperty))
+        transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
+        transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
     }
     fun placeText(text: String, color: Color, x: Double, y: Double) {
+        removeText()
+
         val gc = textLayer.graphicsContext2D
         val lineCount = text.length - text.replace("\n".toRegex(), "").length + 1
         val t = Text(text).also { it.font = DISPLAY_FONT }
@@ -390,26 +442,45 @@ class CLabelPane : ScrollPane() {
         gc.fill = color
         gc.fillText(text, textX, textY)
     }
-    fun clearLabel(transLabel: TransLabel) {
-        labelLayers[transLabel.groupId].children.remove(labels[transLabel.index])
-        labels[transLabel.index] = null
+
+    fun removeLabelLayer(groupId: Int) {
+        root.children.removeAt(groupId + 1) // Bottom is view
+        labelLayers.removeAt(groupId)
     }
-    fun clearText() {
+    fun removeLabel(transLabel: TransLabel) {
+        val label = getLabel(transLabel)
+        labelLayers[transLabel.groupId].children.remove(label)
+        labels.remove(label)
+
+        selectedLabelIndex = NOT_FOUND
+    }
+    fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
     }
 
-    fun addLabelLayer() {
-        val pane = AnchorPane()
-        pane.isPickOnBounds = false
-        labelLayers.add(pane)
-        root.children.add(pane)
-        textLayer.toFront()
+    fun moveToLabel(transLabel: TransLabel) {
+        val label = getLabel(transLabel)
+
+        vvalue = 0.0
+        hvalue = 0.0
+
+        val centerX = AnchorPane.getLeftAnchor(label)
+        val centerY = AnchorPane.getTopAnchor(label)
+
+        /**
+         * Scaled (fake)
+         *  -> Image / 2 - (Image / 2 - Center) * Scale
+         *  -> Image / 2 * (1 - Scale) + Center * Scale
+         */
+        val fakeX = imageWidth / 2 * (1 - scale) + centerX * scale
+        val fakeY = imageHeight / 2 * (1 - scale) + centerY * scale
+
+        /**
+         * To center
+         *  -> Scroll / 2 = Layout + Fake
+         *  -> Layout = Scroll / 2 - Fake
+         */
+        root.layoutX = width / 2 - fakeX
+        root.layoutY = height / 2 - fakeY
     }
-    fun removeLabelLayer(groupId: Int) {
-        val pane = labelLayers[groupId]
-        labelLayers.remove(pane)
-        root.children.remove(pane)
-    }
-    fun updateTextLayer() {}
-    fun moveToLabel(index: Int) {}
 }

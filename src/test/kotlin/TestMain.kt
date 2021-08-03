@@ -29,9 +29,9 @@ class App : Application() {
 }
 
 fun main(vararg args: String) {
-    Application.launch(App::class.java, *args)
+    //Application.launch(App::class.java, *args)
     //eventTest()
-    //compTest()
+    compTest()
 }
 
 fun utilTest() {

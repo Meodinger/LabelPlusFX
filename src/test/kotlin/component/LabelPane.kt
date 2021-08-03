@@ -1,15 +1,29 @@
-package component;
+package component
 
 import info.meodinger.lpfx.component.CLabelPane
+import info.meodinger.lpfx.component.CLabelPane.LabelEvent
+import info.meodinger.lpfx.type.TransLabel
 import io.commonTest
 
 import javafx.application.Application
+import javafx.beans.binding.ListBinding
+import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.geometry.Orientation
 import javafx.scene.Cursor
 import javafx.scene.Scene
+import javafx.scene.control.Button
+import javafx.scene.control.SplitPane
 import javafx.scene.control.TextArea
+import javafx.scene.control.TextField
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import kotlin.math.roundToInt
 
 /**
  * Author: Meodinger
@@ -21,41 +35,134 @@ class LabelPane : Application() {
     companion object {
         private const val WIDTH = 600.0
         private const val HEIGHT = 600.0
+
+        private const val picName = "1.jpg"
+
     }
 
     val transFile = commonTest()
-    val picName = "1.jpg"
 
+    val s = SplitPane()
     val box = VBox()
     val pane = CLabelPane()
+
+    val moveToButton = Button("Move to")
+    val moveToField = TextField()
+
+    val changeColorButton = Button("Change Color")
+
+    val changeIndexButton = Button("Change Index")
+
     val textArea = TextArea()
 
 
     init {
-        val colorList = ArrayList<String>()
-        transFile.groupList.forEach { colorList.add(it.color) }
 
         pane.minScale = 0.2
         pane.maxScale = 2.0
         pane.defaultCursor = Cursor.CROSSHAIR
-        pane.colorList = colorList
-        pane.onLabelClicked = EventHandler {
-            textArea.text = "233"
+
+        val l : ListBinding<String> =  object : ListBinding<String>() {
+
+            init {
+                bind(transFile.groupListProperty)
+                for (group in transFile.groupList) {
+                    bind(group.colorProperty)
+                }
+            }
+
+            override fun computeValue(): ObservableList<String> {
+                val list = ArrayList<String>()
+                transFile.groupList.forEach {
+                    list.add(it.color)
+                }
+                return FXCollections.observableList(list)
+            }
         }
-        pane.onLabelPointed = EventHandler {
-            textArea.text = transFile.transMap[picName]!![it.labelIndex - 1].toString()
+        pane.colorListProperty.bind(l)
+
+        pane.handleInputMode = EventHandler {
+            when (it.eventType) {
+                LabelEvent.LABEL_OTHER -> {
+                    textArea.appendText("I other nothing")
+                }
+                LabelEvent.LABEL_PLACE -> {
+                    textArea.appendText("I place nothing")
+                }
+                LabelEvent.LABEL_REMOVE -> {
+                    textArea.appendText("I remove nothing")
+                }
+                LabelEvent.LABEL_POINTED -> {
+                    textArea.appendText("I pointed ${it.labelIndex}")
+                }
+                LabelEvent.LABEL_CLICKED -> {
+                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+                    textArea.appendText("I clicked ${transLabel}")
+                }
+            }
+            textArea.appendText("\n")
+        }
+        pane.handleLabelMode = EventHandler {
+            when (it.eventType) {
+                LabelEvent.LABEL_OTHER -> {
+                    textArea.appendText("L other nothing")
+                }
+                LabelEvent.LABEL_PLACE -> {
+                    val transLabel = TransLabel(
+                        transFile.getTransLabelListOf(picName).size,
+                        it.x,
+                        it.y,
+                        0,
+                        "NewText@${(Math.random() * 1000).roundToInt()}"
+                    )
+                    transFile.getTransLabelListOf(picName).add(transLabel)
+                    pane.placeLabel(transLabel)
+
+                    textArea.appendText("L place $transLabel")
+                }
+                LabelEvent.LABEL_REMOVE -> {
+                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+                    transFile.getTransLabelListOf(picName).remove(transLabel)
+                    pane.removeLabel(transLabel)
+                    textArea.appendText("L remove $transLabel")
+                }
+                LabelEvent.LABEL_POINTED -> {
+                    textArea.appendText("L pointed ${it.labelIndex}")
+                }
+                LabelEvent.LABEL_CLICKED -> {
+                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+                    textArea.appendText("L clicked ${transLabel}")
+                }
+            }
+            textArea.appendText("\n")
         }
 
         pane.setupImage("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\test\\resources\\sample\\1.jpg")
         pane.setupLayers(transFile.groupList.size)
-        pane.setupLabels(transFile.transMap["1.jpg"]!!)
+        pane.setupLabels(transFile.transMap[picName]!!)
 
-        box.children.add(pane)
+        moveToButton.setOnAction {
+            pane.moveToLabel(transFile.transMap[picName]!![moveToField.text.toInt() - 1])
+        }
+        changeColorButton.setOnAction {
+            transFile.groupList[0].color = "66ccff"
+            println(transFile.groupList)
+            println(pane.colorList)
+        }
+        changeIndexButton.setOnAction {
+            transFile.transMap[picName]!![0].index += 2
+        }
+
+        textArea.prefHeight = 600.0
+        box.children.add(HBox(moveToButton, moveToField, changeColorButton, changeIndexButton))
         box.children.add(textArea)
+
+        s.orientation = Orientation.VERTICAL
+        s.items.addAll(pane, box)
     }
 
     override fun start(primaryStage: Stage) {
-        primaryStage.scene = Scene(box, WIDTH, HEIGHT)
+        primaryStage.scene = Scene(s, WIDTH, HEIGHT)
         primaryStage.show()
     }
 

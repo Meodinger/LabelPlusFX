@@ -36,22 +36,22 @@ class CLabel(
         get() = indexProperty.value
         set(value) {
             indexProperty.value = value
+            update()
         }
     var radius: Double
         get() = radiusProperty.value
         set(value) {
             radiusProperty.value = value
+            update()
         }
     var color: String
         get() = colorProperty.value
         set(value) {
             colorProperty.value = value
+            update()
         }
 
     init {
-        indexProperty.addListener { _, _, _ -> update() }
-        radiusProperty.addListener { _, _, _ -> update() }
-        colorProperty.addListener { _, _, _ -> update() }
 
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER

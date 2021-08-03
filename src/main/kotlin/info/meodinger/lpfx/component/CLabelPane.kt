@@ -216,17 +216,17 @@ class CLabelPane : ScrollPane() {
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            if (it.isConsumed) return@addEventHandler
-
-            shiftX = root.layoutX -  it.sceneX
-            shiftY = root.layoutY -it.sceneY
-            root.cursor = Cursor.MOVE
+            if (!it.isConsumed) {
+                shiftX = root.layoutX - it.sceneX
+                shiftY = root.layoutY - it.sceneY
+                root.cursor = Cursor.MOVE
+            }
         }
         root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            if (it.isConsumed) return@addEventHandler
-
-            root.layoutX = shiftX + it.sceneX
-            root.layoutY = shiftY + it.sceneY
+            if (!it.isConsumed) {
+                root.layoutX = shiftX + it.sceneX
+                root.layoutY = shiftY + it.sceneY
+            }
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = defaultCursor
@@ -324,9 +324,11 @@ class CLabelPane : ScrollPane() {
 
     fun placeLabelLayer() {
         val pane = AnchorPane().also { it.isPickOnBounds = false }
+        // Layout
         root.children.add(pane)
+        // Add layer in list
         labelLayers.add(pane)
-
+        // Move text layer to front
         textLayer.toFront()
     }
     fun placeLabel(transLabel: TransLabel) {
@@ -343,19 +345,19 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_PRESSED) {
             it.consume()
 
-            shiftX = label.layoutX -  it.sceneX
-            shiftY = label.layoutY -it.sceneY
+            shiftX = label.layoutX -  it.sceneX / scale
+            shiftY = label.layoutY -it.sceneY / scale
             label.cursor = Cursor.MOVE
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
             it.consume()
             removeText()
 
-            AnchorPane.setLeftAnchor(label, shiftX + it.sceneX)
-            AnchorPane.setTopAnchor(label, shiftY + it.sceneY)
+            AnchorPane.setLeftAnchor(label, shiftX + it.sceneX / scale)
+            AnchorPane.setTopAnchor(label, shiftY + it.sceneY / scale)
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
-            label.cursor = defaultCursor
+            label.cursor = Cursor.HAND
         }
 
         // Cursor
@@ -400,7 +402,7 @@ class CLabelPane : ScrollPane() {
         AnchorPane.setTopAnchor(label, imageHeight * transLabel.y)
         labelLayers[transLabel.groupId].children.add(label)
 
-        // Register label
+        // Add label in list
         labels.add(label)
 
         // Bind property
@@ -444,15 +446,22 @@ class CLabelPane : ScrollPane() {
     }
 
     fun removeLabelLayer(groupId: Int) {
-        root.children.removeAt(groupId + 1) // Bottom is view
-        labelLayers.removeAt(groupId)
+        val layer = labelLayers[groupId]
+        // Remove labels
+        labels.removeAll(layer.children)
+        layer.children.clear()
+        // Remove layer
+        labelLayers.remove(layer)
+        root.children.remove(layer) // Bottom is view
     }
     fun removeLabel(transLabel: TransLabel) {
         val label = getLabel(transLabel)
-        labelLayers[transLabel.groupId].children.remove(label)
+        // Remove label in list
         labels.remove(label)
-
-        selectedLabelIndex = NOT_FOUND
+        // Remove label comp
+        labelLayers[transLabel.groupId].children.remove(label)
+        // Edit data
+        if (selectedLabelIndex == label.index) selectedLabelIndex = NOT_FOUND
     }
     fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)

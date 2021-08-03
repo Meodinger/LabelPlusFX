@@ -2,10 +2,12 @@ package component
 
 import info.meodinger.lpfx.component.CLabelPane
 import info.meodinger.lpfx.component.CLabelPane.LabelEvent
+import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import io.commonTest
 
 import javafx.application.Application
+import javafx.beans.Observable
 import javafx.beans.binding.ListBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleStringProperty
@@ -23,6 +25,7 @@ import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import java.lang.reflect.Method
 import kotlin.math.roundToInt
 
 /**
@@ -47,11 +50,11 @@ class LabelPane : Application() {
     val pane = CLabelPane()
 
     val moveToButton = Button("Move to")
-    val moveToField = TextField()
-
+    val moveToField = TextField("1")
     val changeColorButton = Button("Change Color")
-
     val changeIndexButton = Button("Change Index")
+    val addLayerButton = Button("Add Layer")
+    val removeLayerButton = Button("Remove Layer")
 
     val textArea = TextArea()
 
@@ -62,24 +65,24 @@ class LabelPane : Application() {
         pane.maxScale = 2.0
         pane.defaultCursor = Cursor.CROSSHAIR
 
-        val l : ListBinding<String> =  object : ListBinding<String>() {
-
-            init {
-                bind(transFile.groupListProperty)
-                for (group in transFile.groupList) {
-                    bind(group.colorProperty)
+        fun createColorHexBinding(): ListBinding<String> {
+            return object : ListBinding<String>() {
+                init {
+                    for (i in 0 until transFile.groupList.size) {
+                        bind(transFile.groupList[i].colorProperty)
+                    }
                 }
-            }
 
-            override fun computeValue(): ObservableList<String> {
-                val list = ArrayList<String>()
-                transFile.groupList.forEach {
-                    list.add(it.color)
+                override fun computeValue(): ObservableList<String> {
+                    val list = ArrayList<String>()
+                    transFile.groupList.forEach {
+                        list.add(it.color)
+                    }
+                    return FXCollections.observableList(list)
                 }
-                return FXCollections.observableList(list)
             }
         }
-        pane.colorListProperty.bind(l)
+        pane.colorListProperty.bind(createColorHexBinding())
 
         pane.handleInputMode = EventHandler {
             when (it.eventType) {
@@ -109,7 +112,7 @@ class LabelPane : Application() {
                 }
                 LabelEvent.LABEL_PLACE -> {
                     val transLabel = TransLabel(
-                        transFile.getTransLabelListOf(picName).size,
+                        transFile.getTransLabelListOf(picName).size + 1,
                         it.x,
                         it.y,
                         0,
@@ -118,11 +121,17 @@ class LabelPane : Application() {
                     transFile.getTransLabelListOf(picName).add(transLabel)
                     pane.placeLabel(transLabel)
 
+                    // x/y is 0.0 because of bind
                     textArea.appendText("L place $transLabel")
                 }
                 LabelEvent.LABEL_REMOVE -> {
                     val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+
                     transFile.getTransLabelListOf(picName).remove(transLabel)
+                    for (label in transFile.getTransLabelListOf(picName)) {
+                        if (label.index > transLabel.index) label.index -= 1
+                    }
+
                     pane.removeLabel(transLabel)
                     textArea.appendText("L remove $transLabel")
                 }
@@ -146,15 +155,52 @@ class LabelPane : Application() {
         }
         changeColorButton.setOnAction {
             transFile.groupList[0].color = "66ccff"
-            println(transFile.groupList)
-            println(pane.colorList)
         }
         changeIndexButton.setOnAction {
             transFile.transMap[picName]!![0].index += 2
         }
+        addLayerButton.setOnAction {
+            // data -> bind -> add
+
+            val group = TransGroup(color = "B3D365")
+            val label = TransLabel(
+                transFile.getTransLabelListOf(picName).size + 1,
+                Math.random(), Math.random(),
+                transFile.groupList.size,
+                "New Layer Label"
+            )
+
+            transFile.groupList.add(group)
+            transFile.getTransLabelListOf(picName).add(label)
+
+            pane.colorListProperty.bind(createColorHexBinding())
+
+            pane.placeLabelLayer()
+            pane.placeLabel(label)
+        }
+        removeLayerButton.setOnAction {
+            // data -> remove -> bind
+
+            val id = transFile.groupList.size - 1
+            val group = transFile.groupList[id]
+
+            transFile.groupList.remove(group)
+            val list = transFile.getTransLabelListOf(picName)
+            val listToRemove = ArrayList<TransLabel>()
+            for (label in list) {
+                if (label.groupId == id) {
+                    listToRemove.add(label)
+                }
+            }
+            list.removeAll(listToRemove)
+
+            pane.removeLabelLayer(id)
+
+            pane.colorListProperty.bind(createColorHexBinding())
+        }
 
         textArea.prefHeight = 600.0
-        box.children.add(HBox(moveToButton, moveToField, changeColorButton, changeIndexButton))
+        box.children.add(HBox(moveToButton, moveToField, changeColorButton, changeIndexButton, addLayerButton, removeLayerButton))
         box.children.add(textArea)
 
         s.orientation = Orientation.VERTICAL

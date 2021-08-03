@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.type
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import info.meodinger.lpfx.util.char.repeat
@@ -8,12 +9,7 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.isDigit
 import info.meodinger.lpfx.util.string.trimSame
-
-import javafx.beans.property.SimpleListProperty
-import javafx.beans.property.SimpleMapProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
+import javafx.beans.property.SimpleIntegerProperty
 
 import java.util.TreeSet
 
@@ -22,7 +18,6 @@ import java.util.TreeSet
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
  */
-@JsonIgnoreProperties("versionProperty", "commentProperty", "groupListProperty", "transMapProperty")
 class TransFile {
 
     companion object {
@@ -94,31 +89,11 @@ class TransFile {
         }
     }
 
-    val versionProperty = SimpleObjectProperty(DEFAULT_VERSION)
-    val commentProperty = SimpleStringProperty(DEFAULT_COMMENT)
-    val groupListProperty = SimpleListProperty<TransGroup>(FXCollections.emptyObservableList())
-    val transMapProperty = SimpleMapProperty<String, MutableList<TransLabel>>(FXCollections.emptyObservableMap())
-
-    var version: IntArray
-        get() = versionProperty.value
-        set(value) {
-            versionProperty.value = value
-        }
-    var comment: String
-        get() = commentProperty.value
-        set(value) {
-            commentProperty.value = value
-        }
-    var groupList: MutableList<TransGroup>
-        get() = groupListProperty.value
-        set(value) {
-            groupListProperty.value = FXCollections.observableList(value)
-        }
-    var transMap: MutableMap<String, MutableList<TransLabel>>
-        get() = transMapProperty.value
-        set(value) {
-            transMapProperty.value = FXCollections.observableMap(value)
-        }
+    var version: IntArray = DEFAULT_VERSION
+    var comment: String = DEFAULT_COMMENT
+    @JsonAlias("group", "groups")
+    var groupList: MutableList<TransGroup> = ArrayList()
+    var transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
 
     fun getTransGroupAt(groupId: Int): TransGroup {
         if (groupId < 0 || groupId >= groupList.size)

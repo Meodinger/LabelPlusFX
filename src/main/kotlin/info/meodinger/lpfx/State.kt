@@ -28,6 +28,7 @@ object State {
         }
     val accessor = controllerAccessor!!
 
+    var isOpened = false
     var transFile = TransFile()
     var transPath = ""
     var currentGroupId: Int = 0
@@ -38,6 +39,7 @@ object State {
     var viewMode = DefaultViewMode
 
     fun reset() {
+        isOpened = false
         transFile = TransFile()
         transPath = ""
         currentGroupId = 0

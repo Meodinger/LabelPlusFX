@@ -20,10 +20,16 @@ import javafx.scene.text.TextAlignment
  * Location: info.meodinger.lpfx.component
  */
 class CLabel(
-    index: Int = 0,
-    radius: Double = 16.0,
-    color: String = "66CCFF"
+    index: Int = DEFAULT_INDEX,
+    radius: Double = DEFAULT_RADIUS,
+    color: String = DEFAULT__COLOR
 ) : Region() {
+
+    companion object {
+        const val DEFAULT_INDEX = -1
+        const val DEFAULT_RADIUS = 16.0
+        const val DEFAULT__COLOR = "66CCFFFF"
+    }
 
     private val circle = Circle(radius, Color.web(color))
     private val text = Text(index.toString())
@@ -52,7 +58,6 @@ class CLabel(
         }
 
     init {
-
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY

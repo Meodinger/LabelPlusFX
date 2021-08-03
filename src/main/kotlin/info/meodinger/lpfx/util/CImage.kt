@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.util
+package info.meodinger.lpfx.util.image
 
 import javafx.scene.image.Image
 

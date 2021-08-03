@@ -117,7 +117,7 @@ object CTreeMenu {
                 val groupId = State.getGroupIdByName(groupItem.value)
 
                 // Edit data
-                State.transFile.groupList[groupId].name = newName
+                State.transFile.getTransGroupAt(groupId).name = newName
                 // Update view
                 State.accessor.updateGroupList()
                 groupItem.value = newName
@@ -133,7 +133,7 @@ object CTreeMenu {
             val groupId = State.getGroupIdByName(groupItem.value)
 
             // Edit data
-            State.transFile.groupList[groupId].color = newColor.toHex()
+            State.transFile.getTransGroupAt(groupId).color = newColor.toHex()
             // Update view
             (groupItem.graphic as Circle).fill = newColor
             // Mark change
@@ -230,12 +230,12 @@ object CTreeMenu {
 
             if (result.isPresent && result.get() == ButtonType.YES) {
                 // Edit data
-                for (label in State.transFile.transMap[State.currentPicName]!!) {
+                for (label in State.transFile.getTransLabelListOf(State.currentPicName)) {
                     if (label.index > labelItem.index) {
                         label.index = label.index - 1
                     }
                 }
-                State.transFile.transMap[State.currentPicName]!!.remove(labelItem.meta)
+                State.transFile.getTransLabelListOf(State.currentPicName).remove(labelItem.meta)
                 // Update view
                 State.accessor.updateTree()
                 // Mark change
@@ -302,11 +302,11 @@ object CTreeMenu {
                 // Edit data
                 for (item in selectedItems) {
                     val label = (item as CTreeItem).meta
-                    for (l in State.transFile.transMap[State.currentPicName]!!) {
+                    for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
                         if (l.index > label.index)
                             l.index = l.index - 1
                     }
-                    State.transFile.transMap[State.currentPicName]!!.remove(label)
+                    State.transFile.getTransLabelListOf(State.currentPicName).remove(label)
                 }
                 // Update view
                 State.accessor.updateTree()

@@ -54,9 +54,6 @@ class CLabelPane : ScrollPane() {
         const val NOT_FOUND = -1
         const val NOT_SET = -1.0
 
-        // general
-        const val LINE_HEIGHT_RATIO = 0.5
-
         // label
         const val LABEL_RADIUS = 20.0
         const val LABEL_ALPHA = "80"
@@ -65,8 +62,7 @@ class CLabelPane : ScrollPane() {
         const val DISPLAY_SHIFT = 20.0
         const val DISPLAY_INSET = 10.0
         const val DISPLAY_ALPHA = "A0"
-        const val DISPLAY_FONT_SIZE = 28.0
-        val DISPLAY_FONT = Font(MonoType, DISPLAY_FONT_SIZE)
+        val DISPLAY_FONT = Font(MonoType, 28.0)
     }
 
     // ----- event ----- //
@@ -288,7 +284,7 @@ class CLabelPane : ScrollPane() {
         setupLayers(0)
     }
 
-    fun getLabel(transLabel: TransLabel): CLabel {
+    private fun getLabel(transLabel: TransLabel): CLabel {
         for (label in labels) if (label.index == transLabel.index) return label
         throw IllegalStateException(String.format(I18N["exception.illegal_state.label_not_found.format"], transLabel.index))
     }
@@ -335,7 +331,7 @@ class CLabelPane : ScrollPane() {
         val label = CLabel(
             transLabel.index,
             LABEL_RADIUS,
-            colorList[transLabel.groupId]
+            colorList[transLabel.groupId] + LABEL_ALPHA
         )
 
         // Draggable
@@ -407,7 +403,7 @@ class CLabelPane : ScrollPane() {
 
         // Bind property
         label.indexProperty.bind(transLabel.indexProperty)
-        label.colorProperty.bind(colorListProperty.valueAt(transLabel.groupIdProperty))
+        label.colorProperty.bind(colorListProperty.valueAt(transLabel.groupIdProperty).asString("%s$LABEL_ALPHA"))
         transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
         transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
     }

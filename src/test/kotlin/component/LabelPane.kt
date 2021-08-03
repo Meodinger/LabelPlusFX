@@ -7,11 +7,7 @@ import info.meodinger.lpfx.type.TransLabel
 import io.commonTest
 
 import javafx.application.Application
-import javafx.beans.Observable
 import javafx.beans.binding.ListBinding
-import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
@@ -25,7 +21,6 @@ import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import java.lang.reflect.Method
 import kotlin.math.roundToInt
 
 /**

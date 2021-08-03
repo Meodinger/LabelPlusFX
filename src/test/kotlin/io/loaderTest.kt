@@ -1,6 +1,7 @@
 package io
 
 import info.meodinger.lpfx.io.loadLP
+import info.meodinger.lpfx.io.loadMeo
 import info.meodinger.lpfx.type.TransFile
 
 import java.io.File
@@ -13,6 +14,7 @@ import java.io.File
 lateinit var sample: TransFile
 
 fun loaderTest() {
+    jsonTest()
     sample = commonTest()
     comment_sticky_to_body_Test()
     empty_line_in_1_2_Test()
@@ -24,6 +26,10 @@ fun loaderTest() {
     invalid_index_Test()
     repeated_group()
     repeated_index()
+}
+
+fun jsonTest(): TransFile {
+    return loadMeo(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\test\\resources\\sample\\meo.json"))
 }
 
 fun commonTest(): TransFile {

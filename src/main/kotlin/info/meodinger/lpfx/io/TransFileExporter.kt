@@ -4,7 +4,6 @@ import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.type.TransLabel
-import info.meodinger.lpfx.util.dialog.showInfo
 import info.meodinger.lpfx.util.dialog.showAlert
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.resource.I18N

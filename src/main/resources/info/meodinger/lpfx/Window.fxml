@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import info.meodinger.lpfx.component.*?>
@@ -33,5 +30,43 @@
             </Menu>
         </MenuBar>
     </top>
-
+    <center>
+        <SplitPane fx:id="pMain" dividerPositions="0.63">
+            <BorderPane>
+                <center>
+                    <CLabelPane fx:id="cLabelPane" initScale="1.0" scale="1.0" minScale="0.2" maxScale="2.0"/>
+                </center>
+                <bottom>
+                    <HBox alignment="CENTER_RIGHT">
+                        <CTextSlider fx:id="cSlider" scale="1.0" minScale="0.2" maxScale="2.0"/>
+                        <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
+                        <CComboBox fx:id="cPicBox"/>
+                    </HBox>
+                </bottom>
+            </BorderPane>
+            <SplitPane fx:id="pRight" dividerPositions="0.6" orientation="VERTICAL">
+                <AnchorPane>
+                    <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <top>
+                            <HBox alignment="CENTER_RIGHT">
+                                <Button fx:id="bSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode"/>
+                                <CComboBox fx:id="cGroupBox" />
+                                <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="bSwitchViewMode" mnemonicParsing="false" onAction="#switchViewMode"/>
+                            </HBox>
+                        </top>
+                        <center>
+                            <TreeView fx:id="vTree"/>
+                        </center>
+                    </BorderPane>
+                </AnchorPane>
+                <AnchorPane fx:id="pText">
+                    <TextArea fx:id="tTransText"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                </AnchorPane>
+            </SplitPane>
+        </SplitPane>
+    </center>
 </BorderPane>

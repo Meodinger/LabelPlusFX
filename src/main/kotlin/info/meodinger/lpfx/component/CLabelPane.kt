@@ -125,8 +125,8 @@ class CLabelPane : ScrollPane() {
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val colorListProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val handleInputModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
-    val handleLabelModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> { println(it) })
+    val handleInputModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val handleLabelModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
 
     var initScale: Double
         get() = initScaleProperty.value
@@ -206,6 +206,10 @@ class CLabelPane : ScrollPane() {
         view.isPreserveRatio = true
         view.isPickOnBounds = true
         root.alignment = Pos.CENTER
+
+        // Got this by running once
+        root.layoutX = 55.0
+        root.layoutY = 83.0
 
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
@@ -292,6 +296,7 @@ class CLabelPane : ScrollPane() {
     fun setupImage(path: String) {
         try {
             image = Image(File(path).toURI().toURL().toString())
+            scale = width / imageWidth
         } catch (e : IOException) {
             showException(e)
         }

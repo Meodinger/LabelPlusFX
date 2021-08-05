@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleStringProperty
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
  */
-// 'xProperty' not work, export field as 'xproperty', so like this
+// 'xProperty' not work because jackson exports field as 'xproperty'
 @JsonIgnoreProperties("indexProperty", "xproperty", "yproperty", "groupIdProperty", "textProperty")
 class TransLabel(
     index: Int = 0,

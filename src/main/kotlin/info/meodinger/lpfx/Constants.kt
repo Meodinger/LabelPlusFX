@@ -5,6 +5,8 @@ package info.meodinger.lpfx
  * Date: 2021/8/1
  * Location: info.meodinger.lpfx
  */
+const val WIDTH = 900.0
+const val HEIGHT = 600.0
 
 enum class WorkMode { LabelMode, InputMode }
 val DefaultWorkMode = WorkMode.InputMode

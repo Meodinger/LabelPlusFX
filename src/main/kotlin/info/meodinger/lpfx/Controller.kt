@@ -6,6 +6,7 @@ import info.meodinger.lpfx.component.CLabelPane
 import info.meodinger.lpfx.component.CTextSlider
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import javafx.application.Platform.runLater
 
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -95,15 +96,14 @@ class Controller : Initializable {
         }
     }
 
-    private inner class AutoBack : TimerTask() {
+    private val timer = Timer()
+    private val task = object : TimerTask() {
         override fun run() {
             if (State.isChanged) {
                 this@Controller.silentBackup()
             }
         }
     }
-    private val timer = Timer()
-    private val task = AutoBack()
 
     init {
 
@@ -113,7 +113,6 @@ class Controller : Initializable {
     }
 
     private fun setText() {}
-
     private fun setDisable(isDisable: Boolean) {}
     private fun disable() {}
     private fun enable() {}
@@ -135,7 +134,6 @@ class Controller : Initializable {
     private fun open(path: String) {}
     private fun save(path: String, isSilent: Boolean) {}
 
-
     // new & open
     @FXML fun newTranslation() {}
     // open
@@ -154,7 +152,8 @@ class Controller : Initializable {
 
     @FXML fun setComment() {}
 
-    @FXML fun about() {}
+    @FXML fun about() {
+    }
 
     @FXML fun switchViewMode() {}
     @FXML fun switchWorkMode() {}

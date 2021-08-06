@@ -11,12 +11,12 @@ import java.util.zip.ZipOutputStream
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-class CZip(zipFilePath: String) {
+class CZip(zipFile: File) {
     private val zip: ZipOutputStream
 
     init {
         val zipOutputStream: ZipOutputStream = try {
-            val bufferedOutputStream = BufferedOutputStream(FileOutputStream(zipFilePath))
+            val bufferedOutputStream = BufferedOutputStream(FileOutputStream(zipFile))
             ZipOutputStream(bufferedOutputStream)
         } catch (e: IOException) {
             showException(e)

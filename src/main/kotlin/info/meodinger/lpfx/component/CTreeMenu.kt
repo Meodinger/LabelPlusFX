@@ -35,7 +35,6 @@ object CTreeMenu {
     abstract class TargetMenu : ContextMenu() {
         abstract fun redirectTo(target: TreeItem<String>?)
     }
-
     val rootMenu = object : TargetMenu() {
 
         private val addGroupField = TextField()
@@ -261,7 +260,11 @@ object CTreeMenu {
 
     }
 
-    val treeMenu = object : ContextMenu() {
+    abstract class TreeMenu : ContextMenu() {
+        abstract fun init(view: TreeView<String>?)
+        abstract fun update()
+    }
+    val treeMenu = object : TreeMenu() {
 
         private var view: TreeView<String>? = null
 
@@ -321,7 +324,7 @@ object CTreeMenu {
             items.add(deleteItem)
         }
 
-        fun init(view: TreeView<String>?) {
+        override fun init(view: TreeView<String>?) {
             this.view = view
 
             if (view == null) {
@@ -333,7 +336,7 @@ object CTreeMenu {
             }
         }
 
-        fun update() {
+        override fun update() {
             moveToItem.isDisable = true
             deleteItem.isDisable = true
 

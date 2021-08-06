@@ -1,7 +1,7 @@
 package io
 
 import info.meodinger.lpfx.io.pack
-
+import java.io.File
 /**
  * Author: Meodinger
  * Date: 2021/8/1
@@ -9,5 +9,5 @@ import info.meodinger.lpfx.io.pack
  */
 fun packTest() {
     print("Pack: ")
-    println(pack("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.zip", "C:\\Users\\Meodinger\\Desktop\\12", commonTest()))
+    println(pack(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.zip"), "D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\test\\resources\\sample\\pics", commonTest()))
 }

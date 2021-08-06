@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.options
 
+import info.meodinger.lpfx.type.CProperty
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
@@ -9,6 +11,10 @@ object RecentFiles : AbstractProperties() {
 
     private const val MAX_SIZE = 10
     private const val RECENT = "recent"
+
+    init {
+        this.properties.add(CProperty("recent", ""))
+    }
 
     val recent = ArrayList<String>()
 
@@ -25,7 +31,8 @@ object RecentFiles : AbstractProperties() {
         save(Options.recentFiles, this)
     }
 
-    fun getLastOpenFile(): String {
+    fun getLastOpenFile(): String? {
+        if (recent.size == 0) return null
         return recent[0]
     }
 

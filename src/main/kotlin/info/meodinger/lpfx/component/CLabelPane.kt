@@ -71,7 +71,8 @@ class CLabelPane : ScrollPane() {
         eventType: EventType<LabelEvent>,
         val source: MouseEvent,
         val labelIndex: Int,
-        val x: Double, val y: Double,
+        val labelX: Double, val labelY: Double,
+        val rootX: Double, val rootY: Double,
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY = EventType<LabelEvent>(EventType.ROOT)
@@ -207,10 +208,6 @@ class CLabelPane : ScrollPane() {
         view.isPickOnBounds = true
         root.alignment = Pos.CENTER
 
-        // Got this by running once
-        root.layoutX = 55.0
-        root.layoutY = 83.0
-
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
@@ -263,13 +260,13 @@ class CLabelPane : ScrollPane() {
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
-            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight))
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
             }
         }
 
@@ -380,21 +377,23 @@ class CLabelPane : ScrollPane() {
 
         // Text display
         label.addEventHandler(MouseEvent.MOUSE_MOVED) {
+            removeText()
             placeText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
         }
 
         // Event handle
         label.setOnMouseMoved {
-            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y))
-            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y))
+            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
         }
         label.setOnMouseClicked {
+            if (!it.isStillSincePress) return@setOnMouseClicked
             if (it.button == MouseButton.PRIMARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y))
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
             } else if (it.button == MouseButton.SECONDARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y))
+                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
             }
         }
 
@@ -413,8 +412,6 @@ class CLabelPane : ScrollPane() {
         transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
     }
     fun placeText(text: String, color: Color, x: Double, y: Double) {
-        removeText()
-
         val gc = textLayer.graphicsContext2D
         val lineCount = text.length - text.replace("\n".toRegex(), "").length + 1
         val t = Text(text).also { it.font = DISPLAY_FONT }
@@ -492,5 +489,19 @@ class CLabelPane : ScrollPane() {
          */
         root.layoutX = width / 2 - fakeX
         root.layoutY = height / 2 - fakeY
+    }
+    fun moveToZero() {
+        root.layoutX = 0.0
+        root.layoutY = 0.0
+    }
+    fun moveToCenter() {
+        root.layoutX = (width - imageWidth) / 2
+        root.layoutY = (height - imageHeight) / 2
+    }
+
+    fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
+        setupImage(picPath)
+        setupLayers(layerCount)
+        setupLabels(transLabels)
     }
 }

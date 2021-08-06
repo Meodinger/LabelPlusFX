@@ -23,10 +23,11 @@ object State {
 
     var controllerAccessor: ControllerAccessor? = null
         set(value) {
-            if (field != null) field = value
+            if (field == null) field = value
             else throw IllegalStateException(I18N["exception.illegal_state.accessor_already_set"])
         }
-    val accessor = controllerAccessor!!
+    val accessor: ControllerAccessor
+        get() = controllerAccessor!!
 
     var isOpened = false
     var transFile = TransFile()
@@ -90,11 +91,11 @@ object State {
         fun reset()
 
         fun addLabelLayer()
-        fun removeLabelLayer(index: Int)
+        fun removeLabelLayer(groupId: Int)
 
         fun updateTree()
         fun updateGroupList()
 
-        operator fun get(field: String): Any
+        operator fun get(fieldName: String): Any
     }
 }

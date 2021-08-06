@@ -14,7 +14,7 @@ import java.util.*
  * Location: util
  */
 fun zipTest() {
-    val zip = CZip("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\a.zip")
+    val zip = CZip(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\a.zip"))
     var startTime = Date().time
     var endTime: Long
 

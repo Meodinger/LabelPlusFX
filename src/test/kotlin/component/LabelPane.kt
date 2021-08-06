@@ -108,8 +108,8 @@ class LabelPane : Application() {
                 LabelEvent.LABEL_PLACE -> {
                     val transLabel = TransLabel(
                         transFile.getTransLabelListOf(picName).size + 1,
-                        it.x,
-                        it.y,
+                        it.labelX,
+                        it.labelY,
                         0,
                         "NewText@${(Math.random() * 1000).roundToInt()}"
                     )

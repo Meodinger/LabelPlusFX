@@ -18,6 +18,7 @@ class CComboBox<T> : HBox() {
     private var index = 0
     private var size = 0
 
+    val valueProperty = comboBox.valueProperty()
     var isWrapped = false
 
     init {

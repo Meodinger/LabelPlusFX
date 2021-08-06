@@ -17,7 +17,7 @@ class CProperty(val key: String, var value: String) {
             for (value in values) {
                 builder.append(value).append(LIST_SEPARATOR)
             }
-            builder.deleteCharAt(builder.length - 1)
+            if (builder.isNotEmpty()) builder.deleteCharAt(builder.length - 1)
             return builder.toString()
         }
     }

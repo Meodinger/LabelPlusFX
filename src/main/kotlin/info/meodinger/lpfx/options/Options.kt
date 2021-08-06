@@ -64,6 +64,7 @@ object Options {
     private fun initRecentFiles() {
         if (Files.notExists(recentFiles)) {
             Files.createFile(recentFiles)
+            RecentFiles.save()
         }
         RecentFiles.load()
         Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })

@@ -2,6 +2,7 @@ package info.meodinger.lpfx.component
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.ObservableList
 import javafx.stage.FileChooser
 import javafx.stage.Window
 import java.io.File
@@ -47,7 +48,7 @@ class CFileChooser {
         chooser.title = title
     }
 
-    fun getExtensionFilters(): List<FileChooser.ExtensionFilter> {
+    fun getExtensionFilters(): ObservableList<FileChooser.ExtensionFilter> {
         return chooser.extensionFilters
     }
 }

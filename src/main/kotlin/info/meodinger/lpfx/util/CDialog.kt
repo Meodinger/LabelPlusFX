@@ -31,7 +31,7 @@ private fun initDialog() {
     dialog.dialogPane = DialogPane()
 }
 
-fun initOwner(window: Window?) {
+fun initCDialogOwner(window: Window?) {
     dialog.initOwner(window)
 }
 
@@ -70,79 +70,78 @@ fun showException(e: Exception): Optional<ButtonType> {
 
 /**
  * Show information
- * @param info Info to show
+ * @param content Info to show
  * @return ButtonType.OK?
  */
-fun showInfo(info: String): Optional<ButtonType> {
-    return showInfo(I18N["common.info"], info)
+fun showInfo(content: String): Optional<ButtonType> {
+    return showInfo(I18N["common.info"], content)
 }
 /**
  * Show information with specific title
  * @param title Dialog title
- * @param info Info to show
+ * @param content Info to show
  * @return ButtonType.OK?
  */
-fun showInfo(title: String, info: String): Optional<ButtonType> {
+fun showInfo(title: String, content: String): Optional<ButtonType> {
     initDialog()
     dialog.title = title
-    dialog.contentText = info
+    dialog.contentText = content
     dialog.dialogPane.buttonTypes.add(ButtonType.OK)
     return dialog.showAndWait()
 }
 /**
  * Show information with specific title and link
  * @param title Dialog title
- * @param info Info to show
+ * @param content Info to show
  * @param linkText Text for hyperlink
  * @param handler Handler for action of link
  * @return ButtonType.OK?
  */
-fun showInfoWithLink(title: String, info: String, linkText: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+fun showInfoWithLink(title: String, content: String, linkText: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
     initDialog()
     dialog.title = title
     dialog.dialogPane.buttonTypes.add(ButtonType.OK)
 
-    val label = Label(info)
+    val label = Label(content)
     val separator = Separator()
     val hyperlink = Hyperlink(linkText)
     separator.padding = Insets(8.0, 0.0, 8.0, 0.0)
     hyperlink.onAction = handler
 
-    val content = VBox(label, separator, hyperlink)
-    dialog.dialogPane.content = content
+    dialog.dialogPane.content = VBox(label, separator, hyperlink)
 
     return dialog.showAndWait()
 }
 
 /**
  * Show alert
- * @param alert Alert to show
+ * @param content Alert to show
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(alert: String): Optional<ButtonType> {
-    return showAlert(I18N["common.alert"], alert)
+fun showAlert(content: String): Optional<ButtonType> {
+    return showAlert(I18N["common.alert"], content)
 }
 /**
  * Show alert with specific title
  * @param title Dialog title
- * @param alert Alert to show
+ * @param content Alert to show
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(title: String, alert: String): Optional<ButtonType> {
-    return showAlert(title, alert, I18N["common.yes"], I18N["common.no"])
+fun showAlert(title: String, content: String): Optional<ButtonType> {
+    return showAlert(title, content, I18N["common.yes"], I18N["common.no"])
 }
 /**
  * Show alert with specific title and yes/no text
  * @param title Dialog title
- * @param alert Alert to show
+ * @param content Alert to show
  * @param yes Text for ButtonType with ButtonData.YES
  * @param no  Text for ButtonType with ButtonData.NO
  * @return ButtonType? with ButtonDate YES | NO
  */
-fun showAlert(title: String, alert: String, yes: String, no: String): Optional<ButtonType> {
+fun showAlert(title: String, content: String, yes: String, no: String): Optional<ButtonType> {
     initDialog()
     dialog.title = title
-    dialog.contentText = alert
+    dialog.contentText = content
     dialog.dialogPane.buttonTypes.addAll(
         ButtonType(yes, ButtonBar.ButtonData.YES),
         ButtonType(no, ButtonBar.ButtonData.NO),

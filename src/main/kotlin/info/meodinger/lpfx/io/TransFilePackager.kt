@@ -13,7 +13,7 @@ import java.io.File
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
-fun pack(target: String, source: String, transFile: TransFile): Boolean {
+fun pack(target: File, source: String, transFile: TransFile): Boolean {
     try {
         val zip = CZip(target)
 

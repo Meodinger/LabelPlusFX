@@ -16,7 +16,7 @@ object RecentFiles : AbstractProperties() {
         this.properties.add(CProperty("recent", ""))
     }
 
-    val recent = ArrayList<String>()
+    private val recent = ArrayList<String>()
 
     override fun load() {
         load(Options.recentFiles, this)
@@ -29,6 +29,10 @@ object RecentFiles : AbstractProperties() {
         this[RECENT].set(recent)
 
         save(Options.recentFiles, this)
+    }
+
+    fun getAll(): List<String> {
+        return recent
     }
 
     fun getLastOpenFile(): String? {

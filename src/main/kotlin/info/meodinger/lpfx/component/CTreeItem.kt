@@ -1,18 +1,16 @@
 package info.meodinger.lpfx.component
 
-import info.meodinger.lpfx.State
 import info.meodinger.lpfx.type.TransLabel
 
+import javafx.scene.Node
 import javafx.scene.control.TreeItem
-import javafx.scene.paint.Color
-import javafx.scene.shape.Circle
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
  */
-class CTreeItem(val meta: TransLabel) : TreeItem<String>() {
+class CTreeItem(val meta: TransLabel, node: Node? = null) : TreeItem<String>() {
 
     var index: Int
         get() = meta.index
@@ -35,11 +33,11 @@ class CTreeItem(val meta: TransLabel) : TreeItem<String>() {
 
     init {
         update()
+        if (node != null) graphic = node
     }
 
     private fun update() {
         value = "${String.format("%02d",index)}: ${text.replace("\n", " ")}"
-        if (parent.graphic == null) graphic = Circle(8.0, Color.web(State.transFile.getTransGroupAt(groupId).color))
     }
 
 }

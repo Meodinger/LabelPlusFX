@@ -48,9 +48,6 @@ object State {
         isChanged = false
         workMode = DefaultWorkMode
         viewMode = DefaultViewMode
-
-        stage.title = INFO["application.name"]
-        accessor.reset()
     }
 
     fun getGroupIdByName(name: String): Int {
@@ -88,7 +85,6 @@ object State {
 
     interface ControllerAccessor {
         fun close()
-        fun reset()
 
         fun addLabelLayer()
         fun removeLabelLayer(groupId: Int)

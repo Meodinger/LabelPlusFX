@@ -4,16 +4,11 @@ import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.type.TransLabel
-import info.meodinger.lpfx.util.dialog.showAlert
-import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.using
 
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
-import java.io.BufferedWriter
+import java.io.*
 import java.nio.charset.StandardCharsets
 
 /**
@@ -21,13 +16,13 @@ import java.nio.charset.StandardCharsets
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
-fun exportLP(file: File, transFile: TransFile): Boolean {
+@Throws(IOException::class)
+fun exportLP(file: File, transFile: TransFile) {
 
     // Group count validate
     val groupCount = transFile.groupList.size
     if (groupCount > 9) {
-        showAlert(I18N["alert.exporter.too_many_groups"])
-        return false
+        throw IOException(I18N["alert.exporter.too_many_groups"])
     }
 
     fun buildLabel(transLabel: TransLabel): String {
@@ -101,24 +96,20 @@ fun exportLP(file: File, transFile: TransFile): Boolean {
         // write content
         writer.write(builder.toString())
     } catch { e : Exception ->
-        showException(e)
-        return false
+        throw e
     } finally {
 
     }
-
-    return true
 }
 
-fun exportMeo(file: File, transFile: TransFile): Boolean {
+@Throws(IOException::class)
+fun exportMeo(file: File, transFile: TransFile) {
     using {
         val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
         writer.write(transFile.toJsonString())
     } catch { e: Exception ->
-        showException(e)
-        return false
+        throw e
     } finally {
 
     }
-    return true
 }

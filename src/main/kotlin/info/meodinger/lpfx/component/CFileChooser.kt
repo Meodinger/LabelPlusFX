@@ -32,13 +32,13 @@ class CFileChooser {
         chooser.initialDirectoryProperty().bind(lastDirectoryProperty)
     }
 
-    fun showOpenDialog(owner: Window?): File? {
+    fun showOpenDialog(owner: Window? = null): File? {
         val file = chooser.showOpenDialog(owner)
         lastDirectory = file
         return file
     }
 
-    fun showSaveDialog(owner: Window?): File? {
+    fun showSaveDialog(owner: Window? = null): File? {
         val file = chooser.showSaveDialog(owner)
         lastDirectory = file
         return file

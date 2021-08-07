@@ -18,11 +18,13 @@ object Options {
     private const val FileName_Config = "config"
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
+    private const val FolderName_ErrorLog = "error_log"
 
     val lpfx: Path = Paths.get(System.getProperty("user.home")).resolve(LPFX)
     val config: Path = lpfx.resolve(FileName_Config)
     val settings: Path = lpfx.resolve(FileName_Settings)
     val recentFiles: Path = lpfx.resolve(FileName_RecentFiles)
+    val errorLog: Path = lpfx.resolve(FolderName_ErrorLog)
 
     init {
         try {

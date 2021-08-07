@@ -4,10 +4,7 @@ import info.meodinger.lpfx.State
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.util.color.toHex
-import info.meodinger.lpfx.util.dialog.showAlert
-import info.meodinger.lpfx.util.dialog.showChoice
-import info.meodinger.lpfx.util.dialog.showConfirm
-import info.meodinger.lpfx.util.dialog.showInput
+import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
@@ -109,7 +106,7 @@ object CTreeMenu {
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
                 for (group in State.transFile.groupList) {
-                    if (group.name == newName) showAlert(I18N["context.rename_group.alert.same_name"])
+                    if (group.name == newName) showError(I18N["context.rename_group.error.same_name"])
                     return@ifPresent
                 }
 

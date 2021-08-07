@@ -69,6 +69,28 @@ fun showException(e: Exception): Optional<ButtonType> {
 }
 
 /**
+ * Show error
+ * @param content Error to show
+ * @return ButtonType? with ButtonDate OK
+ */
+fun showError(content: String): Optional<ButtonType> {
+    return showError(I18N["common.error"], content)
+}
+/**
+ * Show error with specific title
+ * @param title Dialog title
+ * @param content Error to show
+ * @return ButtonType? with ButtonDate OK
+ */
+fun showError(title: String, content: String): Optional<ButtonType> {
+    initDialog()
+    dialog.title = title
+    dialog.contentText = content
+    dialog.dialogPane.buttonTypes.add(ButtonType.OK)
+    return dialog.showAndWait()
+}
+
+/**
  * Show information
  * @param content Info to show
  * @return ButtonType.OK?
@@ -116,7 +138,7 @@ fun showInfoWithLink(title: String, content: String, linkText: String, handler: 
 /**
  * Show alert
  * @param content Alert to show
- * @return ButtonType? with ButtonDate YES | NO
+ * @return ButtonType? with ButtonDate YES | NO | CANCEL
  */
 fun showAlert(content: String): Optional<ButtonType> {
     return showAlert(I18N["common.alert"], content)
@@ -125,7 +147,7 @@ fun showAlert(content: String): Optional<ButtonType> {
  * Show alert with specific title
  * @param title Dialog title
  * @param content Alert to show
- * @return ButtonType? with ButtonDate YES | NO
+ * @return ButtonType? with ButtonDate YES | NO | CANCEL
  */
 fun showAlert(title: String, content: String): Optional<ButtonType> {
     return showAlert(title, content, I18N["common.yes"], I18N["common.no"])
@@ -136,7 +158,7 @@ fun showAlert(title: String, content: String): Optional<ButtonType> {
  * @param content Alert to show
  * @param yes Text for ButtonType with ButtonData.YES
  * @param no  Text for ButtonType with ButtonData.NO
- * @return ButtonType? with ButtonDate YES | NO
+ * @return ButtonType? with ButtonDate YES | NO | CANCEL
  */
 fun showAlert(title: String, content: String, yes: String, no: String): Optional<ButtonType> {
     initDialog()

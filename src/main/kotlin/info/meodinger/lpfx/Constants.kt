@@ -7,6 +7,7 @@ package info.meodinger.lpfx
  */
 const val WIDTH = 900.0
 const val HEIGHT = 600.0
+const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
 enum class WorkMode { LabelMode, InputMode }
 val DefaultWorkMode = WorkMode.InputMode
@@ -21,5 +22,5 @@ const val EXTENSION_PACK = ".zip"
 const val EXTENSION_BAK = ".bak"
 const val FOLDER_NAME_BAK = "bak"
 
-const val AUTO_SAVE_DELAY = 5 * 60 * 1000
-const val AUTO_SAVE_PERIOD = 3 * 60 * 1000
+const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
+const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L

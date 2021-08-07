@@ -1,22 +1,21 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.component.*
 import info.meodinger.lpfx.component.CLabelPane.LabelEvent
-import info.meodinger.lpfx.io.exportLP
-import info.meodinger.lpfx.io.exportMeo
-import info.meodinger.lpfx.io.pack
-import info.meodinger.lpfx.options.Config
-import info.meodinger.lpfx.options.Options
-import info.meodinger.lpfx.options.RecentFiles
-import info.meodinger.lpfx.type.TransFile
-import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.component.*
+import info.meodinger.lpfx.io.*
+import info.meodinger.lpfx.options.*
+import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.isLPFile
+import info.meodinger.lpfx.util.isMeoFile
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
-import javafx.application.Platform
+import info.meodinger.lpfx.util.tree.expandAll
+import info.meodinger.lpfx.util.using
 
+import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -30,10 +29,12 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.stage.FileChooser
-import java.io.File
+import javafx.util.Callback
+import java.io.*
 import java.net.URL
 import java.util.*
-import java.util.function.BiFunction
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.system.exitProcess
 
 /**
@@ -128,10 +129,6 @@ class Controller : Initializable {
                 this@Controller.close()
             }
 
-            override fun reset() {
-                this@Controller.reset()
-            }
-
             override fun addLabelLayer() {
                 this@Controller.cLabelPane.placeLabelLayer()
             }
@@ -193,7 +190,7 @@ class Controller : Initializable {
         pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
         cPicBox.isWrapped = true
-        updateRecentFiles()
+        updateOpenRecent()
 
         // Register handler
         cLabelPane.handleInputMode = EventHandler {
@@ -314,35 +311,198 @@ class Controller : Initializable {
         cLabelPane.isDisable = !State.isOpened
     }
 
-    private fun reset() {}
-    private fun updateRecentFiles() {}
-    private fun updateGroupList() {}
-    private fun updateTreeView() {}
-    private fun updateTreeViewByGroup() {}
-    private fun updateTreeViewByIndex() {}
+    private fun reset() {
+        setDisable()
+        vTree.root = null
+        bSwitchWorkMode.text = I18N["mode.work.input"]
+        bSwitchViewMode.text = I18N["mode.view.index"]
 
-    private fun findLabelItemByIndex(index: Int): CTreeItem {
-        val transLabel = State.transFile.getTransLabelAt(State.currentPicName, index)
-        val whereToSearch: List<TreeItem<String>> = when (State.viewMode) {
-            ViewMode.GroupMode -> vTree.root.children[transLabel.groupId].children
-            ViewMode.IndexMode -> vTree.root.children
+        cPicBox.reset()
+        cGroupBox.reset()
+        cLabelPane.reset()
+        // cSlider will reset with cImagePane through bind
+    }
+    private fun updateOpenRecent() {
+        mOpenRecent.items.clear()
+        for (path in RecentFiles.getAll()) {
+            val item = MenuItem(path)
+            item.setOnAction {
+                stay()
+                prepare()
+                open(path)
+            }
+            mOpenRecent.items.add(item)
         }
-        for (l in whereToSearch) if ((l as CTreeItem).meta.index == index) return l
-        throw IllegalStateException("Not found")
+    }
+    private fun updateGroupList() {
+        val list = ArrayList<String>()
+        for (transGroup in State.transFile.groupList)
+            list.add(transGroup.name)
+        cGroupBox.setList(list)
+    }
+    private fun updateTreeView() {
+        when (State.viewMode) {
+            ViewMode.GroupMode -> {
+                vTree.selectionModel.selectionMode = SelectionMode.SINGLE
+                vTree.cellFactory = Callback { CTreeCell() }
+                vTree.contextMenu = null
+                updateTreeViewByGroup()
+            }
+            ViewMode.IndexMode -> {
+                vTree.selectionModel.selectionMode = SelectionMode.MULTIPLE
+                vTree.cellFactory = null
+                vTree.contextMenu = CTreeMenu.treeMenu
+                updateTreeViewByIndex()
+            }
+        }
+        vTree.root.expandAll()
+    }
+    private fun updateTreeViewByGroup() {
+        val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+        val rootItem = TreeItem(State.currentPicName)
+        val groupItems = ArrayList<TreeItem<String>>()
+
+        for (transGroup in State.transFile.groupList) {
+            val circle = Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(transGroup.color))
+            val groupItem = TreeItem(transGroup.name, circle)
+            groupItems.add(groupItem)
+            rootItem.children.add(groupItem)
+        }
+        for (transLabel in transLabels) {
+            groupItems[transLabel.groupId].children.add(CTreeItem(transLabel))
+        }
+
+        vTree.root = rootItem
+    }
+    private fun updateTreeViewByIndex() {
+        val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+        val rootItem = TreeItem(State.currentPicName)
+
+        for (transLabel in transLabels) {
+            val transGroup = State.transFile.groupList[transLabel.groupId]
+            val circle = Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(transGroup.color))
+            rootItem.children.add(CTreeItem(transLabel, circle))
+        }
+
+        vTree.root = rootItem
     }
 
-    private fun silentBackup() {}
+    private fun silentBackup() {
+        val bak = File(State.getBakFolder() + File.separator + Date().time + EXTENSION_BAK)
+        try {
+            exportMeo(bak, State.transFile)
+        } catch (e: IOException) {
+            using {
+                val writer = PrintWriter(
+                    BufferedWriter(
+                        FileWriter(
+                            Options.errorLog.resolve(Date().toString()).toFile()
+                        )
+                    )
+                ).autoClose()
+                e.printStackTrace(writer)
+            } catch { ex: Exception ->
+                ex.printStackTrace()
+            } finally {
 
-    private fun prepare() {}
-    private fun stay() {}
+            }
+        }
+    }
 
-    private fun new(path: String) {}
+    private fun prepare() {
+        // Initialize workspace
+        reset()
+        State.stage.title = INFO["application.name"] + " - " + File(State.transPath).name
+
+        // Update recent files
+        RecentFiles.add(State.transPath)
+        updateOpenRecent()
+
+        // Auto backup
+        task.cancel()
+        val bakDir = File(State.getBakFolder())
+        if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
+            timer.schedule(task, AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
+        } else {
+            showError(I18N["error.auto_backup_unavailable"])
+        }
+    }
+    private fun stay(): Boolean {
+        // Not open
+        if (!State.isOpened) return false
+        // Opened but saved
+        if (!State.isChanged) return false
+
+        // Not saved
+        val result = showAlert(I18N["common.exit"], I18N["dialog.exit_save_alert.content"], I18N["common.save"], I18N["common.not_save"])
+        if (result.isPresent) {
+            if (result.get().buttonData == ButtonBar.ButtonData.CANCEL_CLOSE) {
+                return true
+            }
+            if (result.get().buttonData == ButtonBar.ButtonData.YES) {
+                saveTranslation()
+            }
+            return false
+        }
+        // Closed
+        return true
+    }
+
+    private fun new(path: String) {
+        // Choose Pics
+        val potentialPics = ArrayList<String>()
+        val pics = ArrayList<String>()
+        val dir = File(path).parentFile
+        if (dir.isDirectory && dir.listFiles() != null) {
+            val files = dir.listFiles()
+            if (files != null) for (file in files) if (file.isFile) {
+                for (extension in EXTENSIONS_PIC) if (file.name.endsWith(extension)) {
+                    potentialPics.add(file.name)
+                }
+            }
+        }
+        val result = showListChoose(State.stage, potentialPics)
+        if (result.isPresent) {
+            pics.addAll(result.get())
+        } else {
+            return
+        }
+
+        // Prepare new TransFile
+        val groupList = ArrayList<TransGroup>()
+        val groupNameList = Settings[Settings.DefaultGroupList].asList()
+        val groupColorList = Settings[Settings.DefaultColorList].asList()
+        for (i in groupNameList.indices) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
+
+        val transMap = HashMap<String, MutableList<TransLabel>>()
+        for (pic in pics) transMap[pic] = ArrayList()
+
+        val transFile = TransFile()
+        transFile.version = TransFile.DEFAULT_VERSION
+        transFile.comment = TransFile.DEFAULT_COMMENT
+        transFile.groupList = groupList
+        transFile.transMap = transMap
+
+        // Export to file
+        try {
+            val file = File(path)
+            if (isMeoFile(path)) {
+                exportMeo(file, State.transFile)
+            } else if (isLPFile(path)) {
+                exportLP(file, State.transFile)
+            }
+        } catch (e: IOException) {
+            showException(e)
+            showError(I18N["error.new_failed"])
+        }
+    }
     private fun open(path: String) {}
     private fun save(path: String, isSilent: Boolean) {}
 
     // new & open
     @FXML fun newTranslation() {
-        stay()
+        if (stay()) return
+
         val file = fileChooser.showOpenDialog(State.stage) ?: return
         new(file.path)
         prepare()
@@ -350,7 +510,8 @@ class Controller : Initializable {
     }
     // open
     @FXML fun openTranslation() {
-        stay()
+        if (stay()) return
+
         val file = fileChooser.showOpenDialog(State.stage) ?: return
         prepare()
         open(file.path)
@@ -366,7 +527,7 @@ class Controller : Initializable {
     }
     // open & save
     @FXML fun bakRecovery() {
-        stay()
+        if (stay()) return
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
         prepare()
@@ -394,34 +555,37 @@ class Controller : Initializable {
     @FXML fun exportTransFile(event: ActionEvent) {
         exportChooser.getExtensionFilters().clear()
 
-        val exporter = when (event.source) {
-            mExportAsLp -> {
+        try {
+            val file: File
+            if (event.source == mExportAsMeo) {
+                exportChooser.getExtensionFilters().add(meoFilter)
+                file = exportChooser.showSaveDialog(State.stage) ?: return
+                exportMeo(file, State.transFile)
+            } else {
                 exportChooser.getExtensionFilters().add(lpFilter)
-                BiFunction<File, TransFile, Boolean> { file, transFile -> exportLP(file, transFile) }
+                file = exportChooser.showSaveDialog(State.stage) ?: return
+                exportLP(file, State.transFile)
             }
-            mExportAsMeo -> {
-                exportChooser.getExtensionFilters().addAll(meoFilter)
-                BiFunction<File, TransFile, Boolean> { file, transFile -> exportMeo(file, transFile) }
-            }
-            else -> return
+        } catch (e: IOException) {
+            showException(e)
+            showError(I18N["error.export_failed"])
+            return
         }
 
-        val file = exportChooser.showSaveDialog(State.stage) ?: return
-
-        if (exporter.apply(file, State.transFile)) {
-            showInfo(I18N["info.exported_successful"])
-        } else {
-            showAlert(I18N["alert.export_failed"])
-        }
+        showInfo(I18N["info.exported_successful"])
     }
     @FXML fun exportTransPack() {
         val file = exportPackChooser.showSaveDialog(State.stage) ?: return
 
-        if (pack(file, State.getFileFolder(), State.transFile)) {
-            showInfo(I18N["info.exported_successful"])
-        } else {
-            showAlert(I18N["alert.export_failed"])
+        try {
+            pack(file, State.getFileFolder(), State.transFile)
+        } catch (e : IOException) {
+            showException(e)
+            showError(I18N["error.export_failed"])
+            return
         }
+
+        showInfo(I18N["info.exported_successful"])
     }
 
     @FXML fun setComment() {
@@ -434,9 +598,8 @@ class Controller : Initializable {
         showInfoWithLink(
             I18N["dialog.about.title"],
             StringBuilder()
-                .appendLine(INFO["application.name"])
-                .appendLine(INFO["application.version"])
-                .appendLine(INFO["application.vendor"])
+                .append(INFO["application.name"]).append(" - ").append(INFO["application.version"]).append("\n")
+                .append("Developed By ").append(INFO["application.vendor"]).append("\n")
                 .toString(),
             INFO["application.link"]
         ) {

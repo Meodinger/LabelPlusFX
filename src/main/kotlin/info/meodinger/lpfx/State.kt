@@ -3,10 +3,13 @@ package info.meodinger.lpfx
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.application.Application
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 import java.io.File
@@ -29,13 +32,44 @@ object State {
     val accessor: ControllerAccessor
         get() = controllerAccessor!!
 
-    var isOpened = false
-    var transFile = TransFile()
-    var transPath = ""
-    var currentGroupId: Int = 0
-    var currentPicName: String = ""
+    val isOpenedProperty = SimpleBooleanProperty(false)
+    val isChangedProperty = SimpleBooleanProperty(false)
+    val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_FILE)
+    val transPathProperty = SimpleStringProperty("")
+    val currentGroupIdProperty = SimpleIntegerProperty(0)
+    val currentPicNameProperty = SimpleStringProperty("")
 
-    var isChanged = false
+    var isOpened: Boolean
+        get() = isOpenedProperty.value
+        set(value) {
+            isOpenedProperty.value = value
+        }
+    var isChanged: Boolean
+        get() = isChangedProperty.value
+        set(value) {
+            isChangedProperty.value = value
+        }
+    var transFile: TransFile
+        get() = transFileProperty.value
+        set(value) {
+            transFileProperty.value = value
+        }
+    var transPath: String
+        get() = transPathProperty.value
+        set(value) {
+            transPathProperty.value = value
+        }
+    var currentGroupId: Int
+        get() = currentGroupIdProperty.value
+        set(value) {
+            currentGroupIdProperty.value = value
+        }
+    var currentPicName: String
+        get() = currentPicNameProperty.value
+        set(value) {
+            currentPicNameProperty.value = value
+        }
+
     var workMode = DefaultWorkMode
     var viewMode = DefaultViewMode
 
@@ -59,7 +93,6 @@ object State {
         }
         return -1
     }
-
     fun getGroupColorByName(name: String): String {
         for (group in transFile.groupList) {
             if (group.name == name) return group.color

@@ -19,6 +19,8 @@ import java.util.TreeSet
 class TransFile {
 
     companion object {
+        val DEFAULT_FILE = TransFile()
+
         val DEFAULT_VERSION = intArrayOf(1, 0)
 
         const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"

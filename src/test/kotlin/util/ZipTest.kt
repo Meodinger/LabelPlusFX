@@ -2,8 +2,8 @@ package util
 
 import info.meodinger.lpfx.util.CZip
 import info.meodinger.lpfx.util.resource.*
-import java.io.ByteArrayInputStream
 
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -17,6 +17,8 @@ fun zipTest() {
     val zip = CZip(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\a.zip"))
     var startTime = Date().time
     var endTime: Long
+
+    println("----- Zip Test -----")
 
     print("Zip File: ")
     zip.zip(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\main\\resources\\file\\script\\Meo_PS_Script"), "/file")
@@ -41,6 +43,5 @@ fun zipTest() {
     endTime = Date().time
     println(endTime - startTime)
 
-    println("Zip end")
     zip.close()
 }

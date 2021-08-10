@@ -4,6 +4,7 @@ import info.meodinger.lpfx.io.exportLP
 import info.meodinger.lpfx.io.exportMeo
 
 import java.io.File
+import java.io.IOException
 
 /**
  * Author: Meodinger
@@ -13,9 +14,24 @@ import java.io.File
 fun exporterTest() {
     val transFile = commonTest()
 
+    println("----- Exporter Test -----")
+
     print("LP: ")
-    println(exportLP(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.txt"), transFile))
+    try {
+        exportLP(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.txt"), transFile)
+        println(true)
+    } catch (e: IOException) {
+        println(false)
+        e.printStackTrace()
+    }
 
     print("Meo: ")
-    println(exportMeo(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.json"), transFile))
+    try {
+        exportMeo(File("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\target\\export.json"), transFile)
+        println(true)
+    } catch (e: IOException) {
+        println(false)
+        e.printStackTrace()
+    }
+
 }

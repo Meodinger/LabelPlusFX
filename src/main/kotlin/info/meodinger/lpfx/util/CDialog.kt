@@ -3,6 +3,7 @@ package info.meodinger.lpfx.util.dialog
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -24,7 +25,7 @@ private val alertDialog = Dialog<ButtonType>()
 private val errorDialog = Dialog<ButtonType>()
 private val exceptionDialog = Dialog<ButtonType>()
 
-fun init(owner: Window?) {
+fun initDialogOwner(owner: Window?) {
     confirmDialog.initOwner(owner)
     infoDialog.initOwner(owner)
     alertDialog.initOwner(owner)
@@ -40,6 +41,14 @@ fun init(owner: Window?) {
 fun showConfirm(content: String): Optional<ButtonType> {
     return showConfirm(I18N["common.confirm"], null, content)
 }
+
+/**
+ * Show message for confirm
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @return ButtonType? YES | NO
+ */
 fun showConfirm(title: String, header: String?, content: String): Optional<ButtonType> {
     return confirmDialog.showAndWait()
 }
@@ -52,6 +61,13 @@ fun showConfirm(title: String, header: String?, content: String): Optional<Butto
 fun showInfo(content: String): Optional<ButtonType> {
     return showInfo(I18N["common.confirm"], null, content)
 }
+/**
+ * Show information
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @return ButtonType? OK
+ */
 fun showInfo(title: String, header: String?, content: String): Optional<ButtonType> {
     return infoDialog.showAndWait()
 }
@@ -64,6 +80,13 @@ fun showInfo(title: String, header: String?, content: String): Optional<ButtonTy
 fun showAlert(content: String): Optional<ButtonType> {
     return showAlert(I18N["common.confirm"], null, content)
 }
+/**
+ * Show alert
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @return ButtonType? YES | NO | CANCEL
+ */
 fun showAlert(title: String, header: String?, content: String): Optional<ButtonType> {
     return alertDialog.showAndWait()
 }
@@ -76,6 +99,13 @@ fun showAlert(title: String, header: String?, content: String): Optional<ButtonT
 fun showError(content: String): Optional<ButtonType> {
     return showError(I18N["common.confirm"], null, content)
 }
+/**
+ * Show error
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @return ButtonType? OK
+ */
 fun showError(title: String, header: String?, content: String): Optional<ButtonType> {
     return errorDialog.showAndWait()
 }
@@ -91,6 +121,10 @@ fun showException(e: Exception): Optional<ButtonType> {
 
 
 // Specific dialogs
+
+fun showLink(owner: Window?, title: String, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+    return Dialog<ButtonType>().showAndWait()
+}
 
 fun showInput(owner: Window?, title: String, header: String, placeholder: String?, formatter: TextFormatter<String>?): Optional<String> {
     val dialog = TextInputDialog(placeholder)
@@ -125,7 +159,7 @@ fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<
     return dialog.showAndWait()
 }
 
-fun <T> showListChoose(owner: Window?, list: List<T>): Optional<List<T>> {
+fun <T> showChoiceList(owner: Window?, list: List<T>): Optional<List<T>> {
     val dialog = Dialog<List<T>>()
     dialog.initOwner(owner)
     dialog.title = I18N["dialog.choose.title"]

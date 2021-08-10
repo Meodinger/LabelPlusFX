@@ -434,12 +434,12 @@ class Controller : Initializable {
         if (!State.isChanged) return false
 
         // Not saved
-        val result = showAlert(I18N["common.exit"], I18N["dialog.exit_save_alert.content"], I18N["common.save"], I18N["common.not_save"])
+        val result = showAlert(I18N["common.exit"], null, I18N["dialog.exit_save_alert.content"])
         if (result.isPresent) {
-            if (result.get().buttonData == ButtonBar.ButtonData.CANCEL_CLOSE) {
+            if (result.get() == ButtonType.CANCEL) {
                 return true
             }
-            if (result.get().buttonData == ButtonBar.ButtonData.YES) {
+            if (result.get() == ButtonType.YES) {
                 saveTranslation()
             }
             return false
@@ -461,7 +461,7 @@ class Controller : Initializable {
                 }
             }
         }
-        val result = showListChoose(State.stage, potentialPics)
+        val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             pics.addAll(result.get())
         } else {
@@ -538,16 +538,18 @@ class Controller : Initializable {
     @FXML fun close() {
         if (!State.isChanged) exitProcess(0)
 
-        showAlert(I18N["common.exit"], I18N["dialog.exit_save_alert.content"], I18N["common.save"], I18N["common.not_save"]).ifPresent {
-            when (it.buttonData) {
-                ButtonBar.ButtonData.YES -> {
+        showAlert(I18N["common.exit"], null, I18N["dialog.exit_save_alert.content"]).ifPresent {
+            when (it) {
+                ButtonType.YES -> {
                     saveTranslation()
                     exitProcess(0)
                 }
-                ButtonBar.ButtonData.NO -> {
+                ButtonType.NO -> {
                     exitProcess(0)
                 }
-                else -> return@ifPresent
+                ButtonType.CANCEL -> {
+                    return@ifPresent
+                }
             }
         }
     }
@@ -595,7 +597,8 @@ class Controller : Initializable {
     }
 
     @FXML fun about() {
-        showInfoWithLink(
+        showLink(
+            State.stage,
             I18N["dialog.about.title"],
             StringBuilder()
                 .append(INFO["application.name"]).append(" - ").append(INFO["application.version"]).append("\n")

@@ -25,12 +25,11 @@ fun fileTest() {
     another.transMap["0"]!!.add(TransLabel(1, 0.0, 0.0, 0, ""))
     another.transMap["1"] = listOf(TransLabel()).toMutableList()
     println("""
-        |----------
+        |----- TransFile Test -----
         |TransFile clone test
         |Version: ${!(file.version.contentEquals(another.version))}
         |Comment: ${file.comment != another.comment}
         |Groups: ${(file.groupList[0].name != another.groupList[0].name) && (file.groupList.size == 1)}
         |TransMap: ${(file.transMap["0"]!![0].text != another.transMap["0"]!![0].text) && (file.transMap["0"]!!.size == 1) && (file.transMap.keys.size == 1)}
-        |----------
-        """.trimIndent())
+        """.trimMargin())
 }

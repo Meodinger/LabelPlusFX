@@ -15,6 +15,7 @@ lateinit var sample: TransFile
 
 fun loaderTest() {
     jsonTest()
+    println("----- Loader Test -----")
     sample = commonTest()
     comment_sticky_to_body_Test()
     empty_line_in_1_2_Test()

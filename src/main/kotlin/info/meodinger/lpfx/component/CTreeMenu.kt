@@ -295,6 +295,7 @@ object CTreeMenu {
             val selectedItems = view.selectionModel.selectedItems
             val result = showConfirm(
                 I18N["context.delete_label.dialog.title"],
+                null,
                 I18N["context.delete_label.dialog.content.pl"],
             )
 

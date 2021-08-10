@@ -1,6 +1,6 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.util.dialog.initCDialogOwner
+import info.meodinger.lpfx.util.dialog.initDialogOwner
 import info.meodinger.lpfx.util.resource.ICON
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -36,6 +36,6 @@ class LabelPlusFX: Application() {
         primaryStage.scene = scene
         primaryStage.show()
 
-        initCDialogOwner(primaryStage)
+        initDialogOwner(primaryStage)
     }
 }

@@ -11,7 +11,7 @@ import info.meodinger.lpfx.options.Settings
  */
 fun optionsTest() {
     println("""
-        |----------
+        |----- Options Test -----
         |Config:
         |${Config.MAIN_DIVIDER}: ${Config[Config.MAIN_DIVIDER]}
         |${Config.RIGHT_DIVIDER}: ${Config[Config.RIGHT_DIVIDER]}
@@ -21,7 +21,6 @@ fun optionsTest() {
         |${Settings.DefaultGroupList}: ${Settings[Settings.DefaultGroupList].asList()}
         |
         |RecentFiles:
-        |${RecentFiles.recent.size}: ${RecentFiles.recent.joinToString("\n")}
-        |----------
-    """.trimIndent())
+        |${RecentFiles.getAll().size}: ${RecentFiles.getAll().joinToString("\n")}
+    """.trimMargin())
 }

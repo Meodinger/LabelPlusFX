@@ -1,5 +1,8 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.util.isLPFile
+import info.meodinger.lpfx.util.isMeoFile
+
 /**
  * Author: Meodinger
  * Date: 2021/8/1
@@ -14,6 +17,13 @@ val DefaultWorkMode = WorkMode.InputMode
 
 enum class ViewMode { IndexMode, GroupMode }
 val DefaultViewMode = ViewMode.GroupMode
+
+enum class FileType { LPFile, MeoFile }
+fun getFileType(path: String): FileType {
+    if (isMeoFile(path)) return FileType.MeoFile
+    if (isLPFile(path)) return FileType.LPFile
+    throw IllegalArgumentException("Invalid file extension")
+}
 
 val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
 const val EXTENSION_MEO = ".json"

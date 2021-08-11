@@ -1,13 +1,11 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.component.CLabelPane.LabelEvent
 import info.meodinger.lpfx.component.*
+import info.meodinger.lpfx.component.CLabelPane.LabelEvent
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.dialog.*
-import info.meodinger.lpfx.util.isLPFile
-import info.meodinger.lpfx.util.isMeoFile
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
@@ -33,8 +31,6 @@ import javafx.util.Callback
 import java.io.*
 import java.net.URL
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.system.exitProcess
 
 /**
@@ -329,7 +325,7 @@ class Controller : Initializable {
             item.setOnAction {
                 stay()
                 prepare()
-                open(path)
+                open(path, getFileType(path))
             }
             mOpenRecent.items.add(item)
         }
@@ -448,7 +444,8 @@ class Controller : Initializable {
         return true
     }
 
-    private fun new(path: String) {
+    // TODO: Use File instead of String
+    private fun new(path: String, type: FileType) {
         // Choose Pics
         val potentialPics = ArrayList<String>()
         val pics = ArrayList<String>()
@@ -486,44 +483,131 @@ class Controller : Initializable {
         // Export to file
         try {
             val file = File(path)
-            if (isMeoFile(path)) {
-                exportMeo(file, State.transFile)
-            } else if (isLPFile(path)) {
-                exportLP(file, State.transFile)
+            when (type) {
+                FileType.LPFile -> exportLP(file, State.transFile)
+                FileType.MeoFile -> exportMeo(file, State.transFile)
             }
         } catch (e: IOException) {
             showException(e)
             showError(I18N["error.new_failed"])
         }
     }
-    private fun open(path: String) {}
-    private fun save(path: String, isSilent: Boolean) {}
+    private fun open(path: String, type: FileType) {
+        val transFile: TransFile
+        try {
+            val file = File(path)
+            transFile = when (type) {
+                FileType.LPFile -> loadLP(file)
+                FileType.MeoFile -> loadMeo(file)
+            }
+        } catch (e: IOException) {
+            showException(e)
+            showError(I18N["error.open_failed"])
+            return
+        }
+
+        // Show info if comment not in default list
+        val comment = transFile.comment.trim()
+        var isModified = true
+        for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
+            if (comment == defaultComment) {
+                isModified = false
+                break
+            }
+        }
+        if (isModified) {
+            showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+        }
+
+        State.transFile = transFile
+        State.transPath = path
+        State.isOpened = true
+    }
+    private fun save(path: String, type: FileType, isSilent: Boolean) {
+        val file = File(path)
+
+        // Check folder
+        if (!isSilent) if (file.parent != State.getFileFolder()) {
+            val result = showAlert(I18N["alert.save_to_another_place.content"])
+            if (!(result.isPresent && result.get() == ButtonType.YES)) return
+        }
+
+        // Backup if overwrite
+        var bak: File? = null
+        if (State.transPath == path) {
+            bak = File(State.transPath + EXTENSION_BAK)
+
+            using {
+                val input = FileInputStream(State.transPath).channel.autoClose()
+                val output = FileInputStream(bak!!).channel.autoClose()
+
+                output.transferFrom(input, 0, input.size())
+            } catch { e: Exception ->
+                if (!isSilent) showException(IOException(I18N["error.backup_failed"], e))
+                bak = null
+            } finally {
+
+            }
+        }
+
+        // Export
+        try {
+            when (type) {
+                FileType.LPFile -> exportLP(file, State.transFile)
+                FileType.MeoFile -> exportMeo(file, State.transFile)
+            }
+            if (!isSilent) showInfo(I18N["info.saved_successfully"])
+        } catch (e: IOException) {
+            if (!isSilent) {
+                showException(e)
+                if (bak != null) {
+                    showError(String.format(I18N["error.save_failed_backed.format"], bak!!.path))
+                } else {
+                    showError(I18N["error.save_failed"])
+                }
+            }
+            return
+        }
+
+        // Remove Backup
+        if (!(bak != null && bak!!.delete())) {
+            if (!isSilent) {
+                showError(I18N["error.backup_clear_failed"])
+            }
+        }
+
+        State.transPath = path
+        State.isChanged = false
+    }
 
     // new & open
     @FXML fun newTranslation() {
         if (stay()) return
 
+        State.reset()
         val file = fileChooser.showOpenDialog(State.stage) ?: return
-        new(file.path)
+        val type = getFileType(file.path)
+        new(file.path, type)
         prepare()
-        open(file.path)
+        open(file.path, type)
     }
     // open
     @FXML fun openTranslation() {
         if (stay()) return
 
+        State.reset()
         val file = fileChooser.showOpenDialog(State.stage) ?: return
         prepare()
-        open(file.path)
+        open(file.path, getFileType(file.path))
     }
     // save
     @FXML fun saveTranslation() {
-        save(State.transPath, false)
+        save(State.transPath, getFileType(State.transPath),false)
     }
     // save
     @FXML fun saveAsTranslation() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
-        save(file.path, false)
+        save(file.path, getFileType(file.path), false)
     }
     // open & save
     @FXML fun bakRecovery() {
@@ -531,8 +615,8 @@ class Controller : Initializable {
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
         prepare()
-        open(bak.path)
-        save(rec.path, false)
+        open(bak.path, FileType.MeoFile)
+        save(rec.path, getFileType(rec.path), false)
     }
 
     @FXML fun close() {

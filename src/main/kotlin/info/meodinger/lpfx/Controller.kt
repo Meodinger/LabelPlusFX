@@ -1,10 +1,12 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
+import info.meodinger.lpfx.component.CLabelPane.Companion.NOT_FOUND
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.keyboard.isControlDown
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
@@ -13,18 +15,17 @@ import info.meodinger.lpfx.util.tree.expandAll
 import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
-import javafx.beans.binding.IntegerBinding
+import javafx.beans.binding.ListBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.value.ChangeListener
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
-import javafx.scene.input.ContextMenuEvent
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
-import javafx.scene.input.KeyCombination
+import javafx.scene.input.*
 import javafx.scene.layout.AnchorPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -42,13 +43,13 @@ import kotlin.system.exitProcess
  */
 class Controller : Initializable {
 
-    @FXML private lateinit var tTransText: TextArea
+    @FXML private lateinit var tTransText: CTransArea
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
     @FXML private lateinit var pMain: SplitPane
     @FXML private lateinit var pRight: SplitPane
     @FXML private lateinit var pText: AnchorPane
-    @FXML private lateinit var vTree: TreeView<String>
+    @FXML private lateinit var vTree: CTreeView
     @FXML private lateinit var cSlider: CTextSlider
     @FXML private lateinit var cPicBox: CComboBox<String>
     @FXML private lateinit var cGroupBox: CComboBox<String>
@@ -79,47 +80,30 @@ class Controller : Initializable {
     private val exportChooser = CFileChooser()
     private val exportPackChooser = CFileChooser()
 
-    private val symbolMenu = object : ContextMenu() {
+    private inner class BackupTaskManager {
 
-        private val radius = 6.0
-        private val symbols = listOf(
-            Pair("※", true),
-            Pair("◎", true),
-            Pair("★", true),
-            Pair("☆", true),
-            Pair("～", true),
-            Pair("♡", false),
-            Pair("♥", false),
-            Pair("♢", false),
-            Pair("♦", false),
-            Pair("♪", false)
-        )
+        var task: TimerTask = getNewTask()
 
-        fun createSymbolItem(symbol: String, displayable: Boolean): MenuItem {
-            return MenuItem(
-                symbol,
-                if (displayable) Circle(radius, Color.GREEN)
-                else Circle(radius, Color.RED)
-            ).also {
-                it.style = "-fx-font-family: \"Segoe UI Symbol\""
+        private fun getNewTask(): TimerTask {
+            return object : TimerTask() {
+                override fun run() {
+                    if (State.isChanged) {
+                        this@Controller.silentBackup()
+                    }
+                }
             }
         }
 
-        init {
-            for (symbol in symbols) items.add(createSymbolItem(symbol.first, symbol.second).also {
-                it.setOnAction { tTransText.insertText(tTransText.caretPosition, symbol.first) }
-            })
+        fun refresh() {
+            task.cancel()
+            task = getNewTask()
         }
-    }
 
+        fun getTimerTask(): TimerTask = task
+
+    }
+    private val taskManager = BackupTaskManager()
     private val timer = Timer()
-    private val task = object : TimerTask() {
-        override fun run() {
-            if (State.isChanged) {
-                this@Controller.silentBackup()
-            }
-        }
-    }
 
     init {
         State.controllerAccessor = object : State.ControllerAccessor {
@@ -153,8 +137,6 @@ class Controller : Initializable {
 
         }
 
-        CFileChooser.lastDirectory = File(RecentFiles.getLastOpenFile() ?: Options.lpfx.toString()).parentFile
-
         fileChooser.getExtensionFilters().add(fileFilter)
         fileChooser.getExtensionFilters().add(meoFilter)
         fileChooser.getExtensionFilters().add(lpFilter)
@@ -172,6 +154,13 @@ class Controller : Initializable {
 
         // ----- Component Initialize ----- //
 
+        // Set last used dir
+        val lastFilePath = RecentFiles.getLastOpenFile()
+        if (lastFilePath != null) CFileChooser.lastDirectory = File(lastFilePath).parentFile
+
+        // Update OpenRecent
+        updateOpenRecent()
+
         // Set menu text
         setText()
 
@@ -186,9 +175,6 @@ class Controller : Initializable {
             mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
             mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
         }
-
-        // Update OpenRecent
-        updateOpenRecent()
 
         // Warp cPicBox
         cPicBox.isWrapped = true
@@ -210,25 +196,14 @@ class Controller : Initializable {
         // ----- Property bindings ----- //
 
         // cPicBox - currentPicName
-        State.currentPicNameProperty.bind(cPicBox.valueProperty)
+        cPicBox.valueProperty.addListener { _, _, newValue -> State.currentPicName = newValue }
         // cGroupBox - currentGroupId
-        State.currentGroupIdProperty.bind(object : IntegerBinding() {
-
-            init {
-                bind(cGroupBox.valueProperty)
+        cGroupBox.valueProperty.addListener { _, _, newValue ->
+            State.transFile.groupList.forEachIndexed { index, transGroup ->
+                if (transGroup.name == cGroupBox.valueProperty.value)
+                    State.currentGroupId = index
             }
-
-            override fun computeValue(): Int {
-                State.transFile.groupList.forEachIndexed { index, transGroup ->
-                    if (transGroup.name == cGroupBox.valueProperty.value)
-                        return index
-                }
-                return 0
-            }
-
-        })
-        // cLabelPane - currentLabelIndex
-        State.currentLabelIndexProperty.bind(cLabelPane.selectedLabelIndexProperty)
+        }
 
         // tTransText - transLabel.text
         tTransText.textProperty().bind(object : StringBinding() {
@@ -345,6 +320,7 @@ class Controller : Initializable {
                 vTree.selectionModel.select(item)
                 cLabelPane.moveToLabel(item.meta)
                 cLabelPane.selectedLabelIndex = item.index
+                State.currentLabelIndex = item.index
             }
         }
 
@@ -362,6 +338,137 @@ class Controller : Initializable {
                 cGroupBox.moveTo(State.getGroupIdByName(item.value))
             }
         }
+
+        // Bind text and Tree
+        vTree.addEventHandler(ScrollToEvent.ANY) {
+            val item = vTree.selectionModel.selectedItem
+            if (item != null && item is CTreeItem)
+                State.currentLabelIndex = item.index
+        }
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            val item = vTree.selectionModel.selectedItem
+            if (item != null && item is CTreeItem)
+                State.currentLabelIndex = item.index
+        }
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code.isArrowKey) {
+
+                // shift
+                val shift = if (it.code == KeyCode.UP) -1 else if (it.code == KeyCode.DOWN) 1 else 0
+                val item = vTree.getTreeItem(vTree.selectionModel.selectedIndex + shift)
+
+                if (item != null && item is CTreeItem)
+                    State.currentLabelIndex = item.index
+            }
+        }
+
+        // Bind Label and Tree
+        cLabelPane.selectedLabelIndexProperty.addListener { _, _, index ->
+            if (index == NOT_FOUND) return@addListener
+
+            val item = findLabelItemByIndex(index as Int)
+            vTree.selectionModel.clearSelection()
+            vTree.selectionModel.select(item)
+            vTree.scrollTo(vTree.getRow(item))
+        }
+        vTree.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            if (it.clickCount < 2) return@addEventHandler
+
+            val item = vTree.selectionModel.selectedItem
+            if (item != null && item is CTreeItem) {
+                cLabelPane.moveToLabel(State.transFile.transMap[State.currentPicName]!!.find { e -> e.index == item.index }!!)
+            }
+        }
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code.isArrowKey) {
+
+                // shift
+                val shift = if (it.code == KeyCode.UP) -1 else if (it.code == KeyCode.DOWN) 1 else 0
+                val item = vTree.getTreeItem(vTree.selectionModel.selectedIndex + shift)
+
+                if (item != null && item is CTreeItem)
+                    cLabelPane.moveToLabel(State.transFile.transMap[State.currentPicName]!!.find { e -> e.index == item.index }!!)
+            }
+        }
+
+        // Bind number input with group selection
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code.isDigitKey)
+                cGroupBox.moveTo(it.text.toInt() - 1)
+        }
+
+        // Bind tab with work mode switch
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.TAB) {
+                switchWorkMode()
+                it.consume()
+            }
+        }
+
+        // Bind Tab with view mode switch
+        vTree.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.TAB) {
+                switchViewMode()
+                it.consume()
+            }
+        }
+
+        // Bind Arrow KeyEvent with Label change and Pic change
+        val arrowKeyListener = EventHandler<KeyEvent> {
+            if (isControlDown(it) && it.code.isArrowKey) {
+                when (it.code) {
+                    KeyCode.UP, KeyCode.DOWN -> {
+
+                        // Shift
+                        val shift = if (it.code == KeyCode.UP) -1 else 1
+
+                        var index = vTree.selectionModel.selectedIndex + shift
+                        vTree.selectionModel.clearSelection()
+                        // if item == null (to the end), vTree select nothing, return to top
+
+                        var item = vTree.getTreeItem(index)
+                        if (item != null) {
+                            index = if (item is CTreeItem) {
+                                // Label
+                                vTree.selectionModel.select(index)
+                                State.currentLabelIndex = item.index
+                                cLabelPane.moveToLabel(item.meta)
+                                return@EventHandler
+                            } else if (item.parent != null) {
+                                // Group
+                                item.isExpanded = true
+                                index + shift
+                            } else {
+                                // Root
+                                item.expandAll()
+                                if (State.viewMode === ViewMode.GroupMode) index++
+                                while (vTree.getTreeItem(index).children.size == 0) {
+                                    index++
+                                    if (vTree.getTreeItem(index) == null) break
+                                }
+                                index + shift
+                            }
+
+                            vTree.selectionModel.select(index)
+                            item = vTree.getTreeItem(index)
+                            if (item == null) return@EventHandler
+
+                            if (item is CTreeItem) {
+                                // Label
+                                State.currentLabelIndex = item.index
+                                cLabelPane.moveToLabel(item.meta)
+                            }
+                        }
+                    }
+                    KeyCode.LEFT -> cPicBox.back()
+                    KeyCode.RIGHT -> cPicBox.next()
+                    else -> return@EventHandler
+                }
+            }
+        }
+        // Bind Arrow KeyEvent with Label change and Pic change
+        tTransText.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener)
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener)
 
     }
 
@@ -415,11 +522,13 @@ class Controller : Initializable {
             val item = MenuItem(path)
             item.setOnAction {
                 stay()
-                prepare()
                 open(path, getFileType(path))
             }
             mOpenRecent.items.add(item)
         }
+    }
+    private fun updatePicList() {
+        cPicBox.setList(TransFile.getSortedPicList(State.transFile))
     }
     private fun updateGroupList() {
         val list = ArrayList<String>()
@@ -508,24 +617,6 @@ class Controller : Initializable {
         }
     }
 
-    private fun prepare() {
-        // Initialize workspace
-        reset()
-        State.stage.title = INFO["application.name"] + " - " + File(State.transPath).name
-
-        // Update recent files
-        RecentFiles.add(State.transPath)
-        updateOpenRecent()
-
-        // Auto backup
-        task.cancel()
-        val bakDir = File(State.getBakFolder())
-        if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
-            timer.schedule(task, AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
-        } else {
-            showError(I18N["error.auto_backup_unavailable"])
-        }
-    }
     private fun stay(): Boolean {
         // Not open
         if (!State.isOpened) return false
@@ -624,6 +715,46 @@ class Controller : Initializable {
 
         State.transFile = transFile
         State.transPath = path
+
+        // Initialize workspace
+        reset()
+        State.stage.title = INFO["application.name"] + " - " + File(path).name
+
+        fun createColorHexBinding(): ListBinding<String> {
+            return object : ListBinding<String>() {
+                init {
+                    for (i in 0 until State.transFile.groupList.size) {
+                        bind(State.transFile.groupList[i].colorProperty)
+                    }
+                }
+
+                override fun computeValue(): ObservableList<String> {
+                    val list = ArrayList<String>()
+                    State.transFile.groupList.forEach {
+                        list.add(it.color)
+                    }
+                    return FXCollections.observableList(list)
+                }
+            }
+        }
+        cLabelPane.colorListProperty.bind(createColorHexBinding())
+
+        updatePicList()
+        updateGroupList()
+
+        // Update recent files
+        RecentFiles.add(path)
+        updateOpenRecent()
+
+        // Auto backup
+        taskManager.refresh()
+        val bakDir = File(State.getBakFolder())
+        if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
+            timer.schedule(taskManager.getTimerTask(), AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
+        } else {
+            showError(I18N["error.auto_backup_unavailable"])
+        }
+
         State.isOpened = true
     }
     private fun save(path: String, type: FileType) {
@@ -687,7 +818,6 @@ class Controller : Initializable {
         val file = fileChooser.showOpenDialog(State.stage) ?: return
         val type = getFileType(file.path)
         new(file.path, type)
-        prepare()
         open(file.path, type)
     }
     // open
@@ -696,7 +826,6 @@ class Controller : Initializable {
 
         State.reset()
         val file = fileChooser.showOpenDialog(State.stage) ?: return
-        prepare()
         open(file.path, getFileType(file.path))
     }
     // save
@@ -713,7 +842,6 @@ class Controller : Initializable {
         if (stay()) return
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
-        prepare()
         open(bak.path, FileType.MeoFile)
         save(rec.path, getFileType(rec.path))
     }

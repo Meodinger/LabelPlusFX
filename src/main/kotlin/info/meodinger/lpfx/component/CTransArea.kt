@@ -1,6 +1,13 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.util.keyboard.isAltDown
+import javafx.geometry.Side
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import javafx.scene.control.TextArea
+import javafx.scene.input.KeyEvent
+import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
 
 /**
  * Author: Meodinger
@@ -9,9 +16,46 @@ import javafx.scene.control.TextArea
  */
 class CTransArea: TextArea() {
 
-    init {
+    private val symbolMenu = object : ContextMenu() {
 
+        private val radius = 6.0
+        private val symbols = listOf(
+            Pair("※", true),
+            Pair("◎", true),
+            Pair("★", true),
+            Pair("☆", true),
+            Pair("～", true),
+            Pair("♡", false),
+            Pair("♥", false),
+            Pair("♢", false),
+            Pair("♦", false),
+            Pair("♪", false)
+        )
+
+        fun createSymbolItem(symbol: String, displayable: Boolean): MenuItem {
+            return MenuItem(
+                symbol,
+                if (displayable) Circle(radius, Color.GREEN)
+                else Circle(radius, Color.RED)
+            ).also {
+                it.style = "-fx-font-family: \"Segoe UI Symbol\""
+            }
+        }
+
+        init {
+            for (symbol in symbols) items.add(createSymbolItem(symbol.first, symbol.second).also {
+                it.setOnAction { this@CTransArea.insertText(this@CTransArea.caretPosition, symbol.first) }
+            })
+        }
     }
 
-    
+
+    init {
+        addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (isAltDown(it)) {
+                symbolMenu.show(this, Side.LEFT, 0.0, 0.0)
+            }
+        }
+    }
+
 }

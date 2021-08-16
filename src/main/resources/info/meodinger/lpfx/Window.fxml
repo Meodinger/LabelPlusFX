@@ -57,12 +57,12 @@
                             </HBox>
                         </top>
                         <center>
-                            <TreeView fx:id="vTree"/>
+                            <CTreeView fx:id="vTree"/>
                         </center>
                     </BorderPane>
                 </AnchorPane>
                 <AnchorPane fx:id="pText">
-                    <TextArea fx:id="tTransText"
+                    <CTransArea fx:id="tTransText"
                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                 </AnchorPane>

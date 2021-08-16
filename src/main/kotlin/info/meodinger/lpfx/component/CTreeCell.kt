@@ -17,7 +17,7 @@ class CTreeCell: TreeCell<String>() {
 
         setOnMouseClicked { event ->
             if (treeItem != null) {
-                if (treeItem.javaClass == CTreeItem::class) {
+                if (treeItem is CTreeItem) {
                     // Label
                     CTreeMenu.labelMenu.redirectTo(treeItem)
                     contextMenu = CTreeMenu.labelMenu

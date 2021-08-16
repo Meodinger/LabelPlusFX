@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.type
 
+import java.util.*
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
@@ -14,10 +16,9 @@ class CProperty(val key: String, var value: String) {
 
         fun parseList(values: List<String>): String {
             val builder = StringBuilder()
-            for (value in values) {
-                builder.append(value).append(LIST_SEPARATOR)
-            }
-            if (builder.isNotEmpty()) builder.deleteCharAt(builder.length - 1)
+            for (value in values) builder.append(value).append(LIST_SEPARATOR)
+            if (builder.isNotEmpty())
+                builder.deleteCharAt(builder.length - 1)
             return builder.toString()
         }
     }
@@ -36,6 +37,7 @@ class CProperty(val key: String, var value: String) {
         return value.toDouble()
     }
     fun asList(): List<String> {
+        if (value.isBlank()) return emptyList()
         return listOf(*value.split(LIST_SEPARATOR).toTypedArray())
     }
 

@@ -308,19 +308,21 @@ class Controller : Initializable {
             val transLabels = State.transFile.transMap[newValue]!!
 
             updateTreeView()
-            cLabelPane.moveToZero()
             cLabelPane.update(
                 State.getPicPathNow(),
                 State.transFile.groupList.size,
                 transLabels
             )
+            cLabelPane.moveToZero()
 
-            if (transLabels.size > 0) {
-                val item = findLabelItemByIndex(transLabels[0].index)
-                vTree.selectionModel.select(item)
-                cLabelPane.moveToLabel(item.meta)
-                cLabelPane.selectedLabelIndex = item.index
-                State.currentLabelIndex = item.index
+            if (false) {
+                if (transLabels.size > 0) {
+                    val item = findLabelItemByIndex(transLabels[0].index)
+                    vTree.selectionModel.select(item)
+                    cLabelPane.moveToLabel(item.meta)
+                    cLabelPane.selectedLabelIndex = item.index
+                    State.currentLabelIndex = item.index
+                }
             }
         }
 

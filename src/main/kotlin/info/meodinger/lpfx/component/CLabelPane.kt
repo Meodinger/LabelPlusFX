@@ -244,6 +244,7 @@ class CLabelPane : ScrollPane() {
                 root.layoutX = shiftX + it.sceneX
                 root.layoutY = shiftY + it.sceneY
             }
+            println("${root.layoutX}-${root.layoutY}")
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = defaultCursor
@@ -506,8 +507,8 @@ class CLabelPane : ScrollPane() {
         root.layoutY = height / 2 - fakeY
     }
     fun moveToZero() {
-        root.layoutX = 0.0
-        root.layoutY = 0.0
+        root.layoutX = - (1 - scale) * imageWidth / 2
+        root.layoutY = - (1 - scale) * imageHeight / 2
     }
     fun moveToCenter() {
         root.layoutX = (width - imageWidth) / 2

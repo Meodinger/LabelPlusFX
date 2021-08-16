@@ -1,5 +1,6 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Options
 import javafx.application.Application
 
 /**
@@ -8,5 +9,6 @@ import javafx.application.Application
  * Location: info.meodinger.lpfx
  */
 fun main(vararg args: String) {
+    Options.init()
     Application.launch(LabelPlusFX::class.java, *args)
 }

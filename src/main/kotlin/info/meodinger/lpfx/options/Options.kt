@@ -5,8 +5,8 @@ import info.meodinger.lpfx.util.dialog.showException
 
 import java.io.IOException
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.Path
 import kotlin.system.exitProcess
 
 /**
@@ -28,7 +28,7 @@ object Options {
     val recentFiles: Path = lpfx.resolve(FileName_RecentFiles)
     val errorLog: Path = lpfx.resolve(FolderName_ErrorLog)
 
-    init {
+    fun init() {
         try {
             // project data folder
             if (Files.notExists(lpfx)) Files.createDirectories(lpfx)

@@ -1,11 +1,13 @@
 package info.meodinger.lpfx.options
 
+import info.meodinger.lpfx.util.dialog.showError
 import info.meodinger.lpfx.util.dialog.showException
 
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.system.exitProcess
 
 /**
  * Author: Meodinger
@@ -39,6 +41,8 @@ object Options {
             initRecentFiles()
         } catch (e: IOException) {
             showException(e)
+            showError("Initialize options failed")
+            exitProcess(0)
         }
     }
 

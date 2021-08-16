@@ -1,7 +1,6 @@
 package component
 
 import info.meodinger.lpfx.component.CLabelPane
-import info.meodinger.lpfx.component.CLabelPane.LabelEvent
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import io.commonTest
@@ -79,66 +78,40 @@ class LabelPane : Application() {
         }
         pane.colorListProperty.bind(createColorHexBinding())
 
-        pane.handleInputMode = EventHandler {
-            when (it.eventType) {
-                LabelEvent.LABEL_OTHER -> {
-                    textArea.appendText("I other nothing")
-                }
-                LabelEvent.LABEL_PLACE -> {
-                    textArea.appendText("I place nothing")
-                }
-                LabelEvent.LABEL_REMOVE -> {
-                    textArea.appendText("I remove nothing")
-                }
-                LabelEvent.LABEL_POINTED -> {
-                    textArea.appendText("I pointed ${it.labelIndex}")
-                }
-                LabelEvent.LABEL_CLICKED -> {
-                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
-                    textArea.appendText("I clicked ${transLabel}")
-                }
-            }
-            textArea.appendText("\n")
+        pane.onLabelOther = EventHandler {
+            textArea.appendText("Other nothing\n")
         }
-        pane.handleLabelMode = EventHandler {
-            when (it.eventType) {
-                LabelEvent.LABEL_OTHER -> {
-                    textArea.appendText("L other nothing")
-                }
-                LabelEvent.LABEL_PLACE -> {
-                    val transLabel = TransLabel(
-                        transFile.getTransLabelListOf(picName).size + 1,
-                        it.labelX,
-                        it.labelY,
-                        0,
-                        "NewText@${(Math.random() * 1000).roundToInt()}"
-                    )
-                    transFile.getTransLabelListOf(picName).add(transLabel)
-                    pane.placeLabel(transLabel)
+        pane.onLabelPlace = EventHandler {
+            val transLabel = TransLabel(
+                transFile.getTransLabelListOf(picName).size + 1,
+                it.labelX,
+                it.labelY,
+                0,
+                "NewText@${(Math.random() * 1000).roundToInt()}"
+            )
+            transFile.getTransLabelListOf(picName).add(transLabel)
+            pane.placeLabel(transLabel)
 
-                    // x/y is 0.0 because of bind
-                    textArea.appendText("L place $transLabel")
-                }
-                LabelEvent.LABEL_REMOVE -> {
-                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+            // x/y is 0.0 because of bind
+            textArea.appendText("Place ${transLabel}\n")
+        }
+        pane.onLabelRemove = EventHandler {
+            val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
 
-                    transFile.getTransLabelListOf(picName).remove(transLabel)
-                    for (label in transFile.getTransLabelListOf(picName)) {
-                        if (label.index > transLabel.index) label.index -= 1
-                    }
-
-                    pane.removeLabel(transLabel)
-                    textArea.appendText("L remove $transLabel")
-                }
-                LabelEvent.LABEL_POINTED -> {
-                    textArea.appendText("L pointed ${it.labelIndex}")
-                }
-                LabelEvent.LABEL_CLICKED -> {
-                    val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
-                    textArea.appendText("L clicked ${transLabel}")
-                }
+            transFile.getTransLabelListOf(picName).remove(transLabel)
+            for (label in transFile.getTransLabelListOf(picName)) {
+                if (label.index > transLabel.index) label.index -= 1
             }
-            textArea.appendText("\n")
+
+            pane.removeLabel(transLabel)
+            textArea.appendText("Remove ${transLabel}\n")
+        }
+        pane.onLabelPointed = EventHandler {
+            textArea.appendText("Pointed ${it.labelIndex}\n")
+        }
+        pane.onLabelClicked = EventHandler {
+            val transLabel = transFile.getTransLabelAt(picName, it.labelIndex)
+            textArea.appendText("Clicked ${transLabel}\n")
         }
 
         pane.setupImage("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\test\\resources\\sample\\1.jpg")

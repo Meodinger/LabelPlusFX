@@ -64,12 +64,9 @@ object CTreeMenu {
             addGroupDialog.title = I18N["context.add_group.dialog.title"]
             addGroupDialog.headerText = I18N["context.add_group.dialog.header"]
             addGroupDialog.dialogPane.content = HBox(addGroupField, addGroupPicker).also { it.alignment = Pos.CENTER }
-            addGroupDialog.dialogPane.buttonTypes.addAll(
-                ButtonType(I18N["common.submit"], ButtonBar.ButtonData.OK_DONE),
-                ButtonType(I18N["common.cancel"], ButtonBar.ButtonData.CANCEL_CLOSE)
-            )
+            addGroupDialog.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
             addGroupDialog.setResultConverter {
-                if (it.buttonData == ButtonBar.ButtonData.OK_DONE)
+                if (it == ButtonType.APPLY)
                     TransGroup(addGroupField.text, addGroupPicker.value.toHex())
                 else
                     null

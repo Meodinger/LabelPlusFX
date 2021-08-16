@@ -1,7 +1,6 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
-import info.meodinger.lpfx.component.CLabelPane.LabelEvent
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
@@ -265,7 +264,6 @@ class Controller : Initializable {
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
             Config[Config.RIGHT_DIVIDER].value = newValue.toString()
         }
-
     }
 
     private fun setText() {
@@ -518,11 +516,11 @@ class Controller : Initializable {
         State.transPath = path
         State.isOpened = true
     }
-    private fun save(path: String, type: FileType, isSilent: Boolean) {
+    private fun save(path: String, type: FileType) {
         val file = File(path)
 
         // Check folder
-        if (!isSilent) if (file.parent != State.getFileFolder()) {
+        if (file.parent != State.getFileFolder()) {
             val result = showAlert(I18N["alert.save_to_another_place.content"])
             if (!(result.isPresent && result.get() == ButtonType.YES)) return
         }
@@ -538,7 +536,7 @@ class Controller : Initializable {
 
                 output.transferFrom(input, 0, input.size())
             } catch { e: Exception ->
-                if (!isSilent) showException(IOException(I18N["error.backup_failed"], e))
+                showException(IOException(I18N["error.backup_failed"], e))
                 bak = null
             } finally {
 
@@ -551,24 +549,20 @@ class Controller : Initializable {
                 FileType.LPFile -> exportLP(file, State.transFile)
                 FileType.MeoFile -> exportMeo(file, State.transFile)
             }
-            if (!isSilent) showInfo(I18N["info.saved_successfully"])
+            showInfo(I18N["info.saved_successfully"])
         } catch (e: IOException) {
-            if (!isSilent) {
-                showException(e)
-                if (bak != null) {
-                    showError(String.format(I18N["error.save_failed_backed.format"], bak!!.path))
-                } else {
-                    showError(I18N["error.save_failed"])
-                }
+            showException(e)
+            if (bak != null) {
+                showError(String.format(I18N["error.save_failed_backed.format"], bak!!.path))
+            } else {
+                showError(I18N["error.save_failed"])
             }
             return
         }
 
         // Remove Backup
         if (!(bak != null && bak!!.delete())) {
-            if (!isSilent) {
-                showError(I18N["error.backup_clear_failed"])
-            }
+            showError(I18N["error.backup_clear_failed"])
         }
 
         State.transPath = path
@@ -597,12 +591,12 @@ class Controller : Initializable {
     }
     // save
     @FXML fun saveTranslation() {
-        save(State.transPath, getFileType(State.transPath),false)
+        save(State.transPath, getFileType(State.transPath))
     }
     // save
     @FXML fun saveAsTranslation() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
-        save(file.path, getFileType(file.path), false)
+        save(file.path, getFileType(file.path))
     }
     // open & save
     @FXML fun bakRecovery() {
@@ -611,7 +605,7 @@ class Controller : Initializable {
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
         prepare()
         open(bak.path, FileType.MeoFile)
-        save(rec.path, getFileType(rec.path), false)
+        save(rec.path, getFileType(rec.path))
     }
 
     @FXML fun close() {

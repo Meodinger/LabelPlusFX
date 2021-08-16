@@ -191,7 +191,7 @@ fun showLink(owner: Window?, title: String, header: String?, content: String?, l
 
     val label = Label(content)
     val separator = Separator().also { it.padding = Insets(8.0, 0.0, 8.0, 0.0) }
-    val hyperlink = Hyperlink(link).also { it.onAction = handler }
+    val hyperlink = Hyperlink(link).also { it.onAction = handler; it.padding = Insets(0.0) }
     val box = VBox(label, separator, hyperlink)
 
     dialog.title = title

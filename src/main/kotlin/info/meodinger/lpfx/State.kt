@@ -1,5 +1,6 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.component.CLabelPane.Companion.NOT_FOUND
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.resource.I18N
@@ -36,8 +37,9 @@ object State {
     val isChangedProperty = SimpleBooleanProperty(false)
     val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_FILE)
     val transPathProperty = SimpleStringProperty("")
-    val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentPicNameProperty = SimpleStringProperty("")
+    val currentGroupIdProperty = SimpleIntegerProperty(0)
+    val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
 
     var isOpened: Boolean
         get() = isOpenedProperty.value
@@ -59,16 +61,22 @@ object State {
         set(value) {
             transPathProperty.value = value
         }
-    var currentGroupId: Int
-        get() = currentGroupIdProperty.value
-        set(value) {
-            currentGroupIdProperty.value = value
-        }
     var currentPicName: String
         get() = currentPicNameProperty.value
         set(value) {
             currentPicNameProperty.value = value
         }
+    var currentGroupId: Int
+        get() = currentGroupIdProperty.value
+        set(value) {
+            currentGroupIdProperty.value = value
+        }
+    var currentLabelIndex: Int
+        get() = currentLabelIndexProperty.value
+        set(value) {
+            currentLabelIndexProperty.value = value
+        }
+
 
     var workMode = DefaultWorkMode
     var viewMode = DefaultViewMode
@@ -77,8 +85,9 @@ object State {
         isOpened = false
         transFile = TransFile()
         transPath = ""
-        currentGroupId = 0
         currentPicName = ""
+        currentGroupId = 0
+        currentLabelIndex = NOT_FOUND
         isChanged = false
         workMode = DefaultWorkMode
         viewMode = DefaultViewMode
@@ -123,7 +132,6 @@ object State {
         fun removeLabelLayer(groupId: Int)
 
         fun updateTree()
-        fun updateGroupList()
 
         operator fun get(fieldName: String): Any
     }

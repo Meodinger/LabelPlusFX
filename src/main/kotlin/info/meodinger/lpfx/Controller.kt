@@ -13,12 +13,15 @@ import info.meodinger.lpfx.util.tree.expandAll
 import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
+import javafx.beans.binding.IntegerBinding
+import javafx.beans.binding.StringBinding
 import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.*
+import javafx.scene.input.ContextMenuEvent
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
@@ -136,10 +139,6 @@ class Controller : Initializable {
                 this@Controller.updateTreeView()
             }
 
-            override fun updateGroupList() {
-                this@Controller.updateGroupList()
-            }
-
             override fun get(fieldName: String): Any {
                 try {
                     val clazz = this@Controller.javaClass
@@ -170,22 +169,88 @@ class Controller : Initializable {
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+
+        // ----- Component Initialize ----- //
+
+        // Set menu text
         setText()
+
+        // Set menu disabled
         setDisable()
 
-        // Init image
+        // Set accelerators
+        if (isMac) {
+            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN)
+            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN, KeyCombination.SHIFT_DOWN)
+        } else {
+            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
+            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
+        }
+
+        // Update OpenRecent
+        updateOpenRecent()
+
+        // Warp cPicBox
+        cPicBox.isWrapped = true
+
+        // Init vTree context menu
+        CTreeMenu.treeMenu.init(vTree)
+
+        // Display dividers
+        pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
+        pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
+
+        // Display default image
         cLabelPane.isVisible = false
         Platform.runLater {
             cLabelPane.moveToCenter()
             cLabelPane.isVisible = true
         }
 
-        // Initialize
-        CTreeMenu.treeMenu.init(vTree)
-        pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
-        pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
-        cPicBox.isWrapped = true
-        updateOpenRecent()
+        // ----- Property bindings ----- //
+
+        // cPicBox - currentPicName
+        State.currentPicNameProperty.bind(cPicBox.valueProperty)
+        // cGroupBox - currentGroupId
+        State.currentGroupIdProperty.bind(object : IntegerBinding() {
+
+            init {
+                bind(cGroupBox.valueProperty)
+            }
+
+            override fun computeValue(): Int {
+                State.transFile.groupList.forEachIndexed { index, transGroup ->
+                    if (transGroup.name == cGroupBox.valueProperty.value)
+                        return index
+                }
+                return 0
+            }
+
+        })
+        // cLabelPane - currentLabelIndex
+        State.currentLabelIndexProperty.bind(cLabelPane.selectedLabelIndexProperty)
+
+        // tTransText - transLabel.text
+        tTransText.textProperty().bind(object : StringBinding() {
+            init {
+                bind(State.currentLabelIndexProperty)
+            }
+
+            override fun computeValue(): String {
+                if (!State.isOpened) return ""
+
+                val index = State.currentLabelIndex
+                val transLabels = State.transFile.transMap[State.currentPicName]!!
+                val transLabel = transLabels.find { it.index == index }!!
+                return transLabel.text
+            }
+
+        })
+
+        // cSlider - cLabelPane#scale
+        cSlider.scaleProperty.bindBidirectional(cLabelPane.scaleProperty)
+
+        // ----- Listeners & Handlers ----- //
 
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
@@ -239,24 +304,6 @@ class Controller : Initializable {
             cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.rootX, it.rootY)
         }
 
-        // Accelerator
-        if (isMac) {
-            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN)
-            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN, KeyCombination.SHIFT_DOWN)
-        } else {
-            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
-            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
-        }
-
-        // Fix split ratio when resize
-        val geometryListener = ChangeListener<Number> { _, _, _ ->
-            val debounce = { input: Double -> (input * 100 + 0.2) / 100 }
-            pMain.setDividerPositions(debounce(pMain.dividerPositions[0]))
-            pRight.setDividerPositions(debounce(pRight.dividerPositions[0]))
-        }
-        State.stage.widthProperty().addListener(geometryListener)
-        State.stage.heightProperty().addListener(geometryListener)
-
         // Update config
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Config[Config.MAIN_DIVIDER].value = newValue.toString()
@@ -264,6 +311,58 @@ class Controller : Initializable {
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
             Config[Config.RIGHT_DIVIDER].value = newValue.toString()
         }
+
+        // Fix dividers when resize
+        val geometryListener = ChangeListener<Number> { _, _, _ ->
+            // Now only god knows its efffect
+            val debounce = { input: Double -> (input * 100 + 0.2) / 100 }
+            pMain.setDividerPositions(debounce(pMain.dividerPositions[0]))
+            pRight.setDividerPositions(debounce(pRight.dividerPositions[0]))
+        }
+        State.stage.widthProperty().addListener(geometryListener)
+        State.stage.heightProperty().addListener(geometryListener)
+
+        // TreeView update
+        State.isChangedProperty.addListener { _, _, _ -> updateTreeView() }
+
+        // GroupBox update
+        State.isChangedProperty.addListener { _, _, _ -> updateGroupList() }
+
+        // Update vTree & cLabelPane when change pic
+        State.currentPicNameProperty.addListener { _, _, newValue ->
+            val transLabels = State.transFile.transMap[newValue]!!
+
+            updateTreeView()
+            cLabelPane.moveToZero()
+            cLabelPane.update(
+                State.getPicPathNow(),
+                State.transFile.groupList.size,
+                transLabels
+            )
+
+            if (transLabels.size > 0) {
+                val item = findLabelItemByIndex(transLabels[0].index)
+                vTree.selectionModel.select(item)
+                cLabelPane.moveToLabel(item.meta)
+                cLabelPane.selectedLabelIndex = item.index
+            }
+        }
+
+        // Clear text layer when change group
+        State.currentGroupIdProperty.addListener { _, _, _ -> cLabelPane.removeText() }
+
+        // Update tree menu when requested in ViewMode.IndexMode
+        vTree.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
+            if (State.viewMode == ViewMode.IndexMode) CTreeMenu.treeMenu.update()
+        }
+
+        // Update selected group when clicked GroupTreeItem
+        vTree.selectionModel.selectedItemProperty().addListener { _, _, item ->
+            if (item != null) if (item.parent != null && item !is CTreeItem) {
+                cGroupBox.moveTo(State.getGroupIdByName(item.value))
+            }
+        }
+
     }
 
     private fun setText() {
@@ -284,24 +383,23 @@ class Controller : Initializable {
         mAbout.text = I18N["m.about"]
     }
     private fun setDisable() {
-        mSave.isDisable = !State.isOpened
-        mSaveAs.isDisable = !State.isOpened
-        mExportAsLp.isDisable = !State.isOpened
-        mExportAsMeo.isDisable = !State.isOpened
-        mExportAsMeoPack.isDisable = !State.isOpened
-        mEditComment.isDisable = !State.isOpened
-        bSwitchViewMode.isDisable = !State.isOpened
-        bSwitchWorkMode.isDisable = !State.isOpened
-        tTransText.isDisable = !State.isOpened
-        vTree.isDisable = !State.isOpened
-        cPicBox.isDisable = !State.isOpened
-        cGroupBox.isDisable = !State.isOpened
-        cSlider.isDisable = !State.isOpened
-        cLabelPane.isDisable = !State.isOpened
+        mSave.disableProperty().bind(State.isOpenedProperty.not())
+        mSaveAs.disableProperty().bind(State.isOpenedProperty.not())
+        mExportAsLp.disableProperty().bind(State.isOpenedProperty.not())
+        mExportAsMeo.disableProperty().bind(State.isOpenedProperty.not())
+        mExportAsMeoPack.disableProperty().bind(State.isOpenedProperty.not())
+        mEditComment.disableProperty().bind(State.isOpenedProperty.not())
+        bSwitchViewMode.disableProperty().bind(State.isOpenedProperty.not())
+        bSwitchWorkMode.disableProperty().bind(State.isOpenedProperty.not())
+        tTransText.disableProperty().bind(State.isOpenedProperty.not())
+        vTree.disableProperty().bind(State.isOpenedProperty.not())
+        cPicBox.disableProperty().bind(State.isOpenedProperty.not())
+        cGroupBox.disableProperty().bind(State.isOpenedProperty.not())
+        cSlider.disableProperty().bind(State.isOpenedProperty.not())
+        cLabelPane.disableProperty().bind(State.isOpenedProperty.not())
     }
 
     private fun reset() {
-        setDisable()
         vTree.root = null
         bSwitchWorkMode.text = I18N["mode.work.input"]
         bSwitchViewMode.text = I18N["mode.view.index"]
@@ -328,6 +426,7 @@ class Controller : Initializable {
         for (transGroup in State.transFile.groupList)
             list.add(transGroup.name)
         cGroupBox.setList(list)
+        cGroupBox.moveTo(State.currentGroupId)
     }
     private fun updateTreeView() {
         when (State.viewMode) {
@@ -374,6 +473,17 @@ class Controller : Initializable {
         }
 
         vTree.root = rootItem
+    }
+
+    private fun findLabelItemByIndex(index: Int): CTreeItem {
+        val transLabels = State.transFile.transMap[State.currentPicName]!!
+        val transLabel = transLabels.find { it.index == index }!!
+        val whereToSearch = when (State.viewMode) {
+            ViewMode.GroupMode -> vTree.root.children[transLabel.groupId]
+            ViewMode.IndexMode -> vTree.root
+        }
+        val item = whereToSearch.children.find { (it as CTreeItem).meta == transLabel }!!
+        return item as CTreeItem
     }
 
     private fun silentBackup() {

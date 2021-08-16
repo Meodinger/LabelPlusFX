@@ -50,7 +50,6 @@ object CTreeMenu {
                 // Edit data
                 State.transFile.groupList.add(newGroup)
                 // Update view
-                State.accessor.updateGroupList()
                 State.accessor.addLabelLayer()
                 rootItem.children.add(TreeItem(newGroup.name, Circle(8.0, Color.web(newGroup.color))))
                 // Mark change
@@ -112,7 +111,6 @@ object CTreeMenu {
                 // Edit data
                 State.transFile.getTransGroupAt(groupId).name = newName
                 // Update view
-                State.accessor.updateGroupList()
                 groupItem.value = newName
                 // Mark change
                 State.isChanged = true
@@ -143,7 +141,6 @@ object CTreeMenu {
             State.transFile.groupList.removeIf { it.name == groupItem.value }
             // Update view
             groupItem.parent.children.remove(groupItem)
-            State.accessor.updateGroupList()
             State.accessor.removeLabelLayer(groupId)
             // Mark change
             State.isChanged = true

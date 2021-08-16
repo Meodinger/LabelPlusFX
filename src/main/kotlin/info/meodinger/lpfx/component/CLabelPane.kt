@@ -50,19 +50,21 @@ class CLabelPane : ScrollPane() {
 
     companion object {
 
-        // layer
-        const val NOT_FOUND = -1
+        // scale
         const val NOT_SET = -1.0
 
-        // label
+        // selected
+        const val NOT_FOUND = -1
+
+        // label display
         const val LABEL_RADIUS = 20.0
         const val LABEL_ALPHA = "80"
 
-        // display
-        const val DISPLAY_SHIFT = 20.0
-        const val DISPLAY_INSET = 10.0
-        const val DISPLAY_ALPHA = "A0"
-        val DISPLAY_FONT = Font(MonoType, 28.0)
+        // text display
+        const val TEXT_SHIFT = 20.0
+        const val TEXT_INSET = 10.0
+        const val TEXT_ALPHA = "A0"
+        val TEXT_FONT = Font(MonoType, 28.0)
     }
 
     // ----- event ----- //
@@ -220,7 +222,7 @@ class CLabelPane : ScrollPane() {
 
     init {
         textLayer.isMouseTransparent = true
-        textLayer.graphicsContext2D.font = DISPLAY_FONT
+        textLayer.graphicsContext2D.font = TEXT_FONT
         view.image = INIT_IMAGE
         view.isPreserveRatio = true
         view.isPickOnBounds = true
@@ -427,28 +429,28 @@ class CLabelPane : ScrollPane() {
     fun placeText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val lineCount = text.length - text.replace("\n".toRegex(), "").length + 1
-        val t = Text(text).also { it.font = DISPLAY_FONT }
+        val t = Text(text).also { it.font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
-        var textX = x + DISPLAY_SHIFT
+        var textX = x + TEXT_SHIFT
         var textY = y + textH / lineCount
 
-        val shapeW = textW + 2 * DISPLAY_INSET
-        val shapeH = textH + 2 * DISPLAY_INSET
-        var shapeX = x + (DISPLAY_SHIFT - DISPLAY_INSET)
+        val shapeW = textW + 2 * TEXT_INSET
+        val shapeH = textH + 2 * TEXT_INSET
+        var shapeX = x + (TEXT_SHIFT - TEXT_INSET)
         var shapeY = y
 
         if (shapeX + shapeW > imageWidth) {
             shapeX = x - shapeW
-            textX = x - textW - DISPLAY_INSET
+            textX = x - textW - TEXT_INSET
         }
         if (shapeY + shapeH > imageHeight) {
             shapeY = y - shapeH
-            textY = y - textH - DISPLAY_INSET
+            textY = y - textH - TEXT_INSET
         }
 
-        gc.fill = Color.web(Color.WHEAT.toHex() + DISPLAY_ALPHA)
+        gc.fill = Color.web(Color.WHEAT.toHex() + TEXT_ALPHA)
         gc.fillRect(shapeX, shapeY, shapeW, shapeH)
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)

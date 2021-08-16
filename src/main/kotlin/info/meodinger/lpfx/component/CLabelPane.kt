@@ -126,8 +126,11 @@ class CLabelPane : ScrollPane() {
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val colorListProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val handleInputModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val handleLabelModeProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelPointedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelClickedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelOtherProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
 
     var initScale: Double
         get() = initScaleProperty.value
@@ -179,15 +182,30 @@ class CLabelPane : ScrollPane() {
         set(value) {
             selectedLabelIndexProperty.value = value
         }
-    var handleInputMode: EventHandler<LabelEvent>
-        get() = handleInputModeProperty.value
+    var onLabelPlace: EventHandler<LabelEvent>
+        get() = onLabelPlaceProperty.value
         set(value) {
-            handleInputModeProperty.value = value
+            onLabelPlaceProperty.value = value
         }
-    var handleLabelMode: EventHandler<LabelEvent>
-        get() = handleLabelModeProperty.value
+    var onLabelRemove: EventHandler<LabelEvent>
+        get() = onLabelRemoveProperty.value
         set(value) {
-            handleLabelModeProperty.value = value
+            onLabelRemoveProperty.value = value
+        }
+    var onLabelPointed: EventHandler<LabelEvent>
+        get() = onLabelPointedProperty.value
+        set(value) {
+            onLabelPointedProperty.value = value
+        }
+    var onLabelClicked: EventHandler<LabelEvent>
+        get() = onLabelClickedProperty.value
+        set(value) {
+            onLabelClickedProperty.value = value
+        }
+    var onLabelOther: EventHandler<LabelEvent>
+        get() = onLabelOtherProperty.value
+        set(value) {
+            onLabelOtherProperty.value = value
         }
     var image: Image
         get() = view.image
@@ -260,13 +278,11 @@ class CLabelPane : ScrollPane() {
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
-            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+            onLabelOther.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+                onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
             }
         }
 
@@ -383,17 +399,14 @@ class CLabelPane : ScrollPane() {
 
         // Event handle
         label.setOnMouseMoved {
-            handleInputMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
-            handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+            onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
             if (it.button == MouseButton.PRIMARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                onLabelClicked.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
             } else if (it.button == MouseButton.SECONDARY) {
-                handleInputMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
-                handleLabelMode.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                onLabelRemove.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
             }
         }
 

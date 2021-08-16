@@ -189,60 +189,55 @@ class Controller : Initializable {
         updateOpenRecent()
 
         // Register handler
-        cLabelPane.handleInputMode = EventHandler {
-            if (State.workMode != WorkMode.InputMode) return@EventHandler
-            when (it.eventType) {
-                LabelEvent.LABEL_POINTED -> {
-                    val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
-
-                    cLabelPane.removeText()
-                    cLabelPane.placeText(transLabel.text, Color.BLACK, it.rootX, it.rootY * cLabelPane.imageHeight)
-                }
-                LabelEvent.LABEL_CLICKED -> {
-                    val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
-
-                    tTransText.textProperty().unbind()
-                    tTransText.textProperty().bindBidirectional(transLabel.textProperty)
-                }
-            }
-        }
-        cLabelPane.handleLabelMode = EventHandler {
+        cLabelPane.onLabelPlace = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            when (it.eventType) {
-                LabelEvent.LABEL_OTHER -> {
-                    val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
-                    cLabelPane.removeText()
-                    cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.rootX, it.rootY)
-                }
-                LabelEvent.LABEL_PLACE -> {
-                    val transLabel = TransLabel(
-                        State.transFile.getTransLabelListOf(State.currentPicName).size + 1,
-                        it.labelX, it.labelY, State.currentGroupId, ""
-                    )
-                    // Edit data
-                    State.transFile.getTransLabelListOf(State.currentPicName).add(transLabel)
-                    // Update view
-                    cLabelPane.placeLabel(transLabel)
-                    updateTreeView()
-                    // Mark change
-                    State.isChanged = true
-                }
-                LabelEvent.LABEL_REMOVE -> {
-                    val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
-                    // Edit data
-                    State.transFile.getTransLabelListOf(State.currentPicName).remove(transLabel)
-                    for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
-                        if (l.index > transLabel.index) {
-                            l.index -= 1
-                        }
-                    }
-                    // Update view
-                    // Pane will update through bind
-                    updateTreeView()
-                    // Mark change
-                    State.isChanged = true
+            val transLabel = TransLabel(
+                State.transFile.getTransLabelListOf(State.currentPicName).size + 1,
+                it.labelX, it.labelY, State.currentGroupId, ""
+            )
+            // Edit data
+            State.transFile.getTransLabelListOf(State.currentPicName).add(transLabel)
+            // Update view
+            cLabelPane.placeLabel(transLabel)
+            updateTreeView()
+            // Mark change
+            State.isChanged = true
+        }
+        cLabelPane.onLabelRemove = EventHandler {
+            if (State.workMode != WorkMode.LabelMode) return@EventHandler
+            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+            // Edit data
+            State.transFile.getTransLabelListOf(State.currentPicName).remove(transLabel)
+            for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
+                if (l.index > transLabel.index) {
+                    l.index -= 1
                 }
             }
+            // Update view
+            // Pane will update through bind
+            updateTreeView()
+            // Mark change
+            State.isChanged = true
+        }
+        cLabelPane.onLabelPointed = EventHandler {
+            if (State.workMode != WorkMode.InputMode) return@EventHandler
+            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+
+            cLabelPane.removeText()
+            cLabelPane.placeText(transLabel.text, Color.BLACK, it.rootX, it.rootY * cLabelPane.imageHeight)
+        }
+        cLabelPane.onLabelClicked = EventHandler {
+            if (State.workMode != WorkMode.InputMode) return@EventHandler
+            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+
+            tTransText.textProperty().unbind()
+            tTransText.textProperty().bindBidirectional(transLabel.textProperty)
+        }
+        cLabelPane.onLabelOther = EventHandler {
+            if (State.workMode != WorkMode.LabelMode) return@EventHandler
+            val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
+            cLabelPane.removeText()
+            cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.rootX, it.rootY)
         }
 
         // Accelerator

@@ -2,6 +2,7 @@ import javafx.application.Application
 
 import component.*
 import event.*
+import info.meodinger.lpfx.util.dialog.initDialogOwner
 import io.*
 import options.*
 import type.*
@@ -16,13 +17,17 @@ import kotlin.system.exitProcess
  */
 class App : Application() {
     override fun start(primaryStage: Stage) {
-        // do nothing
-        loaderTest()
-        exporterTest()
-        packTest()
-        fileTest()
-        optionsTest()
-        utilTest()
+        initDialogOwner(null)
+
+        //loaderTest()
+        //exporterTest()
+        //packTest()
+        //fileTest()
+        //optionsTest()
+        //utilTest()
+
+        dialogExceptionTest()
+
         exitProcess(0)
     }
 
@@ -35,7 +40,7 @@ fun main(vararg args: String) {
 }
 
 fun utilTest() {
-    zipTest()
+    //zipTest()
 }
 
 fun compTest(vararg args: String) {

@@ -1,15 +1,21 @@
 package info.meodinger.lpfx.util.dialog
 
+import info.meodinger.lpfx.util.image.resize
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.util.resource.loadImage
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
+import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.stage.Window
 import javafx.util.Callback
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 /**
@@ -27,10 +33,23 @@ private val exceptionDialog = Dialog<ButtonType>()
 
 fun initDialogOwner(owner: Window?) {
     confirmDialog.initOwner(owner)
+    confirmDialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
+    confirmDialog.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resize(64.0, 64.0))
+
     infoDialog.initOwner(owner)
+    infoDialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
+    infoDialog.graphic = ImageView(loadImage("/image/dialog/Info.png").resize(64.0, 64.0))
+
     alertDialog.initOwner(owner)
+    alertDialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+    alertDialog.graphic = ImageView(loadImage("/image/dialog/Alert.png").resize(64.0, 64.0))
+
     errorDialog.initOwner(owner)
+    errorDialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
+    errorDialog.graphic = ImageView(loadImage("/image/dialog/Error.png").resize(64.0, 64.0))
+
     exceptionDialog.initOwner(owner)
+    exceptionDialog.dialogPane.buttonTypes.add(ButtonType.OK)
 }
 
 /**
@@ -41,7 +60,6 @@ fun initDialogOwner(owner: Window?) {
 fun showConfirm(content: String): Optional<ButtonType> {
     return showConfirm(I18N["common.confirm"], null, content)
 }
-
 /**
  * Show message for confirm
  * @param title Dialog title
@@ -50,6 +68,9 @@ fun showConfirm(content: String): Optional<ButtonType> {
  * @return ButtonType? YES | NO
  */
 fun showConfirm(title: String, header: String?, content: String): Optional<ButtonType> {
+    confirmDialog.title = title
+    confirmDialog.headerText = header
+    confirmDialog.contentText = content
     return confirmDialog.showAndWait()
 }
 
@@ -59,7 +80,7 @@ fun showConfirm(title: String, header: String?, content: String): Optional<Butto
  * @return ButtonType? OK
  */
 fun showInfo(content: String): Optional<ButtonType> {
-    return showInfo(I18N["common.confirm"], null, content)
+    return showInfo(I18N["common.info"], null, content)
 }
 /**
  * Show information
@@ -69,6 +90,9 @@ fun showInfo(content: String): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showInfo(title: String, header: String?, content: String): Optional<ButtonType> {
+    infoDialog.title = title
+    infoDialog.headerText = header
+    infoDialog.contentText = content
     return infoDialog.showAndWait()
 }
 
@@ -78,7 +102,7 @@ fun showInfo(title: String, header: String?, content: String): Optional<ButtonTy
  * @return ButtonType? YES | NO | CANCEL
  */
 fun showAlert(content: String): Optional<ButtonType> {
-    return showAlert(I18N["common.confirm"], null, content)
+    return showAlert(I18N["common.alert"], null, content)
 }
 /**
  * Show alert
@@ -88,6 +112,9 @@ fun showAlert(content: String): Optional<ButtonType> {
  * @return ButtonType? YES | NO | CANCEL
  */
 fun showAlert(title: String, header: String?, content: String): Optional<ButtonType> {
+    alertDialog.title = title
+    alertDialog.headerText = header
+    alertDialog.contentText = content
     return alertDialog.showAndWait()
 }
 
@@ -97,7 +124,7 @@ fun showAlert(title: String, header: String?, content: String): Optional<ButtonT
  * @return ButtonType? OK
  */
 fun showError(content: String): Optional<ButtonType> {
-    return showError(I18N["common.confirm"], null, content)
+    return showError(I18N["common.error"], null, content)
 }
 /**
  * Show error
@@ -107,6 +134,9 @@ fun showError(content: String): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showError(title: String, header: String?, content: String): Optional<ButtonType> {
+    errorDialog.title = title
+    errorDialog.headerText = header
+    errorDialog.contentText = content
     return errorDialog.showAndWait()
 }
 
@@ -116,14 +146,60 @@ fun showError(title: String, header: String?, content: String): Optional<ButtonT
  * @return ButtonType? OK
  */
 fun showException(e: Exception): Optional<ButtonType> {
+
+    // Get exception stack trace
+    val sw = StringWriter()
+    val pw = PrintWriter(sw)
+    e.printStackTrace(pw)
+    val text = sw.toString()
+
+    // Create expandable pane
+    val expContent = VBox(8.0)
+    val label = Label("The exception stacktrace is:")
+    val textArea = TextArea(text)
+    textArea.isEditable = false
+    textArea.prefWidthProperty().bind(expContent.widthProperty())
+    textArea.prefHeightProperty().bind(expContent.heightProperty())
+    expContent.children.addAll(Separator(), label, textArea)
+    expContent.prefHeight = 400.0
+    expContent.prefWidth = 800.0
+
+    exceptionDialog.title = I18N["common.error"]
+    exceptionDialog.headerText = e.javaClass.toString()
+    exceptionDialog.contentText = e.message
+    exceptionDialog.dialogPane.expandableContent = expContent
+
     return exceptionDialog.showAndWait()
 }
 
 
 // Specific dialogs
 
-fun showLink(owner: Window?, title: String, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
-    return Dialog<ButtonType>().showAndWait()
+/**
+ * Show a link
+ * @param owner Owner
+ * @param title Dialog title
+ * @param header Dialog header
+ * @param content Dialog content
+ * @param link Link text
+ * @param handler Handler for link
+ * @return ButtonType? OK
+ */
+fun showLink(owner: Window?, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+
+    val label = Label(content)
+    val separator = Separator().also { it.padding = Insets(8.0, 0.0, 8.0, 0.0) }
+    val hyperlink = Hyperlink(link).also { it.onAction = handler }
+    val box = VBox(label, separator, hyperlink)
+
+    dialog.title = title
+    dialog.headerText = header
+    dialog.dialogPane.buttonTypes.add(ButtonType.OK)
+    dialog.dialogPane.content = box
+
+    return dialog.showAndWait()
 }
 
 fun showInput(owner: Window?, title: String, header: String, placeholder: String?, formatter: TextFormatter<String>?): Optional<String> {

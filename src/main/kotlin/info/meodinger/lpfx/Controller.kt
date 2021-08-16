@@ -684,6 +684,7 @@ class Controller : Initializable {
         showLink(
             State.stage,
             I18N["dialog.about.title"],
+            null,
             StringBuilder()
                 .append(INFO["application.name"]).append(" - ").append(INFO["application.version"]).append("\n")
                 .append("Developed By ").append(INFO["application.vendor"]).append("\n")

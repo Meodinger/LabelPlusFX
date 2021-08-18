@@ -50,7 +50,7 @@ object CTreeMenu {
                 // Edit data
                 State.transFile.groupList.add(newGroup)
                 // Update view
-                State.accessor.addLabelLayer()
+                State.controller.addLabelLayer()
                 rootItem.children.add(TreeItem(newGroup.name, Circle(8.0, Color.web(newGroup.color))))
                 // Mark change
                 State.isChanged = true
@@ -141,7 +141,7 @@ object CTreeMenu {
             State.transFile.groupList.removeIf { it.name == groupItem.value }
             // Update view
             groupItem.parent.children.remove(groupItem)
-            State.accessor.removeLabelLayer(groupId)
+            State.controller.delLabelLayer(groupId)
             // Mark change
             State.isChanged = true
         }
@@ -203,7 +203,7 @@ object CTreeMenu {
                 // Edit data
                 labelItem.groupId = State.getGroupIdByName(newGroupName)
                 // Update view
-                State.accessor.updateTree()
+                State.controller.updateTreeView()
                 // Mark change
                 State.isChanged = true
             }
@@ -227,7 +227,7 @@ object CTreeMenu {
                 }
                 State.transFile.getTransLabelListOf(State.currentPicName).remove(labelItem.meta)
                 // Update view
-                State.accessor.updateTree()
+                State.controller.updateTreeView()
                 // Mark change
                 State.isChanged = true
             }
@@ -278,7 +278,7 @@ object CTreeMenu {
                     (item as CTreeItem).groupId = newGroupId
                 }
                 // Update view
-                State.accessor.updateTree()
+                State.controller.updateTreeView()
                 // Mark change
                 State.isChanged = true
             }
@@ -304,7 +304,7 @@ object CTreeMenu {
                     State.transFile.getTransLabelListOf(State.currentPicName).remove(label)
                 }
                 // Update view
-                State.accessor.updateTree()
+                State.controller.updateTreeView()
                 // Mark change
                 State.isChanged = true
             }

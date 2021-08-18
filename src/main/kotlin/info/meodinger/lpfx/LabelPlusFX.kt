@@ -27,10 +27,12 @@ class LabelPlusFX: Application() {
         val root = loader.load<Parent>()
         val scene = Scene(root, WIDTH, HEIGHT)
 
+        State.controller = loader.getController()
+
         // Global event catch, prevent mnemonic parsing
         scene.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
 
-        primaryStage.setOnCloseRequest { State.accessor.close() }
+        primaryStage.setOnCloseRequest { State.controller.close() }
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
         primaryStage.scene = scene

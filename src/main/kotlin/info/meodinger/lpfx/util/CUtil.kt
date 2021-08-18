@@ -1,8 +1,5 @@
 package info.meodinger.lpfx.util
 
-import info.meodinger.lpfx.EXTENSION_MEO
-import info.meodinger.lpfx.EXTENSION_LP
-
 import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
@@ -10,13 +7,6 @@ import java.util.concurrent.ConcurrentLinkedDeque
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
-fun isMeoFile(filePath: String): Boolean {
-    return filePath.endsWith(EXTENSION_MEO)
-}
-
-fun isLPFile(filePath: String): Boolean {
-    return filePath.endsWith(EXTENSION_LP)
-}
 
 /**
  * All streams want to be auto-closed should run `autoClose()`

@@ -3,8 +3,6 @@ package info.meodinger.lpfx
 import info.meodinger.lpfx.component.CLabelPane.Companion.NOT_FOUND
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.util.color.toHex
-import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.get
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
@@ -24,14 +22,7 @@ object State {
 
     lateinit var application: Application
     lateinit var stage: Stage
-
-    var controllerAccessor: ControllerAccessor? = null
-        set(value) {
-            if (field == null) field = value
-            else throw IllegalStateException(I18N["exception.illegal_state.accessor_already_set"])
-        }
-    val accessor: ControllerAccessor
-        get() = controllerAccessor!!
+    lateinit var controller: Controller
 
     val isOpenedProperty = SimpleBooleanProperty(false)
     val isChangedProperty = SimpleBooleanProperty(false)
@@ -123,16 +114,5 @@ object State {
           |workMode=${workMode}
           |viewMode=${viewMode}
         """.trimIndent()
-    }
-
-    interface ControllerAccessor {
-        fun close()
-
-        fun addLabelLayer()
-        fun removeLabelLayer(groupId: Int)
-
-        fun updateTree()
-
-        operator fun get(fieldName: String): Any
     }
 }

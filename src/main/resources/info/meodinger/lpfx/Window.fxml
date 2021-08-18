@@ -4,31 +4,9 @@
 <?import javafx.scene.layout.*?>
 <?import info.meodinger.lpfx.component.*?>
 
-<BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="info.meodinger.lpfx.Controller">
+<BorderPane xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="info.meodinger.lpfx.Controller">
     <top>
-        <MenuBar>
-            <Menu fx:id="mmFile" mnemonicParsing="false">
-                <MenuItem fx:id="mNew" mnemonicParsing="false" onAction="#newTranslation" />
-                <MenuItem fx:id="mOpen" mnemonicParsing="false" onAction="#openTranslation" />
-                <Menu fx:id="mOpenRecent" mnemonicParsing="false" />
-                <MenuItem fx:id="mSave" mnemonicParsing="false" onAction="#saveTranslation" />
-                <MenuItem fx:id="mSaveAs" mnemonicParsing="false" onAction="#saveAsTranslation" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem fx:id="mBakRecover" mnemonicParsing="false" onAction="#bakRecovery" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem fx:id="mClose" mnemonicParsing="false" onAction="#close" />
-            </Menu>
-            <Menu fx:id="mmExport" mnemonicParsing="false">
-                <MenuItem fx:id="mExportAsLp" mnemonicParsing="false" onAction="#exportTransFile" />
-                <MenuItem fx:id="mExportAsMeo" mnemonicParsing="false" onAction="#exportTransFile" />
-                <MenuItem fx:id="mExportAsMeoPack" mnemonicParsing="false" onAction="#exportTransPack" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem fx:id="mEditComment" mnemonicParsing="false" onAction="#setComment" />
-            </Menu>
-            <Menu fx:id="mmAbout" mnemonicParsing="false">
-                <MenuItem fx:id="mAbout" mnemonicParsing="false" onAction="#about" />
-            </Menu>
-        </MenuBar>
+        <CMenuBar fx:id="cMenuBar" />
     </top>
     <center>
         <SplitPane fx:id="pMain" dividerPositions="0.63">
@@ -57,12 +35,12 @@
                             </HBox>
                         </top>
                         <center>
-                            <CTreeView fx:id="vTree"/>
+                            <CTreeView fx:id="cTreeView"/>
                         </center>
                     </BorderPane>
                 </AnchorPane>
                 <AnchorPane fx:id="pText">
-                    <CTransArea fx:id="tTransText"
+                    <CTransArea fx:id="cTransArea"
                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                 </AnchorPane>

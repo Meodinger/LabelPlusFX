@@ -1,8 +1,5 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.util.isLPFile
-import info.meodinger.lpfx.util.isMeoFile
-
 /**
  * Author: Meodinger
  * Date: 2021/8/1
@@ -19,6 +16,12 @@ enum class ViewMode { IndexMode, GroupMode }
 val DefaultViewMode = ViewMode.GroupMode
 
 enum class FileType { LPFile, MeoFile }
+fun isMeoFile(filePath: String): Boolean {
+    return filePath.endsWith(EXTENSION_MEO)
+}
+fun isLPFile(filePath: String): Boolean {
+    return filePath.endsWith(EXTENSION_LP)
+}
 fun getFileType(path: String): FileType {
     if (isMeoFile(path)) return FileType.MeoFile
     if (isLPFile(path)) return FileType.LPFile

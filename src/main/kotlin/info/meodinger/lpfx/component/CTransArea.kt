@@ -5,6 +5,7 @@ import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TextArea
+import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -52,7 +53,7 @@ class CTransArea: TextArea() {
 
     init {
         addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (isAltDown(it)) {
+            if (isAltDown(it) && it.code == KeyCode.A) {
                 symbolMenu.show(this, Side.LEFT, 0.0, 0.0)
             }
         }

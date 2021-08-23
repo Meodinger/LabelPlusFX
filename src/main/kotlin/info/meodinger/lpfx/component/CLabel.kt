@@ -29,6 +29,8 @@ class CLabel(
         const val DEFAULT_INDEX = -1
         const val DEFAULT_RADIUS = 16.0
         const val DEFAULT_COLOR = "66CCFFFF"
+
+        const val MIN_PICK_RADIUS = 12.0
     }
 
     private val circle = Circle(radius, Color.web(color))
@@ -62,7 +64,6 @@ class CLabel(
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
 
-        setPrefSize(radius, radius)
         update()
         children.setAll(circle, text)
     }
@@ -71,6 +72,9 @@ class CLabel(
         text.text = index.toString()
         circle.radius = radius
         circle.fill = Color.web(color)
+
+        val pickRadius = radius.coerceAtMost(MIN_PICK_RADIUS)
+        setPrefSize(pickRadius, pickRadius)
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R

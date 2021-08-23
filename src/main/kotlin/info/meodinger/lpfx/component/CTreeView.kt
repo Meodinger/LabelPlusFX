@@ -266,6 +266,7 @@ class CTreeView: TreeView<String>() {
     private var picName = ""
     private var transGroups = ArrayList<TransGroup>()
     private var transLabels = ArrayList<TransLabel>()
+
     private var viewMode: ViewMode
         get() = viewModeProperty.value
         set(value) {
@@ -365,9 +366,6 @@ class CTreeView: TreeView<String>() {
                 (groupItem.graphic as Circle).fill = Color.web(transGroup.color)
             }
         }
-    }
-    fun updateLabelItem(transLabel: TransLabel) {
-
     }
 
     fun removeGroupItem(transGroup: TransGroup) {

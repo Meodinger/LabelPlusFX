@@ -108,7 +108,7 @@ class CMenuBar : MenuBar() {
         }
     }
 
-    fun newTranslation() {
+    private fun newTranslation() {
         // new & open
 
         if (State.controller.stay()) return
@@ -119,7 +119,7 @@ class CMenuBar : MenuBar() {
         State.controller.new(file, type)
         State.controller.open(file, type)
     }
-    fun openTranslation() {
+    private fun openTranslation() {
         // open
 
         if (State.controller.stay()) return
@@ -128,18 +128,18 @@ class CMenuBar : MenuBar() {
         val file = fileChooser.showOpenDialog(State.stage) ?: return
         State.controller.open(file, getFileType(file.path))
     }
-    fun saveTranslation() {
+    private fun saveTranslation() {
         // save
 
         State.controller.save(File(State.transPath), getFileType(State.transPath))
     }
-    fun saveAsTranslation() {
+    private fun saveAsTranslation() {
         // save
 
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         State.controller.save(file, getFileType(file.path))
     }
-    fun bakRecovery() {
+    private fun bakRecovery() {
         // open & save
 
         if (State.controller.stay()) return
@@ -149,7 +149,7 @@ class CMenuBar : MenuBar() {
         State.controller.save(rec, getFileType(rec.path))
     }
 
-    fun exportTransFile(event: ActionEvent) {
+    private fun exportTransFile(event: ActionEvent) {
         exportChooser.getExtensionFilters().clear()
 
         try {
@@ -171,7 +171,7 @@ class CMenuBar : MenuBar() {
 
         showInfo(I18N["info.exported_successful"])
     }
-    fun exportTransPack() {
+    private fun exportTransPack() {
         val file = exportPackChooser.showSaveDialog(State.stage) ?: return
 
         try {
@@ -185,13 +185,13 @@ class CMenuBar : MenuBar() {
         showInfo(I18N["info.exported_successful"])
     }
 
-    fun editComment() {
+    private fun editComment() {
         showInputArea(State.stage, I18N["dialog.edit_comment.title"], State.transFile.comment).ifPresent {
             State.transFile.comment = it
         }
     }
 
-    fun about() {
+    private fun about() {
         showLink(
             State.stage,
             I18N["dialog.about.title"],

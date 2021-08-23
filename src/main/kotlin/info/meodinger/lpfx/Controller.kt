@@ -64,7 +64,25 @@ class Controller : Initializable {
             return object : TimerTask() {
                 override fun run() {
                     if (State.isChanged) {
-                        this@Controller.silentBackup()
+                        val bak = File(State.getBakFolder() + File.separator + Date().time + EXTENSION_BAK)
+                        try {
+                            exportMeo(bak, State.transFile)
+                        } catch (e: IOException) {
+                            using {
+                                val writer = PrintWriter(
+                                    BufferedWriter(
+                                        FileWriter(
+                                            Options.errorLog.resolve(Date().toString()).toFile()
+                                        )
+                                    )
+                                ).autoClose()
+                                e.printStackTrace(writer)
+                            } catch { ex: Exception ->
+                                ex.printStackTrace()
+                            } finally {
+
+                            }
+                        }
                     }
                 }
             }
@@ -104,9 +122,6 @@ class Controller : Initializable {
 
         // Warp cPicBox
         cPicBox.isWrapped = true
-
-        // Init vTree context menu
-        CTreeMenu.treeMenu.init(cTreeView)
 
         // Display dividers
         pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
@@ -273,11 +288,6 @@ class Controller : Initializable {
             if (!State.isOpened) return@addListener
 
             cLabelPane.removeText()
-        }
-
-        // Update tree menu when requested in ViewMode.IndexMode
-        cTreeView.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-            if (State.viewMode == ViewMode.IndexMode) CTreeMenu.treeMenu.update()
         }
 
         // Update selected group when clicked GroupTreeItem
@@ -448,27 +458,6 @@ class Controller : Initializable {
         return item as CTreeItem
     }
 
-    private fun silentBackup() {
-        val bak = File(State.getBakFolder() + File.separator + Date().time + EXTENSION_BAK)
-        try {
-            exportMeo(bak, State.transFile)
-        } catch (e: IOException) {
-            using {
-                val writer = PrintWriter(
-                    BufferedWriter(
-                        FileWriter(
-                            Options.errorLog.resolve(Date().toString()).toFile()
-                        )
-                    )
-                ).autoClose()
-                e.printStackTrace(writer)
-            } catch { ex: Exception ->
-                ex.printStackTrace()
-            } finally {
-
-            }
-        }
-    }
     fun stay(): Boolean {
         // Not open
         if (!State.isOpened) return false
@@ -688,18 +677,8 @@ class Controller : Initializable {
     }
     fun updateTreeView() {
         when (State.viewMode) {
-            ViewMode.GroupMode -> {
-                cTreeView.selectionModel.selectionMode = SelectionMode.SINGLE
-                cTreeView.cellFactory = Callback { CTreeCell() }
-                cTreeView.contextMenu = null
-                updateTreeViewByGroup()
-            }
-            ViewMode.IndexMode -> {
-                cTreeView.selectionModel.selectionMode = SelectionMode.MULTIPLE
-                cTreeView.cellFactory = null
-                cTreeView.contextMenu = CTreeMenu.treeMenu
-                updateTreeViewByIndex()
-            }
+            ViewMode.GroupMode -> updateTreeViewByGroup()
+            ViewMode.IndexMode -> updateTreeViewByIndex()
         }
         cTreeView.root.expandAll()
     }

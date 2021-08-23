@@ -553,14 +553,6 @@ object Controller : Initializable {
         State.transFile = transFile
         State.transPath = file.path
 
-        // Initialize workspace
-        State.controller.reset()
-        State.stage.title = INFO["application.name"] + " - " + file.name
-
-        State.controller.updateLabelColorList()
-        State.controller.updatePicList()
-        State.controller.updateGroupList()
-
         // Update recent files
         RecentFiles.add(file.path)
         cMenuBar.updateOpenRecent()
@@ -573,6 +565,14 @@ object Controller : Initializable {
         } else {
             showError(I18N["error.auto_backup_unavailable"])
         }
+
+        // Initialize workspace
+        State.controller.reset()
+        State.stage.title = INFO["application.name"] + " - " + file.name
+
+        State.controller.updateLabelColorList()
+        State.controller.updateGroupList()
+        State.controller.updatePicList()
 
         State.isOpened = true
     }

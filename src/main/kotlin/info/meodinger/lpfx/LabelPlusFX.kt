@@ -23,13 +23,9 @@ class LabelPlusFX: Application() {
         State.application = this
         State.stage = primaryStage
 
-        val loader = FXMLLoader(javaClass.getResource("Window.fxml")).also {
-            it.setControllerFactory {
-                Controller
-            }
-        }
-        val controller = loader.getController<Controller>()
+        val loader = FXMLLoader(javaClass.getResource("Window.fxml")).also { it.setControllerFactory { Controller } }
         val root = loader.load<Parent>()
+        val controller = loader.getController<Controller>()
 
         primaryStage.setOnCloseRequest { controller.close() }
         primaryStage.title = INFO["application.name"]

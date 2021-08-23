@@ -12,32 +12,19 @@ import javafx.scene.control.TreeItem
  */
 class CTreeItem(val meta: TransLabel, node: Node? = null) : TreeItem<String>() {
 
-    var index: Int
-        get() = meta.index
-        set(value) {
-            meta.index = value
-            update()
-        }
-    var groupId: Int
-        get() = meta.groupId
-        set(value) {
-            meta.groupId = value
-            update()
-        }
-    var text: String
-        get() = meta.text
-        set(value) {
-            meta.text = value
-            update()
-        }
+    val index: Int = meta.index
 
     init {
+        graphic = node
+
+        meta.textProperty.addListener { _, _, _ -> update() }
+        meta.indexProperty.addListener { _,_,_ -> update() }
+
         update()
-        if (node != null) graphic = node
     }
 
     private fun update() {
-        value = "${String.format("%02d",index)}: ${text.replace("\n", " ")}"
+        value = "${String.format("%02d",meta.index)}: ${meta.text.replace("\n", " ")}"
     }
 
 }

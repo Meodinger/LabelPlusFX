@@ -47,7 +47,7 @@ class CTreeView: TreeView<String>() {
         private val r_addGroupField = TextField()
         private val r_addGroupPicker = CColorPicker()
         private val r_addGroupDialog = Dialog<TransGroup>()
-        private val r_addGroupAction = { rootItem: TreeItem<String> ->
+        private val r_addGroupAction = {
             val newGroupId = State.transFile.groupList.size
             val newColor = if (newGroupId >= 9) Color.WHITE
             else Color.web(Settings[Settings.DefaultColorList].asList()[newGroupId])
@@ -59,6 +59,7 @@ class CTreeView: TreeView<String>() {
                 // Edit data
                 State.transFile.groupList.add(newGroup)
                 // Update view
+                State.controller.updateLabelColorList()
                 State.controller.addLabelLayer()
                 State.controller.updateGroupList()
                 addGroupItem(newGroup)
@@ -103,6 +104,7 @@ class CTreeView: TreeView<String>() {
             // Edit data
             transGroup.color = newColor.toHex()
             // Update view
+            State.controller.updateLabelColorList()
             updateGroupItem(transGroup)
             // Mark change
             State.isChanged = true
@@ -120,8 +122,9 @@ class CTreeView: TreeView<String>() {
             }
             State.transFile.groupList.remove(transGroup)
             // Update view
-            State.controller.updateGroupList()
+            State.controller.updateLabelColorList()
             State.controller.delLabelLayer(groupId)
+            State.controller.updateGroupList()
             removeGroupItem(transGroup)
             // Mark change
             State.isChanged = true
@@ -141,7 +144,10 @@ class CTreeView: TreeView<String>() {
                 val newGroupId = State.getGroupIdByName(newGroupName)
 
                 // Edit data
-                for (item in items) (item as CTreeItem).groupId = newGroupId
+                for (item in items) {
+                    val transLabel = (item as CTreeItem).meta
+                    transLabel.groupId = newGroupId
+                }
                 // Update view
                 State.controller.updateTreeView()
                 // Mark change
@@ -159,13 +165,13 @@ class CTreeView: TreeView<String>() {
             if (result.isPresent && result.get() == ButtonType.YES) {
                 // Edit data
                 for (item in items) {
-                    val label = (item as CTreeItem).meta
+                    val transLabel = (item as CTreeItem).meta
                     for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
-                        if (l.index > label.index) {
+                        if (l.index > transLabel.index) {
                             l.index = l.index - 1
                         }
                     }
-                    State.transFile.getTransLabelListOf(State.currentPicName).remove(label)
+                    State.transFile.getTransLabelListOf(State.currentPicName).remove(transLabel)
                 }
                 // Update view
                 State.controller.updateTreeView()
@@ -188,6 +194,7 @@ class CTreeView: TreeView<String>() {
                 else
                     null
             }
+            r_addGroupItem.setOnAction { r_addGroupAction() }
 
             g_changeColorPicker.valueProperty().addListener { _, _, newValue -> g_changeColorItem.text = newValue.toHex() }
             g_changeColorPicker.setPrefSize(40.0, 20.0)
@@ -217,10 +224,6 @@ class CTreeView: TreeView<String>() {
 
             if (rootCount == 1 && groupCount == 0 && labelCount == 0) {
                 // root
-                val rootItem = selectedItems[0]
-
-                r_addGroupItem.setOnAction { r_addGroupAction(rootItem) }
-
                 items.add(r_addGroupItem)
             } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
                 // group
@@ -245,7 +248,6 @@ class CTreeView: TreeView<String>() {
                 items.add(g_deleteItem)
             } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
                 // label(s)
-
                 l_moveToItem.setOnAction { l_moveToAction(selectedItems) }
                 l_deleteItem.setOnAction { l_deleteAction(selectedItems) }
 

@@ -14,6 +14,7 @@ import javafx.event.ActionEvent
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
@@ -54,14 +55,14 @@ class CMenuBar : MenuBar() {
     private val exportPackChooser = CFileChooser()
 
     init {
-        fileChooser.getExtensionFilters().add(fileFilter)
-        fileChooser.getExtensionFilters().add(meoFilter)
-        fileChooser.getExtensionFilters().add(lpFilter)
-        bakChooser.setTitle(I18N["chooser.bak"])
-        bakChooser.getExtensionFilters().add(bakFilter)
-        exportChooser.setTitle(I18N["chooser.export"])
-        exportPackChooser.setTitle(I18N["chooser.pack"])
-        exportPackChooser.getExtensionFilters().add(packFilter)
+        fileChooser.extensionFilter.add(fileFilter)
+        fileChooser.extensionFilter.add(meoFilter)
+        fileChooser.extensionFilter.add(lpFilter)
+        bakChooser.title = I18N["chooser.bak"]
+        bakChooser.extensionFilter.add(bakFilter)
+        exportChooser.title = I18N["chooser.export"]
+        exportPackChooser.title = I18N["chooser.pack"]
+        exportPackChooser.extensionFilter.add(packFilter)
 
         this.disableMnemonicParsingForAll()
 
@@ -93,6 +94,9 @@ class CMenuBar : MenuBar() {
             mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
         }
 
+        mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
+        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment)
+        mmAbout.items.addAll(mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 
@@ -150,16 +154,16 @@ class CMenuBar : MenuBar() {
     }
 
     private fun exportTransFile(event: ActionEvent) {
-        exportChooser.getExtensionFilters().clear()
+        exportChooser.extensionFilter.clear()
 
         try {
             val file: File
             if (event.source == mExportAsMeo) {
-                exportChooser.getExtensionFilters().add(meoFilter)
+                exportChooser.extensionFilter.add(meoFilter)
                 file = exportChooser.showSaveDialog(State.stage) ?: return
                 exportMeo(file, State.transFile)
             } else {
-                exportChooser.getExtensionFilters().add(lpFilter)
+                exportChooser.extensionFilter.add(lpFilter)
                 file = exportChooser.showSaveDialog(State.stage) ?: return
                 exportLP(file, State.transFile)
             }

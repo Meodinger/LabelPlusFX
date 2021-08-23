@@ -1,6 +1,7 @@
 import javafx.application.Application
 
 import component.*
+import crash.DemoApp
 import event.*
 import info.meodinger.lpfx.util.dialog.initDialogOwner
 import util.*
@@ -31,7 +32,7 @@ class App : Application() {
 }
 
 fun main(vararg args: String) {
-    Application.launch(App::class.java, *args)
+    Application.launch(DemoApp::class.java, *args)
     //eventTest()
     //compTest()
 }

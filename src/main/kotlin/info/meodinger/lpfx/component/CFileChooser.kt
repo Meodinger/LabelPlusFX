@@ -28,6 +28,13 @@ class CFileChooser {
 
     private val chooser = FileChooser()
 
+    val extensionFilter: ObservableList<FileChooser.ExtensionFilter> = chooser.extensionFilters
+    var title: String
+        get() = chooser.title
+        set(value) {
+            chooser.title = value
+        }
+
     init {
         chooser.initialDirectoryProperty().bind(lastDirectoryProperty)
     }
@@ -42,13 +49,5 @@ class CFileChooser {
         val file = chooser.showSaveDialog(owner)
         lastDirectory = file
         return file
-    }
-
-    fun setTitle(title: String?) {
-        chooser.title = title
-    }
-
-    fun getExtensionFilters(): ObservableList<FileChooser.ExtensionFilter> {
-        return chooser.extensionFilters
     }
 }

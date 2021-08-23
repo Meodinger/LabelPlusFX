@@ -18,7 +18,6 @@ import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
-import javafx.util.Callback
 import kotlin.collections.ArrayList
 
 /**
@@ -36,7 +35,8 @@ class CTreeView: TreeView<String>() {
         abstract fun update(selectedItems: ObservableList<TreeItem<String>>)
     }
     private val treeMenu = object : TreeMenu() {
-        private val groupNameFormatter = TextFormatter<String> { change ->
+
+        private fun genGroupNameFormatter() = TextFormatter<String> { change ->
             change.text = change.text
                 .trim()
                 .replace(" ", "_")
@@ -75,12 +75,14 @@ class CTreeView: TreeView<String>() {
                 I18N["context.rename_group.dialog.title"],
                 I18N["context.rename_group.dialog.header"],
                 groupItem.value,
-                groupNameFormatter
+                genGroupNameFormatter()
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
                 for (group in State.transFile.groupList) {
-                    if (group.name == newName) showError(I18N["context.rename_group.error.same_name"])
-                    return@ifPresent
+                    if (group.name == newName) {
+                        showError(I18N["context.rename_group.error.same_name"])
+                        return@ifPresent
+                    }
                 }
 
                 val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
@@ -182,7 +184,7 @@ class CTreeView: TreeView<String>() {
         private val l_deleteItem = MenuItem(I18N["context.delete_label"])
 
         init {
-            r_addGroupField.textFormatter = groupNameFormatter
+            r_addGroupField.textFormatter = genGroupNameFormatter()
             r_addGroupPicker.hide()
             r_addGroupDialog.title = I18N["context.add_group.dialog.title"]
             r_addGroupDialog.headerText = I18N["context.add_group.dialog.header"]
@@ -275,17 +277,6 @@ class CTreeView: TreeView<String>() {
 
     init {
         // Init
-        this.cellFactory = Callback {
-            object : TreeCell<String>() {
-                init {
-                    alignment = Pos.CENTER_LEFT
-                    setOnMouseClicked {
-                        if (treeItem == treeItem.root && it.clickCount > 1)
-                            treeItem.expandAll()
-                    }
-                }
-            }
-        }
         this.selectionModel.selectionMode = SelectionMode.MULTIPLE
         this.contextMenu = treeMenu
 

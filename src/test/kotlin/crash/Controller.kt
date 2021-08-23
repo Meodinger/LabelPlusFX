@@ -11,12 +11,17 @@ import java.util.*
  */
 object Controller : Initializable {
 
-    @FXML private lateinit var button: Button
+    init {
+        println("Controller init {}")
+    }
+
+    @FXML lateinit var button: Button
     @FXML fun buttonAction() {
         println("Clicked")
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
+        println("fun initialize")
         button.text = "Click Me"
     }
 }

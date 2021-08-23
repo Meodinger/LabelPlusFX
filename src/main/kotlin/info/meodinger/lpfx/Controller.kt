@@ -13,10 +13,7 @@ import info.meodinger.lpfx.util.tree.expandAll
 import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
-import javafx.beans.binding.ListBinding
 import javafx.beans.value.ChangeListener
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -34,7 +31,7 @@ import kotlin.system.exitProcess
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx
  */
-object Controller : Initializable {
+class Controller : Initializable {
 
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
@@ -145,6 +142,7 @@ object Controller : Initializable {
         // cPicBox - currentPicName
         cPicBox.valueProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
+            if (newValue == null) return@addListener
 
             State.currentPicName = newValue
         }
@@ -152,6 +150,7 @@ object Controller : Initializable {
         // cGroupBox - currentGroupId
         cGroupBox.valueProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
+            if (newValue == null) return@addListener
 
             State.transFile.groupList.forEachIndexed { index, transGroup ->
                 if (transGroup.name == newValue)
@@ -200,15 +199,19 @@ object Controller : Initializable {
         }
 
         // Update text when label change
-        State.currentLabelIndexProperty.addListener { _, _, newValue ->
-            cTransArea.textProperty().unbind()
-
+        State.currentLabelIndexProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
-            if (State.currentLabelIndex == NOT_FOUND) return@addListener
 
             val transLabels = State.transFile.transMap[State.currentPicName]!!
-            val transLabel = transLabels.find { it.index == newValue }!!
-            cTransArea.textProperty().bindBidirectional(transLabel.textProperty)
+
+            if (oldValue != NOT_FOUND) {
+                val oldLabel = transLabels.find { it.index == oldValue }!!
+                cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
+            }
+            if (newValue != NOT_FOUND) {
+                val newLabel = transLabels.find { it.index == newValue }!!
+                cTransArea.textProperty().bindBidirectional(newLabel.textProperty)
+            }
         }
 
         // Update cLabelPane default cursor
@@ -430,23 +433,6 @@ object Controller : Initializable {
         reg()
     }
 
-    private fun createColorHexBinding(): ListBinding<String> {
-        return object : ListBinding<String>() {
-            init {
-                for (i in 0 until State.transFile.groupList.size) {
-                    bind(State.transFile.groupList[i].colorProperty)
-                }
-            }
-
-            override fun computeValue(): ObservableList<String> {
-                val list = ArrayList<String>()
-                State.transFile.groupList.forEach {
-                    list.add(it.color)
-                }
-                return FXCollections.observableList(list)
-            }
-        }
-    }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
         val transLabels = State.transFile.transMap[State.currentPicName]!!
         val transLabel = transLabels.find { it.index == index }!!
@@ -553,6 +539,7 @@ object Controller : Initializable {
         State.transFile = transFile
         State.transPath = file.path
 
+
         // Update recent files
         RecentFiles.add(file.path)
         cMenuBar.updateOpenRecent()
@@ -566,15 +553,15 @@ object Controller : Initializable {
             showError(I18N["error.auto_backup_unavailable"])
         }
 
-        // Initialize workspace
-        State.controller.reset()
-        State.stage.title = INFO["application.name"] + " - " + file.name
-
-        State.controller.updateLabelColorList()
-        State.controller.updateGroupList()
-        State.controller.updatePicList()
-
         State.isOpened = true
+
+        // Initialize workspace
+        State.stage.title = INFO["application.name"] + " - " + file.name
+        reset()
+
+        updateLabelColorList()
+        updateGroupList()
+        updatePicList()
     }
     fun save(file: File, type: FileType) {
 
@@ -663,7 +650,9 @@ object Controller : Initializable {
         cLabelPane.removeLabelLayer(groupId)
     }
     fun updateLabelColorList() {
-        cLabelPane.colorListProperty.bind(createColorHexBinding())
+        val list = ArrayList<String>()
+        State.transFile.groupList.forEach { list.add(it.color) }
+        cLabelPane.colorList = list
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))

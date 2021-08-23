@@ -1,3 +1,6 @@
+package crash
+
+import Controller
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
@@ -11,10 +14,19 @@ import javafx.stage.Stage
  */
 class DemoApp : Application() {
     override fun start(primaryStage: Stage) {
-
-        val loader = FXMLLoader(javaClass.getResource("window.fxml")).also { it.setControllerFactory { Controller } }
+        println("Start")
+        val loader = FXMLLoader(javaClass.getResource("window.fxml")).also {
+            println("Loader init start")
+            it.setControllerFactory {
+                println("Controller Factory")
+                Controller
+            }
+        }
+        println("Loader init end")
+        println("Loader load")
         val root = loader.load<Parent>()
-        val scene = Scene(root, 4600.0, 900.0)
+        println("Loader loaded")
+        val scene = Scene(root, 400.0, 600.0)
 
         primaryStage.scene = scene
         primaryStage.show()

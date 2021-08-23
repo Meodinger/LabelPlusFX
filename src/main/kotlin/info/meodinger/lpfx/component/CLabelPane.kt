@@ -12,9 +12,7 @@ import info.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.collections.FXCollections
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.event.EventType
@@ -123,7 +121,7 @@ class CLabelPane : ScrollPane() {
     val minScaleProperty = SimpleDoubleProperty(NOT_SET)
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
-    val colorListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
+    val colorListProperty = SimpleObjectProperty(emptyList<String>())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -166,11 +164,10 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var colorList: MutableList<String>
+    var colorList: List<String>
         get() = colorListProperty.value
         set(value) {
-            // setAll not supported
-            colorListProperty.value = FXCollections.observableList(value)
+            colorListProperty.value = value
         }
     var selectedLabelIndex: Int
         get() = selectedLabelIndexProperty.value
@@ -242,7 +239,6 @@ class CLabelPane : ScrollPane() {
                 root.layoutX = shiftX + it.sceneX
                 root.layoutY = shiftY + it.sceneY
             }
-            println("${root.layoutX}-${root.layoutY}")
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = defaultCursor
@@ -283,6 +279,7 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
+                if (!it.isStillSincePress) return@addEventHandler
                 onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
             }
         }
@@ -422,8 +419,8 @@ class CLabelPane : ScrollPane() {
         labels.add(label)
 
         // Bind property
+        colorListProperty.addListener { _, _, _ -> label.color = colorList[transLabel.groupId] + LABEL_ALPHA }
         label.indexProperty.bind(transLabel.indexProperty)
-        label.colorProperty.bind(colorListProperty.valueAt(transLabel.groupIdProperty).asString("%s$LABEL_ALPHA"))
         transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
         transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
     }

@@ -3,9 +3,6 @@ import javafx.application.Application
 import component.*
 import event.*
 import info.meodinger.lpfx.util.dialog.initDialogOwner
-import io.*
-import options.*
-import type.*
 import util.*
 import javafx.stage.Stage
 import kotlin.system.exitProcess

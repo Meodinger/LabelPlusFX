@@ -16,7 +16,7 @@
                 </center>
                 <bottom>
                     <HBox alignment="CENTER_RIGHT">
-                        <CTextSlider fx:id="cSlider" scale="1.0" minScale="0.2" maxScale="2.0"/>
+                        <CTextSlider fx:id="cSlider" initScale="1.0" scale="1.0" minScale="0.2" maxScale="2.0"/>
                         <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
                         <CComboBox fx:id="cPicBox"/>
                     </HBox>
@@ -39,7 +39,7 @@
                         </center>
                     </BorderPane>
                 </AnchorPane>
-                <AnchorPane fx:id="pText">
+                <AnchorPane>
                     <CTransArea fx:id="cTransArea"
                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>

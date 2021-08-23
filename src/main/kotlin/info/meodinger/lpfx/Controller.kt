@@ -1,11 +1,7 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
-import info.meodinger.lpfx.component.CLabelPane.Companion.NOT_FOUND
-import info.meodinger.lpfx.io.exportLP
-import info.meodinger.lpfx.io.exportMeo
-import info.meodinger.lpfx.io.loadLP
-import info.meodinger.lpfx.io.loadMeo
+import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isControlDown
@@ -18,19 +14,16 @@ import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
 import javafx.beans.binding.ListBinding
-import javafx.beans.binding.StringBinding
 import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
-import javafx.scene.layout.AnchorPane
 import javafx.scene.paint.Color
-import javafx.scene.shape.Circle
-import javafx.util.Callback
 import java.io.*
 import java.net.URL
 import java.util.*
@@ -41,13 +34,12 @@ import kotlin.system.exitProcess
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx
  */
-class Controller : Initializable {
+object Controller : Initializable {
 
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
     @FXML private lateinit var pMain: SplitPane
     @FXML private lateinit var pRight: SplitPane
-    @FXML private lateinit var pText: AnchorPane
     @FXML private lateinit var cMenuBar: CMenuBar
     @FXML private lateinit var cLabelPane: CLabelPane
     @FXML private lateinit var cSlider: CTextSlider
@@ -56,7 +48,7 @@ class Controller : Initializable {
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CTransArea
 
-    private inner class BackupTaskManager {
+    private class BackupTaskManager {
 
         var task: TimerTask = getNewTask()
 
@@ -127,6 +119,16 @@ class Controller : Initializable {
         pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
 
+        // Fix dividers when resize (debounce)
+        val geometryListener = ChangeListener<Number> { _, _, _ ->
+            // Now only god knows its effect
+            val debounce = { input: Double -> (input * 100 + 0.2) / 100 }
+            pMain.setDividerPositions(debounce(pMain.dividerPositions[0]))
+            pRight.setDividerPositions(debounce(pRight.dividerPositions[0]))
+        }
+        State.stage.widthProperty().addListener(geometryListener)
+        State.stage.heightProperty().addListener(geometryListener)
+
         // Display default image
         cLabelPane.isVisible = false
         Platform.runLater {
@@ -134,7 +136,6 @@ class Controller : Initializable {
             cLabelPane.isVisible = true
         }
     }
-
     /**
      * Property bindings
      */
@@ -166,10 +167,12 @@ class Controller : Initializable {
         }
 
         // cSlider - cLabelPane#scale
+        cSlider.initScaleProperty.bindBidirectional(cLabelPane.initScaleProperty)
+        cSlider.minScaleProperty.bindBidirectional(cLabelPane.minScaleProperty)
+        cSlider.maxScaleProperty.bindBidirectional(cLabelPane.maxScaleProperty)
         cSlider.scaleProperty.bindBidirectional(cLabelPane.scaleProperty)
 
     }
-
     /**
      * Listeners & Handlers
      */
@@ -208,6 +211,14 @@ class Controller : Initializable {
             cTransArea.textProperty().bindBidirectional(transLabel.textProperty)
         }
 
+        // Update cLabelPane default cursor
+        State.workModeProperty.addListener { _, _, newValue ->
+            when (newValue!!) {
+                WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
+                WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
+            }
+        }
+
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
@@ -221,7 +232,7 @@ class Controller : Initializable {
             State.transFile.getTransLabelListOf(State.currentPicName).add(transLabel)
             // Update view
             cLabelPane.placeLabel(transLabel)
-            updateTreeView()
+            cTreeView.addLabelItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -239,7 +250,7 @@ class Controller : Initializable {
             }
             // Update view
             cLabelPane.removeLabel(transLabel)
-            updateTreeView()
+            cTreeView.removeLabelItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -249,16 +260,20 @@ class Controller : Initializable {
             val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
 
             cLabelPane.removeText()
-            cLabelPane.placeText(transLabel.text, Color.BLACK, it.rootX, it.rootY * cLabelPane.imageHeight)
+            cLabelPane.placeText(transLabel.text, Color.BLACK, it.rootX * cLabelPane.imageWidth, it.rootY * cLabelPane.imageHeight)
         }
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
 
             val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+
+            if (it.source.clickCount > 1) cLabelPane.moveToLabel(transLabel)
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
+
             val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
+
             cLabelPane.removeText()
             cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.rootX, it.rootY)
         }
@@ -271,20 +286,10 @@ class Controller : Initializable {
             Config[Config.RIGHT_DIVIDER].value = newValue.toString()
         }
 
-        // Fix dividers when resize
-        val geometryListener = ChangeListener<Number> { _, _, _ ->
-            // Now only god knows its effect
-            val debounce = { input: Double -> (input * 100 + 0.2) / 100 }
-            pMain.setDividerPositions(debounce(pMain.dividerPositions[0]))
-            pRight.setDividerPositions(debounce(pRight.dividerPositions[0]))
-        }
-        State.stage.widthProperty().addListener(geometryListener)
-        State.stage.heightProperty().addListener(geometryListener)
-
         // Update selected group when clicked GroupTreeItem
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, item ->
             if (item != null) if (item.parent != null && item !is CTreeItem) {
-                cGroupBox.moveTo(State.getGroupIdByName(item.value))
+                cGroupBox.moveTo(item.value)
             }
         }
 

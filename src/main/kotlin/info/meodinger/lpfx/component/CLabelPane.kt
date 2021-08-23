@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.dialog.showException
@@ -52,9 +53,6 @@ class CLabelPane : ScrollPane() {
 
         // scale
         const val NOT_SET = -1.0
-
-        // selected
-        const val NOT_FOUND = -1
 
         // label display
         const val LABEL_RADIUS = 20.0
@@ -125,9 +123,9 @@ class CLabelPane : ScrollPane() {
     val minScaleProperty = SimpleDoubleProperty(NOT_SET)
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
-    val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
-    val colorListProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
+    val colorListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
+    val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelPointedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -139,8 +137,8 @@ class CLabelPane : ScrollPane() {
         set(value) {
             if (value >= 0) {
                 var temp = value
-                if (minScale != NOT_SET) temp = Math.max(temp, minScale)
-                if (maxScale != NOT_SET) temp = Math.min(temp, maxScale)
+                if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
+                if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
                 initScaleProperty.value = temp
             }
         }
@@ -163,15 +161,10 @@ class CLabelPane : ScrollPane() {
         set(value) {
             if (value >= 0) {
                 var temp = value
-                if (minScale != NOT_SET) temp = Math.max(temp, minScale)
-                if (maxScale != NOT_SET) temp = Math.min(temp, maxScale)
+                if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
+                if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
                 scaleProperty.value = temp
             }
-        }
-    var defaultCursor: Cursor
-        get() = defaultCursorProperty.value
-        set(value) {
-            defaultCursorProperty.value = value
         }
     var colorList: MutableList<String>
         get() = colorListProperty.value
@@ -183,6 +176,11 @@ class CLabelPane : ScrollPane() {
         get() = selectedLabelIndexProperty.value
         set(value) {
             selectedLabelIndexProperty.value = value
+        }
+    var defaultCursor: Cursor
+        get() = defaultCursorProperty.value
+        set(value) {
+            defaultCursorProperty.value = value
         }
     var onLabelPlace: EventHandler<LabelEvent>
         get() = onLabelPlaceProperty.value
@@ -262,8 +260,8 @@ class CLabelPane : ScrollPane() {
             root.scaleX = newScale
             root.scaleY = newScale
             container.setPrefSize(
-                Math.max(root.boundsInParent.maxX, viewportBounds.width),
-                Math.max(root.boundsInParent.maxY, viewportBounds.height)
+                root.boundsInParent.maxX.coerceAtLeast(viewportBounds.width),
+                root.boundsInParent.maxY.coerceAtLeast(viewportBounds.height)
             )
         }
 

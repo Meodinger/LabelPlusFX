@@ -23,21 +23,26 @@ class LabelPlusFX: Application() {
         State.application = this
         State.stage = primaryStage
 
-        val loader = FXMLLoader(javaClass.getResource("Window.fxml"))
+        val loader = FXMLLoader(javaClass.getResource("Window.fxml")).also {
+            it.setControllerFactory {
+                Controller
+            }
+        }
+        val controller = loader.getController<Controller>()
         val root = loader.load<Parent>()
-        val scene = Scene(root, WIDTH, HEIGHT)
 
-        State.controller = loader.getController()
-
-        // Global event catch, prevent mnemonic parsing
-        scene.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
-
-        primaryStage.setOnCloseRequest { State.controller.close() }
+        primaryStage.setOnCloseRequest { controller.close() }
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
-        primaryStage.scene = scene
+        primaryStage.scene = Scene(root, WIDTH, HEIGHT).also {
+            // Global event catch, prevent mnemonic parsing
+            it.addEventHandler(KeyEvent.KEY_PRESSED) { event ->
+                if (event.isAltDown) event.consume()
+            }
+        }
         primaryStage.show()
 
+        State.controller = controller
         initDialogOwner(primaryStage)
     }
 }

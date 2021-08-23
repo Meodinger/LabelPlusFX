@@ -1,6 +1,5 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.component.CLabelPane.Companion.NOT_FOUND
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.util.color.toHex
 
@@ -93,19 +92,16 @@ object State {
     }
 
     fun getGroupIdByName(name: String): Int {
-        val size = transFile.groupList.size
-        for (i in 0 until size) {
-            if (transFile.groupList[i].name == name) {
-                return i
-            }
+        transFile.groupList.forEachIndexed { index, transGroup ->
+            if (transGroup.name == name) return index
         }
-        return -1
+        throw IllegalArgumentException("invalid name")
     }
     fun getGroupColorByName(name: String): String {
         for (group in transFile.groupList) {
             if (group.name == name) return group.color
         }
-        return Color.WHITE.toHex()
+        throw IllegalArgumentException("invalid name")
     }
 
     fun getFileFolder(): String = File(transPath).parent

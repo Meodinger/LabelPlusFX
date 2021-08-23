@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.component
 
+import javafx.beans.property.ObjectProperty
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
@@ -18,7 +19,7 @@ class CComboBox<T> : HBox() {
     private var index = 0
     private var size = 0
 
-    val valueProperty = comboBox.valueProperty()
+    val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
     var isWrapped = false
 
     init {
@@ -72,5 +73,9 @@ class CComboBox<T> : HBox() {
         }
     }
 
+    fun moveTo(item: T) {
+        if (comboBox.items.contains(item)) comboBox.value = item
+        else throw IllegalArgumentException("no such item")
+    }
 
 }

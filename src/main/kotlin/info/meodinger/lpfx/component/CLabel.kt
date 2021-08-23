@@ -22,13 +22,13 @@ import javafx.scene.text.TextAlignment
 class CLabel(
     index: Int = DEFAULT_INDEX,
     radius: Double = DEFAULT_RADIUS,
-    color: String = DEFAULT__COLOR
+    color: String = DEFAULT_COLOR
 ) : Region() {
 
     companion object {
         const val DEFAULT_INDEX = -1
         const val DEFAULT_RADIUS = 16.0
-        const val DEFAULT__COLOR = "66CCFFFF"
+        const val DEFAULT_COLOR = "66CCFFFF"
     }
 
     private val circle = Circle(radius, Color.web(color))

@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.component
 
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
@@ -16,10 +18,20 @@ class CTextSlider : HBox() {
     private val slider = Slider()
     private val label = Label()
 
-    val minScaleProperty = slider.minProperty()
-    val maxScaleProperty = slider.maxProperty()
-    val scaleProperty = slider.valueProperty()
+    val initScaleProperty = SimpleDoubleProperty(0.0)
+    val minScaleProperty: DoubleProperty = slider.minProperty()
+    val maxScaleProperty: DoubleProperty = slider.maxProperty()
+    val scaleProperty: DoubleProperty = slider.valueProperty()
 
+    var initScale: Double
+        get() = initScaleProperty.value
+        set(value) {
+            if (value >= 0) {
+                initScaleProperty.value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
+            } else {
+                throw IllegalArgumentException("negative scale")
+            }
+        }
     var minScale: Double
         get() = minScaleProperty.value
         set(value) {

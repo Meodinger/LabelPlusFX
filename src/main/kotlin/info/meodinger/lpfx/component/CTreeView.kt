@@ -11,7 +11,6 @@ import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.tree.*
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -28,6 +27,10 @@ import kotlin.collections.ArrayList
  * Location: info.meodinger.lpfx.component
  */
 class CTreeView: TreeView<String>() {
+
+    companion object {
+        const val GRAPHICS_CIRCLE_RADIUS = 8.0
+    }
 
     private abstract class TreeMenu : ContextMenu() {
         abstract fun update(selectedItems: ObservableList<TreeItem<String>>)
@@ -58,7 +61,7 @@ class CTreeView: TreeView<String>() {
                 // Update view
                 State.controller.addLabelLayer()
                 State.controller.updateGroupList()
-                rootItem.children.add(TreeItem(newGroup.name, Circle(8.0, Color.web(newGroup.color))))
+                addGroupItem(newGroup)
                 // Mark change
                 State.isChanged = true
             }
@@ -79,13 +82,13 @@ class CTreeView: TreeView<String>() {
                     return@ifPresent
                 }
 
-                val groupId = State.getGroupIdByName(groupItem.value)
+                val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
 
                 // Edit data
-                State.transFile.getTransGroupAt(groupId).name = newName
+                transGroup.name = newName
                 // Update view
                 State.controller.updateGroupList()
-                groupItem.value = newName
+                updateGroupItem(transGroup)
                 // Mark change
                 State.isChanged = true
             }
@@ -94,18 +97,20 @@ class CTreeView: TreeView<String>() {
         private val g_changeColorPicker = CColorPicker()
         private val g_changeColorAction = { groupItem: TreeItem<String> ->
             val newColor = g_changeColorPicker.value
-            val groupId = State.getGroupIdByName(groupItem.value)
+
+            val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
 
             // Edit data
-            State.transFile.getTransGroupAt(groupId).color = newColor.toHex()
+            transGroup.color = newColor.toHex()
             // Update view
-            (groupItem.graphic as Circle).fill = newColor
+            updateGroupItem(transGroup)
             // Mark change
             State.isChanged = true
         }
         private val g_changeColorItem = MenuItem()
         private val g_deleteAction = { groupItem: TreeItem<String> ->
             val groupId = State.getGroupIdByName(groupItem.value)
+            val transGroup = State.transFile.groupList[groupId]
 
             // Edit data
             for (labels in State.transFile.transMap.values) for (label in labels) {
@@ -113,11 +118,11 @@ class CTreeView: TreeView<String>() {
                     label.groupId = label.groupId - 1
                 }
             }
-            State.transFile.groupList.removeIf { it.name == groupItem.value }
+            State.transFile.groupList.remove(transGroup)
             // Update view
-            groupItem.parent.children.remove(groupItem)
             State.controller.updateGroupList()
             State.controller.delLabelLayer(groupId)
+            removeGroupItem(transGroup)
             // Mark change
             State.isChanged = true
         }
@@ -254,27 +259,12 @@ class CTreeView: TreeView<String>() {
 
     }
 
-    val picNameProperty = SimpleStringProperty("")
-    val transGroupsProperty = SimpleObjectProperty(ArrayList<TransGroup>())
-    val transLabelsProperty = SimpleObjectProperty(ArrayList<TransLabel>())
     val viewModeProperty = SimpleObjectProperty(DefaultViewMode)
 
-    var picName: String
-        get() = picNameProperty.value
-        set(value) {
-            picNameProperty.value = value
-        }
-    var transGroups: ArrayList<TransGroup>
-        get() = transGroupsProperty.value
-        set(value) {
-            transGroupsProperty.value = value
-        }
-    var transLabels: ArrayList<TransLabel>
-        get() = transLabelsProperty.value
-        set(value) {
-            transLabelsProperty.value = value
-        }
-    var viewMode: ViewMode
+    private var picName = ""
+    private var transGroups = ArrayList<TransGroup>()
+    private var transLabels = ArrayList<TransLabel>()
+    private var viewMode: ViewMode
         get() = viewModeProperty.value
         set(value) {
             viewModeProperty.value = value
@@ -362,6 +352,20 @@ class CTreeView: TreeView<String>() {
                 groupItem.children.add(newItem)
             }
         }
+    }
+
+    fun updateGroupItem(transGroup: TransGroup) {
+        when (viewMode) {
+            ViewMode.IndexMode -> return
+            ViewMode.GroupMode -> {
+                val groupItem = root.children.find { it.value == transGroup.name }!!
+                groupItem.value = transGroup.name
+                (groupItem.graphic as Circle).fill = Color.web(transGroup.color)
+            }
+        }
+    }
+    fun updateLabelItem(transLabel: TransLabel) {
+
     }
 
     fun removeGroupItem(transGroup: TransGroup) {

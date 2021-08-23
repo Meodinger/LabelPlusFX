@@ -7,7 +7,7 @@ package info.meodinger.lpfx
  */
 const val WIDTH = 900.0
 const val HEIGHT = 600.0
-const val GRAPHICS_CIRCLE_RADIUS = 8.0
+const val NOT_FOUND = -1
 
 enum class WorkMode { LabelMode, InputMode }
 val DefaultWorkMode = WorkMode.InputMode

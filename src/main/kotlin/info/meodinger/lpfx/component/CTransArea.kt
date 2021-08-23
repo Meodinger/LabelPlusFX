@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
-import info.meodinger.lpfx.util.keyboard.isAltDown
+import info.meodinger.lpfx.util.accelerator.isAltDown
+
 import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem

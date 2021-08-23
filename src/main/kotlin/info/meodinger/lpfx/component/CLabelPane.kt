@@ -3,7 +3,7 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.dialog.showException
-import info.meodinger.lpfx.util.keyboard.isControlDown
+import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE

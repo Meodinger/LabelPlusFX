@@ -15,14 +15,12 @@ class CZip(zipFile: File) {
     private val zip: ZipOutputStream
 
     init {
-        val zipOutputStream: ZipOutputStream = try {
-            val bufferedOutputStream = BufferedOutputStream(FileOutputStream(zipFile))
-            ZipOutputStream(bufferedOutputStream)
+        zip = try {
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile)))
         } catch (e: IOException) {
             showException(e)
             throw RuntimeException("Abort")
         }
-        zip = zipOutputStream
     }
 
     @Throws(IOException::class)

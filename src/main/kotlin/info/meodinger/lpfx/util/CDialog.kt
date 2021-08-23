@@ -25,31 +25,32 @@ import java.util.*
  */
 
 // Common dialogs
-private val confirmDialog = Dialog<ButtonType>()
-private val infoDialog = Dialog<ButtonType>()
-private val alertDialog = Dialog<ButtonType>()
-private val errorDialog = Dialog<ButtonType>()
-private val exceptionDialog = Dialog<ButtonType>()
+private val confirmDialog = Dialog<ButtonType>().also {
+    it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
+    it.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resize(64.0, 64.0))
+}
+private val infoDialog = Dialog<ButtonType>().also {
+    it.dialogPane.buttonTypes.addAll(ButtonType.OK)
+    it.graphic = ImageView(loadImage("/image/dialog/Info.png").resize(64.0, 64.0))
+}
+private val alertDialog = Dialog<ButtonType>().also {
+    it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+    it.graphic = ImageView(loadImage("/image/dialog/Alert.png").resize(64.0, 64.0))
+}
+private val errorDialog = Dialog<ButtonType>().also {
+    it.dialogPane.buttonTypes.addAll(ButtonType.OK)
+    it.graphic = ImageView(loadImage("/image/dialog/Error.png").resize(64.0, 64.0))
+}
+private val exceptionDialog = Dialog<ButtonType>().also {
+    it.dialogPane.buttonTypes.add(ButtonType.OK)
+}
 
 fun initDialogOwner(owner: Window?) {
     confirmDialog.initOwner(owner)
-    confirmDialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-    confirmDialog.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resize(64.0, 64.0))
-
     infoDialog.initOwner(owner)
-    infoDialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    infoDialog.graphic = ImageView(loadImage("/image/dialog/Info.png").resize(64.0, 64.0))
-
     alertDialog.initOwner(owner)
-    alertDialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-    alertDialog.graphic = ImageView(loadImage("/image/dialog/Alert.png").resize(64.0, 64.0))
-
     errorDialog.initOwner(owner)
-    errorDialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    errorDialog.graphic = ImageView(loadImage("/image/dialog/Error.png").resize(64.0, 64.0))
-
     exceptionDialog.initOwner(owner)
-    exceptionDialog.dialogPane.buttonTypes.add(ButtonType.OK)
 }
 
 /**

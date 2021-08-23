@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.util.keyboard
+package info.meodinger.lpfx.util.accelerator
 
 import info.meodinger.lpfx.util.platform.isMac
 

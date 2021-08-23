@@ -21,8 +21,8 @@ import java.io.File
 object State {
 
     lateinit var application: Application
-    lateinit var stage: Stage
     lateinit var controller: Controller
+    lateinit var stage: Stage
 
     val isOpenedProperty = SimpleBooleanProperty(false)
     val isChangedProperty = SimpleBooleanProperty(false)
@@ -113,6 +113,6 @@ object State {
           |isChanged=${isChanged}
           |workMode=${workMode}
           |viewMode=${viewMode}
-        """.trimIndent()
+        """.trimMargin()
     }
 }

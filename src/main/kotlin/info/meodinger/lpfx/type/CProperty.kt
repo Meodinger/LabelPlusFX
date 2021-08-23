@@ -1,7 +1,5 @@
 package info.meodinger.lpfx.type
 
-import java.util.*
-
 /**
  * Author: Meodinger
  * Date: 2021/7/29

@@ -291,7 +291,9 @@ class CLabelPane : ScrollPane() {
 
         root.children.add(view)
         root.children.add(textLayer)
-        content = container.also { it.children.add(root) }
+        container.children.add(root)
+
+        content = container
     }
 
     fun reset() {

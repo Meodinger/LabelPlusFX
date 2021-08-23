@@ -31,6 +31,8 @@ object State {
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
+    val viewModeProperty = SimpleObjectProperty(DefaultViewMode)
+    val workModeProperty = SimpleObjectProperty(DefaultWorkMode)
 
     var isOpened: Boolean
         get() = isOpenedProperty.value
@@ -67,10 +69,16 @@ object State {
         set(value) {
             currentLabelIndexProperty.value = value
         }
-
-
-    var workMode = DefaultWorkMode
-    var viewMode = DefaultViewMode
+    var viewMode: ViewMode
+        get() = viewModeProperty.value
+        set(value) {
+            viewModeProperty.value = value
+        }
+    var workMode: WorkMode
+        get() = workModeProperty.value
+        set(value) {
+            workModeProperty.value = value
+        }
 
     fun reset() {
         isOpened = false

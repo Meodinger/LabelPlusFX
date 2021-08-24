@@ -1,14 +1,12 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.type.TransFile
-import info.meodinger.lpfx.util.color.toHex
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.paint.Color
 import javafx.stage.Stage
 import java.io.File
 
@@ -98,8 +96,8 @@ object State {
         throw IllegalArgumentException("invalid name")
     }
     fun getGroupColorByName(name: String): String {
-        for (group in transFile.groupList) {
-            if (group.name == name) return group.color
+        for (transGroup in transFile.groupList) {
+            if (transGroup.name == name) return transGroup.color
         }
         throw IllegalArgumentException("invalid name")
     }
@@ -108,15 +106,4 @@ object State {
     fun getBakFolder(): String = getFileFolder() + File.separator + FOLDER_NAME_BAK
     fun getPicPathOf(picName: String): String = getFileFolder() + File.separator + picName
     fun getPicPathNow(): String = getPicPathOf(currentPicName)
-
-    override fun toString(): String {
-        return """State{
-          |transPath=${transPath}
-          |currentGroupId=${currentGroupId}
-          |currentPicName=${currentPicName}
-          |isChanged=${isChanged}
-          |workMode=${workMode}
-          |viewMode=${viewMode}
-        """.trimMargin()
-    }
 }

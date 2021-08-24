@@ -13,6 +13,10 @@ import java.io.IOException
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
+
+/**
+ * Export a pic pack with Meo_PS_Script
+ */
 @Throws(IOException::class)
 fun pack(target: File, source: String, transFile: TransFile) {
     val zip = CZip(target)

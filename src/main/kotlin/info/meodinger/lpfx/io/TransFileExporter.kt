@@ -16,6 +16,10 @@ import java.nio.charset.StandardCharsets
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
+
+/**
+ * Export TransFile as LP format
+ */
 @Throws(IOException::class)
 fun exportLP(file: File, transFile: TransFile) {
 
@@ -95,19 +99,22 @@ fun exportLP(file: File, transFile: TransFile) {
         fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
         // write content
         writer.write(builder.toString())
-    } catch { e : Exception ->
+    } catch { e : IOException ->
         throw e
     } finally {
 
     }
 }
 
+/**
+ * Export TransFile as MEO format
+ */
 @Throws(IOException::class)
 fun exportMeo(file: File, transFile: TransFile) {
     using {
         val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
         writer.write(transFile.toJsonString())
-    } catch { e: Exception ->
+    } catch { e: IOException ->
         throw e
     } finally {
 

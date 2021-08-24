@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
+import javafx.beans.property.SimpleBooleanProperty
 
 import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
@@ -51,8 +52,15 @@ class CTransArea: TextArea() {
         }
     }
 
+    val isBoundProperty = SimpleBooleanProperty(false)
+    var isBound: Boolean
+        get() = isBoundProperty.value
+        set(value) {
+            isBoundProperty.value = value
+        }
 
     init {
+        // Symbol Menu
         addEventHandler(KeyEvent.KEY_PRESSED) {
             if (isAltDown(it) && it.code == KeyCode.A) {
                 symbolMenu.show(this, Side.LEFT, 0.0, 0.0)

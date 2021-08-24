@@ -17,6 +17,10 @@ import java.nio.charset.StandardCharsets
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
  */
+
+/**
+ * Load LP File
+ */
 @Throws(IOException::class)
 fun loadLP(file: File): TransFile {
 
@@ -148,6 +152,9 @@ fun loadLP(file: File): TransFile {
     return transFile
 }
 
+/**
+ * Load MEO File
+ */
 @Throws(IOException::class)
 fun loadMeo(file: File): TransFile {
     return ObjectMapper().readValue(

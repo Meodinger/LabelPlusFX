@@ -21,7 +21,6 @@ inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
     }
     return manager.getCatcher()
 }
-
 class ResourceManager : AutoCloseable {
 
     private val resourceQueue = ConcurrentLinkedDeque<AutoCloseable>()
@@ -50,7 +49,6 @@ class ResourceManager : AutoCloseable {
         return Catcher(this)
     }
 }
-
 class Catcher(manager: ResourceManager) {
     var throwable: Throwable? = null
     var thrown: Throwable? = null

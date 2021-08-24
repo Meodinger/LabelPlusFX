@@ -5,6 +5,7 @@ import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
+import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
@@ -118,8 +119,10 @@ class CMenuBar : MenuBar() {
         if (State.controller.stay()) return
 
         State.reset()
+
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = getFileType(file.path)
+
         State.controller.new(file, type)
         State.controller.open(file, type)
     }
@@ -129,7 +132,9 @@ class CMenuBar : MenuBar() {
         if (State.controller.stay()) return
 
         State.reset()
+
         val file = fileChooser.showOpenDialog(State.stage) ?: return
+
         State.controller.open(file, getFileType(file.path))
     }
     private fun saveTranslation() {
@@ -141,16 +146,29 @@ class CMenuBar : MenuBar() {
         // save
 
         val file = fileChooser.showSaveDialog(State.stage) ?: return
+
         State.controller.save(file, getFileType(file.path))
     }
     private fun bakRecovery() {
-        // open & save
+        // transfer & open
 
         if (State.controller.stay()) return
+
+        State.reset()
+
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
-        State.controller.open(bak, FileType.MeoFile)
-        State.controller.save(rec, getFileType(rec.path))
+
+        try {
+            transfer(bak, rec)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showError(I18N["error.recovery_failed"])
+            showException(e)
+            return
+        }
+
+        State.controller.open(rec, getFileType(rec.path))
     }
 
     private fun exportTransFile(event: ActionEvent) {
@@ -192,6 +210,7 @@ class CMenuBar : MenuBar() {
     private fun editComment() {
         showInputArea(State.stage, I18N["dialog.edit_comment.title"], State.transFile.comment).ifPresent {
             State.transFile.comment = it
+            State.isChanged = true
         }
     }
 

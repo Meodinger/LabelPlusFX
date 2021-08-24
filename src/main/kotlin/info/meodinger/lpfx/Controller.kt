@@ -6,6 +6,7 @@ import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -58,15 +59,11 @@ class Controller : Initializable {
                             exportMeo(bak, State.transFile)
                         } catch (e: IOException) {
                             using {
-                                val writer = PrintWriter(
-                                    BufferedWriter(
-                                        FileWriter(
-                                            Options.errorLog.resolve(Date().toString()).toFile()
-                                        )
-                                    )
-                                ).autoClose()
+                                val writer = PrintWriter(BufferedWriter(FileWriter(
+                                    Options.errorLog.resolve(Date().toString()).toFile()
+                                ))).autoClose()
                                 e.printStackTrace(writer)
-                            } catch { ex: Exception ->
+                            } catch { ex: IOException ->
                                 ex.printStackTrace()
                             } finally {
 
@@ -137,6 +134,12 @@ class Controller : Initializable {
      * Property bindings
      */
     private fun bind() {
+        // cTransArea - isChanged
+        cTransArea.textProperty().addListener { _, _, _ ->
+            if (cTransArea.isBound) State.isChanged = true
+        }
+
+        // cTreeView - viewMode
         cTreeView.viewModeProperty.bind(State.viewModeProperty)
 
         // cPicBox - currentPicName
@@ -207,10 +210,12 @@ class Controller : Initializable {
             if (oldValue != NOT_FOUND) {
                 val oldLabel = transLabels.find { it.index == oldValue }!!
                 cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
+                cTransArea.isBound = false
             }
             if (newValue != NOT_FOUND) {
                 val newLabel = transLabels.find { it.index == newValue }!!
                 cTransArea.textProperty().bindBidirectional(newLabel.textProperty)
+                cTransArea.isBound = true
             }
         }
 
@@ -506,8 +511,9 @@ class Controller : Initializable {
                 FileType.MeoFile -> exportMeo(file, transFile)
             }
         } catch (e: IOException) {
-            showException(e)
+            e.printStackTrace()
             showError(I18N["error.new_failed"])
+            showException(e)
         }
     }
     fun open(file: File, type: FileType) {
@@ -518,8 +524,9 @@ class Controller : Initializable {
                 FileType.MeoFile -> loadMeo(file)
             }
         } catch (e: IOException) {
-            showException(e)
+            e.printStackTrace()
             showError(I18N["error.open_failed"])
+            showException(e)
             return
         }
 
@@ -576,16 +583,13 @@ class Controller : Initializable {
         if (State.transPath == file.path) {
             bak = File(State.transPath + EXTENSION_BAK)
 
-            using {
-                val input = FileInputStream(State.transPath).channel.autoClose()
-                val output = FileInputStream(bak!!).channel.autoClose()
-
-                output.transferFrom(input, 0, input.size())
-            } catch { e: Exception ->
-                showException(IOException(I18N["error.backup_failed"], e))
+            try {
+                transfer(File(State.transPath), bak)
+            } catch (e: Exception) {
                 bak = null
-            } finally {
-
+                e.printStackTrace()
+                showError(I18N["error.backup_failed"])
+                showException(e)
             }
         }
 
@@ -597,19 +601,18 @@ class Controller : Initializable {
             }
             showInfo(I18N["info.saved_successfully"])
         } catch (e: IOException) {
-            showException(e)
+            e.printStackTrace()
             if (bak != null) {
-                showError(String.format(I18N["error.save_failed_backed.format"], bak!!.path))
+                showError(String.format(I18N["error.save_failed_backed.format"], bak.path))
             } else {
                 showError(I18N["error.save_failed"])
             }
+            showException(e)
             return
         }
 
         // Remove Backup
-        if (!(bak != null && bak!!.delete())) {
-            showError(I18N["error.backup_clear_failed"])
-        }
+        if (bak != null) if (!bak.delete()) showError(I18N["error.backup_clear_failed"])
 
         State.transPath = file.path
         State.isChanged = false

@@ -166,8 +166,8 @@ fun showException(e: Exception): Optional<ButtonType> {
     expContent.prefWidth = 800.0
 
     exceptionDialog.title = I18N["common.error"]
-    exceptionDialog.headerText = e.javaClass.toString()
-    exceptionDialog.contentText = e.message
+    exceptionDialog.headerText = e.javaClass.name
+    exceptionDialog.contentText = e.message ?: e.javaClass.name
     exceptionDialog.dialogPane.expandableContent = expContent
 
     return exceptionDialog.showAndWait()

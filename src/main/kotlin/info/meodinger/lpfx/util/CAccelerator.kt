@@ -21,11 +21,11 @@ fun isControlDown(event: KeyEvent): Boolean {
 }
 
 fun isAltDown(event: GestureEvent): Boolean {
-    if (event.isControlDown) return true
+    if (event.isAltDown) return true
     return if (isMac) event.isMetaDown else false
 }
 
 fun isAltDown(event: KeyEvent): Boolean {
-    if (event.isControlDown) return true
+    if (event.isAltDown) return true
     return if (isMac) event.isMetaDown else false
 }

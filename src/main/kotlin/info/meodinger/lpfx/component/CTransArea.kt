@@ -1,8 +1,8 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
-import javafx.beans.property.SimpleBooleanProperty
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -38,8 +38,7 @@ class CTransArea: TextArea() {
         fun createSymbolItem(symbol: String, displayable: Boolean): MenuItem {
             return MenuItem(
                 symbol,
-                if (displayable) Circle(radius, Color.GREEN)
-                else Circle(radius, Color.RED)
+                Circle(radius, if (displayable) Color.GREEN else Color.RED)
             ).also {
                 it.style = "-fx-font-family: \"Segoe UI Symbol\""
             }

@@ -27,17 +27,17 @@ class LabelPlusFX: Application() {
         val root = loader.load<Parent>()
         val controller = loader.getController<Controller>()
 
-        primaryStage.setOnCloseRequest {
-            controller.close()
-            it.consume()
-        }
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, WIDTH, HEIGHT).also {
-            // Global event catch, prevent mnemonic parsing
+            // Global event catch, prevent mnemonic parsing and the beep
             it.addEventHandler(KeyEvent.KEY_PRESSED) { event ->
                 if (event.isAltDown) event.consume()
             }
+        }
+        primaryStage.setOnCloseRequest {
+            controller.close()
+            it.consume()
         }
         primaryStage.show()
 

@@ -7,6 +7,10 @@ import javafx.scene.control.TreeItem
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
+
+/**
+ * Returns the root of it
+ */
 val <T> TreeItem<T>.root: TreeItem<T>
     get() {
         var root: TreeItem<T> = this
@@ -14,6 +18,9 @@ val <T> TreeItem<T>.root: TreeItem<T>
         return root
     }
 
+/**
+ * Expand all items under it
+ */
 fun TreeItem<*>.expandAll() {
     if (this.children.size > 0) {
         this.isExpanded = true

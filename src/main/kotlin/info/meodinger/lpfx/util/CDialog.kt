@@ -24,6 +24,9 @@ import java.util.*
  * Location: info.meodinger.lpfx.util
  */
 
+/**
+ * Constants
+ */
 const val DIALOG_ICON_RADIUS = 32.0
 
 // Common dialogs

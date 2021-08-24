@@ -10,21 +10,34 @@ import javafx.scene.input.KeyEvent
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
+
+/**
+ * Alias isMetaDown
+ */
 fun isControlDown(event: GestureEvent): Boolean {
     if (event.isControlDown) return true
     return if (isMac) event.isMetaDown else false
 }
 
+/**
+ * Alias isMetaDown
+ */
 fun isControlDown(event: KeyEvent): Boolean {
     if (event.isControlDown) return true
     return if (isMac) event.isMetaDown else false
 }
 
+/**
+ * Alias isMetaDown
+ */
 fun isAltDown(event: GestureEvent): Boolean {
     if (event.isAltDown) return true
     return if (isMac) event.isMetaDown else false
 }
 
+/**
+ * Alias isMetaDown
+ */
 fun isAltDown(event: KeyEvent): Boolean {
     if (event.isAltDown) return true
     return if (isMac) event.isMetaDown else false

@@ -35,12 +35,10 @@ class CTransArea: TextArea() {
             Pair("♪", false)
         )
 
-        fun createSymbolItem(symbol: String, displayable: Boolean): MenuItem {
-            return MenuItem(
-                symbol,
-                Circle(radius, if (displayable) Color.GREEN else Color.RED)
-            ).also {
-                it.style = "-fx-font-family: \"Segoe UI Symbol\""
+        private fun createSymbolItem(symbol: String, displayable: Boolean): MenuItem {
+            return MenuItem(symbol, Circle(radius, if (displayable) Color.GREEN else Color.RED)).also {
+                it.isMnemonicParsing = false
+                it.style = "-fx-font-family: \"Segoe UI Symbol\"; -fx-font-size: 12px"
             }
         }
 

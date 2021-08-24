@@ -7,6 +7,10 @@ import java.util.*
  * Date: 2021/7/30
  * Location: info.meodinger.lpfx.util
  */
+
+/**
+ * OS name
+ */
 private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefault())
 
 val isWin = OS.contains("win")

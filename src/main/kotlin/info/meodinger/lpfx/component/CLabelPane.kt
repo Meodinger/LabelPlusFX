@@ -71,7 +71,7 @@ class CLabelPane : ScrollPane() {
         val source: MouseEvent,
         val labelIndex: Int,
         val labelX: Double, val labelY: Double,
-        val rootX: Double, val rootY: Double,
+        val displayX: Double, val displayY: Double,
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY = EventType<LabelEvent>(EventType.ROOT)
@@ -293,6 +293,8 @@ class CLabelPane : ScrollPane() {
     }
 
     fun reset() {
+        isVisible = false
+
         scale = initScale
         image = INIT_IMAGE
         selectedLabelIndex = NOT_FOUND
@@ -300,6 +302,9 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
         setupLayers(0)
+
+        moveToCenter()
+        isVisible = true
     }
 
     private fun getLabel(transLabel: TransLabel): CLabel {
@@ -396,6 +401,7 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_MOVED) {
             removeText()
             placeText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
+            it.consume()
         }
 
         // Event handle

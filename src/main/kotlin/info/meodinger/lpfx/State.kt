@@ -87,6 +87,8 @@ object State {
         isChanged = false
         workMode = DefaultWorkMode
         viewMode = DefaultViewMode
+
+        controller.reset()
     }
 
     fun getGroupIdByName(name: String): Int {

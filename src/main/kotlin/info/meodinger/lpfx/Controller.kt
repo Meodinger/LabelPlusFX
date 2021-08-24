@@ -266,14 +266,7 @@ class Controller : Initializable {
             // Mark change
             State.isChanged = true
         }
-        cLabelPane.onLabelPointed = EventHandler {
-            if (State.workMode != WorkMode.InputMode) return@EventHandler
-
-            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
-
-            cLabelPane.removeText()
-            cLabelPane.placeText(transLabel.text, Color.BLACK, it.rootX * cLabelPane.imageWidth, it.rootY * cLabelPane.imageHeight)
-        }
+        cLabelPane.onLabelPointed = EventHandler {} // Text display already set on Label
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
 
@@ -287,7 +280,7 @@ class Controller : Initializable {
             val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
 
             cLabelPane.removeText()
-            cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.rootX, it.rootY)
+            cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
         }
 
         // Update config
@@ -551,7 +544,6 @@ class Controller : Initializable {
         State.transFile = transFile
         State.transPath = file.path
 
-
         // Update recent files
         RecentFiles.add(file.path)
         cMenuBar.updateOpenRecent()
@@ -569,7 +561,6 @@ class Controller : Initializable {
 
         // Initialize workspace
         State.stage.title = INFO["application.name"] + " - " + file.name
-        reset()
 
         updateLabelColorList()
         updateGroupList()
@@ -650,12 +641,6 @@ class Controller : Initializable {
         cTreeView.reset()
         // cTransArea
     }
-    fun addLabelLayer() {
-        cLabelPane.placeLabelLayer()
-    }
-    fun delLabelLayer(groupId: Int) {
-        cLabelPane.removeLabelLayer(groupId)
-    }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
     }
@@ -681,6 +666,12 @@ class Controller : Initializable {
     fun updateLabelColorList() {
         val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
         cLabelPane.colorList = FXCollections.observableList(list)
+    }
+    fun addLabelLayer() {
+        cLabelPane.placeLabelLayer()
+    }
+    fun delLabelLayer(groupId: Int) {
+        cLabelPane.removeLabelLayer(groupId)
     }
 
     fun setViewMode(mode: ViewMode) {

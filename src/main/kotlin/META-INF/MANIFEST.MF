@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Main-Class: info.meodinger.lpfx.LauncherKt
+Class-Path: kotlin-stdlib-jdk8-1.5.21.jar kotlin-stdlib-1.5.21.jar kotli
+ n-stdlib-jdk7-1.5.21.jar annotations-13.0.jar jackson-databind-2.12.3.j
+ ar jackson-core-2.12.3.jar kotlin-stdlib-common-1.5.21.jar jackson-anno
+ tations-2.12.3.jar
+

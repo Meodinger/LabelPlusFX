@@ -1,7 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.color.toHex
-import info.meodinger.lpfx.util.char.repeat
+import info.meodinger.lpfx.util.character.repeat
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler

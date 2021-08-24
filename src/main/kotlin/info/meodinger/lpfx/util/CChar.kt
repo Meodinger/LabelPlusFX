@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.util.char
+package info.meodinger.lpfx.util.character
 
 /**
  * Author: Meodinger

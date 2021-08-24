@@ -1,0 +1,54 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="LabelPlusFX">
+    <output-path>$PROJECT_DIR$/out/artifacts/LabelPlusFX</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="alias" />
+        <option name="appClass" value="info.meodinger.lpfx.LauncherKt" />
+        <option name="convertCss2Bin" value="false" />
+        <option name="customManifestAttributes">
+          <list />
+        </option>
+        <option name="description" value="LabelPlusFX" />
+        <option name="enabledSigning" value="false" />
+        <option name="height" value="600" />
+        <option name="htmlParamFile" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="htmlTemplateFile" />
+        <option name="icons">
+          <JavaFxApplicationIcons>
+            <option name="linuxIcon" value="$PROJECT_DIR$/images/icons/cat.png" />
+            <option name="macIcon" value="$PROJECT_DIR$/images/icons/cat.icns" />
+            <option name="windowsIcon" value="$PROJECT_DIR$/images/icons/cat.ico" />
+          </JavaFxApplicationIcons>
+        </option>
+        <option name="keypass" />
+        <option name="keystore" />
+        <option name="msgOutputLevel" value="Default" />
+        <option name="nativeBundle" value="all" />
+        <option name="paramFile" />
+        <option name="selfSigning" value="true" />
+        <option name="storepass" />
+        <option name="title" value="LabelPlusFX" />
+        <option name="updateMode" value="background" />
+        <option name="vendor" value="Meodinger" />
+        <option name="version" value="2.0.0" />
+        <option name="width" value="900" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.3" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.3" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.3" />
+      <element id="archive" name="lpfx.jar">
+        <element id="module-output" name="lpfx" />
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/kotlin/META-INF/MANIFEST.MF" />
+        </element>
+      </element>
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.5.21" />
+    </root>
+  </artifact>
+</component>

@@ -1,6 +1,6 @@
 /out/
 /target/
-/.idea/
-!/.idea/artifacts/lpfx_jar.xml
-!/.idea/modules.xml
+/.idea/*
+!/.idea/artifacts
+!/.idea/vcs.xml
 *.iml

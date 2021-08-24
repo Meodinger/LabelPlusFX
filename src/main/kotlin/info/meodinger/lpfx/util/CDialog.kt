@@ -1,6 +1,6 @@
 package info.meodinger.lpfx.util.dialog
 
-import info.meodinger.lpfx.util.image.resize
+import info.meodinger.lpfx.util.image.resizeByRadius
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.resource.loadImage
@@ -24,22 +24,24 @@ import java.util.*
  * Location: info.meodinger.lpfx.util
  */
 
+const val DIALOG_ICON_RADIUS = 32.0
+
 // Common dialogs
 private val confirmDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-    it.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resize(64.0, 64.0))
+    it.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val infoDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadImage("/image/dialog/Info.png").resize(64.0, 64.0))
+    it.graphic = ImageView(loadImage("/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val alertDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-    it.graphic = ImageView(loadImage("/image/dialog/Alert.png").resize(64.0, 64.0))
+    it.graphic = ImageView(loadImage("/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val errorDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadImage("/image/dialog/Error.png").resize(64.0, 64.0))
+    it.graphic = ImageView(loadImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val exceptionDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.add(ButtonType.OK)

@@ -10,9 +10,10 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE
 import info.meodinger.lpfx.util.resource.get
 
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.binding.StringBinding
+import javafx.beans.property.*
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.event.EventType
@@ -121,7 +122,7 @@ class CLabelPane : ScrollPane() {
     val minScaleProperty = SimpleDoubleProperty(NOT_SET)
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
-    val colorListProperty = SimpleObjectProperty(emptyList<String>())
+    val colorListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
     val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -164,7 +165,7 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var colorList: List<String>
+    var colorList: ObservableList<String>
         get() = colorListProperty.value
         set(value) {
             colorListProperty.value = value
@@ -419,7 +420,22 @@ class CLabelPane : ScrollPane() {
         labels.add(label)
 
         // Bind property
-        colorListProperty.addListener { _, _, _ -> label.color = colorList[transLabel.groupId] + LABEL_ALPHA }
+        label.colorProperty.bind(object : StringBinding() {
+
+            init {
+                bind(colorListProperty)
+                bind(transLabel.groupIdProperty)
+            }
+
+            override fun computeValue(): String {
+                val colorBinding = colorListProperty.valueAt(transLabel.groupIdProperty)
+                if (colorBinding.isNotNull.value) {
+                    return colorBinding.value + LABEL_ALPHA
+                }
+                return "000000$LABEL_ALPHA"
+            }
+
+        })
         label.indexProperty.bind(transLabel.indexProperty)
         transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
         transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))

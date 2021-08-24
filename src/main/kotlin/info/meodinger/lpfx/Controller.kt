@@ -15,6 +15,7 @@ import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
+import javafx.collections.FXCollections
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -89,6 +90,10 @@ class Controller : Initializable {
      * Component Initialize
      */
     private fun init() {
+        // Text
+        bSwitchWorkMode.text = I18N["mode.work.input"]
+        bSwitchViewMode.text = I18N["mode.view.group"]
+
         // Set last used dir
         val lastFilePath = RecentFiles.getLastOpenFile()
         if (lastFilePath != null) CFileChooser.lastDirectory = File(lastFilePath).parentFile
@@ -139,9 +144,6 @@ class Controller : Initializable {
             if (cTransArea.isBound) State.isChanged = true
         }
 
-        // cTreeView - viewMode
-        cTreeView.viewModeProperty.bind(State.viewModeProperty)
-
         // cPicBox - currentPicName
         cPicBox.valueProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
@@ -180,17 +182,11 @@ class Controller : Initializable {
      */
     private fun reg() {
         // Update cTreeView & cLabelPane when change pic
-        State.currentPicNameProperty.addListener { _, _, newValue ->
+        State.currentPicNameProperty.addListener { _, _, _ ->
             if (!State.isOpened) return@addListener
 
-            val transLabels = State.transFile.transMap[newValue]!!
-
             updateTreeView()
-            cLabelPane.update(
-                State.getPicPathNow(),
-                State.transFile.groupList.size,
-                transLabels
-            )
+            updateLabelPane()
             cLabelPane.moveToZero()
         }
 
@@ -208,12 +204,20 @@ class Controller : Initializable {
             val transLabels = State.transFile.transMap[State.currentPicName]!!
 
             if (oldValue != NOT_FOUND) {
-                val oldLabel = transLabels.find { it.index == oldValue }!!
+                val oldLabel = transLabels.find { it.index == oldValue }
+                if (oldLabel == null) {
+                    cTransArea.textProperty().unbind()
+                    return@addListener
+                }
                 cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
                 cTransArea.isBound = false
             }
             if (newValue != NOT_FOUND) {
-                val newLabel = transLabels.find { it.index == newValue }!!
+                val newLabel = transLabels.find { it.index == newValue }
+                if (newLabel == null) {
+                    cTransArea.textProperty().unbind()
+                    return@addListener
+                }
                 cTransArea.textProperty().bindBidirectional(newLabel.textProperty)
                 cTransArea.isBound = true
             }
@@ -362,6 +366,7 @@ class Controller : Initializable {
         // Bind tab with work mode switch
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.TAB) {
+                cLabelPane.removeText()
                 switchWorkMode()
                 it.consume()
             }
@@ -637,24 +642,19 @@ class Controller : Initializable {
         }
     }
     fun reset() {
-        cTreeView.root = null
-        bSwitchWorkMode.text = I18N["mode.work.input"]
-        bSwitchViewMode.text = I18N["mode.view.index"]
-
+        // cMenuBar
+        cLabelPane.reset()
+        // cSlider
         cPicBox.reset()
         cGroupBox.reset()
-        cLabelPane.reset()
-        // cSlider will reset with cImagePane through bind
+        cTreeView.reset()
+        // cTransArea
     }
     fun addLabelLayer() {
         cLabelPane.placeLabelLayer()
     }
     fun delLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)
-    }
-    fun updateLabelColorList() {
-        val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
-        cLabelPane.colorList = list
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
@@ -666,36 +666,57 @@ class Controller : Initializable {
     }
     fun updateTreeView() {
         cTreeView.update(
+            State.viewMode,
             State.currentPicName,
             State.transFile.groupList,
             State.transFile.getTransLabelListOf(State.currentPicName))
+    }
+    fun updateLabelPane() {
+        cLabelPane.update(
+            State.getPicPathNow(),
+            State.transFile.groupList.size,
+            State.transFile.transMap[State.currentPicName]!!
+        )
+    }
+    fun updateLabelColorList() {
+        val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
+        cLabelPane.colorList = FXCollections.observableList(list)
+    }
+
+    fun setViewMode(mode: ViewMode) {
+        State.viewMode = mode
+
+        when (mode) {
+            ViewMode.IndexMode -> bSwitchViewMode.text = I18N["mode.view.index"]
+            ViewMode.GroupMode -> bSwitchViewMode.text = I18N["mode.view.group"]
+        }
+
+        updateTreeView()
+    }
+    fun setWorkMode(mode: WorkMode) {
+        State.workMode = mode
+
+        when (mode) {
+            WorkMode.InputMode -> {
+                bSwitchWorkMode.text = I18N["mode.work.input"]
+                setViewMode(ViewMode.IndexMode)
+            }
+            WorkMode.LabelMode -> {
+                bSwitchWorkMode.text = I18N["mode.work.label"]
+                setViewMode(ViewMode.GroupMode)
+            }
+        }
     }
 
     @FXML fun switchViewMode() {
         val now = ViewMode.values().indexOf(State.viewMode)
         val all = ViewMode.values().size
-        State.viewMode = ViewMode.values()[(now + 1) % all]
-
-        when (State.viewMode) {
-            ViewMode.IndexMode -> bSwitchViewMode.text = I18N["mode.view.index"]
-            ViewMode.GroupMode -> bSwitchViewMode.text = I18N["mode.view.group"]
-        }
+        setViewMode(ViewMode.values()[(now + 1) % all])
     }
     @FXML fun switchWorkMode() {
         val now = WorkMode.values().indexOf(State.workMode)
         val all = WorkMode.values().size
-        State.workMode = WorkMode.values()[(now + 1) % all]
-
-        when (State.workMode) {
-            WorkMode.InputMode -> {
-                bSwitchWorkMode.text = I18N["mode.work.input"]
-                State.viewMode = ViewMode.IndexMode
-            }
-            WorkMode.LabelMode -> {
-                bSwitchWorkMode.text = I18N["mode.work.label"]
-                State.viewMode = ViewMode.GroupMode
-            }
-        }
+        setWorkMode(WorkMode.values()[(now + 1) % all])
     }
 
 }

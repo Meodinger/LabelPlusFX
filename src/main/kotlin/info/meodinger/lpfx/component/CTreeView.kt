@@ -10,7 +10,6 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.tree.*
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -86,12 +85,13 @@ class CTreeView: TreeView<String>() {
                 }
 
                 val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
+                val oldName = transGroup.name
 
                 // Edit data
                 transGroup.name = newName
                 // Update view
                 State.controller.updateGroupList()
-                updateGroupItem(transGroup)
+                updateGroupItem(oldName, transGroup)
                 // Mark change
                 State.isChanged = true
             }
@@ -107,7 +107,7 @@ class CTreeView: TreeView<String>() {
             transGroup.color = newColor.toHex()
             // Update view
             State.controller.updateLabelColorList()
-            updateGroupItem(transGroup)
+            updateGroupItem(transGroup.name, transGroup)
             // Mark change
             State.isChanged = true
         }
@@ -152,6 +152,7 @@ class CTreeView: TreeView<String>() {
                 }
                 // Update view
                 State.controller.updateTreeView()
+                State.controller.updateLabelPane()
                 // Mark change
                 State.isChanged = true
             }
@@ -177,6 +178,7 @@ class CTreeView: TreeView<String>() {
                 }
                 // Update view
                 State.controller.updateTreeView()
+                State.controller.updateLabelPane()
                 // Mark change
                 State.isChanged = true
             }
@@ -189,14 +191,13 @@ class CTreeView: TreeView<String>() {
             r_addGroupDialog.title = I18N["context.add_group.dialog.title"]
             r_addGroupDialog.headerText = I18N["context.add_group.dialog.header"]
             r_addGroupDialog.dialogPane.content = HBox(r_addGroupField, r_addGroupPicker).also { box -> box.alignment = Pos.CENTER }
-            r_addGroupDialog.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+            r_addGroupDialog.dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
             r_addGroupDialog.setResultConverter {
-                if (it == ButtonType.APPLY)
+                if (it == ButtonType.FINISH)
                     TransGroup(r_addGroupField.text, r_addGroupPicker.value.toHex())
                 else
                     null
             }
-            r_addGroupItem.setOnAction { r_addGroupAction() }
 
             g_changeColorPicker.valueProperty().addListener { _, _, newValue -> g_changeColorItem.text = newValue.toHex() }
             g_changeColorPicker.setPrefSize(40.0, 20.0)
@@ -227,6 +228,8 @@ class CTreeView: TreeView<String>() {
             if (rootCount == 1 && groupCount == 0 && labelCount == 0) {
                 // root
                 items.add(r_addGroupItem)
+
+                r_addGroupItem.setOnAction { r_addGroupAction() }
             } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
                 // group
                 val groupItem = selectedItems[0]
@@ -263,17 +266,10 @@ class CTreeView: TreeView<String>() {
 
     }
 
-    val viewModeProperty = SimpleObjectProperty(DefaultViewMode)
-
-    private var picName = ""
-    private var transGroups = ArrayList<TransGroup>()
-    private var transLabels = ArrayList<TransLabel>()
-
-    private var viewMode: ViewMode
-        get() = viewModeProperty.value
-        set(value) {
-            viewModeProperty.value = value
-        }
+    private var viewMode: ViewMode = DefaultViewMode
+    private var picName: String = ""
+    private var transGroups: MutableList<TransGroup> = ArrayList()
+    private var transLabels: MutableList<TransLabel> = ArrayList()
 
     init {
         // Init
@@ -286,7 +282,14 @@ class CTreeView: TreeView<String>() {
         }
     }
 
-    fun update(picName: String, transGroups: List<TransGroup>, transLabels: List<TransLabel>) {
+    fun reset() {
+        this.root = null
+        this.picName = ""
+        this.transGroups = ArrayList()
+        this.transLabels = ArrayList()
+    }
+    fun update(viewMode: ViewMode, picName: String, transGroups: List<TransGroup>, transLabels: List<TransLabel>) {
+        this.viewMode = viewMode
         this.picName = picName
         this.transGroups = ArrayList(transGroups)
         this.transLabels = ArrayList(transLabels)
@@ -348,11 +351,11 @@ class CTreeView: TreeView<String>() {
         }
     }
 
-    fun updateGroupItem(transGroup: TransGroup) {
+    fun updateGroupItem(name: String, transGroup: TransGroup) {
         when (viewMode) {
             ViewMode.IndexMode -> return
             ViewMode.GroupMode -> {
-                val groupItem = root.children.find { it.value == transGroup.name }!!
+                val groupItem = root.children.find { it.value == name }!!
                 groupItem.value = transGroup.name
                 (groupItem.graphic as Circle).fill = Color.web(transGroup.color)
             }

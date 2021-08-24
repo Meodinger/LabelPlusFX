@@ -118,16 +118,6 @@ class Controller : Initializable {
         pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
 
-        // Fix dividers when resize (debounce)
-        val geometryListener = ChangeListener<Number> { _, _, _ ->
-            // Now only god knows its effect
-            val debounce = { input: Double -> (input * 100 + 0.2) / 100 }
-            pMain.setDividerPositions(debounce(pMain.dividerPositions[0]))
-            pRight.setDividerPositions(debounce(pRight.dividerPositions[0]))
-        }
-        State.stage.widthProperty().addListener(geometryListener)
-        State.stage.heightProperty().addListener(geometryListener)
-
         // Display default image
         cLabelPane.isVisible = false
         Platform.runLater {

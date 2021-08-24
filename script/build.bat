@@ -1,5 +1,8 @@
-cd ..\out\artifacts\lpfx_jar
+@echo off
 
-javapackager -deploy -v -native image -outdir packages --module-path . --module lpfx/info.meodinger.lpfx.LauncherKt --strip-native-commands true -name LabelPlusFX -width 900 -height 600 -Bicon=..\..\..\images\icons\cat.ico
+set DIR=%~dp0..
+set OUT="%DIR%\out"
+set MODULES="%DIR%\out\artifacts\lpfx_jar"
+set ICON="%DIR%\images\icons\cat.ico"
 
-cd ..\..\..\script
+javapackager -deploy -v -native image -outdir %OUT% --module-path %MODULES% --module lpfx/info.meodinger.lpfx.LauncherKt --strip-native-commands true -name LabelPlusFX -width 900 -height 600 -Bicon=%ICON%

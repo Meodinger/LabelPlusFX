@@ -1,4 +1,6 @@
 /out/
 /target/
 /.idea/
+!/.idea/artifacts/lpfx_jar.xml
+!/.idea/modules.xml
 *.iml

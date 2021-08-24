@@ -79,7 +79,7 @@ To get a local copy up and running follow these simple steps.
    ```sh
    git clone https://github.com/Meodinger/LabelPlusFX.git
    ```
-2. Package with [IDE](https://openjfx.cn/openjfx-docs/)
+2. Build with script
 
 
 

@@ -3,6 +3,7 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.*
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
+import info.meodinger.lpfx.type.CProperty
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
 import info.meodinger.lpfx.util.file.transfer
@@ -12,10 +13,7 @@ import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.event.ActionEvent
-import javafx.scene.control.Menu
-import javafx.scene.control.MenuBar
-import javafx.scene.control.MenuItem
-import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
@@ -44,6 +42,7 @@ class CMenuBar : MenuBar() {
     private val mEditComment = MenuItem(I18N["m.comment"])
     private val mmAbout = Menu(I18N["mm.about"])
     private val mAbout = MenuItem(I18N["m.about"])
+    private val mSettings = MenuItem(I18N["m.settings"])
 
     private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*${EXTENSION_MEO}", "*${EXTENSION_LP}")
     private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*${EXTENSION_MEO}")
@@ -78,6 +77,7 @@ class CMenuBar : MenuBar() {
         mExportAsTransPack.setOnAction { exportTransPack() }
         mEditComment.setOnAction { editComment() }
         mAbout.setOnAction { about() }
+        mSettings.setOnAction { settings() }
 
         mSave.disableProperty().bind(State.isOpenedProperty.not())
         mSaveAs.disableProperty().bind(State.isOpenedProperty.not())
@@ -231,5 +231,8 @@ class CMenuBar : MenuBar() {
         ) {
             State.application.hostServices.showDocument(INFO["application.url"])
         }
+    }
+    private fun settings() {
+        val dialog = Dialog<List<CProperty>>()
     }
 }

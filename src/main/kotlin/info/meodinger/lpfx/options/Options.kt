@@ -2,6 +2,8 @@ package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.util.dialog.showError
 import info.meodinger.lpfx.util.dialog.showException
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 
 import java.io.IOException
 import java.nio.file.Files
@@ -41,7 +43,7 @@ object Options {
             initRecentFiles()
         } catch (e: IOException) {
             showException(e)
-            showError("Initialize options failed")
+            showError(I18N["error.initialize_options_failed"])
             exitProcess(0)
         }
     }

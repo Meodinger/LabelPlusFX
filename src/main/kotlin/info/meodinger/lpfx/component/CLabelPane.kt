@@ -139,6 +139,8 @@ class CLabelPane : ScrollPane() {
                 if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
                 if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
                 initScaleProperty.value = temp
+            } else {
+                throw IllegalArgumentException(I18N["exception.illegal_argument.negative_scale"])
             }
         }
     var minScale: Double
@@ -309,7 +311,7 @@ class CLabelPane : ScrollPane() {
 
     private fun getLabel(transLabel: TransLabel): CLabel {
         for (label in labels) if (label.index == transLabel.index) return label
-        throw IllegalStateException(String.format(I18N["exception.illegal_state.label_not_found.format"], transLabel.index))
+        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format"], transLabel.index))
     }
 
     fun setupImage(path: String) {

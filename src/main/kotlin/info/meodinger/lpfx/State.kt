@@ -1,6 +1,8 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.type.TransFile
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
@@ -95,13 +97,13 @@ object State {
         transFile.groupList.forEachIndexed { index, transGroup ->
             if (transGroup.name == name) return index
         }
-        throw IllegalArgumentException("invalid name")
+        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
     }
     fun getGroupColorByName(name: String): String {
         for (transGroup in transFile.groupList) {
             if (transGroup.name == name) return transGroup.color
         }
-        throw IllegalArgumentException("invalid name")
+        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
     }
 
     fun getFileFolder(): String = File(transPath).parent

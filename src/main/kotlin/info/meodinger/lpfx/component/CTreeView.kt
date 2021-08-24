@@ -51,7 +51,7 @@ class CTreeView: TreeView<String>() {
             val newColor = if (newGroupId >= 9) Color.WHITE
             else Color.web(Settings[Settings.DefaultColorList].asList()[newGroupId])
 
-            r_addGroupField.text = String.format(I18N["context.add_group.dialog.format"], newGroupId + 1)
+            r_addGroupField.text = String.format(I18N["context.add_group.new_group.format"], newGroupId + 1)
             r_addGroupPicker.value = newColor
             r_addGroupDialog.result = null
             r_addGroupDialog.showAndWait().ifPresent { newGroup ->
@@ -79,7 +79,7 @@ class CTreeView: TreeView<String>() {
                 if (newName.isBlank()) return@ifPresent
                 for (group in State.transFile.groupList) {
                     if (group.name == newName) {
-                        showError(I18N["context.rename_group.error.same_name"])
+                        showError(I18N["error.same_group_name"])
                         return@ifPresent
                     }
                 }
@@ -139,8 +139,8 @@ class CTreeView: TreeView<String>() {
 
             showChoice(
                 State.stage,
-                I18N["context.move_to.title"],
-                I18N["context.move_to.header"],
+                I18N["context.move_to.dialog.title"],
+                if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
                 groupNameList
             ).ifPresent { newGroupName ->
                 val newGroupId = State.getGroupIdByName(newGroupName)
@@ -161,8 +161,8 @@ class CTreeView: TreeView<String>() {
         private val l_deleteAction = { items: ObservableList<TreeItem<String>> ->
             val result = showConfirm(
                 I18N["context.delete_label.dialog.title"],
-                null,
-                I18N["context.delete_label.dialog.content.pl"],
+                if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
+                StringBuilder().also { for (item in items) it.appendLine(item.value) }.toString(),
             )
 
             if (result.isPresent && result.get() == ButtonType.YES) {

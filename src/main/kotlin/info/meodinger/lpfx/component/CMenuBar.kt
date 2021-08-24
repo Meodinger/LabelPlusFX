@@ -120,6 +120,7 @@ class CMenuBar : MenuBar() {
 
         State.reset()
 
+        fileChooser.title = I18N["chooser.new"]
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = getFileType(file.path)
 
@@ -133,6 +134,7 @@ class CMenuBar : MenuBar() {
 
         State.reset()
 
+        fileChooser.title = I18N["chooser.open"]
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
         State.controller.open(file, getFileType(file.path))
@@ -145,6 +147,7 @@ class CMenuBar : MenuBar() {
     private fun saveAsTranslation() {
         // save
 
+        fileChooser.title = I18N["chooser.save"]
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.save(file, getFileType(file.path))
@@ -156,6 +159,7 @@ class CMenuBar : MenuBar() {
 
         State.reset()
 
+        fileChooser.title = I18N["chooser.rec"]
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 

@@ -454,7 +454,7 @@ class Controller : Initializable {
         if (!State.isChanged) return false
 
         // Not saved
-        val result = showAlert(I18N["common.exit"], null, I18N["dialog.exit_save_alert.content"])
+        val result = showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"])
         if (result.isPresent) {
             if (result.get() == ButtonType.CANCEL) {
                 return true
@@ -617,7 +617,7 @@ class Controller : Initializable {
     fun close() {
         if (!State.isChanged) exitProcess(0)
 
-        showAlert(I18N["common.exit"], null, I18N["dialog.exit_save_alert.content"]).ifPresent {
+        showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), getFileType(State.transPath))
@@ -677,9 +677,9 @@ class Controller : Initializable {
     fun setViewMode(mode: ViewMode) {
         State.viewMode = mode
 
-        when (mode) {
-            ViewMode.IndexMode -> bSwitchViewMode.text = I18N["mode.view.index"]
-            ViewMode.GroupMode -> bSwitchViewMode.text = I18N["mode.view.group"]
+        bSwitchViewMode.text = when (mode) {
+            ViewMode.IndexMode -> I18N["mode.view.index"]
+            ViewMode.GroupMode -> I18N["mode.view.group"]
         }
 
         updateTreeView()
@@ -687,14 +687,14 @@ class Controller : Initializable {
     fun setWorkMode(mode: WorkMode) {
         State.workMode = mode
 
-        when (mode) {
+        bSwitchWorkMode.text = when (mode) {
             WorkMode.InputMode -> {
-                bSwitchWorkMode.text = I18N["mode.work.input"]
                 setViewMode(ViewMode.IndexMode)
+                I18N["mode.work.input"]
             }
             WorkMode.LabelMode -> {
-                bSwitchWorkMode.text = I18N["mode.work.label"]
                 setViewMode(ViewMode.GroupMode)
+                I18N["mode.work.label"]
             }
         }
     }

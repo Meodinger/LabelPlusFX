@@ -1,5 +1,8 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
+
 /**
  * Author: Meodinger
  * Date: 2021/8/1
@@ -25,7 +28,7 @@ fun isLPFile(filePath: String): Boolean {
 fun getFileType(path: String): FileType {
     if (isMeoFile(path)) return FileType.MeoFile
     if (isLPFile(path)) return FileType.LPFile
-    throw IllegalArgumentException("Invalid file extension")
+    throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
 }
 
 val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")

@@ -69,6 +69,6 @@ abstract class AbstractProperties {
                 return property
             }
         }
-        throw IllegalStateException(String.format(I18N["exception.illegal_state.property_not_found.format"], key))
+        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.property_not_found.format"], key))
     }
 }

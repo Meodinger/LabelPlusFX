@@ -1,5 +1,8 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
+
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
@@ -29,7 +32,7 @@ class CTextSlider : HBox() {
             if (value >= 0) {
                 initScaleProperty.value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
             } else {
-                throw IllegalArgumentException("negative scale")
+                throw IllegalArgumentException(I18N["exception.illegal_argument.negative_scale"])
             }
         }
     var minScale: Double

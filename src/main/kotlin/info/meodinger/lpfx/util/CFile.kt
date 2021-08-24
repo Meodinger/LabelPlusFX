@@ -1,5 +1,8 @@
 package info.meodinger.lpfx.util.file
 
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
+
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -14,9 +17,9 @@ import java.io.IOException
 /**
  * Transfer a File to another File
  */
-@Throws(IOException::class, IllegalStateException::class)
+@Throws(IOException::class, IllegalArgumentException::class)
 fun transfer(from: File, to: File) {
-    if (from.isDirectory || to.isDirectory) throw IllegalStateException("Cannot transfer Directory")
+    if (from.isDirectory || to.isDirectory) throw IllegalArgumentException(I18N["exception.illegal_argument.cannot_transfer_directory"])
 
     val input = FileInputStream(from).channel
     val output = FileOutputStream(to).channel

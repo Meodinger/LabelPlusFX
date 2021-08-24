@@ -3,13 +3,9 @@ package info.meodinger.lpfx.type
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import info.meodinger.lpfx.util.char.repeat
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.util.string.isDigit
-import info.meodinger.lpfx.util.string.trimSame
-
-import java.util.TreeSet
+import info.meodinger.lpfx.util.string.sortByDigit
 
 /**
  * Author: Meodinger
@@ -51,41 +47,7 @@ class TransFile {
         }
 
         fun getSortedPicList(transFile: TransFile): List<String> {
-            val trimmed = trimSame(transFile.transMap.keys.toList())
-            if (trimmed.size > 2) {
-                var canCastToNumberList = true
-                for (i in 2 until trimmed.size) {
-                    if (!trimmed[i].isDigit()) {
-                        canCastToNumberList = false
-                        break
-                    }
-                }
-                if (canCastToNumberList) {
-                    val map = HashMap<Int, Int>()
-                    val integerList = ArrayList<Int>()
-                    for (i in 2 until trimmed.size) {
-                        val num = trimmed[i].toInt()
-                        integerList.add(num)
-                        map[num] = i
-                    }
-                    integerList.sortWith(Comparator.naturalOrder())
-
-                    var numberLength: Int
-                    var complementLength: Int
-                    val list = ArrayList<String>()
-                    for (integer in integerList) {
-                        numberLength = integer.toString().length
-                        complementLength = trimmed[map[integer]!!].length - numberLength
-                        list.add(trimmed[0] + '0'.repeat(complementLength) + integer + trimmed[1])
-                    }
-                    return list
-                }
-            }
-
-            // default
-            val sorted = TreeSet<String>(Comparator.naturalOrder())
-            sorted.addAll(transFile.transMap.keys)
-            return ArrayList(sorted)
+            return sortByDigit(transFile.transMap.keys.toList())
         }
     }
 

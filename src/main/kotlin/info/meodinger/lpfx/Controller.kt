@@ -653,17 +653,14 @@ class Controller : Initializable {
         cLabelPane.removeLabelLayer(groupId)
     }
     fun updateLabelColorList() {
-        val list = ArrayList<String>()
-        State.transFile.groupList.forEach { list.add(it.color) }
+        val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
         cLabelPane.colorList = list
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
     }
     fun updateGroupList() {
-        val list = ArrayList<String>()
-        for (transGroup in State.transFile.groupList)
-            list.add(transGroup.name)
+        val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].name }
         cGroupBox.setList(list)
         cGroupBox.moveTo(State.currentGroupId)
     }

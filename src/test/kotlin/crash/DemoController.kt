@@ -9,7 +9,7 @@ import java.util.*
  * Date: 2021/8/23
  * Location:
  */
-object Controller : Initializable {
+object DemoController : Initializable {
 
     init {
         println("Controller init {}")

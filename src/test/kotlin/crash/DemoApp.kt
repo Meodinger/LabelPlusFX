@@ -1,6 +1,6 @@
 package crash
 
-import Controller
+import DemoController
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
@@ -19,7 +19,7 @@ class DemoApp : Application() {
             println("Loader init start")
             it.setControllerFactory {
                 println("Controller Factory")
-                Controller
+                DemoController
             }
         }
         println("Loader init end")

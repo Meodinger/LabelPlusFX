@@ -12,11 +12,13 @@ object RecentFiles : AbstractProperties() {
     private const val MAX_SIZE = 10
     private const val RECENT = "recent"
 
-    init {
-        this.properties.add(CProperty("recent", ""))
-    }
+    override val default = listOf(CProperty(RECENT))
 
     private val recent = ArrayList<String>()
+
+    init {
+        this.properties.addAll(listOf(CProperty(RECENT)))
+    }
 
     override fun load() {
         load(Options.recentFiles, this)

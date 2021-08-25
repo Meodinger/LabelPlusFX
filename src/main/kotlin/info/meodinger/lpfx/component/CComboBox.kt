@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
@@ -20,7 +21,14 @@ class CComboBox<T> : HBox() {
     private var size = 0
 
     val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
-    var isWrapped = false
+    val isWrappedProperty = SimpleBooleanProperty(false)
+
+    val value: T = valueProperty.value
+    var isWrapped: Boolean
+        get() = isWrappedProperty.value
+        set(value) {
+            isWrappedProperty.value = value
+        }
 
     init {
         comboBox.valueProperty().addListener { _, _, newValue -> index = comboBox.items.indexOf(newValue) }

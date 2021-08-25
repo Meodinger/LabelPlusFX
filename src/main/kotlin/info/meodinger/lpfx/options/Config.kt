@@ -12,13 +12,13 @@ object Config : AbstractProperties() {
     const val MAIN_DIVIDER = "MainDivider"
     const val RIGHT_DIVIDER = "RightDivider"
 
+    override val default = listOf(
+        CProperty(MAIN_DIVIDER, 0.63),
+        CProperty(RIGHT_DIVIDER, 0.6)
+    )
+
     init {
-        this.properties.addAll(
-            listOf(
-                CProperty("MainDivider", 0.63),
-                CProperty("RightDivider", 0.6)
-            )
-        )
+        this.properties.addAll(listOf(CProperty(MAIN_DIVIDER), CProperty(RIGHT_DIVIDER)))
     }
 
     override fun load() = load(Options.config, this)

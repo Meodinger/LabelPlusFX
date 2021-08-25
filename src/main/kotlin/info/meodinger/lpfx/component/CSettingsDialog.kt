@@ -3,10 +3,12 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.getViewMode
 import info.meodinger.lpfx.options.Settings
+import info.meodinger.lpfx.type.CProperty
 import info.meodinger.lpfx.util.color.isColorHex
+import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.getGroupNameFormatter
-import javafx.beans.binding.Bindings
 
+import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -20,7 +22,7 @@ import javafx.stage.Window
  * Date: 2021/8/25
  * Location: info.meodinger.lpfx.component
  */
-class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
+class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
 
     companion object {
         const val Gap = 16.0
@@ -85,8 +87,14 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         tabPane.tabs.addAll(groupTab, modeTab)
 
         this.title = "Settings"
-        this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL, ButtonType.APPLY)
+        this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         this.dialogPane.content = tabPane
+        this.setResultConverter {
+            when (it) {
+                ButtonType.OK -> convertResult()
+                else -> emptyList()
+            }
+        }
     }
 
     // ----- Group ----- //
@@ -115,6 +123,8 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button("Delete").also { it.setOnAction { _ -> removeGroupBox(GridPane.getRowIndex(it) - RowShift) } }
 
+        checkBox.setOnAction { if (textField.text.isBlank()) checkBox.isSelected = false }
+
         gGridPane.add(checkBox, 0, newRowIndex)
         gGridPane.add(textField, 1, newRowIndex)
         gGridPane.add(colorPicker, 2, newRowIndex)
@@ -138,15 +148,16 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
 
     // ----- Mode ----- //
     private fun initModeBox() {
-        val a = Settings
         val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
         val preferenceList = List(preferenceStringList.size) { getViewMode(preferenceStringList[it]) }
         val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
 
         mComboInput.setList(viewModeList)
         mComboInput.moveTo(preferenceList[0])
+        mComboInput.isWrapped = true
         mComboLabel.setList(viewModeList)
         mComboLabel.moveTo(preferenceList[1])
+        mComboLabel.isWrapped = true
 
         mGridPane.add(mLabelWork, 0, 0)
         mGridPane.add(mLabelView, 1, 0)
@@ -154,5 +165,50 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         mGridPane.add(mComboInput, 1, 1)
         mGridPane.add(mComboLabel, 1, 2)
         mGridPane.add(mLabelLabel, 0, 2)
+    }
+
+    // ----- Result convert ---- //
+    private fun convertResult(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.addAll(convertGroup())
+        list.addAll(convertMode())
+
+        return list
+    }
+    private fun convertGroup(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        val isCreateList = ArrayList<Boolean>(remainGroup)
+        val nameList = ArrayList<String>(remainGroup)
+        val colorList = ArrayList<String>(remainGroup)
+        for (node in gGridPane.children) {
+            val groupId = GridPane.getRowIndex(node) - RowShift
+            when (node) {
+                is CheckBox -> isCreateList[groupId] = node.isSelected
+                is TextField -> nameList[groupId] = node.text
+                is CColorPicker -> colorList[groupId] = node.value.toHex()
+            }
+        }
+        for (i in 0 until remainGroup) {
+            val isCreate = isCreateList[i]
+            val name = nameList[i]
+            val color = colorList[i]
+
+
+        }
+
+        list.add(CProperty(Settings.DefaultColorList, colorList))
+        list.add(CProperty(Settings.DefaultGroupList, nameList))
+        list.add(CProperty(Settings.IsCreateOnNewTrans, isCreateList))
+
+        return list
+    }
+    private fun convertMode(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.ViewModePreference, mComboInput.value, mComboLabel.value))
+
+        return list
     }
 }

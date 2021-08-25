@@ -1,7 +1,7 @@
 package info.meodinger.lpfx.options
 
-import info.meodinger.lpfx.util.dialog.showError
-import info.meodinger.lpfx.util.dialog.showException
+import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.printExceptionToErrorLog
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
@@ -34,6 +34,7 @@ object Options {
         try {
             // project data folder
             if (Files.notExists(lpfx)) Files.createDirectories(lpfx)
+            if (Files.notExists(errorLog)) Files.createDirectories(errorLog)
 
             // config
             initConfig()
@@ -58,8 +59,9 @@ object Options {
             Config.load()
             Config.check()
         } catch (e: Exception) {
-            Config.save()
-            Config.load()
+            Config.useDefault()
+            printExceptionToErrorLog(e)
+            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
         }
         Runtime.getRuntime().addShutdownHook(Thread { Config.save() })
     }
@@ -74,8 +76,9 @@ object Options {
             Settings.load()
             Settings.check()
         } catch (e: Exception) {
-            Settings.save()
-            Settings.load()
+            Settings.useDefault()
+            printExceptionToErrorLog(e)
+            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
         }
         Runtime.getRuntime().addShutdownHook(Thread { Settings.save() })
     }
@@ -90,8 +93,9 @@ object Options {
             RecentFiles.load()
             RecentFiles.check()
         } catch (e: Exception) {
-            RecentFiles.save()
-            RecentFiles.load()
+            RecentFiles.useDefault()
+            printExceptionToErrorLog(e)
+            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
         }
         Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })
     }

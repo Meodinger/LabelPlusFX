@@ -1,6 +1,13 @@
 package info.meodinger.lpfx.util
 
+import info.meodinger.lpfx.options.Options
+
 import javafx.scene.control.TextFormatter
+import java.io.BufferedWriter
+import java.io.FileWriter
+import java.io.IOException
+import java.io.PrintWriter
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
@@ -114,4 +121,17 @@ fun getGroupNameFormatter() = TextFormatter<String> { change ->
         .replace(" ", "_")
         .replace("|", "_")
     change
+}
+
+fun printExceptionToErrorLog(e: Exception) {
+    using {
+        val writer = PrintWriter(BufferedWriter(FileWriter(
+            Options.errorLog.resolve(Date().time.toString()).toFile(), true
+        ))).autoClose()
+        e.printStackTrace(writer)
+    } catch { ex: IOException ->
+        ex.printStackTrace()
+    } finally {
+
+    }
 }

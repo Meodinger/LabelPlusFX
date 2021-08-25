@@ -16,29 +16,34 @@ object Settings : AbstractProperties() {
     const val IsCreateOnNewTrans = "isCreateOnLoad"
     const val ViewModePreference = "ViewModePreference"
 
-    init {
-        this.properties.addAll(
-            listOf(
-                CProperty(
-                    DefaultColorList,
-                    "FF0000", "0000FF", "008000",
-                    "1E90FF", "FFD700", "FF00FF",
-                    "A0522D", "FF4500", "9400D3"
-                ),
-                CProperty(
-                    DefaultGroupList,
-                    "框外", "框内"
-                ),
-                CProperty(
-                    IsCreateOnNewTrans,
-                    true, true
-                ),
-                CProperty(
-                    ViewModePreference,
-                    ViewMode.GroupMode, ViewMode.IndexMode // Input, Label
-                )
-            )
+    override val default = listOf(
+        CProperty(
+            DefaultColorList,
+            "FF0000", "0000FF", "008000",
+            "1E90FF", "FFD700", "FF00FF",
+            "A0522D", "FF4500", "9400D3"
+        ),
+        CProperty(
+            DefaultGroupList,
+            "框外", "框内"
+        ),
+        CProperty(
+            IsCreateOnNewTrans,
+            true, true
+        ),
+        CProperty(
+            ViewModePreference,
+            ViewMode.GroupMode, ViewMode.IndexMode // Input, Label
         )
+    )
+
+    init {
+        this.properties.addAll(listOf(
+            CProperty(DefaultColorList),
+            CProperty(DefaultGroupList),
+            CProperty(IsCreateOnNewTrans),
+            CProperty(ViewModePreference)
+        ))
     }
 
     override fun load() = load(Options.settings, this)

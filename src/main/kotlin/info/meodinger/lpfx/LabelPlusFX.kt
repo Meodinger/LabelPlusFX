@@ -21,14 +21,14 @@ import javafx.stage.Stage
 class LabelPlusFX: Application() {
 
     override fun start(primaryStage: Stage) {
+        Options.init()
+
         State.application = this
         State.stage = primaryStage
 
         val loader = FXMLLoader(javaClass.getResource("Window.fxml"))
         val root = loader.load<Parent>()
         val controller = loader.getController<Controller>()
-
-        Options.init()
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)

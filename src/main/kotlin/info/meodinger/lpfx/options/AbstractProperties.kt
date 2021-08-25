@@ -56,11 +56,17 @@ abstract class AbstractProperties {
     }
 
     val properties = ArrayList<CProperty>()
+    abstract val default: List<CProperty>
 
     abstract fun load()
     abstract fun save()
     @Throws(Exception::class)
     abstract fun check()
+    fun useDefault() {
+        properties.clear()
+        properties.addAll(default)
+        save()
+    }
 
     operator fun get(key: String): CProperty {
         for (property in properties) {

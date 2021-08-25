@@ -5,7 +5,7 @@ package info.meodinger.lpfx.type
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
  */
-class CProperty(val key: String, var value: String) {
+class CProperty(val key: String, var value: String = "") {
 
     companion object {
         const val LIST_SEPARATOR = "|"

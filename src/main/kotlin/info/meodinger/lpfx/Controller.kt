@@ -7,6 +7,7 @@ import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.file.transfer
+import info.meodinger.lpfx.util.printExceptionToErrorLog
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -58,16 +59,7 @@ class Controller : Initializable {
                         try {
                             exportMeo(bak, State.transFile)
                         } catch (e: IOException) {
-                            using {
-                                val writer = PrintWriter(BufferedWriter(FileWriter(
-                                    Options.errorLog.resolve(Date().toString()).toFile()
-                                ))).autoClose()
-                                e.printStackTrace(writer)
-                            } catch { ex: IOException ->
-                                ex.printStackTrace()
-                            } finally {
-
-                            }
+                            printExceptionToErrorLog(e)
                         }
                     }
                 }

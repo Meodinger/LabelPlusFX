@@ -232,6 +232,6 @@ class CMenuBar : MenuBar() {
         }
     }
     private fun settings() {
-        CSettings(State.stage).showAndWait()
+        CSettingsDialog(State.stage).showAndWait()
     }
 }

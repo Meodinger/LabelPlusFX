@@ -26,7 +26,6 @@ class CColorPicker() : ColorPicker() {
     private val colorHexProperty = colorHexField.textProperty()
 
     constructor(color: Color): this() { this.value = color }
-    constructor(colorHex: String): this(Color.web(colorHex))
 
     init {
         colorHexField.textFormatter = TextFormatter<String> { change ->

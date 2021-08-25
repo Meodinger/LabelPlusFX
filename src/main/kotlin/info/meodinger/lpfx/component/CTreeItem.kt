@@ -12,7 +12,8 @@ import javafx.scene.control.TreeItem
  */
 class CTreeItem(val meta: TransLabel, node: Node? = null) : TreeItem<String>() {
 
-    val index: Int = meta.index
+    val index: Int
+        get() = meta.index
 
     init {
         graphic = node

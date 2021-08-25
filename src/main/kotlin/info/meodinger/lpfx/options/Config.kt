@@ -18,7 +18,10 @@ object Config : AbstractProperties() {
     )
 
     init {
-        this.properties.addAll(listOf(CProperty(MAIN_DIVIDER), CProperty(RIGHT_DIVIDER)))
+        this.properties.addAll(listOf(
+            CProperty(MAIN_DIVIDER),
+            CProperty(RIGHT_DIVIDER)
+        ))
     }
 
     override fun load() = load(Options.config, this)

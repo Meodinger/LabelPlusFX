@@ -51,6 +51,7 @@ object Settings : AbstractProperties() {
     override fun check() {
         val colorList = this[DefaultColorList].asStringList()
         for (color in colorList) if (color.length != 6) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
+        if (colorList.size < 9) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
 
         val nameList = this[DefaultGroupList].asStringList()
         for (name in nameList) if (name.contains(Regex("s+"))) throw IllegalStateException("exception.illegal_state.name_has_whitespace")

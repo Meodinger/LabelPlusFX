@@ -23,7 +23,8 @@ class CComboBox<T> : HBox() {
     val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
     val isWrappedProperty = SimpleBooleanProperty(false)
 
-    val value: T = valueProperty.value
+    val value: T
+        get() = valueProperty.value
     var isWrapped: Boolean
         get() = isWrappedProperty.value
         set(value) {

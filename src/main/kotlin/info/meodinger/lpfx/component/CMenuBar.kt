@@ -3,6 +3,7 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.*
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
+import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
 import info.meodinger.lpfx.util.file.transfer
@@ -232,6 +233,27 @@ class CMenuBar : MenuBar() {
         }
     }
     private fun settings() {
-        CSettingsDialog(State.stage).showAndWait()
+        val result = CSettingsDialog(State.stage).showAndWait()
+        if (!result.isPresent) return
+        val list = result.get()
+
+        for (property in list) {
+            when (property.key) {
+                Settings.ViewModePreference -> Settings[Settings.ViewModePreference] = property.value
+                Settings.IsCreateOnNewTrans -> Settings[Settings.IsCreateOnNewTrans] = property.value
+                Settings.DefaultGroupList -> Settings[Settings.DefaultGroupList] = property.value
+                Settings.DefaultColorList -> {
+                    val propertyList = property.asStringList()
+                    val settingList = Settings[Settings.DefaultColorList].asStringList().toMutableList()
+
+                    if (propertyList.size <= settingList.size ) {
+                        propertyList.forEachIndexed { index, s -> settingList[index] = s }
+                        Settings[Settings.DefaultColorList] = settingList
+                    } else {
+                        Settings[Settings.DefaultColorList] = propertyList
+                    }
+                }
+            }
+        }
     }
 }

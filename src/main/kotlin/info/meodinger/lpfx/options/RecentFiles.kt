@@ -17,7 +17,9 @@ object RecentFiles : AbstractProperties() {
     private val recent = ArrayList<String>()
 
     init {
-        this.properties.addAll(listOf(CProperty(RECENT)))
+        this.properties.addAll(listOf(
+            CProperty(RECENT)
+        ))
     }
 
     override fun load() {

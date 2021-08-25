@@ -179,9 +179,9 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        val isCreateList = ArrayList<Boolean>(remainGroup)
-        val nameList = ArrayList<String>(remainGroup)
-        val colorList = ArrayList<String>(remainGroup)
+        val isCreateList = MutableList(remainGroup) { false }
+        val nameList = MutableList(remainGroup) { "" }
+        val colorList = MutableList(remainGroup) { "" }
         for (node in gGridPane.children) {
             val groupId = GridPane.getRowIndex(node) - RowShift
             when (node) {
@@ -190,17 +190,21 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
                 is CColorPicker -> colorList[groupId] = node.value.toHex()
             }
         }
+
+        val isCreateResult = ArrayList<Boolean>()
+        val nameResult = ArrayList<String>()
         for (i in 0 until remainGroup) {
             val isCreate = isCreateList[i]
             val name = nameList[i]
-            val color = colorList[i]
-
-
+            if (name.isNotBlank()) {
+                isCreateResult.add(isCreate)
+                nameResult.add(name)
+            }
         }
 
         list.add(CProperty(Settings.DefaultColorList, colorList))
-        list.add(CProperty(Settings.DefaultGroupList, nameList))
-        list.add(CProperty(Settings.IsCreateOnNewTrans, isCreateList))
+        list.add(CProperty(Settings.DefaultGroupList, nameResult))
+        list.add(CProperty(Settings.IsCreateOnNewTrans, isCreateResult))
 
         return list
     }

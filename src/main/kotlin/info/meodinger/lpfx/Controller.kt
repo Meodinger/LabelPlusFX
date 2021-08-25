@@ -470,9 +470,11 @@ class Controller : Initializable {
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
+        val groupCreateList = Settings[Settings.IsCreateOnNewTrans].asBooleanList()
         val groupNameList = Settings[Settings.DefaultGroupList].asStringList()
         val groupColorList = Settings[Settings.DefaultColorList].asStringList()
-        for (i in groupNameList.indices) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
+        for (i in groupNameList.indices) if (groupCreateList[i])
+            groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
 
         val transMap = HashMap<String, MutableList<TransLabel>>()
         for (pic in pics) transMap[pic] = ArrayList()

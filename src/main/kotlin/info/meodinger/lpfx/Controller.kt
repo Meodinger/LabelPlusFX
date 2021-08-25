@@ -12,7 +12,6 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.tree.expandAll
-import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
 import javafx.collections.FXCollections
@@ -671,15 +670,14 @@ class Controller : Initializable {
         State.workMode = mode
 
         bSwitchWorkMode.text = when (mode) {
-            WorkMode.InputMode -> {
-                setViewMode(ViewMode.IndexMode)
-                I18N["mode.work.input"]
-            }
-            WorkMode.LabelMode -> {
-                setViewMode(ViewMode.GroupMode)
-                I18N["mode.work.label"]
-            }
+            WorkMode.InputMode -> I18N["mode.work.input"]
+            WorkMode.LabelMode -> I18N["mode.work.label"]
         }
+
+        setViewMode(when (mode) {
+            WorkMode.InputMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
+            WorkMode.LabelMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[1])
+        })
     }
 
     @FXML fun switchViewMode() {

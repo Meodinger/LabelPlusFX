@@ -70,7 +70,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* [Liberica JDK 11 (Full)](bell-sw.com/pages/downloads/#/java-11-current)
+* [Liberica JDK 16 (Full)](bell-sw.com/pages/downloads/#/java-16-current)
 
 
 ### Installation

@@ -44,7 +44,9 @@ class CTransArea: TextArea() {
 
         init {
             for (symbol in symbols) items.add(createSymbolItem(symbol.first, symbol.second).also {
-                it.setOnAction { this@CTransArea.insertText(this@CTransArea.caretPosition, symbol.first) }
+                it.setOnAction {
+                    this@CTransArea.insertText(this@CTransArea.caretPosition, symbol.first)
+                }
             })
         }
     }

@@ -1,10 +1,8 @@
 package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.getViewMode
 import info.meodinger.lpfx.type.CProperty
-
-import java.io.IOException
-import kotlin.jvm.Throws
 
 /**
  * Author: Meodinger
@@ -43,8 +41,20 @@ object Settings : AbstractProperties() {
         )
     }
 
-    @Throws(IOException::class)
     override fun load() = load(Options.settings, this)
-    @Throws(IOException::class)
     override fun save() = save(Options.settings, this)
+    override fun check() {
+        val colorList = this[DefaultColorList].asStringList()
+        for (color in colorList) if (color.length != 6) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
+
+        val nameList = this[DefaultGroupList].asStringList()
+        for (name in nameList) if (name.contains(Regex("s+"))) throw IllegalStateException("exception.illegal_state.name_has_whitespace")
+        if (nameList.size > colorList.size) throw IllegalStateException("exception.illegal_state.name_more_than_color")
+
+        val isCreateList = this[IsCreateOnNewTrans].asBooleanList()
+        if (isCreateList.size != nameList.size) throw IllegalStateException("exception.illegal_state.isCreate_not_equal_to_name")
+
+        val viewModePreferenceList = this[ViewModePreference].asStringList()
+        for (preference in viewModePreferenceList) getViewMode(preference)
+    }
 }

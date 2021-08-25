@@ -24,11 +24,13 @@ object RecentFiles : AbstractProperties() {
         recent.clear()
         recent.addAll(this[RECENT].asStringList())
     }
-
     override fun save() {
         this[RECENT].set(recent)
 
         save(Options.recentFiles, this)
+    }
+    override fun check() {
+        // Nothing
     }
 
     fun getAll(): List<String> {

@@ -59,6 +59,9 @@ abstract class AbstractProperties {
 
     abstract fun load()
     abstract fun save()
+    @Throws(Exception::class)
+    abstract fun check()
+
     operator fun get(key: String): CProperty {
         for (property in properties) {
             if (property.key == key) {

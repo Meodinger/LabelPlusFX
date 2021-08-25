@@ -54,7 +54,13 @@ object Options {
             Files.createFile(config)
             Config.save()
         }
-        Config.load()
+        try {
+            Config.load()
+            Config.check()
+        } catch (e: Exception) {
+            Config.save()
+            Config.load()
+        }
         Runtime.getRuntime().addShutdownHook(Thread { Config.save() })
     }
 
@@ -64,7 +70,13 @@ object Options {
             Files.createFile(settings)
             Settings.save()
         }
-        Settings.load()
+        try {
+            Settings.load()
+            Settings.check()
+        } catch (e: Exception) {
+            Settings.save()
+            Settings.load()
+        }
         Runtime.getRuntime().addShutdownHook(Thread { Settings.save() })
     }
 
@@ -74,7 +86,13 @@ object Options {
             Files.createFile(recentFiles)
             RecentFiles.save()
         }
-        RecentFiles.load()
+        try {
+            RecentFiles.load()
+            RecentFiles.check()
+        } catch (e: Exception) {
+            RecentFiles.save()
+            RecentFiles.load()
+        }
         Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })
     }
 

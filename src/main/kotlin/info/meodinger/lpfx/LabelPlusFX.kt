@@ -1,5 +1,6 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Options
 import info.meodinger.lpfx.util.dialog.initDialogOwner
 import info.meodinger.lpfx.util.resource.ICON
 import info.meodinger.lpfx.util.resource.INFO
@@ -26,6 +27,8 @@ class LabelPlusFX: Application() {
         val loader = FXMLLoader(javaClass.getResource("Window.fxml"))
         val root = loader.load<Parent>()
         val controller = loader.getController<Controller>()
+
+        Options.init()
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)

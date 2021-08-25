@@ -19,8 +19,8 @@ enum class WorkMode {
 val DefaultWorkMode = WorkMode.InputMode
 
 enum class ViewMode(val description: String) {
-    IndexMode(I18N["mode.view.index"]),
-    GroupMode(I18N["mode.view.group"]);
+    IndexMode("index"),
+    GroupMode("group");
 
     override fun toString(): String = description
 }

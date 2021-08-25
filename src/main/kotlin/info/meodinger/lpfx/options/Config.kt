@@ -23,4 +23,11 @@ object Config : AbstractProperties() {
 
     override fun load() = load(Options.config, this)
     override fun save() = save(Options.config, this)
+    override fun check() {
+        val mainDivider = this[MAIN_DIVIDER].asDouble()
+        if (mainDivider < 0 || mainDivider > 1) throw IllegalStateException("exception.illegal_state.main_divider_invalid")
+
+        val rightDivider = this[RIGHT_DIVIDER].asDouble()
+        if (rightDivider < 0 || rightDivider > 1) throw IllegalStateException("exception.illegal_state.right_divider_invalid")
+    }
 }

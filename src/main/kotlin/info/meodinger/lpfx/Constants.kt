@@ -12,19 +12,31 @@ const val WIDTH = 900.0
 const val HEIGHT = 600.0
 const val NOT_FOUND = -1
 
-enum class WorkMode { LabelMode, InputMode }
+enum class WorkMode {
+    LabelMode,
+    InputMode
+}
 val DefaultWorkMode = WorkMode.InputMode
 
-enum class ViewMode { IndexMode, GroupMode }
+enum class ViewMode(val description: String) {
+    IndexMode(I18N["mode.view.index"]),
+    GroupMode(I18N["mode.view.group"]);
+
+    override fun toString(): String = description
+}
+fun getViewMode(description: String): ViewMode = when (description) {
+    ViewMode.IndexMode.description -> ViewMode.IndexMode
+    ViewMode.GroupMode.description -> ViewMode.GroupMode
+    else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
+}
 val DefaultViewMode = ViewMode.GroupMode
 
-enum class FileType { LPFile, MeoFile }
-fun isMeoFile(filePath: String): Boolean {
-    return filePath.endsWith(EXTENSION_MEO)
+enum class FileType {
+    LPFile,
+    MeoFile
 }
-fun isLPFile(filePath: String): Boolean {
-    return filePath.endsWith(EXTENSION_LP)
-}
+fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
+fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)
 fun getFileType(path: String): FileType {
     if (isMeoFile(path)) return FileType.MeoFile
     if (isLPFile(path)) return FileType.LPFile

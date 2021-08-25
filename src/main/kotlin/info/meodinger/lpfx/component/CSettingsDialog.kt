@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.getViewMode
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.getGroupNameFormatter
@@ -29,38 +31,54 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
 
     private var remainGroup = 0
     private val groupTab = Tab("Groups")
-    private val groupPane = BorderPane()
-    private val groupLabelIsCreate = Label("is Create On New")
-    private val groupLabelName = Label("Group Name")
-    private val groupLabelColor = Label("Group Color")
-    private val groupGridPane = GridPane()
-    private val groupButtonAdd = Button("Add Group")
+    private val gBorderPane = BorderPane()
+    private val gLabelIsCreate = Label("is Create On New")
+    private val gLabelName = Label("Group Name")
+    private val gLabelColor = Label("Group Color")
+    private val gGridPane = GridPane()
+    private val gButtonAdd = Button("Add Group")
 
     private val modeTab = Tab("Mode")
-    private val modeGridPane = GridPane()
+    private val mLabelWork = Label("Work Mode")
+    private val mLabelView = Label("View Mode")
+    private val mLabelInput = Label("Input Mode")
+    private val mLabelLabel = Label("Label Mode")
+    private val mComboInput = CComboBox<ViewMode>()
+    private val mComboLabel = CComboBox<ViewMode>()
+    private val mGridPane = GridPane()
 
     init {
         initOwner(owner)
 
+        // ----- Group ----- //
         initGroupBox()
-        groupGridPane.padding = Insets(Gap, Gap, Gap, 0.0)
-        groupGridPane.vgap = Gap
-        groupGridPane.hgap = Gap
-        groupGridPane.alignment = Pos.TOP_CENTER
-        groupButtonAdd.setOnAction { createGroupBox(remainGroup) }
+        gGridPane.padding = Insets(Gap, Gap, Gap, 0.0)
+        gGridPane.vgap = Gap
+        gGridPane.hgap = Gap
+        gGridPane.alignment = Pos.TOP_CENTER
+        gButtonAdd.setOnAction { createGroupBox(remainGroup) }
         val scrollPane = ScrollPane().also {
             it.style = "-fx-background-color:transparent;"
         }
-        val stackPane = StackPane(groupGridPane).also {
+        val stackPane = StackPane(gGridPane).also {
             it.prefWidthProperty().bind(Bindings.createDoubleBinding(
                 { scrollPane.viewportBounds.width },
                 scrollPane.viewportBoundsProperty())
             )
         }
-        groupPane.center = scrollPane.also { it.content = stackPane }
-        groupPane.bottom = HBox(groupButtonAdd).also { it.alignment = Pos.CENTER_RIGHT }
-        groupTab.content = groupPane
+        gBorderPane.center = scrollPane.also { it.content = stackPane }
+        gBorderPane.bottom = HBox(gButtonAdd).also { it.alignment = Pos.CENTER_RIGHT }
+        groupTab.content = gBorderPane
 
+        // ----- Mode ----- //
+        initModeBox()
+        mGridPane.padding = Insets(Gap, Gap, Gap, 0.0)
+        mGridPane.vgap = Gap
+        mGridPane.hgap = Gap
+        mGridPane.alignment = Pos.TOP_CENTER
+        modeTab.content = mGridPane
+
+        // ----- Tab ----- //
         tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tabPane.prefHeight = 400.0
         tabPane.prefWidth = 600.0
@@ -71,10 +89,11 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         this.dialogPane.content = tabPane
     }
 
+    // ----- Group ----- //
     private fun initGroupBox() {
         val nameList = Settings[Settings.DefaultGroupList].asStringList()
         val colorList = Settings[Settings.DefaultColorList].asStringList()
-        val createList = Settings[Settings.CreateOnNewTrans].asBooleanList()
+        val createList = Settings[Settings.IsCreateOnNewTrans].asBooleanList()
 
         for (i in nameList.indices) createGroupBox(i, createList[i], nameList[i], colorList[i])
     }
@@ -82,9 +101,9 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         val newRowIndex = groupId + RowShift
 
         if (remainGroup == 0) {
-            groupGridPane.add(groupLabelIsCreate, 0, 0)
-            groupGridPane.add(groupLabelName, 1, 0)
-            groupGridPane.add(groupLabelColor, 2, 0)
+            gGridPane.add(gLabelIsCreate, 0, 0)
+            gGridPane.add(gLabelName, 1, 0)
+            gGridPane.add(gLabelColor, 2, 0)
         }
         remainGroup++
 
@@ -96,24 +115,44 @@ class CSettingsDialog(owner: Window?) : Dialog<ButtonType>() {
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button("Delete").also { it.setOnAction { _ -> removeGroupBox(GridPane.getRowIndex(it) - RowShift) } }
 
-        groupGridPane.add(checkBox, 0, newRowIndex)
-        groupGridPane.add(textField, 1, newRowIndex)
-        groupGridPane.add(colorPicker, 2, newRowIndex)
-        groupGridPane.add(button, 3, newRowIndex)
+        gGridPane.add(checkBox, 0, newRowIndex)
+        gGridPane.add(textField, 1, newRowIndex)
+        gGridPane.add(colorPicker, 2, newRowIndex)
+        gGridPane.add(button, 3, newRowIndex)
     }
     private fun removeGroupBox(groupId: Int) {
         val toRemoveRow = groupId + RowShift
         val toRemoveList = ArrayList<Node>()
-        for (node in groupGridPane.children) {
+        for (node in gGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
             if (row == toRemoveRow) toRemoveList.add(node)
             if (row > toRemoveRow) GridPane.setRowIndex(node, row - 1)
         }
-        groupGridPane.children.removeAll(toRemoveList)
+        gGridPane.children.removeAll(toRemoveList)
 
         remainGroup--
         if (remainGroup == 0) {
-            groupGridPane.children.removeAll(groupLabelIsCreate, groupLabelName, groupLabelColor)
+            gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
         }
+    }
+
+    // ----- Mode ----- //
+    private fun initModeBox() {
+        val a = Settings
+        val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
+        val preferenceList = List(preferenceStringList.size) { getViewMode(preferenceStringList[it]) }
+        val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
+
+        mComboInput.setList(viewModeList)
+        mComboInput.moveTo(preferenceList[0])
+        mComboLabel.setList(viewModeList)
+        mComboLabel.moveTo(preferenceList[1])
+
+        mGridPane.add(mLabelWork, 0, 0)
+        mGridPane.add(mLabelView, 1, 0)
+        mGridPane.add(mLabelInput, 0, 1)
+        mGridPane.add(mComboInput, 1, 1)
+        mGridPane.add(mComboLabel, 1, 2)
+        mGridPane.add(mLabelLabel, 0, 2)
     }
 }

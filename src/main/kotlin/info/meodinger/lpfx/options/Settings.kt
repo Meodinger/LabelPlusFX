@@ -1,6 +1,10 @@
 package info.meodinger.lpfx.options
 
+import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.type.CProperty
+
+import java.io.IOException
+import kotlin.jvm.Throws
 
 /**
  * Author: Meodinger
@@ -11,7 +15,8 @@ object Settings : AbstractProperties() {
 
     const val DefaultColorList = "DefaultColorList"
     const val DefaultGroupList = "DefaultGroupList"
-    const val CreateOnNewTrans = "isCreateOnLoad"
+    const val IsCreateOnNewTrans = "isCreateOnLoad"
+    const val ViewModePreference = "ViewModePreference"
 
     init {
         this.properties.addAll(
@@ -27,13 +32,19 @@ object Settings : AbstractProperties() {
                     "框外", "框内"
                 ),
                 CProperty(
-                    CreateOnNewTrans,
+                    IsCreateOnNewTrans,
                     true, true
+                ),
+                CProperty(
+                    ViewModePreference,
+                    ViewMode.GroupMode, ViewMode.IndexMode // Input, Label
                 )
             )
         )
     }
 
+    @Throws(IOException::class)
     override fun load() = load(Options.settings, this)
+    @Throws(IOException::class)
     override fun save() = save(Options.settings, this)
 }

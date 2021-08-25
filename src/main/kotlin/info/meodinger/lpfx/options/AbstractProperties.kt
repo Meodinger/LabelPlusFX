@@ -76,7 +76,7 @@ abstract class AbstractProperties {
     operator fun set(key: String, value: Number) {
         set(key, value.toString())
     }
-    operator fun set(key: String, value: List<String>) {
-        set(key, value.toString())
+    operator fun set(key: String, value: List<*>) {
+        set(key, CProperty.parseList(value))
     }
 }

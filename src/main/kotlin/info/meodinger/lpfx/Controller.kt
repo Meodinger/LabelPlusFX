@@ -14,7 +14,6 @@ import info.meodinger.lpfx.util.tree.expandAll
 import info.meodinger.lpfx.util.using
 
 import javafx.application.Platform
-import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.event.EventHandler
 import javafx.fxml.FXML
@@ -233,7 +232,7 @@ class Controller : Initializable {
             // Edit data
             State.transFile.getTransLabelListOf(State.currentPicName).add(transLabel)
             // Update view
-            cLabelPane.placeLabel(transLabel)
+            cLabelPane.createLabel(transLabel)
             cTreeView.addLabelItem(transLabel)
             // Mark change
             State.isChanged = true
@@ -270,15 +269,15 @@ class Controller : Initializable {
             val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
 
             cLabelPane.removeText()
-            cLabelPane.placeText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
+            cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
         }
 
         // Update config
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Config[Config.MAIN_DIVIDER].value = newValue.toString()
+            Config[Config.MAIN_DIVIDER] = newValue
         }
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Config[Config.RIGHT_DIVIDER].value = newValue.toString()
+            Config[Config.RIGHT_DIVIDER] = newValue
         }
 
         // Update selected group when clicked GroupTreeItem
@@ -479,8 +478,8 @@ class Controller : Initializable {
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
-        val groupNameList = Settings[Settings.DefaultGroupList].asList()
-        val groupColorList = Settings[Settings.DefaultColorList].asList()
+        val groupNameList = Settings[Settings.DefaultGroupList].asStringList()
+        val groupColorList = Settings[Settings.DefaultColorList].asStringList()
         for (i in groupNameList.indices) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
 
         val transMap = HashMap<String, MutableList<TransLabel>>()
@@ -658,7 +657,7 @@ class Controller : Initializable {
         cLabelPane.colorList = FXCollections.observableList(list)
     }
     fun addLabelLayer() {
-        cLabelPane.placeLabelLayer()
+        cLabelPane.createLabelLayer()
     }
     fun delLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)

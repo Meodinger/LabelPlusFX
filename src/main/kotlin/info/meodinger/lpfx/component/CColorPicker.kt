@@ -20,10 +20,13 @@ import java.util.stream.Collectors
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
  */
-class CColorPicker : ColorPicker() {
+class CColorPicker() : ColorPicker() {
 
     private val colorHexField = TextField()
     private val colorHexProperty = colorHexField.textProperty()
+
+    constructor(color: Color): this() { this.value = color }
+    constructor(colorHex: String): this(Color.web(colorHex))
 
     init {
         colorHexField.textFormatter = TextFormatter<String> { change ->

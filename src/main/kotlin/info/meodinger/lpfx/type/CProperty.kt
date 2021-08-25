@@ -12,7 +12,7 @@ class CProperty(val key: String, var value: String) {
         const val KV_SEPARATOR = "="
         const val COMMENT_HEAD = "#"
 
-        fun parseList(values: List<String>): String {
+        fun parseList(values: List<*>): String {
             val builder = StringBuilder()
             for (value in values) builder.append(value).append(LIST_SEPARATOR)
             if (builder.isNotEmpty())
@@ -21,12 +21,16 @@ class CProperty(val key: String, var value: String) {
         }
     }
 
+    constructor(key: String, value: Boolean): this(key, value.toString())
     constructor(key: String, value: Number) : this(key, value.toString())
-    constructor(key: String, value: List<String>) : this(key, parseList(value))
-    constructor(key: String, vararg value: String) : this(key, listOf(*value))
+    constructor(key: String, value: List<*>) : this(key, parseList(value))
+    constructor(key: String, vararg value: Any) : this(key, listOf(*value))
 
     fun asString(): String {
         return value
+    }
+    fun asBoolean(): Boolean {
+        return value.toBoolean()
     }
     fun asInteger(): Int {
         return value.toInt()
@@ -34,21 +38,39 @@ class CProperty(val key: String, var value: String) {
     fun asDouble(): Double {
         return value.toDouble()
     }
-    fun asList(): List<String> {
+    fun asStringList(): List<String> {
         if (value.isBlank()) return emptyList()
         return listOf(*value.split(LIST_SEPARATOR).toTypedArray())
+    }
+    fun asBooleanList(): List<Boolean> {
+        if (value.isBlank()) return emptyList()
+        val rawList = value.split(LIST_SEPARATOR)
+        return MutableList(rawList.size) { rawList[it].toBoolean() }
+    }
+    fun asIntegerList(): List<Int> {
+        if (value.isBlank()) return emptyList()
+        val rawList = value.split(LIST_SEPARATOR)
+        return MutableList(rawList.size) { rawList[it].toInt() }
+    }
+    fun asDoubleList(): List<Double> {
+        if (value.isBlank()) return emptyList()
+        val rawList = value.split(LIST_SEPARATOR)
+        return MutableList(rawList.size) { rawList[it].toDouble() }
     }
 
     fun set(value: String) {
         this.value = value
     }
+    fun set(value: Boolean) {
+        set(value.toString())
+    }
     fun set(value: Number) {
         set(value.toString())
     }
-    fun set(list: List<String>) {
+    fun set(list: List<*>) {
         set(parseList(list))
     }
-    fun set(vararg list: String) {
+    fun set(vararg list: Any) {
         set(listOf(*list))
     }
 

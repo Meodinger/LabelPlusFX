@@ -22,7 +22,7 @@ object RecentFiles : AbstractProperties() {
         load(Options.recentFiles, this)
 
         recent.clear()
-        recent.addAll(this[RECENT].asList())
+        recent.addAll(this[RECENT].asStringList())
     }
 
     override fun save() {

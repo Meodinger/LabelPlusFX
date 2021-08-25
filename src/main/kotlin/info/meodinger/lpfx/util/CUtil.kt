@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.util
 
+import javafx.scene.control.TextFormatter
 import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
@@ -105,4 +106,12 @@ class Catcher(manager: ResourceManager) {
         }
         thrown?.let { throw it }
     }
+}
+
+fun getGroupNameFormatter() = TextFormatter<String> { change ->
+    change.text = change.text
+        .trim()
+        .replace(" ", "_")
+        .replace("|", "_")
+    change
 }

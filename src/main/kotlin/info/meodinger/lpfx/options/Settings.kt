@@ -11,6 +11,7 @@ object Settings : AbstractProperties() {
 
     const val DefaultColorList = "DefaultColorList"
     const val DefaultGroupList = "DefaultGroupList"
+    const val CreateOnNewTrans = "isCreateOnLoad"
 
     init {
         this.properties.addAll(
@@ -24,6 +25,10 @@ object Settings : AbstractProperties() {
                 CProperty(
                     DefaultGroupList,
                     "框外", "框内"
+                ),
+                CProperty(
+                    CreateOnNewTrans,
+                    true, true
                 )
             )
         )

@@ -17,8 +17,8 @@ fun optionsTest() {
         |${Config.RIGHT_DIVIDER}: ${Config[Config.RIGHT_DIVIDER]}
         |
         |Settings:
-        |${Settings.DefaultColorList}: ${Settings[Settings.DefaultColorList].asList()}
-        |${Settings.DefaultGroupList}: ${Settings[Settings.DefaultGroupList].asList()}
+        |${Settings.DefaultColorList}: ${Settings[Settings.DefaultColorList].asStringList()}
+        |${Settings.DefaultGroupList}: ${Settings[Settings.DefaultGroupList].asStringList()}
         |
         |RecentFiles:
         |${RecentFiles.getAll().size}: ${RecentFiles.getAll().joinToString("\n")}

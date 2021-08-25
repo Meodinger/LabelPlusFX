@@ -90,7 +90,7 @@ class LabelPane : Application() {
                 "NewText@${(Math.random() * 1000).roundToInt()}"
             )
             transFile.getTransLabelListOf(picName).add(transLabel)
-            pane.placeLabel(transLabel)
+            pane.createLabel(transLabel)
 
             // x/y is 0.0 because of bind
             textArea.appendText("Place ${transLabel}\n")
@@ -143,8 +143,8 @@ class LabelPane : Application() {
 
             pane.colorListProperty.bind(createColorHexBinding())
 
-            pane.placeLabelLayer()
-            pane.placeLabel(label)
+            pane.createLabelLayer()
+            pane.createLabel(label)
         }
         removeLayerButton.setOnAction {
             // data -> remove -> bind

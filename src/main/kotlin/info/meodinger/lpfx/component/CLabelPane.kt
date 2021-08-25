@@ -340,11 +340,11 @@ class CLabelPane : ScrollPane() {
     fun setupLabels(transLabels: List<TransLabel>) {
         labels.clear()
         for (transLabel in transLabels) {
-            placeLabel(transLabel)
+            createLabel(transLabel)
         }
     }
 
-    fun placeLabelLayer() {
+    fun createLabelLayer() {
         val pane = AnchorPane().also { it.isPickOnBounds = false }
         // Layout
         root.children.add(pane)
@@ -353,7 +353,7 @@ class CLabelPane : ScrollPane() {
         // Move text layer to front
         textLayer.toFront()
     }
-    fun placeLabel(transLabel: TransLabel) {
+    fun createLabel(transLabel: TransLabel) {
         val label = CLabel(
             transLabel.index,
             LABEL_RADIUS,
@@ -402,7 +402,7 @@ class CLabelPane : ScrollPane() {
         // Text display
         label.addEventHandler(MouseEvent.MOUSE_MOVED) {
             removeText()
-            placeText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
+            createText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
             it.consume()
         }
 
@@ -448,7 +448,7 @@ class CLabelPane : ScrollPane() {
         transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
         transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
     }
-    fun placeText(text: String, color: Color, x: Double, y: Double) {
+    fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val lineCount = text.length - text.replace("\n".toRegex(), "").length + 1
         val t = Text(text).also { it.font = TEXT_FONT }

@@ -22,19 +22,15 @@ abstract class AbstractProperties {
     companion object {
         fun load(path: Path, instance: AbstractProperties) {
             try {
-                val properties = ArrayList<CProperty>()
                 val lines = Files.newBufferedReader(path).readLines()
                 for (line in lines) {
                     if (line.isBlank()) continue
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
                     val prop = line.split(KV_SEPARATOR, limit = 2)
-                    properties.add(CProperty(prop[0], prop[1]))
+                    instance[prop[0]] = prop[1]
                 }
-
-                instance.properties.clear()
-                instance.properties.addAll(properties)
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 showException(e)
             }
         }
@@ -70,5 +66,17 @@ abstract class AbstractProperties {
             }
         }
         throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.property_not_found.format"], key))
+    }
+    operator fun set(key: String, value: String) {
+        get(key).value = value
+    }
+    operator fun set(key: String, value: Boolean) {
+        set(key, value.toString())
+    }
+    operator fun set(key: String, value: Number) {
+        set(key, value.toString())
+    }
+    operator fun set(key: String, value: List<String>) {
+        set(key, value.toString())
     }
 }

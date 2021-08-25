@@ -3,7 +3,6 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.*
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
-import info.meodinger.lpfx.type.CProperty
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
 import info.meodinger.lpfx.util.file.transfer
@@ -97,7 +96,7 @@ class CMenuBar : MenuBar() {
 
         mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment)
-        mmAbout.items.addAll(mAbout)
+        mmAbout.items.addAll(mAbout, mSettings)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 
@@ -233,6 +232,6 @@ class CMenuBar : MenuBar() {
         }
     }
     private fun settings() {
-        val dialog = Dialog<List<CProperty>>()
+        CSettings(State.stage).showAndWait()
     }
 }

@@ -20,10 +20,12 @@ import javafx.stage.Stage
  */
 class LabelPlusFX: Application() {
 
-    override fun start(primaryStage: Stage) {
-        Options.init()
-
+    init {
         State.application = this
+        Options.init()
+    }
+
+    override fun start(primaryStage: Stage) {
         State.stage = primaryStage
 
         val loader = FXMLLoader(javaClass.getResource("Window.fxml"))

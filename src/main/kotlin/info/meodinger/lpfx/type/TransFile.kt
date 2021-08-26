@@ -55,6 +55,13 @@ class TransFile {
     var groupList: MutableList<TransGroup> = ArrayList()
     var transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
 
+    fun getGroupIdByName(name: String): Int {
+        groupList.forEachIndexed { index, transGroup ->
+            if (transGroup.name == name) return index
+        }
+        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
+    }
+
     fun getTransGroupAt(groupId: Int): TransGroup {
         if (groupId < 0 || groupId >= groupList.size)
             throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.groupId_invalid.format"], groupId))

@@ -1,8 +1,7 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransFile
-import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.get
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
@@ -19,9 +18,6 @@ import java.io.File
  */
 object State {
 
-    private val DEFAULT_WORK_MODE = WorkMode.LabelMode
-    private val DEFAULT_VIEW_MODE = ViewMode.GroupMode
-
     lateinit var application: Application
     lateinit var controller: Controller
     lateinit var stage: Stage
@@ -33,8 +29,8 @@ object State {
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
-    val workModeProperty = SimpleObjectProperty(DEFAULT_WORK_MODE)
+    val viewModeProperty = SimpleObjectProperty(ViewMode.GroupMode)
+    val workModeProperty = SimpleObjectProperty(WorkMode.InputMode)
 
     var isOpened: Boolean
         get() = isOpenedProperty.value
@@ -84,29 +80,16 @@ object State {
 
     fun reset() {
         isOpened = false
-        transFile = TransFile()
+        transFile = TransFile.DEFAULT_FILE
         transPath = ""
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
         isChanged = false
-        workMode = DEFAULT_WORK_MODE
-        viewMode = DEFAULT_VIEW_MODE
+        workMode = WorkMode.InputMode
+        viewMode = getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
 
         controller.reset()
-    }
-
-    fun getGroupIdByName(name: String): Int {
-        transFile.groupList.forEachIndexed { index, transGroup ->
-            if (transGroup.name == name) return index
-        }
-        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
-    }
-    fun getGroupColorByName(name: String): String {
-        for (transGroup in transFile.groupList) {
-            if (transGroup.name == name) return transGroup.color
-        }
-        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
     }
 
     fun getFileFolder(): String = File(transPath).parent

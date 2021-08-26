@@ -1,6 +1,5 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.options.Options
 import javafx.application.Application
 
 /**

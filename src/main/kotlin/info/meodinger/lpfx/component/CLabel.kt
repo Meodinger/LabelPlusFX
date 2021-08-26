@@ -9,7 +9,6 @@ import javafx.geometry.VPos
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
-import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
@@ -34,7 +33,6 @@ class CLabel(
         const val MIN_PICK_RADIUS = 16.0
     }
 
-    private val pickerSquare = Rectangle()
     private val circle = Circle()
     private val text = Text()
 
@@ -59,7 +57,6 @@ class CLabel(
         }
 
     init {
-        pickerSquare.fill = Color.TRANSPARENT
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
@@ -68,18 +65,17 @@ class CLabel(
         radiusProperty.addListener { _, _, _ -> update() }
         colorProperty.addListener { _, _, _ -> update() }
 
+        this.children.setAll(circle, text)
         update()
-        children.setAll(circle, text)
     }
 
     private fun update() {
+        val pickerSize = radius.coerceAtLeast(MIN_PICK_RADIUS)
+        setPrefSize(pickerSize * 2, pickerSize * 2)
+
         text.text = index.toString()
         circle.radius = radius
         circle.fill = Color.web(color)
-
-        val pickerEdge = radius.coerceAtLeast(MIN_PICK_RADIUS) * 2
-        pickerSquare.width = pickerEdge
-        pickerSquare.height = pickerEdge
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R
@@ -92,9 +88,11 @@ class CLabel(
         // Axis is 0 →
         //         ↓
         text.layoutX = -text.layoutBounds.width / 2
-        pickerSquare.layoutX = - pickerSquare.width / 2
-        pickerSquare.layoutY = - pickerSquare.height / 2
 
-        setPrefSize(pickerEdge, pickerEdge)
+        // Move to Region Center
+        text.layoutX += prefWidth / 2
+        text.layoutY += prefHeight / 2
+        circle.layoutX += prefWidth / 2
+        circle.layoutY += prefHeight / 2
     }
 }

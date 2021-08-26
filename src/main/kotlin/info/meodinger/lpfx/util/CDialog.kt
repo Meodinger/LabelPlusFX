@@ -25,7 +25,7 @@ import java.util.*
  */
 
 /**
- * Constants
+ * Constant
  */
 const val DIALOG_ICON_RADIUS = 32.0
 

@@ -84,7 +84,7 @@ class CTreeView: TreeView<String>() {
                     }
                 }
 
-                val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
+                val transGroup = State.transFile.groupList[State.transFile.getGroupIdByName(groupItem.value)]
                 val oldName = transGroup.name
 
                 // Edit data
@@ -101,7 +101,7 @@ class CTreeView: TreeView<String>() {
         private val g_changeColorAction = { groupItem: TreeItem<String> ->
             val newColor = g_changeColorPicker.value
 
-            val transGroup = State.transFile.groupList[State.getGroupIdByName(groupItem.value)]
+            val transGroup = State.transFile.groupList[State.transFile.getGroupIdByName(groupItem.value)]
 
             // Edit data
             transGroup.color = newColor.toHex()
@@ -113,7 +113,7 @@ class CTreeView: TreeView<String>() {
         }
         private val g_changeColorItem = MenuItem()
         private val g_deleteAction = { groupItem: TreeItem<String> ->
-            val groupId = State.getGroupIdByName(groupItem.value)
+            val groupId = State.transFile.getGroupIdByName(groupItem.value)
             val transGroup = State.transFile.groupList[groupId]
 
             // Edit data
@@ -143,7 +143,7 @@ class CTreeView: TreeView<String>() {
                 if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
                 groupNameList
             ).ifPresent { newGroupName ->
-                val newGroupId = State.getGroupIdByName(newGroupName)
+                val newGroupId = State.transFile.getGroupIdByName(newGroupName)
 
                 // Edit data
                 for (item in items) {
@@ -239,7 +239,7 @@ class CTreeView: TreeView<String>() {
                 g_changeColorPicker.value = (groupItem.graphic as Circle).fill as Color
                 g_changeColorPicker.setOnAction { g_changeColorAction(groupItem) }
                 g_deleteItem.isDisable = run {
-                    val thisGroupId = State.getGroupIdByName(groupItem.value)
+                    val thisGroupId = State.transFile.getGroupIdByName(groupItem.value)
 
                     for (labels in State.transFile.transMap.values) for (label in labels)
                         if (label.groupId == thisGroupId) return@run true

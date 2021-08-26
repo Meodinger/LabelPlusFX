@@ -205,6 +205,8 @@ class Controller : Initializable {
 
         // Update cLabelPane default cursor
         State.workModeProperty.addListener { _, _, newValue ->
+            if (!State.isOpened) return@addListener
+
             when (newValue!!) {
                 WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
                 WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
@@ -426,6 +428,18 @@ class Controller : Initializable {
         val item = whereToSearch.children.find { (it as CTreeItem).meta == transLabel }!!
         return item as CTreeItem
     }
+    private fun setSwitchViewModeButton(viewMode: ViewMode) {
+        bSwitchViewMode.text = when (viewMode) {
+            ViewMode.IndexMode -> I18N["mode.view.index"]
+            ViewMode.GroupMode -> I18N["mode.view.group"]
+        }
+    }
+    private fun setSwitchWorkModeButton(workMode: WorkMode) {
+        bSwitchWorkMode.text = when (workMode) {
+            WorkMode.InputMode -> I18N["mode.work.input"]
+            WorkMode.LabelMode -> I18N["mode.work.label"]
+        }
+    }
 
     fun stay(): Boolean {
         // Not open
@@ -626,6 +640,9 @@ class Controller : Initializable {
         cGroupBox.reset()
         cTreeView.reset()
         // cTransArea
+
+        setSwitchViewModeButton(State.viewMode)
+        setSwitchWorkModeButton(State.workMode)
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
@@ -663,20 +680,14 @@ class Controller : Initializable {
     fun setViewMode(mode: ViewMode) {
         State.viewMode = mode
 
-        bSwitchViewMode.text = when (mode) {
-            ViewMode.IndexMode -> I18N["mode.view.index"]
-            ViewMode.GroupMode -> I18N["mode.view.group"]
-        }
+        setSwitchViewModeButton(mode)
 
         updateTreeView()
     }
     fun setWorkMode(mode: WorkMode) {
         State.workMode = mode
 
-        bSwitchWorkMode.text = when (mode) {
-            WorkMode.InputMode -> I18N["mode.work.input"]
-            WorkMode.LabelMode -> I18N["mode.work.label"]
-        }
+        setSwitchWorkModeButton(mode)
 
         setViewMode(when (mode) {
             WorkMode.InputMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])

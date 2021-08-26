@@ -18,6 +18,7 @@ import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.event.EventType
 import javafx.geometry.Pos
+import javafx.geometry.VPos
 import javafx.scene.Cursor
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.ScrollPane
@@ -58,7 +59,10 @@ class CLabelPane : ScrollPane() {
         const val LABEL_ALPHA = "80"
 
         // text display
-        const val SHIFT_X = 60.0
+        /**
+         * Rect based shift
+         */
+        const val SHIFT_X = 20.0
         const val TEXT_INSET = 10.0
         const val TEXT_ALPHA = "A0"
         val TEXT_FONT = Font(MonoType, 32.0)
@@ -221,6 +225,7 @@ class CLabelPane : ScrollPane() {
     init {
         textLayer.isMouseTransparent = true
         textLayer.graphicsContext2D.font = TEXT_FONT
+        textLayer.graphicsContext2D.textBaseline = VPos.TOP
         view.image = INIT_IMAGE
         view.isPreserveRatio = true
         view.isPickOnBounds = true
@@ -327,15 +332,10 @@ class CLabelPane : ScrollPane() {
         labelLayers.clear()
         removeText()
 
-        for (i in 0 until count) {
-            val pane = AnchorPane().also { it.isPickOnBounds = false }
-            root.children.add(pane)
-            labelLayers.add(pane)
-        }
-
         textLayer.width = imageWidth
         textLayer.height = imageHeight
-        textLayer.toFront()
+
+        for (i in 0 until count) createLabelLayer()
     }
     fun setupLabels(transLabels: List<TransLabel>) {
         labels.clear()
@@ -378,8 +378,12 @@ class CLabelPane : ScrollPane() {
             val newLayoutX = shiftX + it.sceneX / scale
             val newLayoutY = shiftY + it.sceneY / scale
 
-            if (newLayoutX < 0 || newLayoutX > imageWidth) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > imageHeight) return@addEventHandler
+            //  0--L-----    0 LR LR |
+            //  |  R         LR      |
+            //  |LR|-----    LR      |
+            //  |  |         --------|
+            if (newLayoutX < 0 || newLayoutX > imageWidth - 2 * LABEL_RADIUS) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > imageHeight - 2 * LABEL_RADIUS) return@addEventHandler
 
             AnchorPane.setLeftAnchor(label, newLayoutX)
             AnchorPane.setTopAnchor(label, newLayoutY)
@@ -425,9 +429,14 @@ class CLabelPane : ScrollPane() {
             }
         }
 
+        //Anchor-L-----  Anchor = imageWidth * x - LR
+        //  |    R
+        //  | LR X-----  x = (Anchor + LR) / imageWidth
+        //  |    |
+
         // Layout
-        AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x)
-        AnchorPane.setTopAnchor(label, imageHeight * transLabel.y)
+        AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x - LABEL_RADIUS)
+        AnchorPane.setTopAnchor(label, imageHeight * transLabel.y - LABEL_RADIUS)
         labelLayers[transLabel.groupId].children.add(label)
 
         // Add label in list
@@ -451,12 +460,11 @@ class CLabelPane : ScrollPane() {
 
         })
         label.indexProperty.bind(transLabel.indexProperty)
-        transLabel.xProperty.bind(label.layoutXProperty().divide(view.image.widthProperty()))
-        transLabel.yProperty.bind(label.layoutYProperty().divide(view.image.heightProperty()))
+        transLabel.xProperty.bind(label.layoutXProperty().add(LABEL_RADIUS).divide(view.image.widthProperty()))
+        transLabel.yProperty.bind(label.layoutYProperty().add(LABEL_RADIUS).divide(view.image.heightProperty()))
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
-        val lineCount = text.length - text.replace("\n".toRegex(), "").length + 1
         val t = Text(text).also { it.font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width
@@ -464,23 +472,21 @@ class CLabelPane : ScrollPane() {
         val shapeW = textW + 2 * TEXT_INSET
         val shapeH = textH + 2 * TEXT_INSET
 
-        // TODO: Text location
-
-        //           Text
-        //   0 -> x ------   ------
-        //   ↓       Text    |    |
-        //   y       Text    ------
-        var textX = x + SHIFT_X
-        var shapeX = x + SHIFT_X - TEXT_INSET
-        var textY = y + textH / lineCount
+        //
+        //   0 -> x  ------
+        //   ↓       |    |
+        //   y       ------
+        var textX = x + SHIFT_X + TEXT_INSET
+        var textY = y + TEXT_INSET
+        var shapeX = x + SHIFT_X
         var shapeY = y
 
         if (shapeX + shapeW > imageWidth) {
-            textX = x - textW - SHIFT_X
-            shapeX = x - shapeW - SHIFT_X + TEXT_INSET
+            textX = x - textW - SHIFT_X - TEXT_INSET
+            shapeX = x - shapeW - SHIFT_X
         }
         if (shapeY + shapeH > imageHeight) {
-            textY = y - textH + textH / lineCount - 2 * TEXT_INSET
+            textY = y - textH - TEXT_INSET
             shapeY = y - shapeH
         }
 

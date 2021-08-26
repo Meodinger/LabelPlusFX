@@ -2,9 +2,6 @@ package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.options.CProperty.Companion.COMMENT_HEAD
 import info.meodinger.lpfx.options.CProperty.Companion.KV_SEPARATOR
-import info.meodinger.lpfx.util.dialog.showException
-import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -18,10 +15,8 @@ import java.nio.file.Path
  */
 abstract class AbstractProperties {
 
-    // TODO: Exception type
-
     companion object {
-        @Throws(Exception::class)
+        @Throws(IOException::class, CPropertyException::class)
         fun load(path: Path, instance: AbstractProperties) {
             try {
                 val lines = Files.newBufferedReader(path).readLines()
@@ -33,11 +28,11 @@ abstract class AbstractProperties {
                     instance[prop[0]] = prop[1]
                 }
             } catch (e: Exception) {
-                showException(e)
+                throw e
             }
         }
 
-        @Throws(Exception::class)
+        @Throws(IOException::class)
         fun save(path: Path, instance: AbstractProperties) {
             using {
                 val writer = Files.newBufferedWriter(path).autoClose()
@@ -50,8 +45,8 @@ abstract class AbstractProperties {
                         .toString()
                     )
                 }
-            } catch { e: IOException ->
-                showException(e)
+            } catch { e: Exception ->
+                throw e
             } finally {
 
             }
@@ -61,18 +56,17 @@ abstract class AbstractProperties {
     val properties = ArrayList<CProperty>()
     abstract val default: List<CProperty>
 
-    @Throws(Exception::class)
+    @Throws(CPropertyException::class, IOException::class)
     abstract fun load()
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     abstract fun save()
-    @Throws(Exception::class)
+    @Throws(CPropertyException::class)
     open fun check() {
         for (property in default) if (this[property.key].isEmpty()) this[property.key] = property
     }
     fun useDefault() {
         properties.clear()
         properties.addAll(default)
-        save()
     }
 
     operator fun get(key: String): CProperty {
@@ -81,7 +75,7 @@ abstract class AbstractProperties {
                 return property
             }
         }
-        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.property_not_found.format"], key))
+        throw CPropertyException.propertyNotFound(key)
     }
     operator fun set(key: String, value: String) {
         get(key).value = value

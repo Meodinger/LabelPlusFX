@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.options
 
+import java.io.IOException
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
@@ -20,12 +22,15 @@ object RecentFiles : AbstractProperties() {
         ))
     }
 
+    @Throws(IOException::class, CPropertyException::class)
     override fun load() {
         load(Options.recentFiles, this)
 
         recent.clear()
         recent.addAll(this[RECENT].asStringList())
     }
+
+    @Throws(IOException::class)
     override fun save() {
         this[RECENT].set(recent)
 

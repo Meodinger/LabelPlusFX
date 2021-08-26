@@ -105,8 +105,8 @@ class Controller : Initializable {
         cPicBox.isWrapped = true
 
         // Display dividers
-        pMain.setDividerPositions(Config[Config.MAIN_DIVIDER].asDouble())
-        pRight.setDividerPositions(Config[Config.RIGHT_DIVIDER].asDouble())
+        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
+        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
 
         // Display default image
         cLabelPane.isVisible = false
@@ -265,10 +265,10 @@ class Controller : Initializable {
 
         // Update config
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Config[Config.MAIN_DIVIDER] = newValue
+            Preference[Preference.MAIN_DIVIDER] = newValue
         }
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Config[Config.RIGHT_DIVIDER] = newValue
+            Preference[Preference.RIGHT_DIVIDER] = newValue
         }
 
         // Update selected group when clicked GroupTreeItem

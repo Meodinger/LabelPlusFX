@@ -178,13 +178,9 @@ fun showException(e: Exception): Optional<ButtonType> {
     return exceptionDialog.showAndWait()
 }
 
-
-const val CONFIRM = 0
-const val INFO = 1
-const val ALERT = 2
-const val ERROR = 3
 /**
  * Show dialog
+ * @param type 0=Confirm, 1=Info, 2=Alert, 3=Error
  */
 fun showDialog(owner: Window?, type: Int, title: String, header: String?, content: String): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
@@ -195,10 +191,10 @@ fun showDialog(owner: Window?, type: Int, title: String, header: String?, conten
     dialog.headerText = header
     dialog.contentText = content
     when (type) {
-        CONFIRM -> dialog.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        INFO -> dialog.graphic = ImageView(loadImage("/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        ALERT -> dialog.graphic = ImageView(loadImage("/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        ERROR -> dialog.graphic = ImageView(loadImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        0 -> dialog.graphic = ImageView(loadImage("/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        1 -> dialog.graphic = ImageView(loadImage("/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        2 -> dialog.graphic = ImageView(loadImage("/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        3 -> dialog.graphic = ImageView(loadImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
     }
 
     return dialog.showAndWait()

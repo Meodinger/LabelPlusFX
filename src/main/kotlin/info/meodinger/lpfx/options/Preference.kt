@@ -1,11 +1,13 @@
 package info.meodinger.lpfx.options
 
+import java.io.IOException
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.options
  */
-object Config : AbstractProperties() {
+object Preference : AbstractProperties() {
 
     const val MAIN_DIVIDER = "MainDivider"
     const val RIGHT_DIVIDER = "RightDivider"
@@ -22,15 +24,20 @@ object Config : AbstractProperties() {
         ))
     }
 
-    override fun load() = load(Options.config, this)
-    override fun save() = save(Options.config, this)
+    @Throws(IOException::class, CPropertyException::class)
+    override fun load() = load(Options.preference, this)
+    @Throws(IOException::class)
+    override fun save() = save(Options.preference, this)
+    @Throws(CPropertyException::class)
     override fun check() {
         super.check()
 
         val mainDivider = this[MAIN_DIVIDER].asDouble()
-        if (mainDivider < 0 || mainDivider > 1) throw IllegalStateException("exception.illegal_state.main_divider_invalid")
+        if (mainDivider < 0 || mainDivider > 1)
+            throw CPropertyException.propertyValueInvalid(MAIN_DIVIDER, mainDivider.toString())
 
         val rightDivider = this[RIGHT_DIVIDER].asDouble()
-        if (rightDivider < 0 || rightDivider > 1) throw IllegalStateException("exception.illegal_state.right_divider_invalid")
+        if (rightDivider < 0 || rightDivider > 1)
+            throw CPropertyException.propertyValueInvalid(RIGHT_DIVIDER, rightDivider.toString())
     }
 }

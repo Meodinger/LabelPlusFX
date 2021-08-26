@@ -19,13 +19,13 @@ import kotlin.system.exitProcess
 object Options {
 
     private const val LPFX = ".lpfx"
-    private const val FileName_Config = "config"
+    private const val FileName_Preference = "preference"
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_ErrorLog = "error_log"
 
     val lpfx: Path = Paths.get(System.getProperty("user.home")).resolve(LPFX)
-    val config: Path = lpfx.resolve(FileName_Config)
+    val preference: Path = lpfx.resolve(FileName_Preference)
     val settings: Path = lpfx.resolve(FileName_Settings)
     val recentFiles: Path = lpfx.resolve(FileName_RecentFiles)
     val errorLog: Path = lpfx.resolve(FolderName_ErrorLog)
@@ -51,19 +51,26 @@ object Options {
 
     @Throws(IOException::class)
     private fun initConfig() {
-        if (Files.notExists(config)) {
-            Files.createFile(config)
-            Config.save()
+        if (Files.notExists(preference)) {
+            Files.createFile(preference)
+            Preference.save()
         }
         try {
-            Config.load()
-            Config.check()
+            Preference.load()
+            Preference.check()
         } catch (e: Exception) {
-            Config.useDefault()
+            Preference.useDefault()
+            Preference.save()
             printExceptionToErrorLog(e)
-            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
+            showDialog(
+                null,
+                2,
+                I18N["common.alert"],
+                null,
+                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
+            )
         }
-        Runtime.getRuntime().addShutdownHook(Thread { Config.save() })
+        Runtime.getRuntime().addShutdownHook(Thread { Preference.save() })
     }
 
     @Throws(IOException::class)
@@ -77,9 +84,15 @@ object Options {
             Settings.check()
         } catch (e: Exception) {
             Settings.useDefault()
+            Settings.save()
             printExceptionToErrorLog(e)
-            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
-        }
+            showDialog(
+                null,
+                2,
+                I18N["common.alert"],
+                null,
+                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
+            )        }
         Runtime.getRuntime().addShutdownHook(Thread { Settings.save() })
     }
 
@@ -94,9 +107,15 @@ object Options {
             RecentFiles.check()
         } catch (e: Exception) {
             RecentFiles.useDefault()
+            RecentFiles.save()
             printExceptionToErrorLog(e)
-            showDialog(null, ALERT, I18N["common.alert"], null, "alert.load_option_failed.format")
-        }
+            showDialog(
+                null,
+                2,
+                I18N["common.alert"],
+                null,
+                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
+            )        }
         Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })
     }
 

@@ -1,6 +1,6 @@
 package options
 
-import info.meodinger.lpfx.options.Config
+import info.meodinger.lpfx.options.Preference
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
 
@@ -13,8 +13,8 @@ fun optionsTest() {
     println("""
         |----- Options Test -----
         |Config:
-        |${Config.MAIN_DIVIDER}: ${Config[Config.MAIN_DIVIDER]}
-        |${Config.RIGHT_DIVIDER}: ${Config[Config.RIGHT_DIVIDER]}
+        |${Preference.MAIN_DIVIDER}: ${Preference[Preference.MAIN_DIVIDER]}
+        |${Preference.RIGHT_DIVIDER}: ${Preference[Preference.RIGHT_DIVIDER]}
         |
         |Settings:
         |${Settings.DefaultGroupColorList}: ${Settings[Settings.DefaultGroupColorList].asStringList()}

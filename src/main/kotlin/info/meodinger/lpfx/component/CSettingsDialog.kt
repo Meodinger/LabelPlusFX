@@ -3,7 +3,7 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.getViewMode
 import info.meodinger.lpfx.options.Settings
-import info.meodinger.lpfx.type.CProperty
+import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.getGroupNameFormatter

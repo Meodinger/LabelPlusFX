@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.type
+package info.meodinger.lpfx.options
 
 /**
  * Author: Meodinger
@@ -6,8 +6,6 @@ package info.meodinger.lpfx.type
  * Location: info.meodinger.lpfx.type
  */
 class CProperty(val key: String, var value: String = "") {
-
-    // TODO: Move to .options
 
     companion object {
         const val LIST_SEPARATOR = "|"

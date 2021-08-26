@@ -19,7 +19,6 @@ import java.io.File
  */
 object State {
 
-    // TODO: load from settings
     private val DEFAULT_WORK_MODE = WorkMode.LabelMode
     private val DEFAULT_VIEW_MODE = ViewMode.GroupMode
 

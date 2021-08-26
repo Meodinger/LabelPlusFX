@@ -2,7 +2,6 @@ package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.getViewMode
-import info.meodinger.lpfx.type.CProperty
 
 /**
  * Author: Meodinger

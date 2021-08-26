@@ -266,8 +266,7 @@ class CTreeView: TreeView<String>() {
 
     }
 
-    // TODO: Default view mode from settings
-    private var viewMode: ViewMode = ViewMode.GroupMode
+    private var viewMode: ViewMode = State.viewMode
     private var picName: String = ""
     private var transGroups: MutableList<TransGroup> = ArrayList()
     private var transLabels: MutableList<TransLabel> = ArrayList()

@@ -29,13 +29,19 @@ const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
  */
 const val NOT_FOUND = -1
 
-// TODO: getWorkMode
 /**
  * Work Mode
  */
-enum class WorkMode {
-    LabelMode,
-    InputMode
+enum class WorkMode(val description: String) {
+    InputMode(I18N["mode.work.input"]),
+    LabelMode(I18N["mode.work.label"]);
+
+    override fun toString(): String = description
+}
+fun getWorkMode(description: String): WorkMode = when (description) {
+    WorkMode.InputMode.description -> WorkMode.InputMode
+    WorkMode.LabelMode.description -> WorkMode.LabelMode
+    else -> throw IllegalArgumentException("exception.illegal_argument.invalid_work_mode")
 }
 
 /**

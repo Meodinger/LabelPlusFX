@@ -1,7 +1,5 @@
 package info.meodinger.lpfx.options
 
-import info.meodinger.lpfx.type.CProperty
-
 /**
  * Author: Meodinger
  * Date: 2021/7/29

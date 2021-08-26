@@ -1,8 +1,7 @@
 package info.meodinger.lpfx.options
 
-import info.meodinger.lpfx.type.CProperty
-import info.meodinger.lpfx.type.CProperty.Companion.COMMENT_HEAD
-import info.meodinger.lpfx.type.CProperty.Companion.KV_SEPARATOR
+import info.meodinger.lpfx.options.CProperty.Companion.COMMENT_HEAD
+import info.meodinger.lpfx.options.CProperty.Companion.KV_SEPARATOR
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get

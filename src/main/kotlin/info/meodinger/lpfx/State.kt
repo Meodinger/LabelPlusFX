@@ -19,6 +19,10 @@ import java.io.File
  */
 object State {
 
+    // TODO: load from settings
+    private val DEFAULT_WORK_MODE = WorkMode.LabelMode
+    private val DEFAULT_VIEW_MODE = ViewMode.GroupMode
+
     lateinit var application: Application
     lateinit var controller: Controller
     lateinit var stage: Stage
@@ -30,8 +34,8 @@ object State {
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val viewModeProperty = SimpleObjectProperty(DefaultViewMode)
-    val workModeProperty = SimpleObjectProperty(DefaultWorkMode)
+    val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
+    val workModeProperty = SimpleObjectProperty(DEFAULT_WORK_MODE)
 
     var isOpened: Boolean
         get() = isOpenedProperty.value
@@ -87,8 +91,8 @@ object State {
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
         isChanged = false
-        workMode = DefaultWorkMode
-        viewMode = DefaultViewMode
+        workMode = DEFAULT_WORK_MODE
+        viewMode = DEFAULT_VIEW_MODE
 
         controller.reset()
     }

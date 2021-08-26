@@ -54,14 +54,14 @@ class CLabelPane : ScrollPane() {
         const val NOT_SET = -1.0
 
         // label display
-        const val LABEL_RADIUS = 20.0
+        const val LABEL_RADIUS = 24.0
         const val LABEL_ALPHA = "80"
 
         // text display
-        const val TEXT_SHIFT = 20.0
+        const val SHIFT_X = 60.0
         const val TEXT_INSET = 10.0
         const val TEXT_ALPHA = "A0"
-        val TEXT_FONT = Font(MonoType, 28.0)
+        val TEXT_FONT = Font(MonoType, 32.0)
     }
 
     // ----- event ----- //
@@ -375,8 +375,14 @@ class CLabelPane : ScrollPane() {
             it.consume()
             removeText()
 
-            AnchorPane.setLeftAnchor(label, shiftX + it.sceneX / scale)
-            AnchorPane.setTopAnchor(label, shiftY + it.sceneY / scale)
+            val newLayoutX = shiftX + it.sceneX / scale
+            val newLayoutY = shiftY + it.sceneY / scale
+
+            if (newLayoutX < 0 || newLayoutX > imageWidth) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > imageHeight) return@addEventHandler
+
+            AnchorPane.setLeftAnchor(label, newLayoutX)
+            AnchorPane.setTopAnchor(label, newLayoutY)
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             label.cursor = Cursor.HAND
@@ -455,21 +461,27 @@ class CLabelPane : ScrollPane() {
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
-        var textX = x + TEXT_SHIFT
-        var textY = y + textH / lineCount
-
         val shapeW = textW + 2 * TEXT_INSET
         val shapeH = textH + 2 * TEXT_INSET
-        var shapeX = x + (TEXT_SHIFT - TEXT_INSET)
+
+        // TODO: Text location
+
+        //           Text
+        //   0 -> x ------   ------
+        //   ↓       Text    |    |
+        //   y       Text    ------
+        var textX = x + SHIFT_X
+        var shapeX = x + SHIFT_X - TEXT_INSET
+        var textY = y + textH / lineCount
         var shapeY = y
 
         if (shapeX + shapeW > imageWidth) {
-            shapeX = x - shapeW
-            textX = x - textW - TEXT_INSET
+            textX = x - textW - SHIFT_X
+            shapeX = x - shapeW - SHIFT_X + TEXT_INSET
         }
         if (shapeY + shapeH > imageHeight) {
+            textY = y - textH + textH / lineCount - 2 * TEXT_INSET
             shapeY = y - shapeH
-            textY = y - textH - TEXT_INSET
         }
 
         gc.fill = Color.web(Color.WHEAT.toHex() + TEXT_ALPHA)

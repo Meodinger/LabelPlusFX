@@ -36,9 +36,7 @@ class TransFile {
             const val PROP_END = "]"
             const val SPLIT = ","
             const val SEPARATOR = "-"
-        }
 
-        object MeoTransFile {
             val DEFAULT_COLOR_LIST = arrayOf(
                 "FF0000", "0000FF", "008000",
                 "1E90FF", "FFD700", "FF00FF",

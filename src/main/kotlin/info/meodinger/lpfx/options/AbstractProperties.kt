@@ -19,7 +19,10 @@ import java.nio.file.Path
  */
 abstract class AbstractProperties {
 
+    // TODO: Exception type
+
     companion object {
+        @Throws(Exception::class)
         fun load(path: Path, instance: AbstractProperties) {
             try {
                 val lines = Files.newBufferedReader(path).readLines()
@@ -35,6 +38,7 @@ abstract class AbstractProperties {
             }
         }
 
+        @Throws(Exception::class)
         fun save(path: Path, instance: AbstractProperties) {
             using {
                 val writer = Files.newBufferedWriter(path).autoClose()
@@ -58,10 +62,14 @@ abstract class AbstractProperties {
     val properties = ArrayList<CProperty>()
     abstract val default: List<CProperty>
 
+    @Throws(Exception::class)
     abstract fun load()
+    @Throws(Exception::class)
     abstract fun save()
     @Throws(Exception::class)
-    abstract fun check()
+    open fun check() {
+        for (property in default) if (this[property.key].isEmpty()) this[property.key] = property
+    }
     fun useDefault() {
         properties.clear()
         properties.addAll(default)
@@ -87,5 +95,8 @@ abstract class AbstractProperties {
     }
     operator fun set(key: String, value: List<*>) {
         set(key, CProperty.parseList(value))
+    }
+    operator fun set(key: String, another: CProperty) {
+        set(key, another.value)
     }
 }

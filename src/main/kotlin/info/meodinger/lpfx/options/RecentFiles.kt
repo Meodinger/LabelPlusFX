@@ -33,9 +33,6 @@ object RecentFiles : AbstractProperties() {
 
         save(Options.recentFiles, this)
     }
-    override fun check() {
-        // Nothing
-    }
 
     fun getAll(): List<String> {
         return recent

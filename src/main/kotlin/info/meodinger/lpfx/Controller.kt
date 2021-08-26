@@ -440,7 +440,7 @@ class Controller : Initializable {
                 return true
             }
             if (result.get() == ButtonType.YES) {
-                save(File(State.transPath), getFileType(State.transPath))
+                save(File(State.transPath), getFileType(State.transPath), true)
             }
             return false
         }
@@ -469,9 +469,9 @@ class Controller : Initializable {
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
-        val groupCreateList = Settings[Settings.IsCreateOnNewTrans].asBooleanList()
-        val groupNameList = Settings[Settings.DefaultGroupList].asStringList()
-        val groupColorList = Settings[Settings.DefaultColorList].asStringList()
+        val groupNameList = Settings[Settings.DefaultGroupNameList].asStringList()
+        val groupColorList = Settings[Settings.DefaultGroupColorList].asStringList()
+        val groupCreateList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
         for (i in groupNameList.indices) if (groupCreateList[i])
             groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
 
@@ -548,10 +548,10 @@ class Controller : Initializable {
         updateGroupList()
         updatePicList()
     }
-    fun save(file: File, type: FileType) {
+    fun save(file: File, type: FileType, isSilent: Boolean) {
 
         // Check folder
-        if (file.parent != State.getFileFolder()) {
+        if (!isSilent) if (file.parent != State.getFileFolder()) {
             val result = showAlert(I18N["alert.save_to_another_place.content"])
             if (!(result.isPresent && result.get() == ButtonType.YES)) return
         }
@@ -566,8 +566,10 @@ class Controller : Initializable {
             } catch (e: Exception) {
                 bak = null
                 e.printStackTrace()
-                showError(I18N["error.backup_failed"])
-                showException(e)
+                if (!isSilent) {
+                    showError(I18N["error.backup_failed"])
+                    showException(e)
+                }
             }
         }
 
@@ -577,20 +579,22 @@ class Controller : Initializable {
                 FileType.LPFile -> exportLP(file, State.transFile)
                 FileType.MeoFile -> exportMeo(file, State.transFile)
             }
-            showInfo(I18N["info.saved_successfully"])
+            if (!isSilent) showInfo(I18N["info.saved_successfully"])
         } catch (e: IOException) {
             e.printStackTrace()
-            if (bak != null) {
-                showError(String.format(I18N["error.save_failed_backed.format"], bak.path))
-            } else {
-                showError(I18N["error.save_failed"])
+            if (!isSilent) {
+                if (bak != null) {
+                    showError(String.format(I18N["error.save_failed_backed.format"], bak.path))
+                } else {
+                    showError(I18N["error.save_failed"])
+                }
+                showException(e)
             }
-            showException(e)
             return
         }
 
         // Remove Backup
-        if (bak != null) if (!bak.delete()) showError(I18N["error.backup_clear_failed"])
+        if (bak != null) if (!bak.delete()) if (!isSilent) showError(I18N["error.backup_clear_failed"])
 
         State.transPath = file.path
         State.isChanged = false
@@ -602,7 +606,7 @@ class Controller : Initializable {
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
-                    save(File(State.transPath), getFileType(State.transPath))
+                    save(File(State.transPath), getFileType(State.transPath), false)
                     exitProcess(0)
                 }
                 ButtonType.NO -> {

@@ -40,16 +40,16 @@ class CTreeView: TreeView<String>() {
         private val r_addGroupPicker = CColorPicker()
         private val r_addGroupDialog = Dialog<TransGroup>()
         private val r_addGroupAction = {
-            val colorList = Settings[Settings.DefaultColorList].asStringList()
-            val nameList = Settings[Settings.DefaultGroupList].asStringList()
+            val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
+            val colorList = Settings[Settings.DefaultGroupColorList].asStringList()
 
             val newGroupId = State.transFile.groupList.size
-            val newColor =
-                if (newGroupId < 9) Color.web(colorList[newGroupId])
-                else Color.BLACK
             val newName =
                 if (newGroupId < nameList.size) nameList[newGroupId]
                 else String.format(I18N["context.add_group.new_group.format"], newGroupId + 1)
+            val newColor =
+                if (newGroupId < 9) Color.web(colorList[newGroupId])
+                else Color.BLACK
 
             r_addGroupField.text = newName
             r_addGroupPicker.value = newColor
@@ -266,7 +266,8 @@ class CTreeView: TreeView<String>() {
 
     }
 
-    private var viewMode: ViewMode = DefaultViewMode
+    // TODO: Default view mode from settings
+    private var viewMode: ViewMode = ViewMode.GroupMode
     private var picName: String = ""
     private var transGroups: MutableList<TransGroup> = ArrayList()
     private var transLabels: MutableList<TransLabel> = ArrayList()

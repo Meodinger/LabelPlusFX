@@ -11,37 +11,23 @@ import info.meodinger.lpfx.type.CProperty
  */
 object Settings : AbstractProperties() {
 
-    const val DefaultColorList = "DefaultColorList"
-    const val DefaultGroupList = "DefaultGroupList"
-    const val IsCreateOnNewTrans = "isCreateOnLoad"
+    const val DefaultGroupNameList = "DefaultGroupNameList"
+    const val DefaultGroupColorList = "DefaultGroupColorList"
+    const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
     const val ViewModePreference = "ViewModePreference"
 
     override val default = listOf(
-        CProperty(
-            DefaultColorList,
-            "FF0000", "0000FF", "008000",
-            "1E90FF", "FFD700", "FF00FF",
-            "A0522D", "FF4500", "9400D3"
-        ),
-        CProperty(
-            DefaultGroupList,
-            "框外", "框内"
-        ),
-        CProperty(
-            IsCreateOnNewTrans,
-            true, true
-        ),
-        CProperty(
-            ViewModePreference,
-            ViewMode.GroupMode, ViewMode.IndexMode // Input, Label
-        )
+        CProperty(DefaultGroupNameList, "框内", "框内外"),
+        CProperty(DefaultGroupColorList, "FF0000", "0000FF"),
+        CProperty(IsGroupCreateOnNewTrans, true, true),
+        CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode) // Input, Label
     )
 
     init {
         this.properties.addAll(listOf(
-            CProperty(DefaultColorList),
-            CProperty(DefaultGroupList),
-            CProperty(IsCreateOnNewTrans),
+            CProperty(DefaultGroupNameList),
+            CProperty(DefaultGroupColorList),
+            CProperty(IsGroupCreateOnNewTrans),
             CProperty(ViewModePreference)
         ))
     }
@@ -49,16 +35,17 @@ object Settings : AbstractProperties() {
     override fun load() = load(Options.settings, this)
     override fun save() = save(Options.settings, this)
     override fun check() {
-        val colorList = this[DefaultColorList].asStringList()
-        for (color in colorList) if (color.length != 6) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
-        if (colorList.size < 9) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
+        super.check()
 
-        val nameList = this[DefaultGroupList].asStringList()
-        for (name in nameList) if (name.contains(Regex("s+"))) throw IllegalStateException("exception.illegal_state.name_has_whitespace")
-        if (nameList.size > colorList.size) throw IllegalStateException("exception.illegal_state.name_more_than_color")
+        val groupNameList = this[DefaultGroupNameList].asStringList()
+        for (name in groupNameList) if (name.contains(Regex("s+"))) throw IllegalStateException("exception.illegal_state.name_has_whitespace")
 
-        val isCreateList = this[IsCreateOnNewTrans].asBooleanList()
-        if (isCreateList.size != nameList.size) throw IllegalStateException("exception.illegal_state.isCreate_not_equal_to_name")
+        val groupColorList = this[DefaultGroupColorList].asStringList()
+        for (color in groupColorList) if (color.length != 6) throw IllegalStateException("exception.illegal_state.color_hex_invalid")
+        if (groupColorList.size != groupNameList.size) throw IllegalStateException("exception.illegal_state.name_color_not_equal")
+
+        val isGroupCreateList = this[IsGroupCreateOnNewTrans].asBooleanList()
+        if (isGroupCreateList.size != groupNameList.size) throw IllegalStateException("exception.illegal_state.name_isCreate_not_equal")
 
         val viewModePreferenceList = this[ViewModePreference].asStringList()
         for (preference in viewModePreferenceList) getViewMode(preference)

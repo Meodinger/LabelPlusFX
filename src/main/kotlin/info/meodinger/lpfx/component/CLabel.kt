@@ -5,10 +5,15 @@ import info.meodinger.lpfx.util.platform.MonoType
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
+import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
@@ -30,11 +35,12 @@ class CLabel(
         const val DEFAULT_RADIUS = 16.0
         const val DEFAULT_COLOR = "66CCFFFF"
 
-        const val MIN_PICK_RADIUS = 12.0
+        const val MIN_PICK_RADIUS = 16.0
     }
 
     private val circle = Circle(radius, Color.web(color))
     private val text = Text(index.toString())
+    private val pickerRect = Rectangle(radius * 2, radius * 2)
 
     val indexProperty = SimpleIntegerProperty(index)
     val radiusProperty = SimpleDoubleProperty(radius)
@@ -74,8 +80,8 @@ class CLabel(
         circle.radius = radius
         circle.fill = Color.web(color)
 
-        val pickRadius = radius.coerceAtMost(MIN_PICK_RADIUS)
-        setPrefSize(pickRadius, pickRadius)
+        val pickRadius = radius.coerceAtLeast(MIN_PICK_RADIUS)
+        setPrefSize(pickRadius * 2, pickRadius * 2)
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R
@@ -88,5 +94,13 @@ class CLabel(
         // Axis is 0 →
         //         ↓
         text.layoutX = -text.layoutBounds.width / 2
+
+        // TODO: Picker Rect
+
+        // Move to Region Center
+        // text.layoutX += prefWidth / 2
+        // text.layoutY += prefHeight / 2
+        // circle.layoutX += prefWidth / 2
+        // circle.layoutY += prefHeight / 2
     }
 }

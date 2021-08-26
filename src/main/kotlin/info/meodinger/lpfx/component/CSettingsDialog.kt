@@ -99,9 +99,9 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
 
     // ----- Group ----- //
     private fun initGroupBox() {
-        val nameList = Settings[Settings.DefaultGroupList].asStringList()
-        val colorList = Settings[Settings.DefaultColorList].asStringList()
-        val createList = Settings[Settings.IsCreateOnNewTrans].asBooleanList()
+        val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
+        val colorList = Settings[Settings.DefaultGroupColorList].asStringList()
+        val createList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
 
         for (i in nameList.indices) createGroupBox(i, createList[i], nameList[i], colorList[i])
     }
@@ -115,7 +115,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         }
         remainGroup++
 
-        val defaultColorList = Settings[Settings.DefaultColorList].asStringList()
+        val defaultColorList = Settings[Settings.DefaultGroupColorList].asStringList()
         val colorHex = if (isColorHex(color)) color else defaultColorList[groupId % defaultColorList.size]
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
@@ -123,7 +123,8 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button("Delete").also { it.setOnAction { _ -> removeGroupBox(GridPane.getRowIndex(it) - RowShift) } }
 
-        checkBox.setOnAction { if (textField.text.isBlank()) checkBox.isSelected = false }
+        checkBox.disableProperty().bind(textField.textProperty().isEmpty)
+        textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
 
         gGridPane.add(checkBox, 0, newRowIndex)
         gGridPane.add(textField, 1, newRowIndex)
@@ -179,9 +180,9 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        val isCreateList = MutableList(remainGroup) { false }
         val nameList = MutableList(remainGroup) { "" }
         val colorList = MutableList(remainGroup) { "" }
+        val isCreateList = MutableList(remainGroup) { false }
         for (node in gGridPane.children) {
             val groupId = GridPane.getRowIndex(node) - RowShift
             when (node) {
@@ -191,20 +192,9 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
             }
         }
 
-        val isCreateResult = ArrayList<Boolean>()
-        val nameResult = ArrayList<String>()
-        for (i in 0 until remainGroup) {
-            val isCreate = isCreateList[i]
-            val name = nameList[i]
-            if (name.isNotBlank()) {
-                isCreateResult.add(isCreate)
-                nameResult.add(name)
-            }
-        }
-
-        list.add(CProperty(Settings.DefaultColorList, colorList))
-        list.add(CProperty(Settings.DefaultGroupList, nameResult))
-        list.add(CProperty(Settings.IsCreateOnNewTrans, isCreateResult))
+        list.add(CProperty(Settings.DefaultGroupNameList, nameList))
+        list.add(CProperty(Settings.DefaultGroupColorList, colorList))
+        list.add(CProperty(Settings.IsGroupCreateOnNewTrans, isCreateList))
 
         return list
     }

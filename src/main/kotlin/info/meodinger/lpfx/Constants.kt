@@ -8,16 +8,40 @@ import info.meodinger.lpfx.util.resource.get
  * Date: 2021/8/1
  * Location: info.meodinger.lpfx
  */
+// Stage
 const val WIDTH = 900.0
 const val HEIGHT = 600.0
+
+// Extensions
+val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
+const val EXTENSION_MEO = ".json"
+const val EXTENSION_LP = ".txt"
+const val EXTENSION_PACK = ".zip"
+const val EXTENSION_BAK = ".bak"
+const val FOLDER_NAME_BAK = "bak"
+
+// Auto-save
+const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
+const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
+
+/**
+ * For label not found
+ */
 const val NOT_FOUND = -1
 
+// TODO: getWorkMode
+/**
+ * Work Mode
+ */
 enum class WorkMode {
     LabelMode,
     InputMode
 }
-val DefaultWorkMode = WorkMode.InputMode
 
+/**
+ * Label View Mode
+ * @param description Display name for ViewMode
+ */
 enum class ViewMode(val description: String) {
     IndexMode(I18N["mode.view.index"]),
     GroupMode(I18N["mode.view.group"]);
@@ -29,8 +53,10 @@ fun getViewMode(description: String): ViewMode = when (description) {
     ViewMode.GroupMode.description -> ViewMode.GroupMode
     else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
 }
-val DefaultViewMode = ViewMode.GroupMode
 
+/**
+ * Translation File Type
+ */
 enum class FileType {
     LPFile,
     MeoFile
@@ -42,13 +68,3 @@ fun getFileType(path: String): FileType {
     if (isLPFile(path)) return FileType.LPFile
     throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
 }
-
-val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
-const val EXTENSION_MEO = ".json"
-const val EXTENSION_LP = ".txt"
-const val EXTENSION_PACK = ".zip"
-const val EXTENSION_BAK = ".bak"
-const val FOLDER_NAME_BAK = "bak"
-
-const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
-const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L

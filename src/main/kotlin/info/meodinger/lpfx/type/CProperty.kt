@@ -7,6 +7,8 @@ package info.meodinger.lpfx.type
  */
 class CProperty(val key: String, var value: String = "") {
 
+    // TODO: Move to .options
+
     companion object {
         const val LIST_SEPARATOR = "|"
         const val KV_SEPARATOR = "="
@@ -25,6 +27,10 @@ class CProperty(val key: String, var value: String = "") {
     constructor(key: String, value: Number) : this(key, value.toString())
     constructor(key: String, value: List<*>) : this(key, parseList(value))
     constructor(key: String, vararg value: Any) : this(key, listOf(*value))
+
+    fun isEmpty(): Boolean {
+        return value.isEmpty()
+    }
 
     fun asString(): String {
         return value
@@ -72,6 +78,9 @@ class CProperty(val key: String, var value: String = "") {
     }
     fun set(vararg list: Any) {
         set(listOf(*list))
+    }
+    fun set(another: CProperty) {
+        set(another.value)
     }
 
     override fun toString() = "CProperty(key=${key}, value=${value})"

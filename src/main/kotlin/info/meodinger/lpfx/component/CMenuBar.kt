@@ -142,7 +142,7 @@ class CMenuBar : MenuBar() {
     private fun saveTranslation() {
         // save
 
-        State.controller.save(File(State.transPath), getFileType(State.transPath))
+        State.controller.save(File(State.transPath), getFileType(State.transPath), true)
     }
     private fun saveAsTranslation() {
         // save
@@ -150,7 +150,7 @@ class CMenuBar : MenuBar() {
         fileChooser.title = I18N["chooser.save"]
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
-        State.controller.save(file, getFileType(file.path))
+        State.controller.save(file, getFileType(file.path), false)
     }
     private fun bakRecovery() {
         // transfer & open
@@ -237,23 +237,6 @@ class CMenuBar : MenuBar() {
         if (!result.isPresent) return
         val list = result.get()
 
-        for (property in list) {
-            when (property.key) {
-                Settings.ViewModePreference -> Settings[Settings.ViewModePreference] = property.value
-                Settings.IsCreateOnNewTrans -> Settings[Settings.IsCreateOnNewTrans] = property.value
-                Settings.DefaultGroupList -> Settings[Settings.DefaultGroupList] = property.value
-                Settings.DefaultColorList -> {
-                    val propertyList = property.asStringList()
-                    val settingList = Settings[Settings.DefaultColorList].asStringList().toMutableList()
-
-                    if (propertyList.size <= settingList.size ) {
-                        propertyList.forEachIndexed { index, s -> settingList[index] = s }
-                        Settings[Settings.DefaultColorList] = settingList
-                    } else {
-                        Settings[Settings.DefaultColorList] = propertyList
-                    }
-                }
-            }
-        }
+        for (property in list) Settings[property.key] = property
     }
 }

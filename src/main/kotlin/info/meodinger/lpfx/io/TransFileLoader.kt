@@ -3,7 +3,6 @@ package info.meodinger.lpfx.io
 import com.fasterxml.jackson.databind.ObjectMapper
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
-import info.meodinger.lpfx.type.TransFile.Companion.MeoTransFile
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.resource.I18N
@@ -125,7 +124,7 @@ fun loadLP(file: File): TransFile {
     while (lines[pointer] != LPTransFile.SEPARATOR && groupCount < 10) {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.empty_group_name"])
 
-        val group = TransGroup(lines[pointer], MeoTransFile.DEFAULT_COLOR_LIST[groupCount - 1])
+        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_LIST[groupCount - 1])
 
         groupList.forEach {
             if (it.name == group.name) throw IOException(String.format(I18N["exception.repeated_group_name.format"], group.name))

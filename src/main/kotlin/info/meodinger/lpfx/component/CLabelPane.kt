@@ -33,6 +33,7 @@ import javafx.scene.text.Font
 import javafx.scene.text.Text
 import java.io.File
 import java.io.IOException
+import kotlin.jvm.Throws
 
 /**
  * Author: Meodinger
@@ -319,12 +320,16 @@ class CLabelPane : ScrollPane() {
         throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], transLabel.index))
     }
 
+    @Throws(IOException::class)
     private fun setupImage(path: String) {
-        try {
-            image = Image(File(path).toURI().toURL().toString())
+        val file = File(path)
+        if (file.exists()) {
+            image = Image(file.toURI().toURL().toString())
             scale = width / imageWidth
-        } catch (e : IOException) {
-            showException(e)
+        } else {
+            image = INIT_IMAGE
+            scale = initScale
+            throw IOException(String.format(I18N["exception.io.picture_not_found.format.s"], path))
         }
     }
     private fun setupLayers(count: Int) {
@@ -555,8 +560,16 @@ class CLabelPane : ScrollPane() {
     }
 
     fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
-        setupImage(picPath)
+        this.isDisable = true
+        try {
+            setupImage(picPath)
+        } catch (e: IOException) {
+            setupLayers(0)
+            showException(e)
+            return
+        }
         setupLayers(layerCount)
         setupLabels(transLabels)
+        this.isDisable = false
     }
 }

@@ -99,7 +99,9 @@ class Controller : Initializable {
         cPicBox.disableProperty().bind(State.isOpenedProperty.not())
         cGroupBox.disableProperty().bind(State.isOpenedProperty.not())
         cSlider.disableProperty().bind(State.isOpenedProperty.not())
-        cLabelPane.disableProperty().bind(State.isOpenedProperty.not())
+        // Cause LabelPane will set isDisable while update
+        cLabelPane.isDisable = true
+        State.isOpenedProperty.addListener { _, _ , newValue -> cLabelPane.isDisable = !newValue }
 
         // Warp cPicBox
         cPicBox.isWrapped = true

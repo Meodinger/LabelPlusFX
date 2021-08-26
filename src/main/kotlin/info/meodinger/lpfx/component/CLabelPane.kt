@@ -316,7 +316,7 @@ class CLabelPane : ScrollPane() {
 
     private fun getLabel(transLabel: TransLabel): CLabel {
         for (label in labels) if (label.index == transLabel.index) return label
-        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format"], transLabel.index))
+        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], transLabel.index))
     }
 
     fun setupImage(path: String) {

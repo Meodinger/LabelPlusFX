@@ -26,7 +26,7 @@ fun exportLP(file: File, transFile: TransFile) {
     // Group count validate
     val groupCount = transFile.groupList.size
     if (groupCount > 9) {
-        throw IOException(I18N["exception.too_many_groups"])
+        throw IOException(I18N["exception.exporter.too_many_groups"])
     }
 
     fun buildLabel(transLabel: TransLabel): String {

@@ -56,26 +56,23 @@ class TransFile {
     var transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
 
     fun getGroupIdByName(name: String): Int {
-        groupList.forEachIndexed { index, transGroup ->
-            if (transGroup.name == name) return index
-        }
-        throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_group_name"])
+        groupList.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
+        throw TransFileException.transGroupNotFound(name)
     }
 
     fun getTransGroupAt(groupId: Int): TransGroup {
-        if (groupId < 0 || groupId >= groupList.size)
-            throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.groupId_invalid.format"], groupId))
+        if (groupId < 0 || groupId >= groupList.size) throw TransFileException.groupIdInvalid(groupId)
         return groupList[groupId]
     }
 
     fun getTransLabelListOf(picName: String): MutableList<TransLabel> {
-        return transMap[picName] ?: throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.pic_not_found.format"], picName))
+        return transMap[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
 
     fun getTransLabelAt(picName: String, index: Int): TransLabel {
         val list = getTransLabelListOf(picName)
         for (transLabel in list) if (transLabel.index == index) return transLabel
-        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.index_not_found.format"], index, picName))
+        throw TransFileException.labelIndexInvalid(picName, index)
     }
 
     override fun toString(): String = ObjectMapper().writeValueAsString(this)

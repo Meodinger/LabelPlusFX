@@ -67,7 +67,10 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
+                if (e is CPropertyException)
+                    String.format(I18N["alert.option.broken.format.s"], FileName_Preference)
+                else
+                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
             )
         }
         Runtime.getRuntime().addShutdownHook(Thread { Preference.save() })
@@ -91,8 +94,12 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
-            )        }
+                if (e is CPropertyException)
+                    String.format(I18N["alert.option.broken.format.s"], FileName_Settings)
+                else
+                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
+            )
+        }
         Runtime.getRuntime().addShutdownHook(Thread { Settings.save() })
     }
 
@@ -114,8 +121,12 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) "alert.option_broken.format" else "alert.load_option_failed.format"
-            )        }
+                if (e is CPropertyException)
+                    String.format(I18N["alert.option.broken.format.s"], FileName_RecentFiles)
+                else
+                    String.format(I18N["alert.option.load_failed.format.s"], FileName_RecentFiles)
+            )
+        }
         Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })
     }
 

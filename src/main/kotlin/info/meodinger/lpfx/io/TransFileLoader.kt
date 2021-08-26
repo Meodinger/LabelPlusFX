@@ -31,7 +31,7 @@ fun loadLP(file: File): TransFile {
     val buf = ByteArray(3)
     val fis = FileInputStream(file)
     val len = fis.read(buf, 0, 3)
-    if (len != 3) throw IOException(I18N["exception.unexpected_eof"])
+    if (len != 3) throw IOException(I18N["exception.loader.unexpected_eof"])
     if (bom.contentEquals(buf)) reader.read(CharArray(3), 0, 1)
 
     val lines = reader.readLines()
@@ -72,7 +72,7 @@ fun loadLP(file: File): TransFile {
         val y = props[1].trim().toDouble()
         val groupId = props[2].trim().toInt() - 1
 
-        if (index < 0) throw IOException(String.format(I18N["exception.invalid_index.format"], index))
+        if (index < 0) throw IOException(String.format(I18N["exception.loader.invalid_index.format.i"], index))
 
         pointer++
         return TransLabel(index, x, y, groupId, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
@@ -98,7 +98,7 @@ fun loadLP(file: File): TransFile {
 
             for (l in transLabels) {
                 if (l.index == label.index) {
-                    throw IOException(String.format(I18N["exception.repeated_index.format"], label.index))
+                    throw IOException(String.format(I18N["exception.loader.repeated_index.format.i"], label.index))
                 }
             }
             transLabels.add(label)
@@ -122,19 +122,19 @@ fun loadLP(file: File): TransFile {
     var groupCount = 1
     val groupList = ArrayList<TransGroup>()
     while (lines[pointer] != LPTransFile.SEPARATOR && groupCount < 10) {
-        if (lines[pointer].isBlank()) throw IOException(I18N["exception.empty_group_name"])
+        if (lines[pointer].isBlank()) throw IOException(I18N["exception.loader.empty_group_name"])
 
         val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_LIST[groupCount - 1])
 
         groupList.forEach {
-            if (it.name == group.name) throw IOException(String.format(I18N["exception.repeated_group_name.format"], group.name))
+            if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.format.s"], group.name))
         }
         groupList.add(group)
 
         groupCount++
         pointer++
     }
-    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.too_many_groups"])
+    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.exporter.too_many_groups"])
     transFile.groupList = groupList
     pointer++
 

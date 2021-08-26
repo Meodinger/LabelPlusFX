@@ -17,9 +17,9 @@ import java.io.IOException
 /**
  * Transfer a File to another File
  */
-@Throws(IOException::class, IllegalArgumentException::class)
+@Throws(IOException::class)
 fun transfer(from: File, to: File) {
-    if (from.isDirectory || to.isDirectory) throw IllegalArgumentException(I18N["exception.illegal_argument.cannot_transfer_directory"])
+    if (from.isDirectory || to.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
 
     val input = FileInputStream(from).channel
     val output = FileOutputStream(to).channel

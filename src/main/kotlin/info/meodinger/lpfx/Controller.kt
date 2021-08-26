@@ -598,7 +598,7 @@ class Controller : Initializable {
             e.printStackTrace()
             if (!isSilent) {
                 if (bak != null) {
-                    showError(String.format(I18N["error.save_failed_backed.format"], bak.path))
+                    showError(String.format(I18N["error.save_failed_backed.format.bak"], bak.path))
                 } else {
                     showError(I18N["error.save_failed"])
                 }

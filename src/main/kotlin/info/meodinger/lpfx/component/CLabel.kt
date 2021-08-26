@@ -5,11 +5,7 @@ import info.meodinger.lpfx.util.platform.MonoType
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Insets
 import javafx.geometry.VPos
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -38,9 +34,9 @@ class CLabel(
         const val MIN_PICK_RADIUS = 16.0
     }
 
-    private val circle = Circle(radius, Color.web(color))
-    private val text = Text(index.toString())
-    private val pickerRect = Rectangle(radius * 2, radius * 2)
+    private val pickerSquare = Rectangle()
+    private val circle = Circle()
+    private val text = Text()
 
     val indexProperty = SimpleIntegerProperty(index)
     val radiusProperty = SimpleDoubleProperty(radius)
@@ -63,6 +59,7 @@ class CLabel(
         }
 
     init {
+        pickerSquare.fill = Color.TRANSPARENT
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
@@ -80,8 +77,9 @@ class CLabel(
         circle.radius = radius
         circle.fill = Color.web(color)
 
-        val pickRadius = radius.coerceAtLeast(MIN_PICK_RADIUS)
-        setPrefSize(pickRadius * 2, pickRadius * 2)
+        val pickerEdge = radius.coerceAtLeast(MIN_PICK_RADIUS) * 2
+        pickerSquare.width = pickerEdge
+        pickerSquare.height = pickerEdge
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R
@@ -89,18 +87,14 @@ class CLabel(
         val r = if (index < 10) 1.7 * radius else 1.3 * radius
         text.font = Font.font(MonoType, FontWeight.BOLD, r)
 
-        // Layout 0,0 is the center of the circle
+        // Layout 0,0 is the center of the circle, the left-top of the rect
         // Text display based on left-down corner
         // Axis is 0 →
         //         ↓
         text.layoutX = -text.layoutBounds.width / 2
+        pickerSquare.layoutX = - pickerSquare.width / 2
+        pickerSquare.layoutY = - pickerSquare.height / 2
 
-        // TODO: Picker Rect
-
-        // Move to Region Center
-        // text.layoutX += prefWidth / 2
-        // text.layoutY += prefHeight / 2
-        // circle.layoutX += prefWidth / 2
-        // circle.layoutY += prefHeight / 2
+        setPrefSize(pickerEdge, pickerEdge)
     }
 }

@@ -79,7 +79,10 @@ To get a local copy up and running follow these simple steps.
    ```sh
    git clone https://github.com/Meodinger/LabelPlusFX.git
    ```
-2. Build with script
+   
+2. Build artifact `lpfx:jar`
+
+3. Build with script
 
 
 

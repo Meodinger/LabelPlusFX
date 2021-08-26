@@ -97,7 +97,7 @@ class CMenuBar : MenuBar() {
 
         mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment)
-        mmAbout.items.addAll(mAbout, mSettings)
+        mmAbout.items.addAll(mSettings, SeparatorMenuItem(), mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 

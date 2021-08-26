@@ -7,6 +7,8 @@ import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.getGroupNameFormatter
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.geometry.Insets
@@ -32,19 +34,19 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private val tabPane = TabPane()
 
     private var remainGroup = 0
-    private val groupTab = Tab("Groups")
+    private val groupTab = Tab(I18N["settings.group.title"])
     private val gBorderPane = BorderPane()
-    private val gLabelIsCreate = Label("is Create On New")
-    private val gLabelName = Label("Group Name")
-    private val gLabelColor = Label("Group Color")
+    private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
+    private val gLabelName = Label(I18N["settings.group.name"])
+    private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
-    private val gButtonAdd = Button("Add Group")
+    private val gButtonAdd = Button(I18N["settings.group.add"])
 
-    private val modeTab = Tab("Mode")
-    private val mLabelWork = Label("Work Mode")
-    private val mLabelView = Label("View Mode")
-    private val mLabelInput = Label("Input Mode")
-    private val mLabelLabel = Label("Label Mode")
+    private val modeTab = Tab(I18N["settings.mode.title"])
+    private val mLabelWork = Label(I18N["mode.work"])
+    private val mLabelView = Label(I18N["mode.view"])
+    private val mLabelInput = Label(I18N["mode.work.input"])
+    private val mLabelLabel = Label(I18N["mode.work.label"])
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
     private val mGridPane = GridPane()
@@ -86,7 +88,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         tabPane.prefWidth = 600.0
         tabPane.tabs.addAll(groupTab, modeTab)
 
-        this.title = "Settings"
+        this.title = I18N["settings.title"]
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         this.dialogPane.content = tabPane
         this.setResultConverter {

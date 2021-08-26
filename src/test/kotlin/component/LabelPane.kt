@@ -114,10 +114,6 @@ class LabelPane : Application() {
             textArea.appendText("Clicked ${transLabel}\n")
         }
 
-        pane.setupImage("D:\\WorkPlace\\Kotlin\\LabelPlusFX\\src\\test\\resources\\sample\\1.jpg")
-        pane.setupLayers(transFile.groupList.size)
-        pane.setupLabels(transFile.transMap[picName]!!)
-
         moveToButton.setOnAction {
             pane.moveToLabel(transFile.transMap[picName]!![moveToField.text.toInt() - 1])
         }
@@ -178,6 +174,13 @@ class LabelPane : Application() {
     override fun start(primaryStage: Stage) {
         primaryStage.scene = Scene(s, WIDTH, HEIGHT)
         primaryStage.show()
+
+        pane.update(
+            this.javaClass.getResource("/sample/1.jpg")!!.path,
+            transFile.groupList.size,
+            transFile.transMap[picName]!!
+        )
+        pane.moveToZero()
     }
 
 }

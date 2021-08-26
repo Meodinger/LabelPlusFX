@@ -319,7 +319,7 @@ class CLabelPane : ScrollPane() {
         throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], transLabel.index))
     }
 
-    fun setupImage(path: String) {
+    private fun setupImage(path: String) {
         try {
             image = Image(File(path).toURI().toURL().toString())
             scale = width / imageWidth
@@ -327,7 +327,7 @@ class CLabelPane : ScrollPane() {
             showException(e)
         }
     }
-    fun setupLayers(count: Int) {
+    private fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
         labelLayers.clear()
         removeText()
@@ -337,7 +337,7 @@ class CLabelPane : ScrollPane() {
 
         for (i in 0 until count) createLabelLayer()
     }
-    fun setupLabels(transLabels: List<TransLabel>) {
+    private fun setupLabels(transLabels: List<TransLabel>) {
         labels.clear()
         for (transLabel in transLabels) {
             createLabel(transLabel)

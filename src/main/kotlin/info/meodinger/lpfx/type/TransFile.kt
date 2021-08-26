@@ -3,8 +3,6 @@ package info.meodinger.lpfx.type
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.sortByDigit
 
 /**

@@ -12,8 +12,8 @@ module lpfx {
     requires javafx.graphics;
     requires javafx.fxml;
     requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.databind;
 
     opens info.meodinger.lpfx to javafx.fxml;
     opens info.meodinger.lpfx.component to javafx.fxml;

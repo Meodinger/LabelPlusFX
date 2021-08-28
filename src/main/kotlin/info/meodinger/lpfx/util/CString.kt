@@ -1,5 +1,10 @@
 package info.meodinger.lpfx.util.string
 
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
+
+import javafx.scene.text.Font
+import javafx.scene.text.Text
 import java.util.*
 
 /**
@@ -74,4 +79,43 @@ fun sortByDigit(strings: List<String>): List<String> {
 
     // default
     return strings.toMutableList().sorted()
+}
+
+fun omitHighText(longText: String): String {
+    val lines = longText.split("\n")
+
+    if (lines.size <= 10) return longText
+
+    val builder = StringBuilder()
+    for (i in 0..9) builder.appendLine(lines[i])
+    builder.append(String.format(I18N["util.long_text.format.i"], lines.size - 9))
+
+    return builder.toString()
+}
+
+fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String {
+    val lines = longText.split("\n")
+    val builder = StringBuilder()
+
+    val t = Text().also { it.font = font }
+    val b = StringBuilder()
+    var p: Int
+    for (line in lines) {
+        t.text = line
+        b.clear()
+        p = t.text.length - 1
+        if (t.boundsInLocal.width > maxWidth) {
+            b.append(line).append("...")
+            while (t.boundsInLocal.width > maxWidth) {
+                b.deleteAt(p--)
+                t.text = b.toString()
+            }
+            builder.appendLine(b.toString())
+        } else {
+            builder.appendLine(line)
+        }
+    }
+    if (builder.isNotEmpty()) builder.deleteAt(builder.length - 1)
+
+    return builder.toString()
 }

@@ -2,13 +2,15 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.dialog.showException
-import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE
 import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.util.string.omitHighText
+import info.meodinger.lpfx.util.string.omitWideText
 
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.*
@@ -33,7 +35,7 @@ import javafx.scene.text.Font
 import javafx.scene.text.Text
 import java.io.File
 import java.io.IOException
-import kotlin.jvm.Throws
+
 
 /**
  * Author: Meodinger
@@ -111,7 +113,7 @@ class CLabelPane : ScrollPane() {
     private val root = StackPane()
 
     /**
-     * For contain, scale event handle (use mouse scroll)
+     * For contain (provide space to drag root)
      */
     private val container = AnchorPane()
 
@@ -265,8 +267,8 @@ class CLabelPane : ScrollPane() {
             root.scaleX = newScale
             root.scaleY = newScale
             container.setPrefSize(
-                root.boundsInParent.maxX.coerceAtLeast(viewportBounds.width),
-                root.boundsInParent.maxY.coerceAtLeast(viewportBounds.height)
+                container.boundsInParent.maxX.coerceAtLeast(viewportBounds.width),
+                container.boundsInParent.maxY.coerceAtLeast(viewportBounds.height)
             )
         }
 
@@ -303,12 +305,16 @@ class CLabelPane : ScrollPane() {
     fun reset() {
         isVisible = false
 
-        scale = initScale
-        image = INIT_IMAGE
         selectedLabelIndex = NOT_FOUND
 
+        vvalue = 0.0
+        hvalue = 0.0
         root.layoutX = 0.0
         root.layoutY = 0.0
+
+        scale = initScale
+        image = INIT_IMAGE
+
         setupLayers(0)
 
         moveToCenter()
@@ -322,6 +328,11 @@ class CLabelPane : ScrollPane() {
 
     @Throws(IOException::class)
     private fun setupImage(path: String) {
+        vvalue = 0.0
+        hvalue = 0.0
+        root.layoutX = 0.0
+        root.layoutY = 0.0
+
         val file = File(path)
         if (file.exists()) {
             image = Image(file.toURI().toURL().toString())
@@ -414,13 +425,6 @@ class CLabelPane : ScrollPane() {
              selectedLabelIndex = transLabel.index
         }
 
-        // Text display
-        label.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            removeText()
-            createText(transLabel.text, Color.BLACK, it.x + label.layoutX, it.y + label.layoutY)
-            it.consume()
-        }
-
         // Event handle
         label.setOnMouseMoved {
             onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
@@ -470,7 +474,9 @@ class CLabelPane : ScrollPane() {
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
-        val t = Text(text).also { it.font = TEXT_FONT }
+        val t = Text(omitHighText(text)).also { it.font = TEXT_FONT }
+
+        t.text = omitWideText(t.text, (imageWidth - 2 * (SHIFT_X + TEXT_INSET)) / 2, t.font)
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
@@ -500,17 +506,20 @@ class CLabelPane : ScrollPane() {
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)
         gc.fill = color
-        gc.fillText(text, textX, textY)
+        gc.fillText(t.text, textX, textY)
     }
 
     fun removeLabelLayer(groupId: Int) {
+        // When this method called, means there
+        // are no labels in this group. So no
+        // need to edit labels
+
         val layer = labelLayers[groupId]
-        // Remove labels
-        labels.removeAll(layer.children)
-        layer.children.clear()
-        // Remove layer
+
+        // Remove layer in list
         labelLayers.remove(layer)
-        root.children.remove(layer) // Bottom is view
+        // Remove layer comp
+        root.children.remove(layer)
     }
     fun removeLabel(transLabel: TransLabel) {
         val label = getLabel(transLabel)
@@ -526,10 +535,10 @@ class CLabelPane : ScrollPane() {
     }
 
     fun moveToLabel(transLabel: TransLabel) {
-        val label = getLabel(transLabel)
-
         vvalue = 0.0
         hvalue = 0.0
+
+        val label = getLabel(transLabel)
 
         val centerX = AnchorPane.getLeftAnchor(label)
         val centerY = AnchorPane.getTopAnchor(label)
@@ -551,16 +560,25 @@ class CLabelPane : ScrollPane() {
         root.layoutY = height / 2 - fakeY
     }
     fun moveToZero() {
+        vvalue = 0.0
+        hvalue = 0.0
+
         root.layoutX = - (1 - scale) * imageWidth / 2
         root.layoutY = - (1 - scale) * imageHeight / 2
     }
     fun moveToCenter() {
+        vvalue = 0.0
+        hvalue = 0.0
+
         root.layoutX = (width - imageWidth) / 2
         root.layoutY = (height - imageHeight) / 2
     }
 
     fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
-        this.isDisable = true
+        isVisible = false
+
+        selectedLabelIndex = NOT_FOUND
+
         try {
             setupImage(picPath)
         } catch (e: IOException) {
@@ -570,6 +588,7 @@ class CLabelPane : ScrollPane() {
         }
         setupLayers(layerCount)
         setupLabels(transLabels)
-        this.isDisable = false
+
+        isVisible = true
     }
 }

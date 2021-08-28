@@ -21,6 +21,7 @@ import javafx.fxml.Initializable
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
+import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import java.io.*
 import java.net.URL
@@ -34,6 +35,7 @@ import kotlin.system.exitProcess
  */
 class Controller : Initializable {
 
+    @FXML private lateinit var root: BorderPane
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
     @FXML private lateinit var pMain: SplitPane
@@ -80,6 +82,9 @@ class Controller : Initializable {
      * Component Initialize
      */
     private fun init() {
+        // Global event catch, prevent mnemonic parsing and the beep
+        root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
+
         // Text
         bSwitchWorkMode.text = I18N["mode.work.input"]
         bSwitchViewMode.text = I18N["mode.view.group"]
@@ -99,9 +104,7 @@ class Controller : Initializable {
         cPicBox.disableProperty().bind(State.isOpenedProperty.not())
         cGroupBox.disableProperty().bind(State.isOpenedProperty.not())
         cSlider.disableProperty().bind(State.isOpenedProperty.not())
-        // Cause LabelPane will set isDisable while update
-        cLabelPane.isDisable = true
-        State.isOpenedProperty.addListener { _, _ , newValue -> cLabelPane.isDisable = !newValue }
+        cLabelPane.disableProperty().bind(State.isOpenedProperty.not())
 
         // Warp cPicBox
         cPicBox.isWrapped = true
@@ -163,23 +166,25 @@ class Controller : Initializable {
      * Listeners & Handlers
      */
     private fun reg() {
-        // Update cTreeView & cLabelPane when change pic
+        // Update cTreeView & cLabelPane when pic change
         State.currentPicNameProperty.addListener { _, _, _ ->
             if (!State.isOpened) return@addListener
+
+            State.currentLabelIndex = NOT_FOUND
 
             updateTreeView()
             updateLabelPane()
             cLabelPane.moveToZero()
         }
 
-        // Clear text layer when change group
+        // Clear text layer when group change
         State.currentGroupIdProperty.addListener { _, _, _ ->
             if (!State.isOpened) return@addListener
 
             cLabelPane.removeText()
         }
 
-        // Update text when label change
+        // Update text area when label change
         State.currentLabelIndexProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
@@ -194,6 +199,7 @@ class Controller : Initializable {
                 cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
                 cTransArea.isBound = false
             }
+            cTransArea.text = "" // Remove text
             if (newValue != NOT_FOUND) {
                 val newLabel = transLabels.find { it.index == newValue }
                 if (newLabel == null) {
@@ -205,7 +211,7 @@ class Controller : Initializable {
             }
         }
 
-        // Update cLabelPane default cursor
+        // Update cLabelPane default cursor when work mode change
         State.workModeProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
 
@@ -250,13 +256,23 @@ class Controller : Initializable {
             // Mark change
             State.isChanged = true
         }
-        cLabelPane.onLabelPointed = EventHandler {} // Text display already set on Label
+        cLabelPane.onLabelPointed = EventHandler {
+            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+
+            // Text display
+            cLabelPane.removeText()
+            cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+        }
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
 
             val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
-
             if (it.source.clickCount > 1) cLabelPane.moveToLabel(transLabel)
+
+            val item = findLabelItemByIndex(it.labelIndex)
+            cTreeView.selectionModel.clearSelection()
+            cTreeView.selectionModel.select(item)
+            cTreeView.scrollTo(cTreeView.getRow(item))
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
@@ -289,6 +305,8 @@ class Controller : Initializable {
                 State.currentLabelIndex = item.index
         }
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            if (it.button != MouseButton.PRIMARY) return@addEventHandler
+
             val item = cTreeView.selectionModel.selectedItem
             if (item != null && item is CTreeItem)
                 State.currentLabelIndex = item.index
@@ -306,15 +324,8 @@ class Controller : Initializable {
         }
 
         // Bind Label and Tree
-        cLabelPane.selectedLabelIndexProperty.addListener { _, _, index ->
-            if (index == NOT_FOUND) return@addListener
-
-            val item = findLabelItemByIndex(index as Int)
-            cTreeView.selectionModel.clearSelection()
-            cTreeView.selectionModel.select(item)
-            cTreeView.scrollTo(cTreeView.getRow(item))
-        }
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            if (it.button != MouseButton.PRIMARY) return@addEventHandler
             if (it.clickCount < 2) return@addEventHandler
 
             val item = cTreeView.selectionModel.selectedItem
@@ -334,10 +345,12 @@ class Controller : Initializable {
             }
         }
 
-        // Bind number input with group selection
-        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code.isDigitKey)
-                cGroupBox.moveTo(it.text.toInt() - 1)
+        // Bind Tab with view mode switch
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.TAB) {
+                switchViewMode()
+                it.consume()
+            }
         }
 
         // Bind tab with work mode switch
@@ -349,16 +362,14 @@ class Controller : Initializable {
             }
         }
 
-        // Bind Tab with view mode switch
-        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.TAB) {
-                switchViewMode()
-                it.consume()
-            }
+        // Bind number input with group selection
+        root.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code.isDigitKey)
+                cGroupBox.moveTo(it.text.toInt() - 1)
         }
 
         // Bind Arrow KeyEvent with Label change and Pic change
-        val arrowKeyListener = EventHandler<KeyEvent> {
+        val arrowKeyHandler = EventHandler<KeyEvent> {
             if (isControlDown(it) && it.code.isArrowKey) {
                 when (it.code) {
                     KeyCode.UP, KeyCode.DOWN -> {
@@ -410,8 +421,8 @@ class Controller : Initializable {
                 }
             }
         }
-        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener)
-        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyListener)
+        root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {

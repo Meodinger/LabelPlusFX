@@ -10,7 +10,6 @@ import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
 
 /**
@@ -34,12 +33,7 @@ class LabelPlusFX: Application() {
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
-        primaryStage.scene = Scene(root, WIDTH, HEIGHT).also {
-            // Global event catch, prevent mnemonic parsing and the beep
-            it.addEventHandler(KeyEvent.KEY_PRESSED) { event ->
-                if (event.isAltDown) event.consume()
-            }
-        }
+        primaryStage.scene = Scene(root, WIDTH, HEIGHT)
         primaryStage.setOnCloseRequest {
             controller.close()
             it.consume()

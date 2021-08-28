@@ -4,7 +4,12 @@
 <?import javafx.scene.layout.*?>
 <?import info.meodinger.lpfx.component.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="info.meodinger.lpfx.Controller">
+<BorderPane
+        xmlns="http://javafx.com/javafx/11.0.2"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="info.meodinger.lpfx.Controller"
+        fx:id="root"
+>
     <top>
         <CMenuBar fx:id="cMenuBar" />
     </top>
@@ -23,27 +28,23 @@
                 </bottom>
             </BorderPane>
             <SplitPane fx:id="pRight" dividerPositions="0.6" orientation="VERTICAL">
-                <AnchorPane>
-                    <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <top>
-                            <HBox alignment="CENTER_RIGHT">
-                                <Button fx:id="bSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode"/>
-                                <CComboBox fx:id="cGroupBox" />
-                                <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
-                                <Button fx:id="bSwitchViewMode" mnemonicParsing="false" onAction="#switchViewMode"/>
-                            </HBox>
-                        </top>
-                        <center>
-                            <CTreeView fx:id="cTreeView"/>
-                        </center>
-                    </BorderPane>
-                </AnchorPane>
-                <AnchorPane>
-                    <CTransArea fx:id="cTransArea"
-                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-                </AnchorPane>
+                <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <top>
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button fx:id="bSwitchWorkMode" mnemonicParsing="false" onAction="#switchWorkMode"/>
+                            <CComboBox fx:id="cGroupBox" />
+                            <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="bSwitchViewMode" mnemonicParsing="false" onAction="#switchViewMode"/>
+                        </HBox>
+                    </top>
+                    <center>
+                        <CTreeView fx:id="cTreeView"/>
+                    </center>
+                </BorderPane>
+                <CTransArea fx:id="cTransArea"
+                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
             </SplitPane>
         </SplitPane>
     </center>

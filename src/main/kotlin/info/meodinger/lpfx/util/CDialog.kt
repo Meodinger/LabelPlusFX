@@ -1,9 +1,11 @@
 package info.meodinger.lpfx.util.dialog
 
 import info.meodinger.lpfx.util.image.resizeByRadius
+import info.meodinger.lpfx.util.string.omitHighText
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.resource.loadImage
+import info.meodinger.lpfx.util.string.omitWideText
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -76,7 +78,7 @@ fun showConfirm(content: String): Optional<ButtonType> {
 fun showConfirm(title: String, header: String?, content: String): Optional<ButtonType> {
     confirmDialog.title = title
     confirmDialog.headerText = header
-    confirmDialog.contentText = content
+    confirmDialog.contentText = omitWideText(omitHighText(content), confirmDialog.width / 3 * 2)
     return confirmDialog.showAndWait()
 }
 
@@ -98,7 +100,7 @@ fun showInfo(content: String): Optional<ButtonType> {
 fun showInfo(title: String, header: String?, content: String): Optional<ButtonType> {
     infoDialog.title = title
     infoDialog.headerText = header
-    infoDialog.contentText = content
+    infoDialog.contentText = omitWideText(omitHighText(content), infoDialog.width / 3 * 2)
     return infoDialog.showAndWait()
 }
 
@@ -120,7 +122,7 @@ fun showAlert(content: String): Optional<ButtonType> {
 fun showAlert(title: String, header: String?, content: String): Optional<ButtonType> {
     alertDialog.title = title
     alertDialog.headerText = header
-    alertDialog.contentText = content
+    alertDialog.contentText = omitWideText(omitHighText(content), alertDialog.width / 3 * 2)
     return alertDialog.showAndWait()
 }
 
@@ -142,7 +144,7 @@ fun showError(content: String): Optional<ButtonType> {
 fun showError(title: String, header: String?, content: String): Optional<ButtonType> {
     errorDialog.title = title
     errorDialog.headerText = header
-    errorDialog.contentText = content
+    errorDialog.contentText = omitWideText(omitHighText(content), errorDialog.width / 3 * 2)
     return errorDialog.showAndWait()
 }
 

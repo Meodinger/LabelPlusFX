@@ -1,5 +1,7 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Logger
+
 import javafx.application.Application
 
 /**
@@ -8,5 +10,6 @@ import javafx.application.Application
  * Location: info.meodinger.lpfx
  */
 fun main(vararg args: String) {
+    Logger.info("App start")
     Application.launch(LabelPlusFX::class.java, *args)
 }

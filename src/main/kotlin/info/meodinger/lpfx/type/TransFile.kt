@@ -73,8 +73,6 @@ class TransFile {
         throw TransFileException.labelIndexInvalid(picName, index)
     }
 
-    override fun toString(): String = ObjectMapper().writeValueAsString(this)
-
     fun clone(): TransFile {
         val translation = TransFile()
 
@@ -114,5 +112,7 @@ class TransFile {
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
         return mapper.writeValueAsString(cloned)
     }
+
+    override fun toString(): String = ObjectMapper().writeValueAsString(this)
 
 }

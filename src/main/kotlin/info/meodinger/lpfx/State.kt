@@ -1,5 +1,6 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransFile
 
@@ -90,6 +91,8 @@ object State {
         viewMode = getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
 
         controller.reset()
+
+        Logger.info("State reset", "State")
     }
 
     fun getFileFolder(): String = File(transPath).parent

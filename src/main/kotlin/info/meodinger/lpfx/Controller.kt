@@ -7,7 +7,6 @@ import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.file.transfer
-import info.meodinger.lpfx.util.printExceptionToErrorLog
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -60,7 +59,8 @@ class Controller : Initializable {
                         try {
                             exportMeo(bak, State.transFile)
                         } catch (e: IOException) {
-                            printExceptionToErrorLog(e)
+                            Logger.error("Auto-backup failed")
+                            Logger.exception(e)
                         }
                     }
                 }
@@ -197,7 +197,6 @@ class Controller : Initializable {
                     return@addListener
                 }
                 cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
-                cTransArea.isBound = false
             }
             cTransArea.text = "" // Remove text
             if (newValue != NOT_FOUND) {
@@ -207,7 +206,6 @@ class Controller : Initializable {
                     return@addListener
                 }
                 cTransArea.textProperty().bindBidirectional(newLabel.textProperty)
-                cTransArea.isBound = true
             }
         }
 
@@ -431,6 +429,10 @@ class Controller : Initializable {
         reg()
     }
 
+    private fun exit() {
+        Logger.info("App exit", "Controller")
+        exitProcess(0)
+    }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
         val transLabels = State.transFile.transMap[State.currentPicName]!!
         val transLabel = transLabels.find { it.index == index }!!
@@ -475,6 +477,8 @@ class Controller : Initializable {
         return true
     }
     fun new(file: File, type: FileType) {
+        Logger.info("Newing $type to ${file.path}", "Controller")
+
         // Choose Pics
         val potentialPics = ArrayList<String>()
         val pics = ArrayList<String>()
@@ -491,8 +495,11 @@ class Controller : Initializable {
         if (result.isPresent) {
             pics.addAll(result.get())
         } else {
+            Logger.info("Cancel", "Controller")
             return
         }
+
+        Logger.debug("Chose pics:", pics, "Controller")
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
@@ -511,6 +518,8 @@ class Controller : Initializable {
         transFile.groupList = groupList
         transFile.transMap = transMap
 
+        Logger.debug("Created TransFile: $transFile", "Controller")
+
         // Export to file
         try {
             when (type) {
@@ -521,9 +530,15 @@ class Controller : Initializable {
             e.printStackTrace()
             showError(I18N["error.new_failed"])
             showException(e)
+            Logger.error("New failed", "Controller")
+            Logger.exception(e)
         }
+
+        Logger.info("Newed TransFile", "Controller")
     }
     fun open(file: File, type: FileType) {
+        Logger.info("Opening ${file.path}", "Controller")
+
         val transFile: TransFile
         try {
             transFile = when (type) {
@@ -534,8 +549,12 @@ class Controller : Initializable {
             e.printStackTrace()
             showError(I18N["error.open_failed"])
             showException(e)
+            Logger.error("Open failed", "Controller")
+            Logger.exception(e)
             return
         }
+
+        Logger.debug("Read TransFile: $transFile")
 
         // Show info if comment not in default list
         val comment = transFile.comment.trim()
@@ -548,6 +567,7 @@ class Controller : Initializable {
         }
         if (isModified) {
             showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+            Logger.info("Showed modified comment", "Controller")
         }
 
         State.transFile = transFile
@@ -562,8 +582,10 @@ class Controller : Initializable {
         val bakDir = File(State.getBakFolder())
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             timer.schedule(taskManager.getTimerTask(), AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
+            Logger.info("Scheduled auto-backup", "Controller")
         } else {
             showError(I18N["error.auto_backup_unavailable"])
+            Logger.error("Auto-backup unavailable", "Controller")
         }
 
         State.isOpened = true
@@ -574,8 +596,11 @@ class Controller : Initializable {
         updateLabelColorList()
         updateGroupList()
         updatePicList()
+
+        Logger.info("Opened TransFile", "Controller")
     }
     fun save(file: File, type: FileType, isSilent: Boolean) {
+        Logger.info("Saving to ${file.path}, isSilent:$isSilent", "Controller")
 
         // Check folder
         if (!isSilent) if (file.parent != State.getFileFolder()) {
@@ -590,6 +615,7 @@ class Controller : Initializable {
 
             try {
                 transfer(File(State.transPath), bak)
+                Logger.info("Backed TransFile to ${bak.path}", "Controller")
             } catch (e: Exception) {
                 bak = null
                 e.printStackTrace()
@@ -597,6 +623,8 @@ class Controller : Initializable {
                     showError(I18N["error.backup_failed"])
                     showException(e)
                 }
+                Logger.error("TransFile backup failed", "Controller")
+                Logger.exception(e)
             }
         }
 
@@ -607,6 +635,8 @@ class Controller : Initializable {
                 FileType.MeoFile -> exportMeo(file, State.transFile)
             }
             if (!isSilent) showInfo(I18N["info.saved_successfully"])
+            Logger.debug("Wrote ${State.transFile}", "Controller")
+            Logger.info("Wrote TransFile", "Controller")
         } catch (e: IOException) {
             e.printStackTrace()
             if (!isSilent) {
@@ -617,27 +647,34 @@ class Controller : Initializable {
                 }
                 showException(e)
             }
+            Logger.error("Save failed", "Controller")
+            Logger.exception(e)
             return
         }
 
         // Remove Backup
-        if (bak != null) if (!bak.delete()) if (!isSilent) showError(I18N["error.backup_clear_failed"])
+        if (bak != null) if (!bak.delete()) if (!isSilent) {
+            showError(I18N["error.backup_clear_failed"])
+            Logger.error("Backup removed failed")
+        }
 
         State.transPath = file.path
         State.isChanged = false
+
+        Logger.info("Saved", "Controller")
     }
 
     fun close() {
-        if (!State.isChanged) exitProcess(0)
+        if (!State.isChanged) exit()
 
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), getFileType(State.transPath), false)
-                    exitProcess(0)
+                    exit()
                 }
                 ButtonType.NO -> {
-                    exitProcess(0)
+                    exit()
                 }
                 ButtonType.CANCEL -> {
                     return@ifPresent
@@ -656,14 +693,20 @@ class Controller : Initializable {
 
         setSwitchViewModeButton(State.viewMode)
         setSwitchWorkModeButton(State.workMode)
+
+        Logger.info("Controller reset", "Controller")
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
+
+        Logger.info("Pic list updated", "Controller")
     }
     fun updateGroupList() {
         val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].name }
         cGroupBox.setList(list)
         cGroupBox.moveTo(State.currentGroupId)
+
+        Logger.info("Group list updated", "Controller")
     }
     fun updateTreeView() {
         cTreeView.update(
@@ -671,6 +714,8 @@ class Controller : Initializable {
             State.currentPicName,
             State.transFile.groupList,
             State.transFile.getTransLabelListOf(State.currentPicName))
+
+        Logger.info("Tree view updated", "Controller")
     }
     fun updateLabelPane() {
         cLabelPane.update(
@@ -678,16 +723,24 @@ class Controller : Initializable {
             State.transFile.groupList.size,
             State.transFile.transMap[State.currentPicName]!!
         )
+
+        Logger.info("Label pane updated", "Controller")
     }
     fun updateLabelColorList() {
         val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
         cLabelPane.colorList = FXCollections.observableList(list)
+
+        Logger.info("Label pane color list updated", "Controller")
     }
     fun addLabelLayer() {
         cLabelPane.createLabelLayer()
+
+        Logger.info("Added label layer", "Controller")
     }
     fun delLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)
+
+        Logger.info("Removed label layer", "Controller")
     }
 
     fun setViewMode(mode: ViewMode) {
@@ -696,6 +749,8 @@ class Controller : Initializable {
         setSwitchViewModeButton(mode)
 
         updateTreeView()
+
+        Logger.info("Switched view mode to $mode", "Controller")
     }
     fun setWorkMode(mode: WorkMode) {
         State.workMode = mode
@@ -706,6 +761,8 @@ class Controller : Initializable {
             WorkMode.InputMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
             WorkMode.LabelMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[1])
         })
+
+        Logger.info("Switched work mode to $mode", "Controller")
     }
 
     @FXML fun switchViewMode() {

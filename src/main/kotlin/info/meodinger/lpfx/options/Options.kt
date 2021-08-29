@@ -1,7 +1,6 @@
 package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.util.dialog.*
-import info.meodinger.lpfx.util.printExceptionToErrorLog
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
@@ -22,19 +21,19 @@ object Options {
     private const val FileName_Preference = "preference"
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
-    private const val FolderName_ErrorLog = "error_log"
+    private const val FolderName_logs = "logs"
 
     val lpfx: Path = Paths.get(System.getProperty("user.home")).resolve(LPFX)
     val preference: Path = lpfx.resolve(FileName_Preference)
     val settings: Path = lpfx.resolve(FileName_Settings)
     val recentFiles: Path = lpfx.resolve(FileName_RecentFiles)
-    val errorLog: Path = lpfx.resolve(FolderName_ErrorLog)
+    val logs: Path = lpfx.resolve(FolderName_logs)
 
     fun init() {
         try {
             // project data folder
             if (Files.notExists(lpfx)) Files.createDirectories(lpfx)
-            if (Files.notExists(errorLog)) Files.createDirectories(errorLog)
+            if (Files.notExists(logs)) Files.createDirectories(logs)
 
             // config
             initConfig()
@@ -45,6 +44,8 @@ object Options {
         } catch (e: IOException) {
             showException(e)
             showError(I18N["error.initialize_options_failed"])
+            Logger.fatal("Options init failed", "Options")
+            Logger.exception(e)
             exitProcess(0)
         }
     }
@@ -58,10 +59,14 @@ object Options {
         try {
             Preference.load()
             Preference.check()
+
+            Logger.info("Preference loaded", "Options")
+            Logger.debug("Preference got:", Preference.properties, "Options")
         } catch (e: Exception) {
             Preference.useDefault()
             Preference.save()
-            printExceptionToErrorLog(e)
+            Logger.warning("Preference load failed, using default", "Options")
+            Logger.exception(e)
             showDialog(
                 null,
                 2,
@@ -85,10 +90,14 @@ object Options {
         try {
             Settings.load()
             Settings.check()
+
+            Logger.info("Settings loaded", "Options")
+            Logger.debug("Settings got:", Settings.properties, "Options")
         } catch (e: Exception) {
             Settings.useDefault()
             Settings.save()
-            printExceptionToErrorLog(e)
+            Logger.warning("Settings load failed, using default", "Options")
+            Logger.exception(e)
             showDialog(
                 null,
                 2,
@@ -112,10 +121,14 @@ object Options {
         try {
             RecentFiles.load()
             RecentFiles.check()
+
+            Logger.info("RecentFiles loaded", "Options")
+            Logger.debug("RecentFiles got:", RecentFiles.properties, "Options")
         } catch (e: Exception) {
             RecentFiles.useDefault()
             RecentFiles.save()
-            printExceptionToErrorLog(e)
+            Logger.warning("Recent Files loaded failed", "Options")
+            Logger.exception(e)
             showDialog(
                 null,
                 2,

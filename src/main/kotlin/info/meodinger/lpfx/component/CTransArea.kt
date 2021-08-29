@@ -2,7 +2,6 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -43,20 +42,16 @@ class CTransArea: TextArea() {
         }
 
         init {
-            for (symbol in symbols) items.add(createSymbolItem(symbol.first, symbol.second).also {
+            for ((symbol, displayable) in symbols) items.add(createSymbolItem(symbol, displayable).also {
                 it.setOnAction {
-                    this@CTransArea.insertText(this@CTransArea.caretPosition, symbol.first)
+                    this@CTransArea.insertText(this@CTransArea.caretPosition, symbol)
                 }
             })
         }
     }
 
-    val isBoundProperty = SimpleBooleanProperty(false)
-    var isBound: Boolean
-        get() = isBoundProperty.value
-        set(value) {
-            isBoundProperty.value = value
-        }
+    val isBound: Boolean
+        get() = textProperty().isBound
 
     init {
         // Symbol Menu

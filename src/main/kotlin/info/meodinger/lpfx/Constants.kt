@@ -31,6 +31,7 @@ const val NOT_FOUND = -1
 
 /**
  * Work Mode
+ * @param description Display name for WorkMode
  */
 enum class WorkMode(val description: String) {
     InputMode(I18N["mode.work.input"]),
@@ -63,9 +64,11 @@ fun getViewMode(description: String): ViewMode = when (description) {
 /**
  * Translation File Type
  */
-enum class FileType {
-    LPFile,
-    MeoFile
+enum class FileType(val description: String) {
+    LPFile(I18N["filetype.translation_lp"]),
+    MeoFile(I18N["filetype.translation_meo"]);
+
+    override fun toString(): String = description
 }
 fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
 fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)

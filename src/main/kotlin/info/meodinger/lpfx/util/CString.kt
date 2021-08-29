@@ -13,6 +13,15 @@ import java.util.*
  * Location: info.meodinger.lpfx.util
  */
 
+fun StringBuilder.deleteTail(tail: String) {
+    if (tail.isEmpty()) return
+
+    val tailLength = tail.length
+    val builderLength = this.length
+
+    this.deleteRange(builderLength - tailLength, builderLength - 1)
+}
+
 /**
  * Is a string only contains 0-9
  */
@@ -87,7 +96,7 @@ fun omitHighText(longText: String): String {
     if (lines.size <= 10) return longText
 
     val builder = StringBuilder()
-    for (i in 0..9) builder.appendLine(lines[i])
+    for (i in 0 until 9) builder.appendLine(lines[i])
     builder.append(String.format(I18N["util.long_text.format.i"], lines.size - 9))
 
     return builder.toString()
@@ -115,7 +124,7 @@ fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String
             builder.appendLine(line)
         }
     }
-    if (builder.isNotEmpty()) builder.deleteAt(builder.length - 1)
+    if (builder.isNotEmpty()) builder.deleteTail("\n")
 
     return builder.toString()
 }

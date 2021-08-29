@@ -213,7 +213,7 @@ class CMenuBar : MenuBar() {
 
     private fun editComment() {
         showInputArea(State.stage, I18N["dialog.edit_comment.title"], State.transFile.comment).ifPresent {
-            State.transFile.comment = it
+            State.setComment(it)
             State.isChanged = true
         }
     }

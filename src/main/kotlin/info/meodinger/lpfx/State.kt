@@ -3,6 +3,8 @@ package info.meodinger.lpfx
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransFile
+import info.meodinger.lpfx.type.TransGroup
+import info.meodinger.lpfx.type.TransLabel
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
@@ -92,7 +94,55 @@ object State {
 
         controller.reset()
 
-        Logger.info("State reset", "State")
+        Logger.info("Reset")
+    }
+
+    fun addTransGroup(transGroup: TransGroup) {
+        transFile.groupList.add(transGroup)
+
+        Logger.info("Added $transGroup", "State")
+    }
+    fun delTransGroup(transGroup: TransGroup) {
+        transFile.groupList.remove(transGroup)
+
+        Logger.info("Removed $transGroup", "State")
+    }
+    fun setTransGroupName(groupId: Int, name: String) {
+        transFile.getTransGroupAt(groupId).name = name
+
+        Logger.info("Set GroupID=$groupId @name=$name", "State")
+    }
+    fun setTransGroupColor(groupId: Int, color: String) {
+        transFile.getTransGroupAt(groupId).color = color
+
+        Logger.info("Set GroupID=$groupId @color=$color", "State")
+    }
+
+    fun addTransLabel(picName: String, transLabel: TransLabel) {
+        transFile.getTransLabelListOf(picName).add(transLabel)
+
+        Logger.info("Added $picName @ $transLabel", "State")
+    }
+    fun delTransLabel(picName: String, transLabel: TransLabel) {
+        transFile.getTransLabelListOf(picName).remove(transLabel)
+
+        Logger.info("Removed $picName @ $transLabel", "State")
+    }
+    fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
+        transFile.getTransLabelAt(picName, index).index = newIndex
+
+        Logger.info("Set $picName->Index=$index @index=$newIndex", "State")
+    }
+    fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
+        transFile.getTransLabelAt(picName, index).groupId = groupId
+
+        Logger.info("Set $picName->Index=$index @groupId=$groupId", "State")
+    }
+
+    fun setComment(comment: String) {
+        transFile.comment = comment
+
+        Logger.info("Set comment @ ${comment.replace("\n", " ")}")
     }
 
     fun getFileFolder(): String = File(transPath).parent

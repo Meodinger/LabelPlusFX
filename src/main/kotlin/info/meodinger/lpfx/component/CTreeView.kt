@@ -56,7 +56,7 @@ class CTreeView: TreeView<String>() {
             r_addGroupDialog.result = null
             r_addGroupDialog.showAndWait().ifPresent { newGroup ->
                 // Edit data
-                State.transFile.groupList.add(newGroup)
+                State.addTransGroup(newGroup)
                 // Update view
                 State.controller.updateLabelColorList()
                 State.controller.addLabelLayer()
@@ -84,11 +84,12 @@ class CTreeView: TreeView<String>() {
                     }
                 }
 
-                val transGroup = State.transFile.groupList[State.transFile.getGroupIdByName(groupItem.value)]
+                val groupId = State.transFile.getGroupIdByName(groupItem.value)
+                val transGroup = State.transFile.getTransGroupAt(groupId)
                 val oldName = transGroup.name
 
                 // Edit data
-                transGroup.name = newName
+                State.setTransGroupName(groupId, newName)
                 // Update view
                 State.controller.updateGroupList()
                 updateGroupItem(oldName, transGroup)
@@ -101,10 +102,11 @@ class CTreeView: TreeView<String>() {
         private val g_changeColorAction = { groupItem: TreeItem<String> ->
             val newColor = g_changeColorPicker.value
 
-            val transGroup = State.transFile.groupList[State.transFile.getGroupIdByName(groupItem.value)]
+            val groupId = State.transFile.getGroupIdByName(groupItem.value)
+            val transGroup = State.transFile.getTransGroupAt(groupId)
 
             // Edit data
-            transGroup.color = newColor.toHex()
+            State.setTransGroupColor(groupId, newColor.toHex())
             // Update view
             State.controller.updateLabelColorList()
             updateGroupItem(transGroup.name, transGroup)
@@ -114,15 +116,13 @@ class CTreeView: TreeView<String>() {
         private val g_changeColorItem = MenuItem()
         private val g_deleteAction = { groupItem: TreeItem<String> ->
             val groupId = State.transFile.getGroupIdByName(groupItem.value)
-            val transGroup = State.transFile.groupList[groupId]
+            val transGroup = State.transFile.getTransGroupAt(groupId)
 
             // Edit data
-            for (labels in State.transFile.transMap.values) for (label in labels) {
-                if (label.groupId >= groupId) {
-                    label.groupId = label.groupId - 1
-                }
+            for (key in State.transFile.transMap.keys) for (label in State.transFile.getTransLabelListOf(key)) {
+                if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
             }
-            State.transFile.groupList.remove(transGroup)
+            State.delTransGroup(transGroup)
             // Update view
             State.controller.updateLabelColorList()
             State.controller.delLabelLayer(groupId)
@@ -146,10 +146,7 @@ class CTreeView: TreeView<String>() {
                 val newGroupId = State.transFile.getGroupIdByName(newGroupName)
 
                 // Edit data
-                for (item in items) {
-                    val transLabel = (item as CTreeItem).meta
-                    transLabel.groupId = newGroupId
-                }
+                for (item in items) State.setTransLabelGroup(State.currentPicName, (item as CTreeItem).index, newGroupId)
                 // Update view
                 State.controller.updateTreeView()
                 State.controller.updateLabelPane()
@@ -168,13 +165,12 @@ class CTreeView: TreeView<String>() {
             if (result.isPresent && result.get() == ButtonType.YES) {
                 // Edit data
                 for (item in items) {
+                    val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
                     val transLabel = (item as CTreeItem).meta
-                    for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
-                        if (l.index > transLabel.index) {
-                            l.index = l.index - 1
-                        }
+                    for (label in transLabels) if (label.index > transLabel.index) {
+                        State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                     }
-                    State.transFile.getTransLabelListOf(State.currentPicName).remove(transLabel)
+                    State.delTransLabel(State.currentPicName, transLabel)
                 }
                 // Update view
                 State.controller.updateTreeView()

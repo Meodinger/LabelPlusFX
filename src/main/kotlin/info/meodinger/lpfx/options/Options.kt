@@ -42,10 +42,10 @@ object Options {
             // recent_files
             initRecentFiles()
         } catch (e: IOException) {
-            showException(e)
-            showError(I18N["error.initialize_options_failed"])
             Logger.fatal("Options init failed", "Options")
             Logger.exception(e)
+            showException(e)
+            showError(I18N["error.initialize_options_failed"])
             exitProcess(0)
         }
     }
@@ -78,7 +78,10 @@ object Options {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
             )
         }
-        Runtime.getRuntime().addShutdownHook(Thread { Preference.save() })
+        Runtime.getRuntime().addShutdownHook(Thread {
+            Preference.save()
+            Logger.info("Preference saved", "Options")
+        })
     }
 
     @Throws(IOException::class)
@@ -109,7 +112,10 @@ object Options {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
             )
         }
-        Runtime.getRuntime().addShutdownHook(Thread { Settings.save() })
+        Runtime.getRuntime().addShutdownHook(Thread {
+            Settings.save()
+            Logger.info("Settings saved", "Options")
+        })
     }
 
     @Throws(IOException::class)
@@ -140,7 +146,10 @@ object Options {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_RecentFiles)
             )
         }
-        Runtime.getRuntime().addShutdownHook(Thread { RecentFiles.save() })
+        Runtime.getRuntime().addShutdownHook(Thread {
+            RecentFiles.save()
+            Logger.info("RecentFiles saved", "Options")
+        })
     }
 
 }

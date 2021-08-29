@@ -1,5 +1,6 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Options
 import info.meodinger.lpfx.util.dialog.initDialogOwner
 import info.meodinger.lpfx.util.resource.ICON
@@ -20,6 +21,8 @@ import javafx.stage.Stage
 class LabelPlusFX: Application() {
 
     init {
+        Logger.info("App start")
+        Runtime.getRuntime().addShutdownHook(Thread { Logger.info("App exit") })
         State.application = this
         Options.init()
     }

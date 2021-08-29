@@ -328,11 +328,6 @@ class CLabelPane : ScrollPane() {
 
     @Throws(IOException::class)
     private fun setupImage(path: String) {
-        vvalue = 0.0
-        hvalue = 0.0
-        root.layoutX = 0.0
-        root.layoutY = 0.0
-
         val file = File(path)
         if (file.exists()) {
             image = Image(file.toURI().toURL().toString())
@@ -576,6 +571,11 @@ class CLabelPane : ScrollPane() {
 
     fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
         isVisible = false
+
+        vvalue = 0.0
+        hvalue = 0.0
+        root.layoutX = 0.0
+        root.layoutY = 0.0
 
         selectedLabelIndex = NOT_FOUND
 

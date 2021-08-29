@@ -45,7 +45,7 @@ fun exportLP(file: File, transFile: TransFile) {
         val builder = StringBuilder()
 
         builder.append(LPTransFile.PIC_START).append(picName).append(LPTransFile.PIC_END).append("\n")
-        for (label in transFile.transMap[picName]!!) {
+        for (label in transFile.getTransLabelListOf(picName)) {
             builder.append(buildLabel(label)).append("\n")
         }
         builder.append("\n")

@@ -142,10 +142,7 @@ class Controller : Initializable {
             if (!State.isOpened) return@addListener
             if (newValue == null) return@addListener
 
-            State.transFile.groupList.forEachIndexed { index, transGroup ->
-                if (transGroup.name == newValue)
-                    State.currentGroupId = index
-            }
+            State.currentGroupId = State.transFile.getGroupIdByName(newValue)
         }
 
         // cLabelPane - currentLabelIndex
@@ -174,7 +171,6 @@ class Controller : Initializable {
 
             updateTreeView()
             updateLabelPane()
-            cLabelPane.moveToZero()
         }
 
         // Clear text layer when group change
@@ -188,7 +184,7 @@ class Controller : Initializable {
         State.currentLabelIndexProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
-            val transLabels = State.transFile.transMap[State.currentPicName]!!
+            val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
 
             if (oldValue != NOT_FOUND) {
                 val oldLabel = transLabels.find { it.index == oldValue }
@@ -229,7 +225,7 @@ class Controller : Initializable {
             )
 
             // Edit data
-            State.transFile.getTransLabelListOf(State.currentPicName).add(transLabel)
+            State.addTransLabel(State.currentPicName, transLabel)
             // Update view
             cLabelPane.createLabel(transLabel)
             cTreeView.addLabelItem(transLabel)
@@ -242,10 +238,10 @@ class Controller : Initializable {
             val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
 
             // Edit data
-            State.transFile.getTransLabelListOf(State.currentPicName).remove(transLabel)
-            for (l in State.transFile.getTransLabelListOf(State.currentPicName)) {
-                if (l.index > transLabel.index) {
-                    l.index -= 1
+            State.delTransLabel(State.currentPicName, transLabel)
+            for (label in State.transFile.getTransLabelListOf(State.currentPicName)) {
+                if (label.index > transLabel.index) {
+                    State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                 }
             }
             // Update view
@@ -328,7 +324,7 @@ class Controller : Initializable {
 
             val item = cTreeView.selectionModel.selectedItem
             if (item != null && item is CTreeItem) {
-                cLabelPane.moveToLabel(State.transFile.transMap[State.currentPicName]!!.find { e -> e.index == item.index }!!)
+                cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
             }
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -339,7 +335,7 @@ class Controller : Initializable {
                 val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + shift)
 
                 if (item != null && item is CTreeItem)
-                    cLabelPane.moveToLabel(State.transFile.transMap[State.currentPicName]!!.find { e -> e.index == item.index }!!)
+                    cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
             }
         }
 
@@ -429,12 +425,8 @@ class Controller : Initializable {
         reg()
     }
 
-    private fun exit() {
-        Logger.info("App exit", "Controller")
-        exitProcess(0)
-    }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
-        val transLabels = State.transFile.transMap[State.currentPicName]!!
+        val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
         val transLabel = transLabels.find { it.index == index }!!
         val whereToSearch = when (State.viewMode) {
             ViewMode.GroupMode -> cTreeView.root.children[transLabel.groupId]
@@ -508,7 +500,6 @@ class Controller : Initializable {
         val groupCreateList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
         for (i in groupNameList.indices) if (groupCreateList[i])
             groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
-
         val transMap = HashMap<String, MutableList<TransLabel>>()
         for (pic in pics) transMap[pic] = ArrayList()
 
@@ -527,11 +518,10 @@ class Controller : Initializable {
                 FileType.MeoFile -> exportMeo(file, transFile)
             }
         } catch (e: IOException) {
-            e.printStackTrace()
-            showError(I18N["error.new_failed"])
-            showException(e)
             Logger.error("New failed", "Controller")
             Logger.exception(e)
+            showError(I18N["error.new_failed"])
+            showException(e)
         }
 
         Logger.info("Newed TransFile", "Controller")
@@ -546,15 +536,14 @@ class Controller : Initializable {
                 FileType.MeoFile -> loadMeo(file)
             }
         } catch (e: IOException) {
-            e.printStackTrace()
-            showError(I18N["error.open_failed"])
-            showException(e)
             Logger.error("Open failed", "Controller")
             Logger.exception(e)
+            showError(I18N["error.open_failed"])
+            showException(e)
             return
         }
 
-        Logger.debug("Read TransFile: $transFile")
+        Logger.debug("Read TransFile: $transFile", "Controller")
 
         // Show info if comment not in default list
         val comment = transFile.comment.trim()
@@ -618,13 +607,12 @@ class Controller : Initializable {
                 Logger.info("Backed TransFile to ${bak.path}", "Controller")
             } catch (e: Exception) {
                 bak = null
-                e.printStackTrace()
+                Logger.error("TransFile backup failed", "Controller")
+                Logger.exception(e)
                 if (!isSilent) {
                     showError(I18N["error.backup_failed"])
                     showException(e)
                 }
-                Logger.error("TransFile backup failed", "Controller")
-                Logger.exception(e)
             }
         }
 
@@ -636,9 +624,9 @@ class Controller : Initializable {
             }
             if (!isSilent) showInfo(I18N["info.saved_successfully"])
             Logger.debug("Wrote ${State.transFile}", "Controller")
-            Logger.info("Wrote TransFile", "Controller")
         } catch (e: IOException) {
-            e.printStackTrace()
+            Logger.error("Save failed", "Controller")
+            Logger.exception(e)
             if (!isSilent) {
                 if (bak != null) {
                     showError(String.format(I18N["error.save_failed_backed.format.bak"], bak.path))
@@ -647,15 +635,15 @@ class Controller : Initializable {
                 }
                 showException(e)
             }
-            Logger.error("Save failed", "Controller")
-            Logger.exception(e)
             return
         }
 
         // Remove Backup
-        if (bak != null) if (!bak.delete()) if (!isSilent) {
-            showError(I18N["error.backup_clear_failed"])
-            Logger.error("Backup removed failed")
+        if (bak != null) if (!bak.delete()) {
+            if (!isSilent) showError(I18N["error.backup_clear_failed"])
+            Logger.error("Backup removed failed", "Controller")
+        } else {
+            Logger.info("Backup removed", "Controller")
         }
 
         State.transPath = file.path
@@ -665,16 +653,16 @@ class Controller : Initializable {
     }
 
     fun close() {
-        if (!State.isChanged) exit()
+        if (!State.isChanged) exitProcess(0)
 
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), getFileType(State.transPath), false)
-                    exit()
+                    exitProcess(0)
                 }
                 ButtonType.NO -> {
-                    exit()
+                    exitProcess(0)
                 }
                 ButtonType.CANCEL -> {
                     return@ifPresent
@@ -693,8 +681,6 @@ class Controller : Initializable {
 
         setSwitchViewModeButton(State.viewMode)
         setSwitchWorkModeButton(State.workMode)
-
-        Logger.info("Controller reset", "Controller")
     }
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
@@ -721,8 +707,9 @@ class Controller : Initializable {
         cLabelPane.update(
             State.getPicPathNow(),
             State.transFile.groupList.size,
-            State.transFile.transMap[State.currentPicName]!!
+            State.transFile.getTransLabelListOf(State.currentPicName)
         )
+        cLabelPane.moveToZero()
 
         Logger.info("Label pane updated", "Controller")
     }

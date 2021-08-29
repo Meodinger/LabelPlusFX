@@ -47,18 +47,16 @@ object Logger {
         val builder = StringBuilder()
 
         builder.append("[").append(formatter.format(Date())).append("] ")
-        builder.append("[").append(type).append("] ")
-        if (from != null) builder.append("<").append(from).append("> ")
+
+        builder.append("[")
+        if (from != null) builder.append(from).append("/")
+        builder.append(type)
+        builder.append("] ")
+
+        builder.appendLine(text)
 
         writer.write(builder.toString())
-        writer.write(text)
-        writer.write("\n")
-
         writer.flush()
-    }
-
-    fun debug(message: String, from: String? = null) {
-        log(LogType.DEBUG, message, from)
     }
 
     fun debug(message: String, list: List<*>, from: String? = null) {
@@ -67,6 +65,10 @@ object Logger {
         if (builder.isNotEmpty()) builder.deleteTail("\n")
 
         debug("$message\n$builder", from)
+    }
+
+    fun debug(message: String, from: String? = null) {
+        log(LogType.DEBUG, message, from)
     }
 
     fun info(message: String, from: String? = null) {
@@ -88,5 +90,4 @@ object Logger {
     fun exception(e: Exception) {
         e.printStackTrace(PrintWriter(writer))
     }
-
 }

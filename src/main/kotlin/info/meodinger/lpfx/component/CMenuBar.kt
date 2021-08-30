@@ -21,6 +21,9 @@ import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
 import javafx.stage.FileChooser
 import java.io.*
+import java.nio.file.Files
+import java.util.stream.Collectors
+import kotlin.io.path.name
 
 /**
  * Author: Meodinger
@@ -42,6 +45,7 @@ class CMenuBar : MenuBar() {
     private val mExportAsMeo = MenuItem(I18N["m.meo"])
     private val mExportAsTransPack = MenuItem(I18N["m.pack"])
     private val mEditComment = MenuItem(I18N["m.comment"])
+    private val mEditPictures = MenuItem(I18N["m.pictures"])
     private val mmAbout = Menu(I18N["mm.about"])
     private val mSettings = MenuItem(I18N["m.settings"])
     private val mLogs = MenuItem(I18N["m.logs"])
@@ -79,6 +83,7 @@ class CMenuBar : MenuBar() {
         mExportAsMeo.setOnAction { exportTransFile(it) }
         mExportAsTransPack.setOnAction { exportTransPack() }
         mEditComment.setOnAction { editComment() }
+        mEditPictures.setOnAction { editPictures() }
         mSettings.setOnAction { settings() }
         mLogs.setOnAction { logs() }
         mAbout.setOnAction { about() }
@@ -100,7 +105,7 @@ class CMenuBar : MenuBar() {
         }
 
         mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
-        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment)
+        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
@@ -218,6 +223,34 @@ class CMenuBar : MenuBar() {
     private fun editComment() {
         showInputArea(State.stage, I18N["dialog.edit_comment.title"], State.transFile.comment).ifPresent {
             State.setComment(it)
+            State.isChanged = true
+        }
+    }
+    private fun editPictures() {
+        // Choose Pics
+        val selected = State.transFile.transMap.keys.toList()
+        val unselected = Files.walk(File(State.getFileFolder()).toPath()).filter {
+            if (selected.contains(it.name)) return@filter false
+            for (extension in EXTENSIONS_PIC) if (it.name.endsWith(extension)) return@filter true
+            false
+        }.map { it.name }.collect(Collectors.toList())
+
+        showChoiceList(State.stage, unselected, selected).ifPresent {
+            if (it.isEmpty()) {
+                showInfo(I18N["alert.required_at_least_1_ic"])
+                return@ifPresent
+            }
+
+            // Edit date
+            val toRemove = ArrayList<String>()
+            for (picName in State.transFile.transMap.keys) if (!it.contains(picName)) toRemove.add(picName)
+            for (picName in toRemove) State.removePicture(picName)
+            val toAdd = ArrayList<String>()
+            for (picName in it) if (!State.transFile.transMap.keys.contains(picName)) toAdd.add(picName)
+            for (picName in toAdd) State.addPicture(picName)
+            // Update view
+            State.controller.updatePicList()
+            // Mark change
             State.isChanged = true
         }
     }

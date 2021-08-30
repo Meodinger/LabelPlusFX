@@ -79,10 +79,9 @@ fun sortByDigit(strings: List<String>): List<String> {
             }
         }
         if (canCastToIntList) {
-            val numberLength = trimmed[2].length
-            val integerList = MutableList(trimmed.size - 2) { trimmed[it + 2].toInt() }.also { it.sort() }
+            val sorted = trimmed.subList(2, trimmed.size).sortedBy { it.toInt() }
 
-            return List(integerList.size) { trimmed[0] + String.format("%0${numberLength}d", integerList[it]) + trimmed[1] }
+            return List(sorted.size) { trimmed[0] + sorted[it] + trimmed[1] }
         }
     }
 

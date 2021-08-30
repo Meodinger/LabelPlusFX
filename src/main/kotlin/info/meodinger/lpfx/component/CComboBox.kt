@@ -50,12 +50,11 @@ class CComboBox<T> : HBox() {
     }
 
     fun setList(list: List<T>) {
-        if (list.isEmpty()) return
-
         reset()
         size = list.size
         comboBox.items.addAll(list)
-        comboBox.value = comboBox.items[0]
+
+        if (list.isNotEmpty()) comboBox.value = comboBox.items[0]
     }
 
     fun back() {

@@ -485,6 +485,11 @@ class Controller : Initializable {
         }
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
+            if (result.get().isEmpty()) {
+                showInfo(I18N["alert.required_at_least_1_ic"])
+                Logger.info("Chose none, Cancel", "Controller")
+                return
+            }
             pics.addAll(result.get())
         } else {
             Logger.info("Cancel", "Controller")
@@ -685,7 +690,7 @@ class Controller : Initializable {
     fun updatePicList() {
         cPicBox.setList(TransFile.getSortedPicList(State.transFile))
 
-        Logger.info("Pic list updated", "Controller")
+        Logger.info("Picture list updated", "Controller")
     }
     fun updateGroupList() {
         val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].name }
@@ -699,9 +704,10 @@ class Controller : Initializable {
             State.viewMode,
             State.currentPicName,
             State.transFile.groupList,
-            State.transFile.getTransLabelListOf(State.currentPicName))
+            State.transFile.getTransLabelListOf(State.currentPicName)
+        )
 
-        Logger.info("Tree view updated", "Controller")
+        Logger.info("TreeView updated", "Controller")
     }
     fun updateLabelPane() {
         cLabelPane.update(
@@ -711,15 +717,16 @@ class Controller : Initializable {
         )
         cLabelPane.moveToZero()
 
-        Logger.info("Label pane updated", "Controller")
+        Logger.info("LabelPane updated", "Controller")
     }
     fun updateLabelColorList() {
         val list = List(State.transFile.groupList.size) { State.transFile.groupList[it].color }
         cLabelPane.colorList = FXCollections.observableList(list)
 
-        Logger.info("Label pane color list updated", "Controller")
+        Logger.info("LabelPane color list updated", "Controller")
     }
 
+    // LabelPane
     fun addLabelLayer() {
         cLabelPane.createLabelLayer()
 
@@ -731,6 +738,7 @@ class Controller : Initializable {
         Logger.info("Removed label layer", "Controller")
     }
 
+    // TreeView
     fun addGroupItem(transGroup: TransGroup) {
         cTreeView.addGroupItem(transGroup)
 

@@ -21,6 +21,7 @@ import javafx.util.Callback
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Author: Meodinger
@@ -273,7 +274,7 @@ fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<
     return dialog.showAndWait()
 }
 
-fun <T> showChoiceList(owner: Window?, list: List<T>): Optional<List<T>> {
+fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = ArrayList()): Optional<List<T>> {
     val dialog = Dialog<List<T>>()
     dialog.initOwner(owner)
     dialog.title = I18N["dialog.choose.title"]
@@ -282,7 +283,8 @@ fun <T> showChoiceList(owner: Window?, list: List<T>): Optional<List<T>> {
     val right = ListView<T>()
     left.selectionModel.selectionMode = SelectionMode.MULTIPLE
     right.selectionModel.selectionMode = SelectionMode.MULTIPLE
-    left.items.addAll(list)
+    left.items.addAll(unselected)
+    right.items.addAll(selected)
 
     val add = Button(I18N["dialog.choose.add"])
     val addAll = Button(I18N["dialog.choose.add_all"])

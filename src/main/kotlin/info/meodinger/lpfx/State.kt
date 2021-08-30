@@ -118,6 +118,17 @@ object State {
         Logger.info("Set GroupID=$groupId @color=$color", "State")
     }
 
+    fun addPicture(picName: String) {
+        transFile.transMap[picName] = ArrayList()
+
+        Logger.info("Added picture $picName", "State")
+    }
+    fun removePicture(picName: String) {
+        transFile.transMap.remove(picName)
+
+        Logger.info("Removed picture $picName", "State")
+    }
+
     fun addTransLabel(picName: String, transLabel: TransLabel) {
         transFile.getTransLabelListOf(picName).add(transLabel)
 

@@ -122,10 +122,10 @@ class CTreeView: TreeView<String>() {
             for (key in State.transFile.transMap.keys) for (label in State.transFile.getTransLabelListOf(key)) {
                 if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
             }
-            State.delTransGroup(transGroup)
+            State.removeTransGroup(transGroup)
             // Update view
             State.controller.updateLabelColorList()
-            State.controller.delLabelLayer(groupId)
+            State.controller.removeLabelLayer(groupId)
             State.controller.updateGroupList()
             removeGroupItem(transGroup)
             // Mark change
@@ -170,7 +170,7 @@ class CTreeView: TreeView<String>() {
                     for (label in transLabels) if (label.index > transLabel.index) {
                         State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                     }
-                    State.delTransLabel(State.currentPicName, transLabel)
+                    State.removeTransLabel(State.currentPicName, transLabel)
                 }
                 // Update view
                 State.controller.updateTreeView()

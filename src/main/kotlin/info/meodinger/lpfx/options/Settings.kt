@@ -1,7 +1,6 @@
 package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.ViewMode
-import info.meodinger.lpfx.getViewMode
 
 import java.io.IOException
 
@@ -16,12 +15,14 @@ object Settings : AbstractProperties() {
     const val DefaultGroupColorList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
     const val ViewModePreference = "ViewModePreference"
+    const val LogLevelPreference = "LogLevelPreference"
 
     override val default = listOf(
         CProperty(DefaultGroupNameList, "框内", "框内外"),
         CProperty(DefaultGroupColorList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
-        CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode) // Input, Label
+        CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode), // Input, Label
+        CProperty(LogLevelPreference, Logger.LogType.INFO)
     )
 
     init {
@@ -29,7 +30,8 @@ object Settings : AbstractProperties() {
             CProperty(DefaultGroupNameList),
             CProperty(DefaultGroupColorList),
             CProperty(IsGroupCreateOnNewTrans),
-            CProperty(ViewModePreference)
+            CProperty(ViewModePreference),
+            CProperty(LogLevelPreference)
         ))
     }
 
@@ -58,10 +60,17 @@ object Settings : AbstractProperties() {
         val viewModePreferenceList = this[ViewModePreference].asStringList()
         for (preference in viewModePreferenceList)
             try {
-                getViewMode(preference)
+                ViewMode.getMode(preference)
             } catch (e: Exception) {
                 throw CPropertyException.propertyValueInvalid(ViewModePreference, preference).initCause(e)
             }
+
+        val logLevel = this[LogLevelPreference].asString()
+        try {
+            Logger.LogType.getType(logLevel)
+        } catch (e: Exception) {
+            throw CPropertyException.propertyValueInvalid(LogLevelPreference, logLevel).initCause(e)
+        }
 
     }
 }

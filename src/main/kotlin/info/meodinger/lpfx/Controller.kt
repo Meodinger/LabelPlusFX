@@ -238,7 +238,7 @@ class Controller : Initializable {
             val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
 
             // Edit data
-            State.delTransLabel(State.currentPicName, transLabel)
+            State.removeTransLabel(State.currentPicName, transLabel)
             for (label in State.transFile.getTransLabelListOf(State.currentPicName)) {
                 if (label.index > transLabel.index) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
@@ -461,7 +461,7 @@ class Controller : Initializable {
                 return true
             }
             if (result.get() == ButtonType.YES) {
-                save(File(State.transPath), getFileType(State.transPath), true)
+                save(File(State.transPath), FileType.getType(State.transPath), true)
             }
             return false
         }
@@ -658,7 +658,7 @@ class Controller : Initializable {
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
-                    save(File(State.transPath), getFileType(State.transPath), false)
+                    save(File(State.transPath), FileType.getType(State.transPath), false)
                     exitProcess(0)
                 }
                 ButtonType.NO -> {
@@ -724,7 +724,7 @@ class Controller : Initializable {
 
         Logger.info("Added label layer", "Controller")
     }
-    fun delLabelLayer(groupId: Int) {
+    fun removeLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)
 
         Logger.info("Removed label layer", "Controller")
@@ -745,8 +745,8 @@ class Controller : Initializable {
         setSwitchWorkModeButton(mode)
 
         setViewMode(when (mode) {
-            WorkMode.InputMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
-            WorkMode.LabelMode -> getViewMode(Settings[Settings.ViewModePreference].asStringList()[1])
+            WorkMode.InputMode -> ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[0])
+            WorkMode.LabelMode -> ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[1])
         })
 
         Logger.info("Switched work mode to $mode", "Controller")

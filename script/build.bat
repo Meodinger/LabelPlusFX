@@ -1,10 +1,7 @@
 @echo off
 
 set DIR=%~dp0..
-
-set OUTPUT=%DIR%\out\LabelPlusFX
-
-rd /S /Q "%OUTPUT%"
+rd /S /Q "%DIR%\out\LabelPlusFX"
 
 set OUT="%DIR%\out"
 set MODULES="%DIR%\out\artifacts\lpfx_jar"

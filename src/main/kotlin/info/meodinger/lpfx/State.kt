@@ -90,7 +90,7 @@ object State {
         currentLabelIndex = NOT_FOUND
         isChanged = false
         workMode = WorkMode.InputMode
-        viewMode = getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
+        viewMode = ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[0])
 
         controller.reset()
 
@@ -102,7 +102,7 @@ object State {
 
         Logger.info("Added $transGroup", "State")
     }
-    fun delTransGroup(transGroup: TransGroup) {
+    fun removeTransGroup(transGroup: TransGroup) {
         transFile.groupList.remove(transGroup)
 
         Logger.info("Removed $transGroup", "State")
@@ -123,7 +123,7 @@ object State {
 
         Logger.info("Added $picName @ $transLabel", "State")
     }
-    fun delTransLabel(picName: String, transLabel: TransLabel) {
+    fun removeTransLabel(picName: String, transLabel: TransLabel) {
         transFile.getTransLabelListOf(picName).remove(transLabel)
 
         Logger.info("Removed $picName @ $transLabel", "State")

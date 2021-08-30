@@ -23,6 +23,17 @@ object Logger {
         FATAL("FATAL");
 
         override fun toString(): String = type
+
+        companion object {
+            fun getType(type: String): LogType = when (type) {
+                DEBUG.type -> DEBUG
+                INFO.type -> INFO
+                WARNING.type -> WARNING
+                ERROR.type -> ERROR
+                FATAL.type -> FATAL
+                else -> throw IllegalArgumentException("No such log type")
+            }
+        }
     }
 
     private val log: File
@@ -30,6 +41,8 @@ object Logger {
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
     var level: LogType = LogType.INFO
+    val logName: String
+        get() = log.name
 
     init {
         val path = Options.logs.resolve(SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Date()))
@@ -41,12 +54,12 @@ object Logger {
         info("Logger start")
     }
 
-    private fun log(type: LogType, text: String, from: String? = null) {
+    private fun log(time: Long, type: LogType, text: String, from: String? = null) {
         if (type < level) return
 
         val builder = StringBuilder()
 
-        builder.append("[").append(formatter.format(Date())).append("] ")
+        builder.append("[").append(formatter.format(Date(time))).append("] ")
 
         builder.append("[")
         if (from != null) builder.append(from).append("/")
@@ -60,31 +73,33 @@ object Logger {
     }
 
     fun debug(message: String, list: List<*>, from: String? = null) {
+        val time = Date().time
+
         val builder = StringBuilder()
         for (e in list) builder.appendLine(e)
         if (builder.isNotEmpty()) builder.deleteTail("\n")
 
-        debug("$message\n$builder", from)
+        log(time, LogType.DEBUG, "$message\n$builder", from)
     }
 
     fun debug(message: String, from: String? = null) {
-        log(LogType.DEBUG, message, from)
+        log(Date().time, LogType.DEBUG, message, from)
     }
 
     fun info(message: String, from: String? = null) {
-        log(LogType.INFO, message, from)
+        log(Date().time, LogType.INFO, message, from)
     }
 
     fun warning(message: String, from: String? = null) {
-        log(LogType.WARNING, message, from)
+        log(Date().time, LogType.WARNING, message, from)
     }
 
     fun error(message: String, from: String? = null) {
-        log(LogType.ERROR, message, from)
+        log(Date().time, LogType.ERROR, message, from)
     }
 
     fun fatal(message: String, from: String? = null) {
-        log(LogType.FATAL, message, from)
+        log(Date().time, LogType.FATAL, message, from)
     }
 
     fun exception(e: Exception) {

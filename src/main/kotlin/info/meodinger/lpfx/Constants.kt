@@ -38,11 +38,14 @@ enum class WorkMode(val description: String) {
     LabelMode(I18N["mode.work.label"]);
 
     override fun toString(): String = description
-}
-fun getWorkMode(description: String): WorkMode = when (description) {
-    WorkMode.InputMode.description -> WorkMode.InputMode
-    WorkMode.LabelMode.description -> WorkMode.LabelMode
-    else -> throw IllegalArgumentException("exception.illegal_argument.invalid_work_mode")
+
+    companion object {
+        fun getWorkMode(description: String): WorkMode = when (description) {
+            InputMode.description -> InputMode
+            LabelMode.description -> LabelMode
+            else -> throw IllegalArgumentException("exception.illegal_argument.invalid_work_mode")
+        }
+    }
 }
 
 /**
@@ -54,11 +57,14 @@ enum class ViewMode(val description: String) {
     GroupMode(I18N["mode.view.group"]);
 
     override fun toString(): String = description
-}
-fun getViewMode(description: String): ViewMode = when (description) {
-    ViewMode.IndexMode.description -> ViewMode.IndexMode
-    ViewMode.GroupMode.description -> ViewMode.GroupMode
-    else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
+
+    companion object {
+        fun getMode(description: String): ViewMode = when (description) {
+            IndexMode.description -> IndexMode
+            GroupMode.description -> GroupMode
+            else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
+        }
+    }
 }
 
 /**
@@ -69,11 +75,14 @@ enum class FileType(val description: String) {
     MeoFile(I18N["filetype.translation_meo"]);
 
     override fun toString(): String = description
-}
-fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
-fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)
-fun getFileType(path: String): FileType {
-    if (isMeoFile(path)) return FileType.MeoFile
-    if (isLPFile(path)) return FileType.LPFile
-    throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
+
+    companion object {
+        private fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
+        private fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)
+        fun getType(path: String): FileType {
+            if (isMeoFile(path)) return MeoFile
+            if (isLPFile(path)) return LPFile
+            throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
+        }
+    }
 }

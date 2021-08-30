@@ -107,7 +107,7 @@ class CMenuBar : MenuBar() {
             val item = MenuItem(path)
             item.setOnAction {
                 State.controller.stay()
-                State.controller.open(File(path), getFileType(path))
+                State.controller.open(File(path), FileType.getType(path))
             }
             mOpenRecent.items.add(item)
         }
@@ -122,7 +122,7 @@ class CMenuBar : MenuBar() {
 
         fileChooser.title = I18N["chooser.new"]
         val file = fileChooser.showSaveDialog(State.stage) ?: return
-        val type = getFileType(file.path)
+        val type = FileType.getType(file.path)
 
         State.controller.new(file, type)
         State.controller.open(file, type)
@@ -137,12 +137,12 @@ class CMenuBar : MenuBar() {
         fileChooser.title = I18N["chooser.open"]
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
-        State.controller.open(file, getFileType(file.path))
+        State.controller.open(file, FileType.getType(file.path))
     }
     private fun saveTranslation() {
         // save
 
-        State.controller.save(File(State.transPath), getFileType(State.transPath), true)
+        State.controller.save(File(State.transPath), FileType.getType(State.transPath), true)
     }
     private fun saveAsTranslation() {
         // save
@@ -150,7 +150,7 @@ class CMenuBar : MenuBar() {
         fileChooser.title = I18N["chooser.save"]
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
-        State.controller.save(file, getFileType(file.path), false)
+        State.controller.save(file, FileType.getType(file.path), false)
     }
     private fun bakRecovery() {
         // transfer & open
@@ -172,7 +172,7 @@ class CMenuBar : MenuBar() {
             return
         }
 
-        State.controller.open(rec, getFileType(rec.path))
+        State.controller.open(rec, FileType.getType(rec.path))
     }
 
     private fun exportTransFile(event: ActionEvent) {

@@ -1,16 +1,22 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.ViewMode
-import info.meodinger.lpfx.getViewMode
-import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.options.CProperty
+import info.meodinger.lpfx.options.Logger
+import info.meodinger.lpfx.options.Logger.LogType
+import info.meodinger.lpfx.options.Options
+import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
+import info.meodinger.lpfx.util.dialog.showAlert
+import info.meodinger.lpfx.util.dialog.showInfo
 import info.meodinger.lpfx.util.getGroupNameFormatter
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ReadOnlyStringProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -18,6 +24,15 @@ import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Window
+import java.io.File
+import java.nio.file.*
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.stream.Collectors
+import javax.mail.*
+import javax.mail.internet.*
+import kotlin.collections.ArrayList
+import kotlin.io.path.name
 
 /**
  * Author: Meodinger
@@ -33,7 +48,6 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
 
     private val tabPane = TabPane()
 
-    private var remainGroup = 0
     private val groupTab = Tab(I18N["settings.group.title"])
     private val gBorderPane = BorderPane()
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
@@ -41,26 +55,36 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
     private val gButtonAdd = Button(I18N["settings.group.add"])
+    private var remainGroup = 0
 
     private val modeTab = Tab(I18N["settings.mode.title"])
-    private val mLabelWork = Label(I18N["mode.work"])
-    private val mLabelView = Label(I18N["mode.view"])
-    private val mLabelInput = Label(I18N["mode.work.input"])
-    private val mLabelLabel = Label(I18N["mode.work.label"])
+    private val mGridPane = GridPane()
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
-    private val mGridPane = GridPane()
+
+    private val logTab = Tab("Log")
+    private val lGridPane = GridPane()
+    private val lComboLevel = CComboBox<LogType>()
+    private val lLogTable = TableView<FileModal>()
+    private val lButtonClean = Button("Clean log")
+    private val lButtonSend = Button("Send Log")
+    private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private inner class FileModal(val file: File) {
+        val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)
+        val timeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
+        val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
+    }
 
     init {
         initOwner(owner)
 
         // ----- Group ----- //
-        initGroupBox()
-        gGridPane.padding = Insets(Gap, Gap, Gap, 0.0)
+        initGroupTab()
+        gGridPane.padding = Insets(Gap)
         gGridPane.vgap = Gap
         gGridPane.hgap = Gap
         gGridPane.alignment = Pos.TOP_CENTER
-        gButtonAdd.setOnAction { createGroupBox(remainGroup) }
+        gButtonAdd.setOnAction { createGroupRow(remainGroup) }
         val scrollPane = ScrollPane().also {
             it.style = "-fx-background-color:transparent;"
         }
@@ -75,18 +99,26 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         groupTab.content = gBorderPane
 
         // ----- Mode ----- //
-        initModeBox()
-        mGridPane.padding = Insets(Gap, Gap, Gap, 0.0)
+        initModeTab()
+        mGridPane.padding = Insets(Gap)
         mGridPane.vgap = Gap
         mGridPane.hgap = Gap
         mGridPane.alignment = Pos.TOP_CENTER
         modeTab.content = mGridPane
 
+        // ----- Log ----- //
+        initLogTab()
+        lGridPane.padding = Insets(Gap)
+        lGridPane.vgap = Gap
+        lGridPane.hgap = Gap
+        lGridPane.alignment = Pos.TOP_CENTER
+        logTab.content = lGridPane
+
         // ----- Tab ----- //
         tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tabPane.prefHeight = 400.0
         tabPane.prefWidth = 600.0
-        tabPane.tabs.addAll(groupTab, modeTab)
+        tabPane.tabs.addAll(groupTab, modeTab, logTab)
 
         this.title = I18N["settings.title"]
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
@@ -100,14 +132,14 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     }
 
     // ----- Group ----- //
-    private fun initGroupBox() {
+    private fun initGroupTab() {
         val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
         val colorList = Settings[Settings.DefaultGroupColorList].asStringList()
         val createList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
 
-        for (i in nameList.indices) createGroupBox(i, createList[i], nameList[i], colorList[i])
+        for (i in nameList.indices) createGroupRow(i, createList[i], nameList[i], colorList[i])
     }
-    private fun createGroupBox(groupId: Int, createOnNew: Boolean = false, name: String = "", color: String = "") {
+    private fun createGroupRow(groupId: Int, createOnNew: Boolean = false, name: String = "", color: String = "") {
         val newRowIndex = groupId + RowShift
 
         if (remainGroup == 0) {
@@ -123,7 +155,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
-        val button = Button("Delete").also { it.setOnAction { _ -> removeGroupBox(GridPane.getRowIndex(it) - RowShift) } }
+        val button = Button("Delete").also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - RowShift) } }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
@@ -133,7 +165,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         gGridPane.add(colorPicker, 2, newRowIndex)
         gGridPane.add(button, 3, newRowIndex)
     }
-    private fun removeGroupBox(groupId: Int) {
+    private fun removeGroupRow(groupId: Int) {
         val toRemoveRow = groupId + RowShift
         val toRemoveList = ArrayList<Node>()
         for (node in gGridPane.children) {
@@ -150,9 +182,9 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     }
 
     // ----- Mode ----- //
-    private fun initModeBox() {
+    private fun initModeTab() {
         val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
-        val preferenceList = List(preferenceStringList.size) { getViewMode(preferenceStringList[it]) }
+        val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
         val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
 
         mComboInput.setList(viewModeList)
@@ -162,12 +194,108 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         mComboLabel.moveTo(preferenceList[1])
         mComboLabel.isWrapped = true
 
-        mGridPane.add(mLabelWork, 0, 0)
-        mGridPane.add(mLabelView, 1, 0)
-        mGridPane.add(mLabelInput, 0, 1)
+        mGridPane.add(Label(I18N["mode.work"]), 0, 0)
+        mGridPane.add(Label(I18N["mode.view"]), 1, 0)
+        mGridPane.add(Label(I18N["mode.work.input"]), 0, 1)
+        mGridPane.add(Label(I18N["mode.work.label"]), 0, 2)
         mGridPane.add(mComboInput, 1, 1)
         mGridPane.add(mComboLabel, 1, 2)
-        mGridPane.add(mLabelLabel, 0, 2)
+    }
+
+    // ----- Log ----- //
+    private fun initLogTab() {
+        lComboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
+        lComboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
+
+        val files = Files.walk(Options.logs).filter { it.name != Options.logs.name }.map { it.toFile() }.collect(Collectors.toList())
+        val data = List(files.size) { FileModal(files[it]) }
+
+        val nameCol = TableColumn<FileModal, String>("Name (Start Time)").also { column ->
+            column.setCellValueFactory { it.value.nameProperty }
+        }
+        val timeCol = TableColumn<FileModal, String>("End Time").also { column ->
+            column.setCellValueFactory { it.value.timeProperty }
+        }
+        val sizeCol = TableColumn<FileModal, String>("Size").also { column ->
+            column.setCellValueFactory { it.value.sizeProperty }
+        }
+        lLogTable.columns.addAll(nameCol, timeCol, sizeCol)
+        lLogTable.items.addAll(data)
+
+        lButtonSend.setOnAction {
+            val log = lLogTable.selectionModel.selectedItem.file
+
+            sendLog(log)
+            showInfo("Sent log ${log.name}")
+        }
+        lButtonClean.setOnAction {
+            for (modal in data) {
+                if (modal.file.name == Logger.logName) continue
+                if (!modal.file.delete()) {
+                    showAlert("Delete ${modal.file.name} failed")
+                    continue
+                }
+                lLogTable.items.remove(modal)
+            }
+        }
+
+        //   0      1        2     3
+        //0  Label  ComboBox
+        //1  Label
+        //   ----------------------------
+        //2  | FileName  EndTime  Size  |
+        //3  |                          |
+        //4  |                          |
+        //   ----------------------------
+        //5                  Clean  Send
+
+        lGridPane.add(Label("Log Level"), 0, 0)
+        lGridPane.add(lComboLevel, 1, 0)
+
+        lGridPane.add(Label("Log recorded"), 0, 1)
+        lGridPane.add(lLogTable, 0, 2, 4, 3)
+        lGridPane.add(lButtonClean, 2, 5)
+        lGridPane.add(lButtonSend, 3, 5)
+    }
+    private fun sendLog(log: File) {
+        // properties
+        val host = "smtp.163.com"
+        val reportUser = "labelplusfx_report@163.com"
+        val reportAuth = "SUWAYUTJSKWQNDOF"
+        val targetUser = "meodinger@qq.com"
+        val props = Properties()
+        props.setProperty("mail.transport.protocol", "smtp")
+        props.setProperty("mail.smtp.auth", "true")
+        props.setProperty("mail.smtp.host", host)
+
+        // main variables
+        val textPart = MimeBodyPart()
+        val filePart = MimeBodyPart()
+        val content = MimeMultipart()
+        val message = MimeMessage(Session.getInstance(props))
+
+        // text part
+        val builder = StringBuilder()
+        builder.append(System.getProperty("os.name")).append("-")
+        builder.append(System.getProperty("os.version")).append("-")
+        builder.append(System.getProperty("os.arch"))
+        textPart.setText(builder.toString())
+
+        // file part
+        filePart.attachFile(log)
+        filePart.fileName = "log.txt"
+
+        // content
+        content.addBodyPart(textPart)
+        content.addBodyPart(filePart)
+
+        // message
+        message.subject = "LPFX log report - ${System.getProperty("user.name")}"
+        message.setFrom(reportUser)
+        message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(targetUser))
+        message.setContent(content)
+
+        Transport.send(message, reportUser, reportAuth)
     }
 
     // ----- Result convert ---- //
@@ -176,6 +304,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
 
         list.addAll(convertGroup())
         list.addAll(convertMode())
+        list.addAll(convertLog())
 
         return list
     }
@@ -204,6 +333,13 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.ViewModePreference, mComboInput.value, mComboLabel.value))
+
+        return list
+    }
+    private fun convertLog(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.LogLevelPreference, lComboLevel.value))
 
         return list
     }

@@ -228,7 +228,7 @@ class Controller : Initializable {
             State.addTransLabel(State.currentPicName, transLabel)
             // Update view
             cLabelPane.createLabel(transLabel)
-            cTreeView.addLabelItem(transLabel)
+            addLabelItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -246,7 +246,7 @@ class Controller : Initializable {
             }
             // Update view
             cLabelPane.removeLabel(transLabel)
-            cTreeView.removeLabelItem(transLabel)
+            removeLabelItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -719,6 +719,7 @@ class Controller : Initializable {
 
         Logger.info("Label pane color list updated", "Controller")
     }
+
     fun addLabelLayer() {
         cLabelPane.createLabelLayer()
 
@@ -728,6 +729,32 @@ class Controller : Initializable {
         cLabelPane.removeLabelLayer(groupId)
 
         Logger.info("Removed label layer", "Controller")
+    }
+
+    fun addGroupItem(transGroup: TransGroup) {
+        cTreeView.addGroupItem(transGroup)
+
+        Logger.info("Added group item @ $transGroup", "Controller")
+    }
+    fun removeGroupItem(transGroup: TransGroup) {
+        cTreeView.removeGroupItem(transGroup)
+
+        Logger.info("Removed group item @ $transGroup", "Controller")
+    }
+    fun updateGroupItem(name: String, transGroup: TransGroup) {
+        cTreeView.updateGroupItem(name, transGroup)
+
+        Logger.info("Updated group item (name=$name) @ $transGroup", "Controller")
+    }
+    fun addLabelItem(transLabel: TransLabel) {
+        cTreeView.addLabelItem(transLabel)
+
+        Logger.info("Added label item @ $transLabel")
+    }
+    fun removeLabelItem(transLabel: TransLabel) {
+        cTreeView.removeLabelItem(transLabel)
+
+        Logger.info("Removed label item @ $transLabel")
     }
 
     fun setViewMode(mode: ViewMode) {

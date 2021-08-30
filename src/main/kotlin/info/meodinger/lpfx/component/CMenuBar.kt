@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.*
+import info.meodinger.lpfx.component.singleton.CSettingsDialog
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
@@ -233,7 +234,7 @@ class CMenuBar : MenuBar() {
         }
     }
     private fun settings() {
-        val result = CSettingsDialog(State.stage).showAndWait()
+        val result = CSettingsDialog.showAndWait()
         if (!result.isPresent) return
         val list = result.get()
 

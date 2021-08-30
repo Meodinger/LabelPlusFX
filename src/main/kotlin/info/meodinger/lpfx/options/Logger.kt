@@ -3,6 +3,7 @@ package info.meodinger.lpfx.options
 import info.meodinger.lpfx.util.string.deleteTail
 
 import java.io.*
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,7 +50,7 @@ object Logger {
         if (Files.notExists(path)) Files.createFile(path)
         log = path.toFile()
 
-        writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log)))
+        writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
         info("Logger start")
     }

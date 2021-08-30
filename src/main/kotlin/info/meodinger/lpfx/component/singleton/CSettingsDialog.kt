@@ -1,6 +1,9 @@
-package info.meodinger.lpfx.component
+package info.meodinger.lpfx.component.singleton
 
+import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.component.CColorPicker
+import info.meodinger.lpfx.component.CComboBox
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Logger.LogType
@@ -23,7 +26,6 @@ import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
-import javafx.stage.Window
 import java.io.File
 import java.nio.file.*
 import java.text.SimpleDateFormat
@@ -39,12 +41,9 @@ import kotlin.io.path.name
  * Date: 2021/8/25
  * Location: info.meodinger.lpfx.component
  */
-class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
+object CSettingsDialog : Dialog<List<CProperty>>() {
 
-    companion object {
-        const val Gap = 16.0
-        const val RowShift = 1
-    }
+    private const val Gap = 16.0
 
     private val tabPane = TabPane()
 
@@ -55,7 +54,8 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
     private val gButtonAdd = Button(I18N["settings.group.add"])
-    private var remainGroup = 0
+    private var gRemainGroup = 0
+    private const val gRowShift = 1
 
     private val modeTab = Tab(I18N["settings.mode.title"])
     private val mGridPane = GridPane()
@@ -69,14 +69,14 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private val lButtonClean = Button("Clean log")
     private val lButtonSend = Button("Send Log")
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    private inner class FileModal(val file: File) {
+    private class FileModal(val file: File) {
         val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)
         val timeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
     }
 
     init {
-        initOwner(owner)
+        initOwner(State.stage)
 
         // ----- Group ----- //
         initGroupTab()
@@ -84,7 +84,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         gGridPane.vgap = Gap
         gGridPane.hgap = Gap
         gGridPane.alignment = Pos.TOP_CENTER
-        gButtonAdd.setOnAction { createGroupRow(remainGroup) }
+        gButtonAdd.setOnAction { createGroupRow(gRemainGroup) }
         val scrollPane = ScrollPane().also {
             it.style = "-fx-background-color:transparent;"
         }
@@ -140,14 +140,14 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         for (i in nameList.indices) createGroupRow(i, createList[i], nameList[i], colorList[i])
     }
     private fun createGroupRow(groupId: Int, createOnNew: Boolean = false, name: String = "", color: String = "") {
-        val newRowIndex = groupId + RowShift
+        val newRowIndex = groupId + gRowShift
 
-        if (remainGroup == 0) {
+        if (gRemainGroup == 0) {
             gGridPane.add(gLabelIsCreate, 0, 0)
             gGridPane.add(gLabelName, 1, 0)
             gGridPane.add(gLabelColor, 2, 0)
         }
-        remainGroup++
+        gRemainGroup++
 
         val defaultColorList = Settings[Settings.DefaultGroupColorList].asStringList()
         val colorHex = if (isColorHex(color)) color else defaultColorList[groupId % defaultColorList.size]
@@ -155,7 +155,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
-        val button = Button("Delete").also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - RowShift) } }
+        val button = Button("Delete").also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - gRowShift) } }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
@@ -166,7 +166,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         gGridPane.add(button, 3, newRowIndex)
     }
     private fun removeGroupRow(groupId: Int) {
-        val toRemoveRow = groupId + RowShift
+        val toRemoveRow = groupId + gRowShift
         val toRemoveList = ArrayList<Node>()
         for (node in gGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
@@ -175,8 +175,8 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         }
         gGridPane.children.removeAll(toRemoveList)
 
-        remainGroup--
-        if (remainGroup == 0) {
+        gRemainGroup--
+        if (gRemainGroup == 0) {
             gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
         }
     }
@@ -225,7 +225,7 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
         lButtonSend.setOnAction {
             val log = lLogTable.selectionModel.selectedItem.file
 
-            sendLog(log)
+            Thread { sendLog(log) }.start()
             showInfo("Sent log ${log.name}")
         }
         lButtonClean.setOnAction {
@@ -311,11 +311,11 @@ class CSettingsDialog(owner: Window?) : Dialog<List<CProperty>>() {
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        val nameList = MutableList(remainGroup) { "" }
-        val colorList = MutableList(remainGroup) { "" }
-        val isCreateList = MutableList(remainGroup) { false }
+        val nameList = MutableList(gRemainGroup) { "" }
+        val colorList = MutableList(gRemainGroup) { "" }
+        val isCreateList = MutableList(gRemainGroup) { false }
         for (node in gGridPane.children) {
-            val groupId = GridPane.getRowIndex(node) - RowShift
+            val groupId = GridPane.getRowIndex(node) - gRowShift
             when (node) {
                 is CheckBox -> isCreateList[groupId] = node.isSelected
                 is TextField -> nameList[groupId] = node.text

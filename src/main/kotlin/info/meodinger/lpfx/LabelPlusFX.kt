@@ -21,10 +21,10 @@ import javafx.stage.Stage
 class LabelPlusFX: Application() {
 
     init {
+        Options.init()
         Logger.info("App start")
         Runtime.getRuntime().addShutdownHook(Thread { Logger.info("App exit") })
         State.application = this
-        Options.init()
     }
 
     override fun start(primaryStage: Stage) {

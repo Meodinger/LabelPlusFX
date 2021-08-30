@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.component.singleton
 
+import info.meodinger.lpfx.State
 import info.meodinger.lpfx.component.CComboBox
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
@@ -48,6 +49,8 @@ object CLogsDialog : Dialog<List<CProperty>>() {
     }
 
     init {
+        initOwner(State.stage)
+
         initLogPane()
         root.padding = Insets(Gap)
         root.vgap = Gap

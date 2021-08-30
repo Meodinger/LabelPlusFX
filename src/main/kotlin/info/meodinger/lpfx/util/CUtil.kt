@@ -2,17 +2,12 @@ package info.meodinger.lpfx.util
 
 import info.meodinger.lpfx.options.Logger
 
+import jakarta.mail.*
+import jakarta.mail.internet.*
 import javafx.scene.control.TextFormatter
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
-import javax.mail.Message
-import javax.mail.Session
-import javax.mail.Transport
-import javax.mail.internet.InternetAddress
-import javax.mail.internet.MimeBodyPart
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
 
 
 /**

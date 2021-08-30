@@ -37,18 +37,22 @@
       </options>
     </properties>
     <root id="root">
-      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.3" />
-      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.3" />
-      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.3" />
       <element id="archive" name="lpfx.jar">
         <element id="module-output" name="lpfx" />
         <element id="directory" name="META-INF">
           <element id="file-copy" path="$PROJECT_DIR$/src/main/kotlin/META-INF/MANIFEST.MF" />
         </element>
       </element>
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.4" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.4" />
+      <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.4" />
+      <element id="library" level="project" name="Maven: com.sun.activation:jakarta.activation:2.0.1" />
+      <element id="library" level="project" name="Maven: com.sun.mail:jakarta.mail:2.0.1" />
+      <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.5.21" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.5.21" />
+      <element id="library" level="project" name="Maven: org.jetbrains:annotations:13.0" />
     </root>
   </artifact>
 </component>

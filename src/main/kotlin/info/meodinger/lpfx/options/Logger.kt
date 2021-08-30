@@ -5,7 +5,6 @@ import info.meodinger.lpfx.util.string.deleteTail
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -52,6 +51,7 @@ object Logger {
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
         info("Logger start")
+        Runtime.getRuntime().addShutdownHook(Thread { info("Logger exit") })
     }
 
     private fun log(time: Long, type: LogType, text: String, from: String? = null) {

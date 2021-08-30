@@ -5,6 +5,7 @@ import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.component.CColorPicker
 import info.meodinger.lpfx.component.CComboBox
 import info.meodinger.lpfx.options.CProperty
+import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
@@ -172,6 +173,9 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
 
         list.addAll(convertGroup())
         list.addAll(convertMode())
+
+        Logger.info("Generated settings", "SettingsDialog")
+        Logger.debug("got", list)
 
         return list
     }

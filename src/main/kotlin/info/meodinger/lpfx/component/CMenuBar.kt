@@ -94,6 +94,7 @@ class CMenuBar : MenuBar() {
         mExportAsMeo.disableProperty().bind(State.isOpenedProperty.not())
         mExportAsTransPack.disableProperty().bind(State.isOpenedProperty.not())
         mEditComment.disableProperty().bind(State.isOpenedProperty.not())
+        mEditPictures.disableProperty().bind(State.isOpenedProperty.not())
 
         // Set accelerators
         if (isMac) {

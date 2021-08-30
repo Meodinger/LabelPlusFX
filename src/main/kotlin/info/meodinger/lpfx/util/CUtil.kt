@@ -163,6 +163,8 @@ fun sendLog(log: File) = Thread {
 
     try {
         Transport.send(message, reportUser, reportAuth)
+
+        Logger.info("Sent Log ${log.name}")
     } catch (e: Exception) {
         e.printStackTrace()
         Logger.error("Log sent failed")

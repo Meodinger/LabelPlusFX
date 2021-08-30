@@ -110,6 +110,9 @@ object CLogsDialog : Dialog<List<CProperty>>() {
             }
             data.removeAll(toRemove)
             tableLog.items.removeAll(toRemove)
+
+            Logger.info("Cleaned logs", "LogsDialog")
+            Logger.debug("Cleaned", toRemove, "LogsDialog")
         }
 
         //    0      1        2     3
@@ -136,6 +139,9 @@ object CLogsDialog : Dialog<List<CProperty>>() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))
+
+        Logger.info("Generated settings", "LogsDialog")
+        Logger.debug("got", list)
 
         return list
     }

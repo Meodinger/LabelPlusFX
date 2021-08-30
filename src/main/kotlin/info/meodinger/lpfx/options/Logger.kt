@@ -5,6 +5,7 @@ import info.meodinger.lpfx.util.string.deleteTail
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,13 +38,11 @@ object Logger {
         }
     }
 
-    private val log: File
     private val writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
+    val log: File
     var level: LogType = LogType.INFO
-    val logName: String
-        get() = log.name
 
     init {
         val path = Options.logs.resolve(SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Date()))
@@ -105,5 +104,6 @@ object Logger {
 
     fun exception(e: Exception) {
         e.printStackTrace(PrintWriter(writer))
+        writer.flush()
     }
 }

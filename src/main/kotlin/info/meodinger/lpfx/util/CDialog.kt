@@ -1,10 +1,12 @@
 package info.meodinger.lpfx.util.dialog
 
+import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.util.image.resizeByRadius
 import info.meodinger.lpfx.util.string.omitHighText
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.resource.loadImage
+import info.meodinger.lpfx.util.sendLog
 import info.meodinger.lpfx.util.string.omitWideText
 
 import javafx.event.ActionEvent
@@ -157,25 +159,32 @@ fun showException(e: Exception): Optional<ButtonType> {
 
     // Get exception stack trace
     val sw = StringWriter()
-    val pw = PrintWriter(sw)
-    e.printStackTrace(pw)
+    e.printStackTrace(PrintWriter(sw))
     val text = sw.toString()
 
-    // Create expandable pane
-    val expContent = VBox(8.0)
-    val label = Label("The exception stacktrace is:")
-    val textArea = TextArea(text)
-    textArea.isEditable = false
-    textArea.prefWidthProperty().bind(expContent.widthProperty())
-    textArea.prefHeightProperty().bind(expContent.heightProperty())
-    expContent.children.addAll(Separator(), label, textArea)
-    expContent.prefHeight = 400.0
-    expContent.prefWidth = 800.0
+    // Create pane
+    val content = VBox(8.0)
+
+    val header = HBox(
+        Label(e.message ?: e.javaClass.name),
+        HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
+        Button(I18N["logs.button.send"]).also { it.setOnAction { sendLog(Logger.log) } }
+    ).also {
+        it.alignment = Pos.CENTER_LEFT
+    }
+    val textArea = TextArea(text).also {
+        it.isEditable = false
+        it.prefWidthProperty().bind(content.widthProperty())
+        it.prefHeightProperty().bind(content.heightProperty())
+    }
+
+    content.children.addAll(header, Separator(), Label("The exception stacktrace is:"), textArea)
 
     exceptionDialog.title = I18N["common.error"]
     exceptionDialog.headerText = e.javaClass.name
-    exceptionDialog.contentText = e.message ?: e.javaClass.name
-    exceptionDialog.dialogPane.expandableContent = expContent
+    exceptionDialog.dialogPane.content = content
+    exceptionDialog.dialogPane.prefWidth = 600.0
+    exceptionDialog.dialogPane.prefHeight = 400.0
 
     return exceptionDialog.showAndWait()
 }

@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.*
+import info.meodinger.lpfx.component.singleton.CLogsDialog
 import info.meodinger.lpfx.component.singleton.CSettingsDialog
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
@@ -42,8 +43,9 @@ class CMenuBar : MenuBar() {
     private val mExportAsTransPack = MenuItem(I18N["m.pack"])
     private val mEditComment = MenuItem(I18N["m.comment"])
     private val mmAbout = Menu(I18N["mm.about"])
-    private val mAbout = MenuItem(I18N["m.about"])
     private val mSettings = MenuItem(I18N["m.settings"])
+    private val mLogs = MenuItem(I18N["m.logs"])
+    private val mAbout = MenuItem(I18N["m.about"])
 
     private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*${EXTENSION_MEO}", "*${EXTENSION_LP}")
     private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*${EXTENSION_MEO}")
@@ -77,8 +79,9 @@ class CMenuBar : MenuBar() {
         mExportAsMeo.setOnAction { exportTransFile(it) }
         mExportAsTransPack.setOnAction { exportTransPack() }
         mEditComment.setOnAction { editComment() }
-        mAbout.setOnAction { about() }
         mSettings.setOnAction { settings() }
+        mLogs.setOnAction { logs() }
+        mAbout.setOnAction { about() }
 
         mSave.disableProperty().bind(State.isOpenedProperty.not())
         mSaveAs.disableProperty().bind(State.isOpenedProperty.not())
@@ -98,7 +101,7 @@ class CMenuBar : MenuBar() {
 
         mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment)
-        mmAbout.items.addAll(mSettings, SeparatorMenuItem(), mAbout)
+        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 
@@ -219,6 +222,20 @@ class CMenuBar : MenuBar() {
         }
     }
 
+    private fun settings() {
+        val result = CSettingsDialog.showAndWait()
+        if (!result.isPresent) return
+        val list = result.get()
+
+        for (property in list) Settings[property.key] = property
+    }
+    private fun logs() {
+        val result = CLogsDialog.showAndWait()
+        if (!result.isPresent) return
+        val list = result.get()
+
+        for (property in list) Settings[property.key] = property
+    }
     private fun about() {
         showLink(
             State.stage,
@@ -232,12 +249,5 @@ class CMenuBar : MenuBar() {
         ) {
             State.application.hostServices.showDocument(INFO["application.url"])
         }
-    }
-    private fun settings() {
-        val result = CSettingsDialog.showAndWait()
-        if (!result.isPresent) return
-        val list = result.get()
-
-        for (property in list) Settings[property.key] = property
     }
 }

@@ -83,6 +83,12 @@ class CLabel(
         val r = if (index < 10) 1.7 * radius else 1.3 * radius
         text.font = Font.font(MonoType, FontWeight.BOLD, r)
 
+        // Set to zero
+        text.layoutX = 0.0
+        text.layoutY = 0.0
+        circle.layoutX = 0.0
+        circle.layoutY = 0.0
+
         // Layout 0,0 is the center of the circle, the left-top of the rect
         // Text display based on left-down corner
         // Axis is 0 →

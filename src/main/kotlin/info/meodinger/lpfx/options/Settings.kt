@@ -16,13 +16,17 @@ object Settings : AbstractProperties() {
     const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
     const val ViewModePreference = "ViewModePreference"
     const val LogLevelPreference = "LogLevelPreference"
+    const val LabelRadius = "LabelRadius"
+    const val LabelAlpha = "LabelAlpha"
 
     override val default = listOf(
         CProperty(DefaultGroupNameList, "框内", "框内外"),
         CProperty(DefaultGroupColorList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode), // Input, Label
-        CProperty(LogLevelPreference, Logger.LogType.INFO)
+        CProperty(LogLevelPreference, Logger.LogType.INFO),
+        CProperty(LabelRadius, 24.0),
+        CProperty(LabelAlpha, "80")
     )
 
     init {
@@ -31,7 +35,9 @@ object Settings : AbstractProperties() {
             CProperty(DefaultGroupColorList),
             CProperty(IsGroupCreateOnNewTrans),
             CProperty(ViewModePreference),
-            CProperty(LogLevelPreference)
+            CProperty(LogLevelPreference),
+            CProperty(LabelRadius),
+            CProperty(LabelAlpha)
         ))
     }
 
@@ -71,6 +77,12 @@ object Settings : AbstractProperties() {
         } catch (e: Exception) {
             throw CPropertyException.propertyValueInvalid(LogLevelPreference, logLevel).initCause(e)
         }
+
+        val labelRadius = this[LabelRadius].asDouble()
+        if (labelRadius < 0) throw CPropertyException.propertyValueInvalid(LabelRadius, labelRadius)
+
+        val labelAlpha = this[LabelAlpha].asString().toInt(16)
+        if (labelAlpha < 0 || labelAlpha > 255) throw CPropertyException.propertyValueInvalid(LabelAlpha, labelAlpha)
 
     }
 }

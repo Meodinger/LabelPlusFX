@@ -4,6 +4,7 @@ import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.component.CColorPicker
 import info.meodinger.lpfx.component.CComboBox
+import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
@@ -14,6 +15,7 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -48,6 +50,14 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
 
+    private val labelTab = Tab(I18N["settings.label.title"])
+    private val lGridPane = GridPane()
+    private val lLabelPane = AnchorPane()
+    private val lSliderRadius = Slider()
+    private val lSliderAlpha = Slider()
+    private val lLabelRadius = Label()
+    private val lLabelAlpha = Label()
+
     init {
         initOwner(State.stage)
 
@@ -79,11 +89,19 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         mGridPane.alignment = Pos.TOP_CENTER
         modeTab.content = mGridPane
 
+        // ----- Label ----- //
+        initLabelTab()
+        lGridPane.padding = Insets(Gap)
+        lGridPane.vgap = Gap
+        lGridPane.hgap = Gap
+        lGridPane.alignment = Pos.CENTER
+        labelTab.content = lGridPane
+
         // ----- Tab ----- //
         tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tabPane.prefHeight = 400.0
         tabPane.prefWidth = 600.0
-        tabPane.tabs.addAll(groupTab, modeTab)
+        tabPane.tabs.addAll(groupTab, modeTab, labelTab)
 
         this.title = I18N["settings.title"]
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
@@ -125,6 +143,9 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
 
+        //   0        1       2
+        // 0 isCreate Name    Color
+        // 1  X       _______ | 66CCFF  V |
         gGridPane.add(checkBox, 0, newRowIndex)
         gGridPane.add(textField, 1, newRowIndex)
         gGridPane.add(colorPicker, 2, newRowIndex)
@@ -159,6 +180,10 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         mComboLabel.moveTo(preferenceList[1])
         mComboLabel.isWrapped = true
 
+        //   0         1
+        // 0 WorkMode  ViewMode
+        // 1 Input     | input | < >
+        // 2 Label     | label | < >
         mGridPane.add(Label(I18N["mode.work"]), 0, 0)
         mGridPane.add(Label(I18N["mode.view"]), 1, 0)
         mGridPane.add(Label(I18N["mode.work.input"]), 0, 1)
@@ -167,12 +192,78 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         mGridPane.add(mComboLabel, 1, 2)
     }
 
+    // ----- Label ----- //
+    private fun initLabelTab() {
+        val radius = Settings[Settings.LabelRadius].asDouble()
+        val alpha = Settings[Settings.LabelAlpha].asString()
+        val label = CLabel(8, radius, Color.RED.toHex() + alpha)
+
+        lLabelPane.setPrefSize(200.0, 200.0)
+        lLabelPane.children.add(label)
+        lLabelPane.border = Border(BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii(0.0), BorderWidths(2.0)))
+
+        val layout = {
+            label.layoutX = lLabelPane.prefWidth / 2 - label.prefWidth / 2
+            label.layoutY = lLabelPane.prefHeight / 2 - label.prefHeight / 2
+        }
+        label.radiusProperty.addListener { _, _, _ -> layout.invoke()}
+        layout.invoke()
+
+        lSliderRadius.min = 8.0
+        lSliderRadius.max = 48.0
+        lSliderRadius.value = radius
+        lLabelRadius.textProperty().bind(lSliderRadius.valueProperty().asString("%05.2f"))
+        label.radiusProperty.bind(lSliderRadius.valueProperty())
+
+        lSliderAlpha.min = 0.0
+        lSliderAlpha.max = 1.0
+        lSliderAlpha.value = alpha.toInt(16).toDouble() / 255.0
+        lLabelAlpha.textProperty().bind(object : StringBinding() {
+            init {
+                bind(lSliderAlpha.valueProperty())
+            }
+
+            override fun computeValue(): String {
+                val str = (lSliderAlpha.value * 255).toInt().toString(16)
+                if (str.length == 1) return "0x0$str"
+                return "0x$str"
+            }
+        })
+        label.colorProperty.bind(object : StringBinding() {
+            init {
+                bind(lSliderAlpha.valueProperty())
+            }
+
+            override fun computeValue(): String {
+                val str = (lSliderAlpha.value * 255).toInt().toString(16)
+                if (str.length == 1) return "FF00000$str"
+                return "FF0000$str"
+            }
+        })
+
+        // lGridPane.isGridLinesVisible = true
+        //   0         1           2
+        // 0 --------  Radius
+        // 1 |      |  ----O------ 24.0
+        // 2 |      |  Alpha
+        // 3 |      |  ------O---- 0x80
+        // 4 --------
+        lGridPane.add(lLabelPane, 0, 0, 1, 5)
+        lGridPane.add(Label(I18N["settings.label.radius"]), 1, 0)
+        lGridPane.add(lSliderRadius, 1, 1)
+        lGridPane.add(lLabelRadius, 2, 1)
+        lGridPane.add(Label(I18N["settings.label.alpha"]), 1, 2)
+        lGridPane.add(lSliderAlpha, 1, 3)
+        lGridPane.add(lLabelAlpha, 2, 3)
+    }
+
     // ----- Result convert ---- //
     private fun convertResult(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
         list.addAll(convertGroup())
         list.addAll(convertMode())
+        list.addAll(convertLabel())
 
         Logger.info("Generated settings", "SettingsDialog")
         Logger.debug("got", list)
@@ -204,6 +295,14 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.ViewModePreference, mComboInput.value, mComboLabel.value))
+
+        return list
+    }
+    private fun convertLabel(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
+        list.add(CProperty(Settings.LabelAlpha, (lSliderAlpha.value * 255).toInt().toString(16)))
 
         return list
     }

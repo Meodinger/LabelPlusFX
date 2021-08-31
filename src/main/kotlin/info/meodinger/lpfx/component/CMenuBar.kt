@@ -261,14 +261,24 @@ class CMenuBar : MenuBar() {
         if (!result.isPresent) return
         val list = result.get()
 
-        for (property in list) Settings[property.key] = property
+        var updatePane = false
+        for (property in list) {
+            if (Settings[property.key].asString() == property.value) continue
+            if (property.key == Settings.LabelAlpha || property.key == Settings.LabelRadius) updatePane = true
+            Settings[property.key] = property
+        }
+
+        if (updatePane && State.isOpened) State.controller.updateLabelPane()
     }
     private fun logs() {
         val result = CLogsDialog.showAndWait()
         if (!result.isPresent) return
         val list = result.get()
 
-        for (property in list) Settings[property.key] = property
+        for (property in list) {
+            if (Settings[property.key].asString() == property.value) continue
+            Settings[property.key] = property
+        }
     }
     private fun about() {
         showLink(

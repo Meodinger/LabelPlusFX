@@ -13,10 +13,10 @@ class CPropertyException(message: String) : RuntimeException(message) {
     companion object {
         fun propertyNotFound(key: String) =
             CPropertyException(String.format(I18N["exception.property.property_not_found.format.k"], key))
-        fun propertyValueInvalid(key: String, value: String) =
-            CPropertyException(String.format(I18N["exception.property.property_value_invalid.format.vk"], value, key))
-        fun propertyElementInvalid(key: String, element: String) =
-            CPropertyException(String.format(I18N["exception.property.property_element_invalid.format.ek"], element, key))
+        fun propertyValueInvalid(key: String, value: Any) =
+            CPropertyException(String.format(I18N["exception.property.property_value_invalid.format.vk"], value.toString(), key))
+        fun propertyElementInvalid(key: String, element: Any) =
+            CPropertyException(String.format(I18N["exception.property.property_element_invalid.format.ek"], element.toString(), key))
         fun propertyListSizeInvalid(key: String, size: Int) =
             CPropertyException(String.format(I18N["exception.property.property_list_size_invalid.format.sk"], size, key))
     }

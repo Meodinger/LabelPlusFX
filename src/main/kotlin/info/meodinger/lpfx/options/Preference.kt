@@ -34,10 +34,10 @@ object Preference : AbstractProperties() {
 
         val mainDivider = this[MAIN_DIVIDER].asDouble()
         if (mainDivider < 0 || mainDivider > 1)
-            throw CPropertyException.propertyValueInvalid(MAIN_DIVIDER, mainDivider.toString())
+            throw CPropertyException.propertyValueInvalid(MAIN_DIVIDER, mainDivider)
 
         val rightDivider = this[RIGHT_DIVIDER].asDouble()
         if (rightDivider < 0 || rightDivider > 1)
-            throw CPropertyException.propertyValueInvalid(RIGHT_DIVIDER, rightDivider.toString())
+            throw CPropertyException.propertyValueInvalid(RIGHT_DIVIDER, rightDivider)
     }
 }

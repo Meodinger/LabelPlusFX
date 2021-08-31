@@ -41,6 +41,12 @@ object Options {
             initSettings()
             // recent_files
             initRecentFiles()
+
+            Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
+
+            Logger.debug("Preference got:", Preference.properties, "Options")
+            Logger.debug("Settings got:", Settings.properties, "Options")
+            Logger.debug("RecentFiles got:", RecentFiles.properties, "Options")
         } catch (e: IOException) {
             Logger.fatal("Options init failed", "Options")
             Logger.exception(e)
@@ -61,7 +67,6 @@ object Options {
             Preference.check()
 
             Logger.info("Preference loaded", "Options")
-            Logger.debug("Preference got:", Preference.properties, "Options")
         } catch (e: Exception) {
             Preference.useDefault()
             Preference.save()
@@ -95,7 +100,6 @@ object Options {
             Settings.check()
 
             Logger.info("Settings loaded", "Options")
-            Logger.debug("Settings got:", Settings.properties, "Options")
         } catch (e: Exception) {
             Settings.useDefault()
             Settings.save()
@@ -129,7 +133,6 @@ object Options {
             RecentFiles.check()
 
             Logger.info("RecentFiles loaded", "Options")
-            Logger.debug("RecentFiles got:", RecentFiles.properties, "Options")
         } catch (e: Exception) {
             RecentFiles.useDefault()
             RecentFiles.save()

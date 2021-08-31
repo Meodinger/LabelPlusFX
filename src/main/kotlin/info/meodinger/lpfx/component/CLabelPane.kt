@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.NOT_FOUND
+import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.color.toHex
@@ -56,10 +57,6 @@ class CLabelPane : ScrollPane() {
 
         // scale
         const val NOT_SET = -1.0
-
-        // label display
-        const val LABEL_RADIUS = 24.0
-        const val LABEL_ALPHA = "80"
 
         // text display
         /**
@@ -365,10 +362,13 @@ class CLabelPane : ScrollPane() {
         textLayer.toFront()
     }
     fun createLabel(transLabel: TransLabel) {
+        val radius = Settings[Settings.LabelRadius].asDouble()
+        val alpha = Settings[Settings.LabelAlpha].asString()
+
         val label = CLabel(
             transLabel.index,
-            LABEL_RADIUS,
-            colorList[transLabel.groupId] + LABEL_ALPHA
+            radius,
+            colorList[transLabel.groupId] + alpha
         )
 
         // Draggable
@@ -393,8 +393,8 @@ class CLabelPane : ScrollPane() {
             //  |  R         LR      |
             //  |LR|-----    LR      |
             //  |  |         --------|
-            if (newLayoutX < 0 || newLayoutX > imageWidth - 2 * LABEL_RADIUS) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > imageHeight - 2 * LABEL_RADIUS) return@addEventHandler
+            if (newLayoutX < 0 || newLayoutX > imageWidth - 2 * radius) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > imageHeight - 2 * radius) return@addEventHandler
 
             AnchorPane.setLeftAnchor(label, newLayoutX)
             AnchorPane.setTopAnchor(label, newLayoutY)
@@ -439,8 +439,8 @@ class CLabelPane : ScrollPane() {
         //  |    |
 
         // Layout
-        AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x - LABEL_RADIUS)
-        AnchorPane.setTopAnchor(label, imageHeight * transLabel.y - LABEL_RADIUS)
+        AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x - radius)
+        AnchorPane.setTopAnchor(label, imageHeight * transLabel.y - radius)
         labelLayers[transLabel.groupId].children.add(label)
 
         // Add label in list
@@ -457,28 +457,26 @@ class CLabelPane : ScrollPane() {
             override fun computeValue(): String {
                 val colorBinding = colorListProperty.valueAt(transLabel.groupIdProperty)
                 if (colorBinding.isNotNull.value) {
-                    return colorBinding.value + LABEL_ALPHA
+                    return colorBinding.value + alpha
                 }
-                return "000000$LABEL_ALPHA"
+                return "000000$alpha"
             }
 
         })
         label.indexProperty.bind(transLabel.indexProperty)
-        transLabel.xProperty.bind(label.layoutXProperty().add(LABEL_RADIUS).divide(view.image.widthProperty()))
-        transLabel.yProperty.bind(label.layoutYProperty().add(LABEL_RADIUS).divide(view.image.heightProperty()))
+        transLabel.xProperty.bind(label.layoutXProperty().add(radius).divide(view.image.widthProperty()))
+        transLabel.yProperty.bind(label.layoutYProperty().add(radius).divide(view.image.heightProperty()))
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
-        val t = Text(omitHighText(text)).also { it.font = TEXT_FONT }
-
-        t.text = omitWideText(t.text, (imageWidth - 2 * (SHIFT_X + TEXT_INSET)) / 2, t.font)
+        val s = omitWideText(omitHighText(text), (imageWidth - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
+        val t = Text(s).also { it.font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
         val shapeW = textW + 2 * TEXT_INSET
         val shapeH = textH + 2 * TEXT_INSET
 
-        //
         //   0 -> x  ------
         //   ↓       |    |
         //   y       ------
@@ -538,19 +536,19 @@ class CLabelPane : ScrollPane() {
         val centerX = AnchorPane.getLeftAnchor(label)
         val centerY = AnchorPane.getTopAnchor(label)
 
-        /**
-         * Scaled (fake)
-         *  -> Image / 2 - (Image / 2 - Center) * Scale
-         *  -> Image / 2 * (1 - Scale) + Center * Scale
-         */
+        //
+        // Scaled (fake)
+        // -> Image / 2 - (Image / 2 - Center) * Scale
+        // -> Image / 2 * (1 - Scale) + Center * Scale
+        //
         val fakeX = imageWidth / 2 * (1 - scale) + centerX * scale
         val fakeY = imageHeight / 2 * (1 - scale) + centerY * scale
 
-        /**
-         * To center
-         *  -> Scroll / 2 = Layout + Fake
-         *  -> Layout = Scroll / 2 - Fake
-         */
+        //
+        // To center
+        // -> Scroll / 2 = Layout + Fake
+        // -> Layout = Scroll / 2 - Fake
+        //
         root.layoutX = width / 2 - fakeX
         root.layoutY = height / 2 - fakeY
     }

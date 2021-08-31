@@ -19,7 +19,7 @@ fun StringBuilder.deleteTail(tail: String) {
     val tailLength = tail.length
     val builderLength = this.length
 
-    this.deleteRange(builderLength - tailLength, builderLength - 1)
+    this.deleteRange(builderLength - tailLength, builderLength)
 }
 
 /**

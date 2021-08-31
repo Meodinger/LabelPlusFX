@@ -1,12 +1,6 @@
 package info.meodinger.lpfx.util
 
-import info.meodinger.lpfx.options.Logger
-
-import jakarta.mail.*
-import jakarta.mail.internet.*
 import javafx.scene.control.TextFormatter
-import java.io.File
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 
 
@@ -122,52 +116,3 @@ fun getGroupNameFormatter() = TextFormatter<String> { change ->
         .replace("|", "_")
     change
 }
-
-fun sendLog(log: File) = Thread {
-    // properties
-    val host = "smtp.163.com"
-    val reportUser = "labelplusfx_report@163.com"
-    val reportAuth = "SUWAYUTJSKWQNDOF"
-    val targetUser = "meodinger@qq.com"
-    val props = Properties()
-    props.setProperty("mail.transport.protocol", "smtp")
-    props.setProperty("mail.smtp.auth", "true")
-    props.setProperty("mail.smtp.host", host)
-
-    // main variables
-    val textPart = MimeBodyPart()
-    val filePart = MimeBodyPart()
-    val content = MimeMultipart()
-    val message = MimeMessage(Session.getInstance(props))
-
-    // text part
-    val builder = StringBuilder()
-    builder.append(System.getProperty("os.name")).append("-")
-    builder.append(System.getProperty("os.version")).append("-")
-    builder.append(System.getProperty("os.arch"))
-    textPart.setText(builder.toString())
-
-    // file part
-    filePart.attachFile(log)
-    filePart.fileName = "log.txt"
-
-    // content
-    content.addBodyPart(textPart)
-    content.addBodyPart(filePart)
-
-    // message
-    message.subject = "LPFX log report - ${System.getProperty("user.name")}"
-    message.setFrom(reportUser)
-    message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(targetUser))
-    message.setContent(content)
-
-    try {
-        Transport.send(message, reportUser, reportAuth)
-
-        Logger.info("Sent Log ${log.name}")
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Logger.error("Log sent failed")
-        Logger.exception(e)
-    }
-}.start()

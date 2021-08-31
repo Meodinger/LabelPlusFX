@@ -3,11 +3,11 @@ package info.meodinger.lpfx.util.dialog
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.util.image.resizeByRadius
 import info.meodinger.lpfx.util.string.omitHighText
+import info.meodinger.lpfx.util.string.omitWideText
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.resource.loadImage
-import info.meodinger.lpfx.util.sendLog
-import info.meodinger.lpfx.util.string.omitWideText
+import info.meodinger.lpfx.io.LogSender
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -18,8 +18,6 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.stage.Window
 import javafx.util.Callback
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -156,20 +154,22 @@ fun showError(title: String, header: String?, content: String): Optional<ButtonT
  * @param e Exception to print
  * @return ButtonType? OK
  */
-fun showException(e: Exception): Optional<ButtonType> {
+fun showException(e: Throwable): Optional<ButtonType> {
 
     // Get exception stack trace
-    val sw = StringWriter()
-    e.printStackTrace(PrintWriter(sw))
-    val text = sw.toString()
+    val text = e.stackTraceToString()
 
     // Create pane
     val content = VBox(8.0)
 
+    val sentLabel = Label().also {
+        it.padding = Insets(0.0, 8.0, 0.0, 0.0)
+    }
     val header = HBox(
         Label(e.message ?: e.javaClass.name),
         HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
-        Button(I18N["logs.button.send"]).also { it.setOnAction { sendLog(Logger.log) } }
+        sentLabel,
+        Button(I18N["logs.button.send"]).also { it.setOnAction { LogSender.sendLog(Logger.log); sentLabel.text = "Sent" } }
     ).also {
         it.alignment = Pos.CENTER_LEFT
     }

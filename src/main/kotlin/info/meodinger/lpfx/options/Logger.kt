@@ -102,8 +102,8 @@ object Logger {
         log(Date().time, LogType.FATAL, message, from)
     }
 
-    fun exception(e: Exception) {
-        e.printStackTrace(PrintWriter(writer))
+    fun exception(e: Throwable) {
+        writer.write(e.stackTraceToString())
         writer.flush()
     }
 }

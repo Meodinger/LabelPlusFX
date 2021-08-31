@@ -25,6 +25,7 @@ import javafx.scene.paint.Color
 import java.io.*
 import java.net.URL
 import java.util.*
+import javax.security.auth.login.LoginException
 import kotlin.system.exitProcess
 
 /**
@@ -425,6 +426,9 @@ class Controller : Initializable {
         reg()
     }
 
+    private fun exit() {
+        exitProcess(0)
+    }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
         val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
         val transLabel = transLabels.find { it.index == index }!!
@@ -658,16 +662,16 @@ class Controller : Initializable {
     }
 
     fun close() {
-        if (!State.isChanged) exitProcess(0)
+        if (!State.isChanged) exit()
 
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), FileType.getType(State.transPath), false)
-                    exitProcess(0)
+                    exit()
                 }
                 ButtonType.NO -> {
-                    exitProcess(0)
+                    exit()
                 }
                 ButtonType.CANCEL -> {
                     return@ifPresent

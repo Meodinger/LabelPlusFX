@@ -2,6 +2,7 @@ package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.component.CComboBox
+import info.meodinger.lpfx.io.LogSender
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Logger.LogType
@@ -10,7 +11,6 @@ import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.showAlert
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.util.sendLog
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -93,9 +93,9 @@ object CLogsDialog : Dialog<List<CProperty>>() {
             labelSent.text = ""
         }
         buttonSend.setOnAction {
-            val log = tableLog.selectionModel.selectedItem.file
+            val log = tableLog.selectionModel.selectedItem?.file ?: return@setOnAction
 
-            sendLog(log)
+            LogSender.sendLog(log)
             labelSent.text = "Sent ${log.name}"
         }
         buttonClean.setOnAction {

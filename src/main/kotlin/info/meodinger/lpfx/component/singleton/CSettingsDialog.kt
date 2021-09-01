@@ -302,7 +302,10 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
-        list.add(CProperty(Settings.LabelAlpha, (lSliderAlpha.value * 255).toInt().toString(16)))
+
+        var str = (lSliderAlpha.value * 255).toInt().toString(16)
+        if (str.length == 1) str = "0$str"
+        list.add(CProperty(Settings.LabelAlpha, str))
 
         return list
     }

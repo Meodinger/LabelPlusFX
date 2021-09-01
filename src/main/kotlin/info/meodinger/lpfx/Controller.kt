@@ -25,7 +25,6 @@ import javafx.scene.paint.Color
 import java.io.*
 import java.net.URL
 import java.util.*
-import javax.security.auth.login.LoginException
 import kotlin.system.exitProcess
 
 /**
@@ -182,27 +181,15 @@ class Controller : Initializable {
         }
 
         // Update text area when label change
-        State.currentLabelIndexProperty.addListener { _, oldValue, newValue ->
+        State.currentLabelIndexProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
 
             val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
 
-            if (oldValue != NOT_FOUND) {
-                val oldLabel = transLabels.find { it.index == oldValue }
-                if (oldLabel == null) {
-                    cTransArea.textProperty().unbind()
-                    return@addListener
-                }
-                cTransArea.textProperty().unbindBidirectional(oldLabel.textProperty)
-            }
-            cTransArea.text = "" // Remove text
+            cTransArea.unbindBidirectional()
             if (newValue != NOT_FOUND) {
                 val newLabel = transLabels.find { it.index == newValue }
-                if (newLabel == null) {
-                    cTransArea.textProperty().unbind()
-                    return@addListener
-                }
-                cTransArea.textProperty().bindBidirectional(newLabel.textProperty)
+                if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
             }
         }
 

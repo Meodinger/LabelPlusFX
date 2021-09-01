@@ -2,6 +2,8 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
 
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.StringProperty
 import javafx.geometry.Side
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -50,6 +52,13 @@ class CTransArea: TextArea() {
         }
     }
 
+    private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)
+    private var boundTextProperty: StringProperty?
+        get() = boundTextPropertyProperty.value
+        set(value) {
+            boundTextPropertyProperty.value = value
+        }
+
     val isBound: Boolean
         get() = textProperty().isBound
 
@@ -60,6 +69,19 @@ class CTransArea: TextArea() {
                 symbolMenu.show(this, Side.LEFT, 0.0, 0.0)
             }
         }
+    }
+
+    fun bindBidirectional(property: StringProperty) {
+        textProperty().bindBidirectional(property)
+        boundTextProperty = property
+    }
+
+    fun unbindBidirectional() {
+        if (boundTextProperty == null)  return
+
+        textProperty().unbindBidirectional(boundTextProperty)
+        boundTextProperty = null
+        text = ""
     }
 
 }

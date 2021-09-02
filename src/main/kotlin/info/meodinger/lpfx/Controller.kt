@@ -57,7 +57,7 @@ class Controller : Initializable {
                     if (State.isChanged) {
                         val bak = File(State.getBakFolder() + File.separator + Date().time + EXTENSION_BAK)
                         try {
-                            exportMeo(bak, State.transFile)
+                            export(bak, FileType.MeoFile, State.transFile)
                         } catch (e: IOException) {
                             Logger.error("Auto-backup failed")
                             Logger.exception(e)
@@ -509,10 +509,7 @@ class Controller : Initializable {
 
         // Export to file
         try {
-            when (type) {
-                FileType.LPFile -> exportLP(file, transFile)
-                FileType.MeoFile -> exportMeo(file, transFile)
-            }
+            export(file, type, transFile)
         } catch (e: IOException) {
             Logger.error("New failed", "Controller")
             Logger.exception(e)
@@ -527,10 +524,7 @@ class Controller : Initializable {
 
         val transFile: TransFile
         try {
-            transFile = when (type) {
-                FileType.LPFile -> loadLP(file)
-                FileType.MeoFile -> loadMeo(file)
-            }
+            transFile = load(file, type)
         } catch (e: IOException) {
             Logger.error("Open failed", "Controller")
             Logger.exception(e)
@@ -614,10 +608,7 @@ class Controller : Initializable {
 
         // Export
         try {
-            when (type) {
-                FileType.LPFile -> exportLP(file, State.transFile)
-                FileType.MeoFile -> exportMeo(file, State.transFile)
-            }
+            export(file, type, State.transFile)
             if (!isSilent) showInfo(I18N["info.saved_successfully"])
             Logger.debug("Wrote ${State.transFile}", "Controller")
         } catch (e: IOException) {

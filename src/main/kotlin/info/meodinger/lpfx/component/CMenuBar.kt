@@ -193,11 +193,11 @@ class CMenuBar : MenuBar() {
             if (event.source == mExportAsMeo) {
                 exportChooser.extensionFilter.add(meoFilter)
                 file = exportChooser.showSaveDialog(State.stage) ?: return
-                exportMeo(file, State.transFile)
+                export(file, FileType.MeoFile, State.transFile)
             } else {
                 exportChooser.extensionFilter.add(lpFilter)
                 file = exportChooser.showSaveDialog(State.stage) ?: return
-                exportLP(file, State.transFile)
+                export(file, FileType.LPFile, State.transFile)
             }
         } catch (e: IOException) {
             showException(e)

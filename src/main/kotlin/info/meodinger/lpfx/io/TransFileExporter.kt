@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.io
 
+import info.meodinger.lpfx.FileType
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
@@ -18,10 +19,21 @@ import java.nio.charset.StandardCharsets
  */
 
 /**
+ * Load TransFile
+ */
+@Throws(IOException::class)
+fun export(file: File, type: FileType, transFile: TransFile) {
+    when(type) {
+        FileType.LPFile -> exportLP(file, transFile)
+        FileType.MeoFile -> exportMeo(file, transFile)
+    }
+}
+
+/**
  * Export TransFile as LP format
  */
 @Throws(IOException::class)
-fun exportLP(file: File, transFile: TransFile) {
+private fun exportLP(file: File, transFile: TransFile) {
 
     // Group count validate
     val groupCount = transFile.groupList.size
@@ -110,7 +122,7 @@ fun exportLP(file: File, transFile: TransFile) {
  * Export TransFile as MEO format
  */
 @Throws(IOException::class)
-fun exportMeo(file: File, transFile: TransFile) {
+private fun exportMeo(file: File, transFile: TransFile) {
     using {
         val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
         writer.write(transFile.toJsonString())

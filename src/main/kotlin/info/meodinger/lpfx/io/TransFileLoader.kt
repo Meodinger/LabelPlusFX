@@ -1,6 +1,6 @@
 package info.meodinger.lpfx.io
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import info.meodinger.lpfx.FileType
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import info.meodinger.lpfx.type.TransGroup
@@ -8,6 +8,7 @@ import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.*
 import java.nio.charset.StandardCharsets
 
@@ -18,10 +19,21 @@ import java.nio.charset.StandardCharsets
  */
 
 /**
+ * Load TransFile
+ */
+@Throws(IOException::class)
+fun load(file: File, type: FileType): TransFile {
+    return when(type) {
+        FileType.LPFile -> loadLP(file)
+        FileType.MeoFile -> loadMeo(file)
+    }
+}
+
+/**
  * Load LP File
  */
 @Throws(IOException::class)
-fun loadLP(file: File): TransFile {
+private fun loadLP(file: File): TransFile {
 
     val transFile = TransFile()
     val reader = BufferedReader(InputStreamReader(FileInputStream(file), StandardCharsets.UTF_8))
@@ -155,7 +167,7 @@ fun loadLP(file: File): TransFile {
  * Load MEO File
  */
 @Throws(IOException::class)
-fun loadMeo(file: File): TransFile {
+private fun loadMeo(file: File): TransFile {
     return ObjectMapper().readValue(
         BufferedInputStream(FileInputStream(file)),
         TransFile::class.java

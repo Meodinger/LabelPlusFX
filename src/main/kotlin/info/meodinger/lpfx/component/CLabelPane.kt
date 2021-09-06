@@ -5,7 +5,6 @@ import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.color.toHex
-import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE
@@ -317,6 +316,37 @@ class CLabelPane : ScrollPane() {
         moveToCenter()
         isVisible = true
     }
+    fun clear() {
+        isVisible = false
+
+        selectedLabelIndex = NOT_FOUND
+
+        vvalue = 0.0
+        hvalue = 0.0
+        root.layoutX = 0.0
+        root.layoutY = 0.0
+
+        image = INIT_IMAGE
+        scale = initScale
+
+        setupLayers(0)
+    }
+    fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
+        isVisible = false
+
+        selectedLabelIndex = NOT_FOUND
+
+        vvalue = 0.0
+        hvalue = 0.0
+        root.layoutX = 0.0
+        root.layoutY = 0.0
+
+        setupImage(picPath)
+        setupLayers(layerCount)
+        setupLabels(transLabels)
+
+        isVisible = true
+    }
 
     private fun getLabel(transLabel: TransLabel): CLabel {
         for (label in labels) if (label.index == transLabel.index) return label
@@ -325,15 +355,8 @@ class CLabelPane : ScrollPane() {
 
     @Throws(IOException::class)
     private fun setupImage(path: String) {
-        val file = File(path)
-        if (file.exists()) {
-            image = Image(file.toURI().toURL().toString())
-            scale = width / imageWidth
-        } else {
-            image = INIT_IMAGE
-            scale = initScale
-            throw IOException(String.format(I18N["exception.io.picture_not_found.format.s"], path))
-        }
+        image = Image(File(path).toURI().toURL().toString())
+        scale = width / imageWidth
     }
     private fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
@@ -565,28 +588,5 @@ class CLabelPane : ScrollPane() {
 
         root.layoutX = (width - imageWidth) / 2
         root.layoutY = (height - imageHeight) / 2
-    }
-
-    fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
-        isVisible = false
-
-        vvalue = 0.0
-        hvalue = 0.0
-        root.layoutX = 0.0
-        root.layoutY = 0.0
-
-        selectedLabelIndex = NOT_FOUND
-
-        try {
-            setupImage(picPath)
-        } catch (e: IOException) {
-            setupLayers(0)
-            showException(e)
-            return
-        }
-        setupLayers(layerCount)
-        setupLabels(transLabels)
-
-        isVisible = true
     }
 }

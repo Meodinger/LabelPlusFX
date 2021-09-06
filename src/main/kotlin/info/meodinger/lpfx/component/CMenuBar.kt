@@ -3,12 +3,13 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.*
 import info.meodinger.lpfx.component.singleton.CLogsDialog
 import info.meodinger.lpfx.component.singleton.CSettingsDialog
-import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
-import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.dialog.showChoiceList
+import info.meodinger.lpfx.util.dialog.showInfo
+import info.meodinger.lpfx.util.dialog.showInputArea
+import info.meodinger.lpfx.util.dialog.showLink
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
-import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
@@ -173,52 +174,27 @@ class CMenuBar : MenuBar() {
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 
-        try {
-            transfer(bak, rec)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            showError(I18N["error.recovery_failed"])
-            showException(e)
-            return
-        }
-
-        State.controller.open(rec, FileType.getType(rec.path))
+        State.controller.recovery(bak, rec)
     }
 
     private fun exportTransFile(event: ActionEvent) {
         exportChooser.extensionFilter.clear()
 
-        try {
-            val file: File
-            if (event.source == mExportAsMeo) {
-                exportChooser.extensionFilter.add(meoFilter)
-                file = exportChooser.showSaveDialog(State.stage) ?: return
-                export(file, FileType.MeoFile, State.transFile)
-            } else {
-                exportChooser.extensionFilter.add(lpFilter)
-                file = exportChooser.showSaveDialog(State.stage) ?: return
-                export(file, FileType.LPFile, State.transFile)
-            }
-        } catch (e: IOException) {
-            showException(e)
-            showError(I18N["error.export_failed"])
-            return
+        val file: File
+        if (event.source == mExportAsMeo) {
+            exportChooser.extensionFilter.add(meoFilter)
+            file = exportChooser.showSaveDialog(State.stage) ?: return
+            State.controller.export(file, FileType.MeoFile)
+        } else {
+            exportChooser.extensionFilter.add(lpFilter)
+            file = exportChooser.showSaveDialog(State.stage) ?: return
+            State.controller.export(file, FileType.LPFile)
         }
-
-        showInfo(I18N["info.exported_successful"])
     }
     private fun exportTransPack() {
         val file = exportPackChooser.showSaveDialog(State.stage) ?: return
 
-        try {
-            pack(file, State.getFileFolder(), State.transFile)
-        } catch (e : IOException) {
-            showException(e)
-            showError(I18N["error.export_failed"])
-            return
-        }
-
-        showInfo(I18N["info.exported_successful"])
+        State.controller.pack(file)
     }
 
     private fun editComment() {

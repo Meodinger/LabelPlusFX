@@ -103,7 +103,8 @@ object CLogsDialog : Dialog<List<CProperty>>() {
             for (modal in data) {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
-                    showAlert("Delete ${modal.file.name} failed")
+                    Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
+                    showAlert(String.format(I18N["alert.logs.delete_failed.format.s"], modal.file.name))
                     continue
                 }
                 toRemove.add(modal)

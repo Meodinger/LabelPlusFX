@@ -50,6 +50,7 @@ private val errorDialog = Dialog<ButtonType>().also {
     it.graphic = ImageView(loadImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val exceptionDialog = Dialog<ButtonType>().also {
+    it.isResizable = true
     it.dialogPane.buttonTypes.add(ButtonType.OK)
 }
 

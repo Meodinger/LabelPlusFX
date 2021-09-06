@@ -23,7 +23,6 @@ class LabelPlusFX: Application() {
     init {
         Options.init()
         Logger.info("App start")
-        Runtime.getRuntime().addShutdownHook(Thread { Logger.info("App exit") })
         State.application = this
     }
 

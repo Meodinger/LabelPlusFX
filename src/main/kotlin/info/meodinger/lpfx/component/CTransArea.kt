@@ -71,6 +71,10 @@ class CTransArea: TextArea() {
         }
     }
 
+    fun reset() {
+        unbindBidirectional()
+    }
+
     fun bindBidirectional(property: StringProperty) {
         textProperty().bindBidirectional(property)
         boundTextProperty = property

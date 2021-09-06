@@ -51,7 +51,12 @@ object Logger {
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
         info("Logger start")
-        Runtime.getRuntime().addShutdownHook(Thread { info("Logger exit") })
+    }
+
+    fun exit() {
+        info("Logger exit")
+
+        writer.close()
     }
 
     private fun log(time: Long, type: LogType, text: String, from: String? = null) {

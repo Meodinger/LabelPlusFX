@@ -350,61 +350,68 @@ class Controller : Initializable {
                 cGroupBox.moveTo(it.text.toInt() - 1)
         }
 
-        // Bind Arrow KeyEvent with Label change and Pic change
+        // Bind Arrow KeyEvent with Pic change
         val arrowKeyHandler = EventHandler<KeyEvent> {
             if (isControlDown(it) && it.code.isArrowKey) {
-                when (it.code) {
-                    KeyCode.UP, KeyCode.DOWN -> {
-
-                        // Shift
-                        val shift = if (it.code == KeyCode.UP) -1 else 1
-
-                        var index = cTreeView.selectionModel.selectedIndex + shift
-                        cTreeView.selectionModel.clearSelection()
-                        // if item == null (to the end), vTree select nothing, return to top
-
-                        var item = cTreeView.getTreeItem(index)
-                        if (item != null) {
-                            index = if (item is CTreeItem) {
-                                // Label
-                                cTreeView.selectionModel.select(index)
-                                State.currentLabelIndex = item.index
-                                cLabelPane.moveToLabel(item.meta)
-                                return@EventHandler
-                            } else if (item.parent != null) {
-                                // Group
-                                item.isExpanded = true
-                                index + shift
-                            } else {
-                                // Root
-                                item.expandAll()
-                                if (State.viewMode === ViewMode.GroupMode) index++
-                                while (cTreeView.getTreeItem(index).children.size == 0) {
-                                    index++
-                                    if (cTreeView.getTreeItem(index) == null) break
-                                }
-                                index + shift
-                            }
-
-                            cTreeView.selectionModel.select(index)
-                            item = cTreeView.getTreeItem(index)
-                            if (item == null) return@EventHandler
-
-                            if (item is CTreeItem) {
-                                // Label
-                                State.currentLabelIndex = item.index
-                                cLabelPane.moveToLabel(item.meta)
-                            }
-                        }
-                    }
-                    KeyCode.LEFT -> cPicBox.back()
-                    KeyCode.RIGHT -> cPicBox.next()
-                    else -> return@EventHandler
+                if (it.code == KeyCode.LEFT) {
+                    cPicBox.back()
+                    return@EventHandler
+                }
+                if (it.code == KeyCode.RIGHT) {
+                    cPicBox.next()
+                    return@EventHandler
                 }
             }
         }
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
+
+        // Bind Arrow KeyEvent with Label change
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
+            fun getNextLabelItemIndex(from: Int, direction: Int): Int {
+                var index = from
+                var item: TreeItem<String>?
+                do {
+                    index += direction
+                    item = cTreeView.getTreeItem(index)
+
+                    if (item != null) {
+                        item.expandAll()
+                    } else {
+                        return -1
+                    }
+                } while (item !is CTreeItem)
+
+                return index
+            }
+
+            if (isControlDown(it) && it.code.isArrowKey) {
+                if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@addEventHandler
+
+                val now = cTreeView.selectionModel.selectedIndex
+                cTreeView.selectionModel.clearSelection()
+
+                val shift = if (it.code == KeyCode.UP) -1 else 1
+                var labelItemIndex = now + shift
+
+                val item = cTreeView.getTreeItem(labelItemIndex)
+                if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
+                if (item !is CTreeItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
+
+                if (labelItemIndex == -1) {
+                    cTreeView.selectionModel.select(now)
+                    return@addEventHandler
+                }
+
+                val cTreeItem = cTreeView.getTreeItem(labelItemIndex) as CTreeItem
+
+                State.currentLabelIndex = cTreeItem.index
+
+                cTreeView.selectionModel.select(labelItemIndex)
+                cTreeView.scrollTo(labelItemIndex)
+                cLabelPane.moveToLabel(cTreeItem.meta)
+            }
+        }
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
@@ -414,6 +421,11 @@ class Controller : Initializable {
     }
 
     private fun exit() {
+        Logger.info("App exit")
+
+        Options.exit()
+        Logger.exit()
+
         exitProcess(0)
     }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
@@ -477,8 +489,8 @@ class Controller : Initializable {
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
-                showInfo(I18N["alert.required_at_least_1_ic"])
                 Logger.info("Chose none, Cancel", "Controller")
+                showInfo(I18N["alert.required_at_least_1_ic"])
                 return
             }
             pics.addAll(result.get())
@@ -545,8 +557,8 @@ class Controller : Initializable {
             }
         }
         if (isModified) {
-            showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
             Logger.info("Showed modified comment", "Controller")
+            showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
         }
 
         State.transFile = transFile
@@ -563,8 +575,8 @@ class Controller : Initializable {
             timer.schedule(taskManager.getTimerTask(), AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
             Logger.info("Scheduled auto-backup", "Controller")
         } else {
-            showError(I18N["error.auto_backup_unavailable"])
-            Logger.error("Auto-backup unavailable", "Controller")
+            Logger.warning("Auto-backup unavailable", "Controller")
+            showAlert(I18N["error.auto_backup_unavailable"])
         }
 
         State.isOpened = true
@@ -639,6 +651,53 @@ class Controller : Initializable {
         Logger.info("Saved", "Controller")
     }
 
+    fun recovery(from: File, to: File) {
+        Logger.info("Recovering from ${from.path}", "Controller")
+
+        try {
+            transfer(from, to)
+
+            Logger.info("Recovered to ${to.path}", "Controller")
+        } catch (e: Exception) {
+            Logger.error("Recover failed", "Controller")
+            Logger.exception(e)
+            showError(I18N["error.recovery_failed"])
+            showException(e)
+        }
+
+        open(to, FileType.getType(to.path))
+    }
+    fun export(file: File, type: FileType) {
+        Logger.info("Exporting to ${file.path}", "Controller")
+
+        try {
+            export(file, type, State.transFile)
+
+            Logger.info("Exported to ${file.path}", "Controller")
+            showInfo(I18N["info.exported_successful"])
+        } catch (e: IOException) {
+            Logger.error("Export failed", "Controller")
+            Logger.exception(e)
+            showError(I18N["error.export_failed"])
+            showException(e)
+        }
+    }
+    fun pack(file: File) {
+        Logger.info("Packing to ${file.path}", "Controller")
+
+        try {
+            pack(file, State.getFileFolder(), State.transFile)
+
+            Logger.info("Packed to ${file.path}", "Controller")
+            showInfo(I18N["info.exported_successful"])
+        } catch (e : IOException) {
+            Logger.error("Pack failed", "Controller")
+            Logger.exception(e)
+            showException(e)
+            showError(I18N["error.export_failed"])
+        }
+    }
+
     fun close() {
         if (!State.isChanged) exit()
 
@@ -664,7 +723,7 @@ class Controller : Initializable {
         cPicBox.reset()
         cGroupBox.reset()
         cTreeView.reset()
-        // cTransArea
+        cTransArea.reset()
 
         setSwitchViewModeButton(State.viewMode)
         setSwitchWorkModeButton(State.workMode)
@@ -692,13 +751,20 @@ class Controller : Initializable {
         Logger.info("TreeView updated", "Controller")
     }
     fun updateLabelPane() {
+        if (!File(State.getPicPathNow()).exists()) {
+            cLabelPane.clear()
+
+            Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
+            showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName))
+            return
+        }
+
         cLabelPane.update(
             State.getPicPathNow(),
             State.transFile.groupList.size,
             State.transFile.getTransLabelListOf(State.currentPicName)
         )
         cLabelPane.moveToZero()
-
         Logger.info("LabelPane updated", "Controller")
     }
     fun updateLabelColorList() {
@@ -739,12 +805,12 @@ class Controller : Initializable {
     fun addLabelItem(transLabel: TransLabel) {
         cTreeView.addLabelItem(transLabel)
 
-        Logger.info("Added label item @ $transLabel")
+        Logger.info("Added label item @ $transLabel", "Controller")
     }
     fun removeLabelItem(transLabel: TransLabel) {
         cTreeView.removeLabelItem(transLabel)
 
-        Logger.info("Removed label item @ $transLabel")
+        Logger.info("Removed label item @ $transLabel", "Controller")
     }
 
     fun setViewMode(mode: ViewMode) {

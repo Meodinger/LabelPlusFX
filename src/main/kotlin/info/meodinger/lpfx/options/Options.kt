@@ -35,12 +35,12 @@ object Options {
             if (Files.notExists(lpfx)) Files.createDirectories(lpfx)
             if (Files.notExists(logs)) Files.createDirectories(logs)
 
-            // config
-            initConfig()
-            // settings
-            initSettings()
             // recent_files
             initRecentFiles()
+            // config
+            initPreference()
+            // settings
+            initSettings()
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
@@ -56,70 +56,15 @@ object Options {
         }
     }
 
-    @Throws(IOException::class)
-    private fun initConfig() {
-        if (Files.notExists(preference)) {
-            Files.createFile(preference)
-            Preference.save()
-        }
-        try {
-            Preference.load()
-            Preference.check()
+    fun exit() {
+        RecentFiles.save()
+        Logger.info("RecentFiles saved", "Options")
 
-            Logger.info("Preference loaded", "Options")
-        } catch (e: Exception) {
-            Preference.useDefault()
-            Preference.save()
-            Logger.warning("Preference load failed, using default", "Options")
-            Logger.exception(e)
-            showDialog(
-                null,
-                2,
-                I18N["common.alert"],
-                null,
-                if (e is CPropertyException)
-                    String.format(I18N["alert.option.broken.format.s"], FileName_Preference)
-                else
-                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
-            )
-        }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            Preference.save()
-            Logger.info("Preference saved", "Options")
-        })
-    }
+        Preference.save()
+        Logger.info("Preference saved", "Options")
 
-    @Throws(IOException::class)
-    private fun initSettings() {
-        if (Files.notExists(settings)) {
-            Files.createFile(settings)
-            Settings.save()
-        }
-        try {
-            Settings.load()
-            Settings.check()
-
-            Logger.info("Settings loaded", "Options")
-        } catch (e: Exception) {
-            Settings.useDefault()
-            Settings.save()
-            Logger.warning("Settings load failed, using default", "Options")
-            Logger.exception(e)
-            showDialog(
-                null,
-                2,
-                I18N["common.alert"],
-                null,
-                if (e is CPropertyException)
-                    String.format(I18N["alert.option.broken.format.s"], FileName_Settings)
-                else
-                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
-            )
-        }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            Settings.save()
-            Logger.info("Settings saved", "Options")
-        })
+        Settings.save()
+        Logger.info("Settings saved", "Options")
     }
 
     @Throws(IOException::class)
@@ -149,10 +94,64 @@ object Options {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_RecentFiles)
             )
         }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            RecentFiles.save()
-            Logger.info("RecentFiles saved", "Options")
-        })
+    }
+
+    @Throws(IOException::class)
+    private fun initPreference() {
+        if (Files.notExists(preference)) {
+            Files.createFile(preference)
+            Preference.save()
+        }
+        try {
+            Preference.load()
+            Preference.check()
+
+            Logger.info("Preference loaded", "Options")
+        } catch (e: Exception) {
+            Preference.useDefault()
+            Preference.save()
+            Logger.warning("Preference load failed, using default", "Options")
+            Logger.exception(e)
+            showDialog(
+                null,
+                2,
+                I18N["common.alert"],
+                null,
+                if (e is CPropertyException)
+                    String.format(I18N["alert.option.broken.format.s"], FileName_Preference)
+                else
+                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
+            )
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun initSettings() {
+        if (Files.notExists(settings)) {
+            Files.createFile(settings)
+            Settings.save()
+        }
+        try {
+            Settings.load()
+            Settings.check()
+
+            Logger.info("Settings loaded", "Options")
+        } catch (e: Exception) {
+            Settings.useDefault()
+            Settings.save()
+            Logger.warning("Settings load failed, using default", "Options")
+            Logger.exception(e)
+            showDialog(
+                null,
+                2,
+                I18N["common.alert"],
+                null,
+                if (e is CPropertyException)
+                    String.format(I18N["alert.option.broken.format.s"], FileName_Settings)
+                else
+                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
+            )
+        }
     }
 
 }

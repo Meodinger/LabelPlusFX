@@ -142,9 +142,8 @@ object CLogsDialog : Dialog<List<CProperty>>() {
         list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))
 
         Logger.info("Generated settings", "LogsDialog")
-        Logger.debug("got", list)
+        Logger.debug("got", list, "LogsDialog")
 
         return list
     }
-
 }

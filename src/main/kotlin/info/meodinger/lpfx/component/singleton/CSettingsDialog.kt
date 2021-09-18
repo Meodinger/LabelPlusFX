@@ -266,7 +266,7 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         list.addAll(convertLabel())
 
         Logger.info("Generated settings", "SettingsDialog")
-        Logger.debug("got", list)
+        Logger.debug("got", list, "SettingsDialog")
 
         return list
     }

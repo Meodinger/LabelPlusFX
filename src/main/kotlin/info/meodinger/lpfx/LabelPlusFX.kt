@@ -21,8 +21,8 @@ import javafx.stage.Stage
 class LabelPlusFX: Application() {
 
     init {
-        Options.init()
-        Logger.info("App start")
+        Options.load()
+        Logger.info("App start", "Application")
         State.application = this
     }
 

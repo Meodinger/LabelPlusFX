@@ -41,7 +41,7 @@ object Logger {
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
     val log: File
-    var level: LogType = LogType.INFO
+    var level: LogType = LogType.DEBUG
 
     init {
         val path = Options.logs.resolve(SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Date()))
@@ -49,12 +49,14 @@ object Logger {
         log = path.toFile()
 
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
-
-        info("Logger start")
     }
 
-    fun exit() {
-        info("Logger exit")
+    fun start() {
+        info("Logger start", "Logger")
+    }
+
+    fun stop() {
+        info("Logger exit", "Logger")
 
         writer.close()
     }

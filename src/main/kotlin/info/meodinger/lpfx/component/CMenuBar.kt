@@ -106,7 +106,7 @@ class CMenuBar : MenuBar() {
             mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
         }
 
-        mmFile.items.addAll(mNew, mOpen, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
+        mmFile.items.addAll(mNew, mOpen, mOpenRecent, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
@@ -115,13 +115,15 @@ class CMenuBar : MenuBar() {
     fun updateOpenRecent() {
         mOpenRecent.items.clear()
         for (path in RecentFiles.getAll()) {
-            val item = MenuItem(path)
-            item.setOnAction {
-                State.controller.stay()
-                State.controller.open(File(path), FileType.getType(path))
-            }
-            mOpenRecent.items.add(item)
+            mOpenRecent.items.add(MenuItem(path).also { it.setOnAction { openRecentTranslation(path) } })
         }
+    }
+    private fun openRecentTranslation(path: String) {
+        if (State.controller.stay()) return
+
+        State.reset()
+
+        State.controller.open(File(path), FileType.getType(path))
     }
 
     private fun newTranslation() {

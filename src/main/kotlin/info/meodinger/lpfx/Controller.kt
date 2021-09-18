@@ -351,7 +351,7 @@ class Controller : Initializable {
         }
 
         // Bind Arrow KeyEvent with Pic change
-        val arrowKeyHandler = EventHandler<KeyEvent> {
+        val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
             if (isControlDown(it) && it.code.isArrowKey) {
                 if (it.code == KeyCode.LEFT) {
                     cPicBox.back()
@@ -363,11 +363,11 @@ class Controller : Initializable {
                 }
             }
         }
-        root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
-        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyHandler)
+        root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
 
         // Bind Arrow KeyEvent with Label change
-        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
+        val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
             fun getNextLabelItemIndex(from: Int, direction: Int): Int {
                 var index = from
                 var item: TreeItem<String>?
@@ -386,7 +386,7 @@ class Controller : Initializable {
             }
 
             if (isControlDown(it) && it.code.isArrowKey) {
-                if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@addEventHandler
+                if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
 
                 val now = cTreeView.selectionModel.selectedIndex
                 cTreeView.selectionModel.clearSelection()
@@ -400,7 +400,7 @@ class Controller : Initializable {
 
                 if (labelItemIndex == -1) {
                     cTreeView.selectionModel.select(now)
-                    return@addEventHandler
+                    return@EventHandler
                 }
 
                 val cTreeItem = cTreeView.getTreeItem(labelItemIndex) as CTreeItem
@@ -412,6 +412,8 @@ class Controller : Initializable {
                 cLabelPane.moveToLabel(cTreeItem.meta)
             }
         }
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
@@ -421,10 +423,10 @@ class Controller : Initializable {
     }
 
     private fun exit() {
-        Logger.info("App exit")
+        Logger.info("App exit", "Application")
 
-        Options.exit()
-        Logger.exit()
+        Options.save()
+        Logger.stop()
 
         exitProcess(0)
     }
@@ -622,7 +624,6 @@ class Controller : Initializable {
         try {
             export(file, type, State.transFile)
             if (!isSilent) showInfo(I18N["info.saved_successfully"])
-            Logger.debug("Wrote ${State.transFile}", "Controller")
         } catch (e: IOException) {
             Logger.error("Save failed", "Controller")
             Logger.exception(e)

@@ -14,6 +14,10 @@ import java.util.*
  * Date: 2021/8/28
  * Location: info.meodinger.lpfx.options
  */
+
+/**
+ * A simple Logger for global use
+ */
 object Logger {
 
     enum class LogType(val type: String) {

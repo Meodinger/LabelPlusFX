@@ -4,10 +4,15 @@ import info.meodinger.lpfx.ViewMode
 
 import java.io.IOException
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.options
+ */
+
+/**
+ * The settings that user set through CSettingsDialog
  */
 object Settings : AbstractProperties() {
 

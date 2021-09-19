@@ -21,10 +21,15 @@ import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/30
  * Location: info.meodinger.lpfx.component.singleton
+ */
+
+/**
+ * A ContextMenu Singleton for CTreeView
  */
 object CTreeMenu : ContextMenu() {
 

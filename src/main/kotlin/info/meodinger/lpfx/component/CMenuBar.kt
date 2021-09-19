@@ -26,10 +26,15 @@ import java.nio.file.Files
 import java.util.stream.Collectors
 import kotlin.io.path.name
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/17
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A MenuBar for main scene, did not make it singleton for fxml loader
  */
 class CMenuBar : MenuBar() {
 

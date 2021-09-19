@@ -8,6 +8,8 @@ package info.meodinger.lpfx.util.character
 
 /**
  * Repeat char
+ *
+ * @param n times to repeat
  */
 fun Char.repeat(n: Int): String {
     return this.toString().repeat(n)

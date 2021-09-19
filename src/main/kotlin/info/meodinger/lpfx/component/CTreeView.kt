@@ -12,10 +12,15 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import kotlin.collections.ArrayList
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/16
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A TreeView for tree-style label display
  */
 class CTreeView: TreeView<String>() {
 

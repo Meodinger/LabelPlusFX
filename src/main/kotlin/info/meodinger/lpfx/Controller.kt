@@ -4,6 +4,7 @@ import info.meodinger.lpfx.component.*
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
+import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.accelerator.isControlDown
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.file.transfer
@@ -28,10 +29,15 @@ import java.net.URL
 import java.util.*
 import kotlin.system.exitProcess
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx
+ */
+
+/**
+ * Main controller for lpfx
  */
 class Controller : Initializable {
 
@@ -47,6 +53,7 @@ class Controller : Initializable {
     @FXML private lateinit var cGroupBox: CComboBox<String>
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CTransArea
+    @FXML private lateinit var lInfo: Label
 
     private class BackupTaskManager {
 
@@ -281,12 +288,17 @@ class Controller : Initializable {
         }
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
-        cTransArea.addEventHandler(ScrollEvent.SCROLL) {
-            if (!isControlDown(it)) return@addEventHandler
+        cTransArea.addEventFilter(ScrollEvent.SCROLL) {
+            if (!(isControlDown(it) || isAltDown(it))) return@addEventFilter
 
-            cTransArea.font = Font.font(cTransArea.font.size + it.deltaY / 40)
+            val newSize = cTransArea.font.size + it.deltaY / 40
+
+            if (newSize < 12) return@addEventFilter
+
+            cTransArea.font = Font.font("宋体", newSize)
+            showInfo("Text font size set to $newSize")
+            it.consume()
         }
-
 
         // Bind selected group with clicked GroupTreeItem
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, item ->
@@ -373,7 +385,7 @@ class Controller : Initializable {
             cGroupBox.moveTo(it.text.toInt() - 1)
         }
 
-        // Bind Arrow KeyEvent with Pic change
+        // Bind Ctrl + Arrow KeyEvent with Pic change
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
             if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
 
@@ -386,7 +398,7 @@ class Controller : Initializable {
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
 
-        // Bind Arrow KeyEvent with Label change
+        // Bind Ctrl + Arrow KeyEvent with Label change
         fun getNextLabelItemIndex(from: Int, direction: Int): Int {
             var index = from
             var item: TreeItem<String>?
@@ -783,6 +795,7 @@ class Controller : Initializable {
             State.transFile.groupList.size,
             State.transFile.getTransLabelListOf(State.currentPicName)
         )
+        cLabelPane.fitToPane()
         cLabelPane.moveToZero()
         Logger.info("LabelPane updated", "Controller")
     }
@@ -791,6 +804,11 @@ class Controller : Initializable {
         cLabelPane.colorList = FXCollections.observableList(list)
 
         Logger.info("LabelPane color list updated", "Controller")
+    }
+
+    // Info
+    fun showInfo(text: String) {
+        lInfo.text = text
     }
 
     // LabelPane
@@ -832,6 +850,7 @@ class Controller : Initializable {
         Logger.info("Removed label item @ $transLabel", "Controller")
     }
 
+    // Mode
     fun setViewMode(mode: ViewMode) {
         State.viewMode = mode
 

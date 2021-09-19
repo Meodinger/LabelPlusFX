@@ -2,7 +2,6 @@ package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
-import info.meodinger.lpfx.component.CColorPicker
 import info.meodinger.lpfx.component.CComboBox
 import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.options.CProperty
@@ -24,10 +23,15 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import kotlin.collections.ArrayList
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/25
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A Dialog Singleton for settings
  */
 object CSettingsDialog : Dialog<List<CProperty>>() {
 
@@ -137,7 +141,7 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
-        val colorPicker = CColorPicker(Color.web(colorHex))
+        val colorPicker = ColorPicker(Color.web(colorHex))
         val button = Button(I18N["common.delete"]).also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - gRowShift) } }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
@@ -281,7 +285,7 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
             when (node) {
                 is CheckBox -> isCreateList[groupId] = node.isSelected
                 is TextField -> nameList[groupId] = node.text
-                is CColorPicker -> colorList[groupId] = node.value.toHex()
+                is ColorPicker -> colorList[groupId] = node.value.toHex()
             }
         }
 

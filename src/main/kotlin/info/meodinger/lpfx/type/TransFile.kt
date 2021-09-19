@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import info.meodinger.lpfx.util.string.sortByDigit
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
+ */
+
+/**
+ * A MEO Translation file
  */
 class TransFile {
 

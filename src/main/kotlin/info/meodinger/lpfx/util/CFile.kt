@@ -8,6 +8,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/24
@@ -16,6 +17,9 @@ import java.io.IOException
 
 /**
  * Transfer a File to another File
+ *
+ * @param from File that transfer from
+ * @param to   File that transfer to
  */
 @Throws(IOException::class)
 fun transfer(from: File, to: File) {

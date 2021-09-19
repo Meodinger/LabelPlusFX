@@ -2,6 +2,7 @@ package info.meodinger.lpfx.util.color
 
 import javafx.scene.paint.Color
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
@@ -9,7 +10,7 @@ import javafx.scene.paint.Color
  */
 
 /**
- * Get color RGB
+ * Get color RGB in hex
  */
 fun Color.toHex(): String {
     return this.toString().substring(2, 8).uppercase()
@@ -17,6 +18,8 @@ fun Color.toHex(): String {
 
 /**
  * Is a string ColorHex
+ *
+ * @param hex HEX String to judge
  */
 fun isColorHex(hex: String): Boolean {
     val length = hex.length

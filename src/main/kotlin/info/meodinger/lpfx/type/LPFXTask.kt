@@ -2,6 +2,7 @@ package info.meodinger.lpfx.type
 
 import javafx.concurrent.Task
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/31

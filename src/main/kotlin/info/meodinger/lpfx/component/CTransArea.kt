@@ -12,11 +12,18 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/8/16
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A TextArea with a symbol ContextMenu
  */
 class CTransArea: TextArea() {
 
@@ -53,14 +60,9 @@ class CTransArea: TextArea() {
     }
 
     private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)
-    private var boundTextProperty: StringProperty?
-        get() = boundTextPropertyProperty.value
-        set(value) {
-            boundTextPropertyProperty.value = value
-        }
+    private var boundTextProperty: StringProperty? by boundTextPropertyProperty
 
-    val isBound: Boolean
-        get() = textProperty().isBound
+    val isBound: Boolean get() = textProperty().isBound
 
     init {
         // Symbol Menu

@@ -13,10 +13,15 @@ import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Stage
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx
+ */
+
+/**
+ * LPFX Application
  */
 class LabelPlusFX: Application() {
 

@@ -13,11 +13,18 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A Label component for LabelPane
  */
 class CLabel(
     index: Int = DEFAULT_INDEX,
@@ -40,21 +47,9 @@ class CLabel(
     val radiusProperty = SimpleDoubleProperty(radius)
     val colorProperty = SimpleStringProperty(color)
 
-    var index: Int
-        get() = indexProperty.value
-        set(value) {
-            indexProperty.value = value
-        }
-    var radius: Double
-        get() = radiusProperty.value
-        set(value) {
-            radiusProperty.value = value
-        }
-    var color: String
-        get() = colorProperty.value
-        set(value) {
-            colorProperty.value = value
-        }
+    var index: Int by indexProperty
+    var radius: Double by radiusProperty
+    var color: String by colorProperty
 
     init {
         text.fill = Color.WHITE

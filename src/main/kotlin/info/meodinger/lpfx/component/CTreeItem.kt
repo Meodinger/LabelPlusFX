@@ -4,16 +4,21 @@ import info.meodinger.lpfx.type.TransLabel
 
 import javafx.scene.Node
 import javafx.scene.control.TreeItem
+import tornadofx.getValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
  */
+
+/**
+ * A TreeItem for TransLabel containing
+ */
 class CTreeItem(val meta: TransLabel, node: Node? = null) : TreeItem<String>() {
 
-    val index: Int
-        get() = meta.index
+    val index: Int by meta.indexProperty
 
     init {
         graphic = node

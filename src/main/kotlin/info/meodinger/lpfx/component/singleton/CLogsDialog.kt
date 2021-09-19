@@ -26,10 +26,15 @@ import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 import kotlin.io.path.name
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/30
  * Location: info.meodinger.lpfx.component.singleton
+ */
+
+/**
+ * A Dialog Singleton for logs set/clean/send
  */
 object CLogsDialog : Dialog<List<CProperty>>() {
 

@@ -42,9 +42,15 @@
                         <CTreeView fx:id="cTreeView"/>
                     </center>
                 </BorderPane>
-                <CTransArea fx:id="cTransArea"
-                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <center>
+                        <CTransArea fx:id="cTransArea"/>
+                    </center>
+                    <bottom>
+                        <Label fx:id="lInfo"/>
+                    </bottom>
+                </BorderPane>
             </SplitPane>
         </SplitPane>
     </center>

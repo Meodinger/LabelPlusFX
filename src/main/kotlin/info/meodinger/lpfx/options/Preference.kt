@@ -7,6 +7,10 @@ import java.io.IOException
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.options
  */
+
+/**
+ * The preferences that user set while using
+ */
 object Preference : AbstractProperties() {
 
     const val MAIN_DIVIDER = "MainDivider"

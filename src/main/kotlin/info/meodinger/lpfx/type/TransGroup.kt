@@ -3,11 +3,18 @@ package info.meodinger.lpfx.type
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 import javafx.beans.property.SimpleStringProperty
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/30
  * Location: info.meodinger.lpfx.type
+ */
+
+/**
+ * A translation label group
  */
 @JsonIgnoreProperties("nameProperty", "colorProperty")
 class TransGroup(
@@ -21,16 +28,8 @@ class TransGroup(
     val nameProperty = SimpleStringProperty(name)
     val colorProperty = SimpleStringProperty(color)
 
-    var name: String
-        get() = nameProperty.value
-        set(value) {
-            nameProperty.value = value
-        }
-    var color: String
-        get() = colorProperty.value
-        set(value) {
-            colorProperty.value = value
-        }
+    var name: String by nameProperty
+    var color: String by colorProperty
 
     override fun toString(): String = "TransGroup(name=$name, color=$color)"
 

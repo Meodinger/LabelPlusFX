@@ -33,6 +33,8 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
+import tornadofx.getValue
+import tornadofx.setValue
 import java.io.File
 import java.io.IOException
 
@@ -41,14 +43,10 @@ import java.io.IOException
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
- *
- *           |   Layout   | Width
- * -----------------------------
- * pane      | -          | actual width
- * container | 0 - Fixed  | ?
- * image     | left-top   | image width
- * root      | with image | image width
- * layer     | with image | image width
+ */
+
+/**
+ * A scalable, draggable ScrollPane that can display image, text and labels
  */
 class CLabelPane : ScrollPane() {
 
@@ -89,6 +87,16 @@ class CLabelPane : ScrollPane() {
     // ----- layer system ----- //
 
     /**
+     *           |   Layout   | Width
+     * -----------------------------
+     * pane      | -          | actual width
+     * container | 0 - Fixed  | ?
+     * image     | left-top   | image width
+     * root      | with image | image width
+     * layer     | with image | image width
+     */
+
+    /**
      * For all text display
      */
     private val textLayer = Canvas()
@@ -101,7 +109,7 @@ class CLabelPane : ScrollPane() {
     /**
      * For image display
      */
-    private val view = ImageView()
+    private val view = ImageView(INIT_IMAGE)
 
     /**
      * For display, scale, drag, label, event handle
@@ -170,62 +178,23 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var colorList: ObservableList<String>
-        get() = colorListProperty.value
-        set(value) {
-            colorListProperty.value = value
-        }
-    var selectedLabelIndex: Int
-        get() = selectedLabelIndexProperty.value
-        set(value) {
-            selectedLabelIndexProperty.value = value
-        }
-    var defaultCursor: Cursor
-        get() = defaultCursorProperty.value
-        set(value) {
-            defaultCursorProperty.value = value
-        }
-    var onLabelPlace: EventHandler<LabelEvent>
-        get() = onLabelPlaceProperty.value
-        set(value) {
-            onLabelPlaceProperty.value = value
-        }
-    var onLabelRemove: EventHandler<LabelEvent>
-        get() = onLabelRemoveProperty.value
-        set(value) {
-            onLabelRemoveProperty.value = value
-        }
-    var onLabelPointed: EventHandler<LabelEvent>
-        get() = onLabelPointedProperty.value
-        set(value) {
-            onLabelPointedProperty.value = value
-        }
-    var onLabelClicked: EventHandler<LabelEvent>
-        get() = onLabelClickedProperty.value
-        set(value) {
-            onLabelClickedProperty.value = value
-        }
-    var onLabelOther: EventHandler<LabelEvent>
-        get() = onLabelOtherProperty.value
-        set(value) {
-            onLabelOtherProperty.value = value
-        }
-    var image: Image
-        get() = view.image
-        set(value) {
-            view.image = value
-        }
-    val imageWidth: Double
-        get() = image.width
-    val imageHeight: Double
-        get() = image.height
+    var colorList: ObservableList<String> by colorListProperty
+    var selectedLabelIndex: Int by selectedLabelIndexProperty
+    var defaultCursor: Cursor by defaultCursorProperty
+    var onLabelPlace: EventHandler<LabelEvent> by onLabelPlaceProperty
+    var onLabelRemove: EventHandler<LabelEvent> by onLabelRemoveProperty
+    var onLabelPointed: EventHandler<LabelEvent> by onLabelPointedProperty
+    var onLabelClicked: EventHandler<LabelEvent> by onLabelClickedProperty
+    var onLabelOther: EventHandler<LabelEvent> by onLabelOtherProperty
+    var image: Image by view.imageProperty()
 
+    private val imageWidth: Double get() = image.width
+    private val imageHeight: Double get() = image.height
 
     init {
         textLayer.isMouseTransparent = true
         textLayer.graphicsContext2D.font = TEXT_FONT
         textLayer.graphicsContext2D.textBaseline = VPos.TOP
-        view.image = INIT_IMAGE
         view.isPreserveRatio = true
         view.isPickOnBounds = true
         root.alignment = Pos.CENTER
@@ -356,7 +325,6 @@ class CLabelPane : ScrollPane() {
     @Throws(IOException::class)
     private fun setupImage(path: String) {
         image = Image(File(path).toURI().toURL().toString())
-        scale = width / imageWidth
     }
     private fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
@@ -588,5 +556,9 @@ class CLabelPane : ScrollPane() {
 
         root.layoutX = (width - imageWidth) / 2
         root.layoutY = (height - imageHeight) / 2
+    }
+
+    fun fitToPane() {
+        scale = width / imageWidth
     }
 }

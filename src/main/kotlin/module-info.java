@@ -11,6 +11,7 @@ module lpfx {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.fxml;
+    requires tornadofx;
     requires jakarta.mail;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;

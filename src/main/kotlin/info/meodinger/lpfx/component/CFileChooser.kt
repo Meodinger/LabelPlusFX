@@ -6,12 +6,18 @@ import javafx.collections.ObservableList
 import javafx.stage.FileChooser
 import javafx.stage.Window
 import java.io.File
-import java.util.*
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A FileChooser with shared initial directory with other CFileChooser
  */
 class CFileChooser {
 
@@ -29,12 +35,8 @@ class CFileChooser {
 
     private val chooser = FileChooser()
 
+    var title: String by chooser.titleProperty()
     val extensionFilter: ObservableList<FileChooser.ExtensionFilter> = chooser.extensionFilters
-    var title: String
-        get() = chooser.title
-        set(value) {
-            chooser.title = value
-        }
 
     init {
         chooser.initialDirectoryProperty().bind(lastDirectoryProperty)

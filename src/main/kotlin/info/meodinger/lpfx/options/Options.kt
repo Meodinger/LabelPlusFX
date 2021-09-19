@@ -10,10 +10,15 @@ import java.nio.file.Paths
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.options
+ */
+
+/**
+ * The manager for all options
  */
 object Options {
 

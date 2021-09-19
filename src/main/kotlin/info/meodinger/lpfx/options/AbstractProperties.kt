@@ -8,10 +8,15 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.options
+ */
+
+/**
+ * Abstract properties structure for save/load/check
  */
 abstract class AbstractProperties {
 

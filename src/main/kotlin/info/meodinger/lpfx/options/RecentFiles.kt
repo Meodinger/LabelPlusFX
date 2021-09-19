@@ -2,10 +2,15 @@ package info.meodinger.lpfx.options
 
 import java.io.IOException
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.io
+ */
+
+/**
+ * The recent files that user opens while using
  */
 object RecentFiles : AbstractProperties() {
 

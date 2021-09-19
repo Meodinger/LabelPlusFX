@@ -5,11 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
+ */
+
+/**
+ * A translation label
  */
 // 'xProperty' not work because jackson exports field as 'xproperty'
 @JsonIgnoreProperties("indexProperty", "xproperty", "yproperty", "groupIdProperty", "textProperty")
@@ -26,31 +33,11 @@ class TransLabel(
     val groupIdProperty = SimpleIntegerProperty(groupId)
     val textProperty = SimpleStringProperty(text)
 
-    var index: Int
-        get() = indexProperty.value
-        set(value) {
-            indexProperty.value = value
-        }
-    var x: Double
-        get() = xProperty.value
-        set(value) {
-            xProperty.value = value
-        }
-    var y: Double
-        get() = yProperty.value
-        set(value) {
-            yProperty.value = value
-        }
-    var groupId: Int
-        get() = groupIdProperty.value
-        set(value) {
-            groupIdProperty.value = value
-        }
-    var text: String
-        get() = textProperty.value
-        set(value) {
-            textProperty.value = value
-        }
+    var index: Int by indexProperty
+    var x: Double by xProperty
+    var y: Double by yProperty
+    var groupId: Int by groupIdProperty
+    var text: String by textProperty
 
     override fun toString(): String = "TransLabel($index, $x - $y, $groupId, ${text.replace("\n", ",")})"
 

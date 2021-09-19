@@ -6,11 +6,18 @@ import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
 import javafx.scene.text.TextAlignment
+import tornadofx.getValue
+import tornadofx.setValue
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A ComboBox with back/next Button (in HBox)
  */
 class CComboBox<T> : HBox() {
 
@@ -23,13 +30,8 @@ class CComboBox<T> : HBox() {
     val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
     val isWrappedProperty = SimpleBooleanProperty(false)
 
-    val value: T
-        get() = valueProperty.value
-    var isWrapped: Boolean
-        get() = isWrappedProperty.value
-        set(value) {
-            isWrappedProperty.value = value
-        }
+    val value: T by valueProperty
+    var isWrapped: Boolean by isWrappedProperty
 
     init {
         comboBox.valueProperty().addListener { _, _, newValue -> index = comboBox.items.indexOf(newValue) }

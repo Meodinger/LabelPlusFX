@@ -15,10 +15,16 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import java.util.stream.Collectors
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.component
+ */
+
+/**
+ * A ColorPicker costumed to can be applied to ContextMenu
+ * Replace color link with hex TextField
  */
 class CColorPicker() : ColorPicker() {
 

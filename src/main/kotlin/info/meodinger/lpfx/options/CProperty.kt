@@ -5,6 +5,10 @@ package info.meodinger.lpfx.options
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.type
  */
+
+/**
+ * A data class for property storage
+ */
 class CProperty(val key: String, var value: String = "") {
 
     companion object {

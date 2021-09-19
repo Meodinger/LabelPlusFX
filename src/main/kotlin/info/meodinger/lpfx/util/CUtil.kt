@@ -109,6 +109,9 @@ class Catcher(manager: ResourceManager) {
     }
 }
 
+/**
+ * Get a TextFormatter for TransGroup name
+ */
 fun getGroupNameFormatter() = TextFormatter<String> { change ->
     change.text = change.text
         .trim()

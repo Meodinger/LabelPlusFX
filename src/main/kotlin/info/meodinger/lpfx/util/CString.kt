@@ -7,12 +7,18 @@ import javafx.scene.text.Font
 import javafx.scene.text.Text
 import java.util.*
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
 
+/**
+ * Delete tail string
+ *
+ * @param tail Tail to delete
+ */
 fun StringBuilder.deleteTail(tail: String) {
     if (tail.isEmpty()) return
 
@@ -33,6 +39,12 @@ fun String.isInt(): Boolean {
     return true
 }
 
+/**
+ * Trim a list of string
+ *
+ * @param strings Strings to trim
+ * @return A list of String, first two is the same head & tail of input strings, others are strings that trimmed head & tail
+ */
 fun trimSame(strings: List<String>): List<String> {
     if (strings.isEmpty()) return listOf("", "")
     if (strings.size == 1) return listOf("", "", strings[0])
@@ -67,6 +79,9 @@ fun trimSame(strings: List<String>): List<String> {
     return trimmed
 }
 
+/**
+ * Sort a list of string by their int value
+ */
 fun sortByDigit(strings: List<String>): List<String> {
     val trimmed = trimSame(strings)
 
@@ -89,18 +104,24 @@ fun sortByDigit(strings: List<String>): List<String> {
     return strings.toMutableList().sorted()
 }
 
-fun omitHighText(longText: String): String {
+/**
+ * Omit high text
+ */
+fun omitHighText(longText: String, maxRowCount: Int = 10): String {
     val lines = longText.split("\n")
 
-    if (lines.size <= 10) return longText
+    if (lines.size <= maxRowCount) return longText
 
     val builder = StringBuilder()
-    for (i in 0 until 9) builder.appendLine(lines[i])
-    builder.append(String.format(I18N["util.long_text.format.i"], lines.size - 9))
+    for (i in 0 until maxRowCount - 1) builder.appendLine(lines[i])
+    builder.append(String.format(I18N["util.long_text.format.i"], lines.size - maxRowCount - 1))
 
     return builder.toString()
 }
 
+/**
+ * Omit wide text
+ */
 fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String {
     val lines = longText.split("\n")
     val builder = StringBuilder()

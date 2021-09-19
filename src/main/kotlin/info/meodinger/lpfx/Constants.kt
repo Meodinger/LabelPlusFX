@@ -3,11 +3,13 @@ package info.meodinger.lpfx
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/1
  * Location: info.meodinger.lpfx
  */
+
 // Stage
 const val WIDTH = 900.0
 const val HEIGHT = 600.0

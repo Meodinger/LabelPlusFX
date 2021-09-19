@@ -3,10 +3,15 @@ package info.meodinger.lpfx.options
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/26
  * Location: info.meodinger.lpfx.options
+ */
+
+/**
+ * An exception class for CProperty
  */
 class CPropertyException(message: String) : RuntimeException(message) {
 

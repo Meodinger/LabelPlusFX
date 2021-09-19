@@ -12,12 +12,19 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.stage.Stage
+import tornadofx.getValue
+import tornadofx.setValue
 import java.io.File
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx
+ */
+
+/**
+ * Modal & Manager for LPFX
  */
 object State {
 
@@ -35,51 +42,15 @@ object State {
     val viewModeProperty = SimpleObjectProperty(ViewMode.GroupMode)
     val workModeProperty = SimpleObjectProperty(WorkMode.InputMode)
 
-    var isOpened: Boolean
-        get() = isOpenedProperty.value
-        set(value) {
-            isOpenedProperty.value = value
-        }
-    var isChanged: Boolean
-        get() = isChangedProperty.value
-        set(value) {
-            isChangedProperty.value = value
-        }
-    var transFile: TransFile
-        get() = transFileProperty.value
-        set(value) {
-            transFileProperty.value = value
-        }
-    var transPath: String
-        get() = transPathProperty.value
-        set(value) {
-            transPathProperty.value = value
-        }
-    var currentPicName: String
-        get() = currentPicNameProperty.value
-        set(value) {
-            currentPicNameProperty.value = value
-        }
-    var currentGroupId: Int
-        get() = currentGroupIdProperty.value
-        set(value) {
-            currentGroupIdProperty.value = value
-        }
-    var currentLabelIndex: Int
-        get() = currentLabelIndexProperty.value
-        set(value) {
-            currentLabelIndexProperty.value = value
-        }
-    var viewMode: ViewMode
-        get() = viewModeProperty.value
-        set(value) {
-            viewModeProperty.value = value
-        }
-    var workMode: WorkMode
-        get() = workModeProperty.value
-        set(value) {
-            workModeProperty.value = value
-        }
+    var isOpened: Boolean by isOpenedProperty
+    var isChanged: Boolean by isChangedProperty
+    var transFile: TransFile by transFileProperty
+    var transPath: String by transPathProperty
+    var currentPicName: String by currentPicNameProperty
+    var currentGroupId: Int by currentGroupIdProperty
+    var currentLabelIndex: Int by currentLabelIndexProperty
+    var viewMode: ViewMode by viewModeProperty
+    var workMode: WorkMode by workModeProperty
 
     fun reset() {
         isOpened = false

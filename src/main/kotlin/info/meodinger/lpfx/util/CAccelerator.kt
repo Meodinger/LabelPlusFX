@@ -5,6 +5,7 @@ import info.meodinger.lpfx.util.platform.isMac
 import javafx.scene.input.GestureEvent
 import javafx.scene.input.KeyEvent
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29

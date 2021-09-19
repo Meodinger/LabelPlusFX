@@ -3,10 +3,15 @@ package info.meodinger.lpfx.type
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+
 /**
  * Author: Meodinger
  * Date: 2021/8/26
  * Location: info.meodinger.lpfx.type
+ */
+
+/**
+ * An exception class for TransFile
  */
 class TransFileException(message: String) : RuntimeException(message) {
 

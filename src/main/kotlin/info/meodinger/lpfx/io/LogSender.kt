@@ -15,6 +15,10 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * Date: 2021/8/31
  * Location: info.meodinger.lpfx.io
  */
+
+/**
+ * An async log sender
+ */
 object LogSender {
 
     class SendTask(log: File) : LPFXTask<Unit>({

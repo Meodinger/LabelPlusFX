@@ -22,6 +22,7 @@ import javafx.scene.control.*
 import javafx.scene.input.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
+import javafx.scene.text.Font
 import java.io.*
 import java.net.URL
 import java.util.*
@@ -108,6 +109,9 @@ class Controller : Initializable {
 
         // Warp cPicBox
         cPicBox.isWrapped = true
+
+        // TextArea font size
+        cTransArea.font = Font.font(Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
 
         // Display dividers
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
@@ -265,7 +269,10 @@ class Controller : Initializable {
             cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
         }
 
-        // Update config
+        // Update preference
+        cTransArea.fontProperty().addListener { _, _, newValue ->
+            Preference[Preference.TEXTAREA_FONT_SIZE] = newValue.size.toInt()
+        }
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.MAIN_DIVIDER] = newValue
         }
@@ -273,7 +280,15 @@ class Controller : Initializable {
             Preference[Preference.RIGHT_DIVIDER] = newValue
         }
 
-        // Update selected group when clicked GroupTreeItem
+        // Bind Ctrl/Alt/Meta + Scroll with font size change
+        cTransArea.addEventHandler(ScrollEvent.SCROLL) {
+            if (!isControlDown(it)) return@addEventHandler
+
+            cTransArea.font = Font.font(cTransArea.font.size + it.deltaY / 40)
+        }
+
+
+        // Bind selected group with clicked GroupTreeItem
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, item ->
             if (item != null) if (item.parent != null && item !is CTreeItem) {
                 cGroupBox.moveTo(item.value)
@@ -290,18 +305,22 @@ class Controller : Initializable {
             if (it.button != MouseButton.PRIMARY) return@addEventHandler
 
             val item = cTreeView.selectionModel.selectedItem
-            if (item != null && item is CTreeItem)
+            if (item != null && item is CTreeItem) {
                 State.currentLabelIndex = item.index
+            }
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code.isArrowKey) {
+            if (!it.code.isArrowKey) return@addEventHandler
 
-                // shift
-                val shift = if (it.code == KeyCode.UP) -1 else if (it.code == KeyCode.DOWN) 1 else 0
-                val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + shift)
-
-                if (item != null && item is CTreeItem)
-                    State.currentLabelIndex = item.index
+            val item = cTreeView.getTreeItem(
+                cTreeView.selectionModel.selectedIndex + when (it.code) {
+                    KeyCode.UP -> -1
+                    KeyCode.DOWN -> 1
+                    else -> 0
+                }
+            )
+            if (item != null && item is CTreeItem) {
+                State.currentLabelIndex = item.index
             }
         }
 
@@ -316,101 +335,100 @@ class Controller : Initializable {
             }
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code.isArrowKey) {
+            if (!it.code.isArrowKey) return@addEventHandler
 
-                // shift
-                val shift = if (it.code == KeyCode.UP) -1 else if (it.code == KeyCode.DOWN) 1 else 0
-                val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + shift)
-
-                if (item != null && item is CTreeItem)
-                    cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
+            val item = cTreeView.getTreeItem(
+                cTreeView.selectionModel.selectedIndex + when (it.code) {
+                    KeyCode.UP -> -1
+                    KeyCode.DOWN -> 1
+                    else -> 0
+                }
+            )
+            if (item != null && item is CTreeItem) {
+                cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
             }
         }
 
         // Bind Tab with view mode switch
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.TAB) {
-                switchViewMode()
-                it.consume()
-            }
+            if (it.code != KeyCode.TAB) return@addEventHandler
+
+            switchViewMode()
+            it.consume()
         }
 
         // Bind tab with work mode switch
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.TAB) {
-                cLabelPane.removeText()
-                switchWorkMode()
-                it.consume()
-            }
+            if (it.code != KeyCode.TAB) return@addEventHandler
+
+            cLabelPane.removeText()
+            switchWorkMode()
+            it.consume()
         }
 
         // Bind number input with group selection
         root.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code.isDigitKey)
-                cGroupBox.moveTo(it.text.toInt() - 1)
+            if (!it.code.isDigitKey) return@addEventHandler
+
+            cGroupBox.moveTo(it.text.toInt() - 1)
         }
 
         // Bind Arrow KeyEvent with Pic change
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
-            if (isControlDown(it) && it.code.isArrowKey) {
-                if (it.code == KeyCode.LEFT) {
-                    cPicBox.back()
-                    return@EventHandler
-                }
-                if (it.code == KeyCode.RIGHT) {
-                    cPicBox.next()
-                    return@EventHandler
-                }
+            if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
+
+            when (it.code) {
+                KeyCode.LEFT -> cPicBox.back()
+                KeyCode.RIGHT -> cPicBox.next()
+                else -> return@EventHandler
             }
         }
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
 
         // Bind Arrow KeyEvent with Label change
-        val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
-            fun getNextLabelItemIndex(from: Int, direction: Int): Int {
-                var index = from
-                var item: TreeItem<String>?
-                do {
-                    index += direction
-                    item = cTreeView.getTreeItem(index)
+        fun getNextLabelItemIndex(from: Int, direction: Int): Int {
+            var index = from
+            var item: TreeItem<String>?
+            do {
+                index += direction
+                item = cTreeView.getTreeItem(index)
 
-                    if (item != null) {
-                        item.expandAll()
-                    } else {
-                        return -1
-                    }
-                } while (item !is CTreeItem)
-
-                return index
-            }
-
-            if (isControlDown(it) && it.code.isArrowKey) {
-                if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
-
-                val now = cTreeView.selectionModel.selectedIndex
-                cTreeView.selectionModel.clearSelection()
-
-                val shift = if (it.code == KeyCode.UP) -1 else 1
-                var labelItemIndex = now + shift
-
-                val item = cTreeView.getTreeItem(labelItemIndex)
-                if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
-                if (item !is CTreeItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
-
-                if (labelItemIndex == -1) {
-                    cTreeView.selectionModel.select(now)
-                    return@EventHandler
+                if (item != null) {
+                    item.expandAll()
+                } else {
+                    return -1
                 }
+            } while (item !is CTreeItem)
 
-                val cTreeItem = cTreeView.getTreeItem(labelItemIndex) as CTreeItem
+            return index
+        }
+        val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
+            if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
+            if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
 
-                State.currentLabelIndex = cTreeItem.index
+            val now = cTreeView.selectionModel.selectedIndex
+            cTreeView.selectionModel.clearSelection()
 
-                cTreeView.selectionModel.select(labelItemIndex)
-                cTreeView.scrollTo(labelItemIndex)
-                cLabelPane.moveToLabel(cTreeItem.meta)
+            val shift = if (it.code == KeyCode.UP) -1 else 1
+            var labelItemIndex = now + shift
+
+            val item = cTreeView.getTreeItem(labelItemIndex)
+            if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
+            if (item !is CTreeItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
+
+            if (labelItemIndex == -1) {
+                cTreeView.selectionModel.select(now)
+                return@EventHandler
             }
+
+            val cTreeItem = cTreeView.getTreeItem(labelItemIndex) as CTreeItem
+
+            State.currentLabelIndex = cTreeItem.index
+
+            cTreeView.selectionModel.select(labelItemIndex)
+            cTreeView.scrollTo(labelItemIndex)
+            cLabelPane.moveToLabel(cTreeItem.meta)
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)

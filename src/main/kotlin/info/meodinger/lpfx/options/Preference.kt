@@ -11,16 +11,19 @@ object Preference : AbstractProperties() {
 
     const val MAIN_DIVIDER = "MainDivider"
     const val RIGHT_DIVIDER = "RightDivider"
+    const val TEXTAREA_FONT_SIZE = "TextAreaFontSize"
 
     override val default = listOf(
         CProperty(MAIN_DIVIDER, 0.63),
-        CProperty(RIGHT_DIVIDER, 0.6)
+        CProperty(RIGHT_DIVIDER, 0.6),
+        CProperty(TEXTAREA_FONT_SIZE, 12)
     )
 
     init {
         this.properties.addAll(listOf(
             CProperty(MAIN_DIVIDER),
-            CProperty(RIGHT_DIVIDER)
+            CProperty(RIGHT_DIVIDER),
+            CProperty(TEXTAREA_FONT_SIZE)
         ))
     }
 
@@ -39,5 +42,9 @@ object Preference : AbstractProperties() {
         val rightDivider = this[RIGHT_DIVIDER].asDouble()
         if (rightDivider < 0 || rightDivider > 1)
             throw CPropertyException.propertyValueInvalid(RIGHT_DIVIDER, rightDivider)
+
+        val textAreaFontSize = this[TEXTAREA_FONT_SIZE].asInteger()
+        if (textAreaFontSize < 0)
+            throw CPropertyException.propertyValueInvalid(TEXTAREA_FONT_SIZE, textAreaFontSize)
     }
 }

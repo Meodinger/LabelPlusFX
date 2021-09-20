@@ -158,7 +158,16 @@ private fun loadLP(file: File): TransFile {
     // Content
     val transMap = HashMap<String, MutableList<TransLabel>>()
     while (pointer < size && lines[pointer].startsWith(LPTransFile.PIC_START)) {
-        transMap[parsePicHead()] = parsePicBody()
+
+        // Parse order：
+        //  - Kotlin     -> head body
+        //  - JavaScript -> body head
+        // transMap[parsePicHead()] = parsePicBody()
+
+        val picName = parsePicHead()
+        val labels = parsePicBody()
+
+        transMap[picName] = labels
     }
     transFile.transMap = transMap
 

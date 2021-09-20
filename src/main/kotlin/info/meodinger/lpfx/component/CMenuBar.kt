@@ -3,6 +3,7 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.*
 import info.meodinger.lpfx.component.singleton.CLogsDialog
 import info.meodinger.lpfx.component.singleton.CSettingsDialog
+import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.showChoiceList
@@ -247,7 +248,12 @@ class CMenuBar : MenuBar() {
         var updatePane = false
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue
-            if (property.key == Settings.LabelAlpha || property.key == Settings.LabelRadius) updatePane = true
+
+            when (property.key) {
+                Settings.LabelAlpha -> updatePane = true
+                Settings.LabelRadius -> updatePane = true
+            }
+
             Settings[property.key] = property
         }
 
@@ -260,6 +266,11 @@ class CMenuBar : MenuBar() {
 
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue
+
+            when (property.key) {
+                Settings.LogLevelPreference -> Logger.level = Logger.LogType.getType(property.value)
+            }
+
             Settings[property.key] = property
         }
     }

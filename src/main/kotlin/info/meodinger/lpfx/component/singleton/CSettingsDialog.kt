@@ -33,7 +33,7 @@ import kotlin.collections.ArrayList
 /**
  * A Dialog Singleton for settings
  */
-object CSettingsDialog : Dialog<List<CProperty>>() {
+object CSettingsDialog : AbstractPropertiesDialog() {
 
     private const val Gap = 16.0
 
@@ -78,11 +78,16 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         val stackPane = StackPane(gGridPane).also {
             it.prefWidthProperty().bind(Bindings.createDoubleBinding(
                 { scrollPane.viewportBounds.width },
-                scrollPane.viewportBoundsProperty())
-            )
+                scrollPane.viewportBoundsProperty()
+            ))
         }
-        gBorderPane.center = scrollPane.also { it.content = stackPane }
-        gBorderPane.bottom = HBox(gButtonAdd).also { it.alignment = Pos.CENTER_RIGHT }
+        gBorderPane.center = scrollPane.also {
+            it.content = stackPane
+        }
+        gBorderPane.bottom = HBox(gButtonAdd).also {
+            it.alignment = Pos.CENTER_RIGHT
+            it.padding = Insets(Gap, Gap / 2, 0.0, 0.0)
+        }
         groupTab.content = gBorderPane
 
         // ----- Mode ----- //
@@ -110,12 +115,6 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
         this.title = I18N["settings.title"]
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         this.dialogPane.content = tabPane
-        this.setResultConverter {
-            when (it) {
-                ButtonType.OK -> convertResult()
-                else -> emptyList()
-            }
-        }
     }
 
     // ----- Group ----- //
@@ -262,7 +261,7 @@ object CSettingsDialog : Dialog<List<CProperty>>() {
     }
 
     // ----- Result convert ---- //
-    private fun convertResult(): List<CProperty> {
+    override fun convertResult(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
         list.addAll(convertGroup())

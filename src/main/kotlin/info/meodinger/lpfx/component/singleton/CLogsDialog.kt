@@ -36,7 +36,7 @@ import kotlin.io.path.name
 /**
  * A Dialog Singleton for logs set/clean/send
  */
-object CLogsDialog : Dialog<List<CProperty>>() {
+object CLogsDialog : AbstractPropertiesDialog() {
 
     private const val Gap = 16.0
 
@@ -67,12 +67,6 @@ object CLogsDialog : Dialog<List<CProperty>>() {
         this.dialogPane.prefHeight = 400.0
         this.dialogPane.content = root
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-        this.setResultConverter {
-            when (it) {
-                ButtonType.OK -> convertResult()
-                else -> emptyList()
-            }
-        }
     }
 
     private fun initLogPane() {
@@ -141,7 +135,7 @@ object CLogsDialog : Dialog<List<CProperty>>() {
         root.add(buttonClean, 3, 5)
     }
 
-    private fun convertResult(): List<CProperty> {
+    override fun convertResult(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))

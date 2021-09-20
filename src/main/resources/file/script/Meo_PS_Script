@@ -9104,18 +9104,18 @@ var LabelPlus;
 })(LabelPlus || (LabelPlus = {})); // namespace LabelPlus
 var LabelPlus;
 (function (LabelPlus) {
-    function lpTextParser(path) {
-        var f = new File(path);
-        if (!f || !f.exists) {
-            return null;
-        }
-        f.open("r", "TEXT", "????");
-        f.lineFeed = "unix";
-        f.encoding = "UTF-8";
-        var meo = f.read();
-        var data = (new Function('return ' + meo))();
-        f.close();
-        var meoFile = data;
+    var PIC_START = ">>>>>>>>[";
+    var PIC_END = "]<<<<<<<<";
+    var LABEL_START = "----------------[";
+    var LABEL_END = "]----------------";
+    var PROP_START = "[";
+    var PROP_END = "]";
+    var SPLIT = ",";
+    var SEPARATOR = "-";
+    function startWith(str, head) {
+        return str.indexOf(head) === 0;
+    }
+    function meo2lp(path, meoFile) {
         var groups = [];
         for (var i = 0; i < meoFile.groupList.length; i++) {
             groups.push(meoFile.groupList[i].name);
@@ -9129,7 +9129,7 @@ var LabelPlus;
                     x: label.x,
                     y: label.y,
                     group: groups[label.groupId],
-                    contents: label.text
+                    contents: label.text.replace(" ", "\n")
                 };
                 labels.push(l);
             }
@@ -9141,7 +9141,117 @@ var LabelPlus;
             images: label_dict
         };
     }
-    LabelPlus.lpTextParser = lpTextParser;
+    function parseMeoFile(path) {
+        var f = new File(path);
+        if (!f || !f.exists) {
+            LabelPlus.log_err("LabelPlusFXJsonReader: file " + path + " not exists");
+            return null;
+        }
+        f.open("r", "TEXT", "????");
+        f.lineFeed = "unix";
+        f.encoding = "UTF-8";
+        var meo = f.read();
+        var data = (new Function('return ' + meo))();
+        f.close();
+        return meo2lp(path, data);
+    }
+    function parseLPFile(path) {
+        var f = new File(path);
+        if (!f || !f.exists) {
+            LabelPlus.log_err("LabelPlusFXTextReader: file " + path + " not exists");
+            return null;
+        }
+        f.open("r");
+        f.lineFeed = "unix";
+        f.encoding = 'UTF-8';
+        var lines = f.read().split("\n");
+        var size = lines.length;
+        f.close();
+        var pointer = 0;
+        var parseText = function (marks) {
+            var str = "";
+            while (pointer < size) {
+                for (var _i = 0, marks_1 = marks; _i < marks_1.length; _i++) {
+                    var mark = marks_1[_i];
+                    if (startWith(lines[pointer], mark)) {
+                        return str.replace(RegExp("\n+"), "\n").trim();
+                    }
+                }
+                str += lines[pointer];
+                str += "\n";
+                pointer++;
+            }
+            return str.replace(RegExp("\n+"), "\n").trim();
+        };
+        var parseTransLabel = function () {
+            var s = lines[pointer].split(LABEL_END);
+            var props = s[1].replace(PROP_START, "").replace(PROP_END, "").split(SPLIT);
+            var index = parseInt(s[0].replace(LABEL_START, "").trim());
+            var x = parseFloat(props[0].trim());
+            var y = parseFloat(props[1].trim());
+            var groupId = parseInt(props[2].trim());
+            pointer++;
+            return {
+                groupId: groupId,
+                index: index,
+                text: parseText([PIC_START, LABEL_START]),
+                x: x,
+                y: y
+            };
+        };
+        var parsePicHead = function () {
+            var picName = lines[pointer].replace(PIC_START, "").replace(PIC_END, "");
+            pointer++;
+            return picName;
+        };
+        var parsePicBody = function () {
+            var labels = [];
+            while (pointer < size && startWith(lines[pointer], LABEL_START)) {
+                labels.push(parseTransLabel());
+            }
+            while (pointer < size && !startWith(lines[pointer], PIC_START)) {
+                pointer++;
+            }
+            return labels;
+        };
+        var v = lines[pointer].split(SPLIT);
+        var version = [parseInt(v[0].trim()), parseInt(v[1].trim())];
+        pointer++;
+        pointer++;
+        var groupCount = 1;
+        var groupList = [];
+        while (lines[pointer] != SEPARATOR && groupCount < 10) {
+            groupList.push({
+                color: "000000",
+                name: lines[pointer]
+            });
+            groupCount++;
+            pointer++;
+        }
+        pointer++;
+        var comment = parseText([PIC_START]);
+        var transMap = {};
+        while (pointer < size && startWith(lines[pointer], PIC_START)) {
+            var picName = parsePicHead();
+            var labels = parsePicBody();
+            transMap[picName] = labels;
+        }
+        var transFile = {
+            version: version,
+            comment: comment,
+            groupList: groupList,
+            transMap: transMap
+        };
+        return meo2lp(path, transFile);
+    }
+    function parseTransFile(path) {
+        if (path.substring(path.lastIndexOf("."), path.length) == '.json')
+            return parseMeoFile(path);
+        if (path.substring(path.lastIndexOf("."), path.length) == '.txt')
+            return parseLPFile(path);
+        return null;
+    }
+    LabelPlus.parseTransFile = parseTransFile;
 })(LabelPlus || (LabelPlus = {}));
 var LabelPlus;
 (function (LabelPlus) {
@@ -9409,7 +9519,7 @@ var LabelPlus;
         LabelPlus.log("Properties start ------------------");
         LabelPlus.log(Stdlib.listProps(opts));
         LabelPlus.log("Properties end   ------------------");
-        var lpFile = LabelPlus.lpTextParser(opts.lpTextFilePath);
+        var lpFile = LabelPlus.parseTransFile(opts.lpTextFilePath);
         if (lpFile == null) {
             LabelPlus.log_err("error: " + I18n.ERROR_PARSER_LPTEXT_FAIL);
             return false;
@@ -13660,7 +13770,7 @@ var LabelPlus;
                     var inputPnl = _this.inputPnl;
                     var outputPnl = _this.outputPnl;
                     var automationPnl = _this.automationPnl;
-                    var fmask = "*.json";
+                    var fmask = "*.txt;*.json";
                     var f = File.openDialog(I18n.LABEL_TEXT_FILE, fmask);
                     if (f && f.exists) {
                         pnl.lpTextFileTextBox.text = f.fsName;
@@ -13671,7 +13781,7 @@ var LabelPlus;
                     else {
                         return {}; // cancel by user
                     }
-                    var lpFile = LabelPlus.lpTextParser(f.fsName);
+                    var lpFile = LabelPlus.parseTransFile(f.fsName);
                     if (lpFile === null) {
                         alert(I18n.ERROR_PARSER_LPTEXT_FAIL);
                         return {};
@@ -13702,7 +13812,7 @@ var LabelPlus;
                             alert(I18n.ERROR_NOT_FOUND_LPTEXT);
                             return null;
                         }
-                        var lpFile = LabelPlus.lpTextParser(pnl.lpTextFileTextBox.text);
+                        var lpFile = LabelPlus.parseTransFile(pnl.lpTextFileTextBox.text);
                         if (lpFile == null) {
                             alert(I18n.ERROR_PARSER_LPTEXT_FAIL);
                             return null;

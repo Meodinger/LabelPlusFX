@@ -56,9 +56,9 @@ object State {
         isOpened = false
         transFile = TransFile.DEFAULT_FILE
         transPath = ""
-        currentPicName = ""
-        currentGroupId = 0
-        currentLabelIndex = NOT_FOUND
+        //currentPicName = ""
+        //currentGroupId = 0
+        //currentLabelIndex = NOT_FOUND
         isChanged = false
         workMode = WorkMode.InputMode
         viewMode = ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[0])

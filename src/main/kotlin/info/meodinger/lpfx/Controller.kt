@@ -119,10 +119,8 @@ class Controller : Initializable {
         // Warp cPicBox
         cPicBox.isWrapped = true
 
-        // TextArea font size
+        // Preferences
         cTransArea.font = Font.font(Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
-
-        // Display dividers
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
 
@@ -137,32 +135,39 @@ class Controller : Initializable {
      * Property bindings
      */
     private fun bind() {
-        // cTransArea - isChanged
+        // isChanged
         cTransArea.textProperty().addListener { _, _, _ ->
             if (cTransArea.isBound) State.isChanged = true
         }
 
-        // cPicBox - currentPicName
+        // currentPicName
         cPicBox.valueProperty.addListener { _, _, newValue ->
-            if (!State.isOpened) return@addListener
-            if (newValue == null) return@addListener
-
-            State.currentPicName = newValue
+            State.currentPicName = newValue ?: ""
         }
 
-        // cGroupBox - currentGroupId
-        cGroupBox.valueProperty.addListener { _, _, newValue ->
-            if (!State.isOpened) return@addListener
-            if (newValue == null) return@addListener
-
-            State.currentGroupId = State.transFile.getGroupIdByName(newValue)
+        // currentGroupId
+        cGroupBox.indexProperty.addListener { _, _, newValue ->
+            State.currentGroupId = newValue as Int
+        }
+        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            // Bind selected group with clicked GroupTreeItem
+            if (newValue != null && newValue.parent != null && newValue !is CTreeItem) {
+                State.currentGroupId = State.transFile.getGroupIdByName(newValue.value)
+            }
         }
 
-        // cLabelPane - currentLabelIndex
+        // currentLabelIndex
+        State.currentPicNameProperty.addListener { _ , _, _ ->
+            // Clear selected when change pic
+            State.currentLabelIndex = NOT_FOUND
+        }
         cLabelPane.selectedLabelIndexProperty.addListener { _, _, newValue ->
-            if (!State.isOpened) return@addListener
-
             State.currentLabelIndex = newValue as Int
+        }
+        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            if (newValue != null && newValue is CTreeItem) {
+                State.currentLabelIndex = newValue.index
+            }
         }
 
         // cSlider - cLabelPane#scale
@@ -180,8 +185,6 @@ class Controller : Initializable {
         State.currentPicNameProperty.addListener { _, _, _ ->
             if (!State.isOpened) return@addListener
 
-            State.currentLabelIndex = NOT_FOUND
-
             updateTreeView()
             updateLabelPane()
         }
@@ -192,11 +195,11 @@ class Controller : Initializable {
 
             cLabelPane.removeText()
 
+            val groupName = State.transFile.getTransGroupAt(newGroupId as Int).name
+            cGroupBox.moveTo(groupName)
             for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
-                if (cGroup.groupName == State.transFile.getTransGroupAt(newGroupId as Int).name)
-                    cGroup.select()
-                else
-                    cGroup.unselect()
+                cGroup.unselect()
+                if (cGroup.groupName == groupName) cGroup.select()
             }
         }
 
@@ -327,42 +330,6 @@ class Controller : Initializable {
             it.consume()
         }
 
-        // Bind selected group with clicked GroupTreeItem
-        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, item ->
-            if (item != null) if (item.parent != null && item !is CTreeItem) {
-                cGroupBox.moveTo(item.value)
-            }
-        }
-
-        // Bind text and Tree
-        cTreeView.addEventHandler(ScrollToEvent.ANY) {
-            val item = cTreeView.selectionModel.selectedItem
-            if (item != null && item is CTreeItem)
-                State.currentLabelIndex = item.index
-        }
-        cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
-            if (it.button != MouseButton.PRIMARY) return@addEventHandler
-
-            val item = cTreeView.selectionModel.selectedItem
-            if (item != null && item is CTreeItem) {
-                State.currentLabelIndex = item.index
-            }
-        }
-        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (!it.code.isArrowKey) return@addEventHandler
-
-            val item = cTreeView.getTreeItem(
-                cTreeView.selectionModel.selectedIndex + when (it.code) {
-                    KeyCode.UP -> -1
-                    KeyCode.DOWN -> 1
-                    else -> 0
-                }
-            )
-            if (item != null && item is CTreeItem) {
-                State.currentLabelIndex = item.index
-            }
-        }
-
         // Bind Label and Tree
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button != MouseButton.PRIMARY) return@addEventHandler
@@ -457,18 +424,11 @@ class Controller : Initializable {
             if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
             if (item !is CTreeItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
 
-            if (labelItemIndex == -1) {
-                cTreeView.selectionModel.select(now)
-                return@EventHandler
-            }
+            if (labelItemIndex == -1) return@EventHandler
 
-            val cTreeItem = cTreeView.getTreeItem(labelItemIndex) as CTreeItem
-
-            State.currentLabelIndex = cTreeItem.index
-
-            cTreeView.selectionModel.select(labelItemIndex)
+            cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeItem).meta)
             cTreeView.scrollTo(labelItemIndex)
-            cLabelPane.moveToLabel(cTreeItem.meta)
+            cTreeView.selectionModel.select(labelItemIndex)
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
@@ -768,6 +728,7 @@ class Controller : Initializable {
         // cSlider
         cPicBox.reset()
         cGroupBox.reset()
+        hbGroupBar.children.clear()
         cTreeView.reset()
         cTransArea.reset()
     }
@@ -784,9 +745,7 @@ class Controller : Initializable {
 
         hbGroupBar.children.clear()
         for (group in groups) hbGroupBar.children.add(CGroup(group).also {
-            it.setOnMouseClicked { _ ->
-                State.currentGroupId = State.transFile.getGroupIdByName(it.groupName)
-            }
+            it.setOnMouseClicked { _ -> cGroupBox.moveTo(it.groupName) }
         })
 
         Logger.info("Group list updated", "Controller")

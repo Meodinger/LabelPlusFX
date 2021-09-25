@@ -1,7 +1,6 @@
 package info.meodinger.lpfx.component
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.*
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
@@ -24,68 +23,70 @@ class CComboBox<T> : HBox() {
     private val comboBox = ComboBox<T>()
     private val back = Button("<")
     private val next = Button(">")
-    private var index = 0
-    private var size = 0
 
     val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
+    val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
     val isWrappedProperty = SimpleBooleanProperty(false)
 
     val value: T by valueProperty
+    val index: Int by indexProperty
     var isWrapped: Boolean by isWrappedProperty
 
     init {
-        comboBox.valueProperty().addListener { _, _, newValue -> index = comboBox.items.indexOf(newValue) }
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
 
         comboBox.prefWidth = 150.0
         back.textAlignment = TextAlignment.CENTER
         next.textAlignment = TextAlignment.CENTER
+
         children.addAll(comboBox, back, next)
     }
 
     fun reset() {
         comboBox.items.clear()
-        comboBox.value = null
-        index = 0
-        size = 0
+        comboBox.selectionModel.clearSelection()
     }
 
     fun setList(list: List<T>) {
         reset()
-        size = list.size
         comboBox.items.addAll(list)
 
-        if (list.isNotEmpty()) comboBox.value = comboBox.items[0]
+        if (list.isNotEmpty()) comboBox.selectionModel.select(0)
     }
 
     fun back() {
+        val size = comboBox.items.size
+        var newIndex = index - 1
+
         if (isWrapped) {
-            if (index <= 0) index += size
+            if (newIndex < 0) newIndex += size
         }
-        if (index > 0) {
-            comboBox.value = comboBox.items[--index]
+        if (newIndex >= 0) {
+            comboBox.value = comboBox.items[newIndex]
         }
     }
 
     fun next() {
+        val size = comboBox.items.size
+        var newIndex = index + 1
+
         if (isWrapped) {
-            if (index >= size - 1) index -= size
+            if (newIndex > size - 1) newIndex -= size
         }
-        if (index < size - 1) {
-            comboBox.value = comboBox.items[++index]
+        if (newIndex <= size - 1) {
+            comboBox.value = comboBox.items[newIndex]
         }
     }
 
     fun moveTo(index: Int) {
-        if (index in 0 until size) {
-            comboBox.value = comboBox.items[index]
-        }
+        if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
+        // else throw IllegalArgumentException("index invalid")
     }
 
     fun moveTo(item: T) {
-        if (comboBox.items.contains(item)) comboBox.value = item
-        else throw IllegalArgumentException("no such item")
+        if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
+        // else throw IllegalArgumentException("no such item")
     }
 
 }

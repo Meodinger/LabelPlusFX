@@ -132,7 +132,7 @@ class Controller : Initializable {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
 
             val transLabel = TransLabel(
-                State.transFile.getTransLabelListOf(State.currentPicName).size + 1,
+                it.labelIndex,
                 it.labelX, it.labelY, State.currentGroupId, ""
             )
 
@@ -188,6 +188,9 @@ class Controller : Initializable {
             cLabelPane.removeText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
         }
+        cLabelPane.onLabelMove = EventHandler {
+            State.isChanged = true
+        }
 
         // Preferences
         cTransArea.font = Font.font("SimSun", Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
@@ -242,8 +245,6 @@ class Controller : Initializable {
         // Preferences
         cTransArea.fontProperty().addListener { _, _, newValue ->
             Preference[Preference.TEXTAREA_FONT_SIZE] = newValue.size.toInt()
-
-            cInfoLabel.showInfo("Text font size set to $newValue")
         }
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.MAIN_DIVIDER] = newValue
@@ -266,6 +267,8 @@ class Controller : Initializable {
 
             updateTreeView()
             updateLabelPane()
+
+            cInfoLabel.showInfo("Change picture to $newValue")
         }
 
         // Clear text layer & re-select CGroup when group change
@@ -297,6 +300,8 @@ class Controller : Initializable {
                 val newLabel = transLabels.find { it.index == newIndex }
                 if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
             }
+
+            cInfoLabel.showInfo("Selected label $newIndex")
         }
 
         // Update cLabelPane default cursor when work mode change
@@ -312,6 +317,8 @@ class Controller : Initializable {
                 WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
                 WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
             }
+
+            cInfoLabel.showInfo("Switch work mode to $newMode")
         }
 
         // Update CTreeView when view mode change
@@ -324,6 +331,8 @@ class Controller : Initializable {
             }
 
             updateTreeView()
+
+            cInfoLabel.showInfo("Switch view mode to $newMode")
         }
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
@@ -337,6 +346,8 @@ class Controller : Initializable {
             cTransArea.font = Font.font("SimSun", newSize) // Song
             cTransArea.positionCaret(0)
             it.consume()
+
+            cInfoLabel.showInfo("Text font size set to $newSize")
         }
 
         // Bind Label and Tree
@@ -367,7 +378,7 @@ class Controller : Initializable {
     /**
      * Transformation
      *
-     * Some actions will transform to other actions
+     * Some actions will transform to others
      */
     private fun transform() {
         // Transform tab pressed in CTreeView to ViewModeBtn clicked
@@ -392,7 +403,7 @@ class Controller : Initializable {
             if (!it.code.isDigitKey) return@addEventHandler
 
             val index = it.text.toInt() - 1
-            if (index < 0 || index >= cGroupBox.items.size)
+            if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
             cGroupBox.moveTo(it.text.toInt() - 1)
         }
 
@@ -444,7 +455,8 @@ class Controller : Initializable {
 
             if (labelItemIndex == -1) return@EventHandler
 
-            cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeItem).meta)
+            val transLabel = (cTreeView.getTreeItem(labelItemIndex) as CTreeItem).meta
+            cLabelPane.moveToLabel(transLabel)
             cTreeView.scrollTo(labelItemIndex)
             cTreeView.selectionModel.select(labelItemIndex)
 
@@ -754,9 +766,11 @@ class Controller : Initializable {
         cTransArea.reset()
     }
     fun updatePicList() {
-        cPicBox.setList(TransFile.getSortedPicList(State.transFile))
+        val pics = TransFile.getSortedPicList(State.transFile)
+        cPicBox.setList(pics)
 
         Logger.info("Picture list updated", "Controller")
+        Logger.debug("List is", pics, "Controller")
     }
     fun updateGroupList() {
         val groups = State.transFile.groupList
@@ -771,12 +785,14 @@ class Controller : Initializable {
         (hbGroupBar.children[State.currentGroupId] as CGroup).select()
 
         Logger.info("Group list updated", "Controller")
+        Logger.debug("List is", groups, "Controller")
     }
     fun updateLabelColorList() {
         val list = List(State.transFile.groupList.size) { State.transFile.getTransGroupAt(it).color }
         cLabelPane.colorList = FXCollections.observableList(list)
 
         Logger.info("LabelPane color list updated", "Controller")
+        Logger.debug("List is", list, "Controller")
     }
     fun updateTreeView() {
         cTreeView.update(

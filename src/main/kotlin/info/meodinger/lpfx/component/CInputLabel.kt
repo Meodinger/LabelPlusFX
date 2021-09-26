@@ -54,14 +54,14 @@ class CInputLabel : Pane() {
     val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
     var textFormatter: TextFormatter<String> by textFormatterProperty
 
-    val onChangeStartProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty()
-    val onChangeStart: Callback<String, Unit>? by onChangeStartProperty
+    val onChangeStartProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty(Callback {})
+    val onChangeStart: Callback<String, Unit> by onChangeStartProperty
     fun setOnChangeStart(callback: Callback<String, Unit>) {
         onChangeStartProperty.value = callback
     }
 
-    val onChangeFinishProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty()
-    val onChangeFinish: Callback<String, Unit>? by onChangeFinishProperty
+    val onChangeFinishProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty(Callback {})
+    val onChangeFinish: Callback<String, Unit> by onChangeFinishProperty
     fun setOnChangeFinish(callback: Callback<String, Unit>) {
         onChangeFinishProperty.value = callback
     }
@@ -88,14 +88,14 @@ class CInputLabel : Pane() {
 
             isEditing = true
 
-            onChangeStart?.call(labelText)
+            onChangeStart.call(labelText)
         }
         field.setOnAction {
             labelText = fieldText
 
             isEditing = false
 
-            onChangeFinish?.call(fieldText)
+            onChangeFinish.call(fieldText)
         }
 
         this.children.add(label)

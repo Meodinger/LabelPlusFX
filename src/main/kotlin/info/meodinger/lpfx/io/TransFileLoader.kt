@@ -51,6 +51,7 @@ private fun loadLP(file: File): TransFile {
     val lines = reader.readLines()
     val size = lines.size
 
+    var index = 0
     var pointer = 0
 
     /**
@@ -81,15 +82,22 @@ private fun loadLP(file: File): TransFile {
         val s = lines[pointer].split(LPTransFile.LABEL_END)
         val props = s[1].replace(LPTransFile.PROP_START, "").replace(LPTransFile.PROP_END, "").split(LPTransFile.SPLIT)
 
-        val index = s[0].replace(LPTransFile.LABEL_START, "").trim().toInt()
+        /*
+           Re-arrange label index when loading, ignore file data
+           Line  54: index define
+           Line 100: index inc
+           Line 169: index reset
+         */
+
+        // val index = s[0].replace(LPTransFile.LABEL_START, "").trim().toInt()
         val x = props[0].trim().toDouble()
         val y = props[1].trim().toDouble()
         val groupId = props[2].trim().toInt() - 1
 
-        if (index < 0) throw IOException(String.format(I18N["exception.loader.invalid_index.format.i"], index))
+        // if (index < 0) throw IOException(String.format(I18N["exception.loader.invalid_index.format.i"], index))
 
         pointer++
-        return TransLabel(index, x, y, groupId, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
+        return TransLabel(++index, x, y, groupId, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
     }
 
     /**
@@ -158,6 +166,7 @@ private fun loadLP(file: File): TransFile {
     // Content
     val transMap = HashMap<String, MutableList<TransLabel>>()
     while (pointer < size && lines[pointer].startsWith(LPTransFile.PIC_START)) {
+        index = 0
 
         // Parse order：
         //  - Kotlin     -> head body

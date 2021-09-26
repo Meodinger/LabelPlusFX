@@ -76,6 +76,7 @@ class CLabelPane : ScrollPane() {
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY = EventType<LabelEvent>(EventType.ROOT)
+            val LABEL_MOVE = EventType(LABEL_ANY, "LABEL_MOVE")
             val LABEL_OTHER = EventType(LABEL_ANY, "LABEL_OTHER")
             val LABEL_PLACE = EventType(LABEL_ANY, "LABEL_PLACE")
             val LABEL_REMOVE = EventType(LABEL_ANY, "LABEL_REMOVE")
@@ -140,6 +141,7 @@ class CLabelPane : ScrollPane() {
     val onLabelPointedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelClickedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelOtherProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelMoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
 
     var initScale: Double
         get() = initScaleProperty.value
@@ -184,6 +186,7 @@ class CLabelPane : ScrollPane() {
     var onLabelPointed: EventHandler<LabelEvent> by onLabelPointedProperty
     var onLabelClicked: EventHandler<LabelEvent> by onLabelClickedProperty
     var onLabelOther: EventHandler<LabelEvent> by onLabelOtherProperty
+    var onLabelMove: EventHandler<LabelEvent> by onLabelMoveProperty
     var image: Image by view.imageProperty()
 
     private val imageWidth: Double get() = image.width
@@ -249,12 +252,20 @@ class CLabelPane : ScrollPane() {
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            onLabelOther.handle(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+            onLabelOther.handle(LabelEvent(LabelEvent.LABEL_OTHER,
+                it, NOT_FOUND,
+                it.x / imageWidth, it.y / imageHeight,
+                it.x, it.y
+            ))
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
                 if (!it.isStillSincePress) return@addEventHandler
-                onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE, it, NOT_FOUND, it.x / imageWidth, it.y / imageHeight, it.x, it.y))
+                onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE,
+                    it, labels.size + 1,
+                    it.x / imageWidth, it.y / imageHeight,
+                    it.x, it.y
+                ))
             }
         }
 
@@ -381,6 +392,12 @@ class CLabelPane : ScrollPane() {
 
             AnchorPane.setLeftAnchor(label, newLayoutX)
             AnchorPane.setTopAnchor(label, newLayoutY)
+
+            onLabelMove.handle(LabelEvent(LabelEvent.LABEL_MOVE,
+                it, transLabel.index,
+                transLabel.x, transLabel.y,
+                label.layoutX + it.x, label.layoutY + it.y
+            ))
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             label.cursor = Cursor.HAND
@@ -400,14 +417,26 @@ class CLabelPane : ScrollPane() {
 
         // Event handle
         label.setOnMouseMoved {
-            onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+            onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED,
+                it, transLabel.index,
+                transLabel.x, transLabel.y,
+                label.layoutX + it.x, label.layoutY + it.y
+            ))
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
             if (it.button == MouseButton.PRIMARY) {
-                onLabelClicked.handle(LabelEvent(LabelEvent.LABEL_CLICKED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                onLabelClicked.handle(LabelEvent(LabelEvent.LABEL_CLICKED,
+                    it, transLabel.index,
+                    transLabel.x, transLabel.y,
+                    label.layoutX + it.x, label.layoutY + it.y
+                ))
             } else if (it.button == MouseButton.SECONDARY) {
-                onLabelRemove.handle(LabelEvent(LabelEvent.LABEL_REMOVE, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
+                onLabelRemove.handle(LabelEvent(LabelEvent.LABEL_REMOVE,
+                    it, transLabel.index,
+                    transLabel.x, transLabel.y,
+                    label.layoutX + it.x, label.layoutY + it.y
+                ))
             }
         }
 

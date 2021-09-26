@@ -237,30 +237,36 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         lSliderRadius.max = 48.0
 
         lLabelAlpha.textFormatter = TextFormatter { change ->
-            val fieldText = lLabelAlpha.fieldText
-            val isHead0x = lLabelAlpha.fieldText.startsWith("0x")
-            if (fieldText.length >= (if (isHead0x) 4 else 2)) {
-                change.text = ""
-                return@TextFormatter change
-            }
-
-            change.text = change.text.uppercase().replace(Regex("[^0-9A-F]"), "")
             if (change.isAdded) {
-                val left = (if (isHead0x) 4 else 2) - fieldText.length
-                change.text = change.text.substring(0, left.coerceAtMost(change.text.length))
-            }
+                if (lLabelAlpha.fieldText.length == 2) {
+                    change.text = ""
+                    return@TextFormatter change
+                }
 
+                val builder = StringBuilder()
+                for (c in change.text.uppercase().toCharArray()) {
+                    if (c in '0'..'9' || c in 'A'..'F') {
+                        builder.append(c)
+                    }
+                }
+                change.text = builder.toString()
+
+                if (lLabelAlpha.fieldText.length + change.text.length > 2) {
+                    change.text = ""
+                }
+            }
             change
         }
         lLabelAlpha.setOnChangeStart {
             lLabelAlpha.fieldText = it.replace("0x", "")
         }
         lLabelAlpha.setOnChangeFinish {
-            lSliderAlpha.value = it.replace("0x", "").toInt(16) / 255.0
+            lSliderAlpha.value = it.toInt(16) / 255.0
         }
         lSliderAlpha.valueProperty().addListener { _, _, newValue ->
             val str = (newValue as Double * 255.0).toInt().toString(16).uppercase()
-            lLabelAlpha.text = if (str.length == 1) "0x0$str" else "0x$str"
+            lLabelAlpha.labelText = if (str.length == 1) "0x0$str" else "0x$str"
+            lLabelAlpha.fieldText = str
             label.color = if (str.length == 1) "FF00000$str" else "FF0000$str"
         }
         lSliderAlpha.min = 0.0

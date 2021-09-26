@@ -3,4 +3,7 @@
 /.idea/*
 !/.idea/artifacts
 !/.idea/vcs.xml
-*.iml
+
+lpfx.iml
+lpfx.ipr
+lpfx.iws

@@ -70,7 +70,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* [Liberica JDK 16 (Full)](bell-sw.com/pages/downloads/#/java-16-current)
+* [Liberica JDK 16 (Full)](https://bell-sw.com/pages/downloads/#/java-16-current)
 
 
 ### Installation
@@ -80,9 +80,11 @@ To get a local copy up and running follow these simple steps.
    git clone https://github.com/Meodinger/LabelPlusFX.git
    ```
    
-2. Build artifact `lpfx:jar`
+2. Run maven plugins idea:module
 
-3. Build with script
+3. Build artifact `lpfx:jar`
+
+4. Build with script
 
 
 

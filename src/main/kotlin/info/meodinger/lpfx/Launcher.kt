@@ -10,7 +10,7 @@ import javafx.application.Application
  */
 
 /**
- * Launcher for LPFX
+ * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
     Application.launch(LabelPlusFX::class.java, *args)

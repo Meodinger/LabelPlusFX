@@ -44,9 +44,7 @@ object CTreeMenu : ContextMenu() {
         val newName =
             if (newGroupId < nameList.size) nameList[newGroupId]
             else String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
-        val newColor =
-            if (newGroupId < 9) Color.web(colorList[newGroupId])
-            else Color.BLACK
+        val newColor = Color.web(colorList[newGroupId % colorList.size])
 
         r_addGroupField.text = newName
         r_addGroupPicker.value = newColor

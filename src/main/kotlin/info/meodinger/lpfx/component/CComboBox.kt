@@ -25,12 +25,15 @@ class CComboBox<T> : HBox() {
     private val next = Button(">")
 
     val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
-    val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
-    val isWrappedProperty = SimpleBooleanProperty(false)
-
     val value: T by valueProperty
+
+    val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
     val index: Int by indexProperty
+
+    val isWrappedProperty = SimpleBooleanProperty(false)
     var isWrapped: Boolean by isWrappedProperty
+
+    val items: List<T> get() = comboBox.items
 
     init {
         back.setOnMouseClicked { back() }
@@ -81,12 +84,12 @@ class CComboBox<T> : HBox() {
 
     fun moveTo(index: Int) {
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
-        // else throw IllegalArgumentException("index invalid")
+        else throw IllegalArgumentException("index invalid")
     }
 
     fun moveTo(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
-        // else throw IllegalArgumentException("no such item")
+        else throw IllegalArgumentException("no such item")
     }
 
 }

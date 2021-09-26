@@ -26,5 +26,14 @@ abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
         }
     }
 
+    protected abstract fun initProperties()
+
     protected abstract fun convertResult(): List<CProperty>
+
+    fun generateProperties(): List<CProperty> {
+        initProperties()
+
+        val result = this.showAndWait()
+        return if (result.isPresent) result.get() else emptyList()
+    }
 }

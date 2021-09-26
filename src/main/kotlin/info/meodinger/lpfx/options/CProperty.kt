@@ -43,6 +43,9 @@ class CProperty(val key: String, var value: String = "") {
     fun asInteger(): Int {
         return value.toInt()
     }
+    fun asInteger(radix: Int): Int {
+        return value.toInt(radix)
+    }
     fun asDouble(): Double {
         return value.toDouble()
     }

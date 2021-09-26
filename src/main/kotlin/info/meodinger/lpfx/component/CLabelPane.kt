@@ -134,7 +134,6 @@ class CLabelPane : ScrollPane() {
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
     val colorListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
-    val selectedLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -179,7 +178,6 @@ class CLabelPane : ScrollPane() {
             }
         }
     var colorList: ObservableList<String> by colorListProperty
-    var selectedLabelIndex: Int by selectedLabelIndexProperty
     var defaultCursor: Cursor by defaultCursorProperty
     var onLabelPlace: EventHandler<LabelEvent> by onLabelPlaceProperty
     var onLabelRemove: EventHandler<LabelEvent> by onLabelRemoveProperty
@@ -270,8 +268,6 @@ class CLabelPane : ScrollPane() {
     fun reset() {
         isVisible = false
 
-        selectedLabelIndex = NOT_FOUND
-
         vvalue = 0.0
         hvalue = 0.0
         root.layoutX = 0.0
@@ -288,8 +284,6 @@ class CLabelPane : ScrollPane() {
     fun clear() {
         isVisible = false
 
-        selectedLabelIndex = NOT_FOUND
-
         vvalue = 0.0
         hvalue = 0.0
         root.layoutX = 0.0
@@ -302,8 +296,6 @@ class CLabelPane : ScrollPane() {
     }
     fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
         isVisible = false
-
-        selectedLabelIndex = NOT_FOUND
 
         vvalue = 0.0
         hvalue = 0.0
@@ -406,11 +398,6 @@ class CLabelPane : ScrollPane() {
             this.removeText()
         }
 
-        // Selected index
-        label.addEventHandler(MouseEvent.MOUSE_CLICKED) {
-             selectedLabelIndex = transLabel.index
-        }
-
         // Event handle
         label.setOnMouseMoved {
             onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED, it, transLabel.index, transLabel.x, transLabel.y, label.layoutX + it.x, label.layoutY + it.y))
@@ -511,8 +498,6 @@ class CLabelPane : ScrollPane() {
         labels.remove(label)
         // Remove label comp
         labelLayers[transLabel.groupId].children.remove(label)
-        // Edit data
-        if (selectedLabelIndex == label.index) selectedLabelIndex = NOT_FOUND
     }
     fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)

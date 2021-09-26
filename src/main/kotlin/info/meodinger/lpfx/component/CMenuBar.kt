@@ -241,9 +241,7 @@ class CMenuBar : MenuBar() {
     }
 
     private fun settings() {
-        val result = CSettingsDialog.showAndWait()
-        if (!result.isPresent) return
-        val list = result.get()
+        val list = CSettingsDialog.generateProperties()
 
         var updatePane = false
         for (property in list) {
@@ -260,9 +258,7 @@ class CMenuBar : MenuBar() {
         if (updatePane && State.isOpened) State.controller.updateLabelPane()
     }
     private fun logs() {
-        val result = CLogsDialog.showAndWait()
-        if (!result.isPresent) return
-        val list = result.get()
+        val list = CLogsDialog.generateProperties()
 
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue

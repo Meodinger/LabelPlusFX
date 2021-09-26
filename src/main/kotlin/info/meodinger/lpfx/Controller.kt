@@ -55,7 +55,7 @@ class Controller : Initializable {
     @FXML private lateinit var cGroupBox: CComboBox<String>
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CTransArea
-    @FXML private lateinit var cInfo: CInfo
+    @FXML private lateinit var cInfoLabel: CInfoLabel
 
     private class BackupTaskManager {
 
@@ -90,21 +90,23 @@ class Controller : Initializable {
 
     /**
      * Component Initialize
+     *
+     * Some props of comps will be initialized
      */
     private fun init() {
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
 
-        // Text
-        bSwitchWorkMode.text = I18N["mode.work.input"]
-        bSwitchViewMode.text = I18N["mode.view.group"]
-
         // Set last used dir
         val lastFilePath = RecentFiles.getLastOpenFile()
         if (lastFilePath != null) CFileChooser.lastDirectory = File(lastFilePath).parentFile
 
-        // Update OpenRecent
-        cMenuBar.updateOpenRecent()
+        // Warp cPicBox
+        cPicBox.isWrapped = true
+
+        // Text
+        bSwitchWorkMode.text = I18N["mode.work.input"]
+        bSwitchViewMode.text = Settings[Settings.ViewModePreference].asStringList()[WorkMode.InputMode.ordinal]
 
         // Set comp disabled
         bSwitchViewMode.disableProperty().bind(State.isOpenedProperty.not())
@@ -116,132 +118,14 @@ class Controller : Initializable {
         cSlider.disableProperty().bind(State.isOpenedProperty.not())
         cLabelPane.disableProperty().bind(State.isOpenedProperty.not())
 
-        // Warp cPicBox
-        cPicBox.isWrapped = true
-
-        // Preferences
-        cTransArea.font = Font.font(Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
-        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
-        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
-
-        // Display default image
-        cLabelPane.isVisible = false
-        Platform.runLater {
-            cLabelPane.moveToCenter()
-            cLabelPane.isVisible = true
-        }
-    }
-    /**
-     * Property bindings
-     */
-    private fun bind() {
-        // isChanged
-        cTransArea.textProperty().addListener { _, _, _ ->
-            if (cTransArea.isBound) State.isChanged = true
-        }
-
-        // currentPicName
-        cPicBox.valueProperty.addListener { _, _, newValue ->
-            State.currentPicName = newValue ?: ""
-        }
-
-        // currentGroupId
-        cGroupBox.indexProperty.addListener { _, _, newValue ->
-            State.currentGroupId = newValue as Int
-        }
-        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            // Bind selected group with clicked GroupTreeItem
-            if (newValue != null && newValue.parent != null && newValue !is CTreeItem) {
-                State.currentGroupId = State.transFile.getGroupIdByName(newValue.value)
-            }
-        }
-
-        // currentLabelIndex
-        State.currentPicNameProperty.addListener { _ , _, _ ->
-            // Clear selected when change pic
-            State.currentLabelIndex = NOT_FOUND
-        }
-        cLabelPane.selectedLabelIndexProperty.addListener { _, _, newValue ->
-            State.currentLabelIndex = newValue as Int
-        }
-        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            if (newValue != null && newValue is CTreeItem) {
-                State.currentLabelIndex = newValue.index
-            }
-        }
-
         // cSlider - cLabelPane#scale
         cSlider.initScaleProperty.bindBidirectional(cLabelPane.initScaleProperty)
         cSlider.minScaleProperty.bindBidirectional(cLabelPane.minScaleProperty)
         cSlider.maxScaleProperty.bindBidirectional(cLabelPane.maxScaleProperty)
         cSlider.scaleProperty.bindBidirectional(cLabelPane.scaleProperty)
 
-    }
-    /**
-     * Listeners & Handlers
-     */
-    private fun reg() {
-        // Update cTreeView & cLabelPane when pic change
-        State.currentPicNameProperty.addListener { _, _, _ ->
-            if (!State.isOpened) return@addListener
-
-            updateTreeView()
-            updateLabelPane()
-        }
-
-        // Clear text layer & re-select CGroup when group change
-        State.currentGroupIdProperty.addListener { _, _, newGroupId ->
-            if (!State.isOpened) return@addListener
-
-            cLabelPane.removeText()
-
-            val groupName = State.transFile.getTransGroupAt(newGroupId as Int).name
-            cGroupBox.moveTo(groupName)
-            for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
-                cGroup.unselect()
-                if (cGroup.groupName == groupName) cGroup.select()
-            }
-        }
-
-        // Update text area when label change
-        State.currentLabelIndexProperty.addListener { _, _, newIndex ->
-            if (!State.isOpened) return@addListener
-
-            val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
-
-            cTransArea.unbindBidirectional()
-            if (newIndex != NOT_FOUND) {
-                val newLabel = transLabels.find { it.index == newIndex }
-                if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
-            }
-        }
-
-        // Update cLabelPane default cursor when work mode change
-        State.workModeProperty.addListener { _, _, newMode ->
-            if (!State.isOpened) return@addListener
-
-            bSwitchWorkMode.text = when (newMode!!) {
-                WorkMode.InputMode -> I18N["mode.work.input"]
-                WorkMode.LabelMode -> I18N["mode.work.label"]
-            }
-
-            when (newMode) {
-                WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
-                WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
-            }
-        }
-
-        // Update CTreeView when view mode change
-        State.viewModeProperty.addListener { _, _, newMode ->
-            if (!State.isOpened) return@addListener
-
-            bSwitchViewMode.text = when (newMode!!) {
-                ViewMode.IndexMode -> I18N["mode.view.index"]
-                ViewMode.GroupMode -> I18N["mode.view.group"]
-            }
-
-            updateTreeView()
-        }
+        // Update OpenRecent
+        cMenuBar.updateOpenRecent()
 
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
@@ -305,15 +189,141 @@ class Controller : Initializable {
             cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
         }
 
-        // Update preference
+        // Preferences
+        cTransArea.font = Font.font("SimSun", Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
+        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
+        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
+
+        // Display default image
+        cLabelPane.isVisible = false
+        Platform.runLater {
+            cLabelPane.moveToCenter()
+            cLabelPane.isVisible = true
+        }
+    }
+    /**
+     * Property listen
+     *
+     * State & Preference will change with specific property
+     */
+    private fun listen() {
+        // isChanged
+        cTransArea.textProperty().addListener { _, _, _ ->
+            if (cTransArea.isBound) State.isChanged = true
+        }
+
+        // currentPicName
+        cPicBox.valueProperty.addListener { _, _, newValue ->
+            State.currentPicName = newValue ?: ""
+        }
+
+        // currentGroupId
+        cGroupBox.indexProperty.addListener { _, _, newValue ->
+            State.currentGroupId = newValue as Int
+        }
+        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            // Bind selected group with clicked GroupTreeItem
+            if (newValue != null && newValue.parent != null && newValue !is CTreeItem) {
+                State.currentGroupId = State.transFile.getGroupIdByName(newValue.value)
+            }
+        }
+
+        // currentLabelIndex
+        State.currentPicNameProperty.addListener { _ , _, _ ->
+            // Clear selected when change pic
+            State.currentLabelIndex = NOT_FOUND
+        }
+        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            if (newValue != null && newValue is CTreeItem) {
+                State.currentLabelIndex = newValue.index
+            }
+        }
+
+        // Preferences
         cTransArea.fontProperty().addListener { _, _, newValue ->
             Preference[Preference.TEXTAREA_FONT_SIZE] = newValue.size.toInt()
+
+            cInfoLabel.showInfo("Text font size set to $newValue")
         }
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.MAIN_DIVIDER] = newValue
         }
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.RIGHT_DIVIDER] = newValue
+        }
+    }
+    /**
+     * Effect on view
+     *
+     * View will update with some props change
+     */
+    private fun effect() {
+        // Update cTreeView & cLabelPane when pic change
+        State.currentPicNameProperty.addListener { _, _, newValue ->
+            if (!State.isOpened) return@addListener
+
+            cPicBox.moveTo(newValue)
+
+            updateTreeView()
+            updateLabelPane()
+        }
+
+        // Clear text layer & re-select CGroup when group change
+        State.currentGroupIdProperty.addListener { _, _, newGroupId ->
+            if (!State.isOpened) return@addListener
+
+            // Remove text
+            cLabelPane.removeText()
+
+            // Select CGroup & GroupBox
+            val groupName = State.transFile.getTransGroupAt(newGroupId as Int).name
+            for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
+                cGroup.unselect()
+                if (cGroup.groupName == groupName) cGroup.select()
+            }
+            cGroupBox.moveTo(groupName)
+
+            cInfoLabel.showInfo("Change Group to ${cGroupBox.value}")
+        }
+
+        // Update text area when label change
+        State.currentLabelIndexProperty.addListener { _, _, newIndex ->
+            if (!State.isOpened) return@addListener
+
+            val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+
+            cTransArea.unbindBidirectional()
+            if (newIndex != NOT_FOUND) {
+                val newLabel = transLabels.find { it.index == newIndex }
+                if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
+            }
+        }
+
+        // Update cLabelPane default cursor when work mode change
+        State.workModeProperty.addListener { _, _, newMode ->
+            if (!State.isOpened) return@addListener
+
+            bSwitchWorkMode.text = when (newMode!!) {
+                WorkMode.InputMode -> I18N["mode.work.input"]
+                WorkMode.LabelMode -> I18N["mode.work.label"]
+            }
+
+            when (newMode) {
+                WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
+                WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
+            }
+        }
+
+        // Update CTreeView when view mode change
+        State.viewModeProperty.addListener { _, _, newMode ->
+            if (!State.isOpened) return@addListener
+
+            bSwitchViewMode.text = when (newMode!!) {
+                ViewMode.IndexMode -> I18N["mode.view.index"]
+                ViewMode.GroupMode -> I18N["mode.view.group"]
+            }
+
+            updateTreeView()
         }
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
@@ -324,9 +334,8 @@ class Controller : Initializable {
 
             if (newSize < 12) return@addEventFilter
 
-            cTransArea.font = Font.font("宋体", newSize)
+            cTransArea.font = Font.font("SimSun", newSize) // Song
             cTransArea.positionCaret(0)
-            cInfo.showInfo("Text font size set to $newSize")
             it.consume()
         }
 
@@ -354,8 +363,14 @@ class Controller : Initializable {
                 cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
             }
         }
-
-        // Bind Tab with view mode switch
+    }
+    /**
+     * Transformation
+     *
+     * Some actions will transform to other actions
+     */
+    private fun transform() {
+        // Transform tab pressed in CTreeView to ViewModeBtn clicked
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code != KeyCode.TAB) return@addEventHandler
 
@@ -363,7 +378,7 @@ class Controller : Initializable {
             it.consume()
         }
 
-        // Bind tab with work mode switch
+        // Transform tab pressed in CLabelPane to WorkModeBtn clicked
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code != KeyCode.TAB) return@addEventHandler
 
@@ -372,15 +387,16 @@ class Controller : Initializable {
             it.consume()
         }
 
-        // Bind number input with group selection
+        // Transform number key pressed to CGroupBox selected
         root.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (!it.code.isDigitKey) return@addEventHandler
 
+            val index = it.text.toInt() - 1
+            if (index < 0 || index >= cGroupBox.items.size)
             cGroupBox.moveTo(it.text.toInt() - 1)
-            cInfo.showInfo("Change Group to ${cGroupBox.value}")
         }
 
-        // Bind Ctrl + Arrow KeyEvent with Pic change
+        // Transform Ctrl + Left/Right KeyEvent to CPicBox button clicked
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
             if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
 
@@ -389,11 +405,13 @@ class Controller : Initializable {
                 KeyCode.RIGHT -> cPicBox.next()
                 else -> return@EventHandler
             }
+
+            it.consume()
         }
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
 
-        // Bind Ctrl + Arrow KeyEvent with Label change
+        // Transform Ctrl + Up/Down KeyEvent to CTreeView selected
         fun getNextLabelItemIndex(from: Int, direction: Int): Int {
             var index = from
             var item: TreeItem<String>?
@@ -429,6 +447,8 @@ class Controller : Initializable {
             cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeItem).meta)
             cTreeView.scrollTo(labelItemIndex)
             cTreeView.selectionModel.select(labelItemIndex)
+
+            it.consume()
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
@@ -436,8 +456,9 @@ class Controller : Initializable {
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         init()
-        bind()
-        reg()
+        listen()
+        effect()
+        transform()
     }
 
     private fun exit() {
@@ -747,6 +768,7 @@ class Controller : Initializable {
         for (group in groups) hbGroupBar.children.add(CGroup(group).also {
             it.setOnMouseClicked { _ -> cGroupBox.moveTo(it.groupName) }
         })
+        (hbGroupBar.children[State.currentGroupId] as CGroup).select()
 
         Logger.info("Group list updated", "Controller")
     }

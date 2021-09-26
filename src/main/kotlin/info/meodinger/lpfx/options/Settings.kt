@@ -86,7 +86,7 @@ object Settings : AbstractProperties() {
         val labelRadius = this[LabelRadius].asDouble()
         if (labelRadius < 0) throw CPropertyException.propertyValueInvalid(LabelRadius, labelRadius)
 
-        val labelAlpha = this[LabelAlpha].asString().toInt(16)
+        val labelAlpha = this[LabelAlpha].asInteger(16)
         if (labelAlpha < 0 || labelAlpha > 255) throw CPropertyException.propertyValueInvalid(LabelAlpha, labelAlpha)
 
     }

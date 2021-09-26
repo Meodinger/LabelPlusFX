@@ -3,6 +3,7 @@ package info.meodinger.lpfx.component.singleton
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
 import info.meodinger.lpfx.component.CComboBox
+import info.meodinger.lpfx.component.CInputLabel
 import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
@@ -13,8 +14,6 @@ import info.meodinger.lpfx.util.getGroupNameFormatter
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
-import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -59,34 +58,25 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
     private val lSliderAlpha = Slider()
-    private val lLabelRadius = Label()
-    private val lLabelAlpha = Label()
+    private val lLabelRadius = CInputLabel()
+    private val lLabelAlpha = CInputLabel()
 
     init {
         initOwner(State.stage)
 
         // ----- Group ----- //
-        initGroupTab()
+        // initGroupTab()
         gGridPane.padding = Insets(Gap)
         gGridPane.vgap = Gap
         gGridPane.hgap = Gap
         gGridPane.alignment = Pos.TOP_CENTER
         gButtonAdd.setOnAction { createGroupRow(gRemainGroup) }
-        val scrollPane = ScrollPane().also {
+        gBorderPane.center = ScrollPane(gGridPane).also {
             it.style = "-fx-background-color:transparent;"
-        }
-        val stackPane = StackPane(gGridPane).also {
-            it.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                { scrollPane.viewportBounds.width },
-                scrollPane.viewportBoundsProperty()
-            ))
-        }
-        gBorderPane.center = scrollPane.also {
-            it.content = stackPane
         }
         gBorderPane.bottom = HBox(gButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(Gap, Gap / 2, 0.0, 0.0)
+            it.padding = Insets(Gap, Gap / 2, Gap / 2, 0.0)
         }
         groupTab.content = gBorderPane
 
@@ -112,6 +102,8 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         tabPane.prefWidth = 600.0
         tabPane.tabs.addAll(groupTab, modeTab, labelTab)
 
+        initProperties()
+
         this.title = I18N["settings.title"]
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         this.dialogPane.content = tabPane
@@ -129,9 +121,9 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val newRowIndex = groupId + gRowShift
 
         if (gRemainGroup == 0) {
-            gGridPane.add(gLabelIsCreate, 0, 0)
-            gGridPane.add(gLabelName, 1, 0)
-            gGridPane.add(gLabelColor, 2, 0)
+            gGridPane.add(gLabelName, 0, 0)
+            gGridPane.add(gLabelColor, 1, 0)
+            gGridPane.add(gLabelIsCreate, 2, 0)
         }
         gRemainGroup++
 
@@ -140,18 +132,33 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
-        val colorPicker = ColorPicker(Color.web(colorHex))
+        val colorPicker = ColorPicker(Color.web(colorHex)).also {
+            /*
+            it.setOnShown { _ ->
+                val clazz = ComboBoxPopupControl::class.java
+                val methods = clazz.declaredMethods
+                for (method in methods) {
+                    if (method.name == "getPopup") {
+                        method.isAccessible = true
+                        val popupControl = method.invoke(it.skin) as PopupControl
+                        popupControl.isAutoHide = false
+                        print("success")
+                    }
+                }
+            }
+             */
+        }
         val button = Button(I18N["common.delete"]).also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - gRowShift) } }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
 
-        //   0        1       2
-        // 0 isCreate Name    Color
-        // 1  X       _______ | 66CCFF  V |
-        gGridPane.add(checkBox, 0, newRowIndex)
-        gGridPane.add(textField, 1, newRowIndex)
-        gGridPane.add(colorPicker, 2, newRowIndex)
+        //   0       1             2        3
+        // 0 Name    Color         isCreate
+        // 1 _______ | 66CCFF  V |  X       Delete
+        gGridPane.add(textField, 0, newRowIndex)
+        gGridPane.add(colorPicker, 1, newRowIndex)
+        gGridPane.add(checkBox, 2, newRowIndex)
         gGridPane.add(button, 3, newRowIndex)
     }
     private fun removeGroupRow(groupId: Int) {
@@ -172,15 +179,11 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
     // ----- Mode ----- //
     private fun initModeTab() {
-        val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
-        val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
         val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
 
         mComboInput.setList(viewModeList)
-        mComboInput.moveTo(preferenceList[0])
         mComboInput.isWrapped = true
         mComboLabel.setList(viewModeList)
-        mComboLabel.moveTo(preferenceList[1])
         mComboLabel.isWrapped = true
 
         //   0         1
@@ -208,41 +211,60 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val layout = {
             label.layoutX = lLabelPane.prefWidth / 2 - label.prefWidth / 2
             label.layoutY = lLabelPane.prefHeight / 2 - label.prefHeight / 2
-        }
+        }.also { it.invoke() }
         label.radiusProperty.addListener { _, _, _ -> layout.invoke()}
-        layout.invoke()
 
+        lLabelRadius.textFormatter = TextFormatter { change ->
+            if (change.isAdded) {
+                val builder = StringBuilder()
+                for (c in change.text.toCharArray()) {
+                    if ((c in '0'..'9') || (c == '.' && !lLabelRadius.fieldText.contains(c))) {
+                        builder.append(c)
+                    }
+                }
+                change.text = builder.toString()
+            }
+            change
+        }
+        lLabelRadius.setOnChangeFinish {
+            lSliderRadius.value = it.toDouble()
+        }
+        lSliderRadius.valueProperty().addListener { _, _, newValue ->
+            lLabelRadius.text = String.format("%05.2f", newValue as Double)
+            label.radius = newValue
+        }
         lSliderRadius.min = 8.0
         lSliderRadius.max = 48.0
-        lSliderRadius.value = radius
-        lLabelRadius.textProperty().bind(lSliderRadius.valueProperty().asString("%05.2f"))
-        label.radiusProperty.bind(lSliderRadius.valueProperty())
 
+        lLabelAlpha.textFormatter = TextFormatter { change ->
+            val fieldText = lLabelAlpha.fieldText
+            val isHead0x = lLabelAlpha.fieldText.startsWith("0x")
+            if (fieldText.length >= (if (isHead0x) 4 else 2)) {
+                change.text = ""
+                return@TextFormatter change
+            }
+
+            change.text = change.text.uppercase().replace(Regex("[^0-9A-F]"), "")
+            if (change.isAdded) {
+                val left = (if (isHead0x) 4 else 2) - fieldText.length
+                change.text = change.text.substring(0, left.coerceAtMost(change.text.length))
+            }
+
+            change
+        }
+        lLabelAlpha.setOnChangeStart {
+            lLabelAlpha.fieldText = it.replace("0x", "")
+        }
+        lLabelAlpha.setOnChangeFinish {
+            lSliderAlpha.value = it.replace("0x", "").toInt(16) / 255.0
+        }
+        lSliderAlpha.valueProperty().addListener { _, _, newValue ->
+            val str = (newValue as Double * 255.0).toInt().toString(16).uppercase()
+            lLabelAlpha.text = if (str.length == 1) "0x0$str" else "0x$str"
+            label.color = if (str.length == 1) "FF00000$str" else "FF0000$str"
+        }
         lSliderAlpha.min = 0.0
         lSliderAlpha.max = 1.0
-        lSliderAlpha.value = alpha.toInt(16).toDouble() / 255.0
-        lLabelAlpha.textProperty().bind(object : StringBinding() {
-            init {
-                bind(lSliderAlpha.valueProperty())
-            }
-
-            override fun computeValue(): String {
-                val str = (lSliderAlpha.value * 255).toInt().toString(16)
-                if (str.length == 1) return "0x0$str"
-                return "0x$str"
-            }
-        })
-        label.colorProperty.bind(object : StringBinding() {
-            init {
-                bind(lSliderAlpha.valueProperty())
-            }
-
-            override fun computeValue(): String {
-                val str = (lSliderAlpha.value * 255).toInt().toString(16)
-                if (str.length == 1) return "FF00000$str"
-                return "FF0000$str"
-            }
-        })
 
         // lGridPane.isGridLinesVisible = true
         //   0         1           2
@@ -258,6 +280,27 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         lGridPane.add(Label(I18N["settings.label.alpha"]), 1, 2)
         lGridPane.add(lSliderAlpha, 1, 3)
         lGridPane.add(lLabelAlpha, 2, 3)
+    }
+
+    // ----- Initialize Properties ----- //
+
+    override fun initProperties() {
+        // Group
+        gRemainGroup = 0
+        gGridPane.children.clear()
+        initGroupTab()
+
+        // Mode
+        val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
+        val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
+        mComboInput.moveTo(preferenceList[0])
+        mComboLabel.moveTo(preferenceList[1])
+
+        // Label
+        lLabelRadius.isEditing = false
+        lLabelAlpha.isEditing = false
+        lSliderRadius.value = Settings[Settings.LabelRadius].asDouble()
+        lSliderAlpha.value = Settings[Settings.LabelAlpha].asInteger(16) / 255.0
     }
 
     // ----- Result convert ---- //
@@ -306,7 +349,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
 
-        var str = (lSliderAlpha.value * 255).toInt().toString(16)
+        var str = (lSliderAlpha.value * 255.0).toInt().toString(16)
         if (str.length == 1) str = "0$str"
         list.add(CProperty(Settings.LabelAlpha, str))
 

@@ -3,13 +3,10 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.character.repeat
 
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.control.skin.ColorPickerSkin
-import javafx.scene.input.KeyCode
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
@@ -47,11 +44,10 @@ class CColorPicker() : ColorPicker() {
             }
             change
         }
-        colorHexField.onKeyReleased = EventHandler { event ->
-            if (event.code == KeyCode.ENTER) {
-                fireEvent(ActionEvent())
-                hide()
-            }
+        colorHexField.setOnAction {
+            if (!customColors.contains(value)) customColors.add(value)
+
+            hide()
         }
 
         colorHexProperty.addListener { _, _, newValue ->

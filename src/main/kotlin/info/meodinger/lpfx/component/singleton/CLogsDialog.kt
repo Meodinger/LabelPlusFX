@@ -62,6 +62,8 @@ object CLogsDialog : AbstractPropertiesDialog() {
         root.hgap = Gap
         root.alignment = Pos.TOP_CENTER
 
+        initProperties()
+
         this.title = I18N["logs.title"]
         this.dialogPane.prefWidth = 600.0
         this.dialogPane.prefHeight = 400.0
@@ -71,7 +73,6 @@ object CLogsDialog : AbstractPropertiesDialog() {
 
     private fun initLogPane() {
         comboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
-        comboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
 
         val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
         val data = MutableList(paths.size) { FileModal(paths[it].toFile()) }
@@ -133,6 +134,10 @@ object CLogsDialog : AbstractPropertiesDialog() {
         root.add(labelSent, 0, 5, 2 , 1)
         root.add(buttonSend, 2, 5)
         root.add(buttonClean, 3, 5)
+    }
+
+    override fun initProperties() {
+        comboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
     }
 
     override fun convertResult(): List<CProperty> {

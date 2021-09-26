@@ -52,7 +52,7 @@
                         <CTransArea fx:id="cTransArea"/>
                     </center>
                     <bottom>
-                        <CInfo fx:id="cInfo"/>
+                        <CInfoLabel fx:id="cInfoLabel"/>
                     </bottom>
                 </BorderPane>
             </SplitPane>

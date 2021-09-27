@@ -2,6 +2,8 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -10,8 +12,6 @@ import javafx.scene.control.Label
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import kotlin.math.roundToInt
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

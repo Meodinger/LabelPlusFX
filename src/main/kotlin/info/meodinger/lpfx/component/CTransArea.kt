@@ -1,6 +1,8 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.StringProperty
@@ -12,8 +14,6 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

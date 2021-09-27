@@ -11,6 +11,8 @@ import info.meodinger.lpfx.util.resource.INIT_IMAGE
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.omitHighText
 import info.meodinger.lpfx.util.string.omitWideText
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.*
@@ -33,8 +35,6 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import tornadofx.getValue
-import tornadofx.setValue
 import java.io.File
 import java.io.IOException
 

@@ -98,8 +98,16 @@ class Controller : Initializable {
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
 
         // Set last used dir
-        val lastFilePath = RecentFiles.getLastOpenFile()
-        if (lastFilePath != null) CFileChooser.lastDirectory = File(lastFilePath).parentFile
+        var lastFilePath = RecentFiles.getLastOpenFile()
+        while (lastFilePath != null) {
+            val lastDirectory = File(lastFilePath).parentFile
+            if (lastDirectory.exists()) {
+                CFileChooser.lastDirectory = lastDirectory
+                break
+            }
+            lastFilePath = RecentFiles.getLastOpenFile()
+        }
+
 
         // Warp cPicBox
         cPicBox.isWrapped = true

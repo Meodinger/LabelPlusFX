@@ -1,10 +1,10 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.util.property.getValue
 
 import javafx.scene.Node
 import javafx.scene.control.TreeItem
-import tornadofx.getValue
 
 
 /**

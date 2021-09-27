@@ -2,6 +2,9 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.platform.MonoType
 
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
+
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
@@ -13,8 +16,6 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

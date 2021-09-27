@@ -11,7 +11,6 @@ module lpfx {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.fxml;
-    requires tornadofx;
     requires jakarta.mail;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
@@ -22,4 +21,6 @@ module lpfx {
     opens info.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports info.meodinger.lpfx;
+    exports info.meodinger.lpfx.type;
+    exports info.meodinger.lpfx.io;
 }

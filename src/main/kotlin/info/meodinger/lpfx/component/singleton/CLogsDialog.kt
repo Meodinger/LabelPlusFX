@@ -51,6 +51,8 @@ object CLogsDialog : AbstractPropertiesDialog() {
         val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)
         val timeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
+
+        override fun toString(): String = file.name
     }
 
     init {
@@ -74,9 +76,6 @@ object CLogsDialog : AbstractPropertiesDialog() {
     private fun initLogPane() {
         comboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
 
-        val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
-        val data = MutableList(paths.size) { FileModal(paths[it].toFile()) }
-
         val nameCol = TableColumn<FileModal, String>(I18N["logs.table.name"]).also { column ->
             column.setCellValueFactory { it.value.nameProperty }
         }
@@ -87,7 +86,6 @@ object CLogsDialog : AbstractPropertiesDialog() {
             column.setCellValueFactory { it.value.sizeProperty }
         }
         tableLog.columns.addAll(nameCol, timeCol, sizeCol)
-        tableLog.items.addAll(data)
 
         tableLog.selectionModel.selectedItemProperty().addListener { _, _ , _ ->
             labelSent.text = ""
@@ -100,7 +98,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
         }
         buttonClean.setOnAction {
             val toRemove = ArrayList<FileModal>()
-            for (modal in data) {
+            for (modal in tableLog.items) {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
                     Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
@@ -109,7 +107,6 @@ object CLogsDialog : AbstractPropertiesDialog() {
                 }
                 toRemove.add(modal)
             }
-            data.removeAll(toRemove)
             tableLog.items.removeAll(toRemove)
 
             Logger.info("Cleaned logs", "LogsDialog")
@@ -138,6 +135,13 @@ object CLogsDialog : AbstractPropertiesDialog() {
 
     override fun initProperties() {
         comboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
+
+        val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
+        val data = MutableList(paths.size) { FileModal(paths[it].toFile()) }.also {
+            it.sortByDescending { modal -> modal.file.lastModified() }
+        }
+        tableLog.items.clear()
+        tableLog.items.addAll(data)
     }
 
     override fun convertResult(): List<CProperty> {

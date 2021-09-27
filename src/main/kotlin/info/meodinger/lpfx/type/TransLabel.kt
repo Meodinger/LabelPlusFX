@@ -1,12 +1,12 @@
 package info.meodinger.lpfx.type
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

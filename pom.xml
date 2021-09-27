@@ -7,7 +7,7 @@
 
     <artifactId>lpfx</artifactId>
     <groupId>info.meodinger</groupId>
-    <version>2.0-Alpha</version>
+    <version>2.1.0</version>
     <packaging>jar</packaging>
 
     <name>lpfx</name>
@@ -74,27 +74,22 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.12.4</version>
+            <version>2.12.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.12.4</version>
+            <version>2.12.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.12.4</version>
+            <version>2.12.5</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>no.tornado</groupId>
-            <artifactId>tornadofx</artifactId>
-            <version>1.7.20</version>
         </dependency>
     </dependencies>
 

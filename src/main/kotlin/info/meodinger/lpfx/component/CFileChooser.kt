@@ -1,13 +1,14 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
+
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.stage.FileChooser
 import javafx.stage.Window
 import java.io.File
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**
@@ -26,6 +27,7 @@ class CFileChooser {
             get() = lastDirectoryProperty.value
             set(value) {
                 if (value == null) return
+                if (!value.exists()) return
                 if (value.isDirectory) lastDirectoryProperty.set(value)
                 else lastDirectoryProperty.set(value.parentFile)
             }

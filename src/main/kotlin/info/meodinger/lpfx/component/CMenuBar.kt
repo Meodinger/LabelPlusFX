@@ -6,10 +6,7 @@ import info.meodinger.lpfx.component.singleton.CSettingsDialog
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
-import info.meodinger.lpfx.util.dialog.showChoiceList
-import info.meodinger.lpfx.util.dialog.showInfo
-import info.meodinger.lpfx.util.dialog.showInputArea
-import info.meodinger.lpfx.util.dialog.showLink
+import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.disableMnemonicParsingForAll
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
@@ -121,15 +118,25 @@ class CMenuBar : MenuBar() {
     fun updateOpenRecent() {
         mOpenRecent.items.clear()
         for (path in RecentFiles.getAll()) {
-            mOpenRecent.items.add(MenuItem(path).also { it.setOnAction { openRecentTranslation(path) } })
+            mOpenRecent.items.add(MenuItem(path).also { it.setOnAction { _ -> openRecentTranslation(it) } })
         }
     }
-    private fun openRecentTranslation(path: String) {
+    private fun openRecentTranslation(item: MenuItem) {
+        val path = item.text
+        val file = File(path)
+
+        if (!file.exists()) {
+            showAlert(String.format(I18N["alert.file_not_exist.s"], path))
+            RecentFiles.remove(path)
+            mOpenRecent.items.remove(item)
+            return
+        }
+
         if (State.controller.stay()) return
 
         State.reset()
 
-        State.controller.open(File(path), FileType.getType(path))
+        State.controller.open(file, FileType.getType(path))
     }
 
     private fun newTranslation() {

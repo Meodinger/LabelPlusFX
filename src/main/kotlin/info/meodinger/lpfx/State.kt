@@ -5,6 +5,8 @@ import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
 import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
@@ -12,8 +14,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.stage.Stage
-import tornadofx.getValue
-import tornadofx.setValue
 import java.io.File
 
 

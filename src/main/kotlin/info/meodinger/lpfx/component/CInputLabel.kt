@@ -1,5 +1,8 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
+
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -10,8 +13,6 @@ import javafx.scene.control.TextFormatter
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.Pane
 import javafx.util.Callback
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

@@ -1,12 +1,13 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
+
 import javafx.beans.property.*
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.HBox
 import javafx.scene.text.TextAlignment
-import tornadofx.getValue
-import tornadofx.setValue
 
 
 /**

@@ -80,7 +80,7 @@ object CTreeMenu : ContextMenu() {
             }
 
             val groupId = State.transFile.getGroupIdByName(groupItem.value)
-            val transGroup = State.transFile.getTransGroupAt(groupId)
+            val transGroup = State.transFile.getTransGroup(groupId)
             val oldName = transGroup.name
 
             // Edit data
@@ -98,7 +98,7 @@ object CTreeMenu : ContextMenu() {
         val newColor = g_changeColorPicker.value
 
         val groupId = State.transFile.getGroupIdByName(groupItem.value)
-        val transGroup = State.transFile.getTransGroupAt(groupId)
+        val transGroup = State.transFile.getTransGroup(groupId)
 
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
@@ -111,10 +111,10 @@ object CTreeMenu : ContextMenu() {
     private val g_changeColorItem = MenuItem()
     private val g_deleteAction = { groupItem: TreeItem<String> ->
         val groupId = State.transFile.getGroupIdByName(groupItem.value)
-        val transGroup = State.transFile.getTransGroupAt(groupId)
+        val transGroup = State.transFile.getTransGroup(groupId)
 
         // Edit data
-        for (key in State.transFile.transMap.keys) for (label in State.transFile.getTransLabelListOf(key)) {
+        for (key in State.transFile.transMap.keys) for (label in State.transFile.getTransList(key)) {
             if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
         }
         State.removeTransGroup(transGroup)
@@ -160,7 +160,7 @@ object CTreeMenu : ContextMenu() {
         if (result.isPresent && result.get() == ButtonType.YES) {
             // Edit data
             for (item in items) {
-                val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+                val transLabels = State.transFile.getTransList(State.currentPicName)
                 val transLabel = (item as CTreeItem).meta
                 for (label in transLabels) if (label.index > transLabel.index) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)

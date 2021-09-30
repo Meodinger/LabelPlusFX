@@ -23,7 +23,7 @@ fun Color.toHex(): String {
  */
 fun isColorHex(hex: String): Boolean {
     val length = hex.length
-    if (length != 6 || length != 8) return false
+    if (length != 6 && length != 8) return false
 
     val chars = hex.uppercase().toCharArray()
     for (c in chars) if (c !in '0'..'9' && c !in 'A'..'F') return false

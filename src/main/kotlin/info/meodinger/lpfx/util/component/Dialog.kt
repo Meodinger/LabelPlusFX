@@ -168,7 +168,7 @@ fun showException(e: Throwable): Optional<ButtonType> {
         it.padding = Insets(0.0, 8.0, 0.0, 0.0)
     }
     val header = HBox(
-        Label(e.message ?: e.javaClass.name),
+        Label(e.message ?: e.javaClass.simpleName),
         HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
         sentLabel,
         Button(I18N["logs.button.send"]).also { it.setOnAction { LogSender.sendLog(Logger.log); sentLabel.text = "Sent" } }

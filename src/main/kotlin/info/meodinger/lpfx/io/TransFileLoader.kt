@@ -97,7 +97,7 @@ private fun loadLP(file: File): TransFile {
         // if (index < 0) throw IOException(String.format(I18N["exception.loader.invalid_index.format.i"], index))
 
         pointer++
-        return TransLabel(++index, x, y, groupId, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
+        return TransLabel(++index, groupId, x, y, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
     }
 
     /**

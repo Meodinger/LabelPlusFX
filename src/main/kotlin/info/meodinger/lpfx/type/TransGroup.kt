@@ -1,9 +1,10 @@
 package info.meodinger.lpfx.type
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import info.meodinger.lpfx.util.property.getValue
-import info.meodinger.lpfx.util.property.setValue
+import info.meodinger.lpfx.util.color.isColorHex
+import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.get
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import javafx.beans.property.SimpleStringProperty
 
 
@@ -16,20 +17,45 @@ import javafx.beans.property.SimpleStringProperty
 /**
  * A translation label group
  */
-@JsonIgnoreProperties("nameProperty", "colorProperty")
+@JsonIncludeProperties("name", "color")
 class TransGroup(
     name: String = "NewGroup@${index++}",
     color: String = "66CCFF"
 ) {
     companion object {
         private var index = 0
+
+        class TransGroupException(message: String) : RuntimeException(message) {
+            companion object {
+                fun nameInvalid(groupName: String) =
+                    TransGroupException(String.format(I18N["exception.trans_group.name_invalid.format.s"], groupName))
+                fun colorInvalid(color: String) =
+                    TransGroupException(String.format(I18N["exception.trans_group.color_invalid.format.s"], color))
+            }
+        }
     }
 
-    val nameProperty = SimpleStringProperty(name)
-    val colorProperty = SimpleStringProperty(color)
+    val nameProperty = SimpleStringProperty()
+    val colorProperty = SimpleStringProperty()
 
-    var name: String by nameProperty
-    var color: String by colorProperty
+    var name: String
+        get() = nameProperty.value
+        set(value) {
+            if (value.isEmpty()) throw TransGroupException.nameInvalid(value)
+            for (c in value.toCharArray()) if (c == '|' || c.isWhitespace()) throw TransGroupException.nameInvalid(value)
+            nameProperty.value = value
+        }
+    var color: String
+        get() = colorProperty.value
+        set(value) {
+            if (!isColorHex(value)) throw TransGroupException.colorInvalid(value)
+            colorProperty.value = value
+        }
+
+    init {
+        this.name = name
+        this.color = color
+    }
 
     override fun toString(): String = "TransGroup(name=$name, color=$color)"
 
@@ -42,8 +68,8 @@ class TransGroup(
     }
 
     override fun hashCode(): Int {
-        var result = nameProperty.hashCode()
-        result = 31 * result + colorProperty.hashCode()
+        var result = name.hashCode()
+        result = 31 * result + color.hashCode()
         return result
     }
 }

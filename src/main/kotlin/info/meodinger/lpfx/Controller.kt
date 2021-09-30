@@ -141,7 +141,7 @@ class Controller : Initializable {
 
             val transLabel = TransLabel(
                 it.labelIndex,
-                it.labelX, it.labelY, State.currentGroupId, ""
+                State.currentGroupId, it.labelX, it.labelY, ""
             )
 
             // Edit data
@@ -155,11 +155,11 @@ class Controller : Initializable {
         cLabelPane.onLabelRemove = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
 
-            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
 
             // Edit data
             State.removeTransLabel(State.currentPicName, transLabel)
-            for (label in State.transFile.getTransLabelListOf(State.currentPicName)) {
+            for (label in State.transFile.getTransList(State.currentPicName)) {
                 if (label.index > transLabel.index) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                 }
@@ -171,7 +171,7 @@ class Controller : Initializable {
             State.isChanged = true
         }
         cLabelPane.onLabelPointed = EventHandler {
-            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
 
             // Text display
             cLabelPane.removeText()
@@ -180,7 +180,7 @@ class Controller : Initializable {
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
 
-            val transLabel = State.transFile.getTransLabelAt(State.currentPicName, it.labelIndex)
+            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
             if (it.source.clickCount > 1) cLabelPane.moveToLabel(transLabel)
 
             val item = findLabelItemByIndex(it.labelIndex)
@@ -191,7 +191,7 @@ class Controller : Initializable {
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
 
-            val transGroup = State.transFile.getTransGroupAt(State.currentGroupId)
+            val transGroup = State.transFile.getTransGroup(State.currentGroupId)
 
             cLabelPane.removeText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
@@ -287,12 +287,14 @@ class Controller : Initializable {
             cLabelPane.removeText()
 
             // Select CGroup & GroupBox
-            val groupName = State.transFile.getTransGroupAt(newGroupId as Int).name
-            for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
-                cGroup.unselect()
-                if (cGroup.groupName == groupName) cGroup.select()
+            if (newGroupId != NOT_FOUND) {
+                val groupName = State.transFile.getTransGroup(newGroupId as Int).name
+                for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
+                    cGroup.unselect()
+                    if (cGroup.groupName == groupName) cGroup.select()
+                }
+                cGroupBox.moveTo(groupName)
             }
-            cGroupBox.moveTo(groupName)
 
             cInfoLabel.showInfo("Change Group to ${cGroupBox.value}")
         }
@@ -301,7 +303,7 @@ class Controller : Initializable {
         State.currentLabelIndexProperty.addListener { _, _, newIndex ->
             if (!State.isOpened) return@addListener
 
-            val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+            val transLabels = State.transFile.getTransList(State.currentPicName)
 
             cTransArea.unbindBidirectional()
             if (newIndex != NOT_FOUND) {
@@ -365,7 +367,7 @@ class Controller : Initializable {
 
             val item = cTreeView.selectionModel.selectedItem
             if (item != null && item is CTreeItem) {
-                cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
+                cLabelPane.moveToLabel(State.transFile.getTransLabel(State.currentPicName, item.index))
             }
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -379,7 +381,7 @@ class Controller : Initializable {
                 }
             )
             if (item != null && item is CTreeItem) {
-                cLabelPane.moveToLabel(State.transFile.getTransLabelAt(State.currentPicName, item.index))
+                cLabelPane.moveToLabel(State.transFile.getTransLabel(State.currentPicName, item.index))
             }
         }
     }
@@ -490,7 +492,7 @@ class Controller : Initializable {
         exitProcess(0)
     }
     private fun findLabelItemByIndex(index: Int): CTreeItem {
-        val transLabels = State.transFile.getTransLabelListOf(State.currentPicName)
+        val transLabels = State.transFile.getTransList(State.currentPicName)
         val transLabel = transLabels.find { it.index == index }!!
         val whereToSearch = when (State.viewMode) {
             ViewMode.GroupMode -> cTreeView.root.children[transLabel.groupId]
@@ -796,7 +798,7 @@ class Controller : Initializable {
         Logger.debug("List is", groups, "Controller")
     }
     fun updateLabelColorList() {
-        val list = List(State.transFile.groupList.size) { State.transFile.getTransGroupAt(it).color }
+        val list = List(State.transFile.groupList.size) { State.transFile.getTransGroup(it).color }
         cLabelPane.colorList = FXCollections.observableList(list)
 
         Logger.info("LabelPane color list updated", "Controller")
@@ -807,7 +809,7 @@ class Controller : Initializable {
             State.viewMode,
             State.currentPicName,
             State.transFile.groupList,
-            State.transFile.getTransLabelListOf(State.currentPicName)
+            State.transFile.getTransList(State.currentPicName)
         )
 
         Logger.info("TreeView updated", "Controller")
@@ -824,7 +826,7 @@ class Controller : Initializable {
         cLabelPane.update(
             State.getPicPathNow(),
             State.transFile.groupList.size,
-            State.transFile.getTransLabelListOf(State.currentPicName)
+            State.transFile.getTransList(State.currentPicName)
         )
         cLabelPane.fitToPane()
         cLabelPane.moveToZero()

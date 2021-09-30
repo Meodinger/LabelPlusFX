@@ -69,54 +69,54 @@ object State {
     }
 
     fun addTransGroup(transGroup: TransGroup) {
-        transFile.groupList.add(transGroup)
+        transFile.addTransGroup(transGroup)
 
         Logger.info("Added $transGroup", "State")
     }
     fun removeTransGroup(transGroup: TransGroup) {
-        transFile.groupList.remove(transGroup)
+        transFile.removeTransGroup(transGroup)
 
         Logger.info("Removed $transGroup", "State")
     }
     fun setTransGroupName(groupId: Int, name: String) {
-        transFile.getTransGroupAt(groupId).name = name
+        transFile.getTransGroup(groupId).name = name
 
         Logger.info("Set GroupID=$groupId @name=$name", "State")
     }
     fun setTransGroupColor(groupId: Int, color: String) {
-        transFile.getTransGroupAt(groupId).color = color
+        transFile.getTransGroup(groupId).color = color
 
         Logger.info("Set GroupID=$groupId @color=$color", "State")
     }
 
     fun addPicture(picName: String) {
-        transFile.transMap[picName] = ArrayList()
+        transFile.addTransList(picName)
 
         Logger.info("Added picture $picName", "State")
     }
     fun removePicture(picName: String) {
-        transFile.transMap.remove(picName)
+        transFile.removeTransList(picName)
 
         Logger.info("Removed picture $picName", "State")
     }
 
     fun addTransLabel(picName: String, transLabel: TransLabel) {
-        transFile.getTransLabelListOf(picName).add(transLabel)
+        transFile.addTransLabel(picName, transLabel)
 
         Logger.info("Added $picName @ $transLabel", "State")
     }
     fun removeTransLabel(picName: String, transLabel: TransLabel) {
-        transFile.getTransLabelListOf(picName).remove(transLabel)
+        transFile.removeTransLabel(picName, transLabel)
 
         Logger.info("Removed $picName @ $transLabel", "State")
     }
     fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
-        transFile.getTransLabelAt(picName, index).index = newIndex
+        transFile.getTransLabel(picName, index).index = newIndex
 
         Logger.info("Set $picName->Index=$index @index=$newIndex", "State")
     }
     fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
-        transFile.getTransLabelAt(picName, index).groupId = groupId
+        transFile.getTransLabel(picName, index).groupId = groupId
 
         Logger.info("Set $picName->Index=$index @groupId=$groupId", "State")
     }

@@ -1,7 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.util.color.toHex
-import info.meodinger.lpfx.util.character.repeat
+import info.meodinger.lpfx.util.string.repeat
 
 import javafx.geometry.Pos
 import javafx.scene.Node

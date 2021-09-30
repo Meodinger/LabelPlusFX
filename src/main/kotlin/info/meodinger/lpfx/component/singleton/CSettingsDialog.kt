@@ -2,6 +2,7 @@ package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.component.CColorPicker
 import info.meodinger.lpfx.component.CComboBox
 import info.meodinger.lpfx.component.CInputLabel
 import info.meodinger.lpfx.component.CLabel
@@ -143,7 +144,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
-        val colorPicker = ColorPicker(Color.web(colorHex))
+        val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button(I18N["common.delete"]).also {
             it.setOnAction { _ ->
                 removeGroupRow(GridPane.getRowIndex(it) - gRowShift)

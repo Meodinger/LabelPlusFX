@@ -15,6 +15,15 @@ import java.util.*
  */
 
 /**
+ * Repeat char
+ *
+ * @param n times to repeat
+ */
+fun Char.repeat(n: Int): String {
+    return this.toString().repeat(n)
+}
+
+/**
  * Delete tail string
  *
  * @param tail Tail to delete

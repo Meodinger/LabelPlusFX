@@ -13,6 +13,8 @@ import info.meodinger.lpfx.util.string.omitHighText
 import info.meodinger.lpfx.util.string.omitWideText
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
+import info.meodinger.lpfx.util.property.div
+import info.meodinger.lpfx.util.property.plus
 
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.*
@@ -390,8 +392,8 @@ class CLabelPane : ScrollPane() {
             if (newLayoutX < 0 || newLayoutX > imageWidth - 2 * radius) return@addEventHandler
             if (newLayoutY < 0 || newLayoutY > imageHeight - 2 * radius) return@addEventHandler
 
-            AnchorPane.setLeftAnchor(label, newLayoutX)
-            AnchorPane.setTopAnchor(label, newLayoutY)
+            label.layoutX = newLayoutX
+            label.layoutY = newLayoutY
 
             onLabelMove.handle(LabelEvent(LabelEvent.LABEL_MOVE,
                 it, transLabel.index,
@@ -446,8 +448,8 @@ class CLabelPane : ScrollPane() {
         //  |    |
 
         // Layout
-        AnchorPane.setLeftAnchor(label, imageWidth * transLabel.x - radius)
-        AnchorPane.setTopAnchor(label, imageHeight * transLabel.y - radius)
+        label.layoutX = imageWidth * transLabel.x - radius
+        label.layoutY = imageHeight * transLabel.y - radius
         labelLayers[transLabel.groupId].children.add(label)
 
         // Add label in list
@@ -471,8 +473,10 @@ class CLabelPane : ScrollPane() {
 
         })
         label.indexProperty.bind(transLabel.indexProperty)
-        transLabel.xProperty.bind(label.layoutXProperty().add(radius).divide(view.image.widthProperty()))
-        transLabel.yProperty.bind(label.layoutYProperty().add(radius).divide(view.image.heightProperty()))
+        transLabel.xProperty.bind((label.layoutXProperty() + radius) / view.image.widthProperty())
+        transLabel.yProperty.bind((label.layoutYProperty() + radius) / view.image.heightProperty())
+        //transLabel.xProperty.bind(label.layoutXProperty().add(radius).divide(view.image.widthProperty()))
+        //transLabel.yProperty.bind(label.layoutYProperty().add(radius).divide(view.image.heightProperty()))
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D

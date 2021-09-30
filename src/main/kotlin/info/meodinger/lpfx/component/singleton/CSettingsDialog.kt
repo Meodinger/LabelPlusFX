@@ -10,16 +10,23 @@ import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
+import info.meodinger.lpfx.util.component.anchorPaneLeft
+import info.meodinger.lpfx.util.component.anchorPaneTop
+import info.meodinger.lpfx.util.component.invoke
 import info.meodinger.lpfx.util.getGroupNameFormatter
 import info.meodinger.lpfx.util.resource.I18N
+import info.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.*
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.text.TextAlignment
 import kotlin.collections.ArrayList
 
 
@@ -55,6 +62,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
     private val labelTab = Tab(I18N["settings.label.title"])
     private val lGridPane = GridPane()
+    private val lCLabel = CLabel(8)
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
     private val lSliderAlpha = Slider()
@@ -71,8 +79,11 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         gGridPane.hgap = Gap
         gGridPane.alignment = Pos.TOP_CENTER
         gButtonAdd.setOnAction { createGroupRow(gRemainGroup) }
-        gBorderPane.center = ScrollPane(gGridPane).also {
+        gBorderPane.center = ScrollPane(AnchorPane(gGridPane)).also {
             it.style = "-fx-background-color:transparent;"
+            it.widthProperty().addListener { _, _, newValue ->
+                gGridPane.layoutX = (newValue as Double - gGridPane.width) / 2
+            }
         }
         gBorderPane.bottom = HBox(gButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
@@ -90,7 +101,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         // ----- Label ----- //
         initLabelTab()
-        lGridPane.padding = Insets(Gap)
+        lGridPane.padding = Insets(Gap, Gap, 0.0, Gap)
         lGridPane.vgap = Gap
         lGridPane.hgap = Gap
         lGridPane.alignment = Pos.CENTER
@@ -132,23 +143,12 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
-        val colorPicker = ColorPicker(Color.web(colorHex)).also {
-            /*
-            it.setOnShown { _ ->
-                val clazz = ComboBoxPopupControl::class.java
-                val methods = clazz.declaredMethods
-                for (method in methods) {
-                    if (method.name == "getPopup") {
-                        method.isAccessible = true
-                        val popupControl = method.invoke(it.skin) as PopupControl
-                        popupControl.isAutoHide = false
-                        print("success")
-                    }
-                }
+        val colorPicker = ColorPicker(Color.web(colorHex))
+        val button = Button(I18N["common.delete"]).also {
+            it.setOnAction { _ ->
+                removeGroupRow(GridPane.getRowIndex(it) - gRowShift)
             }
-             */
         }
-        val button = Button(I18N["common.delete"]).also { it.setOnAction { _ -> removeGroupRow(GridPane.getRowIndex(it) - gRowShift) } }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
@@ -200,19 +200,64 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
     // ----- Label ----- //
     private fun initLabelTab() {
-        val radius = Settings[Settings.LabelRadius].asDouble()
-        val alpha = Settings[Settings.LabelAlpha].asString()
-        val label = CLabel(8, radius, Color.RED.toHex() + alpha)
+        val lLabelPaneEdgeLength = 320.0
+        val lLabelPaneBorderWidth = 2.0
 
-        lLabelPane.setPrefSize(200.0, 200.0)
-        lLabelPane.children.add(label)
-        lLabelPane.border = Border(BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii(0.0), BorderWidths(2.0)))
+        lLabelPane.setPrefSize(lLabelPaneEdgeLength, lLabelPaneEdgeLength)
+        lLabelPane.border = Border(BorderStroke(
+            Color.DARKGRAY,
+            BorderStrokeStyle.SOLID,
+            CornerRadii(0.0),
+            BorderWidths(lLabelPaneBorderWidth)
+        ))
+        lLabelPane.background = Background(BackgroundImage(
+            SAMPLE_IMAGE,
+            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+            BackgroundPosition.CENTER,
+            BackgroundSize.DEFAULT
+        ))
 
-        val layout = {
-            label.layoutX = lLabelPane.prefWidth / 2 - label.prefWidth / 2
-            label.layoutY = lLabelPane.prefHeight / 2 - label.prefHeight / 2
-        }.also { it.invoke() }
-        label.radiusProperty.addListener { _, _, _ -> layout.invoke()}
+        // Draggable & drag-limitation
+        var shiftX = 0.0
+        var shiftY = 0.0
+        lCLabel.addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            it.consume()
+
+            lCLabel.cursor = Cursor.MOVE
+
+            shiftX = lCLabel.anchorPaneLeft - it.sceneX
+            shiftY = lCLabel.anchorPaneTop - it.sceneY
+        }
+        lCLabel.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            it.consume()
+
+            val newLayoutX = shiftX + it.sceneX
+            val newLayoutY = shiftY + it.sceneY
+
+            //  0--L-----    0 LR LR |
+            //  |  R         LR      |
+            //  |LR|-----    LR      |
+            //  |  |         --------|
+            val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
+            val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
+            if (newLayoutX < 0 || newLayoutX > limitX) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > limitY) return@addEventHandler
+
+            lCLabel.anchorPaneLeft = newLayoutX
+            lCLabel.anchorPaneTop = newLayoutY
+        }
+        lCLabel.addEventHandler(MouseEvent.MOUSE_RELEASED) {
+            lCLabel.cursor = Cursor.HAND
+        }
+        lCLabel.radiusProperty.addListener { _, _, _ ->
+
+            val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
+            val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
+            if (lCLabel.anchorPaneLeft > limitX) lCLabel.anchorPaneLeft = limitX
+            if (lCLabel.anchorPaneTop > limitY) lCLabel.anchorPaneTop = limitY
+        }
+
+        lLabelPane.children.add(lCLabel)
 
         lLabelRadius.textFormatter = TextFormatter { change ->
             if (change.isAdded) {
@@ -231,7 +276,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         }
         lSliderRadius.valueProperty().addListener { _, _, newValue ->
             lLabelRadius.text = String.format("%05.2f", newValue as Double)
-            label.radius = newValue
+            lCLabel.radius = newValue
         }
         lSliderRadius.min = 8.0
         lSliderRadius.max = 48.0
@@ -267,7 +312,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
             val str = (newValue as Double * 255.0).toInt().toString(16).uppercase()
             lLabelAlpha.labelText = if (str.length == 1) "0x0$str" else "0x$str"
             lLabelAlpha.fieldText = str
-            label.color = if (str.length == 1) "FF00000$str" else "FF0000$str"
+            lCLabel.color = if (str.length == 1) "FF00000$str" else "FF0000$str"
         }
         lSliderAlpha.min = 0.0
         lSliderAlpha.max = 1.0
@@ -278,8 +323,9 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         // 1 |      |  ----O------ 24.0
         // 2 |      |  Alpha
         // 3 |      |  ------O---- 0x80
-        // 4 --------
+        // 4 --------  *TEXT*
         lGridPane.add(lLabelPane, 0, 0, 1, 5)
+        lGridPane.add(Label(I18N["settings.label.helpText"])(true, TextAlignment.CENTER), 1, 4, 2, 1)
         lGridPane.add(Label(I18N["settings.label.radius"]), 1, 0)
         lGridPane.add(lSliderRadius, 1, 1)
         lGridPane.add(lLabelRadius, 2, 1)
@@ -303,6 +349,8 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         mComboLabel.moveTo(preferenceList[1])
 
         // Label
+        lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
+        lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
         lLabelRadius.isEditing = false
         lLabelAlpha.isEditing = false
         lSliderRadius.value = Settings[Settings.LabelRadius].asDouble()

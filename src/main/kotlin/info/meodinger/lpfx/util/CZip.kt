@@ -12,6 +12,10 @@ import java.util.zip.ZipOutputStream
  * Date: 2021/7/29
  * Location: info.meodinger.lpfx.util
  */
+
+/**
+ * Zip files easier
+ */
 class CZip(zipFile: File) {
     private val zip: ZipOutputStream
 

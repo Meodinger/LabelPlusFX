@@ -25,6 +25,7 @@ fun loadFile(fileName: String): ByteArray {
 
 val ICON = loadImage("/image/icon.png")
 val INIT_IMAGE = loadImage("/image/init_image.png")
+val SAMPLE_IMAGE = loadImage("/image/sample_320x320.jpg")
 
 val SCRIPT = loadFile("/file/script/Meo_PS_Script")
 val TEMPLATE_EN = loadFile("/file/script/ps_script_res/en.psd")

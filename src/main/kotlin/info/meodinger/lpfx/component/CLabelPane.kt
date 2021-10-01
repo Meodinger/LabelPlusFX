@@ -17,7 +17,7 @@ import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.div
 import info.meodinger.lpfx.util.property.plus
 
-import javafx.beans.binding.StringBinding
+import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -368,7 +368,7 @@ class CLabelPane : ScrollPane() {
         val label = CLabel(
             transLabel.index,
             radius,
-            colorHexList[transLabel.groupId] + alpha
+            Color.web(colorHexList[transLabel.groupId] + alpha)
         )
 
         // Draggable
@@ -460,27 +460,13 @@ class CLabelPane : ScrollPane() {
         labels.add(label)
 
         // Bind property
-        label.colorProperty.bind(object : StringBinding() {
-
-            init {
-                bind(colorHexListProperty)
-                bind(transLabel.groupIdProperty)
-            }
-
-            override fun computeValue(): String {
-                val colorBinding = colorHexListProperty.valueAt(transLabel.groupIdProperty)
-                if (colorBinding.isNotNull.value) {
-                    return colorBinding.value + alpha
-                }
-                return "000000$alpha"
-            }
-
-        })
         label.indexProperty.bind(transLabel.indexProperty)
+        label.colorProperty.bind(Bindings.createObjectBinding(
+            { Color.web(colorHexList[transLabel.groupId] + alpha) },
+            colorHexListProperty, transLabel.groupIdProperty
+        ))
         transLabel.xProperty.bind((label.layoutXProperty() + radius) / view.image.widthProperty())
         transLabel.yProperty.bind((label.layoutYProperty() + radius) / view.image.heightProperty())
-        //transLabel.xProperty.bind(label.layoutXProperty().add(radius).divide(view.image.widthProperty()))
-        //transLabel.yProperty.bind(label.layoutYProperty().add(radius).divide(view.image.heightProperty()))
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D

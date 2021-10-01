@@ -4,8 +4,10 @@ import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
+import javafx.collections.ObservableList
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
+import javafx.scene.control.SelectionModel
 import javafx.scene.layout.HBox
 import javafx.scene.text.TextAlignment
 
@@ -34,7 +36,8 @@ class CComboBox<T> : HBox() {
     val isWrappedProperty = SimpleBooleanProperty(false)
     var isWrapped: Boolean by isWrappedProperty
 
-    val items: List<T> get() = comboBox.items
+    val items: ObservableList<T> get() = comboBox.items
+    val selectionModel: SelectionModel<T> get() = comboBox.selectionModel
 
     init {
         back.setOnMouseClicked { back() }

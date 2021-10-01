@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
 import javafx.geometry.VPos
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -29,7 +28,7 @@ class CGroup(name: String, color: Color) : Region() {
     companion object {
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0
-        private const val PADDING = 2.0
+        private const val PADDING = 4.0
     }
 
     private val backgroundSelected: Background = Background(BackgroundFill(

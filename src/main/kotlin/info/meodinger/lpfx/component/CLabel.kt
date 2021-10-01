@@ -7,7 +7,7 @@ import info.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.VPos
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -30,7 +30,7 @@ import javafx.scene.text.TextAlignment
 class CLabel(
     index: Int = DEFAULT_INDEX,
     radius: Double = DEFAULT_RADIUS,
-    color: String = DEFAULT_COLOR
+    color: Color = Color.web(DEFAULT_COLOR)
 ) : Region() {
 
     companion object {
@@ -45,33 +45,34 @@ class CLabel(
     private val text = Text()
 
     val indexProperty = SimpleIntegerProperty(index)
-    val radiusProperty = SimpleDoubleProperty(radius)
-    val colorProperty = SimpleStringProperty(color)
-
     var index: Int by indexProperty
+
+    val radiusProperty = SimpleDoubleProperty(radius)
     var radius: Double by radiusProperty
-    var color: String by colorProperty
+
+    val colorProperty = SimpleObjectProperty(color)
+    var color: Color by colorProperty
 
     init {
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
 
-        indexProperty.addListener { _, _, _ -> update() }
-        radiusProperty.addListener { _, _, _ -> update() }
-        colorProperty.addListener { _, _, _ -> update() }
+        indexProperty.addListener { _, _, newIndex -> update(index = newIndex as Int) }
+        radiusProperty.addListener { _, _, newRadius -> update(radius = newRadius as Double) }
+        colorProperty.addListener { _, _, newColor -> update(color = newColor) }
 
         this.children.setAll(circle, text)
         update()
     }
 
-    private fun update() {
+    private fun update(index: Int = this.index, radius: Double = this.radius, color: Color = this.color) {
         val pickerSize = radius.coerceAtLeast(MIN_PICK_RADIUS)
         setPrefSize(pickerSize * 2, pickerSize * 2)
 
         text.text = index.toString()
         circle.radius = radius
-        circle.fill = Color.web(color)
+        circle.fill = color
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R

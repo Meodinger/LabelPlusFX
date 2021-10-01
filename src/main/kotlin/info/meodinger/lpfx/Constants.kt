@@ -27,7 +27,7 @@ const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
 const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
 
 /**
- * For label not found
+ * For label/group not found
  */
 const val NOT_FOUND = -1
 

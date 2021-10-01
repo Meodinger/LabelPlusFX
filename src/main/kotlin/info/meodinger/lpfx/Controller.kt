@@ -29,7 +29,6 @@ import javafx.scene.text.Font
 import java.io.*
 import java.net.URL
 import java.util.*
-import java.util.function.Consumer
 import kotlin.system.exitProcess
 
 
@@ -430,9 +429,7 @@ class Controller : Initializable {
         }
 
         // Transform CGroup select to CGroupBox selected
-        cGroupBar.onGroupSelect = Consumer {
-            // cGroupBar.unselectAll()
-            cGroupBar.select(it)
+        cGroupBar.setOnGroupSelect {
             cGroupBox.moveTo(it)
         }
 
@@ -825,12 +822,12 @@ class Controller : Initializable {
         val color = if (isColorHex(colorHex)) Color.web(colorHex) else CC_66CFFF
         cGroupBar.addGroup(name, color)
     }
-    fun updateGroupBar(groupId: Int, name: String? = null, colorHex: String? = null) {
+    fun updateGroupBar(oldName: String, name: String? = null, colorHex: String? = null) {
         val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
-        cGroupBar.updateGroup(groupId, name, color)
+        cGroupBar.updateGroup(oldName, name, color)
     }
-    fun removeGroupBar(groupId: Int) {
-        cGroupBar.removeGroup(groupId)
+    fun removeGroupBar(oldName: String) {
+        cGroupBar.removeGroup(oldName)
     }
 
     // ----- LabelPane ----- //
@@ -891,16 +888,17 @@ class Controller : Initializable {
 
         Logger.info("Added group item @ $transGroup", "Controller")
     }
-    fun removeGroupItem(transGroup: TransGroup) {
-        cTreeView.removeGroupItem(transGroup)
-
-        Logger.info("Removed group item @ $transGroup", "Controller")
-    }
     fun updateGroupItem(name: String, transGroup: TransGroup) {
         cTreeView.updateGroupItem(name, transGroup)
 
         Logger.info("Updated group item (name=$name) @ $transGroup", "Controller")
     }
+    fun removeGroupItem(transGroup: TransGroup) {
+        cTreeView.removeGroupItem(transGroup)
+
+        Logger.info("Removed group item @ $transGroup", "Controller")
+    }
+
     fun addLabelItem(transLabel: TransLabel) {
         cTreeView.addLabelItem(transLabel)
 

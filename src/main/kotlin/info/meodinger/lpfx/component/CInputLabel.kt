@@ -34,8 +34,13 @@ class CInputLabel : Pane() {
     private val label = Label()
     private val field = TextField()
 
+    val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
+    val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun labelTextProperty() = label.textProperty()
     fun fieldTextProperty() = field.textProperty()
+
+    var textFormatter: TextFormatter<String> by textFormatterProperty
+    var isEditing: Boolean by isEditingProperty
     var labelText: String by label.textProperty()
     var fieldText: String by field.textProperty()
     var text: String
@@ -43,17 +48,8 @@ class CInputLabel : Pane() {
             return if (isEditing) fieldText else labelText
         }
         set(value) {
-            if (isEditing)
-                fieldText = value
-            else
-                labelText = value
+            if (isEditing) fieldText = value else labelText = value
         }
-
-    val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
-    var isEditing: Boolean by isEditingProperty
-
-    val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
-    var textFormatter: TextFormatter<String> by textFormatterProperty
 
     val onChangeStartProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty(Callback {})
     val onChangeStart: Callback<String, Unit> by onChangeStartProperty

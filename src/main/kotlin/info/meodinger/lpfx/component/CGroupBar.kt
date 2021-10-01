@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 
@@ -31,13 +32,15 @@ class CGroupBar : HBox() {
     private val groups = ArrayList<CGroup>()
 
     val groupNamesProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
-    var groupNames: ObservableList<String> by groupNamesProperty
-
     val groupColorsProperty = SimpleListProperty<Color>(FXCollections.emptyObservableList())
+    var groupNames: ObservableList<String> by groupNamesProperty
     var groupColors: ObservableList<Color> by groupColorsProperty
 
     val onGroupSelectProperty = SimpleObjectProperty<Consumer<String>>(Consumer {})
-    var onGroupSelect: Consumer<String> by onGroupSelectProperty
+    val onGroupSelect: Consumer<String> by onGroupSelectProperty
+    fun setOnGroupSelect(consumer: Consumer<String>) {
+        onGroupSelectProperty.value = consumer
+    }
 
     fun reset() {
         children.clear()
@@ -59,13 +62,12 @@ class CGroupBar : HBox() {
     }
 
     fun select(groupName: String) {
-        for (node in children) if (node is CGroup) {
+        for (node in groups)
             if (node.name == groupName) {
                 node.select()
             } else {
                 node.unselect()
             }
-        }
     }
     fun unselectAll() {
         for (node in children) if (node is CGroup) node.unselect()
@@ -88,22 +90,31 @@ class CGroupBar : HBox() {
         groups.add(cGroup)
         children.add(cGroup)
     }
-    fun updateGroup(id: Int, name: String? = null, color: Color? = null) {
+    fun updateGroup(oldName: String, name: String? = null, color: Color? = null) {
+        var id: Int = NOT_FOUND
+        for (i in groups.indices) if (groups[i].name == oldName) id = i
+
+        if (id == NOT_FOUND) return
+
         if (name != null) groupNames[id] = name
         if (color != null) groupColors[id] = color
     }
-    fun removeGroup(id: Int) {
-        val toRemove = groups[id]
+    fun removeGroup(oldName: String) {
+        var id: Int = NOT_FOUND
+        for (i in groups.indices) if (groups[i].name == oldName) id = i
+
+        if (id == NOT_FOUND) return
 
         for (cGroup in groups) {
             val tag = useCGroupId(cGroup)
             if (tag > id) tagCGroupId(cGroup, tag - 1)
         }
 
-        groupColors.remove(toRemove.color)
-        groupNames.remove(toRemove.name)
-        children.remove(toRemove)
+        val toRemove = groups[id]
         groups.remove(toRemove)
+        children.remove(toRemove)
+        groupNames.remove(toRemove.name)
+        groupColors.remove(toRemove.color)
     }
 
 }

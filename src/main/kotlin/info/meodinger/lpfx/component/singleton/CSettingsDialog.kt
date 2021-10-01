@@ -313,7 +313,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
             val str = (newValue as Double * 255.0).toInt().toString(16).uppercase()
             lLabelAlpha.labelText = if (str.length == 1) "0x0$str" else "0x$str"
             lLabelAlpha.fieldText = str
-            lCLabel.color = if (str.length == 1) "FF00000$str" else "FF0000$str"
+            lCLabel.color = if (str.length == 1) Color.web("FF00000$str") else Color.web("FF0000$str")
         }
         lSliderAlpha.min = 0.0
         lSliderAlpha.max = 1.0

@@ -20,7 +20,7 @@ import javafx.beans.property.SimpleStringProperty
 @JsonIncludeProperties("name", "color")
 class TransGroup(
     name: String = "NewGroup@${index++}",
-    color: String = "66CCFF"
+    colorHex: String = "66CCFF"
 ) {
     companion object {
         private var index = 0
@@ -36,7 +36,7 @@ class TransGroup(
     }
 
     val nameProperty = SimpleStringProperty()
-    val colorProperty = SimpleStringProperty()
+    val colorHexProperty = SimpleStringProperty()
 
     var name: String
         get() = nameProperty.value
@@ -45,36 +45,36 @@ class TransGroup(
             for (c in value.toCharArray()) if (c == '|' || c.isWhitespace()) throw TransGroupException.nameInvalid(value)
             nameProperty.value = value
         }
-    var color: String
-        get() = colorProperty.value
+    var colorHex: String
+        get() = colorHexProperty.value
         set(value) {
             if (!isColorHex(value)) throw TransGroupException.colorInvalid(value)
-            colorProperty.value = value
+            colorHexProperty.value = value
         }
 
     init {
         this.name = name
-        this.color = color
+        this.colorHex = colorHex
     }
 
     fun clone(): TransGroup {
-        return TransGroup(name, color)
+        return TransGroup(name, colorHex)
     }
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is TransGroup) return false
         if (name != other.name) return false
-        if (color != other.color) return false
+        if (colorHex != other.colorHex) return false
         return true
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
-        result = 31 * result + color.hashCode()
+        result = 31 * result + colorHex.hashCode()
         return result
     }
 
-    override fun toString(): String = "TransGroup(name=$name, color=$color)"
+    override fun toString(): String = "TransGroup(name=$name, color=$colorHex)"
 
 }

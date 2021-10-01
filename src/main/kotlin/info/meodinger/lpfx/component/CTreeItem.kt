@@ -1,8 +1,10 @@
 package info.meodinger.lpfx.component
 
-import info.meodinger.lpfx.type.TransLabel
+import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
 import javafx.scene.control.TreeItem
 
@@ -16,21 +18,25 @@ import javafx.scene.control.TreeItem
 /**
  * A TreeItem for TransLabel containing
  */
-class CTreeItem(val meta: TransLabel, node: Node? = null) : TreeItem<String>() {
+class CTreeItem(index: Int, text: String, node: Node? = null) : TreeItem<String>() {
 
-    val index: Int by meta.indexProperty
+    val indexProperty = SimpleIntegerProperty(index)
+    var index: Int by indexProperty
+
+    val textProperty = SimpleStringProperty(text)
+    var text: String by textProperty
 
     init {
-        graphic = node
+        this.graphic = node
 
-        meta.textProperty.addListener { _, _, _ -> update() }
-        meta.indexProperty.addListener { _,_,_ -> update() }
+        indexProperty.addListener { _, _, newIndex -> update(index = newIndex as Int) }
+        textProperty.addListener { _, _, newText -> update(text = newText) }
 
         update()
     }
 
-    private fun update() {
-        value = "${String.format("%02d",meta.index)}: ${meta.text.replace("\n", " ")}"
+    private fun update(index: Int = this.index, text: String = this.text) {
+        this.value = "${String.format("%02d", index)}: ${text.replace("\n", " ")}"
     }
 
 }

@@ -322,13 +322,18 @@ class CLabelPane : ScrollPane() {
 
         isVisible = true
     }
+
     fun updateColor(id: Int, hex: String) {
         if (isColorHex(hex)) colorHexList[id] = hex
     }
 
-    private fun getLabel(transLabel: TransLabel): CLabel {
-        for (label in labels) if (label.index == transLabel.index) return label
-        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], transLabel.index))
+    private fun getLabel(labelIndex: Int): CLabel {
+        for (label in labels) if (label.index == labelIndex) return label
+        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], labelIndex))
+    }
+    private fun getLabelGroup(label: CLabel): Int {
+        for (i in labelLayers.indices) if (labelLayers[i].children.contains(label)) return i
+        throw IllegalArgumentException(String.format(I18N["exception.illegal_argument.label_not_found.format.i"], label.index))
     }
 
     @Throws(IOException::class)
@@ -361,6 +366,11 @@ class CLabelPane : ScrollPane() {
         // Move text layer to front
         textLayer.toFront()
     }
+    /**
+     * Properties (x, y) of argument TransLabel will bind to created CLabel;
+     *
+     * Properties (groupId, index) of created CLabel will bind to TransLabel
+     */
     fun createLabel(transLabel: TransLabel) {
         val radius = Settings[Settings.LabelRadius].asDouble()
         val alpha = Settings[Settings.LabelAlpha].asString()
@@ -515,22 +525,23 @@ class CLabelPane : ScrollPane() {
         // Remove layer comp
         root.children.remove(layer)
     }
-    fun removeLabel(transLabel: TransLabel) {
-        val label = getLabel(transLabel)
+    fun removeLabel(labelIndex: Int) {
+        val label = getLabel(labelIndex)
+        val groupId = getLabelGroup(label)
         // Remove label in list
         labels.remove(label)
         // Remove label comp
-        labelLayers[transLabel.groupId].children.remove(label)
+        labelLayers[groupId].children.remove(label)
     }
     fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
     }
 
-    fun moveToLabel(transLabel: TransLabel) {
+    fun moveToLabel(labelIndex: Int) {
         vvalue = 0.0
         hvalue = 0.0
 
-        val label = getLabel(transLabel)
+        val label = getLabel(labelIndex)
 
         val centerX = AnchorPane.getLeftAnchor(label)
         val centerY = AnchorPane.getTopAnchor(label)

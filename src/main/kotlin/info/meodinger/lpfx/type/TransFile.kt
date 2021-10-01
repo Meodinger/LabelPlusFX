@@ -94,7 +94,7 @@ open class TransFile(
 
     val groupCount: Int get() = groupList.size
     val groupNames: List<String> get() = List(groupCount) { groupList[it].name }
-    val groupColors: List<String> get() = List(groupCount) { groupList[it].color }
+    val groupColors: List<String> get() = List(groupCount) { groupList[it].colorHex }
     val sortedPicNames: List<String> get() = sortByDigit(transMap.keys.toList())
 
     // ----- TransGroup ----- //

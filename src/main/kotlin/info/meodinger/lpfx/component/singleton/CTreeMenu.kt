@@ -44,10 +44,10 @@ object CTreeMenu : ContextMenu() {
         val newName =
             if (newGroupId < nameList.size) nameList[newGroupId]
             else String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
-        val newColor = Color.web(colorList[newGroupId % colorList.size])
+        val newColorHex =colorList[newGroupId % colorList.size]
 
         r_addGroupField.text = newName
-        r_addGroupPicker.value = newColor
+        r_addGroupPicker.value = Color.web(newColorHex)
         r_addGroupDialog.result = null
         r_addGroupDialog.showAndWait().ifPresent { newGroup ->
             // Edit data
@@ -56,8 +56,8 @@ object CTreeMenu : ContextMenu() {
             State.controller.updateLabelColorList()
             State.controller.addLabelLayer()
             State.controller.renderGroupBox()
-            State.controller.addGroupBar(newName, newColor.toHex())
-            State.controller.addGroupItem(newGroup)
+            State.controller.addGroupBar(newName, newColorHex)
+            State.controller.addGroupItem(newName, newColorHex)
             // Mark change
             State.isChanged = true
         }
@@ -87,7 +87,7 @@ object CTreeMenu : ContextMenu() {
             // Update view
             State.controller.renderGroupBox()
             State.controller.updateGroupBar(oldName, name = newName)
-            State.controller.updateGroupItem(oldName, transGroup)
+            State.controller.updateGroupItem(oldName, name = newName)
             // Mark change
             State.isChanged = true
         }
@@ -105,26 +105,26 @@ object CTreeMenu : ContextMenu() {
         // Update view
         State.controller.updateGroupBar(transGroup.name, colorHex = newColor.toHex())
         State.controller.updateLabelColor(groupId, newColor.toHex())
-        State.controller.updateGroupItem(transGroup.name, transGroup)
+        State.controller.updateGroupItem(transGroup.name, colorHex = newColor.toHex())
         // Mark change
         State.isChanged = true
     }
     private val g_changeColorItem = MenuItem()
     private val g_deleteAction = { groupItem: TreeItem<String> ->
-        val groupId = State.transFile.getGroupIdByName(groupItem.value)
-        val transGroup = State.transFile.getTransGroup(groupId)
+        val groupName = groupItem.value
+        val groupId = State.transFile.getGroupIdByName(groupName)
 
         // Edit data
         for (key in State.transFile.sortedPicNames) for (label in State.transFile.getTransList(key)) {
             if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
         }
-        State.removeTransGroup(transGroup.name)
+        State.removeTransGroup(groupName)
         // Update view
         State.controller.updateLabelColorList()
         State.controller.removeLabelLayer(groupId)
         State.controller.renderGroupBox()
-        State.controller.removeGroupBar(transGroup.name)
-        State.controller.removeGroupItem(transGroup)
+        State.controller.removeGroupBar(groupName)
+        State.controller.removeGroupItem(groupName)
         // Mark change
         State.isChanged = true
     }
@@ -160,11 +160,11 @@ object CTreeMenu : ContextMenu() {
             // Edit data
             for (item in items) {
                 val transLabels = State.transFile.getTransList(State.currentPicName)
-                val transLabel = (item as CTreeItem).meta
-                for (label in transLabels) if (label.index > transLabel.index) {
+                val labelIndex = (item as CTreeItem).index
+                for (label in transLabels) if (label.index > labelIndex) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                 }
-                State.removeTransLabel(State.currentPicName, transLabel.index)
+                State.removeTransLabel(State.currentPicName, labelIndex)
             }
             // Update view
             State.controller.renderTreeView()

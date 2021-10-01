@@ -86,7 +86,7 @@ object State {
         Logger.info("Set GroupID=$groupId @name=$name", "State")
     }
     fun setTransGroupColor(groupId: Int, color: String) {
-        transFile.getTransGroup(groupId).color = color
+        transFile.getTransGroup(groupId).colorHex = color
 
         Logger.info("Set GroupID=$groupId @color=$color", "State")
     }

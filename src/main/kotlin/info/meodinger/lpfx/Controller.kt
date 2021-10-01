@@ -155,25 +155,23 @@ class Controller : Initializable {
             State.addTransLabel(State.currentPicName, transLabel)
             // Update view
             cLabelPane.createLabel(transLabel)
-            addLabelItem(transLabel)
+            addLabelItem(it.labelIndex, "", State.currentGroupId)
             // Mark change
             State.isChanged = true
         }
         cLabelPane.onLabelRemove = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
 
-            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
-
             // Edit data
-            State.removeTransLabel(State.currentPicName, transLabel.index)
+            State.removeTransLabel(State.currentPicName, it.labelIndex)
             for (label in State.transFile.getTransList(State.currentPicName)) {
-                if (label.index > transLabel.index) {
+                if (label.index > it.labelIndex) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                 }
             }
             // Update view
-            cLabelPane.removeLabel(transLabel)
-            removeLabelItem(transLabel)
+            cLabelPane.removeLabel(it.labelIndex)
+            removeLabelItem(it.labelIndex)
             // Mark change
             State.isChanged = true
         }
@@ -187,8 +185,7 @@ class Controller : Initializable {
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
 
-            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
-            if (it.source.clickCount > 1) cLabelPane.moveToLabel(transLabel)
+            if (it.source.clickCount > 1) cLabelPane.moveToLabel(it.labelIndex)
 
             val item = findLabelItemByIndex(it.labelIndex)
             cTreeView.selectionModel.clearSelection()
@@ -201,7 +198,7 @@ class Controller : Initializable {
             val transGroup = State.transFile.getTransGroup(State.currentGroupId)
 
             cLabelPane.removeText()
-            cLabelPane.createText(transGroup.name, Color.web(transGroup.color), it.displayX, it.displayY)
+            cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         cLabelPane.onLabelMove = EventHandler {
             State.isChanged = true
@@ -378,7 +375,7 @@ class Controller : Initializable {
 
             val item = cTreeView.selectionModel.selectedItem
             if (item != null && item is CTreeItem) {
-                cLabelPane.moveToLabel(State.transFile.getTransLabel(State.currentPicName, item.index))
+                cLabelPane.moveToLabel(item.index)
             }
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -392,7 +389,7 @@ class Controller : Initializable {
                 }
             )
             if (item != null && item is CTreeItem) {
-                cLabelPane.moveToLabel(State.transFile.getTransLabel(State.currentPicName, item.index))
+                cLabelPane.moveToLabel(item.index)
             }
         }
     }
@@ -481,8 +478,7 @@ class Controller : Initializable {
 
             if (labelItemIndex == -1) return@EventHandler
 
-            val transLabel = (cTreeView.getTreeItem(labelItemIndex) as CTreeItem).meta
-            cLabelPane.moveToLabel(transLabel)
+            cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeItem).index)
             cTreeView.scrollTo(labelItemIndex)
             cTreeView.selectionModel.select(labelItemIndex)
 
@@ -514,7 +510,7 @@ class Controller : Initializable {
             ViewMode.GroupMode -> cTreeView.root.children[transLabel.groupId]
             ViewMode.IndexMode -> cTreeView.root
         }
-        return whereToSearch.children.find { (it as CTreeItem).meta == transLabel }!! as CTreeItem
+        return whereToSearch.children.find { (it as CTreeItem).index == transLabel.index }!! as CTreeItem
     }
 
     fun stay(): Boolean {
@@ -822,12 +818,12 @@ class Controller : Initializable {
         val color = if (isColorHex(colorHex)) Color.web(colorHex) else CC_66CFFF
         cGroupBar.addGroup(name, color)
     }
-    fun updateGroupBar(oldName: String, name: String? = null, colorHex: String? = null) {
-        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
-        cGroupBar.updateGroup(oldName, name, color)
+    fun removeGroupBar(targetName: String) {
+        cGroupBar.removeGroup(targetName)
     }
-    fun removeGroupBar(oldName: String) {
-        cGroupBar.removeGroup(oldName)
+    fun updateGroupBar(targetName: String, name: String? = null, colorHex: String? = null) {
+        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
+        cGroupBar.updateGroup(targetName, name, color)
     }
 
     // ----- LabelPane ----- //
@@ -883,31 +879,35 @@ class Controller : Initializable {
         Logger.info("TreeView updated", "Controller")
     }
 
-    fun addGroupItem(transGroup: TransGroup) {
-        cTreeView.addGroupItem(transGroup)
+    fun addGroupItem(name: String, colorHex: String) {
+        cTreeView.addGroupItem(name, Color.web(colorHex))
 
-        Logger.info("Added group item @ $transGroup", "Controller")
+        Logger.info("Added group item @ ${TransGroup(name, colorHex)}", "Controller")
     }
-    fun updateGroupItem(name: String, transGroup: TransGroup) {
-        cTreeView.updateGroupItem(name, transGroup)
+    fun removeGroupItem(groupName: String) {
+        cTreeView.removeGroupItem(groupName)
 
-        Logger.info("Updated group item (name=$name) @ $transGroup", "Controller")
+        Logger.info("Removed group item @ $groupName", "Controller")
     }
-    fun removeGroupItem(transGroup: TransGroup) {
-        cTreeView.removeGroupItem(transGroup)
+    fun updateGroupItem(groupName: String, name: String? = null, colorHex: String? = null) {
+        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
+        cTreeView.updateGroupItem(groupName, name, color)
 
-        Logger.info("Removed group item @ $transGroup", "Controller")
+        Logger.info("Updated group item (name=$groupName) @ ${TransGroup(name ?: groupName, colorHex ?: "76ccff")}", "Controller")
     }
 
-    fun addLabelItem(transLabel: TransLabel) {
-        cTreeView.addLabelItem(transLabel)
+    fun addLabelItem(index: Int, text: String, groupId: Int) {
+        cTreeView.addLabelItem(index, text, groupId)
 
-        Logger.info("Added label item @ $transLabel", "Controller")
+        Logger.info("Added label item @ ($index, $groupId, $text)", "Controller")
     }
-    fun removeLabelItem(transLabel: TransLabel) {
-        cTreeView.removeLabelItem(transLabel)
+    fun removeLabelItem(labelIndex: Int) {
+        cTreeView.removeLabelItem(labelIndex)
 
-        Logger.info("Removed label item @ $transLabel", "Controller")
+        Logger.info("Removed label item @ $labelIndex", "Controller")
+    }
+    fun updateLabelItem(labelIndex: Int, index: Int? = null, text: String? = null, groupId: Int? = null) {
+        cTreeView.updateLabelItem(labelIndex, index, text, groupId)
     }
 
     // ----- Mode ----- //

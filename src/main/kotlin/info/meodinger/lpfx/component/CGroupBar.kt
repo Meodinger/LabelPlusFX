@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.NOT_FOUND
+import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 
@@ -90,15 +91,6 @@ class CGroupBar : HBox() {
         groups.add(cGroup)
         children.add(cGroup)
     }
-    fun updateGroup(oldName: String, name: String? = null, color: Color? = null) {
-        var id: Int = NOT_FOUND
-        for (i in groups.indices) if (groups[i].name == oldName) id = i
-
-        if (id == NOT_FOUND) return
-
-        if (name != null) groupNames[id] = name
-        if (color != null) groupColors[id] = color
-    }
     fun removeGroup(oldName: String) {
         var id: Int = NOT_FOUND
         for (i in groups.indices) if (groups[i].name == oldName) id = i
@@ -115,6 +107,15 @@ class CGroupBar : HBox() {
         children.remove(toRemove)
         groupNames.remove(toRemove.name)
         groupColors.remove(toRemove.color)
+    }
+    fun updateGroup(oldName: String, name: String? = null, color: Color? = null) {
+        var id: Int = NOT_FOUND
+        for (i in groups.indices) if (groups[i].name == oldName) id = i
+
+        if (id == NOT_FOUND) return
+
+        if (name != null) groupNames[id] = name
+        if (color != null) groupColors[id] = color
     }
 
 }

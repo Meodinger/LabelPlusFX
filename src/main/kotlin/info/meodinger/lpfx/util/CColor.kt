@@ -9,6 +9,14 @@ import javafx.scene.paint.Color
  * Location: info.meodinger.lpfx.util
  */
 
+
+/**
+ * Custom colors
+ */
+val CC_66CFFF = Color.web("66CCFF")
+val CC_RED = Color.RED
+
+
 /**
  * Get color RGB in hex
  */
@@ -21,7 +29,9 @@ fun Color.toHex(): String {
  *
  * @param hex HEX String to judge
  */
-fun isColorHex(hex: String): Boolean {
+fun isColorHex(hex: String?): Boolean {
+    if (hex == null) return false
+
     val length = hex.length
     if (length != 6 && length != 8) return false
 

@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.event.EventHandler
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import java.util.function.Consumer
@@ -29,6 +28,8 @@ class CGroupBar : HBox() {
         const val C_GROUP_ID = "C_GROUP_ID"
     }
 
+    private val groups = ArrayList<CGroup>()
+
     val groupNamesProperty = SimpleListProperty<String>(FXCollections.emptyObservableList())
     var groupNames: ObservableList<String> by groupNamesProperty
 
@@ -39,7 +40,7 @@ class CGroupBar : HBox() {
     var onGroupSelect: Consumer<String> by onGroupSelectProperty
 
     fun reset() {
-        this.children.clear()
+        children.clear()
     }
     fun render(names: List<String>, colors: List<String>) {
         this.children.clear()
@@ -47,26 +48,7 @@ class CGroupBar : HBox() {
         groupNames = FXCollections.observableList(names)
         groupColors = FXCollections.observableList(List(colors.size) { Color.web(colors[it]) })
 
-        for (i in names.indices) {
-            val cGroup = CGroup(groupNames[i], groupColors[i]).also { tagCGroupId(it, i) }
-
-            cGroup.setOnMouseClicked { onGroupSelect.accept(cGroup.name) }
-
-            cGroup.nameProperty.bind(Bindings.createStringBinding(
-                { groupNames[useCGroupId(cGroup)] },
-                groupNamesProperty
-            ))
-            cGroup.colorProperty.bind(Bindings.createObjectBinding(
-                { groupColors[useCGroupId(cGroup)] },
-                groupColorsProperty
-            ))
-
-            this.children.add(cGroup)
-        }
-    }
-    fun update(id: Int, name: String = groupNames[id], color: Color = groupColors[id]) {
-        groupNames[id] = name
-        groupColors[id] = color
+        for (i in names.indices) addGroup(groupNames[i], groupColors[i])
     }
 
     private fun tagCGroupId(cGroup: CGroup, groupId: Int) {
@@ -85,10 +67,43 @@ class CGroupBar : HBox() {
             }
         }
     }
-    /*
     fun unselectAll() {
         for (node in children) if (node is CGroup) node.unselect()
     }
-     */
+
+    fun addGroup(name: String, color: Color) {
+        val cGroup = CGroup(name, color).also { tagCGroupId(it, groups.size) }
+
+        cGroup.setOnMouseClicked { onGroupSelect.accept(cGroup.name) }
+
+        cGroup.nameProperty.bind(Bindings.createStringBinding(
+            { groupNames[useCGroupId(cGroup)] },
+            groupNamesProperty
+        ))
+        cGroup.colorProperty.bind(Bindings.createObjectBinding(
+            { groupColors[useCGroupId(cGroup)] },
+            groupColorsProperty
+        ))
+
+        groups.add(cGroup)
+        children.add(cGroup)
+    }
+    fun updateGroup(id: Int, name: String? = null, color: Color? = null) {
+        if (name != null) groupNames[id] = name
+        if (color != null) groupColors[id] = color
+    }
+    fun removeGroup(id: Int) {
+        val toRemove = groups[id]
+
+        for (cGroup in groups) {
+            val tag = useCGroupId(cGroup)
+            if (tag > id) tagCGroupId(cGroup, tag - 1)
+        }
+
+        groupColors.remove(toRemove.color)
+        groupNames.remove(toRemove.name)
+        children.remove(toRemove)
+        groups.remove(toRemove)
+    }
 
 }

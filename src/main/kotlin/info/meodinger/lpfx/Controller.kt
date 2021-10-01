@@ -6,6 +6,8 @@ import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.accelerator.isControlDown
+import info.meodinger.lpfx.util.color.CC_66CFFF
+import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
@@ -648,8 +650,8 @@ class Controller : Initializable {
         State.stage.title = INFO["application.name"] + " - " + file.name
 
         updateLabelColorList()
-        updateGroupBox()
-        updateGroupBar()
+        renderGroupBox()
+        renderGroupBar()
         updatePicList()
 
         Logger.info("Opened TransFile", "Controller")
@@ -796,14 +798,17 @@ class Controller : Initializable {
         Logger.info("Picture list updated", "Controller")
         Logger.debug("List is", pics, "Controller")
     }
-    fun updateGroupBox() {
+
+    // ----- Group Display ----- //
+
+    fun renderGroupBox() {
         cGroupBox.setList(State.transFile.groupNames)
         cGroupBox.moveTo(State.currentGroupId)
 
         Logger.info("Group box updated", "Controller")
         Logger.debug("List is", State.transFile.groupNames, "Controller")
     }
-    fun updateGroupBar() {
+    fun renderGroupBar() {
         cGroupBar.reset()
         cGroupBar.render(State.transFile.groupNames, State.transFile.groupColors)
         cGroupBar.select(State.transFile.getTransGroup(State.currentGroupId).name)
@@ -814,6 +819,18 @@ class Controller : Initializable {
                 TransGroup(State.transFile.groupNames[it], State.transFile.groupColors[it])
             }
         }, "Controller")
+    }
+
+    fun addGroupBar(name: String, colorHex: String) {
+        val color = if (isColorHex(colorHex)) Color.web(colorHex) else CC_66CFFF
+        cGroupBar.addGroup(name, color)
+    }
+    fun updateGroupBar(groupId: Int, name: String? = null, colorHex: String? = null) {
+        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
+        cGroupBar.updateGroup(groupId, name, color)
+    }
+    fun removeGroupBar(groupId: Int) {
+        cGroupBar.removeGroup(groupId)
     }
 
     // ----- LabelPane ----- //
@@ -840,6 +857,9 @@ class Controller : Initializable {
 
         Logger.info("LabelPane color list updated", "Controller")
         Logger.debug("List is", State.transFile.groupColors, "Controller")
+    }
+    fun updateLabelColor(groupId: Int, hex: String) {
+        cLabelPane.updateColor(groupId, hex)
     }
 
     fun addLabelLayer() {

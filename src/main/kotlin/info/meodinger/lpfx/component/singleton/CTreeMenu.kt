@@ -55,8 +55,8 @@ object CTreeMenu : ContextMenu() {
             // Update view
             State.controller.updateLabelColorList()
             State.controller.addLabelLayer()
-            State.controller.updateGroupBox()
-            State.controller.updateGroupBar()
+            State.controller.renderGroupBox()
+            State.controller.renderGroupBar()
             State.controller.addGroupItem(newGroup)
             // Mark change
             State.isChanged = true
@@ -85,8 +85,8 @@ object CTreeMenu : ContextMenu() {
             // Edit data
             State.setTransGroupName(groupId, newName)
             // Update view
-            State.controller.updateGroupBox()
-            State.controller.updateGroupBar()
+            State.controller.renderGroupBox()
+            State.controller.renderGroupBar()
             State.controller.updateGroupItem(oldName, transGroup)
             // Mark change
             State.isChanged = true
@@ -103,8 +103,8 @@ object CTreeMenu : ContextMenu() {
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
         // Update view
-        State.controller.updateGroupBar()
-        State.controller.updateLabelColorList()
+        State.controller.updateGroupBar(groupId, colorHex = newColor.toHex())
+        State.controller.updateLabelColor(groupId, newColor.toHex())
         State.controller.updateGroupItem(transGroup.name, transGroup)
         // Mark change
         State.isChanged = true
@@ -122,8 +122,8 @@ object CTreeMenu : ContextMenu() {
         // Update view
         State.controller.updateLabelColorList()
         State.controller.removeLabelLayer(groupId)
-        State.controller.updateGroupBox()
-        State.controller.updateGroupBar()
+        State.controller.renderGroupBox()
+        State.controller.renderGroupBar()
         State.controller.removeGroupItem(transGroup)
         // Mark change
         State.isChanged = true

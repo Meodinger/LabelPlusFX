@@ -1,12 +1,14 @@
 package info.meodinger.lpfx.component
 
+import info.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.Node
 import javafx.scene.control.TreeItem
+import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
 
 
 /**
@@ -18,7 +20,7 @@ import javafx.scene.control.TreeItem
 /**
  * A TreeItem for TransLabel containing
  */
-class CTreeItem(index: Int, text: String, node: Node? = null) : TreeItem<String>() {
+class CTreeLabelItem(index: Int, text: String, color: Color? = null) : TreeItem<String>() {
 
     val indexProperty = SimpleIntegerProperty(index)
     var index: Int by indexProperty
@@ -27,7 +29,7 @@ class CTreeItem(index: Int, text: String, node: Node? = null) : TreeItem<String>
     var text: String by textProperty
 
     init {
-        this.graphic = node
+        if (color != null) this.graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
 
         indexProperty.addListener { _, _, newIndex -> update(index = newIndex as Int) }
         textProperty.addListener { _, _, newText -> update(text = newText) }

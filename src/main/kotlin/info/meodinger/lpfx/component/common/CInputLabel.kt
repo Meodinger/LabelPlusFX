@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.component
+package info.meodinger.lpfx.component.common
 
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
@@ -35,12 +35,13 @@ class CInputLabel : Pane() {
     private val field = TextField()
 
     val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
+    var textFormatter: TextFormatter<String> by textFormatterProperty
+
     val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
+    var isEditing: Boolean by isEditingProperty
+
     fun labelTextProperty() = label.textProperty()
     fun fieldTextProperty() = field.textProperty()
-
-    var textFormatter: TextFormatter<String> by textFormatterProperty
-    var isEditing: Boolean by isEditingProperty
     var labelText: String by label.textProperty()
     var fieldText: String by field.textProperty()
     var text: String

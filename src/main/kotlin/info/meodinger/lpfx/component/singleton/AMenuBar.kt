@@ -1,8 +1,7 @@
-package info.meodinger.lpfx.component
+package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.*
-import info.meodinger.lpfx.component.singleton.CLogsDialog
-import info.meodinger.lpfx.component.singleton.CSettingsDialog
+import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
@@ -34,7 +33,7 @@ import kotlin.io.path.name
 /**
  * A MenuBar for main scene, did not make it singleton for fxml loader
  */
-class CMenuBar : MenuBar() {
+object AMenuBar : MenuBar() {
 
     private val mmFile = Menu(I18N["mm.file"])
     private val mNew = MenuItem(I18N["m.new"])

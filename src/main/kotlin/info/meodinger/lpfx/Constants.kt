@@ -10,9 +10,16 @@ import info.meodinger.lpfx.util.resource.get
  * Location: info.meodinger.lpfx
  */
 
-// Stage
+/**
+ * Stage size
+ */
 const val WIDTH = 900.0
 const val HEIGHT = 600.0
+
+/**
+ * TreeItem Graphic radius
+ */
+const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
 // Extensions
 val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")

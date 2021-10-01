@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.component
+package info.meodinger.lpfx.component.common
 
 import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.property.getValue

@@ -1,13 +1,16 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
+import info.meodinger.lpfx.component.common.CComboBox
+import info.meodinger.lpfx.component.common.CFileChooser
+import info.meodinger.lpfx.component.common.CTextSlider
+import info.meodinger.lpfx.component.common.CTransArea
+import info.meodinger.lpfx.component.singleton.AMenuBar
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
 import info.meodinger.lpfx.type.*
 import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.accelerator.isControlDown
-import info.meodinger.lpfx.util.color.CC_66CFFF
-import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
@@ -20,6 +23,7 @@ import javafx.collections.FXCollections
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
@@ -46,9 +50,9 @@ class Controller : Initializable {
     @FXML private lateinit var root: BorderPane
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
+    @FXML private lateinit var lInfo: Label
     @FXML private lateinit var pMain: SplitPane
     @FXML private lateinit var pRight: SplitPane
-    @FXML private lateinit var cMenuBar: CMenuBar
     @FXML private lateinit var cGroupBar: CGroupBar
     @FXML private lateinit var cLabelPane: CLabelPane
     @FXML private lateinit var cSlider: CTextSlider
@@ -56,7 +60,6 @@ class Controller : Initializable {
     @FXML private lateinit var cGroupBox: CComboBox<String>
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CTransArea
-    @FXML private lateinit var cInfoLabel: CInfoLabel
 
     @FXML fun switchViewMode() {
         val now = ViewMode.values().indexOf(State.viewMode)
@@ -109,6 +112,9 @@ class Controller : Initializable {
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
 
+        // MenuBar
+        root.top = AMenuBar
+
         // Set last used dir
         var lastFilePath = RecentFiles.getLastOpenFile()
         while (lastFilePath != null) {
@@ -122,6 +128,9 @@ class Controller : Initializable {
 
         // Warp cPicBox
         cPicBox.isWrapped = true
+
+        // lInfo padding
+        lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)
 
         // Set comp disabled
         bSwitchViewMode.disableProperty().bind(State.isOpenedProperty.not())
@@ -140,7 +149,7 @@ class Controller : Initializable {
         cSlider.scaleProperty.bindBidirectional(cLabelPane.scaleProperty)
 
         // Update OpenRecent
-        cMenuBar.updateOpenRecent()
+        AMenuBar.updateOpenRecent()
 
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
@@ -155,7 +164,7 @@ class Controller : Initializable {
             State.addTransLabel(State.currentPicName, transLabel)
             // Update view
             cLabelPane.createLabel(transLabel)
-            addLabelItem(it.labelIndex, "", State.currentGroupId)
+            addLabelItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -245,7 +254,7 @@ class Controller : Initializable {
         }
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
             // Bind selected group with clicked GroupTreeItem
-            if (newValue != null && newValue.parent != null && newValue !is CTreeItem) {
+            if (newValue != null && newValue.parent != null && newValue !is CTreeLabelItem) {
                 State.currentGroupId = State.transFile.getGroupIdByName(newValue.value)
             }
         }
@@ -256,7 +265,7 @@ class Controller : Initializable {
             State.currentLabelIndex = NOT_FOUND
         }
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            if (newValue != null && newValue is CTreeItem) {
+            if (newValue != null && newValue is CTreeLabelItem) {
                 State.currentLabelIndex = newValue.index
             }
         }
@@ -287,7 +296,7 @@ class Controller : Initializable {
             renderTreeView()
             renderLabelPane()
 
-            cInfoLabel.showInfo("Change picture to $newValue")
+            showInfo("Change picture to $newValue")
         }
 
         // Clear text layer & re-select CGroup when group change
@@ -304,7 +313,7 @@ class Controller : Initializable {
                 cGroupBar.select(groupName)
             }
 
-            cInfoLabel.showInfo("Change Group to ${cGroupBox.value}")
+            showInfo("Change Group to ${cGroupBox.value}")
         }
 
         // Update text area when label change
@@ -319,7 +328,7 @@ class Controller : Initializable {
                 if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
             }
 
-            cInfoLabel.showInfo("Selected label $newIndex")
+            showInfo("Selected label $newIndex")
         }
 
         // Update cLabelPane default cursor when work mode change
@@ -336,7 +345,7 @@ class Controller : Initializable {
                 WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
             }
 
-            cInfoLabel.showInfo("Switch work mode to $newMode")
+            showInfo("Switch work mode to $newMode")
         }
 
         // Update CTreeView when view mode change
@@ -350,7 +359,7 @@ class Controller : Initializable {
 
             renderTreeView()
 
-            cInfoLabel.showInfo("Switch view mode to $newMode")
+            showInfo("Switch view mode to $newMode")
         }
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
@@ -365,7 +374,7 @@ class Controller : Initializable {
             cTransArea.positionCaret(0)
             it.consume()
 
-            cInfoLabel.showInfo("Text font size set to $newSize")
+            showInfo("Text font size set to $newSize")
         }
 
         // Bind Label and Tree
@@ -374,7 +383,7 @@ class Controller : Initializable {
             if (it.clickCount < 2) return@addEventHandler
 
             val item = cTreeView.selectionModel.selectedItem
-            if (item != null && item is CTreeItem) {
+            if (item != null && item is CTreeLabelItem) {
                 cLabelPane.moveToLabel(item.index)
             }
         }
@@ -388,7 +397,7 @@ class Controller : Initializable {
                     else -> 0
                 }
             )
-            if (item != null && item is CTreeItem) {
+            if (item != null && item is CTreeLabelItem) {
                 cLabelPane.moveToLabel(item.index)
             }
         }
@@ -458,7 +467,7 @@ class Controller : Initializable {
                 } else {
                     return -1
                 }
-            } while (item !is CTreeItem)
+            } while (item !is CTreeLabelItem)
 
             return index
         }
@@ -474,11 +483,11 @@ class Controller : Initializable {
 
             val item = cTreeView.getTreeItem(labelItemIndex)
             if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
-            if (item !is CTreeItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
+            if (item !is CTreeLabelItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
 
             if (labelItemIndex == -1) return@EventHandler
 
-            cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeItem).index)
+            cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeLabelItem).index)
             cTreeView.scrollTo(labelItemIndex)
             cTreeView.selectionModel.select(labelItemIndex)
 
@@ -503,14 +512,14 @@ class Controller : Initializable {
 
         exitProcess(0)
     }
-    private fun findLabelItemByIndex(index: Int): CTreeItem {
+    private fun findLabelItemByIndex(index: Int): CTreeLabelItem {
         val transLabels = State.transFile.getTransList(State.currentPicName)
         val transLabel = transLabels.find { it.index == index }!!
         val whereToSearch = when (State.viewMode) {
             ViewMode.GroupMode -> cTreeView.root.children[transLabel.groupId]
             ViewMode.IndexMode -> cTreeView.root
         }
-        return whereToSearch.children.find { (it as CTreeItem).index == transLabel.index }!! as CTreeItem
+        return whereToSearch.children.find { (it as CTreeLabelItem).index == transLabel.index }!! as CTreeLabelItem
     }
 
     fun stay(): Boolean {
@@ -624,7 +633,7 @@ class Controller : Initializable {
 
         // Update recent files
         RecentFiles.add(file.path)
-        cMenuBar.updateOpenRecent()
+        AMenuBar.updateOpenRecent()
 
         // Auto backup
         taskManager.refresh()
@@ -803,7 +812,7 @@ class Controller : Initializable {
     }
     fun renderGroupBar() {
         cGroupBar.reset()
-        cGroupBar.render(State.transFile.groupNames, State.transFile.groupColors)
+        cGroupBar.render(State.transFile.groups)
         cGroupBar.select(State.transFile.getTransGroup(State.currentGroupId).name)
 
         Logger.info("Group bar updated", "Controller")
@@ -814,16 +823,11 @@ class Controller : Initializable {
         }, "Controller")
     }
 
-    fun addGroupBar(name: String, colorHex: String) {
-        val color = if (isColorHex(colorHex)) Color.web(colorHex) else CC_66CFFF
-        cGroupBar.addGroup(name, color)
+    fun addGroupBar(transGroup: TransGroup) {
+        cGroupBar.addGroup(transGroup)
     }
     fun removeGroupBar(targetName: String) {
         cGroupBar.removeGroup(targetName)
-    }
-    fun updateGroupBar(targetName: String, name: String? = null, colorHex: String? = null) {
-        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
-        cGroupBar.updateGroup(targetName, name, color)
     }
 
     // ----- LabelPane ----- //
@@ -871,43 +875,33 @@ class Controller : Initializable {
         cTreeView.render(
             State.viewMode,
             State.currentPicName,
-            State.transFile.groupNames,
-            State.transFile.groupColors,
+            State.transFile.groups,
             State.transFile.getTransList(State.currentPicName)
         )
 
         Logger.info("TreeView updated", "Controller")
     }
 
-    fun addGroupItem(name: String, colorHex: String) {
-        cTreeView.addGroupItem(name, Color.web(colorHex))
+    fun addGroupItem(transGroup: TransGroup) {
+        cTreeView.addGroupItem(transGroup)
 
-        Logger.info("Added group item @ ${TransGroup(name, colorHex)}", "Controller")
+        Logger.info("Added group item @ $transGroup", "Controller")
     }
     fun removeGroupItem(groupName: String) {
         cTreeView.removeGroupItem(groupName)
 
         Logger.info("Removed group item @ $groupName", "Controller")
     }
-    fun updateGroupItem(groupName: String, name: String? = null, colorHex: String? = null) {
-        val color = if (isColorHex(colorHex)) Color.web(colorHex) else null
-        cTreeView.updateGroupItem(groupName, name, color)
 
-        Logger.info("Updated group item (name=$groupName) @ ${TransGroup(name ?: groupName, colorHex ?: "76ccff")}", "Controller")
-    }
+    fun addLabelItem(transLabel: TransLabel) {
+        cTreeView.addLabelItem(transLabel)
 
-    fun addLabelItem(index: Int, text: String, groupId: Int) {
-        cTreeView.addLabelItem(index, text, groupId)
-
-        Logger.info("Added label item @ ($index, $groupId, $text)", "Controller")
+        Logger.info("Added label item @ $transLabel", "Controller")
     }
     fun removeLabelItem(labelIndex: Int) {
         cTreeView.removeLabelItem(labelIndex)
 
         Logger.info("Removed label item @ $labelIndex", "Controller")
-    }
-    fun updateLabelItem(labelIndex: Int, index: Int? = null, text: String? = null, groupId: Int? = null) {
-        cTreeView.updateLabelItem(labelIndex, index, text, groupId)
     }
 
     // ----- Mode ----- //
@@ -925,6 +919,11 @@ class Controller : Initializable {
         })
 
         Logger.info("Switched work mode to $mode", "Controller")
+    }
+
+    // ----- Info ----- //
+    fun showInfo(info: String) {
+        lInfo.text = info
     }
 
 }

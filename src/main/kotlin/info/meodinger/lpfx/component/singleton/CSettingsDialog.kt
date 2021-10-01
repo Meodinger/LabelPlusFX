@@ -2,9 +2,9 @@ package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
-import info.meodinger.lpfx.component.CColorPicker
-import info.meodinger.lpfx.component.CComboBox
-import info.meodinger.lpfx.component.CInputLabel
+import info.meodinger.lpfx.component.common.CColorPicker
+import info.meodinger.lpfx.component.common.CComboBox
+import info.meodinger.lpfx.component.common.CInputLabel
 import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger

@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.component
+package info.meodinger.lpfx.component.common
 
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get

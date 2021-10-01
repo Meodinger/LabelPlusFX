@@ -92,6 +92,7 @@ open class TransFile(
 
     // ----- Accessible Properties ----- //
 
+    val groups: List<TransGroup> get() = groupList
     val groupCount: Int get() = groupList.size
     val groupNames: List<String> get() = List(groupCount) { groupList[it].name }
     val groupColors: List<String> get() = List(groupCount) { groupList[it].colorHex }

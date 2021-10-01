@@ -18,6 +18,7 @@ module lpfx {
 
     opens info.meodinger.lpfx to javafx.fxml;
     opens info.meodinger.lpfx.component to javafx.fxml;
+    opens info.meodinger.lpfx.component.common to javafx.fxml;
     opens info.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports info.meodinger.lpfx;

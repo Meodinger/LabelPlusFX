@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import info.meodinger.lpfx.component.*?>
+<?import info.meodinger.lpfx.component.common.*?>
 
 <BorderPane
         xmlns="http://javafx.com/javafx/11.0.2"
@@ -10,9 +11,6 @@
         fx:controller="info.meodinger.lpfx.Controller"
         fx:id="root"
 >
-    <top>
-        <CMenuBar fx:id="cMenuBar" />
-    </top>
     <center>
         <SplitPane fx:id="pMain" dividerPositions="0.63">
             <BorderPane>
@@ -51,7 +49,7 @@
                         <CTransArea fx:id="cTransArea"/>
                     </center>
                     <bottom>
-                        <CInfoLabel fx:id="cInfoLabel"/>
+                        <Label fx:id="lInfo"/>
                     </bottom>
                 </BorderPane>
             </SplitPane>

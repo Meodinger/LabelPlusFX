@@ -137,7 +137,7 @@ class CLabelPane : ScrollPane() {
     val minScaleProperty = SimpleDoubleProperty(NOT_SET)
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
-    val colorHexListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
+    val colorHexListProperty = SimpleListProperty(FXCollections.observableArrayList<String>())
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})

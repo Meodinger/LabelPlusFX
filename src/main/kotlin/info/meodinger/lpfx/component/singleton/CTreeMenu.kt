@@ -1,8 +1,8 @@
 package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
-import info.meodinger.lpfx.component.CColorPicker
-import info.meodinger.lpfx.component.CTreeItem
+import info.meodinger.lpfx.component.common.CColorPicker
+import info.meodinger.lpfx.component.CTreeLabelItem
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.util.color.toHex
@@ -56,8 +56,8 @@ object CTreeMenu : ContextMenu() {
             State.controller.updateLabelColorList()
             State.controller.addLabelLayer()
             State.controller.renderGroupBox()
-            State.controller.addGroupBar(newName, newColorHex)
-            State.controller.addGroupItem(newName, newColorHex)
+            State.controller.addGroupBar(newGroup)
+            State.controller.addGroupItem(newGroup)
             // Mark change
             State.isChanged = true
         }
@@ -86,8 +86,6 @@ object CTreeMenu : ContextMenu() {
             State.setTransGroupName(groupId, newName)
             // Update view
             State.controller.renderGroupBox()
-            State.controller.updateGroupBar(oldName, name = newName)
-            State.controller.updateGroupItem(oldName, name = newName)
             // Mark change
             State.isChanged = true
         }
@@ -103,9 +101,7 @@ object CTreeMenu : ContextMenu() {
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
         // Update view
-        State.controller.updateGroupBar(transGroup.name, colorHex = newColor.toHex())
         State.controller.updateLabelColor(groupId, newColor.toHex())
-        State.controller.updateGroupItem(transGroup.name, colorHex = newColor.toHex())
         // Mark change
         State.isChanged = true
     }
@@ -140,7 +136,7 @@ object CTreeMenu : ContextMenu() {
             val newGroupId = State.transFile.getGroupIdByName(newGroupName)
 
             // Edit data
-            for (item in items) State.setTransLabelGroup(State.currentPicName, (item as CTreeItem).index, newGroupId)
+            for (item in items) State.setTransLabelGroup(State.currentPicName, (item as CTreeLabelItem).index, newGroupId)
             // Update view
             State.controller.renderTreeView()
             State.controller.renderLabelPane()
@@ -160,7 +156,7 @@ object CTreeMenu : ContextMenu() {
             // Edit data
             for (item in items) {
                 val transLabels = State.transFile.getTransList(State.currentPicName)
-                val labelIndex = (item as CTreeItem).index
+                val labelIndex = (item as CTreeLabelItem).index
                 for (label in transLabels) if (label.index > labelIndex) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
                 }
@@ -211,7 +207,7 @@ object CTreeMenu : ContextMenu() {
         if (selectedItems.size == 0) return
         for (item in selectedItems) {
             if (item.parent == null) rootCount += 1
-            else if (item is CTreeItem) labelCount += 1
+            else if (item is CTreeLabelItem) labelCount += 1
             else groupCount += 1
         }
 

@@ -17,8 +17,7 @@
         <SplitPane fx:id="pMain" dividerPositions="0.63">
             <BorderPane>
                 <top>
-                    <HBox fx:id="hbGroupBar" alignment="CENTER_LEFT">
-                    </HBox>
+                    <CGroupBar fx:id="cGroupBar"/>
                 </top>
                 <center>
                     <CLabelPane fx:id="cLabelPane" initScale="1.0" scale="1.0" minScale="0.2" maxScale="2.0"/>

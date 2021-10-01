@@ -220,7 +220,7 @@ class CMenuBar : MenuBar() {
     }
     private fun editPictures() {
         // Choose Pics
-        val selected = State.transFile.transMap.keys.toList()
+        val selected = State.transFile.sortedPicNames
         val unselected = Files.walk(File(State.getFileFolder()).toPath()).filter {
             if (selected.contains(it.name)) return@filter false
             for (extension in EXTENSIONS_PIC) if (it.name.endsWith(extension)) return@filter true
@@ -233,12 +233,14 @@ class CMenuBar : MenuBar() {
                 return@ifPresent
             }
 
+            val picNames = State.transFile.sortedPicNames
+
             // Edit date
             val toRemove = ArrayList<String>()
-            for (picName in State.transFile.transMap.keys) if (!it.contains(picName)) toRemove.add(picName)
+            for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
             for (picName in toRemove) State.removePicture(picName)
             val toAdd = ArrayList<String>()
-            for (picName in it) if (!State.transFile.transMap.keys.contains(picName)) toAdd.add(picName)
+            for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
             for (picName in toAdd) State.addPicture(picName)
             // Update view
             State.controller.updatePicList()
@@ -262,7 +264,7 @@ class CMenuBar : MenuBar() {
             Settings[property.key] = property
         }
 
-        if (updatePane && State.isOpened) State.controller.updateLabelPane()
+        if (updatePane && State.isOpened) State.controller.renderLabelPane()
     }
     private fun logs() {
         val list = CLogsDialog.generateProperties()

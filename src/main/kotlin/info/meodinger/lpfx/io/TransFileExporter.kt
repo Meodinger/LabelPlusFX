@@ -3,7 +3,6 @@ package info.meodinger.lpfx.io
 import info.meodinger.lpfx.FileType
 import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransFile.Companion.LPTransFile
-import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
@@ -37,10 +36,7 @@ fun export(file: File, type: FileType, transFile: TransFile) {
 private fun exportLP(file: File, transFile: TransFile) {
 
     // Group count validate
-    val groupCount = transFile.groupList.size
-    if (groupCount > 9) {
-        throw IOException(I18N["exception.exporter.too_many_groups"])
-    }
+    if (transFile.groupCount > 9) throw IOException(I18N["exception.exporter.too_many_groups"])
 
     fun buildLabel(transLabel: TransLabel): String {
         return StringBuilder()
@@ -77,17 +73,13 @@ private fun exportLP(file: File, transFile: TransFile) {
 
     fun exportGroup(): String {
         val gBuilder = StringBuilder()
-        for (g in transFile.groupList) {
-            gBuilder.append(g.name).append("\n")
-        }
+        for (name in transFile.groupNames) gBuilder.append(name).append("\n")
         return gBuilder.deleteCharAt(gBuilder.length - 1).toString()
     }
 
     fun exportTranslation(): String {
         val tBuilder = StringBuilder()
-        for (picName in getSortedPicList(transFile)) {
-            tBuilder.append(buildPic(picName))
-        }
+        for (picName in transFile.sortedPicNames) tBuilder.append(buildPic(picName))
         return tBuilder.toString()
     }
 

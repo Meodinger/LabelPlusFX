@@ -85,12 +85,12 @@ class CComboBox<T> : HBox() {
 
     fun moveTo(index: Int) {
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
-        else throw IllegalArgumentException("index invalid")
+        else throw IllegalArgumentException("index $index invalid")
     }
 
     fun moveTo(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
-        else throw IllegalArgumentException("no such item")
+        else throw IllegalArgumentException("no item $item")
     }
 
 }

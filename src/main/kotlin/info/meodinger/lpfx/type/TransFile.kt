@@ -1,11 +1,12 @@
 package info.meodinger.lpfx.type
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.sortByDigit
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIncludeProperties
+import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 
@@ -20,10 +21,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
  * A MEO Translation file
  */
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
-open class TransFile {
+open class TransFile(
+    val version: IntArray = DEFAULT_VERSION,
+    var comment: String = DEFAULT_COMMENT,
+    private val groupList: MutableList<TransGroup> = ArrayList(),
+    private val transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
+) {
 
     companion object {
-        val DEFAULT_FILE = TransFile()
 
         val DEFAULT_VERSION = intArrayOf(1, 0)
 
@@ -34,6 +39,8 @@ open class TransFile {
             "由 MoeFlow.com 导出",
             "由MoeTra.com导出"
         )
+
+        val DEFAULT_FILE = TransFile()
 
         object LPTransFile {
             const val PIC_START = ">>>>>>>>["
@@ -50,10 +57,6 @@ open class TransFile {
                 "1E90FF", "FFD700", "FF00FF",
                 "A0522D", "FF4500", "9400D3"
             )
-        }
-
-        fun getSortedPicList(transFile: TransFile): List<String> {
-            return sortByDigit(transFile.transMap.keys.toList())
         }
 
         // ----- Exception ----- //
@@ -87,11 +90,12 @@ open class TransFile {
 
     }
 
-    var version: IntArray = DEFAULT_VERSION
-    var comment: String = DEFAULT_COMMENT
-    @JsonAlias("group", "groups")
-    var groupList: MutableList<TransGroup> = ArrayList()
-    var transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
+    // ----- Accessible Properties ----- //
+
+    val groupCount: Int get() = groupList.size
+    val groupNames: List<String> get() = List(groupCount) { groupList[it].name }
+    val groupColors: List<String> get() = List(groupCount) { groupList[it].color }
+    val sortedPicNames: List<String> get() = sortByDigit(transMap.keys.toList())
 
     // ----- TransGroup ----- //
 
@@ -102,42 +106,44 @@ open class TransFile {
 
         groupList.add(transGroup)
     }
-    fun getTransGroup(name: String): TransGroup {
-        for (group in groupList) if (group.name == name) return group
+    fun getTransGroup(groupName: String): TransGroup {
+        for (group in groupList) if (group.name == groupName) return group
 
-        throw TransFileException.transGroupNotFound(name)
+        throw TransFileException.transGroupNotFound(groupName)
     }
-    fun getTransGroup(id: Int): TransGroup {
-        if (id < 0) throw TransFileException.transGroupIdNegative(id)
-        if (id > groupList.size) throw TransFileException.transGroupIdOutOfBounds(id)
+    fun getTransGroup(groupId: Int): TransGroup {
+        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
+        if (groupId > groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        return groupList[id]
+        return groupList[groupId]
     }
-    fun removeTransGroup(transGroup: TransGroup) {
+    fun removeTransGroup(groupName: String) {
         var toRemove: TransGroup? = null
-        for (group in groupList) if (group == transGroup) toRemove = group
+        for (group in groupList) if (group.name == groupName) toRemove = group
 
         if (toRemove != null) groupList.remove(toRemove)
-        else throw TransFileException.transGroupNotFound(transGroup)
+        else throw TransFileException.transGroupNotFound(groupName)
     }
-    fun removeTransGroup(name: String) {
-        var toRemove: TransGroup? = null
-        for (group in groupList) if (group.name == name) toRemove = group
+    fun removeTransGroup(groupId: Int) {
+        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
+        if (groupId >= groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        if (toRemove != null) groupList.remove(toRemove)
-        else throw TransFileException.transGroupNotFound(name)
-    }
-    fun removeTransGroup(id: Int) {
-        if (id < 0) throw TransFileException.transGroupIdNegative(id)
-        if (id >= groupList.size) throw TransFileException.transGroupIdOutOfBounds(id)
-
-        groupList.removeAt(id)
+        groupList.removeAt(groupId)
     }
 
     fun getGroupIdByName(name: String): Int {
         groupList.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
 
         throw TransFileException.transGroupNotFound(name)
+    }
+    fun isGroupUnused(groupName: String): Boolean {
+        return isGroupUnused(getGroupIdByName(groupName))
+    }
+    fun isGroupUnused(groupId: Int): Boolean {
+        for (key in transMap.keys) for (label in getTransList(key)) {
+            if (label.groupId == groupId) return false
+        }
+        return true
     }
 
     // ----- TransList (TransMap) ----- //
@@ -169,14 +175,6 @@ open class TransFile {
 
         throw TransFileException.transLabelNotFound(picName, labelIndex)
     }
-    fun removeTransLabel(picName: String, transLabel: TransLabel) {
-        val list = getTransList(picName)
-        var toRemove: TransLabel? = null
-        for (label in list) if (label == transLabel) toRemove = label
-
-        if (toRemove != null) list.remove(toRemove)
-        else throw TransFileException.transLabelNotFound(picName, transLabel)
-    }
     fun removeTransLabel(picName: String, labelIndex: Int) {
         val list = getTransList(picName)
         var toRemove: TransLabel? = null
@@ -188,44 +186,27 @@ open class TransFile {
 
     // ----- Other ----- //
 
-    fun clone(): TransFile {
-        val translation = TransFile()
+    fun toJsonString(): String {
+        val mapper = ObjectMapper()
 
-        translation.version = this.version.clone()
-        translation.comment = this.comment
+        mapper.enable(SerializationFeature.INDENT_OUTPUT)
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 
-        translation.groupList = MutableList(this.groupList.size) { TransGroup() }
-        for (i in 0 until this.groupList.size) {
-            translation.groupList[i].name = this.groupList[i].name
-            translation.groupList[i].color = this.groupList[i].color
-        }
-
-        translation.transMap = HashMap()
-        for (key in this.transMap.keys) {
-            translation.transMap[key] = MutableList(this.transMap[key]!!.size) { TransLabel() }
-            for (i in 0 until this.transMap[key]!!.size) {
-                val label = translation.transMap[key]!![i]
-                label.index = this.transMap[key]!![i].index
-                label.x = this.transMap[key]!![i].x
-                label.y = this.transMap[key]!![i].y
-                label.groupId = this.transMap[key]!![i].groupId
-                label.text = this.transMap[key]!![i].text
-            }
-        }
-        return translation
+        return mapper.writeValueAsString(this.clone())
     }
 
-    fun toJsonString(): String {
-        val cloned = this.clone()
+    fun clone(): TransFile {
+        val version = this.version.clone()
+        val comment = this.comment
+        val groupList = MutableList(this.groupList.size) { this.groupList[it].clone() }
+        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also { map ->
+            for (key in sortedPicNames)
+                map[key] = MutableList(this.transMap[key]!!.size) {
+                    this.transMap[key]!![it].clone()
+                }
+        }
 
-        val sorted = getSortedPicList(cloned)
-        val map = LinkedHashMap<String, MutableList<TransLabel>>()
-        for (key in sorted) map[key] = cloned.transMap[key]!!
-        cloned.transMap = map
-
-        val mapper = ObjectMapper()
-        mapper.enable(SerializationFeature.INDENT_OUTPUT)
-        return mapper.writeValueAsString(cloned)
+        return TransFile(version, comment, groupList, transMap)
     }
 
     override fun toString(): String = ObjectMapper().writeValueAsString(this)

@@ -1,7 +1,6 @@
 package info.meodinger.lpfx.io
 
 import info.meodinger.lpfx.type.TransFile
-import info.meodinger.lpfx.type.TransFile.Companion.getSortedPicList
 import info.meodinger.lpfx.util.CZip
 import info.meodinger.lpfx.util.resource.*
 
@@ -28,7 +27,7 @@ fun pack(target: File, source: String, transFile: TransFile) {
 
     zip.zip(transFile.toJsonString().toByteArray(), "/images/translation.json")
 
-    for (picName in getSortedPicList(transFile)) {
+    for (picName in transFile.sortedPicNames) {
         zip.zip(File("$source/$picName"), "/images/$picName")
     }
 

@@ -4,6 +4,7 @@ import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isControlDown
+import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
@@ -136,7 +137,7 @@ class CLabelPane : ScrollPane() {
     val minScaleProperty = SimpleDoubleProperty(NOT_SET)
     val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
     val scaleProperty = SimpleDoubleProperty(1.0)
-    val colorListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
+    val colorHexListProperty = SimpleListProperty(FXCollections.emptyObservableList<String>())
     val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
     val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
     val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -181,7 +182,7 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var colorList: ObservableList<String> by colorListProperty
+    var colorHexList: ObservableList<String> by colorHexListProperty
     var defaultCursor: Cursor by defaultCursorProperty
     var onLabelPlace: EventHandler<LabelEvent> by onLabelPlaceProperty
     var onLabelRemove: EventHandler<LabelEvent> by onLabelRemoveProperty
@@ -307,7 +308,7 @@ class CLabelPane : ScrollPane() {
 
         setupLayers(0)
     }
-    fun update(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
+    fun render(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
         isVisible = false
 
         vvalue = 0.0
@@ -320,6 +321,9 @@ class CLabelPane : ScrollPane() {
         setupLabels(transLabels)
 
         isVisible = true
+    }
+    fun updateColor(id: Int, hex: String) {
+        if (isColorHex(hex)) colorHexList[id] = hex
     }
 
     private fun getLabel(transLabel: TransLabel): CLabel {
@@ -364,7 +368,7 @@ class CLabelPane : ScrollPane() {
         val label = CLabel(
             transLabel.index,
             radius,
-            colorList[transLabel.groupId] + alpha
+            colorHexList[transLabel.groupId] + alpha
         )
 
         // Draggable
@@ -459,12 +463,12 @@ class CLabelPane : ScrollPane() {
         label.colorProperty.bind(object : StringBinding() {
 
             init {
-                bind(colorListProperty)
+                bind(colorHexListProperty)
                 bind(transLabel.groupIdProperty)
             }
 
             override fun computeValue(): String {
-                val colorBinding = colorListProperty.valueAt(transLabel.groupIdProperty)
+                val colorBinding = colorHexListProperty.valueAt(transLabel.groupIdProperty)
                 if (colorBinding.isNotNull.value) {
                     return colorBinding.value + alpha
                 }

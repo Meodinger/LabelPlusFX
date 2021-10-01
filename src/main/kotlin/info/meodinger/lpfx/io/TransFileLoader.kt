@@ -8,6 +8,8 @@ import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -36,8 +38,6 @@ fun load(file: File, type: FileType): TransFile {
  */
 @Throws(IOException::class)
 private fun loadLP(file: File): TransFile {
-
-    val transFile = TransFile()
     val reader = BufferedReader(InputStreamReader(FileInputStream(file), StandardCharsets.UTF_8))
 
     // Remove BOM (EF BB BF)
@@ -112,7 +112,7 @@ private fun loadLP(file: File): TransFile {
     /**
      * Parse from current line, leave pointer on next pic
      */
-    fun parsePicBody(): ArrayList<TransLabel> {
+    fun parsePicBody(): MutableList<TransLabel> {
         val transLabels = ArrayList<TransLabel>()
 
         while (pointer < size && lines[pointer].startsWith(LPTransFile.LABEL_START)) {
@@ -134,7 +134,7 @@ private fun loadLP(file: File): TransFile {
 
     // Version
     val v = lines[pointer].split(LPTransFile.SPLIT)
-    transFile.version = intArrayOf(v[0].trim().toInt(), v[1].trim().toInt())
+    val version = intArrayOf(v[0].trim().toInt(), v[1].trim().toInt())
     pointer++
 
     // Separator
@@ -157,11 +157,10 @@ private fun loadLP(file: File): TransFile {
         pointer++
     }
     if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.exporter.too_many_groups"])
-    transFile.groupList = groupList
     pointer++
 
     // Comment
-    transFile.comment = parseText(LPTransFile.PIC_START)
+    val comment = parseText(LPTransFile.PIC_START)
 
     // Content
     val transMap = HashMap<String, MutableList<TransLabel>>()
@@ -178,9 +177,8 @@ private fun loadLP(file: File): TransFile {
 
         transMap[picName] = labels
     }
-    transFile.transMap = transMap
 
-    return transFile
+    return TransFile(version, comment, groupList, transMap)
 }
 
 /**
@@ -188,8 +186,8 @@ private fun loadLP(file: File): TransFile {
  */
 @Throws(IOException::class)
 private fun loadMeo(file: File): TransFile {
-    return ObjectMapper().readValue(
-        BufferedInputStream(FileInputStream(file)),
-        TransFile::class.java
-    )
+    val mapper = ObjectMapper().setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+    val json = mapper.readTree(file)
+
+    return mapper.treeToValue(json, TransFile::class.java)
 }

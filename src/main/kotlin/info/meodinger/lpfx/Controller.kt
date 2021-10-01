@@ -22,12 +22,12 @@ import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import java.io.*
 import java.net.URL
 import java.util.*
+import java.util.function.Consumer
 import kotlin.system.exitProcess
 
 
@@ -45,10 +45,10 @@ class Controller : Initializable {
     @FXML private lateinit var root: BorderPane
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
-    @FXML private lateinit var hbGroupBar: HBox
     @FXML private lateinit var pMain: SplitPane
     @FXML private lateinit var pRight: SplitPane
     @FXML private lateinit var cMenuBar: CMenuBar
+    @FXML private lateinit var cGroupBar: CGroupBar
     @FXML private lateinit var cLabelPane: CLabelPane
     @FXML private lateinit var cSlider: CTextSlider
     @FXML private lateinit var cPicBox: CComboBox<String>
@@ -56,6 +56,17 @@ class Controller : Initializable {
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CTransArea
     @FXML private lateinit var cInfoLabel: CInfoLabel
+
+    @FXML fun switchViewMode() {
+        val now = ViewMode.values().indexOf(State.viewMode)
+        val all = ViewMode.values().size
+        setViewMode(ViewMode.values()[(now + 1) % all])
+    }
+    @FXML fun switchWorkMode() {
+        val now = WorkMode.values().indexOf(State.workMode)
+        val all = WorkMode.values().size
+        setWorkMode(WorkMode.values()[(now + 1) % all])
+    }
 
     private class BackupTaskManager {
 
@@ -108,13 +119,8 @@ class Controller : Initializable {
             lastFilePath = RecentFiles.getLastOpenFile()
         }
 
-
         // Warp cPicBox
         cPicBox.isWrapped = true
-
-        // Text
-        bSwitchWorkMode.text = I18N["mode.work.input"]
-        bSwitchViewMode.text = Settings[Settings.ViewModePreference].asStringList()[WorkMode.InputMode.ordinal]
 
         // Set comp disabled
         bSwitchViewMode.disableProperty().bind(State.isOpenedProperty.not())
@@ -158,7 +164,7 @@ class Controller : Initializable {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
 
             // Edit data
-            State.removeTransLabel(State.currentPicName, transLabel)
+            State.removeTransLabel(State.currentPicName, transLabel.index)
             for (label in State.transFile.getTransList(State.currentPicName)) {
                 if (label.index > transLabel.index) {
                     State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
@@ -204,6 +210,13 @@ class Controller : Initializable {
         cTransArea.font = Font.font("SimSun", Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
+
+        // View Mode
+        val viewModes = Settings[Settings.ViewModePreference].asStringList()
+        State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
+        cTreeView.viewMode = State.viewMode
+        bSwitchWorkMode.text = I18N["mode.work.input"]
+        bSwitchViewMode.text = State.viewMode.description
 
         // Display default image
         cLabelPane.isVisible = false
@@ -273,8 +286,8 @@ class Controller : Initializable {
 
             cPicBox.moveTo(newValue)
 
-            updateTreeView()
-            updateLabelPane()
+            renderTreeView()
+            renderLabelPane()
 
             cInfoLabel.showInfo("Change picture to $newValue")
         }
@@ -289,11 +302,8 @@ class Controller : Initializable {
             // Select CGroup & GroupBox
             if (newGroupId != NOT_FOUND) {
                 val groupName = State.transFile.getTransGroup(newGroupId as Int).name
-                for (cGroup in hbGroupBar.children) if (cGroup is CGroup) {
-                    cGroup.unselect()
-                    if (cGroup.groupName == groupName) cGroup.select()
-                }
                 cGroupBox.moveTo(groupName)
+                cGroupBar.select(groupName)
             }
 
             cInfoLabel.showInfo("Change Group to ${cGroupBox.value}")
@@ -340,7 +350,7 @@ class Controller : Initializable {
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
 
-            updateTreeView()
+            renderTreeView()
 
             cInfoLabel.showInfo("Switch view mode to $newMode")
         }
@@ -415,6 +425,13 @@ class Controller : Initializable {
             val index = it.text.toInt() - 1
             if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
             cGroupBox.moveTo(it.text.toInt() - 1)
+        }
+
+        // Transform CGroup select to CGroupBox selected
+        cGroupBar.onGroupSelect = Consumer {
+            // cGroupBar.unselectAll()
+            cGroupBar.select(it)
+            cGroupBox.moveTo(it)
         }
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button clicked
@@ -561,11 +578,7 @@ class Controller : Initializable {
         val transMap = HashMap<String, MutableList<TransLabel>>()
         for (pic in pics) transMap[pic] = ArrayList()
 
-        val transFile = TransFile()
-        transFile.version = TransFile.DEFAULT_VERSION
-        transFile.comment = TransFile.DEFAULT_COMMENT
-        transFile.groupList = groupList
-        transFile.transMap = transMap
+        val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
 
         Logger.debug("Created TransFile: $transFile", "Controller")
 
@@ -635,7 +648,8 @@ class Controller : Initializable {
         State.stage.title = INFO["application.name"] + " - " + file.name
 
         updateLabelColorList()
-        updateGroupList()
+        updateGroupBox()
+        updateGroupBar()
         updatePicList()
 
         Logger.info("Opened TransFile", "Controller")
@@ -767,54 +781,43 @@ class Controller : Initializable {
     }
     fun reset() {
         // cMenuBar
+        cGroupBar.reset()
         cLabelPane.reset()
         // cSlider
         cPicBox.reset()
         cGroupBox.reset()
-        hbGroupBar.children.clear()
         cTreeView.reset()
         cTransArea.reset()
     }
     fun updatePicList() {
-        val pics = TransFile.getSortedPicList(State.transFile)
+        val pics = State.transFile.sortedPicNames
         cPicBox.setList(pics)
 
         Logger.info("Picture list updated", "Controller")
         Logger.debug("List is", pics, "Controller")
     }
-    fun updateGroupList() {
-        val groups = State.transFile.groupList
-
-        cGroupBox.setList(List(groups.size) { groups[it].name })
+    fun updateGroupBox() {
+        cGroupBox.setList(State.transFile.groupNames)
         cGroupBox.moveTo(State.currentGroupId)
 
-        hbGroupBar.children.clear()
-        for (group in groups) hbGroupBar.children.add(CGroup(group).also {
-            it.setOnMouseClicked { _ -> cGroupBox.moveTo(it.groupName) }
-        })
-        (hbGroupBar.children[State.currentGroupId] as CGroup).select()
-
-        Logger.info("Group list updated", "Controller")
-        Logger.debug("List is", groups, "Controller")
+        Logger.info("Group box updated", "Controller")
+        Logger.debug("List is", State.transFile.groupNames, "Controller")
     }
-    fun updateLabelColorList() {
-        val list = List(State.transFile.groupList.size) { State.transFile.getTransGroup(it).color }
-        cLabelPane.colorList = FXCollections.observableList(list)
+    fun updateGroupBar() {
+        cGroupBar.reset()
+        cGroupBar.render(State.transFile.groupNames, State.transFile.groupColors)
+        cGroupBar.select(State.transFile.getTransGroup(State.currentGroupId).name)
 
-        Logger.info("LabelPane color list updated", "Controller")
-        Logger.debug("List is", list, "Controller")
+        Logger.info("Group bar updated", "Controller")
+        Logger.debug("List is", lazy {
+            List(State.transFile.groupCount) {
+                TransGroup(State.transFile.groupNames[it], State.transFile.groupColors[it])
+            }
+        }, "Controller")
     }
-    fun updateTreeView() {
-        cTreeView.update(
-            State.viewMode,
-            State.currentPicName,
-            State.transFile.groupList,
-            State.transFile.getTransList(State.currentPicName)
-        )
 
-        Logger.info("TreeView updated", "Controller")
-    }
-    fun updateLabelPane() {
+    // ----- LabelPane ----- //
+    fun renderLabelPane() {
         if (!File(State.getPicPathNow()).exists()) {
             cLabelPane.clear()
 
@@ -823,17 +826,22 @@ class Controller : Initializable {
             return
         }
 
-        cLabelPane.update(
+        cLabelPane.render(
             State.getPicPathNow(),
-            State.transFile.groupList.size,
+            State.transFile.groupCount,
             State.transFile.getTransList(State.currentPicName)
         )
         cLabelPane.fitToPane()
         cLabelPane.moveToZero()
         Logger.info("LabelPane updated", "Controller")
     }
+    fun updateLabelColorList() {
+        cLabelPane.colorHexList = FXCollections.observableList(State.transFile.groupColors)
 
-    // LabelPane
+        Logger.info("LabelPane color list updated", "Controller")
+        Logger.debug("List is", State.transFile.groupColors, "Controller")
+    }
+
     fun addLabelLayer() {
         cLabelPane.createLabelLayer()
 
@@ -845,7 +853,19 @@ class Controller : Initializable {
         Logger.info("Removed label layer", "Controller")
     }
 
-    // TreeView
+    // ----- TreeView ----- //
+    fun renderTreeView() {
+        cTreeView.render(
+            State.viewMode,
+            State.currentPicName,
+            State.transFile.groupNames,
+            State.transFile.groupColors,
+            State.transFile.getTransList(State.currentPicName)
+        )
+
+        Logger.info("TreeView updated", "Controller")
+    }
+
     fun addGroupItem(transGroup: TransGroup) {
         cTreeView.addGroupItem(transGroup)
 
@@ -872,7 +892,7 @@ class Controller : Initializable {
         Logger.info("Removed label item @ $transLabel", "Controller")
     }
 
-    // Mode
+    // ----- Mode ----- //
     fun setViewMode(mode: ViewMode) {
         State.viewMode = mode
 
@@ -887,17 +907,6 @@ class Controller : Initializable {
         })
 
         Logger.info("Switched work mode to $mode", "Controller")
-    }
-
-    @FXML fun switchViewMode() {
-        val now = ViewMode.values().indexOf(State.viewMode)
-        val all = ViewMode.values().size
-        setViewMode(ViewMode.values()[(now + 1) % all])
-    }
-    @FXML fun switchWorkMode() {
-        val now = WorkMode.values().indexOf(State.workMode)
-        val all = WorkMode.values().size
-        setWorkMode(WorkMode.values()[(now + 1) % all])
     }
 
 }

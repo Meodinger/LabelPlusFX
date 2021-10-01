@@ -57,7 +57,9 @@ class TransGroup(
         this.color = color
     }
 
-    override fun toString(): String = "TransGroup(name=$name, color=$color)"
+    fun clone(): TransGroup {
+        return TransGroup(name, color)
+    }
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -72,4 +74,7 @@ class TransGroup(
         result = 31 * result + color.hashCode()
         return result
     }
+
+    override fun toString(): String = "TransGroup(name=$name, color=$color)"
+
 }

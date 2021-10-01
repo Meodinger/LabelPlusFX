@@ -85,7 +85,9 @@ class TransLabel(
 
     // ----- Object ----- //
 
-    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replace("\n", ",")})"
+    fun clone(): TransLabel {
+        return TransLabel(index, groupId, x, y, text)
+    }
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -106,6 +108,8 @@ class TransLabel(
         result = 31 * result + text.hashCode()
         return result
     }
+
+    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replace("\n", ",")})"
 
     // ----- Destruction----- //
 

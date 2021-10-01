@@ -83,6 +83,10 @@ object Logger {
         writer.flush()
     }
 
+    fun debug(message: String, lazy: Lazy<List<*>>, from: String? = null) {
+        debug(message, lazy.value, from)
+    }
+
     fun debug(message: String, list: List<*>, from: String? = null) {
         val time = Date().time
 

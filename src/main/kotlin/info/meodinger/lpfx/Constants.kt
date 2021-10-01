@@ -49,6 +49,7 @@ enum class WorkMode(val description: String) {
         }
     }
 }
+val DEFAULT_WORK_MODE = WorkMode.InputMode
 
 /**
  * Label View Mode
@@ -68,6 +69,7 @@ enum class ViewMode(val description: String) {
         }
     }
 }
+val DEFAULT_VIEW_MODE = ViewMode.IndexMode
 
 /**
  * Translation File Type

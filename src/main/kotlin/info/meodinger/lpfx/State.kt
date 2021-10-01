@@ -39,8 +39,8 @@ object State {
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val viewModeProperty = SimpleObjectProperty(ViewMode.GroupMode)
-    val workModeProperty = SimpleObjectProperty(WorkMode.InputMode)
+    val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
+    val workModeProperty = SimpleObjectProperty(DEFAULT_WORK_MODE)
 
     var isOpened: Boolean by isOpenedProperty
     var isChanged: Boolean by isChangedProperty
@@ -73,10 +73,12 @@ object State {
 
         Logger.info("Added $transGroup", "State")
     }
-    fun removeTransGroup(transGroup: TransGroup) {
-        transFile.removeTransGroup(transGroup)
+    fun removeTransGroup(groupName: String) {
+        val toRemove = transFile.getTransGroup(groupName)
 
-        Logger.info("Removed $transGroup", "State")
+        transFile.removeTransGroup(groupName)
+
+        Logger.info("Removed $toRemove", "State")
     }
     fun setTransGroupName(groupId: Int, name: String) {
         transFile.getTransGroup(groupId).name = name
@@ -105,10 +107,12 @@ object State {
 
         Logger.info("Added $picName @ $transLabel", "State")
     }
-    fun removeTransLabel(picName: String, transLabel: TransLabel) {
-        transFile.removeTransLabel(picName, transLabel)
+    fun removeTransLabel(picName: String, labelIndex: Int) {
+        val toRemove = transFile.getTransLabel(picName, labelIndex)
 
-        Logger.info("Removed $picName @ $transLabel", "State")
+        transFile.removeTransLabel(picName, labelIndex)
+
+        Logger.info("Removed $picName @ $toRemove", "State")
     }
     fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
         transFile.getTransLabel(picName, index).index = newIndex

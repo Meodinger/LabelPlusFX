@@ -1,9 +1,14 @@
 package info.meodinger.lpfx.component
 
-import info.meodinger.lpfx.type.TransGroup
+import info.meodinger.lpfx.util.component.invoke
+import info.meodinger.lpfx.util.property.setValue
+import info.meodinger.lpfx.util.property.getValue
 
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -19,15 +24,13 @@ import javafx.scene.text.TextAlignment
 /**
  * A Region that displays a TransGroup
  */
-class CGroup(transGroup: TransGroup) : Region() {
+class CGroup(name: String, color: Color) : Region() {
 
     companion object {
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0
         private const val PADDING = 2.0
     }
-
-    val groupName: String = transGroup.name
 
     private val backgroundSelected: Background = Background(BackgroundFill(
         Color.LIGHTGRAY,
@@ -40,46 +43,48 @@ class CGroup(transGroup: TransGroup) : Region() {
         CornerRadii(CORNER_RADII),
         BorderWidths(BORDER_WIDTH)
     ))
-    private val borderHovered: Border = Border(BorderStroke(
-        Color.web(transGroup.color),
-        BorderStrokeStyle.SOLID,
-        CornerRadii(CORNER_RADII),
-        BorderWidths(BORDER_WIDTH)
-    ))
-    private val text: Text = Text(transGroup.name).also {
-        it.fill = Color.web(transGroup.color)
-        it.textAlignment = TextAlignment.CENTER
-        it.textOrigin = VPos.CENTER
-    }
+
+    private val text: Text = Text(name)(color, TextAlignment.CENTER, VPos.CENTER)
+
+    val nameProperty = SimpleStringProperty(name)
+    var name: String by nameProperty
+
+    val colorProperty = SimpleObjectProperty(color)
+    var color: Color by colorProperty
 
     init {
         this.padding = Insets(PADDING)
         this.border = borderDefault
         this.hoverProperty().addListener { _, _, isHover ->
-            if (isHover) this.border = borderHovered
+            if (isHover) this.border = Border(BorderStroke(
+                color,
+                BorderStrokeStyle.SOLID,
+                CornerRadii(CORNER_RADII),
+                BorderWidths(BORDER_WIDTH)
+            ))
             else this.border = borderDefault
         }
 
+        nameProperty.addListener { _ ,_ , newName -> update(name = newName) }
+        colorProperty.addListener { _ ,_ , newColor -> update(color = newColor) }
+
         this.children.add(text)
+
+        update()
+    }
+
+    private fun update(name: String = this.name, color: Color = this.color) {
+        text.text = name
+        text.fill = color
 
         val textW = text.boundsInLocal.width
         val textH = text.boundsInLocal.height
-        val borderInsets = this.border.insets
-        val borderOutsets = this.border.outsets
-        val borderStrokeInsets = this.border.strokes[0].insets
-        val borderWidths = this.border.strokes[0].widths
-        val insets = this.insets
-        val padding = this.padding
-        val prefW = textW +
-                borderOutsets.left + borderInsets.left + borderStrokeInsets.left + borderWidths.left + padding.left + insets.left +
-                borderOutsets.right + borderInsets.right + borderStrokeInsets.right + borderWidths.right + padding.right + insets.right
-        val prefH = textH +
-                borderOutsets.top + borderInsets.top + borderStrokeInsets.top + borderWidths.top + padding.top + insets.top +
-                borderOutsets.bottom + borderInsets.bottom + borderStrokeInsets.bottom + borderWidths.bottom + padding.bottom + insets.bottom
-        this.setPrefSize(prefW, prefH)
+        val prefW = textW + (BORDER_WIDTH + PADDING) * 2
+        val prefH = textH + (BORDER_WIDTH + PADDING) * 2
 
-        text.layoutX = (-textW + prefWidth) / 2
-        text.layoutY = prefHeight / 2
+        this.setPrefSize(prefW, prefH)
+        text.layoutX = (-textW + prefW) / 2
+        text.layoutY = prefH / 2
     }
 
     fun select() {

@@ -6,7 +6,7 @@ import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.*
-import info.meodinger.lpfx.util.disableMnemonicParsingForAll
+import info.meodinger.lpfx.util.component.disableMnemonicParsingForAll
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
@@ -125,7 +125,7 @@ object AMenuBar : MenuBar() {
         val file = File(path)
 
         if (!file.exists()) {
-            showAlert(String.format(I18N["alert.file_not_exist.s"], path))
+            showError(String.format(I18N["alert.file_not_exist.s"], path))
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)
             return

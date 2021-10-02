@@ -543,16 +543,13 @@ class CLabelPane : ScrollPane() {
 
         val label = getLabel(labelIndex)
 
-        val centerX = AnchorPane.getLeftAnchor(label)
-        val centerY = AnchorPane.getTopAnchor(label)
-
         //
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
         //
-        val fakeX = imageWidth / 2 * (1 - scale) + centerX * scale
-        val fakeY = imageHeight / 2 * (1 - scale) + centerY * scale
+        val fakeX = imageWidth / 2 * (1 - scale) + label.layoutX * scale
+        val fakeY = imageHeight / 2 * (1 - scale) + label.layoutY * scale
 
         //
         // To center

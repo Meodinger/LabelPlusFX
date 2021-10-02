@@ -4,7 +4,7 @@ import info.meodinger.lpfx.*
 import info.meodinger.lpfx.component.singleton.CTreeMenu
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
-import info.meodinger.lpfx.util.tree.*
+import info.meodinger.lpfx.util.component.expandAll
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 import javafx.beans.binding.Bindings
@@ -66,6 +66,9 @@ class CTreeView: TreeView<String>() {
 
         this.root = TreeItem(picName)
 
+        this.groupItems.clear()
+        this.labelItems.clear()
+
         when (viewMode) {
             ViewMode.GroupMode -> {
                 for (transGroup in transGroups) addGroupItem(transGroup)
@@ -80,12 +83,12 @@ class CTreeView: TreeView<String>() {
         this.root.expandAll()
     }
 
-    private fun getLabelItem(labelIndex: Int): CTreeLabelItem {
-        for (labelItems in labelItems) for (labelItem in labelItems) if (labelItem.index == labelIndex) return labelItem
+    private fun getGroupItem(groupName: String): CTreeGroupItem {
+        for (item in groupItems) if (item.name == groupName) return item
         throw IllegalArgumentException()
     }
-    private fun getLabelItem(labelIndex: Int, groupId: Int): CTreeLabelItem {
-        for (labelItem in labelItems[groupId]) if (labelItem.index == labelIndex) return labelItem
+    private fun getLabelItem(labelIndex: Int): CTreeLabelItem {
+        for (labelItems in labelItems) for (labelItem in labelItems) if (labelItem.index == labelIndex) return labelItem
         throw IllegalArgumentException()
     }
 
@@ -113,6 +116,7 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem(transLabel.index, transLabel.text)
 
         labelItem.indexProperty.bind(transLabel.indexProperty)
+        labelItem.textProperty.bind(transLabel.textProperty)
 
         when (viewMode) {
             ViewMode.IndexMode -> {
@@ -132,27 +136,31 @@ class CTreeView: TreeView<String>() {
     }
 
     fun removeGroupItem(groupName: String) {
-        var groupId = NOT_FOUND
-        for (i in groupItems.indices) if (groupItems[i].name == groupName) groupId = i
-        if (groupId == NOT_FOUND) return
+        val groupItem = getGroupItem(groupName)
+        val groupId = groupItems.indexOf(groupItem)
 
         groupColors.removeAt(groupId)
 
         when (viewMode) {
             ViewMode.IndexMode -> return
             ViewMode.GroupMode -> {
-                val groupItem = groupItems[groupId]
                 root.children.remove(groupItem)
                 groupItems.remove(groupItem)
+                labelItems.removeAt(groupId)
             }
         }
     }
     fun removeLabelItem(labelIndex: Int) {
+        var labelItem: CTreeLabelItem? = null
         var groupId = NOT_FOUND
-        for (i in labelItems.indices) for (label in labelItems[i]) if (label.index == labelIndex) groupId = i
-        if (groupId == NOT_FOUND) return
 
-        val labelItem = getLabelItem(labelIndex, groupId)
+        for (i in labelItems.indices) for (item in labelItems[i]) if (item.index == labelIndex) {
+            labelItem = item
+            groupId = i
+        }
+
+        if (groupId == NOT_FOUND) return
+        if (labelItem == null) return
 
         when (viewMode) {
             ViewMode.IndexMode -> root.children.remove(labelItem)
@@ -169,5 +177,17 @@ class CTreeView: TreeView<String>() {
 
         groupItems[to].children.add(labelItem)
         labelItems[to].add(labelItem)
+    }
+
+    fun select(labelIndex: Int) {
+        select(getLabelItem(labelIndex))
+    }
+    fun select(groupName: String) {
+        select(getGroupItem(groupName))
+    }
+    private fun select(item: TreeItem<String>) {
+        this.selectionModel.clearSelection()
+        this.selectionModel.select(item)
+        this.scrollTo(getRow(item))
     }
 }

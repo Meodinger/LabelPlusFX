@@ -62,7 +62,7 @@ class CTransArea: TextArea() {
     private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)
     private var boundTextProperty: StringProperty? by boundTextPropertyProperty
 
-    val isBound: Boolean get() = textProperty().isBound
+    val isBound: Boolean get() = boundTextProperty != null
 
     init {
         // Symbol Menu

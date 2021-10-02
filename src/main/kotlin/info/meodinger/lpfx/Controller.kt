@@ -16,7 +16,7 @@ import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.util.tree.expandAll
+import info.meodinger.lpfx.util.component.expandAll
 
 import javafx.application.Platform
 import javafx.collections.FXCollections
@@ -196,10 +196,7 @@ class Controller : Initializable {
 
             if (it.source.clickCount > 1) cLabelPane.moveToLabel(it.labelIndex)
 
-            val item = findLabelItemByIndex(it.labelIndex)
-            cTreeView.selectionModel.clearSelection()
-            cTreeView.selectionModel.select(item)
-            cTreeView.scrollTo(cTreeView.getRow(item))
+            cTreeView.select(it.labelIndex)
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
@@ -475,11 +472,17 @@ class Controller : Initializable {
             if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
             if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
 
-            val now = cTreeView.selectionModel.selectedIndex
+            var selectedIndex = cTreeView.selectionModel.selectedIndex
             cTreeView.selectionModel.clearSelection()
 
+            if (selectedIndex == -1) selectedIndex = when (it.code) {
+                KeyCode.UP -> cTreeView.expandedItemCount
+                KeyCode.DOWN -> 0
+                else -> return@EventHandler
+            }
+
             val shift = if (it.code == KeyCode.UP) -1 else 1
-            var labelItemIndex = now + shift
+            var labelItemIndex = selectedIndex + shift
 
             val item = cTreeView.getTreeItem(labelItemIndex)
             if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
@@ -511,15 +514,6 @@ class Controller : Initializable {
         Logger.stop()
 
         exitProcess(0)
-    }
-    private fun findLabelItemByIndex(index: Int): CTreeLabelItem {
-        val transLabels = State.transFile.getTransList(State.currentPicName)
-        val transLabel = transLabels.find { it.index == index }!!
-        val whereToSearch = when (State.viewMode) {
-            ViewMode.GroupMode -> cTreeView.root.children[transLabel.groupId]
-            ViewMode.IndexMode -> cTreeView.root
-        }
-        return whereToSearch.children.find { (it as CTreeLabelItem).index == transLabel.index }!! as CTreeLabelItem
     }
 
     fun stay(): Boolean {
@@ -802,10 +796,11 @@ class Controller : Initializable {
     }
 
     // ----- Group Display ----- //
-
     fun renderGroupBox() {
+        val currentGroupId = if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId
+
         cGroupBox.setList(State.transFile.groupNames)
-        cGroupBox.moveTo(State.currentGroupId)
+        cGroupBox.moveTo(currentGroupId)
 
         Logger.info("Group box updated", "Controller")
         Logger.debug("List is", State.transFile.groupNames, "Controller")

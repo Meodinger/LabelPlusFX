@@ -53,11 +53,11 @@ object CTreeMenu : ContextMenu() {
             // Edit data
             State.addTransGroup(newGroup)
             // Update view
-            State.controller.updateLabelColorList()
-            State.controller.addLabelLayer()
             State.controller.renderGroupBox()
+            State.controller.addLabelLayer()
             State.controller.addGroupBar(newGroup)
             State.controller.addGroupItem(newGroup)
+            State.controller.updateLabelColorList()
             // Mark change
             State.isChanged = true
         }
@@ -79,8 +79,6 @@ object CTreeMenu : ContextMenu() {
             }
 
             val groupId = State.transFile.getGroupIdByName(groupItem.value)
-            val transGroup = State.transFile.getTransGroup(groupId)
-            val oldName = transGroup.name
 
             // Edit data
             State.setTransGroupName(groupId, newName)
@@ -96,7 +94,6 @@ object CTreeMenu : ContextMenu() {
         val newColor = g_changeColorPicker.value
 
         val groupId = State.transFile.getGroupIdByName(groupItem.value)
-        val transGroup = State.transFile.getTransGroup(groupId)
 
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
@@ -116,11 +113,11 @@ object CTreeMenu : ContextMenu() {
         }
         State.removeTransGroup(groupName)
         // Update view
-        State.controller.updateLabelColorList()
-        State.controller.removeLabelLayer(groupId)
         State.controller.renderGroupBox()
+        State.controller.removeLabelLayer(groupId)
         State.controller.removeGroupBar(groupName)
         State.controller.removeGroupItem(groupName)
+        State.controller.updateLabelColorList()
         // Mark change
         State.isChanged = true
     }
@@ -139,7 +136,7 @@ object CTreeMenu : ContextMenu() {
             for (item in items) State.setTransLabelGroup(State.currentPicName, (item as CTreeLabelItem).index, newGroupId)
             // Update view
             State.controller.renderTreeView()
-            State.controller.renderLabelPane()
+            // State.controller.renderLabelPane()
             // Mark change
             State.isChanged = true
         }
@@ -155,12 +152,14 @@ object CTreeMenu : ContextMenu() {
         if (result.isPresent && result.get() == ButtonType.YES) {
             // Edit data
             for (item in items) {
-                val transLabels = State.transFile.getTransList(State.currentPicName)
                 val labelIndex = (item as CTreeLabelItem).index
-                for (label in transLabels) if (label.index > labelIndex) {
-                    State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
-                }
+
                 State.removeTransLabel(State.currentPicName, labelIndex)
+                for (label in State.transFile.getTransList(State.currentPicName)) {
+                    if (label.index > labelIndex) {
+                        State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
+                    }
+                }
             }
             // Update view
             State.controller.renderTreeView()

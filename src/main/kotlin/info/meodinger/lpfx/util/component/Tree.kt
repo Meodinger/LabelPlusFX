@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.util.tree
+package info.meodinger.lpfx.util.component
 
 import javafx.scene.control.TreeItem
 

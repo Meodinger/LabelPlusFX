@@ -1,4 +1,4 @@
-package info.meodinger.lpfx.util
+package info.meodinger.lpfx.util.component
 
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar

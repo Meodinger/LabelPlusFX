@@ -2,6 +2,7 @@ package info.meodinger.lpfx
 
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import javafx.scene.control.TextFormatter
 
 
 /**
@@ -96,4 +97,15 @@ enum class FileType(val description: String) {
             throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
         }
     }
+}
+
+/**
+ * Get a TextFormatter for TransGroup name
+ */
+fun getGroupNameFormatter() = TextFormatter<String> { change ->
+    change.text = change.text
+        .trim()
+        .replace(" ", "_")
+        .replace("|", "_")
+    change
 }

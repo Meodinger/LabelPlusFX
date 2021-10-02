@@ -108,14 +108,3 @@ class Catcher(manager: ResourceManager) {
         thrown?.let { throw it }
     }
 }
-
-/**
- * Get a TextFormatter for TransGroup name
- */
-fun getGroupNameFormatter() = TextFormatter<String> { change ->
-    change.text = change.text
-        .trim()
-        .replace(" ", "_")
-        .replace("|", "_")
-    change
-}

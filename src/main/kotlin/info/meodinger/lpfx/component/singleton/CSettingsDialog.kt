@@ -6,6 +6,7 @@ import info.meodinger.lpfx.component.common.CColorPicker
 import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CInputLabel
 import info.meodinger.lpfx.component.CLabel
+import info.meodinger.lpfx.getGroupNameFormatter
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
@@ -14,7 +15,6 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.component.anchorPaneLeft
 import info.meodinger.lpfx.util.component.anchorPaneTop
 import info.meodinger.lpfx.util.component.invoke
-import info.meodinger.lpfx.util.getGroupNameFormatter
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import info.meodinger.lpfx.util.resource.get

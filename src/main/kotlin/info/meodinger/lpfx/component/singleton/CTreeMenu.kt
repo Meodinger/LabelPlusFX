@@ -3,6 +3,7 @@ package info.meodinger.lpfx.component.singleton
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.component.common.CColorPicker
 import info.meodinger.lpfx.component.CTreeLabelItem
+import info.meodinger.lpfx.getGroupNameFormatter
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.util.color.toHex
@@ -10,7 +11,6 @@ import info.meodinger.lpfx.util.dialog.showChoice
 import info.meodinger.lpfx.util.dialog.showConfirm
 import info.meodinger.lpfx.util.dialog.showError
 import info.meodinger.lpfx.util.dialog.showInput
-import info.meodinger.lpfx.util.getGroupNameFormatter
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 

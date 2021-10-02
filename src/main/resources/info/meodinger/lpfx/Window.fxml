@@ -46,7 +46,7 @@
                 <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <center>
-                        <CTransArea fx:id="cTransArea"/>
+                        <CLigatureArea fx:id="cTransArea"/>
                     </center>
                     <bottom>
                         <Label fx:id="lInfo"/>

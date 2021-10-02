@@ -52,7 +52,9 @@ object Logger {
         if (Files.notExists(path)) Files.createFile(path)
         log = path.toFile()
 
-        writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
+        val output = FileOutputStream(log)
+        writer = BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8))
+        System.setErr(PrintStream(output))
     }
 
     fun start() {
@@ -65,12 +67,12 @@ object Logger {
         writer.close()
     }
 
-    private fun log(time: Long, type: LogType, text: String, from: String? = null) {
+    private fun log(type: LogType, text: String, from: String? = null) {
         if (type < level) return
 
         val builder = StringBuilder()
 
-        builder.append("[").append(formatter.format(Date(time))).append("] ")
+        builder.append("[").append(formatter.format(Date())).append("] ")
 
         builder.append("[")
         if (from != null) builder.append(from).append("/")
@@ -88,33 +90,31 @@ object Logger {
     }
 
     fun debug(message: String, list: List<*>, from: String? = null) {
-        val time = Date().time
-
         val builder = StringBuilder()
         for (e in list) builder.appendLine(e)
         if (builder.isNotEmpty()) builder.deleteTail("\n")
 
-        log(time, LogType.DEBUG, "$message\n$builder", from)
+        log(LogType.DEBUG, "$message\n$builder", from)
     }
 
     fun debug(message: String, from: String? = null) {
-        log(Date().time, LogType.DEBUG, message, from)
+        log(LogType.DEBUG, message, from)
     }
 
     fun info(message: String, from: String? = null) {
-        log(Date().time, LogType.INFO, message, from)
+        log(LogType.INFO, message, from)
     }
 
     fun warning(message: String, from: String? = null) {
-        log(Date().time, LogType.WARNING, message, from)
+        log(LogType.WARNING, message, from)
     }
 
     fun error(message: String, from: String? = null) {
-        log(Date().time, LogType.ERROR, message, from)
+        log(LogType.ERROR, message, from)
     }
 
     fun fatal(message: String, from: String? = null) {
-        log(Date().time, LogType.FATAL, message, from)
+        log(LogType.FATAL, message, from)
     }
 
     fun exception(e: Throwable) {

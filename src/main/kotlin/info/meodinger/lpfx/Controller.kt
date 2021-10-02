@@ -4,7 +4,7 @@ import info.meodinger.lpfx.component.*
 import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.component.common.CTextSlider
-import info.meodinger.lpfx.component.common.CTransArea
+import info.meodinger.lpfx.component.common.CLigatureArea
 import info.meodinger.lpfx.component.singleton.AMenuBar
 import info.meodinger.lpfx.io.*
 import info.meodinger.lpfx.options.*
@@ -59,7 +59,7 @@ class Controller : Initializable {
     @FXML private lateinit var cPicBox: CComboBox<String>
     @FXML private lateinit var cGroupBox: CComboBox<String>
     @FXML private lateinit var cTreeView: CTreeView
-    @FXML private lateinit var cTransArea: CTransArea
+    @FXML private lateinit var cTransArea: CLigatureArea
 
     @FXML fun switchViewMode() {
         val now = ViewMode.values().indexOf(State.viewMode)
@@ -128,6 +128,9 @@ class Controller : Initializable {
 
         // Warp cPicBox
         cPicBox.isWrapped = true
+
+        // Warp text
+        cTransArea.isWrapText = true
 
         // lInfo padding
         lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)

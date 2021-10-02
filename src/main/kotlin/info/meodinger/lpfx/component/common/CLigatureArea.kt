@@ -62,11 +62,17 @@ class CLigatureArea: TextArea() {
 
                 if (ligatureString.length <= ligatureMaxLength) {
                     if (ligaturing) for (rule in ligatureRules) if (rule.first == ligatureString) {
-                        this.text = this.text.replaceRange(ligatureStart, this.caretPosition, rule.second)
-                        change.text = ""
-                        ligatureEnd()
+                        val ligatureEnd = this.caretPosition
+                        val caretPosition = ligatureStart + rule.second.length
 
-                        Platform.runLater { positionCaret(ligatureStart + rule.second.length) }
+                        this.text = this.text.replaceRange(ligatureStart, ligatureEnd, rule.second)
+
+                        change.text = ""
+                        change.setRange(caretPosition, caretPosition)
+                        change.caretPosition = caretPosition
+                        change.anchor = caretPosition
+
+                        ligatureEnd()
                     }
                 } else {
                     ligatureEnd()
@@ -92,6 +98,7 @@ class CLigatureArea: TextArea() {
     fun reset() {
         unbindBidirectional()
     }
+
     private fun ligatureStart(startCaret: Int) {
         ligaturing = true
         ligatureStart = startCaret

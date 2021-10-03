@@ -48,13 +48,26 @@ object Logger {
     var level: LogType = LogType.DEBUG
 
     init {
-        val path = Options.logs.resolve(SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(Date()))
+        val path = Options.logs.resolve(Date().time.toString())
         if (Files.notExists(path)) Files.createFile(path)
         log = path.toFile()
 
         val output = FileOutputStream(log)
+
         writer = BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8))
-        System.setErr(PrintStream(output))
+
+        val systemError = System.err
+        System.setErr(object : PrintStream(output) {
+            override fun print(obj: Any?) {
+                systemError.print(obj)
+                super.print(obj)
+            }
+            override fun println(x: Any?) {
+                // val message = "[${formatter.format(Date())}] $x"
+                systemError.println(x)
+                super.println(x)
+            }
+        })
     }
 
     fun start() {

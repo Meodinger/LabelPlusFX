@@ -41,8 +41,9 @@ object AMenuBar : MenuBar() {
     private val mOpenRecent = Menu(I18N["m.recent"])
     private val mSave = MenuItem(I18N["m.save"])
     private val mSaveAs = MenuItem(I18N["m.save_as"])
-    private val mBakRecover = MenuItem(I18N["m.bak_recovery"])
     private val mClose = MenuItem(I18N["m.close"])
+    private val mBakRecover = MenuItem(I18N["m.bak_recovery"])
+    private val mExit = MenuItem(I18N["m.exit"])
     private val mmExport = Menu(I18N["mm.export"])
     private val mExportAsLp = MenuItem(I18N["m.lp"])
     private val mExportAsMeo = MenuItem(I18N["m.meo"])
@@ -80,8 +81,9 @@ object AMenuBar : MenuBar() {
         mOpen.setOnAction { openTranslation() }
         mSave.setOnAction { saveTranslation() }
         mSaveAs.setOnAction { saveAsTranslation() }
+        mClose.setOnAction { closeTranslation() }
         mBakRecover.setOnAction { bakRecovery() }
-        mClose.setOnAction { State.controller.close() }
+        mExit.setOnAction { State.controller.exit() }
         mExportAsLp.setOnAction { exportTransFile(it) }
         mExportAsMeo.setOnAction { exportTransFile(it) }
         mExportAsTransPack.setOnAction { exportTransPack() }
@@ -91,13 +93,14 @@ object AMenuBar : MenuBar() {
         mLogs.setOnAction { logs() }
         mAbout.setOnAction { about() }
 
-        mSave.disableProperty().bind(State.isOpenedProperty.not())
-        mSaveAs.disableProperty().bind(State.isOpenedProperty.not())
-        mExportAsLp.disableProperty().bind(State.isOpenedProperty.not())
-        mExportAsMeo.disableProperty().bind(State.isOpenedProperty.not())
-        mExportAsTransPack.disableProperty().bind(State.isOpenedProperty.not())
-        mEditComment.disableProperty().bind(State.isOpenedProperty.not())
-        mEditPictures.disableProperty().bind(State.isOpenedProperty.not())
+        mSave.disableProperty().bind(!State.isOpenedProperty)
+        mSaveAs.disableProperty().bind(!State.isOpenedProperty)
+        mClose.disableProperty().bind(!State.isOpenedProperty)
+        mExportAsLp.disableProperty().bind(!State.isOpenedProperty)
+        mExportAsMeo.disableProperty().bind(!State.isOpenedProperty)
+        mExportAsTransPack.disableProperty().bind(!State.isOpenedProperty)
+        mEditComment.disableProperty().bind(!State.isOpenedProperty)
+        mEditPictures.disableProperty().bind(!State.isOpenedProperty)
 
         // Set accelerators
         if (isMac) {
@@ -108,7 +111,7 @@ object AMenuBar : MenuBar() {
             mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
         }
 
-        mmFile.items.addAll(mNew, mOpen, mOpenRecent, mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mClose)
+        mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout)
         this.menus.addAll(mmFile, mmExport, mmAbout)
@@ -176,6 +179,11 @@ object AMenuBar : MenuBar() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.save(file, FileType.getType(file.path), false)
+    }
+    private fun closeTranslation() {
+        if (State.controller.stay()) return
+
+        State.reset()
     }
     private fun bakRecovery() {
         // transfer & open

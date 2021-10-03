@@ -6,6 +6,8 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
 import com.fasterxml.jackson.annotation.JsonIncludeProperties
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
@@ -21,12 +23,12 @@ import javafx.beans.property.SimpleStringProperty
  * A translation label
  */
 @JsonIncludeProperties("index", "groupId", "x", "y", "text")
-class TransLabel(
-    index: Int = 0,
-    groupId: Int = 0,
-    x: Double = 0.0,
-    y: Double = 0.0,
-    text: String = ""
+class TransLabel @JsonCreator constructor(
+    @JsonProperty("index")   index:   Int = 0,
+    @JsonProperty("groupId") groupId: Int = 0,
+    @JsonProperty("x")       x:    Double = 0.0,
+    @JsonProperty("y")       y:    Double = 0.0,
+    @JsonProperty("text")    text: String = ""
 ) {
 
     companion object {

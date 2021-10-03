@@ -136,14 +136,14 @@ class Controller : Initializable {
         lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)
 
         // Set comp disabled
-        bSwitchViewMode.disableProperty().bind(State.isOpenedProperty.not())
-        bSwitchWorkMode.disableProperty().bind(State.isOpenedProperty.not())
-        cTransArea.disableProperty().bind(State.isOpenedProperty.not())
-        cTreeView.disableProperty().bind(State.isOpenedProperty.not())
-        cPicBox.disableProperty().bind(State.isOpenedProperty.not())
-        cGroupBox.disableProperty().bind(State.isOpenedProperty.not())
-        cSlider.disableProperty().bind(State.isOpenedProperty.not())
-        cLabelPane.disableProperty().bind(State.isOpenedProperty.not())
+        bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty)
+        bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty)
+        cTransArea.disableProperty().bind(!State.isOpenedProperty)
+        cTreeView.disableProperty().bind(!State.isOpenedProperty)
+        cPicBox.disableProperty().bind(!State.isOpenedProperty)
+        cGroupBox.disableProperty().bind(!State.isOpenedProperty)
+        cSlider.disableProperty().bind(!State.isOpenedProperty)
+        cLabelPane.disableProperty().bind(!State.isOpenedProperty)
 
         // cSlider - cLabelPane#scale
         cSlider.initScaleProperty.bindBidirectional(cLabelPane.initScaleProperty)
@@ -296,7 +296,7 @@ class Controller : Initializable {
             renderTreeView()
             renderLabelPane()
 
-            showInfo("Change picture to $newValue")
+            labelInfo("Change picture to $newValue")
         }
 
         // Clear text layer & re-select CGroup when group change
@@ -313,7 +313,7 @@ class Controller : Initializable {
                 cGroupBar.select(groupName)
             }
 
-            showInfo("Change Group to ${cGroupBox.value}")
+            labelInfo("Change Group to ${cGroupBox.value}")
         }
 
         // Update text area when label change
@@ -328,7 +328,7 @@ class Controller : Initializable {
                 if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
             }
 
-            showInfo("Selected label $newIndex")
+            labelInfo("Selected label $newIndex")
         }
 
         // Update cLabelPane default cursor when work mode change
@@ -345,7 +345,7 @@ class Controller : Initializable {
                 WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
             }
 
-            showInfo("Switch work mode to $newMode")
+            labelInfo("Switch work mode to $newMode")
         }
 
         // Update CTreeView when view mode change
@@ -359,7 +359,7 @@ class Controller : Initializable {
 
             renderTreeView()
 
-            showInfo("Switch view mode to $newMode")
+            labelInfo("Switch view mode to $newMode")
         }
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
@@ -374,7 +374,7 @@ class Controller : Initializable {
             cTransArea.positionCaret(0)
             it.consume()
 
-            showInfo("Text font size set to $newSize")
+            labelInfo("Text font size set to $newSize")
         }
 
         // Bind Label and Tree
@@ -510,7 +510,7 @@ class Controller : Initializable {
         transform()
     }
 
-    private fun exit() {
+    private fun exitApplication() {
         Logger.info("App exit", "Application")
 
         Options.save()
@@ -640,7 +640,7 @@ class Controller : Initializable {
             Logger.info("Scheduled auto-backup", "Controller")
         } else {
             Logger.warning("Auto-backup unavailable", "Controller")
-            showAlert(I18N["error.auto_backup_unavailable"])
+            showError(I18N["error.auto_backup_unavailable"])
         }
 
         State.isOpened = true
@@ -660,7 +660,7 @@ class Controller : Initializable {
 
         // Check folder
         if (!isSilent) if (file.parent != State.getFileFolder()) {
-            val result = showAlert(I18N["alert.save_to_another_place.content"])
+            val result = showConfirm(I18N["alert.save_to_another_place.content"])
             if (!(result.isPresent && result.get() == ButtonType.YES)) return
         }
 
@@ -762,17 +762,17 @@ class Controller : Initializable {
         }
     }
 
-    fun close() {
-        if (!State.isChanged) exit()
+    fun exit() {
+        if (!State.isChanged) exitApplication()
 
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), FileType.getType(State.transPath), false)
-                    exit()
+                    exitApplication()
                 }
                 ButtonType.NO -> {
-                    exit()
+                    exitApplication()
                 }
                 ButtonType.CANCEL -> {
                     return@ifPresent
@@ -920,7 +920,7 @@ class Controller : Initializable {
     }
 
     // ----- Info ----- //
-    fun showInfo(info: String) {
+    fun labelInfo(info: String) {
         lInfo.text = info
     }
 

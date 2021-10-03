@@ -8,7 +8,7 @@ import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Logger.LogType
 import info.meodinger.lpfx.options.Options
 import info.meodinger.lpfx.options.Settings
-import info.meodinger.lpfx.util.dialog.showAlert
+import info.meodinger.lpfx.util.dialog.showError
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
@@ -48,9 +48,10 @@ object CLogsDialog : AbstractPropertiesDialog() {
     private val buttonClean = Button(I18N["logs.button.clean"])
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     private class FileModal(val file: File) {
-        val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)
-        val timeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
+        val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLong())))
+        val endTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
+        val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)
 
         override fun toString(): String = file.name
     }
@@ -76,17 +77,21 @@ object CLogsDialog : AbstractPropertiesDialog() {
     private fun initLogPane() {
         comboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
 
-        val nameCol = TableColumn<FileModal, String>(I18N["logs.table.name"]).also { column ->
-            column.setCellValueFactory { it.value.nameProperty }
+        val startTimeCol = TableColumn<FileModal, String>(I18N["logs.table.startTime"]).also { column ->
+            column.setCellValueFactory { it.value.startTimeProperty }
         }
-        val timeCol = TableColumn<FileModal, String>(I18N["logs.table.time"]).also { column ->
-            column.setCellValueFactory { it.value.timeProperty }
+        val endTimeCol = TableColumn<FileModal, String>(I18N["logs.table.endTime"]).also { column ->
+            column.setCellValueFactory { it.value.endTimeProperty }
         }
         val sizeCol = TableColumn<FileModal, String>(I18N["logs.table.size"]).also { column ->
             column.setCellValueFactory { it.value.sizeProperty }
         }
-        tableLog.columns.addAll(nameCol, timeCol, sizeCol)
+        val nameCol = TableColumn<FileModal, String>(I18N["logs.table.name"]).also { column ->
+            column.setCellValueFactory { it.value.nameProperty }
+        }
+        tableLog.columns.addAll(startTimeCol, endTimeCol, sizeCol, nameCol)
 
+        tableLog.selectionModel.selectionMode = SelectionMode.SINGLE
         tableLog.selectionModel.selectedItemProperty().addListener { _, _ , _ ->
             labelSent.text = ""
         }
@@ -102,7 +107,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
                     Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
-                    showAlert(String.format(I18N["alert.logs.delete_failed.format.s"], modal.file.name))
+                    showError(String.format(I18N["alert.logs.delete_failed.format.s"], modal.file.name))
                     continue
                 }
                 toRemove.add(modal)
@@ -113,15 +118,15 @@ object CLogsDialog : AbstractPropertiesDialog() {
             Logger.debug("Cleaned", toRemove, "LogsDialog")
         }
 
-        //    0      1        2     3
+        //    0      1           2     3
         // 0  Label  ComboBox
         // 1  Label
-        //    ----------------------------
-        // 2  | FileName  EndTime  Size  |
-        // 3  |                          |
-        // 4  |                          |
-        //    ----------------------------
-        // 5   <    >         Send  Clean
+        //    -------------------------------
+        // 2  | StartTime EndTime Size Name |
+        // 3  |                             |
+        // 4  |                             |
+        //    -------------------------------
+        // 5   <    >            Send  Clean
 
         root.add(Label(I18N["logs.label.level"]), 0, 0)
         root.add(comboLevel, 1, 0)

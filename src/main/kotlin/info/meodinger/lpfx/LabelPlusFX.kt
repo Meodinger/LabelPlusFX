@@ -42,7 +42,7 @@ class LabelPlusFX: Application() {
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, WIDTH, HEIGHT)
         primaryStage.setOnCloseRequest {
-            controller.close()
+            controller.exit()
             it.consume()
         }
         primaryStage.show()

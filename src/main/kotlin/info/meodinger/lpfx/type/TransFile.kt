@@ -74,8 +74,6 @@ open class TransFile(
                     TransFileException(String.format(I18N["exception.trans_file.group_id_out_of_bounds.format.i"], groupId))
                 fun transGroupNotFound(groupName: String) =
                     TransFileException(String.format(I18N["exception.trans_file.group_not_found.format.s"], groupName))
-                fun transGroupNotFound(transGroup: TransGroup) =
-                    TransFileException(String.format(I18N["exception.trans_file.group_not_found.format.g"], transGroup))
 
                 fun transLabelIndexRepeated(picName: String, index: Int) =
                     TransFileException(String.format(I18N["exception.trans_file.label_index_repeated.is"], index, picName))
@@ -83,8 +81,6 @@ open class TransFile(
                     TransFileException(String.format(I18N["exception.trans_file.label_groupId_out_of_bounds.i"], groupId))
                 fun transLabelNotFound(picName: String, index: Int) =
                     TransFileException(String.format(I18N["exception.trans_file.label_not_found.is"], index, picName))
-                fun transLabelNotFound(picName: String, transLabel: TransLabel) =
-                    TransFileException(String.format(I18N["exception.trans_file.label_not_found.l_s"], transLabel, picName))
             }
         }
 

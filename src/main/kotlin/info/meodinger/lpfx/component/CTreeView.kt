@@ -75,7 +75,10 @@ class CTreeView: TreeView<String>() {
                 for (transLabel in transLabels) addLabelItem(transLabel)
             }
             ViewMode.IndexMode -> {
-                for (i in transGroups.indices) labelItems.add(ArrayList())
+                for (transGroup in transGroups) {
+                    labelItems.add(ArrayList())
+                    groupColors.add(Color.web(transGroup.colorHex))
+                }
                 for (transLabel in transLabels) addLabelItem(transLabel)
             }
         }

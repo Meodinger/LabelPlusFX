@@ -5,6 +5,9 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
 import com.fasterxml.jackson.annotation.JsonIncludeProperties
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonGetter
 import javafx.beans.property.SimpleStringProperty
 
 
@@ -18,9 +21,9 @@ import javafx.beans.property.SimpleStringProperty
  * A translation label group
  */
 @JsonIncludeProperties("name", "color")
-class TransGroup(
-    name: String = "NewGroup@${index++}",
-    colorHex: String = "66CCFF"
+class TransGroup @JsonCreator constructor(
+    @JsonProperty("name")  name:     String = "NewGroup@${index++}",
+    @JsonProperty("color") colorHex: String = "66CCFF"
 ) {
     companion object {
         private var index = 0
@@ -46,7 +49,9 @@ class TransGroup(
             nameProperty.value = value
         }
     var colorHex: String
+        @JsonGetter("color")
         get() = colorHexProperty.value
+        //@JsonSetter("color")
         set(value) {
             if (!isColorHex(value)) throw TransGroupException.colorInvalid(value)
             colorHexProperty.value = value

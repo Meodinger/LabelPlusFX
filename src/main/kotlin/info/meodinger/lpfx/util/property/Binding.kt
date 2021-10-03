@@ -11,11 +11,7 @@ import javafx.beans.value.ObservableNumberValue
  * Location: info.meodinger.lpfx.util.property
  */
 
-/**
- * Shadow .not()
- */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-operator fun BooleanProperty.not(): BooleanBinding = not()
+// operator fun BooleanProperty.not(): BooleanBinding = not()
 
 operator fun IntegerExpression.unaryMinus(): IntegerBinding = negate()
 operator fun IntegerProperty.plus(other: ObservableNumberValue): NumberBinding = add(other)

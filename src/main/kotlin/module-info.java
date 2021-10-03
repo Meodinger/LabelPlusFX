@@ -1,8 +1,4 @@
-/**
- * Author: Meodinger
- * Date: 2021/8/24
- * Location: 
- */
+
 module lpfx {
     requires kotlin.stdlib;
     requires kotlin.stdlib.jdk7;
@@ -22,6 +18,4 @@ module lpfx {
     opens info.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports info.meodinger.lpfx;
-    exports info.meodinger.lpfx.type;
-    exports info.meodinger.lpfx.io;
 }

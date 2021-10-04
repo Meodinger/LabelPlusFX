@@ -27,7 +27,7 @@ class LabelPlusFX: Application() {
 
     init {
         Options.load()
-        Logger.info("App start", "Application")
+
         State.application = this
     }
 
@@ -45,9 +45,11 @@ class LabelPlusFX: Application() {
             controller.exit()
             it.consume()
         }
-        primaryStage.show()
 
         State.controller = controller
         initDialogOwner(primaryStage)
+
+        primaryStage.show()
+        Logger.info("App start", "Application")
     }
 }

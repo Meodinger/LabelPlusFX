@@ -1,6 +1,10 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.options.Logger
+import info.meodinger.lpfx.options.Options
+
 import javafx.application.Application
+import kotlin.system.exitProcess
 
 
 /**
@@ -13,5 +17,11 @@ import javafx.application.Application
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    Options.init()
+
+    Logger.start()
     Application.launch(LabelPlusFX::class.java, *args)
+    Logger.stop()
+
+    exitProcess(0)
 }

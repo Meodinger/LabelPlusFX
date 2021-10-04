@@ -33,7 +33,6 @@ import javafx.scene.text.Font
 import java.io.*
 import java.net.URL
 import java.util.*
-import kotlin.system.exitProcess
 
 
 /**
@@ -511,12 +510,10 @@ class Controller : Initializable {
     }
 
     private fun exitApplication() {
+        State.stage.close()
         Logger.info("App exit", "Application")
 
         Options.save()
-        Logger.stop()
-
-        exitProcess(0)
     }
 
     fun stay(): Boolean {
@@ -763,7 +760,10 @@ class Controller : Initializable {
     }
 
     fun exit() {
-        if (!State.isChanged) exitApplication()
+        if (!State.isChanged) {
+            exitApplication()
+            return
+        }
 
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {

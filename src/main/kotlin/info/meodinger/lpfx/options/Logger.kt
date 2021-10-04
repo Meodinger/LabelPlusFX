@@ -43,6 +43,7 @@ object Logger {
 
     private val writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
+    private val systemError: PrintStream = System.err
 
     val log: File
     var level: LogType = LogType.DEBUG
@@ -54,9 +55,6 @@ object Logger {
 
         val output = FileOutputStream(log)
 
-        writer = BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8))
-
-        val systemError = System.err
         System.setErr(object : PrintStream(output) {
             override fun print(obj: Any?) {
                 systemError.print(obj)
@@ -68,6 +66,7 @@ object Logger {
                 super.println(x)
             }
         })
+        writer = BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8))
     }
 
     fun start() {

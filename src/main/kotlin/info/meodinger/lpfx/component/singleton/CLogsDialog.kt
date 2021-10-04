@@ -9,6 +9,8 @@ import info.meodinger.lpfx.options.Logger.LogType
 import info.meodinger.lpfx.options.Options
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.showError
+import info.meodinger.lpfx.util.platform.isMac
+import info.meodinger.lpfx.util.platform.isWin
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 
@@ -90,6 +92,15 @@ object CLogsDialog : AbstractPropertiesDialog() {
             column.setCellValueFactory { it.value.nameProperty }
         }
         tableLog.columns.addAll(startTimeCol, endTimeCol, sizeCol, nameCol)
+        tableLog.setRowFactory { _ ->
+            TableRow<FileModal>().also { row -> row.setOnMouseClicked {
+                if (it.clickCount > 1) Runtime.getRuntime().exec(
+                    if (isWin) "notepad ${row.item.file.absolutePath}"
+                    else if (isMac) "open -t ${row.item.file.absolutePath}"
+                    else "vi ${row.item.file.absolutePath}"
+                )
+            } }
+        }
 
         tableLog.selectionModel.selectionMode = SelectionMode.SINGLE
         tableLog.selectionModel.selectedItemProperty().addListener { _, _ , _ ->

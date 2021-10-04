@@ -26,32 +26,38 @@ object Options {
     private const val FileName_Preference = "preference"
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
-    private const val FolderName_logs = "logs"
+    private const val FolderName_Logs = "logs"
 
-    val lpfx: Path = Paths.get(System.getProperty("user.home")).resolve(LPFX)
-    val preference: Path = lpfx.resolve(FileName_Preference)
-    val settings: Path = lpfx.resolve(FileName_Settings)
-    val recentFiles: Path = lpfx.resolve(FileName_RecentFiles)
-    val logs: Path = lpfx.resolve(FolderName_logs)
+    private lateinit var profileDir: Path
+    val preference: Path get() = profileDir.resolve(FileName_Preference)
+    val settings: Path get() = profileDir.resolve(FileName_Settings)
+    val recentFiles: Path get() = profileDir.resolve(FileName_RecentFiles)
+    val logs: Path get() = profileDir.resolve(FolderName_Logs)
+
+    fun init(dirname: String = LPFX) {
+        profileDir = Paths.get(System.getProperty("user.home")).resolve(dirname)
+
+        // project data folder
+        if (Files.notExists(profileDir)) Files.createDirectories(profileDir)
+        if (Files.notExists(logs)) Files.createDirectories(logs)
+    }
 
     fun load() {
         try {
-            // project data folder
-            if (Files.notExists(lpfx)) Files.createDirectories(lpfx)
-            if (Files.notExists(logs)) Files.createDirectories(logs)
-
-            Logger.start()
-
             // recent_files
-            initRecentFiles()
+            loadRecentFiles()
             // config
-            initPreference()
+            loadPreference()
             // settings
-            initSettings()
+            loadSettings()
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
+
+            Logger.debug("RecentFiles got:", RecentFiles.getAll(), "Options")
+            Logger.debug("Preference got:", Preference.properties, "Options")
+            Logger.debug("Settings got:", Settings.properties, "Options")
         } catch (e: IOException) {
-            Logger.fatal("Options init failed", "Options")
+            Logger.fatal("Options load failed", "Options")
             Logger.exception(e)
             showException(e)
             showError(I18N["error.initialize_options_failed"])
@@ -71,7 +77,7 @@ object Options {
     }
 
     @Throws(IOException::class)
-    private fun initRecentFiles() {
+    private fun loadRecentFiles() {
         if (Files.notExists(recentFiles)) {
             Files.createFile(recentFiles)
             RecentFiles.save()
@@ -81,11 +87,10 @@ object Options {
             RecentFiles.check()
 
             Logger.info("RecentFiles loaded", "Options")
-            Logger.debug("RecentFiles got:", RecentFiles.getAll(), "Options")
         } catch (e: Exception) {
             RecentFiles.useDefault()
             RecentFiles.save()
-            Logger.warning("Recent Files loaded failed", "Options")
+            Logger.warning("Recent Files load failed", "Options")
             Logger.exception(e)
             showDialog(
                 null,
@@ -101,7 +106,7 @@ object Options {
     }
 
     @Throws(IOException::class)
-    private fun initPreference() {
+    private fun loadPreference() {
         if (Files.notExists(preference)) {
             Files.createFile(preference)
             Preference.save()
@@ -111,7 +116,6 @@ object Options {
             Preference.check()
 
             Logger.info("Preference loaded", "Options")
-            Logger.debug("Preference got:", Preference.properties, "Options")
         } catch (e: Exception) {
             Preference.useDefault()
             Preference.save()
@@ -131,7 +135,7 @@ object Options {
     }
 
     @Throws(IOException::class)
-    private fun initSettings() {
+    private fun loadSettings() {
         if (Files.notExists(settings)) {
             Files.createFile(settings)
             Settings.save()
@@ -141,7 +145,6 @@ object Options {
             Settings.check()
 
             Logger.info("Settings loaded", "Options")
-            Logger.debug("Settings got:", Settings.properties, "Options")
         } catch (e: Exception) {
             Settings.useDefault()
             Settings.save()

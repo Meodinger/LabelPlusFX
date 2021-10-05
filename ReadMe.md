@@ -10,12 +10,12 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<p align="center">
+<p style="text-align: center">
   <a href="https://github.com/Meodinger/LabelPlusFX">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
-  <h3 align="center">Label Plus FX</h3>
-  <p align="center">
+  <h3 style="text-align: center">Label Plus FX</h3>
+  <p style="text-align: center">
     A cross-platform LabelPlus
     <br />
     <br />

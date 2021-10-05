@@ -2,7 +2,6 @@ package info.meodinger.lpfx.component.common
 
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
-import javafx.application.Platform
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.StringProperty

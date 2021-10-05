@@ -9189,7 +9189,7 @@ var LabelPlus;
             var index = parseInt(s[0].replace(LABEL_START, "").trim());
             var x = parseFloat(props[0].trim());
             var y = parseFloat(props[1].trim());
-            var groupId = parseInt(props[2].trim());
+            var groupId = parseInt(props[2].trim()) - 1;
             pointer++;
             return {
                 groupId: groupId,
@@ -9233,8 +9233,7 @@ var LabelPlus;
         var transMap = {};
         while (pointer < size && startWith(lines[pointer], PIC_START)) {
             var picName = parsePicHead();
-            var labels = parsePicBody();
-            transMap[picName] = labels;
+            transMap[picName] = parsePicBody();
         }
         var transFile = {
             version: version,

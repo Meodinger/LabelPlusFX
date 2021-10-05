@@ -40,7 +40,7 @@ fun StringBuilder.deleteTail(tail: String) {
 /**
  * Is a string only contains 0-9
  */
-fun String.isInt(): Boolean {
+fun String.isMathmaticInteger(): Boolean {
     val chars = this.toCharArray()
     for (c in chars) {
         if (c !in '0'..'9') return false
@@ -97,7 +97,7 @@ fun sortByDigit(strings: List<String>): List<String> {
     if (trimmed.size > 2) {
         var canCastToIntList = true
         for (i in 2 until trimmed.size) {
-            if (!trimmed[i].isInt()) {
+            if (!trimmed[i].isMathmaticInteger()) {
                 canCastToIntList = false
                 break
             }

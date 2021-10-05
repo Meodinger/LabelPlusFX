@@ -13,6 +13,7 @@ import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.platform.isWin
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.util.string.isMathmaticInteger
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -22,10 +23,12 @@ import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
 
 
@@ -152,7 +155,12 @@ object CLogsDialog : AbstractPropertiesDialog() {
     override fun initProperties() {
         comboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
 
+        val toRemove = ArrayList<Path>()
         val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
+        for (path in paths) if (!path.name.isMathmaticInteger()) toRemove.add(path)
+        for (path in toRemove) path.deleteIfExists()
+        paths.removeAll(toRemove)
+
         val data = MutableList(paths.size) { FileModal(paths[it].toFile()) }.also {
             it.sortByDescending { modal -> modal.file.lastModified() }
         }

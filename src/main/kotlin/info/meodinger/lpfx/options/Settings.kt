@@ -19,6 +19,7 @@ object Settings : AbstractProperties() {
     const val DefaultGroupNameList = "DefaultGroupNameList"
     const val DefaultGroupColorList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
+    const val ScaleOnNewPicture = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
     const val ViewModePreference = "ViewModePreference"
     const val LogLevelPreference = "LogLevelPreference"
     const val LabelRadius = "LabelRadius"
@@ -28,6 +29,7 @@ object Settings : AbstractProperties() {
         CProperty(DefaultGroupNameList, "框内", "框内外"),
         CProperty(DefaultGroupColorList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
+        CProperty(ScaleOnNewPicture, 0),
         CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode), // Input, Label
         CProperty(LogLevelPreference, Logger.LogType.INFO),
         CProperty(LabelRadius, 24.0),
@@ -39,6 +41,7 @@ object Settings : AbstractProperties() {
             CProperty(DefaultGroupNameList),
             CProperty(DefaultGroupColorList),
             CProperty(IsGroupCreateOnNewTrans),
+            CProperty(ScaleOnNewPicture),
             CProperty(ViewModePreference),
             CProperty(LogLevelPreference),
             CProperty(LabelRadius),
@@ -67,6 +70,10 @@ object Settings : AbstractProperties() {
         val isGroupCreateList = this[IsGroupCreateOnNewTrans].asBooleanList()
         if (isGroupCreateList.size != groupNameList.size)
             throw CPropertyException.propertyListSizeInvalid(IsGroupCreateOnNewTrans, isGroupCreateList.size)
+
+        val scaleOnNewPicture = this[ScaleOnNewPicture].asInteger()
+        if (scaleOnNewPicture < 0 || scaleOnNewPicture > 2)
+            throw CPropertyException.propertyValueInvalid(ScaleOnNewPicture, scaleOnNewPicture)
 
         val viewModePreferenceList = this[ViewModePreference].asStringList()
         for (preference in viewModePreferenceList)

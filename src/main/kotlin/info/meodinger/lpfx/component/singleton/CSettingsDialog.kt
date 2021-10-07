@@ -60,6 +60,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     private val mGridPane = GridPane()
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
+    private val mComboScale = CComboBox<String>()
 
     private val labelTab = Tab(I18N["settings.label.title"])
     private val lGridPane = GridPane()
@@ -186,17 +187,29 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         mComboInput.isWrapped = true
         mComboLabel.setList(viewModeList)
         mComboLabel.isWrapped = true
+        mComboScale.setList(listOf(
+            I18N["settings.mode.scale.100"],
+            I18N["settings.mode.scale.fit"],
+            I18N["settings.mode.scale.last"]
+        ))
+        mComboScale.isWrapped = true
 
         //   0         1
         // 0 WorkMode  ViewMode
-        // 1 Input     | input | < >
-        // 2 Label     | label | < >
+        // 1 Input     | input | < > (ViewMode)
+        // 2 Label     | label | < > (ViewMode)
+        // 3
+        // 4 Scale on new picture
+        // 5 | selection | < >       (String)
         mGridPane.add(Label(I18N["mode.work"]), 0, 0)
         mGridPane.add(Label(I18N["mode.view"]), 1, 0)
         mGridPane.add(Label(I18N["mode.work.input"]), 0, 1)
         mGridPane.add(Label(I18N["mode.work.label"]), 0, 2)
         mGridPane.add(mComboInput, 1, 1)
         mGridPane.add(mComboLabel, 1, 2)
+        mGridPane.add(HBox(), 0, 3)
+        mGridPane.add(Label(I18N["settings.mode.scale.label"]), 0, 4, 2, 1)
+        mGridPane.add(mComboScale, 0, 5, 2, 1)
     }
 
     // ----- Label ----- //
@@ -348,6 +361,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
         mComboInput.moveTo(preferenceList[0])
         mComboLabel.moveTo(preferenceList[1])
+        mComboScale.moveTo(Settings[Settings.ScaleOnNewPicture].asInteger())
 
         // Label
         lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
@@ -396,6 +410,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.ViewModePreference, mComboInput.value, mComboLabel.value))
+        list.add(CProperty(Settings.ScaleOnNewPicture, mComboScale.index))
 
         return list
     }

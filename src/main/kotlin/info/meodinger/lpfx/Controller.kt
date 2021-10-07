@@ -17,6 +17,7 @@ import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.component.expandAll
+import info.meodinger.lpfx.util.doNothing
 
 import javafx.application.Platform
 import javafx.collections.FXCollections
@@ -287,7 +288,7 @@ class Controller : Initializable {
      */
     private fun effect() {
         // Update cTreeView & cLabelPane when pic change
-        State.currentPicNameProperty.addListener { _, _, newValue ->
+        State.currentPicNameProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
             cPicBox.moveTo(newValue)
@@ -843,7 +844,13 @@ class Controller : Initializable {
             State.transFile.groupCount,
             State.transFile.getTransList(State.currentPicName)
         )
-        cLabelPane.fitToPane()
+
+        when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
+            0 -> cLabelPane.scale = 1.0 // 100%
+            1 -> cLabelPane.fitToPane() // Fit
+            2 -> doNothing() // Last
+        }
+
         cLabelPane.moveToZero()
         Logger.info("LabelPane updated", "Controller")
     }

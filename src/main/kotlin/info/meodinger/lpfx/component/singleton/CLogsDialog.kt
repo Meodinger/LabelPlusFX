@@ -43,7 +43,8 @@ import kotlin.io.path.name
  */
 object CLogsDialog : AbstractPropertiesDialog() {
 
-    private const val Gap = 16.0
+    private const val GAP = 16.0
+    private const val ALIVE = 3 * 24 * 60 * 60 * 1000L
 
     private val root = GridPane()
     private val comboLevel = CComboBox<LogType>()
@@ -65,9 +66,9 @@ object CLogsDialog : AbstractPropertiesDialog() {
         initOwner(State.stage)
 
         initLogPane()
-        root.padding = Insets(Gap)
-        root.vgap = Gap
-        root.hgap = Gap
+        root.padding = Insets(GAP)
+        root.vgap = GAP
+        root.hgap = GAP
         root.alignment = Pos.TOP_CENTER
 
         initProperties()
@@ -157,7 +158,10 @@ object CLogsDialog : AbstractPropertiesDialog() {
 
         val toRemove = ArrayList<Path>()
         val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
-        for (path in paths) if (!path.name.isMathmaticInteger()) toRemove.add(path)
+        for (path in paths) {
+            if (!path.name.isMathmaticInteger()) toRemove.add(path)
+            else if (Date().time - path.toFile().lastModified() > ALIVE) toRemove.add(path)
+        }
         for (path in toRemove) path.deleteIfExists()
         paths.removeAll(toRemove)
 

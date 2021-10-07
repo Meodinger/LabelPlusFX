@@ -2,6 +2,7 @@ package info.meodinger.lpfx
 
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.scene.control.TextFormatter
 
 
@@ -22,13 +23,24 @@ const val HEIGHT = 600.0
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
-// Extensions
+/**
+ * Extensions
+ */
 val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
 const val EXTENSION_MEO = ".json"
 const val EXTENSION_LP = ".txt"
 const val EXTENSION_PACK = ".zip"
 const val EXTENSION_BAK = ".bak"
 const val FOLDER_NAME_BAK = "bak"
+
+/**
+ * Filenames
+ */
+const val INITIAL_FILE_NAME = "New Translation.json"
+const val RECOVERY_FILE_NAME = "Recovery.json"
+const val EXPORT_FILE_NAME_LP = "Translation.txt"
+const val EXPORT_FILE_NAME_MEO = "Translation.json"
+const val EXPORT_PACK_NAME = "Package.zip"
 
 // Auto-save
 const val AUTO_SAVE_DELAY = 5 * 60 * 1000L

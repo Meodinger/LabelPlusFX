@@ -1,6 +1,5 @@
 package info.meodinger.lpfx.util
 
-import javafx.scene.control.TextFormatter
 import java.util.concurrent.ConcurrentLinkedDeque
 
 
@@ -108,3 +107,8 @@ class Catcher(manager: ResourceManager) {
         thrown?.let { throw it }
     }
 }
+
+/**
+ * Placeholder for when expression
+ */
+fun doNothing() {}

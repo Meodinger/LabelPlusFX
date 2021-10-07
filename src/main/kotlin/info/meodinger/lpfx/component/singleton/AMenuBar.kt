@@ -69,11 +69,14 @@ object AMenuBar : MenuBar() {
         fileChooser.extensionFilter.add(fileFilter)
         fileChooser.extensionFilter.add(meoFilter)
         fileChooser.extensionFilter.add(lpFilter)
+        fileChooser.initialFileName = INITIAL_FILE_NAME
         bakChooser.title = I18N["chooser.bak"]
         bakChooser.extensionFilter.add(bakFilter)
+        bakChooser.initialFileName = RECOVERY_FILE_NAME
         exportChooser.title = I18N["chooser.export"]
         exportPackChooser.title = I18N["chooser.pack"]
         exportPackChooser.extensionFilter.add(packFilter)
+        exportPackChooser.initialFileName = EXPORT_PACK_NAME
 
         this.disableMnemonicParsingForAll()
 
@@ -205,10 +208,12 @@ object AMenuBar : MenuBar() {
         val file: File
         if (event.source == mExportAsMeo) {
             exportChooser.extensionFilter.add(meoFilter)
+            exportChooser.initialFileName = EXPORT_FILE_NAME_MEO
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.MeoFile)
         } else {
             exportChooser.extensionFilter.add(lpFilter)
+            exportChooser.initialFileName = EXPORT_FILE_NAME_LP
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.LPFile)
         }

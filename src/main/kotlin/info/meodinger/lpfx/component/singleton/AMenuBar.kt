@@ -54,6 +54,7 @@ object AMenuBar : MenuBar() {
     private val mSettings = MenuItem(I18N["m.settings"])
     private val mLogs = MenuItem(I18N["m.logs"])
     private val mAbout = MenuItem(I18N["m.about"])
+    private val mCrash = MenuItem("Crash")
 
     private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*${EXTENSION_MEO}", "*${EXTENSION_LP}")
     private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*${EXTENSION_MEO}")
@@ -95,6 +96,7 @@ object AMenuBar : MenuBar() {
         mSettings.setOnAction { settings() }
         mLogs.setOnAction { logs() }
         mAbout.setOnAction { about() }
+        mCrash.setOnAction { crash() }
 
         mSave.disableProperty().bind(!State.isOpenedProperty)
         mSaveAs.disableProperty().bind(!State.isOpenedProperty)
@@ -116,7 +118,7 @@ object AMenuBar : MenuBar() {
 
         mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
-        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout)
+        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 
@@ -304,5 +306,8 @@ object AMenuBar : MenuBar() {
         ) {
             State.application.hostServices.showDocument(INFO["application.url"])
         }
+    }
+    private fun crash() {
+        val a = 1 / 0
     }
 }

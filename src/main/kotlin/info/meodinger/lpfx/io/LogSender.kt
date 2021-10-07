@@ -47,7 +47,7 @@ object LogSender {
 
         // file part
         filePart.attachFile(log)
-        filePart.fileName = "log.txt"
+        filePart.fileName = "${log.name}.txt"
 
         // content
         content.addBodyPart(textPart)

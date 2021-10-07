@@ -1,8 +1,10 @@
 package info.meodinger.lpfx
 
+import info.meodinger.lpfx.io.LogSender
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Options
 import info.meodinger.lpfx.util.dialog.initDialogOwner
+import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.resource.ICON
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -27,6 +29,12 @@ class LabelPlusFX: Application() {
 
     init {
         Options.load()
+
+        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
+            showException(e)
+            Logger.exception(e)
+            LogSender.sendLog(Logger.log)
+        }
 
         State.application = this
     }

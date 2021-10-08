@@ -28,19 +28,21 @@ fun Char.repeat(n: Int): String {
  *
  * @param tail Tail to delete
  */
-fun StringBuilder.deleteTail(tail: String) {
-    if (tail.isEmpty()) return
+fun StringBuilder.deleteTail(tail: String): StringBuilder {
+    if (tail.isEmpty()) return this
+    if (this.isEmpty()) return this
+    if (!this.endsWith(tail)) return this
 
     val tailLength = tail.length
     val builderLength = this.length
 
-    this.deleteRange(builderLength - tailLength, builderLength)
+    return this.deleteRange(builderLength - tailLength, builderLength)
 }
 
 /**
  * Is a string only contains 0-9
  */
-fun String.isMathmaticInteger(): Boolean {
+fun String.isMathematicalInteger(): Boolean {
     val chars = this.toCharArray()
     for (c in chars) {
         if (c !in '0'..'9') return false
@@ -97,7 +99,7 @@ fun sortByDigit(strings: List<String>): List<String> {
     if (trimmed.size > 2) {
         var canCastToIntList = true
         for (i in 2 until trimmed.size) {
-            if (!trimmed[i].isMathmaticInteger()) {
+            if (!trimmed[i].isMathematicalInteger()) {
                 canCastToIntList = false
                 break
             }

@@ -31,9 +31,10 @@ class LabelPlusFX: Application() {
         Options.load()
 
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
+            Logger.systemError.println(e.stackTraceToString())
+
             showException(e)
             Logger.exception(e)
-            LogSender.sendLog(Logger.log)
         }
 
         State.application = this

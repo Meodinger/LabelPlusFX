@@ -3,8 +3,9 @@ package info.meodinger.lpfx.component.common
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.scene.control.TextArea
 import javafx.scene.control.TextFormatter
 
@@ -23,30 +24,25 @@ class CLigatureArea: TextArea() {
     companion object {
         private const val LIGATURE_MAX_LENGTH: Int = 10
         private const val LIGATURE_MARK: String = "\\"
-        private val DEFAULT_RULES: List<Pair<String, String>> = listOf(
-            Pair("(", "「"),
-            Pair(")", "」"),
-            Pair("（", "『"),
-            Pair("）", "』"),
-            Pair("*", "※"),
-            Pair("cc", "◎"),
-            Pair("star", "⭐"),
-            Pair("square", "♢"),
-            Pair("heart", "♡"),
-            Pair("music", "♪")
-        )
+        private val DEFAULT_RULES: List<Pair<String, String>> = listOf("cc" to "◎")
     }
 
     private var ligaturing: Boolean = false
     private var ligatureStart: Int = 0
     private var ligatureString: String = ""
 
-    private val ligatureMaxLength: Int = LIGATURE_MAX_LENGTH
-    private val ligatureRules: List<Pair<String, String>> = DEFAULT_RULES
-    private val ligatureMark: String = LIGATURE_MARK
+    val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
+    var ligatureMaxLength: Int by ligatureMaxLengthProperty
+
+    val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList(DEFAULT_RULES))
+    var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
+
+    val ligatureMarkProperty: StringProperty = SimpleStringProperty(LIGATURE_MARK)
+    var ligatureMark: String by ligatureMarkProperty
 
     private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)
     private var boundTextProperty: StringProperty? by boundTextPropertyProperty
+    val boundProperty: StringProperty? get() = boundTextProperty
     val isBound: Boolean get() = boundTextProperty != null
 
     init {

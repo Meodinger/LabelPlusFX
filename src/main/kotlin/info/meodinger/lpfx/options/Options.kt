@@ -3,6 +3,7 @@ package info.meodinger.lpfx.options
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
 
 import java.io.IOException
 import java.nio.file.Files
@@ -97,10 +98,11 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException)
+                if (e is CPropertyException) {
                     String.format(I18N["alert.option.broken.format.s"], FileName_RecentFiles)
-                else
+                } else {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_RecentFiles)
+                }
             )
         }
     }
@@ -126,10 +128,11 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException)
+                if (e is CPropertyException) {
                     String.format(I18N["alert.option.broken.format.s"], FileName_Preference)
-                else
+                } else {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
+                }
             )
         }
     }
@@ -155,10 +158,11 @@ object Options {
                 2,
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException)
+                if (e is CPropertyException) {
                     String.format(I18N["alert.option.broken.format.s"], FileName_Settings)
-                else
+                } else {
                     String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
+                }
             )
         }
     }

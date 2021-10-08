@@ -2,6 +2,7 @@ package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.type.TransGroup
+import info.meodinger.lpfx.util.doNothing
 import info.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.binding.Bindings
@@ -35,9 +36,11 @@ class CGroupBar : HBox() {
     }
 
     fun reset() {
-        children.clear()
+        this.groups.clear()
+        this.children.clear()
     }
     fun render(transGroups: List<TransGroup>) {
+        this.groups.clear()
         this.children.clear()
         for (transGroup in transGroups) addGroup(transGroup)
     }
@@ -49,6 +52,11 @@ class CGroupBar : HBox() {
         return cGroup.properties[C_GROUP_ID] as Int
     }
 
+    fun select(groupId: Int) {
+        if (groupId in 0 until groups.size) select(groups[groupId].name)
+        else if (groups.size == 0 && groupId == 0) doNothing()
+        else throw IllegalArgumentException("GroupId $groupId invalid")
+    }
     fun select(groupName: String) {
         for (node in groups)
             if (node.name == groupName) {
@@ -74,6 +82,8 @@ class CGroupBar : HBox() {
 
         groups.add(cGroup)
         children.add(cGroup)
+
+        if (groups.size == 1) select(0)
     }
     fun removeGroup(oldName: String) {
         var id: Int = NOT_FOUND

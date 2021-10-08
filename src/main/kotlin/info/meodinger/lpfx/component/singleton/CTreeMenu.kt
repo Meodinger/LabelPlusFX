@@ -5,6 +5,7 @@ import info.meodinger.lpfx.component.common.CColorPicker
 import info.meodinger.lpfx.component.CTreeLabelItem
 import info.meodinger.lpfx.getGroupNameFormatter
 import info.meodinger.lpfx.options.Settings
+import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.dialog.showChoice
@@ -38,13 +39,14 @@ object CTreeMenu : ContextMenu() {
     private val r_addGroupDialog = Dialog<TransGroup>()
     private val r_addGroupAction = {
         val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        val colorList = Settings[Settings.DefaultGroupColorList].asStringList()
+        var colorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
+        if (colorList.isEmpty()) colorList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_LIST
 
         val newGroupId = State.transFile.groupCount
         val newName =
             if (newGroupId < nameList.size) nameList[newGroupId]
             else String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
-        val newColorHex =colorList[newGroupId % colorList.size]
+        val newColorHex = colorList[newGroupId % colorList.size]
 
         r_addGroupField.text = newName
         r_addGroupPicker.value = Color.web(newColorHex)

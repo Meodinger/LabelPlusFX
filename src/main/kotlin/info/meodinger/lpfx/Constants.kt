@@ -115,9 +115,16 @@ enum class FileType(val description: String) {
  * Get a TextFormatter for TransGroup name
  */
 fun getGroupNameFormatter() = TextFormatter<String> { change ->
-    change.text = change.text
-        .trim()
-        .replace(" ", "_")
-        .replace("|", "_")
+    change.text = change.text.trim().replace(Regex("[| ]"), "_")
+
+    change
+}
+
+/**
+ * Get a TextFormatter for CProperty
+ */
+fun getPropertyFormatter() = TextFormatter<String> { change ->
+    change.text = change.text.trim().replace(Regex("[|, ]"), "_")
+
     change
 }

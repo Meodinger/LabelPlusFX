@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.options
 
 import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
 
 import java.io.IOException
 
@@ -17,30 +18,37 @@ import java.io.IOException
 object Settings : AbstractProperties() {
 
     const val DefaultGroupNameList = "DefaultGroupNameList"
-    const val DefaultGroupColorList = "DefaultGroupColorList"
+    const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
     const val ScaleOnNewPicture = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
-    const val ViewModePreference = "ViewModePreference"
+    const val ViewModePreference = "ViewModePreference"  // Input, Label
     const val LogLevelPreference = "LogLevelPreference"
     const val LabelRadius = "LabelRadius"
     const val LabelAlpha = "LabelAlpha"
+    const val LigatureRules = "LigatureRules"
 
     override val default = listOf(
-        CProperty(DefaultGroupNameList, "框内", "框内外"),
-        CProperty(DefaultGroupColorList, "FF0000", "0000FF"),
+        CProperty(DefaultGroupNameList, "框内", "框外"),
+        CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ScaleOnNewPicture, 0),
         CProperty(ViewModePreference, ViewMode.GroupMode, ViewMode.IndexMode), // Input, Label
         CProperty(LogLevelPreference, Logger.LogType.INFO),
         CProperty(LabelRadius, 24.0),
-        CProperty(LabelAlpha, "80")
+        CProperty(LabelAlpha, "80"),
+        CProperty(LigatureRules,
+            "(" to "「", ")" to "」", "（" to "『", "）" to "』",
+            "star" to "⭐","square" to "♢", "heart" to "♡", "music" to "♪",
+            "*" to "※", "cc" to "◎",
+        ),
     )
 
     init {
         this.properties.addAll(listOf(
             CProperty(DefaultGroupNameList),
-            CProperty(DefaultGroupColorList),
+            CProperty(DefaultGroupColorHexList),
             CProperty(IsGroupCreateOnNewTrans),
+            CProperty(LigatureRules),
             CProperty(ScaleOnNewPicture),
             CProperty(ViewModePreference),
             CProperty(LogLevelPreference),
@@ -52,7 +60,14 @@ object Settings : AbstractProperties() {
     @Throws(IOException::class, CPropertyException::class)
     override fun load() = load(Options.settings, this)
     @Throws(IOException::class)
-    override fun save() = save(Options.settings, this)
+    override fun save() = save(Options.settings, this, mapOf(
+        DefaultGroupNameList to "Below three properties should have the same length",
+        LigatureRules to "DO NOT USE `,` HERE\nMaybe cause problems",
+        ScaleOnNewPicture to "0 - 100%, 1 - Fit, 2 - Last",
+        ViewModePreference to "Input, Label",
+        LogLevelPreference to "DEBUG, INFO, WARNING, ERROR, FATAL",
+        LabelRadius to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF"
+    ))
     @Throws(CPropertyException::class)
     override fun check() {
         super.check()
@@ -61,11 +76,11 @@ object Settings : AbstractProperties() {
         for (name in groupNameList) if (name.contains(Regex("s+")))
             throw CPropertyException.propertyElementInvalid(DefaultGroupNameList, name)
 
-        val groupColorList = this[DefaultGroupColorList].asStringList()
+        val groupColorList = this[DefaultGroupColorHexList].asStringList()
         for (color in groupColorList) if (color.length != 6)
-            throw CPropertyException.propertyElementInvalid(DefaultGroupColorList, color)
+            throw CPropertyException.propertyElementInvalid(DefaultGroupColorHexList, color)
         if (groupColorList.size != groupNameList.size)
-            throw CPropertyException.propertyListSizeInvalid(DefaultGroupColorList, groupColorList.size)
+            throw CPropertyException.propertyListSizeInvalid(DefaultGroupColorHexList, groupColorList.size)
 
         val isGroupCreateList = this[IsGroupCreateOnNewTrans].asBooleanList()
         if (isGroupCreateList.size != groupNameList.size)
@@ -76,12 +91,11 @@ object Settings : AbstractProperties() {
             throw CPropertyException.propertyValueInvalid(ScaleOnNewPicture, scaleOnNewPicture)
 
         val viewModePreferenceList = this[ViewModePreference].asStringList()
-        for (preference in viewModePreferenceList)
-            try {
-                ViewMode.getMode(preference)
-            } catch (e: Exception) {
-                throw CPropertyException.propertyValueInvalid(ViewModePreference, preference).initCause(e)
-            }
+        for (preference in viewModePreferenceList) try {
+            ViewMode.getMode(preference)
+        } catch (e: Exception) {
+            throw CPropertyException.propertyValueInvalid(ViewModePreference, preference).initCause(e)
+        }
 
         val logLevel = this[LogLevelPreference].asString()
         try {
@@ -91,10 +105,15 @@ object Settings : AbstractProperties() {
         }
 
         val labelRadius = this[LabelRadius].asDouble()
-        if (labelRadius < 0) throw CPropertyException.propertyValueInvalid(LabelRadius, labelRadius)
+        if (labelRadius < 0)
+            throw CPropertyException.propertyValueInvalid(LabelRadius, labelRadius)
 
         val labelAlpha = this[LabelAlpha].asInteger(16)
-        if (labelAlpha < 0 || labelAlpha > 255) throw CPropertyException.propertyValueInvalid(LabelAlpha, labelAlpha)
+        if (labelAlpha < 0 || labelAlpha > 255)
+            throw CPropertyException.propertyValueInvalid(LabelAlpha, labelAlpha)
 
+        val ligatureRules = this[LigatureRules].asPairList()
+        for (pair in ligatureRules) if (pair.first.isBlank())
+            throw CPropertyException.propertyElementInvalid(LigatureRules, pair)
     }
 }

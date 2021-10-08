@@ -1,5 +1,6 @@
 package info.meodinger.lpfx.component.common
 
+import info.meodinger.lpfx.util.doNothing
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
 
@@ -56,8 +57,7 @@ class CComboBox<T> : HBox() {
     }
 
     fun setList(list: List<T>) {
-        reset()
-        comboBox.items.addAll(list)
+        comboBox.items.setAll(list)
 
         if (list.isNotEmpty()) comboBox.selectionModel.select(0)
     }
@@ -88,6 +88,7 @@ class CComboBox<T> : HBox() {
 
     fun moveTo(index: Int) {
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
+        else if (comboBox.items.size == 0 && index == 0) doNothing()
         else throw IllegalArgumentException("index $index invalid")
     }
 

@@ -1,7 +1,6 @@
 package info.meodinger.lpfx.options
 
-import info.meodinger.lpfx.options.CProperty.Companion.COMMENT_HEAD
-import info.meodinger.lpfx.options.CProperty.Companion.KV_SEPARATOR
+import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
 import info.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -21,6 +20,10 @@ import java.nio.file.Path
 abstract class AbstractProperties {
 
     companion object {
+
+        const val KV_SPILT = "="
+        const val COMMENT_HEAD = "#"
+
         @Throws(IOException::class, CPropertyException::class)
         fun load(path: Path, instance: AbstractProperties) {
             try {
@@ -29,7 +32,7 @@ abstract class AbstractProperties {
                     if (line.isBlank()) continue
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
-                    val prop = line.split(KV_SEPARATOR, limit = 2)
+                    val prop = line.split(KV_SPILT, limit = 2)
                     instance[prop[0]] = prop[1]
                 }
             } catch (e: Exception) {
@@ -38,13 +41,21 @@ abstract class AbstractProperties {
         }
 
         @Throws(IOException::class)
-        fun save(path: Path, instance: AbstractProperties) {
+        fun save(path: Path, instance: AbstractProperties, comments: Map<String, String> = emptyMap()) {
             using {
                 val writer = Files.newBufferedWriter(path).autoClose()
                 for (property in instance.properties) {
+                    if (comments[property.key] != null) {
+                        writer.write(StringBuilder()
+                            .append("\n").append(COMMENT_HEAD).append(" ")
+                            .append(comments[property.key]?.replace("\n", "\n$COMMENT_HEAD "))
+                            .append("\n")
+                            .toString()
+                        )
+                    }
                     writer.write(StringBuilder()
                         .append(property.key)
-                        .append(KV_SEPARATOR)
+                        .append(KV_SPILT)
                         .append(property.value)
                         .append("\n")
                         .toString()
@@ -67,7 +78,7 @@ abstract class AbstractProperties {
     abstract fun save()
     @Throws(CPropertyException::class)
     open fun check() {
-        for (property in default) if (this[property.key].isEmpty()) this[property.key] = property
+        for (property in default) if (this[property.key].isUninitialized()) this[property.key] = property
     }
     fun useDefault() {
         properties.clear()

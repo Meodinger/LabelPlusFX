@@ -13,7 +13,7 @@ import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.platform.isWin
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.util.string.isMathmaticInteger
+import info.meodinger.lpfx.util.string.isMathematicalInteger
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -48,12 +48,12 @@ object CLogsDialog : AbstractPropertiesDialog() {
 
     private val root = GridPane()
     private val comboLevel = CComboBox<LogType>()
-    private val tableLog = TableView<FileModal>()
+    private val tableLog = TableView<FileModel>()
     private val labelSent = Label()
     private val buttonSend = Button(I18N["logs.button.send"])
     private val buttonClean = Button(I18N["logs.button.clean"])
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    private class FileModal(val file: File) {
+    private class FileModel(val file: File) {
         val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLong())))
         val endTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
@@ -83,21 +83,21 @@ object CLogsDialog : AbstractPropertiesDialog() {
     private fun initLogPane() {
         comboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
 
-        val startTimeCol = TableColumn<FileModal, String>(I18N["logs.table.startTime"]).also { column ->
+        val startTimeCol = TableColumn<FileModel, String>(I18N["logs.table.startTime"]).also { column ->
             column.setCellValueFactory { it.value.startTimeProperty }
         }
-        val endTimeCol = TableColumn<FileModal, String>(I18N["logs.table.endTime"]).also { column ->
+        val endTimeCol = TableColumn<FileModel, String>(I18N["logs.table.endTime"]).also { column ->
             column.setCellValueFactory { it.value.endTimeProperty }
         }
-        val sizeCol = TableColumn<FileModal, String>(I18N["logs.table.size"]).also { column ->
+        val sizeCol = TableColumn<FileModel, String>(I18N["logs.table.size"]).also { column ->
             column.setCellValueFactory { it.value.sizeProperty }
         }
-        val nameCol = TableColumn<FileModal, String>(I18N["logs.table.name"]).also { column ->
+        val nameCol = TableColumn<FileModel, String>(I18N["logs.table.name"]).also { column ->
             column.setCellValueFactory { it.value.nameProperty }
         }
         tableLog.columns.addAll(startTimeCol, endTimeCol, sizeCol, nameCol)
         tableLog.setRowFactory { _ ->
-            TableRow<FileModal>().also { row -> row.setOnMouseClicked {
+            TableRow<FileModel>().also { row -> row.setOnMouseClicked {
                 if (it.clickCount > 1) Runtime.getRuntime().exec(
                     if (isWin) "notepad ${row.item.file.absolutePath}"
                     else if (isMac) "open -t ${row.item.file.absolutePath}"
@@ -117,7 +117,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
             labelSent.text = "Sent ${log.name}"
         }
         buttonClean.setOnAction {
-            val toRemove = ArrayList<FileModal>()
+            val toRemove = ArrayList<FileModel>()
             for (modal in tableLog.items) {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
@@ -159,13 +159,13 @@ object CLogsDialog : AbstractPropertiesDialog() {
         val toRemove = ArrayList<Path>()
         val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
         for (path in paths) {
-            if (!path.name.isMathmaticInteger()) toRemove.add(path)
+            if (!path.name.isMathematicalInteger()) toRemove.add(path)
             else if (Date().time - path.toFile().lastModified() > ALIVE) toRemove.add(path)
         }
         for (path in toRemove) path.deleteIfExists()
         paths.removeAll(toRemove)
 
-        val data = MutableList(paths.size) { FileModal(paths[it].toFile()) }.also {
+        val data = MutableList(paths.size) { FileModel(paths[it].toFile()) }.also {
             it.sortByDescending { modal -> modal.file.lastModified() }
         }
         tableLog.items.clear()

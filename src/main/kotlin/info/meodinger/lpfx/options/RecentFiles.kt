@@ -1,5 +1,7 @@
 package info.meodinger.lpfx.options
 
+import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
+
 import java.io.IOException
 
 

@@ -157,8 +157,8 @@ object AMenuBar : MenuBar() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = FileType.getType(file.path)
 
-        State.controller.new(file, type)
-        State.controller.open(file, type)
+        val newed = State.controller.new(file, type)
+        if (newed) State.controller.open(file, type)
     }
     private fun openTranslation() {
         // open
@@ -267,18 +267,19 @@ object AMenuBar : MenuBar() {
         val list = CSettingsDialog.generateProperties()
 
         var updatePane = false
+        var updateRules = false
+
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue
 
-            when (property.key) {
-                Settings.LabelAlpha -> updatePane = true
-                Settings.LabelRadius -> updatePane = true
-            }
+            if (property.key == Settings.LabelAlpha || property.key == Settings.LabelRadius) updatePane = true
+            if (property.key == Settings.LigatureRules) updateRules = true
 
             Settings[property.key] = property
         }
 
         if (updatePane && State.isOpened) State.controller.renderLabelPane()
+        if (updateRules) State.controller.updateLigatureRules()
     }
     private fun logs() {
         val list = CLogsDialog.generateProperties()

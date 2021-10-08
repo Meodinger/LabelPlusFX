@@ -43,10 +43,10 @@ object Logger {
 
     private val writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
-    private val systemError: PrintStream = System.err
 
     val log: File
     var level: LogType = LogType.DEBUG
+    val systemError: PrintStream = System.err
 
     init {
         val path = Options.logs.resolve(Date().time.toString())

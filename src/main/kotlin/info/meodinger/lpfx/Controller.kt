@@ -61,12 +61,12 @@ class Controller : Initializable {
     @FXML private lateinit var cTreeView: CTreeView
     @FXML private lateinit var cTransArea: CLigatureArea
 
-    @FXML fun switchViewMode() {
+    @FXML private fun switchViewMode() {
         val now = ViewMode.values().indexOf(State.viewMode)
         val all = ViewMode.values().size
         setViewMode(ViewMode.values()[(now + 1) % all])
     }
-    @FXML fun switchWorkMode() {
+    @FXML private fun switchWorkMode() {
         val now = WorkMode.values().indexOf(State.workMode)
         val all = WorkMode.values().size
         setWorkMode(WorkMode.values()[(now + 1) % all])
@@ -132,6 +132,9 @@ class Controller : Initializable {
         // Warp text
         cTransArea.isWrapText = true
 
+        // Load rules
+        updateLigatureRules()
+
         // lInfo padding
         lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)
 
@@ -157,6 +160,7 @@ class Controller : Initializable {
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
+            if (State.currentGroupId == NOT_FOUND) return@EventHandler
 
             val transLabel = TransLabel(
                 it.labelIndex,
@@ -203,6 +207,7 @@ class Controller : Initializable {
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
+            if (State.currentGroupId == NOT_FOUND) return@EventHandler
 
             val transGroup = State.transFile.getTransGroup(State.currentGroupId)
 
@@ -307,10 +312,9 @@ class Controller : Initializable {
             cLabelPane.removeText()
 
             // Select CGroup & GroupBox
-            if (newGroupId != NOT_FOUND) {
-                val groupName = State.transFile.getTransGroup(newGroupId as Int).name
-                cGroupBox.moveTo(groupName)
-                cGroupBar.select(groupName)
+            if ((newGroupId as Int) != NOT_FOUND) {
+                cGroupBox.moveTo(newGroupId)
+                cGroupBar.select(newGroupId)
             }
 
             labelInfo("Change Group to ${cGroupBox.value}")
@@ -537,7 +541,7 @@ class Controller : Initializable {
         // Closed
         return true
     }
-    fun new(file: File, type: FileType) {
+    fun new(file: File, type: FileType): Boolean {
         Logger.info("Newing $type to ${file.path}", "Controller")
 
         // Choose Pics
@@ -557,12 +561,12 @@ class Controller : Initializable {
             if (result.get().isEmpty()) {
                 Logger.info("Chose none, Cancel", "Controller")
                 showInfo(I18N["alert.required_at_least_1_ic"])
-                return
+                return false
             }
             pics.addAll(result.get())
         } else {
             Logger.info("Cancel", "Controller")
-            return
+            return false
         }
 
         Logger.debug("Chose pics:", pics, "Controller")
@@ -570,7 +574,7 @@ class Controller : Initializable {
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
         val groupNameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        val groupColorList = Settings[Settings.DefaultGroupColorList].asStringList()
+        val groupColorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
         val groupCreateList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
         for (i in groupNameList.indices) if (groupCreateList[i])
             groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
@@ -589,9 +593,12 @@ class Controller : Initializable {
             Logger.exception(e)
             showError(I18N["error.new_failed"])
             showException(e)
+            return false
         }
 
         Logger.info("Newed TransFile", "Controller")
+
+        return true
     }
     fun open(file: File, type: FileType) {
         Logger.info("Opening ${file.path}", "Controller")
@@ -791,6 +798,13 @@ class Controller : Initializable {
         cTreeView.reset()
         cTransArea.reset()
     }
+
+    // ----- Re-init component ----- //
+    fun updateLigatureRules() {
+        cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
+    }
+
+    // ----- Picture Display ----- //
     fun updatePicList() {
         val pics = State.transFile.sortedPicNames
         cPicBox.setList(pics)
@@ -801,10 +815,9 @@ class Controller : Initializable {
 
     // ----- Group Display ----- //
     fun renderGroupBox() {
-        val currentGroupId = if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId
-
+        cGroupBox.reset()
         cGroupBox.setList(State.transFile.groupNames)
-        cGroupBox.moveTo(currentGroupId)
+        cGroupBox.moveTo(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         Logger.info("Group box updated", "Controller")
         Logger.debug("List is", State.transFile.groupNames, "Controller")
@@ -812,7 +825,7 @@ class Controller : Initializable {
     fun renderGroupBar() {
         cGroupBar.reset()
         cGroupBar.render(State.transFile.groups)
-        cGroupBar.select(State.transFile.getTransGroup(State.currentGroupId).name)
+        cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         Logger.info("Group bar updated", "Controller")
         Logger.debug("List is", lazy {

@@ -52,7 +52,7 @@ open class TransFile(
             const val SPLIT = ","
             const val SEPARATOR = "-"
 
-            val DEFAULT_COLOR_LIST = arrayOf(
+            val DEFAULT_COLOR_LIST = listOf(
                 "FF0000", "0000FF", "008000",
                 "1E90FF", "FFD700", "FF00FF",
                 "A0522D", "FF4500", "9400D3"
@@ -110,7 +110,7 @@ open class TransFile(
     }
     fun getTransGroup(groupId: Int): TransGroup {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId > groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
+        if (groupId >= groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
         return groupList[groupId]
     }

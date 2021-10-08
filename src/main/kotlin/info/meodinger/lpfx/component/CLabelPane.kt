@@ -292,6 +292,8 @@ class CLabelPane : ScrollPane() {
 
         setupLayers(0)
 
+        for (label in labels) { label.colorProperty.unbind() }
+
         moveToCenter()
         isVisible = true
     }

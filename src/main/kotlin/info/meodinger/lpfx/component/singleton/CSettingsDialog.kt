@@ -7,9 +7,11 @@ import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CInputLabel
 import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.getGroupNameFormatter
+import info.meodinger.lpfx.getPropertyFormatter
 import info.meodinger.lpfx.options.CProperty
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Settings
+import info.meodinger.lpfx.type.TransFile
 import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.component.anchorPaneLeft
@@ -53,8 +55,17 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
     private val gButtonAdd = Button(I18N["settings.group.add"])
-    private var gRemainGroup = 0
     private const val gRowShift = 1
+
+    private val ruleTab = Tab("Ligature")
+    private val rBorderPane = BorderPane()
+    private val rLabelFrom = Label("From")
+    private val rLabelTo = Label("To")
+    private val rGridPane = GridPane()
+    private val rButtonAdd = Button("Add")
+    private const val rRowShift = 1
+    private const val rIsFrom = "isFrom"
+    private const val rRuleIndex = "ruleIndex"
 
     private val modeTab = Tab(I18N["settings.mode.title"])
     private val mGridPane = GridPane()
@@ -80,7 +91,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         gGridPane.vgap = Gap
         gGridPane.hgap = Gap
         gGridPane.alignment = Pos.TOP_CENTER
-        gButtonAdd.setOnAction { createGroupRow(gRemainGroup) }
+        gButtonAdd.setOnAction { createGroupRow() }
         gBorderPane.center = ScrollPane(AnchorPane(gGridPane)).also {
             it.style = "-fx-background-color:transparent;"
             it.widthProperty().addListener { _, _, newValue ->
@@ -92,6 +103,25 @@ object CSettingsDialog : AbstractPropertiesDialog() {
             it.padding = Insets(Gap, Gap / 2, Gap / 2, 0.0)
         }
         groupTab.content = gBorderPane
+
+        // ----- Ligature Rule ----- //
+        // initLigatureTab()
+        rGridPane.padding = Insets(Gap)
+        rGridPane.vgap = Gap
+        rGridPane.hgap = Gap
+        rGridPane.alignment = Pos.TOP_CENTER
+        rButtonAdd.setOnAction { createLigatureRow() }
+        rBorderPane.center = ScrollPane(AnchorPane(rGridPane)).also {
+            it.style = "-fx-background-color:transparent;"
+            it.widthProperty().addListener { _, _, newValue ->
+                rGridPane.layoutX = (newValue as Double - rGridPane.width) / 2
+            }
+        }
+        rBorderPane.bottom = HBox(rButtonAdd).also {
+            it.alignment = Pos.CENTER_RIGHT
+            it.padding = Insets(Gap, Gap / 2, Gap / 2, 0.0)
+        }
+        ruleTab.content = rBorderPane
 
         // ----- Mode ----- //
         initModeTab()
@@ -113,7 +143,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tabPane.prefHeight = 400.0
         tabPane.prefWidth = 600.0
-        tabPane.tabs.addAll(groupTab, modeTab, labelTab)
+        tabPane.tabs.addAll(groupTab, ruleTab, modeTab, labelTab)
 
         initProperties()
 
@@ -125,30 +155,37 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     // ----- Group ----- //
     private fun initGroupTab() {
         val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        val colorList = Settings[Settings.DefaultGroupColorList].asStringList()
+        val colorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
         val createList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
 
-        for (i in nameList.indices) createGroupRow(i, createList[i], nameList[i], colorList[i])
+        for (i in nameList.indices) createGroupRow(createList[i], nameList[i], colorList[i])
     }
-    private fun createGroupRow(groupId: Int, createOnNew: Boolean = false, name: String = "", color: String = "") {
-        val newRowIndex = groupId + gRowShift
+    private fun createGroupRow(createOnNew: Boolean = false, name: String = "", color: String = "") {
+        val newRowIndex = if (gGridPane.rowCount == 0) 1 else gGridPane.rowCount
 
-        if (gRemainGroup == 0) {
+        if (gGridPane.rowCount == 0) {
             gGridPane.add(gLabelName, 0, 0)
             gGridPane.add(gLabelColor, 1, 0)
             gGridPane.add(gLabelIsCreate, 2, 0)
         }
-        gRemainGroup++
 
-        val defaultColorList = Settings[Settings.DefaultGroupColorList].asStringList()
-        val colorHex = if (isColorHex(color)) color else defaultColorList[groupId % defaultColorList.size]
+        val groupId = newRowIndex - gRowShift
+        val colorHex =
+            if (isColorHex(color))
+                color
+            else {
+                var defaultColorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
+                if (defaultColorList.isEmpty()) defaultColorList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_LIST
+
+                defaultColorList[groupId % defaultColorList.size]
+            }
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button(I18N["common.delete"]).also {
             it.setOnAction { _ ->
-                removeGroupRow(GridPane.getRowIndex(it) - gRowShift)
+                removeGroupRow(GridPane.getRowIndex(it))
             }
         }
 
@@ -163,19 +200,71 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         gGridPane.add(checkBox, 2, newRowIndex)
         gGridPane.add(button, 3, newRowIndex)
     }
-    private fun removeGroupRow(groupId: Int) {
-        val toRemoveRow = groupId + gRowShift
+    private fun removeGroupRow(index: Int) {
         val toRemoveList = ArrayList<Node>()
         for (node in gGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
-            if (row == toRemoveRow) toRemoveList.add(node)
-            if (row > toRemoveRow) GridPane.setRowIndex(node, row - 1)
+            if (row == index) toRemoveList.add(node)
+            if (row > index) GridPane.setRowIndex(node, row - 1)
         }
         gGridPane.children.removeAll(toRemoveList)
 
-        gRemainGroup--
-        if (gRemainGroup == 0) {
+        if (gGridPane.rowCount == gRowShift) {
             gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
+        }
+    }
+
+    // ----- Ligature ----- //
+    private fun initLigatureTab() {
+        val ruleList = Settings[Settings.LigatureRules].asPairList()
+
+        for (rule in ruleList) createLigatureRow(rule.first, rule.second)
+    }
+    private fun createLigatureRow(from: String = "", to: String = "") {
+        val newRowIndex = if (rGridPane.rowCount == 0) 1 else rGridPane.rowCount
+
+        if (rGridPane.rowCount == 0) {
+            rGridPane.add(rLabelFrom, 0, 0)
+            rGridPane.add(rLabelTo, 1, 0)
+        }
+
+        val fromField = TextField(from).also {
+            it.textFormatter = getPropertyFormatter()
+            it.properties[rRuleIndex] = newRowIndex - rRowShift
+            it.properties[rIsFrom] = true
+        }
+        val toField = TextField(to).also {
+            it.textFormatter = getPropertyFormatter()
+            it.properties[rRuleIndex] = newRowIndex - rRowShift
+            it.properties[rIsFrom] = false
+        }
+        val button = Button(I18N["common.delete"]).also {
+            it.setOnAction { _ ->
+                removeLigatureRow(GridPane.getRowIndex(it))
+            }
+        }
+
+        //   0         1         2
+        // 0 From      To
+        // 1 ________  ________  Delete
+        rGridPane.add(fromField, 0, newRowIndex)
+        rGridPane.add(toField, 1, newRowIndex)
+        rGridPane.add(button, 2, newRowIndex)
+    }
+    private fun removeLigatureRow(index: Int) {
+        val toRemoveList = ArrayList<Node>()
+        for (node in rGridPane.children) {
+            val row = GridPane.getRowIndex(node) ?: 0
+            if (row == index) toRemoveList.add(node)
+            if (row > index) {
+                GridPane.setRowIndex(node, row - 1)
+                node.properties[rRuleIndex] = row - 1 - rRowShift
+            }
+        }
+        rGridPane.children.removeAll(toRemoveList)
+
+        if (rGridPane.rowCount == rRowShift) {
+            rGridPane.children.removeAll(rLabelFrom, rLabelTo)
         }
     }
 
@@ -349,12 +438,14 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     }
 
     // ----- Initialize Properties ----- //
-
     override fun initProperties() {
         // Group
-        gRemainGroup = 0
         gGridPane.children.clear()
         initGroupTab()
+
+        // Ligature Rule
+        rGridPane.children.clear()
+        initLigatureTab()
 
         // Mode
         val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
@@ -377,6 +468,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val list = ArrayList<CProperty>()
 
         list.addAll(convertGroup())
+        list.addAll(convertLigatureRule())
         list.addAll(convertMode())
         list.addAll(convertLabel())
 
@@ -388,11 +480,21 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        val nameList = MutableList(gRemainGroup) { "" }
-        val colorList = MutableList(gRemainGroup) { "" }
-        val isCreateList = MutableList(gRemainGroup) { false }
+        val size = gGridPane.rowCount - gRowShift
+        if (size < 0) {
+            list.add(CProperty(Settings.DefaultGroupNameList, CProperty.EMPTY))
+            list.add(CProperty(Settings.DefaultGroupColorHexList, CProperty.EMPTY))
+            list.add(CProperty(Settings.IsGroupCreateOnNewTrans, CProperty.EMPTY))
+
+            return list
+        }
+
+        val nameList = MutableList(size) { "" }
+        val colorList = MutableList(size) { "" }
+        val isCreateList = MutableList(size) { false }
         for (node in gGridPane.children) {
             val groupId = GridPane.getRowIndex(node) - gRowShift
+            if (groupId < 0) continue
             when (node) {
                 is CheckBox -> isCreateList[groupId] = node.isSelected
                 is TextField -> nameList[groupId] = node.text
@@ -401,8 +503,35 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         }
 
         list.add(CProperty(Settings.DefaultGroupNameList, nameList))
-        list.add(CProperty(Settings.DefaultGroupColorList, colorList))
+        list.add(CProperty(Settings.DefaultGroupColorHexList, colorList))
         list.add(CProperty(Settings.IsGroupCreateOnNewTrans, isCreateList))
+
+        return list
+    }
+    private fun convertLigatureRule(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        val size = rGridPane.rowCount - rRowShift
+        if (size < 0) {
+            list.add(CProperty(Settings.LigatureRules, CProperty.EMPTY))
+
+            return list
+        }
+
+        val fromList = MutableList(size) { "" }
+        val toList = MutableList(size) { "" }
+        for (node in rGridPane.children) {
+            if (node is TextField) {
+                val ruleIndex = node.properties[rRuleIndex] as Int
+                val isFrom = node.properties[rIsFrom] as Boolean
+
+                if (isFrom) fromList[ruleIndex] = node.text
+                else toList[ruleIndex] = node.text
+            }
+        }
+        val rules = List(size) { fromList[it] to toList[it] }
+
+        list.add(CProperty(Settings.LigatureRules, rules))
 
         return list
     }

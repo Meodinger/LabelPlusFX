@@ -42,7 +42,7 @@ class CGroupBar : HBox() {
     fun render(transGroups: List<TransGroup>) {
         this.groups.clear()
         this.children.clear()
-        for (transGroup in transGroups) addGroup(transGroup)
+        for (transGroup in transGroups) createGroup(transGroup)
     }
 
     private fun tagCGroupId(cGroup: CGroup, groupId: Int) {
@@ -69,7 +69,7 @@ class CGroupBar : HBox() {
         for (node in children) if (node is CGroup) node.unselect()
     }
 
-    fun addGroup(transGroup: TransGroup) {
+    fun createGroup(transGroup: TransGroup) {
         val cGroup = CGroup(transGroup.name, Color.web(transGroup.colorHex)).also { tagCGroupId(it, groups.size) }
 
         cGroup.setOnMouseClicked { onGroupSelect.accept(cGroup.name) }

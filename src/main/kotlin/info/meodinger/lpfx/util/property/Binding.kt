@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package info.meodinger.lpfx.util.property
 
 import javafx.beans.binding.*

@@ -259,7 +259,7 @@ object AMenuBar : MenuBar() {
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
             for (picName in toAdd) State.addPicture(picName)
             // Update view
-            State.controller.updatePicList()
+            State.controller.renderPictureList()
             // Mark change
             State.isChanged = true
         }

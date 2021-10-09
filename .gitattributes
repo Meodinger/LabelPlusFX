@@ -1,1 +1,2 @@
 *.java text eol=crlf
+*.kt text eol=crlf

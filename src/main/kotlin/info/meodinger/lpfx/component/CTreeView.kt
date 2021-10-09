@@ -1,7 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.*
-import info.meodinger.lpfx.component.singleton.CTreeMenu
+import info.meodinger.lpfx.component.singleton.ATreeMenu
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.component.expandAll
@@ -47,11 +47,11 @@ class CTreeView: TreeView<String>() {
     init {
         // Init
         this.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        this.contextMenu = CTreeMenu
+        this.contextMenu = ATreeMenu
 
         // Update tree menu when requested
         addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-            CTreeMenu.update(this.selectionModel.selectedItems)
+            ATreeMenu.update(this.selectionModel.selectedItems)
         }
     }
 
@@ -71,15 +71,15 @@ class CTreeView: TreeView<String>() {
 
         when (viewMode) {
             ViewMode.GroupMode -> {
-                for (transGroup in transGroups) addGroupItem(transGroup)
-                for (transLabel in transLabels) addLabelItem(transLabel)
+                for (transGroup in transGroups) createGroupItem(transGroup)
+                for (transLabel in transLabels) createLabelItem(transLabel)
             }
             ViewMode.IndexMode -> {
                 for (transGroup in transGroups) {
                     labelItems.add(ArrayList())
                     groupColors.add(Color.web(transGroup.colorHex))
                 }
-                for (transLabel in transLabels) addLabelItem(transLabel)
+                for (transLabel in transLabels) createLabelItem(transLabel)
             }
         }
 
@@ -95,7 +95,7 @@ class CTreeView: TreeView<String>() {
         throw IllegalArgumentException()
     }
 
-    fun addGroupItem(transGroup: TransGroup) {
+    fun createGroupItem(transGroup: TransGroup) {
         groupColors.add(Color.web(transGroup.colorHex))
 
         when (viewMode) {
@@ -115,7 +115,7 @@ class CTreeView: TreeView<String>() {
             }
         }
     }
-    fun addLabelItem(transLabel: TransLabel) {
+    fun createLabelItem(transLabel: TransLabel) {
         val labelItem = CTreeLabelItem(transLabel.index, transLabel.text)
 
         labelItem.indexProperty.bind(transLabel.indexProperty)
@@ -173,11 +173,11 @@ class CTreeView: TreeView<String>() {
     }
 
     fun moveLabelItem(labelIndex: Int, from: Int, to: Int) {
+        if (viewMode != ViewMode.GroupMode) return
         val labelItem = getLabelItem(labelIndex)
 
         groupItems[from].children.remove(labelItem)
         labelItems[from].remove(labelItem)
-
         groupItems[to].children.add(labelItem)
         labelItems[to].add(labelItem)
     }

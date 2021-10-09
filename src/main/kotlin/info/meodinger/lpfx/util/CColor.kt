@@ -14,7 +14,6 @@ import javafx.scene.paint.Color
  * Custom colors
  */
 val CC_66CFFF = Color.web("66CCFF")
-val CC_RED = Color.RED
 
 
 /**

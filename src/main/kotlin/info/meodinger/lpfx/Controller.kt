@@ -1,24 +1,30 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.component.*
+import info.meodinger.lpfx.component.CGroupBar
+import info.meodinger.lpfx.component.CLabelPane
+import info.meodinger.lpfx.component.CTreeLabelItem
+import info.meodinger.lpfx.component.CTreeView
 import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CFileChooser
-import info.meodinger.lpfx.component.common.CTextSlider
 import info.meodinger.lpfx.component.common.CLigatureArea
+import info.meodinger.lpfx.component.common.CTextSlider
 import info.meodinger.lpfx.component.singleton.AMenuBar
-import info.meodinger.lpfx.io.*
+import info.meodinger.lpfx.io.export
+import info.meodinger.lpfx.io.load
+import info.meodinger.lpfx.io.pack
 import info.meodinger.lpfx.options.*
-import info.meodinger.lpfx.type.*
+import info.meodinger.lpfx.type.TransFile
+import info.meodinger.lpfx.type.TransGroup
+import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.accelerator.isControlDown
+import info.meodinger.lpfx.util.component.expandAll
 import info.meodinger.lpfx.util.dialog.*
+import info.meodinger.lpfx.util.doNothing
 import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.util.component.expandAll
-import info.meodinger.lpfx.util.doNothing
-
 import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.event.EventHandler
@@ -31,7 +37,8 @@ import javafx.scene.input.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
-import java.io.*
+import java.io.File
+import java.io.IOException
 import java.net.URL
 import java.util.*
 
@@ -160,7 +167,8 @@ class Controller : Initializable {
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            if (State.currentGroupId == NOT_FOUND) return@EventHandler
+            //if (State.currentGroupId == NOT_FOUND) return@EventHandler
+            if (State.transFile.groupCount == 0) return@EventHandler
 
             val transLabel = TransLabel(
                 it.labelIndex,
@@ -207,7 +215,8 @@ class Controller : Initializable {
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            if (State.currentGroupId == NOT_FOUND) return@EventHandler
+            //if (State.currentGroupId == NOT_FOUND) return@EventHandler
+            if (State.transFile.groupCount == 0) return@EventHandler
 
             val transGroup = State.transFile.getTransGroup(State.currentGroupId)
 
@@ -281,6 +290,7 @@ class Controller : Initializable {
         }
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.MAIN_DIVIDER] = newValue
+            if (!State.isOpened) cLabelPane.moveToCenter()
         }
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.RIGHT_DIVIDER] = newValue

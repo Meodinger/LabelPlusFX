@@ -5,20 +5,22 @@ import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.RecentFiles
 import info.meodinger.lpfx.options.Settings
-import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.component.disableMnemonicParsingForAll
+import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
-
 import javafx.event.ActionEvent
-import javafx.scene.control.*
+import javafx.scene.control.Menu
+import javafx.scene.control.MenuBar
+import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
 import javafx.stage.FileChooser
-import java.io.*
+import java.io.File
 import java.nio.file.Files
 import java.util.stream.Collectors
 import kotlin.io.path.name
@@ -309,6 +311,6 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun crash() {
-        val a = 1 / 0
+        throw RuntimeException("Crash")
     }
 }

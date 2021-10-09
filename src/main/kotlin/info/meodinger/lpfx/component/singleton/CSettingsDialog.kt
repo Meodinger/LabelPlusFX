@@ -2,10 +2,10 @@ package info.meodinger.lpfx.component.singleton
 
 import info.meodinger.lpfx.State
 import info.meodinger.lpfx.ViewMode
+import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.component.common.CColorPicker
 import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CInputLabel
-import info.meodinger.lpfx.component.CLabel
 import info.meodinger.lpfx.getGroupNameFormatter
 import info.meodinger.lpfx.getPropertyFormatter
 import info.meodinger.lpfx.options.CProperty
@@ -17,10 +17,10 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.component.anchorPaneLeft
 import info.meodinger.lpfx.util.component.anchorPaneTop
 import info.meodinger.lpfx.util.component.invoke
+import info.meodinger.lpfx.util.property.minus
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import info.meodinger.lpfx.util.resource.get
-
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Cursor
@@ -30,7 +30,6 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
-import kotlin.collections.ArrayList
 
 
 /**
@@ -44,12 +43,13 @@ import kotlin.collections.ArrayList
  */
 object CSettingsDialog : AbstractPropertiesDialog() {
 
-    private const val Gap = 16.0
+    private const val GAP = 16.0
 
     private val tabPane = TabPane()
 
     private val groupTab = Tab(I18N["settings.group.title"])
     private val gBorderPane = BorderPane()
+    private val gLabelHint = Label(I18N["settings.group.hint"])
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
     private val gLabelName = Label(I18N["settings.group.name"])
     private val gLabelColor = Label(I18N["settings.group.color"])
@@ -57,12 +57,14 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     private val gButtonAdd = Button(I18N["settings.group.add"])
     private const val gRowShift = 1
 
-    private val ruleTab = Tab("Ligature")
+    private val ruleTab = Tab(I18N["settings.ligature.title"])
     private val rBorderPane = BorderPane()
-    private val rLabelFrom = Label("From")
-    private val rLabelTo = Label("To")
+    private val rLabelHint = Label(I18N["settings.ligature.hint"])
+    private val rLabelFrom = Label(I18N["settings.ligature.from"])
+    private val rLabelTo = Label(I18N["settings.ligature.to"])
     private val rGridPane = GridPane()
-    private val rButtonAdd = Button("Add")
+    private val rLabelSample = Label(I18N["settings.ligature.sample"])
+    private val rButtonAdd = Button(I18N["settings.ligature.add"])
     private const val rRowShift = 1
     private const val rIsFrom = "isFrom"
     private const val rRuleIndex = "ruleIndex"
@@ -87,55 +89,53 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         // ----- Group ----- //
         // initGroupTab()
-        gGridPane.padding = Insets(Gap)
-        gGridPane.vgap = Gap
-        gGridPane.hgap = Gap
+        gGridPane.padding = Insets(GAP)
+        gGridPane.vgap = GAP
+        gGridPane.hgap = GAP
         gGridPane.alignment = Pos.TOP_CENTER
         gButtonAdd.setOnAction { createGroupRow() }
-        gBorderPane.center = ScrollPane(AnchorPane(gGridPane)).also {
-            it.style = "-fx-background-color:transparent;"
-            it.widthProperty().addListener { _, _, newValue ->
-                gGridPane.layoutX = (newValue as Double - gGridPane.width) / 2
-            }
-        }
+        val gStackPane = StackPane(gGridPane)
+        val gScrollPane = ScrollPane(gStackPane)
+        gStackPane.prefWidthProperty().bind(gScrollPane.widthProperty() - GAP)
+        gScrollPane.style = "-fx-background-color:transparent;"
+        gBorderPane.center = gScrollPane
         gBorderPane.bottom = HBox(gButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(Gap, Gap / 2, Gap / 2, 0.0)
+            it.padding = Insets(GAP, GAP / 2, GAP / 2, GAP)
         }
         groupTab.content = gBorderPane
 
         // ----- Ligature Rule ----- //
         // initLigatureTab()
-        rGridPane.padding = Insets(Gap)
-        rGridPane.vgap = Gap
-        rGridPane.hgap = Gap
+        rGridPane.padding = Insets(GAP)
+        rGridPane.vgap = GAP
+        rGridPane.hgap = GAP
         rGridPane.alignment = Pos.TOP_CENTER
         rButtonAdd.setOnAction { createLigatureRow() }
-        rBorderPane.center = ScrollPane(AnchorPane(rGridPane)).also {
-            it.style = "-fx-background-color:transparent;"
-            it.widthProperty().addListener { _, _, newValue ->
-                rGridPane.layoutX = (newValue as Double - rGridPane.width) / 2
-            }
-        }
-        rBorderPane.bottom = HBox(rButtonAdd).also {
+        val rStackPane = StackPane(rGridPane)
+        val rScrollPane = ScrollPane(rStackPane)
+        rStackPane.prefWidthProperty().bind(rScrollPane.widthProperty() - GAP)
+        rScrollPane.style = "-fx-background-color:transparent;"
+        rBorderPane.center = rScrollPane
+        rBorderPane.bottom = HBox(rLabelSample, HBox().also { HBox.setHgrow(it, Priority.ALWAYS) }, rButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(Gap, Gap / 2, Gap / 2, 0.0)
+            it.padding = Insets(GAP, GAP / 2, GAP / 2, GAP)
         }
         ruleTab.content = rBorderPane
 
         // ----- Mode ----- //
         initModeTab()
-        mGridPane.padding = Insets(Gap)
-        mGridPane.vgap = Gap
-        mGridPane.hgap = Gap
+        mGridPane.padding = Insets(GAP)
+        mGridPane.vgap = GAP
+        mGridPane.hgap = GAP
         mGridPane.alignment = Pos.TOP_CENTER
         modeTab.content = mGridPane
 
         // ----- Label ----- //
         initLabelTab()
-        lGridPane.padding = Insets(Gap, Gap, 0.0, Gap)
-        lGridPane.vgap = Gap
-        lGridPane.hgap = Gap
+        lGridPane.padding = Insets(GAP, GAP, 0.0, GAP)
+        lGridPane.vgap = GAP
+        lGridPane.hgap = GAP
         lGridPane.alignment = Pos.CENTER
         labelTab.content = lGridPane
 
@@ -154,16 +154,23 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
     // ----- Group ----- //
     private fun initGroupTab() {
+        gGridPane.children.clear()
+
         val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
         val colorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
         val createList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
 
-        for (i in nameList.indices) createGroupRow(createList[i], nameList[i], colorList[i])
+        if (nameList.isEmpty()) {
+            gGridPane.add(gLabelHint, 0, 0)
+        } else {
+            for (i in nameList.indices) createGroupRow(createList[i], nameList[i], colorList[i])
+        }
     }
     private fun createGroupRow(createOnNew: Boolean = false, name: String = "", color: String = "") {
         val newRowIndex = if (gGridPane.rowCount == 0) 1 else gGridPane.rowCount
 
-        if (gGridPane.rowCount == 0) {
+        if (gGridPane.children.size == 1 || gGridPane.rowCount == 0) { // Only hint
+            gGridPane.children.clear()
             gGridPane.add(gLabelName, 0, 0)
             gGridPane.add(gLabelColor, 1, 0)
             gGridPane.add(gLabelIsCreate, 2, 0)
@@ -183,11 +190,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
-        val button = Button(I18N["common.delete"]).also {
-            it.setOnAction { _ ->
-                removeGroupRow(GridPane.getRowIndex(it))
-            }
-        }
+        val button = Button(I18N["common.delete"])() { removeGroupRow(GridPane.getRowIndex(this)) }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
@@ -211,19 +214,27 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         if (gGridPane.rowCount == gRowShift) {
             gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
+            gGridPane.add(gLabelHint, 0, 0)
         }
     }
 
     // ----- Ligature ----- //
     private fun initLigatureTab() {
+        rGridPane.children.clear()
+
         val ruleList = Settings[Settings.LigatureRules].asPairList()
 
-        for (rule in ruleList) createLigatureRow(rule.first, rule.second)
+        if (ruleList.isEmpty()) {
+            rGridPane.add(rLabelHint, 0, 0)
+        } else {
+            for (rule in ruleList) createLigatureRow(rule.first, rule.second)
+        }
     }
     private fun createLigatureRow(from: String = "", to: String = "") {
         val newRowIndex = if (rGridPane.rowCount == 0) 1 else rGridPane.rowCount
 
-        if (rGridPane.rowCount == 0) {
+        if (rGridPane.children.size == 1 || rGridPane.rowCount == 0) { // Only hint || nothing
+            rGridPane.children.clear()
             rGridPane.add(rLabelFrom, 0, 0)
             rGridPane.add(rLabelTo, 1, 0)
         }
@@ -265,6 +276,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
 
         if (rGridPane.rowCount == rRowShift) {
             rGridPane.children.removeAll(rLabelFrom, rLabelTo)
+            rGridPane.add(rLabelHint, 0, 0)
         }
     }
 
@@ -440,11 +452,9 @@ object CSettingsDialog : AbstractPropertiesDialog() {
     // ----- Initialize Properties ----- //
     override fun initProperties() {
         // Group
-        gGridPane.children.clear()
         initGroupTab()
 
         // Ligature Rule
-        rGridPane.children.clear()
         initLigatureTab()
 
         // Mode

@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.util.component
 
 import javafx.geometry.VPos
+import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -27,6 +28,12 @@ operator fun Text.invoke(color: Color, textAlignment: TextAlignment, textOrigin:
     this.fill = color
     this.textAlignment = textAlignment
     this.textOrigin = textOrigin
+
+    return this
+}
+
+operator fun Button.invoke(onAction: Button.() -> Unit): Button {
+    this.setOnAction { onAction.invoke(this) }
 
     return this
 }

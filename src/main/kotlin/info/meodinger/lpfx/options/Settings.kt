@@ -37,9 +37,9 @@ object Settings : AbstractProperties() {
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
-            "(" to "「", ")" to "」", "（" to "『", "）" to "』",
-            "star" to "⭐","square" to "♢", "heart" to "♡", "music" to "♪",
-            "*" to "※", "cc" to "◎",
+            "(" to "\u300c", ")" to "\u300d", "\uff08" to "\u300e", "\uff09" to "\u300f",
+            "star" to "\u2b50","square" to "\u2662", "heart" to "\u2661", "music" to "\u266a",
+            "*" to "\u203b", "cc" to "\u25ce",
         ),
     )
 

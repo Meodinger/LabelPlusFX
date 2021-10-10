@@ -24,11 +24,11 @@ import javafx.beans.property.SimpleStringProperty
  */
 @JsonIncludeProperties("index", "groupId", "x", "y", "text")
 class TransLabel @JsonCreator constructor(
-    @JsonProperty("index")   index:   Int = 0,
-    @JsonProperty("groupId") groupId: Int = 0,
-    @JsonProperty("x")       x:    Double = 0.0,
-    @JsonProperty("y")       y:    Double = 0.0,
-    @JsonProperty("text")    text: String = ""
+    @JsonProperty("index")   index:   Int    = 0,
+    @JsonProperty("groupId") groupId: Int    = 0,
+    @JsonProperty("x")       x:       Double = 0.0,
+    @JsonProperty("y")       y:       Double = 0.0,
+    @JsonProperty("text")    text:    String = ""
 ) {
 
     companion object {

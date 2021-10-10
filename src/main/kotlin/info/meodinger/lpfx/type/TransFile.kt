@@ -1,14 +1,18 @@
 package info.meodinger.lpfx.type
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.sortByDigit
+import info.meodinger.lpfx.util.property.getValue
+import info.meodinger.lpfx.util.property.setValue
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties
-import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import javafx.beans.property.*
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import javafx.collections.ObservableMap
 
 
 /**
@@ -21,11 +25,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
  * A MEO Translation file
  */
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
-open class TransFile(
-    val version: IntArray = DEFAULT_VERSION,
-    var comment: String = DEFAULT_COMMENT,
-    private val groupList: MutableList<TransGroup> = ArrayList(),
-    private val transMap: MutableMap<String, MutableList<TransLabel>> = HashMap()
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
+open class TransFile @JsonCreator constructor(
+    @JsonProperty("version")   version:   IntArray                                    = DEFAULT_VERSION,
+    @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT,
+    @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
+    @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
 ) {
 
     companion object {
@@ -86,50 +91,61 @@ open class TransFile(
 
     }
 
-    // ----- Accessible Properties ----- //
+    // ----- Properties ----- //
 
-    val groups: List<TransGroup> get() = groupList
-    val groupCount: Int get() = groupList.size
-    val groupNames: List<String> get() = List(groupCount) { groupList[it].name }
-    val groupColors: List<String> get() = List(groupCount) { groupList[it].colorHex }
-    val sortedPicNames: List<String> get() = sortByDigit(transMap.keys.toList())
+    val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
+    val commentProperty: StringProperty = SimpleStringProperty(comment)
+    val groupListProperty: ObservableList<TransGroup> = FXCollections.observableList(groupList)
+    val transMapProperty: ObservableMap<String, MutableList<TransLabel>> = FXCollections.observableMap(transMap)
+
+    // ----- Accessible Fields ----- //
+
+    val version: IntArray by versionProperty
+    var comment: String by commentProperty
+    val groupList: List<TransGroup> by groupListProperty
+    val transMap: Map<String, List<TransLabel>> by transMapProperty
+
+    val groupCount: Int get() = groupListProperty.size
+    val groupNames: List<String> get() = List(groupListProperty.size) { groupListProperty[it].name }
+    val groupColors: List<String> get() = List(groupListProperty.size) { groupListProperty[it].colorHex }
+    val sortedPicNames: List<String> get() = sortByDigit(transMapProperty.keys.toList())
 
     // ----- TransGroup ----- //
 
     fun addTransGroup(transGroup: TransGroup) {
-        for (group in groupList)
+        for (group in groupListProperty)
             if (group.name == transGroup.name)
                 throw TransFileException.transGroupNameRepeated(transGroup.name)
 
-        groupList.add(transGroup)
+        groupListProperty.add(transGroup)
     }
     fun getTransGroup(groupName: String): TransGroup {
-        for (group in groupList) if (group.name == groupName) return group
+        for (group in groupListProperty) if (group.name == groupName) return group
 
         throw TransFileException.transGroupNotFound(groupName)
     }
     fun getTransGroup(groupId: Int): TransGroup {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListProperty.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        return groupList[groupId]
+        return groupListProperty[groupId]
     }
     fun removeTransGroup(groupName: String) {
         var toRemove: TransGroup? = null
-        for (group in groupList) if (group.name == groupName) toRemove = group
+        for (group in groupListProperty) if (group.name == groupName) toRemove = group
 
-        if (toRemove != null) groupList.remove(toRemove)
+        if (toRemove != null) groupListProperty.remove(toRemove)
         else throw TransFileException.transGroupNotFound(groupName)
     }
     fun removeTransGroup(groupId: Int) {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupList.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListProperty.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        groupList.removeAt(groupId)
+        groupListProperty.removeAt(groupId)
     }
 
     fun getGroupIdByName(name: String): Int {
-        groupList.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
+        groupListProperty.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
 
         throw TransFileException.transGroupNotFound(name)
     }
@@ -137,7 +153,7 @@ open class TransFile(
         return isGroupUnused(getGroupIdByName(groupName))
     }
     fun isGroupUnused(groupId: Int): Boolean {
-        for (key in transMap.keys) for (label in getTransList(key)) {
+        for (key in transMapProperty.keys) for (label in getTransList(key)) {
             if (label.groupId == groupId) return false
         }
         return true
@@ -146,13 +162,13 @@ open class TransFile(
     // ----- TransList (TransMap) ----- //
 
     open fun addTransList(picName: String) {
-        transMap[picName] = ArrayList()
+        transMapProperty[picName] = ArrayList()
     }
     open fun getTransList(picName: String): MutableList<TransLabel> {
-        return transMap[picName] ?: throw TransFileException.pictureNotFound(picName)
+        return transMapProperty[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
     open fun removeTransList(picName: String) {
-        if (transMap[picName] != null) transMap.remove(picName)
+        if (transMapProperty[picName] != null) transMapProperty.remove(picName)
         else throw TransFileException.pictureNotFound(picName)
     }
 
@@ -162,7 +178,7 @@ open class TransFile(
         val list = getTransList(picName)
 
         val (index, groupId) = transLabel
-        if (groupId >= groupList.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListProperty.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
         for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
 
         list.add(transLabel)
@@ -195,11 +211,11 @@ open class TransFile(
     fun clone(): TransFile {
         val version = this.version.clone()
         val comment = this.comment
-        val groupList = MutableList(this.groupList.size) { this.groupList[it].clone() }
+        val groupList = MutableList(this.groupListProperty.size) { this.groupListProperty[it].clone() }
         val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also { map ->
             for (key in sortedPicNames)
-                map[key] = MutableList(this.transMap[key]!!.size) {
-                    this.transMap[key]!![it].clone()
+                map[key] = MutableList(this.transMapProperty[key]!!.size) {
+                    this.transMapProperty[key]!![it].clone()
                 }
         }
 

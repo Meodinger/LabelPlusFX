@@ -21,6 +21,7 @@ import info.meodinger.lpfx.util.property.minus
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Cursor

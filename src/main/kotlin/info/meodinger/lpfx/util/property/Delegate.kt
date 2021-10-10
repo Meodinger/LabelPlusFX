@@ -2,7 +2,7 @@ package info.meodinger.lpfx.util.property
 
 import javafx.beans.property.*
 import javafx.beans.value.*
-import javafx.collections.ObservableList
+import javafx.collections.*
 import kotlin.reflect.KProperty
 
 /**
@@ -18,8 +18,8 @@ import kotlin.reflect.KProperty
 operator fun <T> ObservableValue<T>.getValue(thisRef: Any, property: KProperty<*>): T = value
 operator fun <T> Property<T>.setValue(thisRef: Any, property: KProperty<*>, value: T) = setValue(value)
 
-operator fun <T> ObservableListValue<T>.getValue(thisRef: Any, property: KProperty<*>): ObservableList<T> = get()
-operator fun <T> ListProperty<T>.setValue(thisRef: Any, property: KProperty<*>, value: ObservableList<T>) = set(value)
+operator fun <E> ObservableListValue<E>.getValue(thisRef: Any, property: KProperty<*>): ObservableList<E> = get()
+operator fun <E> ListProperty<E>.setValue(thisRef: Any, property: KProperty<*>, value: ObservableList<E>) = set(value)
 
 operator fun ObservableStringValue.getValue(thisRef: Any, property: KProperty<*>): String = get()
 operator fun StringProperty.setValue(thisRef: Any, property: KProperty<*>, value: String) = set(value)
@@ -38,3 +38,7 @@ operator fun FloatProperty.setValue(thisRef: Any, property: KProperty<*>, value:
 
 operator fun ObservableDoubleValue.getValue(thisRef: Any, property: KProperty<*>): Double = get()
 operator fun DoubleProperty.setValue(thisRef: Any, property: KProperty<*>, value: Double) = set(value)
+
+operator fun <E> ObservableSet<E>.getValue(thisRef: Any, property: KProperty<*>): Set<E> = toSet()
+operator fun <E> ObservableList<E>.getValue(thisRef: Any, property: KProperty<*>): List<E> = toList()
+operator fun <K, V> ObservableMap<K, V>.getValue(thisRef: Any, property: KProperty<*>): Map<K, V> = toMap()

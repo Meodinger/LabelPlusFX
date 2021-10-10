@@ -17,14 +17,21 @@ import javafx.scene.text.TextAlignment
 /**
  * Label constructor extension
  */
-operator fun Label.invoke(isWrap: Boolean, textAlignment: TextAlignment): Label {
+operator fun Label.invoke(
+    isWrap: Boolean = false,
+    textAlignment: TextAlignment = TextAlignment.LEFT
+): Label {
     this.isWrapText = isWrap
     this.textAlignment = textAlignment
 
     return this
 }
 
-operator fun Text.invoke(color: Color, textAlignment: TextAlignment, textOrigin: VPos): Text {
+operator fun Text.invoke(
+    color: Color = Color.BLACK,
+    textAlignment: TextAlignment = TextAlignment.LEFT,
+    textOrigin: VPos = VPos.BASELINE
+): Text {
     this.fill = color
     this.textAlignment = textAlignment
     this.textOrigin = textOrigin

@@ -32,7 +32,7 @@ import javafx.scene.shape.Circle
 /**
  * A ContextMenu Singleton for CTreeView
  */
-object CTreeMenu : ContextMenu() {
+object ATreeMenu : ContextMenu() {
 
     private val r_addGroupField = TextField()
     private val r_addGroupPicker = CColorPicker()
@@ -43,23 +43,30 @@ object CTreeMenu : ContextMenu() {
         if (colorList.isEmpty()) colorList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_LIST
 
         val newGroupId = State.transFile.groupCount
-        val newName =
-            if (newGroupId < nameList.size) nameList[newGroupId]
-            else String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
-        val newColorHex = colorList[newGroupId % colorList.size]
+        var newName = String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
+        if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
+            if (!State.transFile.groupNames.contains(nameList[newGroupId])) {
+                newName = nameList[newGroupId]
+            }
+        }
 
         r_addGroupField.text = newName
-        r_addGroupPicker.value = Color.web(newColorHex)
+        r_addGroupPicker.value = Color.web(colorList[newGroupId % colorList.size])
         r_addGroupDialog.result = null
         r_addGroupDialog.showAndWait().ifPresent { newGroup ->
+            if (State.transFile.groupNames.contains(newGroup.name)) {
+                showError(I18N["error.same_group_name"])
+                return@ifPresent
+            }
+
             // Edit data
             State.addTransGroup(newGroup)
             // Update view
             State.controller.renderGroupBox()
-            State.controller.addLabelLayer()
-            State.controller.addGroupBar(newGroup)
-            State.controller.addGroupItem(newGroup)
-            State.controller.updateLabelColorList()
+            State.controller.createLabelLayer()
+            State.controller.createGroupBarItem(newGroup)
+            State.controller.createGroupTreeItem(newGroup)
+            State.controller.updateLabelColorList() // need new data
             // Mark change
             State.isChanged = true
         }
@@ -100,7 +107,8 @@ object CTreeMenu : ContextMenu() {
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
         // Update view
-        State.controller.updateLabelColor(groupId, newColor.toHex())
+        State.controller.updateLabelColor(groupId, newColor.toHex()) // need new data
+        // GroupBar, TreeView update with bind
         // Mark change
         State.isChanged = true
     }
@@ -117,15 +125,15 @@ object CTreeMenu : ContextMenu() {
         // Update view
         State.controller.renderGroupBox()
         State.controller.removeLabelLayer(groupId)
-        State.controller.removeGroupBar(groupName)
-        State.controller.removeGroupItem(groupName)
-        State.controller.updateLabelColorList()
+        State.controller.removeGroupBarItem(groupName)
+        State.controller.removeGroupTreeItem(groupName)
+        State.controller.updateLabelColorList() // need new data
         // Mark change
         State.isChanged = true
     }
     private val g_deleteItem = MenuItem(I18N["context.delete_group"])
 
-    private val l_moveToAction = { items: ObservableList<TreeItem<String>> ->
+    private val l_moveToAction = { items: List<TreeItem<String>> ->
         showChoice(
             State.stage,
             I18N["context.move_to.dialog.title"],
@@ -134,17 +142,23 @@ object CTreeMenu : ContextMenu() {
         ).ifPresent { newGroupName ->
             val newGroupId = State.transFile.getGroupIdByName(newGroupName)
 
-            // Edit data
-            for (item in items) State.setTransLabelGroup(State.currentPicName, (item as CTreeLabelItem).index, newGroupId)
-            // Update view
-            State.controller.renderTreeView()
-            // State.controller.renderLabelPane()
+            for (item in items) {
+                val labelIndex = (item as CTreeLabelItem).index
+                val groupId = State.transFile.getTransLabel(State.currentPicName, labelIndex).groupId
+
+                // Update view
+                State.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId) // need old data
+                // LabelPane will update color with bind
+
+                // Edit data
+                State.setTransLabelGroup(State.currentPicName, labelIndex, newGroupId)
+            }
             // Mark change
             State.isChanged = true
         }
     }
     private val l_moveToItem = MenuItem(I18N["context.move_to"])
-    private val l_deleteAction = { items: ObservableList<TreeItem<String>> ->
+    private val l_deleteAction = { items: List<TreeItem<String>> ->
         val result = showConfirm(
             I18N["context.delete_label.dialog.title"],
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
@@ -152,10 +166,14 @@ object CTreeMenu : ContextMenu() {
         )
 
         if (result.isPresent && result.get() == ButtonType.YES) {
-            // Edit data
             for (item in items) {
                 val labelIndex = (item as CTreeLabelItem).index
 
+                // Update view
+                State.controller.removeLabelTreeItem(labelIndex) // need old data
+                State.controller.removeLabel(labelIndex) // need old data
+
+                // Edit data
                 State.removeTransLabel(State.currentPicName, labelIndex)
                 for (label in State.transFile.getTransList(State.currentPicName)) {
                     if (label.index > labelIndex) {
@@ -163,9 +181,6 @@ object CTreeMenu : ContextMenu() {
                     }
                 }
             }
-            // Update view
-            State.controller.renderTreeView()
-            State.controller.renderLabelPane()
             // Mark change
             State.isChanged = true
         }
@@ -234,8 +249,8 @@ object CTreeMenu : ContextMenu() {
             items.add(g_deleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)
-            l_moveToItem.setOnAction { l_moveToAction(selectedItems) }
-            l_deleteItem.setOnAction { l_deleteAction(selectedItems) }
+            l_moveToItem.setOnAction { l_moveToAction(selectedItems.toList()) }
+            l_deleteItem.setOnAction { l_deleteAction(selectedItems.toList()) }
 
             items.add(l_moveToItem)
             items.add(SeparatorMenuItem())

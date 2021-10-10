@@ -37,7 +37,9 @@ class CComboBox<T> : HBox() {
     val isWrappedProperty = SimpleBooleanProperty(false)
     var isWrapped: Boolean by isWrappedProperty
 
-    val items: ObservableList<T> get() = comboBox.items
+    val itemsProperty: ObjectProperty<ObservableList<T>> = comboBox.itemsProperty()
+    val items: ObservableList<T> by itemsProperty
+
     val selectionModel: SelectionModel<T> get() = comboBox.selectionModel
 
     init {

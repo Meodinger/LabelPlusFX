@@ -178,8 +178,8 @@ class Controller : Initializable {
             // Edit data
             State.addTransLabel(State.currentPicName, transLabel)
             // Update view
-            cLabelPane.createLabel(transLabel)
-            addLabelItem(transLabel)
+            createLabel(transLabel)
+            createLabelTreeItem(transLabel)
             // Mark change
             State.isChanged = true
         }
@@ -194,8 +194,8 @@ class Controller : Initializable {
                 }
             }
             // Update view
-            cLabelPane.removeLabel(it.labelIndex)
-            removeLabelItem(it.labelIndex)
+            removeLabel(it.labelIndex)
+            removeLabelTreeItem(it.labelIndex)
             // Mark change
             State.isChanged = true
         }
@@ -303,7 +303,7 @@ class Controller : Initializable {
      */
     private fun effect() {
         // Update cTreeView & cLabelPane when pic change
-        State.currentPicNameProperty.addListener { _, oldValue, newValue ->
+        State.currentPicNameProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
 
             cPicBox.moveTo(newValue)
@@ -666,7 +666,7 @@ class Controller : Initializable {
         updateLabelColorList()
         renderGroupBox()
         renderGroupBar()
-        updatePicList()
+        renderPictureList()
 
         Logger.info("Opened TransFile", "Controller")
     }
@@ -807,15 +807,28 @@ class Controller : Initializable {
         cGroupBox.reset()
         cTreeView.reset()
         cTransArea.reset()
+
+        labelInfo("Reset")
     }
 
-    // ----- Re-init component ----- //
+    // ----- Update component properties ----- //
     fun updateLigatureRules() {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
     }
+    fun updateLabelColorList() {
+        cLabelPane.colorHexList = FXCollections.observableList(State.transFile.groupColors)
+
+        Logger.info("LabelPane color list updated", "Controller")
+        Logger.debug("List is", State.transFile.groupColors, "Controller")
+    }
+    fun updateLabelColor(groupId: Int, hex: String) {
+        cLabelPane.updateColor(groupId, hex)
+
+        Logger.info("LabelPane color updated @ $groupId -> $hex", "Controller")
+    }
 
     // ----- Picture Display ----- //
-    fun updatePicList() {
+    fun renderPictureList() {
         val pics = State.transFile.sortedPicNames
         cPicBox.setList(pics)
 
@@ -834,7 +847,7 @@ class Controller : Initializable {
     }
     fun renderGroupBar() {
         cGroupBar.reset()
-        cGroupBar.render(State.transFile.groups)
+        cGroupBar.render(State.transFile.groupList)
         cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         Logger.info("Group bar updated", "Controller")
@@ -845,11 +858,15 @@ class Controller : Initializable {
         }, "Controller")
     }
 
-    fun addGroupBar(transGroup: TransGroup) {
-        cGroupBar.addGroup(transGroup)
+    fun createGroupBarItem(transGroup: TransGroup) {
+        cGroupBar.createGroup(transGroup)
+
+        Logger.info("Created CGroup @ $transGroup", "Controller")
     }
-    fun removeGroupBar(targetName: String) {
-        cGroupBar.removeGroup(targetName)
+    fun removeGroupBarItem(groupName: String) {
+        cGroupBar.removeGroup(groupName)
+
+        Logger.info("Removed CGroup @ $groupName", "Controller")
     }
 
     // ----- LabelPane ----- //
@@ -877,25 +894,26 @@ class Controller : Initializable {
         cLabelPane.moveToZero()
         Logger.info("LabelPane updated", "Controller")
     }
-    fun updateLabelColorList() {
-        cLabelPane.colorHexList = FXCollections.observableList(State.transFile.groupColors)
 
-        Logger.info("LabelPane color list updated", "Controller")
-        Logger.debug("List is", State.transFile.groupColors, "Controller")
-    }
-    fun updateLabelColor(groupId: Int, hex: String) {
-        cLabelPane.updateColor(groupId, hex)
-    }
-
-    fun addLabelLayer() {
+    fun createLabelLayer() {
         cLabelPane.createLabelLayer()
 
-        Logger.info("Added label layer", "Controller")
+        Logger.info("Created label layer @ ${State.transFile.groupCount - 1}", "Controller")
     }
     fun removeLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)
 
-        Logger.info("Removed label layer", "Controller")
+        Logger.info("Removed label layer @ $groupId", "Controller")
+    }
+    fun createLabel(transLabel: TransLabel) {
+        cLabelPane.createLabel(transLabel)
+
+        Logger.info("Created label @ $transLabel", "Controller")
+    }
+    fun removeLabel(labelIndex: Int) {
+        cLabelPane.removeLabel(labelIndex)
+
+        Logger.info("Removed label @ $labelIndex", "Controller")
     }
 
     // ----- TreeView ----- //
@@ -903,33 +921,37 @@ class Controller : Initializable {
         cTreeView.render(
             State.viewMode,
             State.currentPicName,
-            State.transFile.groups,
+            State.transFile.groupList,
             State.transFile.getTransList(State.currentPicName)
         )
 
         Logger.info("TreeView updated", "Controller")
     }
 
-    fun addGroupItem(transGroup: TransGroup) {
-        cTreeView.addGroupItem(transGroup)
+    fun createGroupTreeItem(transGroup: TransGroup) {
+        cTreeView.createGroupItem(transGroup)
 
-        Logger.info("Added group item @ $transGroup", "Controller")
+        Logger.info("Created group item @ $transGroup", "Controller")
     }
-    fun removeGroupItem(groupName: String) {
+    fun removeGroupTreeItem(groupName: String) {
         cTreeView.removeGroupItem(groupName)
 
         Logger.info("Removed group item @ $groupName", "Controller")
     }
+    fun createLabelTreeItem(transLabel: TransLabel) {
+        cTreeView.createLabelItem(transLabel)
 
-    fun addLabelItem(transLabel: TransLabel) {
-        cTreeView.addLabelItem(transLabel)
-
-        Logger.info("Added label item @ $transLabel", "Controller")
+        Logger.info("Created label item @ $transLabel", "Controller")
     }
-    fun removeLabelItem(labelIndex: Int) {
+    fun removeLabelTreeItem(labelIndex: Int) {
         cTreeView.removeLabelItem(labelIndex)
 
         Logger.info("Removed label item @ $labelIndex", "Controller")
+    }
+    fun moveLabelTreeItem(labelIndex: Int, from: Int, to: Int) {
+        cTreeView.moveLabelItem(labelIndex, from, to)
+
+        Logger.info("Moved label item @ $labelIndex @ from=$from, to=$to", "Controller")
     }
 
     // ----- Mode ----- //

@@ -17,7 +17,9 @@ import javafx.scene.input.KeyEvent
  */
 fun isControlDown(event: GestureEvent): Boolean {
     if (event.isControlDown) return true
-    return if (isMac) event.isMetaDown else false
+    if (isMac && event.isMetaDown) return true
+
+    return false
 }
 
 /**
@@ -25,7 +27,9 @@ fun isControlDown(event: GestureEvent): Boolean {
  */
 fun isControlDown(event: KeyEvent): Boolean {
     if (event.isControlDown) return true
-    return if (isMac) event.isMetaDown else false
+    if (isMac && event.isMetaDown) return true
+
+    return false
 }
 
 /**
@@ -33,7 +37,9 @@ fun isControlDown(event: KeyEvent): Boolean {
  */
 fun isAltDown(event: GestureEvent): Boolean {
     if (event.isAltDown) return true
-    return if (isMac) event.isMetaDown else false
+    if (isMac && event.isMetaDown) return true
+
+    return false
 }
 
 /**
@@ -41,5 +47,7 @@ fun isAltDown(event: GestureEvent): Boolean {
  */
 fun isAltDown(event: KeyEvent): Boolean {
     if (event.isAltDown) return true
-    return if (isMac) event.isMetaDown else false
+    if (isMac && event.isMetaDown) return true
+
+    return false
 }

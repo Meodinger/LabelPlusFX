@@ -34,7 +34,6 @@ import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
-import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
@@ -138,17 +137,8 @@ class Controller : Initializable {
             lastFilePath = RecentFiles.getLastOpenFile()
         }
 
-        // Warp cPicBox
-        cPicBox.isWrapped = true
-
-        // Warp text
-        cTransArea.isWrapText = true
-
         // Load rules
         updateLigatureRules()
-
-        // lInfo padding
-        lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)
 
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty)
@@ -876,6 +866,16 @@ class Controller : Initializable {
         }, "Controller")
     }
 
+    fun createGroupBoxItem(transGroup: TransGroup) {
+        cGroupBox.createItem(transGroup.name)
+
+        Logger.info("Created GroupBox Item @ $transGroup", "Controller")
+    }
+    fun removeGroupBoxItem(groupName: String) {
+        cGroupBox.removeItem(groupName)
+
+        Logger.info("Removed GroupBox Item @ $groupName", "Controller")
+    }
     fun createGroupBarItem(transGroup: TransGroup) {
         cGroupBar.createGroup(transGroup)
 

@@ -48,13 +48,13 @@ class CFileChooser {
 
     fun showOpenDialog(owner: Window? = null): File? {
         val file = chooser.showOpenDialog(owner)
-        lastDirectory = file.parentFile
+        if (file != null) lastDirectory = file.parentFile
         return file
     }
 
     fun showSaveDialog(owner: Window? = null): File? {
         val file = chooser.showSaveDialog(owner)
-        lastDirectory = file.parentFile
+        if (file != null) lastDirectory = file.parentFile
         return file
     }
 }

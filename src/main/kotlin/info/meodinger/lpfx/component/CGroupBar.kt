@@ -101,8 +101,8 @@ class CGroupBar : HBox() {
             if (tag > groupId) tagCGroupId(cGroup, tag - 1)
         }
 
-        groups.remove(groups[groupId])
         children.remove(groups[groupId])
+        groups.remove(groups[groupId])
         transGroups.removeAt(groupId)
     }
 

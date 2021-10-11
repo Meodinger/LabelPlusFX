@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import info.meodinger.lpfx.component.*?>
@@ -12,7 +13,7 @@
         fx:id="root"
 >
     <center>
-        <SplitPane fx:id="pMain" dividerPositions="0.63">
+        <SplitPane fx:id="pMain" dividerPositions="0.618">
             <BorderPane>
                 <top>
                     <CGroupBar fx:id="cGroupBar"/>
@@ -24,11 +25,11 @@
                     <HBox alignment="CENTER_RIGHT">
                         <CTextSlider fx:id="cSlider" initScale="1.0" scale="1.0" minScale="0.2" maxScale="2.0"/>
                         <HBox alignment="CENTER" HBox.hgrow="ALWAYS"/>
-                        <CComboBox fx:id="cPicBox"/>
+                        <CComboBox fx:id="cPicBox" wrapped="true"/>
                     </HBox>
                 </bottom>
             </BorderPane>
-            <SplitPane fx:id="pRight" dividerPositions="0.6" orientation="VERTICAL">
+            <SplitPane fx:id="pRight" dividerPositions="0.618" orientation="VERTICAL">
                 <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <top>
@@ -46,10 +47,14 @@
                 <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <center>
-                        <CLigatureArea fx:id="cTransArea"/>
+                        <CLigatureArea fx:id="cTransArea" wrapText="true"/>
                     </center>
                     <bottom>
-                        <Label fx:id="lInfo"/>
+                        <Label fx:id="lInfo">
+                            <padding>
+                                <Insets left="8.0" right="8.0" top="4.0" bottom="4.0"/>
+                            </padding>
+                        </Label>
                     </bottom>
                 </BorderPane>
             </SplitPane>

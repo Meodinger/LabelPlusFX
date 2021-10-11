@@ -2,7 +2,7 @@
 
 set DIR=%~dp0..
 rd /S /Q "%DIR%\out\LabelPlusFX"
-rd /S /Q "%DIR%\out\*.zip"
+del /F /Q "%DIR%\out\*.zip"
 
 set OUT="%DIR%\out"
 set MODULES="%DIR%\out\artifacts\lpfx_jar"

@@ -63,6 +63,12 @@ class CComboBox<T> : HBox() {
 
         if (list.isNotEmpty()) comboBox.selectionModel.select(0)
     }
+    fun createItem(item: T) {
+        items.add(item)
+    }
+    fun removeItem(item: T) {
+        items.remove(item)
+    }
 
     fun back() {
         val size = comboBox.items.size
@@ -75,7 +81,6 @@ class CComboBox<T> : HBox() {
             comboBox.value = comboBox.items[newIndex]
         }
     }
-
     fun next() {
         val size = comboBox.items.size
         var newIndex = index + 1
@@ -93,7 +98,6 @@ class CComboBox<T> : HBox() {
         else if (comboBox.items.size == 0 && index == 0) doNothing()
         else throw IllegalArgumentException("index $index invalid")
     }
-
     fun moveTo(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
         else throw IllegalArgumentException("no item $item")

@@ -64,31 +64,31 @@ open class TransFile @JsonCreator constructor(
             )
         }
 
-        // ----- Exception ----- //
+    }
 
-        class TransFileException(message: String) : RuntimeException(message) {
-            companion object {
-                fun pictureNotFound(picName: String) =
-                    TransFileException(String.format(I18N["exception.trans_file.picture_not_found.format.s"], picName))
+    // ----- Exception ----- //
 
-                fun transGroupNameRepeated(groupName: String) =
-                    TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.format.s"], groupName))
-                fun transGroupIdNegative(groupId: Int) =
-                    TransFileException(String.format(I18N["exception.trans_file.group_id_negative.format.i"], groupId))
-                fun transGroupIdOutOfBounds(groupId: Int) =
-                    TransFileException(String.format(I18N["exception.trans_file.group_id_out_of_bounds.format.i"], groupId))
-                fun transGroupNotFound(groupName: String) =
-                    TransFileException(String.format(I18N["exception.trans_file.group_not_found.format.s"], groupName))
+    class TransFileException(message: String) : RuntimeException(message) {
+        companion object {
+            fun pictureNotFound(picName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.picture_not_found.format.s"], picName))
 
-                fun transLabelIndexRepeated(picName: String, index: Int) =
-                    TransFileException(String.format(I18N["exception.trans_file.label_index_repeated.is"], index, picName))
-                fun transLabelGroupIdOutOfBounds(groupId: Int) =
-                    TransFileException(String.format(I18N["exception.trans_file.label_groupId_out_of_bounds.i"], groupId))
-                fun transLabelNotFound(picName: String, index: Int) =
-                    TransFileException(String.format(I18N["exception.trans_file.label_not_found.is"], index, picName))
-            }
+            fun transGroupNameRepeated(groupName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.format.s"], groupName))
+            fun transGroupIdNegative(groupId: Int) =
+                TransFileException(String.format(I18N["exception.trans_file.group_id_negative.format.i"], groupId))
+            fun transGroupIdOutOfBounds(groupId: Int) =
+                TransFileException(String.format(I18N["exception.trans_file.group_id_out_of_bounds.format.i"], groupId))
+            fun transGroupNotFound(groupName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.group_not_found.format.s"], groupName))
+
+            fun transLabelIndexRepeated(picName: String, index: Int) =
+                TransFileException(String.format(I18N["exception.trans_file.label_index_repeated.is"], index, picName))
+            fun transLabelGroupIdOutOfBounds(groupId: Int) =
+                TransFileException(String.format(I18N["exception.trans_file.label_groupId_out_of_bounds.i"], groupId))
+            fun transLabelNotFound(picName: String, index: Int) =
+                TransFileException(String.format(I18N["exception.trans_file.label_not_found.is"], index, picName))
         }
-
     }
 
     // ----- Properties ----- //

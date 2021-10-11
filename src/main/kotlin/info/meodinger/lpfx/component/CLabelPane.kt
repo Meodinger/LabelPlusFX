@@ -4,7 +4,6 @@ import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isControlDown
-import info.meodinger.lpfx.util.color.isColorHex
 import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
@@ -50,6 +49,8 @@ import java.io.IOException
 
 /**
  * A scalable, draggable ScrollPane that can display image, text and labels
+ *
+ * Bind Status: Semi-bind (ColorHexList)
  */
 class CLabelPane : ScrollPane() {
 
@@ -66,6 +67,13 @@ class CLabelPane : ScrollPane() {
         const val TEXT_INSET = 10.0
         const val TEXT_ALPHA = "A0"
         val TEXT_FONT = Font(MonoType, 32.0)
+    }
+
+    // ----- Exception ----- //
+    class LabelPaneException(message: String) : IOException(message) {
+        companion object {
+            fun pictureNotFound(picPath: String) = LabelPaneException("Picture $picPath not found")
+        }
     }
 
     // ----- event ----- //
@@ -133,18 +141,18 @@ class CLabelPane : ScrollPane() {
 
     // ----- properties ----- //
 
-    val initScaleProperty = SimpleDoubleProperty(NOT_SET)
-    val minScaleProperty = SimpleDoubleProperty(NOT_SET)
-    val maxScaleProperty = SimpleDoubleProperty(NOT_SET)
-    val scaleProperty = SimpleDoubleProperty(1.0)
-    val colorHexListProperty = SimpleListProperty(FXCollections.observableArrayList<String>())
-    val defaultCursorProperty = SimpleObjectProperty(Cursor.DEFAULT)
-    val onLabelPlaceProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelRemoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelPointedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelClickedProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelOtherProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelMoveProperty = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val initScaleProperty:      DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    val minScaleProperty:       DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    val maxScaleProperty:       DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    val scaleProperty:          DoubleProperty = SimpleDoubleProperty(1.0)
+    val onLabelPlaceProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelRemoveProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelPointedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelClickedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelOtherProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val onLabelMoveProperty:    ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    val colorHexListProperty:   ListProperty<String>   = SimpleListProperty(FXCollections.observableArrayList())
+    val defaultCursorProperty:  ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
 
     var initScale: Double
         get() = initScaleProperty.value
@@ -182,17 +190,17 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var colorHexList: ObservableList<String> by colorHexListProperty
-    var defaultCursor: Cursor by defaultCursorProperty
-    var onLabelPlace: EventHandler<LabelEvent> by onLabelPlaceProperty
-    var onLabelRemove: EventHandler<LabelEvent> by onLabelRemoveProperty
+    var onLabelPlace:   EventHandler<LabelEvent> by onLabelPlaceProperty
+    var onLabelRemove:  EventHandler<LabelEvent> by onLabelRemoveProperty
     var onLabelPointed: EventHandler<LabelEvent> by onLabelPointedProperty
     var onLabelClicked: EventHandler<LabelEvent> by onLabelClickedProperty
-    var onLabelOther: EventHandler<LabelEvent> by onLabelOtherProperty
-    var onLabelMove: EventHandler<LabelEvent> by onLabelMoveProperty
-    var image: Image by view.imageProperty()
+    var onLabelOther:   EventHandler<LabelEvent> by onLabelOtherProperty
+    var onLabelMove:    EventHandler<LabelEvent> by onLabelMoveProperty
+    var colorHexList:   ObservableList<String>   by colorHexListProperty
+    var defaultCursor:  Cursor                   by defaultCursorProperty
+    var image:          Image                    by view.imageProperty()
 
-    private val imageWidth: Double get() = image.width
+    private val imageWidth:  Double get() = image.width
     private val imageHeight: Double get() = image.height
 
     init {
@@ -292,24 +300,22 @@ class CLabelPane : ScrollPane() {
 
         setupLayers(0)
 
-        for (label in labels) { label.colorProperty.unbind() }
+        for (label in labels) {
+            label.indexProperty.unbind()
+            label.colorProperty.unbind()
+        }
 
         moveToCenter()
         isVisible = true
     }
-    fun clear() {
-        isVisible = false
 
-        vvalue = 0.0
-        hvalue = 0.0
-        root.layoutX = 0.0
-        root.layoutY = 0.0
-
-        image = INIT_IMAGE
-        scale = initScale
-
-        setupLayers(0)
-    }
+    /**
+     * Render CLabels
+     *
+     * @throws LabelPaneException when picture not found
+     * @throws IOException when Image load failed
+     */
+    @Throws(LabelPaneException::class, IOException::class)
     fun render(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
         isVisible = false
 
@@ -318,15 +324,20 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        setupImage(picPath)
-        setupLayers(layerCount)
-        setupLabels(transLabels)
+        if (File(picPath).exists()) {
+            setupImage(picPath)
+            setupLayers(layerCount)
+            setupLabels(transLabels)
 
-        isVisible = true
-    }
+            isVisible = true
+        } else {
+            image = INIT_IMAGE
+            scale = initScale
 
-    fun updateColor(id: Int, hex: String) {
-        if (isColorHex(hex)) colorHexList[id] = hex
+            setupLayers(0)
+
+            throw LabelPaneException.pictureNotFound(picPath)
+        }
     }
 
     private fun getLabel(labelIndex: Int): CLabel {

@@ -1,7 +1,5 @@
 package info.meodinger.lpfx.util
 
-import info.meodinger.lpfx.util.dialog.showException
-
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -16,15 +14,14 @@ import java.util.zip.ZipOutputStream
 /**
  * Zip files easier
  */
-class CZip(zipFile: File) {
+class CZip @Throws(IOException::class) constructor(zipFile: File) {
     private val zip: ZipOutputStream
 
     init {
         zip = try {
             ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile)))
         } catch (e: IOException) {
-            showException(e)
-            throw RuntimeException("Abort")
+            throw IOException("CZip initialization aborted").initCause(e)
         }
     }
 

@@ -66,7 +66,6 @@ object ATreeMenu : ContextMenu() {
             State.controller.createLabelLayer()
             State.controller.createGroupBarItem(newGroup)
             State.controller.createGroupTreeItem(newGroup)
-            State.controller.updateLabelColorList() // need new data
             // Mark change
             State.isChanged = true
         }
@@ -106,9 +105,6 @@ object ATreeMenu : ContextMenu() {
 
         // Edit data
         State.setTransGroupColor(groupId, newColor.toHex())
-        // Update view
-        State.controller.updateLabelColor(groupId, newColor.toHex()) // need new data
-        // GroupBar, TreeView update with bind
         // Mark change
         State.isChanged = true
     }
@@ -127,7 +123,6 @@ object ATreeMenu : ContextMenu() {
         State.controller.removeLabelLayer(groupId)
         State.controller.removeGroupBarItem(groupName)
         State.controller.removeGroupTreeItem(groupName)
-        State.controller.updateLabelColorList() // need new data
         // Mark change
         State.isChanged = true
     }
@@ -148,7 +143,6 @@ object ATreeMenu : ContextMenu() {
 
                 // Update view
                 State.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId) // need old data
-                // LabelPane will update color with bind
 
                 // Edit data
                 State.setTransLabelGroup(State.currentPicName, labelIndex, newGroupId)

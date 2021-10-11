@@ -1,6 +1,6 @@
 package info.meodinger.lpfx.options
 
-import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
+import info.meodinger.lpfx.options.CProperty.CPropertyException
 import info.meodinger.lpfx.util.using
 
 import java.io.IOException

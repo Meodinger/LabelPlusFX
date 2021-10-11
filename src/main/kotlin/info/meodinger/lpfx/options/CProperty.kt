@@ -28,19 +28,24 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
             return builder.deleteTail(LIST_SEPARATOR).toString()
         }
 
-        class CPropertyException(message: String) : RuntimeException(message) {
-            companion object {
-                fun propertyNotFound(key: String) =
-                    CPropertyException(String.format(I18N["exception.property.property_not_found.format.k"], key))
-                fun propertyValueInvalid(key: String, value: Any) =
-                    CPropertyException(String.format(I18N["exception.property.property_value_invalid.format.vk"], value.toString(), key))
-                fun propertyElementInvalid(key: String, element: Any) =
-                    CPropertyException(String.format(I18N["exception.property.property_element_invalid.format.ek"], element.toString(), key))
-                fun propertyListSizeInvalid(key: String, size: Int) =
-                    CPropertyException(String.format(I18N["exception.property.property_list_size_invalid.format.sk"], size, key))
-            }
+    }
+
+    // ----- Exception ----- //
+
+    class CPropertyException(message: String) : RuntimeException(message) {
+        companion object {
+            fun propertyNotFound(key: String) =
+                CPropertyException(String.format(I18N["exception.property.property_not_found.format.k"], key))
+            fun propertyValueInvalid(key: String, value: Any) =
+                CPropertyException(String.format(I18N["exception.property.property_value_invalid.format.vk"], value.toString(), key))
+            fun propertyElementInvalid(key: String, element: Any) =
+                CPropertyException(String.format(I18N["exception.property.property_element_invalid.format.ek"], element.toString(), key))
+            fun propertyListSizeInvalid(key: String, size: Int) =
+                CPropertyException(String.format(I18N["exception.property.property_list_size_invalid.format.sk"], size, key))
         }
     }
+
+    // ----- Constructors ----- //
 
     constructor(key: String, value: Boolean): this(key, value.toString())
     constructor(key: String, value: Number) : this(key, value.toString())

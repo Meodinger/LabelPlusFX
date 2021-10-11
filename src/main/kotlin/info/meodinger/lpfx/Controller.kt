@@ -25,8 +25,12 @@ import info.meodinger.lpfx.util.file.transfer
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.application.Platform
+import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -41,6 +45,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -145,7 +150,7 @@ class Controller : Initializable {
         // lInfo padding
         lInfo.padding = Insets(4.0, 8.0, 4.0, 8.0)
 
-        // Set comp disabled
+        // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty)
         bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty)
         cTransArea.disableProperty().bind(!State.isOpenedProperty)
@@ -167,7 +172,6 @@ class Controller : Initializable {
         // Register handler
         cLabelPane.onLabelPlace = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            //if (State.currentGroupId == NOT_FOUND) return@EventHandler
             if (State.transFile.groupCount == 0) return@EventHandler
 
             val transLabel = TransLabel(
@@ -215,7 +219,6 @@ class Controller : Initializable {
         }
         cLabelPane.onLabelOther = EventHandler {
             if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            //if (State.currentGroupId == NOT_FOUND) return@EventHandler
             if (State.transFile.groupCount == 0) return@EventHandler
 
             val transGroup = State.transFile.getTransGroup(State.currentGroupId)
@@ -235,9 +238,36 @@ class Controller : Initializable {
         // View Mode
         val viewModes = Settings[Settings.ViewModePreference].asStringList()
         State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
-        cTreeView.viewMode = State.viewMode
+        cTreeView.viewModeProperty.bind(State.viewModeProperty)
         bSwitchWorkMode.text = I18N["mode.work.input"]
         bSwitchViewMode.text = State.viewMode.description
+
+        // LabelPane ColorList
+        cLabelPane.colorHexListProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+            private var lastGroupListProperty = State.transFile.groupListProperty
+            private val boundGroupHexProperties = ArrayList<StringProperty>()
+
+            init {
+                bind(State.transFileProperty)
+            }
+
+            override fun computeValue(): ObservableList<String> {
+                unbind(lastGroupListProperty)
+                for (property in boundGroupHexProperties) unbind(property)
+                boundGroupHexProperties.clear()
+
+                bind(State.transFile.groupListProperty)
+                for (group in State.transFile.groupListProperty) {
+                    bind(group.colorHexProperty)
+                    boundGroupHexProperties.add(group.colorHexProperty)
+                }
+
+                return FXCollections.observableList(State.transFile.groupColors)
+            }
+        })
+
+        // TreeView root name
+        cTreeView.picNameProperty.bind(State.currentPicNameProperty)
 
         // Display default image
         cLabelPane.isVisible = false
@@ -371,7 +401,7 @@ class Controller : Initializable {
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
 
-            renderTreeView()
+            // renderTreeView()
 
             labelInfo("Switch view mode to $newMode")
         }
@@ -663,7 +693,6 @@ class Controller : Initializable {
         // Initialize workspace
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        updateLabelColorList()
         renderGroupBox()
         renderGroupBar()
         renderPictureList()
@@ -772,8 +801,8 @@ class Controller : Initializable {
         } catch (e : IOException) {
             Logger.error("Pack failed", "Controller")
             Logger.exception(e)
-            showException(e)
             showError(I18N["error.export_failed"])
+            showException(e)
         }
     }
 
@@ -815,24 +844,13 @@ class Controller : Initializable {
     fun updateLigatureRules() {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
     }
-    fun updateLabelColorList() {
-        cLabelPane.colorHexList = FXCollections.observableList(State.transFile.groupColors)
-
-        Logger.info("LabelPane color list updated", "Controller")
-        Logger.debug("List is", State.transFile.groupColors, "Controller")
-    }
-    fun updateLabelColor(groupId: Int, hex: String) {
-        cLabelPane.updateColor(groupId, hex)
-
-        Logger.info("LabelPane color updated @ $groupId -> $hex", "Controller")
-    }
 
     // ----- Picture Display ----- //
     fun renderPictureList() {
         val pics = State.transFile.sortedPicNames
         cPicBox.setList(pics)
 
-        Logger.info("Picture list updated", "Controller")
+        Logger.info("Picture list rendered", "Controller")
         Logger.debug("List is", pics, "Controller")
     }
 
@@ -842,7 +860,7 @@ class Controller : Initializable {
         cGroupBox.setList(State.transFile.groupNames)
         cGroupBox.moveTo(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
-        Logger.info("Group box updated", "Controller")
+        Logger.info("Group box rendered", "Controller")
         Logger.debug("List is", State.transFile.groupNames, "Controller")
     }
     fun renderGroupBar() {
@@ -850,7 +868,7 @@ class Controller : Initializable {
         cGroupBar.render(State.transFile.groupList)
         cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
-        Logger.info("Group bar updated", "Controller")
+        Logger.info("Group bar rendered", "Controller")
         Logger.debug("List is", lazy {
             List(State.transFile.groupCount) {
                 TransGroup(State.transFile.groupNames[it], State.transFile.groupColors[it])
@@ -871,19 +889,22 @@ class Controller : Initializable {
 
     // ----- LabelPane ----- //
     fun renderLabelPane() {
-        if (!File(State.getPicPathNow()).exists()) {
-            cLabelPane.clear()
-
+        try {
+            cLabelPane.render(
+                State.getPicPathNow(),
+                State.transFile.groupCount,
+                State.transFile.getTransList(State.currentPicName)
+            )
+        } catch (e: CLabelPane.LabelPaneException) {
             Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
             showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName))
             return
+        } catch (e: IOException) {
+            Logger.error("LabelPane update failed", "Controller")
+            Logger.exception(e)
+            showException(e)
+            return
         }
-
-        cLabelPane.render(
-            State.getPicPathNow(),
-            State.transFile.groupCount,
-            State.transFile.getTransList(State.currentPicName)
-        )
 
         when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
             0 -> cLabelPane.scale = 1.0 // 100%
@@ -892,7 +913,7 @@ class Controller : Initializable {
         }
 
         cLabelPane.moveToZero()
-        Logger.info("LabelPane updated", "Controller")
+        Logger.info("LabelPane rendered", "Controller")
     }
 
     fun createLabelLayer() {
@@ -919,13 +940,13 @@ class Controller : Initializable {
     // ----- TreeView ----- //
     fun renderTreeView() {
         cTreeView.render(
-            State.viewMode,
-            State.currentPicName,
-            State.transFile.groupList,
-            State.transFile.getTransList(State.currentPicName)
+            // State.currentPicName,
+            transGroups = State.transFile.groupList,
+            transLabels = State.transFile.getTransList(State.currentPicName),
+            // State.viewMode
         )
 
-        Logger.info("TreeView updated", "Controller")
+        Logger.info("TreeView rendered", "Controller")
     }
 
     fun createGroupTreeItem(transGroup: TransGroup) {

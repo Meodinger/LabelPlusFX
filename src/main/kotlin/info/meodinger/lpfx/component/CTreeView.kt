@@ -5,15 +5,13 @@ import info.meodinger.lpfx.component.singleton.ATreeMenu
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.component.expandAll
+import info.meodinger.lpfx.util.property.CChangeListener
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 import javafx.beans.binding.Bindings
 
-import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import javafx.scene.control.*
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.paint.Color
@@ -29,11 +27,10 @@ import kotlin.collections.ArrayList
 
 /**
  * A TreeView for tree-style label display
+ *
+ * Bind Status: Semi-bind (PicName, ViewMode)
  */
 class CTreeView: TreeView<String>() {
-
-    val groupColorsProperty = SimpleListProperty<Color>(FXCollections.observableArrayList())
-    var groupColors: ObservableList<Color> by groupColorsProperty
 
     val picNameProperty = SimpleStringProperty("")
     var picName: String by picNameProperty
@@ -41,8 +38,11 @@ class CTreeView: TreeView<String>() {
     val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
     var viewMode: ViewMode by viewModeProperty
 
-    private val groupItems = ArrayList<CTreeGroupItem>()
-    private val labelItems = ArrayList<ArrayList<CTreeLabelItem>>()
+    private val transGroups: MutableList<TransGroup> = ArrayList()
+    private val transLabels: MutableList<TransLabel> = ArrayList()
+
+    private val groupItems: MutableList<CTreeGroupItem> = ArrayList()
+    private val labelItems: MutableList<MutableList<CTreeLabelItem>> = ArrayList()
 
     init {
         // Init
@@ -50,38 +50,43 @@ class CTreeView: TreeView<String>() {
         this.contextMenu = ATreeMenu
 
         // Update tree menu when requested
-        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-            ATreeMenu.update(this.selectionModel.selectedItems)
-        }
+        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(this.selectionModel.selectedItems) }
+
+        // ViewMode -> update
+        viewModeProperty.addListener(CChangeListener { update() })
     }
 
     fun reset() {
         this.root = null
-        this.picName = ""
-        this.groupColors = FXCollections.observableArrayList()
-    }
-    fun render(viewMode: ViewMode, picName: String, transGroups: List<TransGroup>, transLabels: List<TransLabel>) {
-        this.viewMode = viewMode
-        this.picName = picName
 
+        if (!this.picNameProperty.isBound) this.picName = ""
+        if (!this.viewModeProperty.isBound) this.viewMode = DEFAULT_VIEW_MODE
+
+        this.transGroups.clear()
+        this.transLabels.clear()
+
+        this.groupItems.clear()
+        this.labelItems.clear()
+    }
+    fun render(picName: String = this.picName, transGroups: List<TransGroup>, transLabels: List<TransLabel>, viewMode: ViewMode = this.viewMode) {
+        reset()
+
+        if (!this.picNameProperty.isBound) this.picName = picName
+        if (!this.viewModeProperty.isBound) this.viewMode = viewMode
+
+        update(transGroups, transLabels)
+    }
+    fun update(transGroups: List<TransGroup> = this.transGroups.toList(), transLabels: List<TransLabel> = this.transLabels.toList()) {
         this.root = TreeItem(picName)
+
+        this.transGroups.clear()
+        this.transLabels.clear()
 
         this.groupItems.clear()
         this.labelItems.clear()
 
-        when (viewMode) {
-            ViewMode.GroupMode -> {
-                for (transGroup in transGroups) createGroupItem(transGroup)
-                for (transLabel in transLabels) createLabelItem(transLabel)
-            }
-            ViewMode.IndexMode -> {
-                for (transGroup in transGroups) {
-                    labelItems.add(ArrayList())
-                    groupColors.add(Color.web(transGroup.colorHex))
-                }
-                for (transLabel in transLabels) createLabelItem(transLabel)
-            }
-        }
+        for (transGroup in transGroups) createGroupItem(transGroup)
+        for (transLabel in transLabels) createLabelItem(transLabel)
 
         this.root.expandAll()
     }
@@ -96,7 +101,8 @@ class CTreeView: TreeView<String>() {
     }
 
     fun createGroupItem(transGroup: TransGroup) {
-        groupColors.add(Color.web(transGroup.colorHex))
+        this.transGroups.add(transGroup)
+        this.labelItems.add(ArrayList())
 
         when (viewMode) {
             ViewMode.IndexMode -> return
@@ -110,12 +116,13 @@ class CTreeView: TreeView<String>() {
                 ))
 
                 root.children.add(groupItem)
-                labelItems.add(ArrayList())
                 groupItems.add(groupItem)
             }
         }
     }
     fun createLabelItem(transLabel: TransLabel) {
+        this.transLabels.add(transLabel)
+
         val labelItem = CTreeLabelItem(transLabel.index, transLabel.text)
 
         labelItem.indexProperty.bind(transLabel.indexProperty)
@@ -123,9 +130,15 @@ class CTreeView: TreeView<String>() {
 
         when (viewMode) {
             ViewMode.IndexMode -> {
-                labelItem.graphic = Circle(GRAPHICS_CIRCLE_RADIUS, groupColors[transLabel.groupId])
+                labelItem.graphic = Circle(
+                    GRAPHICS_CIRCLE_RADIUS,
+                    Color.web(transGroups[transLabel.groupId].colorHex)
+                )
                 labelItem.graphicProperty().bind(Bindings.createObjectBinding(
-                    { Circle(GRAPHICS_CIRCLE_RADIUS, groupColors[transLabel.groupId]) },
+                    { Circle(
+                        GRAPHICS_CIRCLE_RADIUS,
+                        Color.web(transGroups[transLabel.groupId].colorHex)
+                    ) },
                     transLabel.groupIdProperty
                 ))
                 root.children.add(labelItem)
@@ -142,7 +155,7 @@ class CTreeView: TreeView<String>() {
         val groupItem = getGroupItem(groupName)
         val groupId = groupItems.indexOf(groupItem)
 
-        groupColors.removeAt(groupId)
+        transGroups.removeAt(groupId)
 
         when (viewMode) {
             ViewMode.IndexMode -> return
@@ -154,22 +167,24 @@ class CTreeView: TreeView<String>() {
         }
     }
     fun removeLabelItem(labelIndex: Int) {
+        var transLabel: TransLabel? = null
         var labelItem: CTreeLabelItem? = null
         var groupId = NOT_FOUND
 
+        for (label in transLabels) if (label.index == labelIndex) transLabel = label
         for (i in labelItems.indices) for (item in labelItems[i]) if (item.index == labelIndex) {
             labelItem = item
             groupId = i
         }
 
         if (groupId == NOT_FOUND) return
-        if (labelItem == null) return
 
         when (viewMode) {
             ViewMode.IndexMode -> root.children.remove(labelItem)
             ViewMode.GroupMode -> groupItems[groupId].children.remove(labelItem)
         }
         labelItems[groupId].remove(labelItem)
+        transLabels.remove(transLabel)
     }
 
     fun moveLabelItem(labelIndex: Int, from: Int, to: Int) {

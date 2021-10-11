@@ -40,7 +40,7 @@ operator fun Text.invoke(
 }
 
 operator fun Button.invoke(onAction: Button.() -> Unit): Button {
-    this.setOnAction { onAction.invoke(this) }
+    this.setOnAction { onAction(this) }
 
     return this
 }

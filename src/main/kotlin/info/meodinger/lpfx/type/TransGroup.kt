@@ -27,16 +27,20 @@ class TransGroup @JsonCreator constructor(
 ) {
     companion object {
         private var index = 0
+    }
 
-        class TransGroupException(message: String) : RuntimeException(message) {
-            companion object {
-                fun nameInvalid(groupName: String) =
-                    TransGroupException(String.format(I18N["exception.trans_group.name_invalid.format.s"], groupName))
-                fun colorInvalid(color: String) =
-                    TransGroupException(String.format(I18N["exception.trans_group.color_invalid.format.s"], color))
-            }
+    // ----- Exception ----- //
+
+    class TransGroupException(message: String) : RuntimeException(message) {
+        companion object {
+            fun nameInvalid(groupName: String) =
+                TransGroupException(String.format(I18N["exception.trans_group.name_invalid.format.s"], groupName))
+            fun colorInvalid(color: String) =
+                TransGroupException(String.format(I18N["exception.trans_group.color_invalid.format.s"], color))
         }
     }
+
+    // ----- Properties ----- //
 
     val nameProperty = SimpleStringProperty()
     val colorHexProperty = SimpleStringProperty()

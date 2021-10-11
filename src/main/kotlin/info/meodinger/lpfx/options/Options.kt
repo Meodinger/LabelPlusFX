@@ -3,7 +3,7 @@ package info.meodinger.lpfx.options
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
-import info.meodinger.lpfx.options.CProperty.Companion.CPropertyException
+import info.meodinger.lpfx.options.CProperty.CPropertyException
 
 import java.io.IOException
 import java.nio.file.Files
@@ -60,8 +60,8 @@ object Options {
         } catch (e: IOException) {
             Logger.fatal("Options load failed", "Options")
             Logger.exception(e)
-            showException(e)
             showError(I18N["error.initialize_options_failed"])
+            showException(e)
             exitProcess(0)
         }
     }

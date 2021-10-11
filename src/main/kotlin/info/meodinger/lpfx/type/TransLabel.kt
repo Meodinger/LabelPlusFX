@@ -31,20 +31,22 @@ class TransLabel @JsonCreator constructor(
     @JsonProperty("text")    text:    String = ""
 ) {
 
-    companion object {
-        class TransLabelException(message: String) : RuntimeException(message) {
-            companion object {
-                fun indexInvalid(index: Int) =
-                    TransLabelException(String.format(I18N["exception.trans_label.index_invalid.i"], index))
-                fun groupIdInvalid(groupId: Int) =
-                    TransLabelException(String.format(I18N["exception.trans_label.groupId_invalid.i"], groupId))
-                fun xInvalid(x: Double) =
-                    TransLabelException(String.format(I18N["exception.trans_label.x_invalid.d"], x))
-                fun yInvalid(y: Double) =
-                    TransLabelException(String.format(I18N["exception.trans_label.y_invalid.d"], y))
-            }
+    // ----- Exception ----- //
+
+    class TransLabelException(message: String) : RuntimeException(message) {
+        companion object {
+            fun indexInvalid(index: Int) =
+                TransLabelException(String.format(I18N["exception.trans_label.index_invalid.i"], index))
+            fun groupIdInvalid(groupId: Int) =
+                TransLabelException(String.format(I18N["exception.trans_label.groupId_invalid.i"], groupId))
+            fun xInvalid(x: Double) =
+                TransLabelException(String.format(I18N["exception.trans_label.x_invalid.d"], x))
+            fun yInvalid(y: Double) =
+                TransLabelException(String.format(I18N["exception.trans_label.y_invalid.d"], y))
         }
     }
+
+    // ----- Properties ----- //
 
     val indexProperty = SimpleIntegerProperty()
     val groupIdProperty = SimpleIntegerProperty()
@@ -120,5 +122,6 @@ class TransLabel @JsonCreator constructor(
     operator fun component3(): Double = x
     operator fun component4(): Double = y
     operator fun component5(): String = text
+
 }
 

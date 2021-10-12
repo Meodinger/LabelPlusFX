@@ -1,7 +1,7 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
-import info.meodinger.lpfx.component.common.CComboBox
+import info.meodinger.lpfx.component.common.*
 import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.component.common.CLigatureArea
 import info.meodinger.lpfx.component.common.CTextSlider
@@ -19,6 +19,7 @@ import info.meodinger.lpfx.util.component.expandAll
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.doNothing
 import info.meodinger.lpfx.util.file.transfer
+import info.meodinger.lpfx.util.property.onChange
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
@@ -304,6 +305,10 @@ class Controller : Initializable {
             }
         })
 
+        // Default image auto-centre
+        cLabelPane.widthProperty().addListener(onChange { if (!State.isOpened) cLabelPane.moveToCenter() })
+        cLabelPane.heightProperty().addListener(onChange { if (!State.isOpened) cLabelPane.moveToCenter() })
+
         // Display default image
         cLabelPane.isVisible = false
         Platform.runLater {
@@ -318,9 +323,9 @@ class Controller : Initializable {
      */
     private fun listen() {
         // isChanged
-        cTransArea.textProperty().addListener { _, _, _ ->
+        cTransArea.textProperty().addListener(onChange {
             if (cTransArea.isBound) State.isChanged = true
-        }
+        })
 
         // currentPicName
         cPicBox.valueProperty.addListener { _, oldValue, newValue ->
@@ -339,10 +344,10 @@ class Controller : Initializable {
         }
 
         // currentLabelIndex
-        State.currentPicNameProperty.addListener { _ , _, _ ->
+        State.currentPicNameProperty.addListener(onChange {
             // Clear selected when change pic
             State.currentLabelIndex = NOT_FOUND
-        }
+        })
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
             if (newValue != null && newValue is CTreeLabelItem) {
                 State.currentLabelIndex = newValue.index
@@ -355,7 +360,6 @@ class Controller : Initializable {
         }
         pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.MAIN_DIVIDER] = newValue
-            if (!State.isOpened) cLabelPane.moveToCenter()
         }
         pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
             Preference[Preference.RIGHT_DIVIDER] = newValue

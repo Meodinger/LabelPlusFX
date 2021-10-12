@@ -2,6 +2,7 @@ package info.meodinger.lpfx.util.property
 
 import javafx.beans.value.ChangeListener
 
+
 /**
  * Author: Meodinger
  * Date: 2021/10/11
@@ -11,5 +12,4 @@ import javafx.beans.value.ChangeListener
 /**
  * For none-argument use
  */
-
-fun <T> CChangeListener(action: () -> Unit): ChangeListener<T> = ChangeListener { _, _, _ -> action() }
+fun <T> onChange(action: () -> Unit) = ChangeListener<T> { _, _, _ -> action() }

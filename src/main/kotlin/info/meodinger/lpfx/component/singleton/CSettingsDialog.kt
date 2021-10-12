@@ -18,6 +18,7 @@ import info.meodinger.lpfx.util.component.anchorPaneLeft
 import info.meodinger.lpfx.util.component.anchorPaneTop
 import info.meodinger.lpfx.util.component.invoke
 import info.meodinger.lpfx.util.property.minus
+import info.meodinger.lpfx.util.property.onChange
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import info.meodinger.lpfx.util.resource.get
@@ -365,13 +366,12 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         lCLabel.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             lCLabel.cursor = Cursor.HAND
         }
-        lCLabel.radiusProperty.addListener { _, _, _ ->
-
+        lCLabel.radiusProperty.addListener(onChange {
             val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
             val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
             if (lCLabel.anchorPaneLeft > limitX) lCLabel.anchorPaneLeft = limitX
             if (lCLabel.anchorPaneTop > limitY) lCLabel.anchorPaneTop = limitY
-        }
+        })
 
         lLabelPane.children.add(lCLabel)
 

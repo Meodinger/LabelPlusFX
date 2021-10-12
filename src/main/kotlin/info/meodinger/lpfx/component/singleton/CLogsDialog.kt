@@ -11,6 +11,7 @@ import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.util.dialog.showError
 import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.platform.isWin
+import info.meodinger.lpfx.util.property.onChange
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.get
 import info.meodinger.lpfx.util.string.isMathematicalInteger
@@ -107,9 +108,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
         }
 
         tableLog.selectionModel.selectionMode = SelectionMode.SINGLE
-        tableLog.selectionModel.selectedItemProperty().addListener { _, _ , _ ->
-            labelSent.text = ""
-        }
+        tableLog.selectionModel.selectedItemProperty().addListener(onChange { labelSent.text = "" })
         buttonSend.setOnAction {
             val log = tableLog.selectionModel.selectedItem?.file ?: return@setOnAction
 

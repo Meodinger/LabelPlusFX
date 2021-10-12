@@ -137,11 +137,11 @@ object ATreeMenu : ContextMenu() {
                 val labelIndex = (item as CTreeLabelItem).index
                 val groupId = State.transFile.getTransLabel(State.currentPicName, labelIndex).groupId
 
-                // Update view
-                State.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId) // need old data
-
                 // Edit data
                 State.setTransLabelGroup(State.currentPicName, labelIndex, newGroupId)
+
+                // Update view
+                State.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId)
             }
             // Mark change
             State.isChanged = true

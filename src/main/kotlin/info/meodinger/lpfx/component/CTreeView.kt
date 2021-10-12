@@ -5,7 +5,7 @@ import info.meodinger.lpfx.component.singleton.ATreeMenu
 import info.meodinger.lpfx.type.TransGroup
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.component.expandAll
-import info.meodinger.lpfx.util.property.CChangeListener
+import info.meodinger.lpfx.util.property.onChange
 import info.meodinger.lpfx.util.property.setValue
 import info.meodinger.lpfx.util.property.getValue
 import javafx.beans.binding.Bindings
@@ -53,7 +53,7 @@ class CTreeView: TreeView<String>() {
         addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(this.selectionModel.selectedItems) }
 
         // ViewMode -> update
-        viewModeProperty.addListener(CChangeListener { update() })
+        viewModeProperty.addListener(onChange { update() })
     }
 
     fun reset() {

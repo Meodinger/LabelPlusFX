@@ -1,9 +1,6 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.component.CGroupBar
-import info.meodinger.lpfx.component.CLabelPane
-import info.meodinger.lpfx.component.CTreeLabelItem
-import info.meodinger.lpfx.component.CTreeView
+import info.meodinger.lpfx.component.*
 import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.component.common.CLigatureArea
@@ -232,6 +229,55 @@ class Controller : Initializable {
         bSwitchWorkMode.text = I18N["mode.work.input"]
         bSwitchViewMode.text = State.viewMode.description
 
+        // TreeView Root Name
+        cTreeView.picNameProperty.bind(State.currentPicNameProperty)
+
+        // PictureBox Names
+        cPicBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+            private var lastMapProperty = State.transFile.transMapProperty
+
+            init {
+                bind(State.transFileProperty)
+            }
+
+            override fun computeValue(): ObservableList<String> {
+                unbind(lastMapProperty)
+
+                lastMapProperty = State.transFile.transMapProperty
+
+                bind(State.transFile.transMapProperty)
+
+                return FXCollections.observableList(State.transFile.sortedPicNames)
+            }
+
+        })
+
+        // GroupBox Names
+        cGroupBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+            private var lastGroupListProperty = State.transFile.groupListProperty
+            private val boundGroupNameProperties = ArrayList<StringProperty>()
+
+            init {
+                bind(State.transFileProperty)
+            }
+
+            override fun computeValue(): ObservableList<String> {
+                unbind(lastGroupListProperty)
+                for (property in boundGroupNameProperties) unbind(property)
+                boundGroupNameProperties.clear()
+
+                lastGroupListProperty = State.transFile.groupListProperty
+
+                bind(State.transFile.groupListProperty)
+                for (group in State.transFile.groupListProperty) {
+                    bind(group.nameProperty)
+                    boundGroupNameProperties.add(group.nameProperty)
+                }
+
+                return FXCollections.observableArrayList(State.transFile.groupNames)
+            }
+        })
+
         // LabelPane ColorList
         cLabelPane.colorHexListProperty.bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListProperty = State.transFile.groupListProperty
@@ -246,18 +292,17 @@ class Controller : Initializable {
                 for (property in boundGroupHexProperties) unbind(property)
                 boundGroupHexProperties.clear()
 
+                lastGroupListProperty = State.transFile.groupListProperty
+
                 bind(State.transFile.groupListProperty)
                 for (group in State.transFile.groupListProperty) {
                     bind(group.colorHexProperty)
                     boundGroupHexProperties.add(group.colorHexProperty)
                 }
 
-                return FXCollections.observableList(State.transFile.groupColors)
+                return FXCollections.observableArrayList(State.transFile.groupColors)
             }
         })
-
-        // TreeView root name
-        cTreeView.picNameProperty.bind(State.currentPicNameProperty)
 
         // Display default image
         cLabelPane.isVisible = false
@@ -278,19 +323,19 @@ class Controller : Initializable {
         }
 
         // currentPicName
-        cPicBox.valueProperty.addListener { _, _, newValue ->
-            State.currentPicName = newValue ?: ""
+        cPicBox.valueProperty.addListener { _, oldValue, newValue ->
+            State.currentPicName = newValue ?:
+                if (!State.isOpened) ""
+                else if (cPicBox.items.contains(oldValue)) oldValue
+                else cPicBox.items[0]
         }
 
         // currentGroupId
-        cGroupBox.indexProperty.addListener { _, _, newValue ->
-            State.currentGroupId = newValue as Int
-        }
-        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            // Bind selected group with clicked GroupTreeItem
-            if (newValue != null && newValue.parent != null && newValue !is CTreeLabelItem) {
-                State.currentGroupId = State.transFile.getGroupIdByName(newValue.value)
-            }
+        cGroupBox.indexProperty.addListener { _, oldValue, newValue ->
+            State.currentGroupId = if ((newValue as Int) != -1) newValue
+                else if (!State.isOpened) -1
+                else if (cGroupBox.items.size > (oldValue as Int)) oldValue
+                else 0
         }
 
         // currentLabelIndex
@@ -442,6 +487,12 @@ class Controller : Initializable {
      * Some actions will transform to others
      */
     private fun transform() {
+        // CTreeView selectionModal -> select Group
+        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            if (newValue != null && newValue is CTreeGroupItem)
+                cGroupBox.moveTo(State.transFile.getGroupIdByName(newValue.name))
+        }
+
         // Transform tab pressed in CTreeView to ViewModeBtn clicked
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code != KeyCode.TAB) return@addEventHandler
@@ -683,9 +734,10 @@ class Controller : Initializable {
         // Initialize workspace
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        renderGroupBox()
         renderGroupBar()
-        renderPictureList()
+
+        cPicBox.moveTo(0)
+        cGroupBox.moveTo(0)
 
         Logger.info("Opened TransFile", "Controller")
     }
@@ -818,12 +870,11 @@ class Controller : Initializable {
         }
     }
     fun reset() {
-        // cMenuBar
+        // cSlider
+        // cPicBox
+        // cGroupBox
         cGroupBar.reset()
         cLabelPane.reset()
-        // cSlider
-        cPicBox.reset()
-        cGroupBox.reset()
         cTreeView.reset()
         cTransArea.reset()
 
@@ -835,24 +886,7 @@ class Controller : Initializable {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
     }
 
-    // ----- Picture Display ----- //
-    fun renderPictureList() {
-        val pics = State.transFile.sortedPicNames
-        cPicBox.setList(pics)
-
-        Logger.info("Picture list rendered", "Controller")
-        Logger.debug("List is", pics, "Controller")
-    }
-
-    // ----- Group Display ----- //
-    fun renderGroupBox() {
-        cGroupBox.reset()
-        cGroupBox.setList(State.transFile.groupNames)
-        cGroupBox.moveTo(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
-
-        Logger.info("Group box rendered", "Controller")
-        Logger.debug("List is", State.transFile.groupNames, "Controller")
-    }
+    // ----- GroupBar ----- //
     fun renderGroupBar() {
         cGroupBar.reset()
         cGroupBar.render(State.transFile.groupList)
@@ -866,16 +900,6 @@ class Controller : Initializable {
         }, "Controller")
     }
 
-    fun createGroupBoxItem(transGroup: TransGroup) {
-        cGroupBox.createItem(transGroup.name)
-
-        Logger.info("Created GroupBox Item @ $transGroup", "Controller")
-    }
-    fun removeGroupBoxItem(groupName: String) {
-        cGroupBox.removeItem(groupName)
-
-        Logger.info("Removed GroupBox Item @ $groupName", "Controller")
-    }
     fun createGroupBarItem(transGroup: TransGroup) {
         cGroupBar.createGroup(transGroup)
 

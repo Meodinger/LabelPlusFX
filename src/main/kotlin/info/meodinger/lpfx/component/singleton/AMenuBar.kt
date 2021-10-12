@@ -11,6 +11,7 @@ import info.meodinger.lpfx.util.platform.isMac
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
+
 import javafx.event.ActionEvent
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
@@ -258,8 +259,6 @@ object AMenuBar : MenuBar() {
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
             for (picName in toAdd) State.addPicture(picName)
-            // Update view
-            State.controller.renderPictureList()
             // Mark change
             State.isChanged = true
         }

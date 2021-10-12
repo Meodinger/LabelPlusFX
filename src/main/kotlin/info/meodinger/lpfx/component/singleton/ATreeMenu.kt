@@ -63,7 +63,6 @@ object ATreeMenu : ContextMenu() {
             State.addTransGroup(newGroup)
             // Update view
             State.controller.createLabelLayer()
-            State.controller.createGroupBoxItem(newGroup)
             State.controller.createGroupBarItem(newGroup)
             State.controller.createGroupTreeItem(newGroup)
             // Mark change
@@ -90,8 +89,6 @@ object ATreeMenu : ContextMenu() {
 
             // Edit data
             State.setTransGroupName(groupId, newName)
-            // Update view
-            State.controller.renderGroupBox()
             // Mark change
             State.isChanged = true
         }
@@ -120,7 +117,6 @@ object ATreeMenu : ContextMenu() {
         State.removeTransGroup(groupName)
         // Update view
         State.controller.removeLabelLayer(groupId)
-        State.controller.removeGroupBoxItem(groupName)
         State.controller.removeGroupBarItem(groupName)
         State.controller.removeGroupTreeItem(groupName)
         // Mark change

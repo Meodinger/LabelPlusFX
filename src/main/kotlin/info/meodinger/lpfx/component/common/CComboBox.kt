@@ -59,7 +59,7 @@ class CComboBox<T> : HBox() {
     }
 
     fun setList(list: List<T>) {
-        comboBox.items.setAll(list)
+        items.setAll(list)
 
         if (list.isNotEmpty()) comboBox.selectionModel.select(0)
     }
@@ -100,7 +100,7 @@ class CComboBox<T> : HBox() {
     }
     fun moveTo(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
-        else throw IllegalArgumentException("no item $item")
+        else throw IllegalArgumentException("no item `$item`")
     }
 
 }

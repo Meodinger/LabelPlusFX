@@ -295,15 +295,16 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        scale = initScale
-        image = INIT_IMAGE
-
-        setupLayers(0)
-
         for (label in labels) {
             label.indexProperty.unbind()
             label.colorProperty.unbind()
         }
+
+        scale = initScale
+        image = INIT_IMAGE
+
+        setupLayers(0)
+        setupLabels(emptyList())
 
         moveToCenter()
         isVisible = true
@@ -365,9 +366,7 @@ class CLabelPane : ScrollPane() {
     }
     private fun setupLabels(transLabels: List<TransLabel>) {
         labels.clear()
-        for (transLabel in transLabels) {
-            createLabel(transLabel)
-        }
+        for (transLabel in transLabels) createLabel(transLabel)
     }
 
     fun createLabelLayer() {

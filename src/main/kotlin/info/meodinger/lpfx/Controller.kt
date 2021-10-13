@@ -1,7 +1,7 @@
 package info.meodinger.lpfx
 
 import info.meodinger.lpfx.component.*
-import info.meodinger.lpfx.component.common.*
+import info.meodinger.lpfx.component.common.CComboBox
 import info.meodinger.lpfx.component.common.CFileChooser
 import info.meodinger.lpfx.component.common.CLigatureArea
 import info.meodinger.lpfx.component.common.CTextSlider

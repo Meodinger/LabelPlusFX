@@ -17,6 +17,7 @@ import info.meodinger.lpfx.util.color.toHex
 import info.meodinger.lpfx.util.component.anchorPaneLeft
 import info.meodinger.lpfx.util.component.anchorPaneTop
 import info.meodinger.lpfx.util.component.invoke
+import info.meodinger.lpfx.util.component.does
 import info.meodinger.lpfx.util.property.minus
 import info.meodinger.lpfx.util.property.onChange
 import info.meodinger.lpfx.util.resource.I18N
@@ -192,7 +193,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
-        val button = Button(I18N["common.delete"])() { removeGroupRow(GridPane.getRowIndex(this)) }
+        val button = Button(I18N["common.delete"]) does { removeGroupRow(GridPane.getRowIndex(this)) }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
         textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }

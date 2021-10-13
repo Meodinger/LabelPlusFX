@@ -3,8 +3,9 @@ package info.meodinger.lpfx.component
 import info.meodinger.lpfx.NOT_FOUND
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
-import info.meodinger.lpfx.util.accelerator.isControlDown
+import info.meodinger.lpfx.util.accelerator.isAltDown
 import info.meodinger.lpfx.util.color.toHex
+import info.meodinger.lpfx.util.component.withContent
 import info.meodinger.lpfx.util.platform.MonoType
 import info.meodinger.lpfx.util.resource.I18N
 import info.meodinger.lpfx.util.resource.INIT_IMAGE
@@ -211,6 +212,30 @@ class CLabelPane : ScrollPane() {
         view.isPickOnBounds = true
         root.alignment = Pos.CENTER
 
+        addEventFilter(ScrollEvent.SCROLL) {
+            // Remove text when scroll event fired
+            removeText()
+
+            // Horizon scroll
+            if (it.isControlDown) {
+                hvalue -= it.deltaY / 400
+                it.consume()
+            }
+        }
+
+        // Scale
+        scaleProperty.addListener { _, _, newValue ->
+            val newScale = newValue as Double
+            root.scaleX = newScale
+            root.scaleY = newScale
+        }
+        root.addEventFilter(ScrollEvent.SCROLL) {
+            if (isAltDown(it)) {
+                scale += it.deltaY / 400
+                it.consume()
+            }
+        }
+
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
@@ -230,23 +255,6 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = defaultCursor
-        }
-
-        // Scale
-        root.addEventHandler(ScrollEvent.SCROLL) {
-            this.removeText()
-            if (isControlDown(it) || it.isAltDown) {
-                scale += it.deltaY / 400
-            }
-        }
-        scaleProperty.addListener { _, _, newValue ->
-            val newScale = newValue as Double
-            root.scaleX = newScale
-            root.scaleY = newScale
-            container.setPrefSize(
-                container.boundsInParent.maxX.coerceAtLeast(viewportBounds.width),
-                container.boundsInParent.maxY.coerceAtLeast(viewportBounds.height)
-            )
         }
 
         // Cursor
@@ -282,32 +290,27 @@ class CLabelPane : ScrollPane() {
 
         root.children.add(view)
         root.children.add(textLayer)
-        container.children.add(root)
 
-        content = container
+        content = container withContent root
     }
 
     fun reset() {
-        isVisible = false
+        container.isDisable = true
 
         vvalue = 0.0
         hvalue = 0.0
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        for (label in labels) {
-            label.indexProperty.unbind()
-            label.colorProperty.unbind()
-        }
-
         scale = initScale
-        image = INIT_IMAGE
 
+        setupImage(INIT_IMAGE)
         setupLayers(0)
         setupLabels(emptyList())
 
         moveToCenter()
-        isVisible = true
+
+        container.isDisable = false
     }
 
     /**
@@ -318,7 +321,7 @@ class CLabelPane : ScrollPane() {
      */
     @Throws(LabelPaneException::class, IOException::class)
     fun render(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
-        isVisible = false
+        container.isDisable = true
 
         vvalue = 0.0
         hvalue = 0.0
@@ -330,12 +333,15 @@ class CLabelPane : ScrollPane() {
             setupLayers(layerCount)
             setupLabels(transLabels)
 
-            isVisible = true
+            container.isDisable = false
         } else {
-            image = INIT_IMAGE
             scale = initScale
 
+            setupImage(INIT_IMAGE)
             setupLayers(0)
+            setupLabels(emptyList())
+
+            moveToCenter()
 
             throw LabelPaneException.pictureNotFound(picPath)
         }
@@ -352,20 +358,28 @@ class CLabelPane : ScrollPane() {
 
     @Throws(IOException::class)
     private fun setupImage(path: String) {
-        image = Image(File(path).toURI().toURL().toString())
+        setupImage(Image(File(path).toURI().toURL().toString()))
+    }
+    private fun setupImage(image: Image) {
+        this.image = image
     }
     private fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
         labelLayers.clear()
-        removeText()
 
+        removeText()
         textLayer.width = imageWidth
         textLayer.height = imageHeight
 
         for (i in 0 until count) createLabelLayer()
     }
     private fun setupLabels(transLabels: List<TransLabel>) {
+        for (label in labels) {
+            label.indexProperty.unbind()
+            label.colorProperty.unbind()
+        }
         labels.clear()
+
         for (transLabel in transLabels) createLabel(transLabel)
     }
 

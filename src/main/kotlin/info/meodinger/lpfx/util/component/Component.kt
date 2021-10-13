@@ -1,8 +1,10 @@
 package info.meodinger.lpfx.util.component
 
 import javafx.geometry.VPos
+import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
@@ -39,8 +41,14 @@ operator fun Text.invoke(
     return this
 }
 
-operator fun Button.invoke(onAction: Button.() -> Unit): Button {
+infix fun Button.does(onAction: Button.() -> Unit): Button {
     this.setOnAction { onAction(this) }
+
+    return this
+}
+
+infix fun Pane.withContent(content: Node): Pane {
+    this.children.add(content)
 
     return this
 }

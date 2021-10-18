@@ -5,10 +5,9 @@ import info.meodinger.lpfx.type.LPFXTask
 
 import jakarta.mail.*
 import jakarta.mail.internet.*
-import javafx.beans.property.SimpleBooleanProperty
 import java.io.File
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
+
 
 /**
  * Author: Meodinger
@@ -62,35 +61,17 @@ object LogSender {
         Transport.send(message, reportUser, reportAuth)
     })
 
-    private val taskList = ConcurrentLinkedQueue<SendTask>()
-
-    val isAllTaskCompleteProperty = SimpleBooleanProperty(true)
-    var isAllTaskComplete: Boolean
-        get() = isAllTaskCompleteProperty.value
-        private set(value) {
-            isAllTaskCompleteProperty.value = value
-        }
-
     fun sendLog(log: File) {
         val task = SendTask(log)
 
         task.setOnFailed {
             Logger.error("Log sent failed", "LogSender")
             Logger.exception(it)
-
-            taskList.remove(task)
-            isAllTaskComplete = taskList.isEmpty()
         }
 
         task.setOnSucceeded {
             Logger.info("Sent Log ${log.name}", "LogSender")
-
-            taskList.remove(task)
-            isAllTaskComplete = taskList.isEmpty()
         }
-
-        taskList.add(task)
-        isAllTaskComplete = taskList.isEmpty()
 
         task.startInNewThread()
     }

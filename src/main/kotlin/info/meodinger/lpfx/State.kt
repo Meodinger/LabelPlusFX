@@ -8,7 +8,6 @@ import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.property.getValue
 import info.meodinger.lpfx.util.property.setValue
 
-import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -28,7 +27,7 @@ import java.io.File
  */
 object State {
 
-    lateinit var application: Application
+    lateinit var application: LabelPlusFX
     lateinit var controller: Controller
     lateinit var stage: Stage
 

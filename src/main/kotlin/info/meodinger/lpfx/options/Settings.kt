@@ -28,7 +28,7 @@ object Settings : AbstractProperties() {
     const val LigatureRules = "LigatureRules"
 
     override val default = listOf(
-        CProperty(DefaultGroupNameList, "框内", "框外"),
+        CProperty(DefaultGroupNameList, "\u6846\u5185", "\u6846\u5916"),
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ScaleOnNewPicture, 0),

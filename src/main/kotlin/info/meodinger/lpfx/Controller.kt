@@ -19,10 +19,9 @@ import info.meodinger.lpfx.util.component.expandAll
 import info.meodinger.lpfx.util.dialog.*
 import info.meodinger.lpfx.util.doNothing
 import info.meodinger.lpfx.util.file.transfer
+import info.meodinger.lpfx.util.media.playOggList
 import info.meodinger.lpfx.util.property.onChange
-import info.meodinger.lpfx.util.resource.I18N
-import info.meodinger.lpfx.util.resource.INFO
-import info.meodinger.lpfx.util.resource.get
+import info.meodinger.lpfx.util.resource.*
 
 import javafx.application.Platform
 import javafx.beans.binding.ObjectBinding
@@ -41,6 +40,7 @@ import javafx.scene.text.Font
 import java.io.File
 import java.io.IOException
 import java.net.URL
+import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -599,13 +599,6 @@ class Controller : Initializable {
         transform()
     }
 
-    private fun exitApplication() {
-        State.stage.close()
-        Logger.info("App exit", "Application")
-
-        Options.save()
-    }
-
     fun stay(): Boolean {
         // Not open
         if (!State.isOpened) return false
@@ -854,7 +847,7 @@ class Controller : Initializable {
 
     fun exit() {
         if (!State.isChanged) {
-            exitApplication()
+            State.application.stop()
             return
         }
 
@@ -862,10 +855,10 @@ class Controller : Initializable {
             when (it) {
                 ButtonType.YES -> {
                     save(File(State.transPath), FileType.getType(State.transPath), false)
-                    exitApplication()
+                    State.application.stop()
                 }
                 ButtonType.NO -> {
-                    exitApplication()
+                    State.application.stop()
                 }
                 ButtonType.CANCEL -> {
                     return@ifPresent
@@ -874,6 +867,8 @@ class Controller : Initializable {
         }
     }
     fun reset() {
+        taskManager.refresh()
+
         // cSlider
         // cPicBox
         // cGroupBox
@@ -1023,6 +1018,34 @@ class Controller : Initializable {
     // ----- Info ----- //
     fun labelInfo(info: String) {
         lInfo.text = info
+    }
+
+    // ----- EXTRA ----- //
+
+    fun justMonika() {
+        if (State.isOpened) {
+            State.transFile.comment = "I Love You Forever"
+            save(File(State.transPath), FileType.MeoFile, true)
+
+            val monika = Paths.get(State.transPath).parent.resolve("monika.json").toFile()
+            save(monika, FileType.MeoFile, true)
+        }
+
+        val chars = "JUST MONIKA ".toCharArray()
+        var index = 0
+
+        cTransArea.textFormatter = TextFormatter<String> {
+            val end = cTransArea.text.length
+
+            it.setRange(end, end)
+            it.text = chars[(index++) % chars.size].toString()
+            it.anchor = end + 1
+            it.caretPosition = end + 1
+
+            it
+        }
+
+        State.application.addShutdownHook { playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it) }
     }
 
 }

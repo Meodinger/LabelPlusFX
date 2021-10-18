@@ -554,6 +554,11 @@ class CLabelPane : ScrollPane() {
     fun removeLabel(labelIndex: Int) {
         val label = getLabel(labelIndex)
         val groupId = getLabelGroup(label)
+
+        // Unbind
+        label.indexProperty.unbind()
+        label.colorProperty.unbind()
+
         // Remove label in list
         labels.remove(label)
         // Remove label comp

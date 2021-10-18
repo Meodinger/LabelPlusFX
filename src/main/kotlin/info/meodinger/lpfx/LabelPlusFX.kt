@@ -1,8 +1,8 @@
 package info.meodinger.lpfx
 
-import info.meodinger.lpfx.io.LogSender
 import info.meodinger.lpfx.options.Logger
 import info.meodinger.lpfx.options.Options
+import info.meodinger.lpfx.util.Promise
 import info.meodinger.lpfx.util.dialog.initDialogOwner
 import info.meodinger.lpfx.util.dialog.showException
 import info.meodinger.lpfx.util.resource.ICON
@@ -10,6 +10,7 @@ import info.meodinger.lpfx.util.resource.INFO
 import info.meodinger.lpfx.util.resource.get
 
 import javafx.application.Application
+import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
@@ -26,6 +27,9 @@ import javafx.stage.Stage
  * LPFX Application
  */
 class LabelPlusFX: Application() {
+
+    private val shutdownHooks = ArrayList<(() -> Unit) -> Unit>()
+    fun addShutdownHook(onShutdown: (() -> Unit) -> Unit) = shutdownHooks.add(onShutdown)
 
     init {
         Options.load()
@@ -59,6 +63,21 @@ class LabelPlusFX: Application() {
         initDialogOwner(primaryStage)
 
         primaryStage.show()
+
         Logger.info("App start", "Application")
+    }
+
+    override fun stop() {
+        State.stage.close()
+
+        Logger.info("App stop", "Application")
+
+        Options.save()
+
+        Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
+            shutdownHooks[it] { resolve(Unit) }
+        } }).then {
+            Platform.exit()
+        }
     }
 }

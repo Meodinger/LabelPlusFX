@@ -1023,17 +1023,18 @@ class Controller : Initializable {
     // ----- EXTRA ----- //
 
     fun justMonika() {
-        if (State.isOpened) {
+        fun loveYouForever() {
             State.transFile.comment = "I Love You Forever"
             save(File(State.transPath), FileType.MeoFile, true)
 
             val monika = Paths.get(State.transPath).parent.resolve("monika.json").toFile()
             save(monika, FileType.MeoFile, true)
         }
+        if (State.isOpened) loveYouForever()
+        State.isOpenedProperty.addListener { _, _, newValue -> if (newValue) loveYouForever() }
 
-        val chars = "JUST MONIKA ".toCharArray()
         var index = 0
-
+        val chars = "JUST MONIKA ".toCharArray()
         cTransArea.textFormatter = TextFormatter<String> {
             val end = cTransArea.text.length
 

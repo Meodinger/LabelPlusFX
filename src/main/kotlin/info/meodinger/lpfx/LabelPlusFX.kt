@@ -29,14 +29,17 @@ import javafx.stage.Stage
 class LabelPlusFX: Application() {
 
     private val shutdownHooks = ArrayList<(() -> Unit) -> Unit>()
+
+    /**
+     * Add a shutdown hook for LabelPlusFX
+     * Should use the resolve function as callback
+     */
     fun addShutdownHook(onShutdown: (() -> Unit) -> Unit) = shutdownHooks.add(onShutdown)
 
     init {
         Options.load()
 
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
-            Logger.systemError.println(e.stackTraceToString())
-
             Logger.exception(e)
             showException(e)
         }
@@ -76,7 +79,10 @@ class LabelPlusFX: Application() {
 
         Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
             shutdownHooks[it] { resolve(Unit) }
-        } }).then {
+        } }).catch { e: Exception ->
+            Logger.exception(e)
+            e
+        } finally {
             Platform.exit()
         }
     }

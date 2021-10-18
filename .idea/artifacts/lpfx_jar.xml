@@ -16,6 +16,9 @@
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.30" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.5.30" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.30" />
+      <element id="library" level="project" name="Maven: ink.meodinger.soundlibs:jorbis:0.0.17-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: ink.meodinger.soundlibs:tritonus-share:0.3.7-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: ink.meodinger.soundlibs:vorbisspi:1.0.3-SNAPSHOT" />
     </root>
   </artifact>
 </component>

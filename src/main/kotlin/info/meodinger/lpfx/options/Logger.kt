@@ -41,35 +41,21 @@ object Logger {
         }
     }
 
-    private val writer: Writer
+    private lateinit var writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
     val log: File
     var level: LogType = LogType.DEBUG
-    val systemError: PrintStream = System.err
 
     init {
         val path = Options.logs.resolve(Date().time.toString())
         if (Files.notExists(path)) Files.createFile(path)
         log = path.toFile()
-
-        val output = FileOutputStream(log)
-
-        System.setErr(object : PrintStream(output) {
-            override fun print(obj: Any?) {
-                systemError.print(obj)
-                super.print(obj)
-            }
-            override fun println(x: Any?) {
-                // val message = "[${formatter.format(Date())}] $x"
-                systemError.println(x)
-                super.println(x)
-            }
-        })
-        writer = BufferedWriter(OutputStreamWriter(output, StandardCharsets.UTF_8))
     }
 
     fun start() {
+        writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
+
         info("Logger start", "Logger")
     }
 
@@ -80,6 +66,7 @@ object Logger {
     }
 
     private fun log(type: LogType, text: String, from: String? = null) {
+        if (!this::writer.isInitialized) return
         if (type < level) return
 
         val builder = StringBuilder()
@@ -130,7 +117,10 @@ object Logger {
     }
 
     fun exception(e: Throwable) {
-        writer.write(e.stackTraceToString())
+        val str = e.stackTraceToString()
+
+        System.err.println(str)
+        writer.write(str)
         writer.flush()
     }
 }

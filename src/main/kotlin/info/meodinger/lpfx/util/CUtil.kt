@@ -181,7 +181,11 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
 
     init {
         Thread {
-            block(this::resolve, this::reject)
+            try {
+                block(this::resolve, this::reject)
+            } catch (e: Throwable) {
+                reject(e)
+            }
         }.start()
     }
 

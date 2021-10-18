@@ -14,10 +14,22 @@ module lpfx {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
 
+    // This three modules provide ogg SPI
+    requires soundlibs.vorbisspi;
+    requires soundlibs.jorbis;
+    requires soundlibs.tritonus.share;
+
     opens info.meodinger.lpfx to javafx.fxml;
     opens info.meodinger.lpfx.component to javafx.fxml;
     opens info.meodinger.lpfx.component.common to javafx.fxml;
     opens info.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports info.meodinger.lpfx;
+    exports info.meodinger.lpfx.io;
+    exports info.meodinger.lpfx.type;
+    exports info.meodinger.lpfx.util;
+    exports info.meodinger.lpfx.options;
+    exports info.meodinger.lpfx.component;
+    exports info.meodinger.lpfx.component.common;
+    exports info.meodinger.lpfx.component.singleton;
 }

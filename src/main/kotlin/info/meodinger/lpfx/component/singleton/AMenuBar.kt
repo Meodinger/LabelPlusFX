@@ -121,7 +121,7 @@ object AMenuBar : MenuBar() {
 
         mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
-        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout /*, SeparatorMenuItem(), mCrash */)
+        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
         this.menus.addAll(mmFile, mmExport, mmAbout)
     }
 
@@ -310,6 +310,8 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun crash() {
+        State.controller.justMonika()
+
         throw RuntimeException("Crash")
     }
 }

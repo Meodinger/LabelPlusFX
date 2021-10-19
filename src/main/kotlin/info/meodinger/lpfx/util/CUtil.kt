@@ -295,9 +295,9 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
     /**
      * The param function will be invoked when the Promise state changes to `REJECTED`.
      * @param onRejected Accept the rejected exception and return a Promise of exception (new or current if you like)
-     * @return `Promise<V : Throwable>`
+     * @return `Promise<T>`
      */
-    infix fun <U : Throwable, V: Throwable> catch(onRejected: OnRejected<U, V>): Promise<V> {
+    infix fun <U : Throwable, V: Throwable> catch(onRejected: OnRejected<U, V>): Promise<T> {
         return Promise { resolve, reject ->
             @Suppress("UNCHECKED_CAST")
             this.handle(null, resolve as Resolve<Any?>, onRejected as OnRejected<Throwable, Throwable>, reject)

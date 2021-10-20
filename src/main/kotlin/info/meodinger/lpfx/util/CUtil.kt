@@ -133,6 +133,11 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
         fun <U : Throwable> reject(throwable: U) = Promise<U> { _, _reject -> _reject(throwable) }
 
         fun <T> all(promises: List<Promise<T>>) = Promise<List<T>> { _resolve, _reject ->
+            if (promises.isEmpty()) {
+                _resolve(emptyList())
+                return@Promise
+            }
+
             val count = promises.size
             val rets = MutableList<T?>(count) { null }
             var resolved = 0
@@ -151,6 +156,11 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
         }
 
         fun <T> race(promises: List<Promise<T>>) = Promise<List<T>> { _resolve, _reject ->
+            if (promises.isEmpty()) {
+                _resolve(emptyList())
+                return@Promise
+            }
+
             val count = promises.size
             val rets = ArrayList<T>()
             var resolved = 0

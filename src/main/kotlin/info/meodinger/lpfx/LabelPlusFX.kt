@@ -79,7 +79,7 @@ class LabelPlusFX: Application() {
 
         Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
             shutdownHooks[it] { resolve(Unit) }
-        } }).catch { e: Exception ->
+        } }) catch { e: Exception ->
             Logger.exception(e)
             e
         } finally {

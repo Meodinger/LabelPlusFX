@@ -19,6 +19,11 @@ const val WIDTH = 900.0
 const val HEIGHT = 600.0
 
 /**
+ * Scroll Delta Default
+ */
+const val SCROLL_DELTA = 32.0
+
+/**
  * TreeItem Graphic radius
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0

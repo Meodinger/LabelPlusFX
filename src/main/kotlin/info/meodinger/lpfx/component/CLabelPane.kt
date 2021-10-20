@@ -1,6 +1,7 @@
 package info.meodinger.lpfx.component
 
 import info.meodinger.lpfx.NOT_FOUND
+import info.meodinger.lpfx.SCROLL_DELTA
 import info.meodinger.lpfx.options.Settings
 import info.meodinger.lpfx.type.TransLabel
 import info.meodinger.lpfx.util.accelerator.isAltDown
@@ -218,7 +219,7 @@ class CLabelPane : ScrollPane() {
 
             // Horizon scroll
             if (it.isControlDown) {
-                hvalue -= it.deltaY / 400
+                hvalue -= it.deltaY / (10 * SCROLL_DELTA)
                 it.consume()
             }
         }
@@ -231,7 +232,7 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventFilter(ScrollEvent.SCROLL) {
             if (isAltDown(it)) {
-                scale += it.deltaY / 400
+                scale += it.deltaY / (10 * SCROLL_DELTA)
                 it.consume()
             }
         }
@@ -464,6 +465,7 @@ class CLabelPane : ScrollPane() {
                 transLabel.x, transLabel.y,
                 label.layoutX + it.x, label.layoutY + it.y
             ))
+            it.consume()
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked

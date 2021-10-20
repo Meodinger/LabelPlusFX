@@ -196,7 +196,14 @@ class Controller : Initializable {
 
             // Text display
             cLabelPane.removeText()
-            cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+            when (State.workMode) {
+                WorkMode.InputMode -> cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+                WorkMode.LabelMode -> {
+                    val groupId = transLabel.groupId
+                    val transGroup = State.transFile.getTransGroup(groupId)
+                    cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
+                }
+            }
         }
         cLabelPane.onLabelClicked = EventHandler {
             if (State.workMode != WorkMode.InputMode) return@EventHandler
@@ -449,11 +456,11 @@ class Controller : Initializable {
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
             if (!(isControlDown(it) || isAltDown(it))) return@addEventFilter
 
-            val newSize = cTransArea.font.size + it.deltaY / 40
+            val newSize = (cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt()
 
             if (newSize < 12) return@addEventFilter
 
-            cTransArea.font = Font.font("SimSun", newSize) // Song
+            cTransArea.font = Font.font("SimSun", newSize.toDouble()) // song_ti
             cTransArea.positionCaret(0)
             it.consume()
 

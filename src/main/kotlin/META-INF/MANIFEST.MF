@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: info.meodinger.lpfx.LauncherKt
+Main-Class: ink.meodinger.lpfx.LauncherKt

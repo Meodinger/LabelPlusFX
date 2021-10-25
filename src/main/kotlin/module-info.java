@@ -19,17 +19,17 @@ module lpfx {
     requires soundlibs.jorbis;
     requires soundlibs.tritonus.share;
 
-    opens info.meodinger.lpfx to javafx.fxml;
-    opens info.meodinger.lpfx.component to javafx.fxml;
-    opens info.meodinger.lpfx.component.common to javafx.fxml;
-    opens info.meodinger.lpfx.type to com.fasterxml.jackson.databind;
+    opens ink.meodinger.lpfx to javafx.fxml;
+    opens ink.meodinger.lpfx.component to javafx.fxml;
+    opens ink.meodinger.lpfx.component.common to javafx.fxml;
+    opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
-    exports info.meodinger.lpfx;
-    exports info.meodinger.lpfx.io;
-    exports info.meodinger.lpfx.type;
-    exports info.meodinger.lpfx.util;
-    exports info.meodinger.lpfx.options;
-    exports info.meodinger.lpfx.component;
-    exports info.meodinger.lpfx.component.common;
-    exports info.meodinger.lpfx.component.singleton;
+    exports ink.meodinger.lpfx;
+    exports ink.meodinger.lpfx.io;
+    exports ink.meodinger.lpfx.type;
+    exports ink.meodinger.lpfx.util;
+    exports ink.meodinger.lpfx.options;
+    exports ink.meodinger.lpfx.component;
+    exports ink.meodinger.lpfx.component.common;
+    exports ink.meodinger.lpfx.component.singleton;
 }

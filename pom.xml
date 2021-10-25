@@ -5,7 +5,7 @@
 >
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>info.meodinger</groupId>
+    <groupId>ink.meodinger</groupId>
     <artifactId>lpfx</artifactId>
     <version>2.1.0</version>
     <packaging>jar</packaging>

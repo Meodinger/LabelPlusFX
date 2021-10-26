@@ -40,7 +40,7 @@ fun Image.resizeByHeight(height: Double) = this.scale(height / this.height)
  * @param radius Radius that the image radius should scale to
  * @return scaled Image
  */
-fun Image.resizeByRadius(radius: Double) = this.scale((radius * 2) / Math.min(this.height, this.width))
+fun Image.resizeByRadius(radius: Double) = this.scale((radius * 2) / this.height.coerceAtMost(this.width))
 
 /**
  * Resize image

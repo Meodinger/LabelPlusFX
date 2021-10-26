@@ -21,8 +21,8 @@ abstract class AbstractProperties {
 
     companion object {
 
-        const val KV_SPILT = "="
-        const val COMMENT_HEAD = "#"
+        private const val KV_SPILT = "="
+        private const val COMMENT_HEAD = "#"
 
         @Throws(IOException::class, CPropertyException::class)
         fun load(path: Path, instance: AbstractProperties) {

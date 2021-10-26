@@ -235,7 +235,7 @@ class Controller : Initializable {
         State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
         cTreeView.viewModeProperty.bind(State.viewModeProperty)
         bSwitchWorkMode.text = I18N["mode.work.input"]
-        bSwitchViewMode.text = State.viewMode.description
+        bSwitchViewMode.text = State.viewMode.toString()
 
         // TreeView Root Name
         cTreeView.picNameProperty.bind(State.currentPicNameProperty)

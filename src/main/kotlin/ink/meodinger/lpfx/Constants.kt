@@ -80,7 +80,7 @@ val DEFAULT_WORK_MODE = WorkMode.InputMode
  * Label View Mode
  * @param description Display name for ViewMode
  */
-enum class ViewMode(val description: String) {
+enum class ViewMode(private val description: String) {
     IndexMode(I18N["mode.view.index"]),
     GroupMode(I18N["mode.view.group"]);
 
@@ -99,7 +99,7 @@ val DEFAULT_VIEW_MODE = ViewMode.IndexMode
 /**
  * Translation File Type
  */
-enum class FileType(val description: String) {
+enum class FileType(private val description: String) {
     LPFile(I18N["filetype.translation_lp"]),
     MeoFile(I18N["filetype.translation_meo"]);
 

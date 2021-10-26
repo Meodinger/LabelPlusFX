@@ -77,6 +77,8 @@ class LabelPlusFX: Application() {
 
         Options.save()
 
+        if (shutdownHooks.isEmpty()) Platform.exit()
+
         Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
             shutdownHooks[it] { resolve(Unit) }
         } }) catch { e: Exception ->

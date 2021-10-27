@@ -36,18 +36,12 @@ fun playMediaTracks(mediaList: List<Media>, callback: () -> Unit = {}) {
 }
 
 /**
- * Vorbis SPI doesn't work, manually use it
- */
-val oggReader = javazoom.spi.vorbis.sampled.file.VorbisAudioFileReader()
-val oggDecoder = javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider()
-
-/**
  * Play ogg media
  *
  * Play music list please use playOggList
  */
 fun playOgg(mediaStream: InputStream, callback: () -> Unit = {}) {
-    val rawStream = oggReader.getAudioInputStream(mediaStream)
+    val rawStream = AudioSystem.getAudioInputStream(mediaStream)
 
     val ch: Int = rawStream.format.channels
     val rate: Float = rawStream.format.sampleRate
@@ -55,7 +49,7 @@ fun playOgg(mediaStream: InputStream, callback: () -> Unit = {}) {
 
     val clip = AudioSystem.getClip()
     clip.addLineListener { e -> if (e.type == LineEvent.Type.STOP) callback() }
-    clip.open(oggDecoder.getAudioInputStream(outFormat, rawStream))
+    clip.open(AudioSystem.getAudioInputStream(outFormat, rawStream))
     clip.start()
 }
 fun playOgg(mediaURL: URL, callback: () -> Unit = {}) = playOgg(mediaURL.openStream(), callback)
@@ -72,14 +66,14 @@ fun playOggList(mediaStreamList: List<InputStream>, callback: () -> Unit = {}) {
     }
 
     for (i in mediaStreamList.indices) {
-        val raw = oggReader.getAudioInputStream(mediaStreamList[i])
+        val raw = AudioSystem.getAudioInputStream(mediaStreamList[i])
         val ch: Int = raw.format.channels
         val rate: Float = raw.format.sampleRate
         val format = AudioFormat(AudioFormat.Encoding.PCM_SIGNED, rate, 16, ch, ch * 2, rate, false)
 
         val clip = AudioSystem.getClip()
         clip.addLineListener { e -> if (e.type == LineEvent.Type.STOP) play(i + 1) }
-        clip.open(oggDecoder.getAudioInputStream(format, raw))
+        clip.open(AudioSystem.getAudioInputStream(format, raw))
 
         clipList.add(clip)
     }

@@ -20,6 +20,7 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
+import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.*
 
@@ -226,7 +227,7 @@ class Controller : Initializable {
         }
 
         // Preferences
-        cTransArea.font = Font.font("SimSun", Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
+        cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
 
@@ -456,11 +457,11 @@ class Controller : Initializable {
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
             if (!(isControlDown(it) || isAltDown(it))) return@addEventFilter
 
-            val newSize = (cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt()
+            val newSize = ((cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt())
+                .coerceAtLeast(12)
+                .coerceAtMost(64)
 
-            if (newSize < 12) return@addEventFilter
-
-            cTransArea.font = Font.font("SimSun", newSize.toDouble()) // song_ti
+            cTransArea.font = Font.font(TextFont, newSize.toDouble())
             cTransArea.positionCaret(0)
             it.consume()
 

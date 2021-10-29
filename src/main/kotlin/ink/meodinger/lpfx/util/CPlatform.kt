@@ -17,4 +17,5 @@ private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefau
 val isWin = OS.contains("win")
 val isMac = OS.contains("mac")
 
-val MonoType = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
+val MonoFont = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
+val TextFont = if (isWin) "SimSun" else if (isMac) "" else ""

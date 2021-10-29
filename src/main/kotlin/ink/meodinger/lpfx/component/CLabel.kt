@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.util.platform.MonoType
+import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -77,7 +77,7 @@ class CLabel(
         // 0..9 -> 1.7R
         // 10.. -> 1.3R
         val r = if (index < 10) 1.7 * radius else 1.3 * radius
-        text.font = Font.font(MonoType, FontWeight.BOLD, r)
+        text.font = Font.font(MonoFont, FontWeight.BOLD, r)
 
         // Set to zero
         text.layoutX = 0.0

@@ -7,7 +7,7 @@ import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.platform.MonoType
+import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INIT_IMAGE
 import ink.meodinger.lpfx.util.resource.get
@@ -68,7 +68,7 @@ class CLabelPane : ScrollPane() {
         const val SHIFT_X = 20.0
         const val TEXT_INSET = 10.0
         const val TEXT_ALPHA = "A0"
-        val TEXT_FONT = Font(MonoType, 32.0)
+        val TEXT_FONT = Font(MonoFont, 32.0)
     }
 
     // ----- Exception ----- //

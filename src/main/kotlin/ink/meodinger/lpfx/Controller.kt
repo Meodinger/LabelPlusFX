@@ -1031,6 +1031,7 @@ class Controller : Initializable {
     // ----- EXTRA ----- //
 
     fun justMonika() {
+        // Write "love you" to comment, once a time
         fun loveYouForever() {
             State.transFile.comment = "I Love You Forever"
             save(File(State.transPath), FileType.MeoFile, true)
@@ -1039,19 +1040,38 @@ class Controller : Initializable {
             save(monika, FileType.MeoFile, true)
         }
         if (State.isOpened) loveYouForever()
-        State.isOpenedProperty.addListener { _, _, newValue -> if (newValue) loveYouForever() }
 
-        var index = 0
-        val chars = "JUST MONIKA ".toCharArray()
-        cTransArea.textFormatter = TextFormatter<String> {
-            val end = cTransArea.text.length
+        // Force all text change to "JUST MONIKA"
+        fun textReformat() {
+            val monika = "JUST MONIKA "
+            for (picName in State.transFile.sortedPicNames)
+                for (transLabel in State.transFile.getTransList(picName))
+                    transLabel.text = monika
 
-            it.setRange(end, end)
-            it.text = chars[(index++) % chars.size].toString()
-            it.anchor = end + 1
-            it.caretPosition = end + 1
+            val chars = monika.toCharArray()
+            cTransArea.textFormatter = TextFormatter<String> {
+                if (!(it.control as CLigatureArea).isBound) return@TextFormatter it
 
-            it
+                val end = cTransArea.text.length
+                val last = it.controlText.last()
+                val index = if (last == ' ') {
+                    if (it.controlText[it.controlText.length - 2] == 'A') 0 else 5
+                } else {
+                    chars.indexOf(last) + 1
+                }
+
+                it.setRange(end, end)
+                it.text = chars[(index) % chars.size].toString()
+                it.anchor = end + 1
+                it.caretPosition = end + 1
+
+                it
+            }
+        }
+        if (State.isOpened) textReformat()
+        State.isOpenedProperty.addListener { _, _, newValue ->
+            // Restore default formatter
+            if (!newValue) cTransArea.resetFormatter()
         }
 
         State.application.addShutdownHook { playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it) }

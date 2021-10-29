@@ -36,19 +36,19 @@ const val DIALOG_ICON_RADIUS = 32.0
 // Common dialogs
 private val confirmDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-    it.graphic = ImageView(loadAsImage("/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    it.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val infoDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadAsImage("/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    it.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val alertDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-    it.graphic = ImageView(loadAsImage("/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    it.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val errorDialog = Dialog<ButtonType>().also {
     it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadAsImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    it.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
 }
 private val exceptionDialog = Dialog<ButtonType>().also {
     it.isResizable = true
@@ -205,10 +205,10 @@ fun showDialog(owner: Window?, type: Int, title: String, header: String?, conten
     dialog.headerText = header
     dialog.contentText = content
     when (type) {
-        0 -> dialog.graphic = ImageView(loadAsImage("/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        1 -> dialog.graphic = ImageView(loadAsImage("/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        2 -> dialog.graphic = ImageView(loadAsImage("/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        3 -> dialog.graphic = ImageView(loadAsImage("/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        0 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        1 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        2 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
+        3 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
     }
 
     return dialog.showAndWait()

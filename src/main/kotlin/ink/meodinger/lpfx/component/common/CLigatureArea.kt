@@ -45,53 +45,58 @@ class CLigatureArea: TextArea() {
     val boundProperty: StringProperty? get() = boundTextProperty
     val isBound: Boolean get() = boundTextProperty != null
 
-    init {
-        this.textFormatter = TextFormatter<String> { change ->
-            if (change.isAdded) {
-                if (change.text == ligatureMark) {
-                    ligatureStart(this.caretPosition)
-                    return@TextFormatter change
-                }
+    private val defaultTextFormatter = TextFormatter<String> { change ->
+        if (change.isAdded) {
+            if (change.text == ligatureMark) {
+                ligatureStart(this.caretPosition)
+                return@TextFormatter change
+            }
 
-                ligatureString += change.text
+            ligatureString += change.text
 
-                if (ligatureString.length <= ligatureMaxLength) {
-                    if (ligaturing) for (rule in ligatureRules) if (rule.first == ligatureString) {
-                        val ligatureEnd = this.caretPosition
-                        val caretPosition = ligatureStart + rule.second.length
+            if (ligatureString.length <= ligatureMaxLength) {
+                if (ligaturing) for (rule in ligatureRules) if (rule.first == ligatureString) {
+                    val ligatureEnd = this.caretPosition
+                    val caretPosition = ligatureStart + rule.second.length
 
-                        this.text = this.text.replaceRange(ligatureStart, ligatureEnd, rule.second)
+                    this.text = this.text.replaceRange(ligatureStart, ligatureEnd, rule.second)
 
-                        change.text = ""
-                        change.setRange(caretPosition, caretPosition)
-                        change.caretPosition = caretPosition
-                        change.anchor = caretPosition
+                    change.text = ""
+                    change.setRange(caretPosition, caretPosition)
+                    change.caretPosition = caretPosition
+                    change.anchor = caretPosition
 
-                        ligatureEnd()
-                    }
-                } else {
                     ligatureEnd()
-                }
-            } else if (change.isDeleted) {
-                if (ligaturing) {
-                    val end = ligatureString.length - 1 - change.text.length
-
-                    if (end >= 0) {
-                        ligatureString = ligatureString.substring(0, end)
-                    } else {
-                        ligatureEnd()
-                    }
                 }
             } else {
                 ligatureEnd()
             }
+        } else if (change.isDeleted) {
+            if (ligaturing) {
+                val end = ligatureString.length - 1 - change.text.length
 
-            change
+                if (end >= 0) {
+                    ligatureString = ligatureString.substring(0, end)
+                } else {
+                    ligatureEnd()
+                }
+            }
+        } else {
+            ligatureEnd()
         }
+
+        change
+    }
+
+    init {
+        this.textFormatter = defaultTextFormatter
     }
 
     fun reset() {
         unbindBidirectional()
+    }
+    fun resetFormatter() {
+        this.textFormatter = defaultTextFormatter
     }
 
     private fun ligatureStart(startCaret: Int) {

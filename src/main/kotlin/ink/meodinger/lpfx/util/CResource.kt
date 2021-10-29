@@ -46,9 +46,9 @@ fun loadAsImage(imageFileName: String): Image {
     return Image(imgUrl.toString())
 }
 
-val ICON = loadAsImage("/image/icon.png")
-val INIT_IMAGE = loadAsImage("/image/init_image.png")
-val SAMPLE_IMAGE = loadAsImage("/image/sample_320x320.jpg")
+val ICON = loadAsImage("/file/image/icon.png")
+val INIT_IMAGE = loadAsImage("/file/image/init_image.png")
+val SAMPLE_IMAGE = loadAsImage("/file/image/sample_320x320.jpg")
 
 val SCRIPT = loadAsBytes("/file/script/Meo_PS_Script")
 val TEMPLATE_EN = loadAsBytes("/file/script/ps_script_res/en.psd")

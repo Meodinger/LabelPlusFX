@@ -35,9 +35,9 @@ open class TransFile @JsonCreator constructor(
 
     companion object {
 
-        val DEFAULT_VERSION = intArrayOf(1, 0)
-
         const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
+
+        val DEFAULT_VERSION = intArrayOf(1, 0)
         val DEFAULT_COMMENT_LIST = arrayListOf(
             DEFAULT_COMMENT,
             "Default Comment\nYou can edit me",

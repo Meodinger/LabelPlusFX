@@ -39,8 +39,8 @@ object ATreeMenu : ContextMenu() {
     private val r_addGroupDialog = Dialog<TransGroup>()
     private val r_addGroupAction = {
         val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        var colorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
-        if (colorList.isEmpty()) colorList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_LIST
+        var colorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList()
+        if (colorHexList.isEmpty()) colorHexList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
 
         val newGroupId = State.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
@@ -51,7 +51,7 @@ object ATreeMenu : ContextMenu() {
         }
 
         r_addGroupField.text = newName
-        r_addGroupPicker.value = Color.web(colorList[newGroupId % colorList.size])
+        r_addGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
         r_addGroupDialog.result = null
         r_addGroupDialog.showAndWait().ifPresent { newGroup ->
             if (State.transFile.groupNames.contains(newGroup.name)) {

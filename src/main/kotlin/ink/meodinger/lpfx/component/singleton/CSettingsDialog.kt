@@ -184,10 +184,10 @@ object CSettingsDialog : AbstractPropertiesDialog() {
             if (isColorHex(color))
                 color
             else {
-                var defaultColorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
-                if (defaultColorList.isEmpty()) defaultColorList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_LIST
+                var defaultColorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList()
+                if (defaultColorHexList.isEmpty()) defaultColorHexList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
 
-                defaultColorList[groupId % defaultColorList.size]
+                defaultColorHexList[groupId % defaultColorHexList.size]
             }
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }

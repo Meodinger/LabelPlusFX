@@ -47,7 +47,9 @@ const val EXPORT_FILE_NAME_LP = "Translation.txt"
 const val EXPORT_FILE_NAME_MEO = "Translation.json"
 const val EXPORT_PACK_NAME = "Package.zip"
 
-// Auto-save
+/**
+ * Auto-save
+ */
 const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
 const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
 

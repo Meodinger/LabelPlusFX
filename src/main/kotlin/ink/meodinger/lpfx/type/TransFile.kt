@@ -57,7 +57,7 @@ open class TransFile @JsonCreator constructor(
             const val SPLIT = ","
             const val SEPARATOR = "-"
 
-            val DEFAULT_COLOR_LIST = listOf(
+            val DEFAULT_COLOR_HEX_LIST = listOf(
                 "FF0000", "0000FF", "008000",
                 "1E90FF", "FFD700", "FF00FF",
                 "A0522D", "FF4500", "9400D3"

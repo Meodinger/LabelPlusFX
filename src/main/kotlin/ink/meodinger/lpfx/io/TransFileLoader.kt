@@ -146,7 +146,7 @@ private fun loadLP(file: File): TransFile {
     while (lines[pointer] != LPTransFile.SEPARATOR && groupCount < 10) {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.loader.empty_group_name"])
 
-        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_LIST[groupCount - 1])
+        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupCount - 1])
 
         groupList.forEach {
             if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.format.s"], group.name))

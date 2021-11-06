@@ -283,9 +283,9 @@ class CLabelPane : ScrollPane() {
                 if (!it.isStillSincePress) return@addEventHandler
 
                 // Make sure all labels will not be placed partial outside
-                val radius = Settings[Settings.LabelRadius].asDouble()
-                if (it.x <= radius || it.x + radius >= imageWidth) return@addEventHandler
-                if (it.y <= radius || it.y + radius >= imageHeight) return@addEventHandler
+                val pickRadius = Settings[Settings.LabelRadius].asDouble().coerceAtLeast(CLabel.MIN_PICK_RADIUS)
+                if (it.x <= pickRadius || it.x + pickRadius >= imageWidth) return@addEventHandler
+                if (it.y <= pickRadius || it.y + pickRadius >= imageHeight) return@addEventHandler
 
                 onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE,
                     it, labels.size + 1,

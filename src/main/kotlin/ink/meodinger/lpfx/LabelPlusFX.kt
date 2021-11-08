@@ -2,15 +2,12 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
-import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.dialog.initDialogOwner
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
-import javafx.application.Application
-import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
@@ -26,15 +23,7 @@ import javafx.stage.Stage
 /**
  * LPFX Application
  */
-class LabelPlusFX: Application() {
-
-    private val shutdownHooks = ArrayList<(() -> Unit) -> Unit>()
-
-    /**
-     * Add a shutdown hook for LabelPlusFX
-     * Should use the resolve function as callback
-     */
-    fun addShutdownHook(onShutdown: (() -> Unit) -> Unit) = shutdownHooks.add(onShutdown)
+class LabelPlusFX: HookedApplication() {
 
     init {
         Options.load()
@@ -77,14 +66,6 @@ class LabelPlusFX: Application() {
 
         Options.save()
 
-        if (shutdownHooks.isEmpty()) Platform.exit()
-        else Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
-            shutdownHooks[it] { resolve(Unit) }
-        } }) catch { e: Exception ->
-            Logger.exception(e)
-            e
-        } finally {
-            Platform.exit()
-        }
+        super.stop()
     }
 }

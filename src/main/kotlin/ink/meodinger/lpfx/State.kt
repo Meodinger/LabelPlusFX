@@ -27,7 +27,7 @@ import java.io.File
  */
 object State {
 
-    lateinit var application: LabelPlusFX
+    lateinit var application: HookedApplication
     lateinit var controller: Controller
     lateinit var stage: Stage
 

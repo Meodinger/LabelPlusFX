@@ -1,8 +1,12 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
+import javafx.application.Application
+import javafx.application.Platform
 import javafx.scene.control.TextFormatter
 
 
@@ -11,6 +15,36 @@ import javafx.scene.control.TextFormatter
  * Date: 2021/8/1
  * Location: ink.meodinger.lpfx
  */
+
+/**
+ * Hooked Application
+ */
+abstract class HookedApplication : Application() {
+    private val shutdownHooks = ArrayList<(() -> Unit) -> Unit>()
+
+    /**
+     * Clear all shutdown hooks
+     */
+    fun clearShutdownHooks() = shutdownHooks.clear()
+
+    /**
+     * Add a shutdown hook for Application
+     * Should use the resolve function as callback
+     */
+    fun addShutdownHook(onShutdown: (() -> Unit) -> Unit) = shutdownHooks.add(onShutdown)
+
+    override fun stop() {
+        if (shutdownHooks.isEmpty()) Platform.exit()
+        else Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
+            shutdownHooks[it] { resolve(Unit) }
+        } }) catch { e: Exception ->
+            Logger.exception(e)
+            e
+        } finally {
+            Platform.exit()
+        }
+    }
+}
 
 /**
  * Stage size

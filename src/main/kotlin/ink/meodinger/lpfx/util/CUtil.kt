@@ -114,9 +114,9 @@ class Catcher(manager: ResourceManager) {
 fun doNothing() {}
 
 typealias Resolve<T>       = (T) -> Unit // T    : Any?
-typealias OnResolved<T, R> = ((T) -> R)  // T, R : Any?
+typealias OnResolved<T, R> = (T) -> R    // T, R : Any?
 typealias Reject<U>        = (U) -> Unit // U    : Throwable
-typealias OnRejected<U, V> = ((U) -> V)  // U, V : Throwable
+typealias OnRejected<U, V> = (U) -> V    // U, V : Throwable
 
 /**
  * Promise
@@ -125,11 +125,11 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
 
     companion object {
         fun <T> resolve(promise: Promise<T>): Promise<T> = promise
-        fun <T, R> resolve(then: (Resolve<T>) -> R) = Promise<T> { _resolve, _ -> then(_resolve) }
+        fun <T> resolve(then: (Resolve<T>) -> Unit) = Promise<T> { _resolve, _ -> then(_resolve) }
         fun <T> resolve(value: T): Promise<T> = Promise { _resolve, _ -> _resolve(value) }
         fun resolve() : Promise<Unit> = Promise { _resolve, _ -> _resolve(Unit) }
 
-        fun <U : Throwable, V : Throwable> reject(catch: (Reject<U>) -> V) = Promise<V> { _, _reject -> catch(_reject) }
+        fun <U : Throwable> reject(catch: (Reject<U>) -> Unit) = Promise<U> { _, _reject -> catch(_reject) }
         fun <U : Throwable> reject(throwable: U) = Promise<U> { _, _reject -> _reject(throwable) }
 
         fun <T> all(promises: List<Promise<T>>) = Promise<List<T>> { _resolve, _reject ->
@@ -279,8 +279,11 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
     }
 
     /**
+     * NOTE: Didn't use overload because java will eraser the type info while compiling.
+     *
      * The param function will be invoked when the Promise state changes to `RESOLVED`.
-     * @param onResolved Accept a `Promise<R>` whose resolved value or rejected exception will be passed to the returned new `Promise<R>`
+     * @param onResolved Accept the resolved value and return a Promise whose resolved value
+     *                   or rejected exception will be passed to the returned new `Promise<R>`
      * @return `Promise<R>`
      */
     infix fun <R> thenPromise(onResolved: OnResolved<T, Promise<R>>): Promise<R> {

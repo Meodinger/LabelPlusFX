@@ -66,6 +66,6 @@ class LabelPlusFX: HookedApplication() {
 
         Options.save()
 
-        super.stop()
+        runShutdownHooksAndExit()
     }
 }

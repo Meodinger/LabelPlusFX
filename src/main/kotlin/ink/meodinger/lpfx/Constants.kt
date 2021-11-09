@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -8,6 +7,9 @@ import ink.meodinger.lpfx.util.resource.get
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.scene.control.TextFormatter
+import java.util.*
+import kotlin.collections.LinkedHashMap
+import kotlin.system.exitProcess
 
 
 /**
@@ -20,7 +22,7 @@ import javafx.scene.control.TextFormatter
  * Hooked Application
  */
 abstract class HookedApplication : Application() {
-    private val shutdownHooks = ArrayList<(() -> Unit) -> Unit>()
+    private val shutdownHooks = LinkedHashMap<String, (() -> Unit) -> Unit>()
 
     /**
      * Clear all shutdown hooks
@@ -28,21 +30,39 @@ abstract class HookedApplication : Application() {
     fun clearShutdownHooks() = shutdownHooks.clear()
 
     /**
-     * Add a shutdown hook for Application
+     * Add a shutdown hook
      * Should use the resolve function as callback
      */
-    fun addShutdownHook(onShutdown: (() -> Unit) -> Unit) = shutdownHooks.add(onShutdown)
+    fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) = shutdownHooks.put(key, onShutdown)
+
+    /**
+     * Remove a shutdown hook
+     */
+    fun removeShutdownHook(key: String) = shutdownHooks.remove(key)
+
+    /**
+     * MUST run this before exit or hooks will not be executed
+     */
+    protected fun runShutdownHooksAndExit() {
+
+        if (shutdownHooks.isEmpty()) Platform.exit()
+        else {
+            val values = shutdownHooks.values.toList()
+            val promise = Promise.all(List(shutdownHooks.size) {
+                Promise<Unit> { resolve, _ -> values[it] { resolve(Unit) } }
+            })
+
+            promise.finally { Platform.exit() }
+
+            // In case of something unexpected happened and the app cannot be shutdown
+            Timer().schedule(object : TimerTask() {
+                override fun run() { exitProcess(0) }
+            }, 1000L * 60 * 5)
+        }
+    }
 
     override fun stop() {
-        if (shutdownHooks.isEmpty()) Platform.exit()
-        else Promise.all(List(shutdownHooks.size) { Promise<Unit> { resolve, _ ->
-            shutdownHooks[it] { resolve(Unit) }
-        } }) catch { e: Exception ->
-            Logger.exception(e)
-            e
-        } finally {
-            Platform.exit()
-        }
+        runShutdownHooksAndExit()
     }
 }
 

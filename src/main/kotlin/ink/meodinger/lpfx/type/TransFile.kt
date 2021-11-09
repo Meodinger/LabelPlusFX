@@ -212,10 +212,10 @@ open class TransFile @JsonCreator constructor(
         val version = this.version.clone()
         val comment = this.comment
         val groupList = MutableList(this.groupListProperty.size) { this.groupListProperty[it].clone() }
-        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also { map ->
+        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also {
             for (key in sortedPicNames)
-                map[key] = MutableList(this.transMapProperty[key]!!.size) {
-                    this.transMapProperty[key]!![it].clone()
+                it[key] = MutableList(this.transMapProperty[key]!!.size) { index ->
+                    this.transMapProperty[key]!![index].clone()
                 }
         }
 

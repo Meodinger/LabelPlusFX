@@ -1074,7 +1074,9 @@ class Controller : Initializable {
             if (!newValue) cTransArea.resetFormatter()
         }
 
-        State.application.addShutdownHook { playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it) }
+        State.application.addShutdownHook("JustMonika") {
+            playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it)
+        }
     }
 
 }

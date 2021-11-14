@@ -195,8 +195,8 @@ fun catchTest() {
 }
 
 fun finallyTest() {
-    println("Catch tests:")
-    val p0 = Promise<Int> { re, _ -> Thread.sleep(5000); re(1) }
+    println("Finally tests:")
+    val p0 = Promise<Int> { re, _ -> Thread.sleep(1000); re(1) }
     p0 finally {
         println("--finally")
     }

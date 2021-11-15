@@ -113,7 +113,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
             val log = tableLog.selectionModel.selectedItem?.file ?: return@setOnAction
 
             LogSender.sendLog(log)
-            labelSent.text = "Sent ${log.name}"
+            labelSent.text = "${I18N["logs.sent"]} ${log.name}"
         }
         buttonClean.setOnAction {
             val toRemove = ArrayList<FileModel>()

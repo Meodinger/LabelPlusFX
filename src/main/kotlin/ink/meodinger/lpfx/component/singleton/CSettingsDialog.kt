@@ -252,11 +252,7 @@ object CSettingsDialog : AbstractPropertiesDialog() {
             it.properties[rRuleIndex] = newRowIndex - rRowShift
             it.properties[rIsFrom] = false
         }
-        val button = Button(I18N["common.delete"]).also {
-            it.setOnAction { _ ->
-                removeLigatureRow(GridPane.getRowIndex(it))
-            }
-        }
+        val button = Button(I18N["common.delete"]) does { removeLigatureRow(GridPane.getRowIndex(this)) }
 
         //   0         1         2
         // 0 From      To

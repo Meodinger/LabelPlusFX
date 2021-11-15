@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.io.LogSender
+import ink.meodinger.lpfx.util.component.does
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -171,7 +172,10 @@ fun showException(e: Throwable): Optional<ButtonType> {
         Label(omitWideText(e.message ?: e.javaClass.name, 400.0)),
         HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
         sentLabel,
-        Button(I18N["logs.button.send"]).also { it.setOnAction { LogSender.sendLog(Logger.log); sentLabel.text = "Sent" } }
+        Button(I18N["logs.button.send"]) does {
+            LogSender.sendLog(Logger.log)
+            sentLabel.text = I18N["logs.sent"]
+        }
     ).also {
         it.alignment = Pos.CENTER_LEFT
     }

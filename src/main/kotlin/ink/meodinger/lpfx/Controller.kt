@@ -243,18 +243,18 @@ class Controller : Initializable {
 
         // PictureBox Names
         cPicBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
-            private var lastMapProperty = State.transFile.transMapProperty
+            private var lastMapObservable = State.transFile.transMapObservable
 
             init {
                 bind(State.transFileProperty)
             }
 
             override fun computeValue(): ObservableList<String> {
-                unbind(lastMapProperty)
+                unbind(lastMapObservable)
 
-                lastMapProperty = State.transFile.transMapProperty
+                lastMapObservable = State.transFile.transMapObservable
 
-                bind(State.transFile.transMapProperty)
+                bind(State.transFile.transMapObservable)
 
                 return FXCollections.observableList(State.transFile.sortedPicNames)
             }
@@ -263,7 +263,7 @@ class Controller : Initializable {
 
         // GroupBox Names
         cGroupBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
-            private var lastGroupListProperty = State.transFile.groupListProperty
+            private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<StringProperty>()
 
             init {
@@ -271,14 +271,14 @@ class Controller : Initializable {
             }
 
             override fun computeValue(): ObservableList<String> {
-                unbind(lastGroupListProperty)
+                unbind(lastGroupListObservable)
                 for (property in boundGroupNameProperties) unbind(property)
                 boundGroupNameProperties.clear()
 
-                lastGroupListProperty = State.transFile.groupListProperty
+                lastGroupListObservable = State.transFile.groupListObservable
 
-                bind(State.transFile.groupListProperty)
-                for (group in State.transFile.groupListProperty) {
+                bind(State.transFile.groupListObservable)
+                for (group in State.transFile.groupListObservable) {
                     bind(group.nameProperty)
                     boundGroupNameProperties.add(group.nameProperty)
                 }
@@ -289,7 +289,7 @@ class Controller : Initializable {
 
         // LabelPane ColorList
         cLabelPane.colorHexListProperty.bind(object : ObjectBinding<ObservableList<String>>() {
-            private var lastGroupListProperty = State.transFile.groupListProperty
+            private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupHexProperties = ArrayList<StringProperty>()
 
             init {
@@ -297,14 +297,14 @@ class Controller : Initializable {
             }
 
             override fun computeValue(): ObservableList<String> {
-                unbind(lastGroupListProperty)
+                unbind(lastGroupListObservable)
                 for (property in boundGroupHexProperties) unbind(property)
                 boundGroupHexProperties.clear()
 
-                lastGroupListProperty = State.transFile.groupListProperty
+                lastGroupListObservable = State.transFile.groupListObservable
 
-                bind(State.transFile.groupListProperty)
-                for (group in State.transFile.groupListProperty) {
+                bind(State.transFile.groupListObservable)
+                for (group in State.transFile.groupListObservable) {
                     bind(group.colorHexProperty)
                     boundGroupHexProperties.add(group.colorHexProperty)
                 }
@@ -646,7 +646,7 @@ class Controller : Initializable {
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Chose none, Cancel", "Controller")
-                showInfo(I18N["alert.required_at_least_1_ic"])
+                showInfo(I18N["alert.required_at_least_1_pic"])
                 return false
             }
             pics.addAll(result.get())

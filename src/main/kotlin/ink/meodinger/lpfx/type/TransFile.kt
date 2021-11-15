@@ -35,9 +35,9 @@ open class TransFile @JsonCreator constructor(
 
     companion object {
 
-        const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
-
         val DEFAULT_VERSION = intArrayOf(1, 0)
+
+        const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
         val DEFAULT_COMMENT_LIST = arrayListOf(
             DEFAULT_COMMENT,
             "Default Comment\nYou can edit me",
@@ -48,14 +48,14 @@ open class TransFile @JsonCreator constructor(
         val DEFAULT_FILE = TransFile()
 
         object LPTransFile {
-            const val PIC_START = ">>>>>>>>["
-            const val PIC_END = "]<<<<<<<<"
+            const val PIC_START   = ">>>>>>>>["
+            const val PIC_END     = "]<<<<<<<<"
             const val LABEL_START = "----------------["
-            const val LABEL_END = "]----------------"
-            const val PROP_START = "["
-            const val PROP_END = "]"
-            const val SPLIT = ","
-            const val SEPARATOR = "-"
+            const val LABEL_END   = "]----------------"
+            const val PROP_START  = "["
+            const val PROP_END    = "]"
+            const val SPLIT       = ","
+            const val SEPARATOR   = "-"
 
             val DEFAULT_COLOR_HEX_LIST = listOf(
                 "FF0000", "0000FF", "008000",
@@ -95,57 +95,60 @@ open class TransFile @JsonCreator constructor(
 
     val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
     val commentProperty: StringProperty = SimpleStringProperty(comment)
-    val groupListProperty: ObservableList<TransGroup> = FXCollections.observableList(groupList)
-    val transMapProperty: ObservableMap<String, MutableList<TransLabel>> = FXCollections.observableMap(transMap)
+    val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
+    val transMapProperty: MapProperty<String, MutableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap))
 
     // ----- Accessible Fields ----- //
 
+    val groupListObservable: ObservableList<TransGroup> by groupListProperty
+    val transMapObservable: ObservableMap<String, MutableList<TransLabel>> by transMapProperty
+
     val version: IntArray by versionProperty
     var comment: String by commentProperty
-    val groupList: List<TransGroup> by groupListProperty
-    val transMap: Map<String, List<TransLabel>> by transMapProperty
+    val groupList: List<TransGroup> by groupListObservable
+    val transMap: Map<String, List<TransLabel>> by transMapObservable
 
-    val groupCount: Int get() = groupListProperty.size
-    val groupNames: List<String> get() = List(groupListProperty.size) { groupListProperty[it].name }
-    val groupColors: List<String> get() = List(groupListProperty.size) { groupListProperty[it].colorHex }
-    val sortedPicNames: List<String> get() = sortByDigit(transMapProperty.keys.toList())
+    val groupCount: Int get() = groupListObservable.size
+    val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
+    val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
+    val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList())
 
     // ----- TransGroup ----- //
 
     fun addTransGroup(transGroup: TransGroup) {
-        for (group in groupListProperty)
+        for (group in groupListObservable)
             if (group.name == transGroup.name)
                 throw TransFileException.transGroupNameRepeated(transGroup.name)
 
-        groupListProperty.add(transGroup)
+        groupListObservable.add(transGroup)
     }
     fun getTransGroup(groupName: String): TransGroup {
-        for (group in groupListProperty) if (group.name == groupName) return group
+        for (group in groupListObservable) if (group.name == groupName) return group
 
         throw TransFileException.transGroupNotFound(groupName)
     }
     fun getTransGroup(groupId: Int): TransGroup {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupListProperty.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        return groupListProperty[groupId]
+        return groupListObservable[groupId]
     }
     fun removeTransGroup(groupName: String) {
         var toRemove: TransGroup? = null
-        for (group in groupListProperty) if (group.name == groupName) toRemove = group
+        for (group in groupListObservable) if (group.name == groupName) toRemove = group
 
-        if (toRemove != null) groupListProperty.remove(toRemove)
+        if (toRemove != null) groupListObservable.remove(toRemove)
         else throw TransFileException.transGroupNotFound(groupName)
     }
     fun removeTransGroup(groupId: Int) {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupListProperty.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        groupListProperty.removeAt(groupId)
+        groupListObservable.removeAt(groupId)
     }
 
     fun getGroupIdByName(name: String): Int {
-        groupListProperty.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
+        groupListObservable.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
 
         throw TransFileException.transGroupNotFound(name)
     }
@@ -153,7 +156,7 @@ open class TransFile @JsonCreator constructor(
         return isGroupUnused(getGroupIdByName(groupName))
     }
     fun isGroupUnused(groupId: Int): Boolean {
-        for (key in transMapProperty.keys) for (label in getTransList(key)) {
+        for (key in transMapObservable.keys) for (label in getTransList(key)) {
             if (label.groupId == groupId) return false
         }
         return true
@@ -162,13 +165,13 @@ open class TransFile @JsonCreator constructor(
     // ----- TransList (TransMap) ----- //
 
     open fun addTransList(picName: String) {
-        transMapProperty[picName] = ArrayList()
+        transMapObservable[picName] = ArrayList()
     }
     open fun getTransList(picName: String): MutableList<TransLabel> {
-        return transMapProperty[picName] ?: throw TransFileException.pictureNotFound(picName)
+        return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
     open fun removeTransList(picName: String) {
-        if (transMapProperty[picName] != null) transMapProperty.remove(picName)
+        if (transMapObservable[picName] != null) transMapObservable.remove(picName)
         else throw TransFileException.pictureNotFound(picName)
     }
 
@@ -178,7 +181,7 @@ open class TransFile @JsonCreator constructor(
         val list = getTransList(picName)
 
         val (index, groupId) = transLabel
-        if (groupId >= groupListProperty.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
+        if (groupId >= groupListObservable.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
         for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
 
         list.add(transLabel)
@@ -211,11 +214,11 @@ open class TransFile @JsonCreator constructor(
     fun clone(): TransFile {
         val version = this.version.clone()
         val comment = this.comment
-        val groupList = MutableList(this.groupListProperty.size) { this.groupListProperty[it].clone() }
+        val groupList = MutableList(this.groupListObservable.size) { this.groupListObservable[it].clone() }
         val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also {
             for (key in sortedPicNames)
-                it[key] = MutableList(this.transMapProperty[key]!!.size) { index ->
-                    this.transMapProperty[key]!![index].clone()
+                it[key] = MutableList(this.transMapObservable[key]!!.size) { index ->
+                    this.transMapObservable[key]!![index].clone()
                 }
         }
 

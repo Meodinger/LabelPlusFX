@@ -186,7 +186,9 @@ private fun loadLP(file: File): TransFile {
  */
 @Throws(IOException::class)
 private fun loadMeo(file: File): TransFile {
-    val mapper = ObjectMapper().setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+    val mapper = ObjectMapper()
+
+    mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
 
     return mapper.readValue(file, TransFile::class.java)
 }

@@ -86,8 +86,8 @@ const val GRAPHICS_CIRCLE_RADIUS = 8.0
  * Extensions
  */
 val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
-const val EXTENSION_MEO = ".json"
 const val EXTENSION_LP = ".txt"
+const val EXTENSION_MEO = ".json"
 const val EXTENSION_PACK = ".zip"
 const val EXTENSION_BAK = ".bak"
 const val FOLDER_NAME_BAK = "bak"
@@ -95,11 +95,9 @@ const val FOLDER_NAME_BAK = "bak"
 /**
  * Filenames
  */
-const val INITIAL_FILE_NAME = "New Translation.json"
-const val RECOVERY_FILE_NAME = "Recovery.json"
-const val EXPORT_FILE_NAME_LP = "Translation.txt"
-const val EXPORT_FILE_NAME_MEO = "Translation.json"
-const val EXPORT_PACK_NAME = "Package.zip"
+const val INITIAL_FILE_NAME = "New Translation"
+const val RECOVERY_FILE_NAME = "Recovery"
+const val EXPORT_PACK_NAME = "Package"
 
 /**
  * Auto-save
@@ -162,11 +160,11 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        private fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
         private fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)
+        private fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
         fun getType(path: String): FileType {
-            if (isMeoFile(path)) return MeoFile
             if (isLPFile(path)) return LPFile
+            if (isMeoFile(path)) return MeoFile
             throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
         }
     }

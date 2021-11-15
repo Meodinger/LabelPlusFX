@@ -60,8 +60,8 @@ object AMenuBar : MenuBar() {
     private val mCrash = MenuItem("Crash")
 
     private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*${EXTENSION_MEO}", "*${EXTENSION_LP}")
-    private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*${EXTENSION_MEO}")
     private val lpFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*${EXTENSION_LP}")
+    private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*${EXTENSION_MEO}")
     private val bakFilter = FileChooser.ExtensionFilter(I18N["filetype.bak"], "*${EXTENSION_BAK}")
     private val packFilter = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*${EXTENSION_PACK}")
     private val fileChooser = CFileChooser()
@@ -70,17 +70,15 @@ object AMenuBar : MenuBar() {
     private val exportPackChooser = CFileChooser()
 
     init {
-        fileChooser.extensionFilter.add(fileFilter)
-        fileChooser.extensionFilter.add(meoFilter)
-        fileChooser.extensionFilter.add(lpFilter)
-        fileChooser.initialFileName = INITIAL_FILE_NAME
+        fileChooser.extensionFilter.addAll(fileFilter, meoFilter, lpFilter)
+        fileChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_MEO
         bakChooser.title = I18N["chooser.bak"]
         bakChooser.extensionFilter.add(bakFilter)
-        bakChooser.initialFileName = RECOVERY_FILE_NAME
+        bakChooser.initialFileName = RECOVERY_FILE_NAME + EXTENSION_MEO
         exportChooser.title = I18N["chooser.export"]
         exportPackChooser.title = I18N["chooser.pack"]
         exportPackChooser.extensionFilter.add(packFilter)
-        exportPackChooser.initialFileName = EXPORT_PACK_NAME
+        exportPackChooser.initialFileName = EXPORT_PACK_NAME + EXTENSION_PACK
 
         this.disableMnemonicParsingForAll()
 
@@ -213,12 +211,12 @@ object AMenuBar : MenuBar() {
         val file: File
         if (event.source == mExportAsMeo) {
             exportChooser.extensionFilter.add(meoFilter)
-            exportChooser.initialFileName = EXPORT_FILE_NAME_MEO
+            exportChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_MEO
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.MeoFile)
         } else {
             exportChooser.extensionFilter.add(lpFilter)
-            exportChooser.initialFileName = EXPORT_FILE_NAME_LP
+            exportChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_LP
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.LPFile)
         }
@@ -246,7 +244,7 @@ object AMenuBar : MenuBar() {
 
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
-                showInfo(I18N["alert.required_at_least_1_ic"])
+                showInfo(I18N["alert.required_at_least_1_pic"])
                 return@ifPresent
             }
 

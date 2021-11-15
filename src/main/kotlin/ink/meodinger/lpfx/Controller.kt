@@ -1034,7 +1034,7 @@ class Controller : Initializable {
         // Write "love you" to comment, once a time
         fun loveYouForever() {
             State.transFile.comment = "I Love You Forever"
-            save(File(State.transPath), FileType.MeoFile, true)
+            save(File(State.transPath), FileType.getType(State.transPath), true)
 
             val monika = Paths.get(State.transPath).parent.resolve("monika.json").toFile()
             save(monika, FileType.MeoFile, true)

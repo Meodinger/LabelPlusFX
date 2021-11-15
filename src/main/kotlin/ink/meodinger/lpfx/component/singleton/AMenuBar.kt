@@ -310,7 +310,14 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun crash() {
-        State.controller.justMonika()
+        val key = "C_Crash_Count"
+        if (this.properties[key] == null) this.properties[key] = 1
+
+        this.properties[key] = (this.properties[key] as Int) + 1
+        if (this.properties[key] as Int >= 5) {
+            this.properties[key] = 0
+            State.controller.justMonika()
+        }
 
         throw RuntimeException("Crash")
     }

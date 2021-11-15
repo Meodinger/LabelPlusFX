@@ -13,10 +13,7 @@ import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.event.ActionEvent
-import javafx.scene.control.Menu
-import javafx.scene.control.MenuBar
-import javafx.scene.control.MenuItem
-import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
@@ -309,12 +306,15 @@ object AMenuBar : MenuBar() {
     }
     private fun crash() {
         val key = "C_Crash_Count"
-        if (this.properties[key] == null) this.properties[key] = 1
+        if (this.properties[key] == null) this.properties[key] = 0
 
         this.properties[key] = (this.properties[key] as Int) + 1
         if (this.properties[key] as Int >= 5) {
             this.properties[key] = 0
-            State.controller.justMonika()
+            val confirm = showAlert(I18N["alert.extra"])
+            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
+                State.controller.justMonika()
+            } else return
         }
 
         throw RuntimeException("Crash")

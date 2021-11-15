@@ -9,7 +9,10 @@ import ink.meodinger.lpfx.component.singleton.AMenuBar
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
-import ink.meodinger.lpfx.options.*
+import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.options.Preference
+import ink.meodinger.lpfx.options.RecentFiles
+import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
@@ -43,7 +46,6 @@ import java.io.IOException
 import java.net.URL
 import java.nio.file.Paths
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -703,17 +705,19 @@ class Controller : Initializable {
         Logger.debug("Read TransFile: $transFile", "Controller")
 
         // Show info if comment not in default list
-        val comment = transFile.comment.trim()
-        var isModified = true
-        for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
-            if (comment == defaultComment) {
-                isModified = false
-                break
+        if (!RecentFiles.getAll().contains(file.path)) {
+            val comment = transFile.comment.trim()
+            var isModified = true
+            for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
+                if (comment == defaultComment) {
+                    isModified = false
+                    break
+                }
             }
-        }
-        if (isModified) {
-            Logger.info("Showed modified comment", "Controller")
-            showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+            if (isModified) {
+                Logger.info("Showed modified comment", "Controller")
+                showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+            }
         }
 
         State.transFile = transFile

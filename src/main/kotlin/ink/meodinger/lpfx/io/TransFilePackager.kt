@@ -1,11 +1,13 @@
 package ink.meodinger.lpfx.io
 
+import ink.meodinger.lpfx.FileType
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.CZip
 import ink.meodinger.lpfx.util.resource.*
 
 import java.io.File
 import java.io.IOException
+import java.nio.charset.StandardCharsets
 
 
 /**
@@ -25,7 +27,8 @@ fun pack(target: File, source: String, transFile: TransFile) {
     zip.zip(TEMPLATE_ZH, "/ps_script_res/zh.psd")
     zip.zip(TEMPLATE_EN, "/ps_script_res/en.psd")
 
-    zip.zip(transFile.toJsonString().toByteArray(), "/images/translation.json")
+    val content = exportAsString(transFile, FileType.getType(target.path))
+    zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.json")
 
     for (picName in transFile.sortedPicNames) {
         zip.zip(File("$source/$picName"), "/images/$picName")

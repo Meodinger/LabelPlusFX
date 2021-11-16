@@ -720,10 +720,13 @@ class Controller : Initializable {
             }
         }
 
+        // Update State
         State.transFile = transFile
         State.transPath = file.path
+        State.isOpened = true
 
         // Update recent files
+        CFileChooser.lastDirectory = file.parentFile
         RecentFiles.add(file.path)
         AMenuBar.updateOpenRecent()
 
@@ -738,11 +741,10 @@ class Controller : Initializable {
             showError(I18N["error.auto_backup_unavailable"])
         }
 
-        State.isOpened = true
-
-        // Initialize workspace
+        // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
+        // Initialize workspace
         renderGroupBar()
 
         cPicBox.moveTo(0)
@@ -804,8 +806,12 @@ class Controller : Initializable {
             Logger.info("Backup removed", "Controller")
         }
 
+        // Update state
         State.transPath = file.path
         State.isChanged = false
+
+        // Change title
+        State.stage.title = INFO["application.name"] + " - " + file.name
 
         Logger.info("Saved", "Controller")
     }
@@ -888,6 +894,8 @@ class Controller : Initializable {
         cLabelPane.reset()
         cTreeView.reset()
         cTransArea.reset()
+
+        State.stage.title = INFO["application.name"]
 
         labelInfo("Reset")
     }
@@ -1037,7 +1045,7 @@ class Controller : Initializable {
     fun justMonika() {
         // Write "love you" to comment, once a time
         fun loveYouForever() {
-            State.transFile.comment = "I Love You Forever"
+            State.transFile.comment = "I Love You Forever  --Yours, Monika"
             save(File(State.transPath), FileType.getType(State.transPath), true)
 
             val monika = Paths.get(State.transPath).parent.resolve("monika.json").toFile()

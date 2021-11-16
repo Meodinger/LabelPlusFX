@@ -97,7 +97,8 @@ const val FOLDER_NAME_BAK = "bak"
  */
 const val INITIAL_FILE_NAME = "New Translation"
 const val RECOVERY_FILE_NAME = "Recovery"
-const val EXPORT_PACK_NAME = "Package"
+const val PACKAGE_FILE_NAME = "Package"
+const val EXPORT_FILE_NAME = "Export"
 
 /**
  * Auto-save

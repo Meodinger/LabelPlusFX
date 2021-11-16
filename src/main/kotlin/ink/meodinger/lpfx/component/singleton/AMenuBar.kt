@@ -67,15 +67,13 @@ object AMenuBar : MenuBar() {
     private val exportPackChooser = CFileChooser()
 
     init {
-        fileChooser.extensionFilter.addAll(fileFilter, meoFilter, lpFilter)
-        fileChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_MEO
+        fileChooser.extensionFilters.addAll(fileFilter, meoFilter, lpFilter)
         bakChooser.title = I18N["chooser.bak"]
-        bakChooser.extensionFilter.add(bakFilter)
-        bakChooser.initialFileName = RECOVERY_FILE_NAME + EXTENSION_MEO
+        bakChooser.extensionFilters.add(bakFilter)
         exportChooser.title = I18N["chooser.export"]
         exportPackChooser.title = I18N["chooser.pack"]
-        exportPackChooser.extensionFilter.add(packFilter)
-        exportPackChooser.initialFileName = EXPORT_PACK_NAME + EXTENSION_PACK
+        exportPackChooser.extensionFilters.add(packFilter)
+        exportPackChooser.initialFileName = PACKAGE_FILE_NAME + EXTENSION_PACK
 
         this.disableMnemonicParsingForAll()
 
@@ -152,6 +150,7 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.new"]
+        fileChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_MEO
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = FileType.getType(file.path)
 
@@ -166,6 +165,7 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.open"]
+        fileChooser.initialFileName = ""
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
         State.controller.open(file, FileType.getType(file.path))
@@ -179,6 +179,7 @@ object AMenuBar : MenuBar() {
         // save
 
         fileChooser.title = I18N["chooser.save"]
+        fileChooser.initialFileName = File(State.transPath).name
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.save(file, FileType.getType(file.path), false)
@@ -195,25 +196,28 @@ object AMenuBar : MenuBar() {
 
         State.reset()
 
-        fileChooser.title = I18N["chooser.rec"]
         val bak = bakChooser.showOpenDialog(State.stage) ?: return
+        CFileChooser.lastDirectory = bak.parentFile.parentFile
+
+        fileChooser.title = I18N["chooser.rec"]
+        fileChooser.initialFileName = RECOVERY_FILE_NAME + EXTENSION_MEO
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.recovery(bak, rec)
     }
 
     private fun exportTransFile(event: ActionEvent) {
-        exportChooser.extensionFilter.clear()
+        exportChooser.extensionFilters.clear()
 
         val file: File
         if (event.source == mExportAsMeo) {
-            exportChooser.extensionFilter.add(meoFilter)
-            exportChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_MEO
+            exportChooser.extensionFilters.add(meoFilter)
+            exportChooser.initialFileName = EXPORT_FILE_NAME + EXTENSION_MEO
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.MeoFile)
         } else {
-            exportChooser.extensionFilter.add(lpFilter)
-            exportChooser.initialFileName = INITIAL_FILE_NAME + EXTENSION_LP
+            exportChooser.extensionFilters.add(lpFilter)
+            exportChooser.initialFileName = EXPORT_FILE_NAME + EXTENSION_LP
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.LPFile)
         }
@@ -250,9 +254,15 @@ object AMenuBar : MenuBar() {
             // Edit date
             val toRemove = ArrayList<String>()
             for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
-            for (picName in toRemove) State.removePicture(picName)
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
+
+            if (toRemove.size != 0) {
+                val result = showAlert(I18N["alert.removing_pic"])
+                if (!result.isPresent || result.get() != ButtonType.YES) return@ifPresent
+            }
+
+            for (picName in toRemove) State.removePicture(picName)
             for (picName in toAdd) State.addPicture(picName)
             // Mark change
             State.isChanged = true

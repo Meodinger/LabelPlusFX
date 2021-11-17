@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets
  * Export a pic pack with Meo_PS_Script
  */
 @Throws(IOException::class)
-fun pack(target: File, source: String, transFile: TransFile) {
+fun pack(target: File, transFile: TransFile) {
     val zip = CZip(target)
 
     zip.zip(SCRIPT, "Meo_PS_Script.jsx")
@@ -31,7 +31,7 @@ fun pack(target: File, source: String, transFile: TransFile) {
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.json")
 
     for (picName in transFile.sortedPicNames) {
-        zip.zip(File("$source/$picName"), "/images/$picName")
+        zip.zip(transFile.getFile(picName), "/images/$picName")
     }
 
     zip.close()

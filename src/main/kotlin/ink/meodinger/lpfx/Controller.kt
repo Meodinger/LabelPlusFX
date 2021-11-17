@@ -92,7 +92,7 @@ class Controller : Initializable {
             return object : TimerTask() {
                 override fun run() {
                     if (State.isChanged) {
-                        val bak = File(State.getBakFolder() + File.separator + Date().time + EXTENSION_BAK)
+                        val bak = State.getBakFolder().resolve("${Date().time}${EXTENSION_BAK}")
                         try {
                             export(bak, FileType.MeoFile, State.transFile)
                         } catch (e: IOException) {
@@ -622,7 +622,7 @@ class Controller : Initializable {
                 return true
             }
             if (result.get() == ButtonType.YES) {
-                save(File(State.transPath), FileType.getType(State.transPath), true)
+                save(State.translationFile, FileType.getType(State.translationFile.path), true)
             }
             return false
         }
@@ -691,6 +691,7 @@ class Controller : Initializable {
     fun open(file: File, type: FileType) {
         Logger.info("Opening ${file.path}", "Controller")
 
+        // Read File
         val transFile: TransFile
         try {
             transFile = load(file, type)
@@ -701,8 +702,16 @@ class Controller : Initializable {
             showException(e)
             return
         }
-
         Logger.debug("Read TransFile: $transFile", "Controller")
+
+        // Set TransFile.fileMap
+        val lost = ArrayList<String>()
+        for (picName in transFile.sortedPicNames) {
+            val picFile = file.parentFile.resolve(picName)
+            if (picFile.exists()) transFile.addFile(picName, picFile)
+            else lost.add(picName)
+        }
+        // todo: lost sepcific
 
         // Show info if comment not in default list
         if (!RecentFiles.getAll().contains(file.path)) {
@@ -722,7 +731,7 @@ class Controller : Initializable {
 
         // Update State
         State.transFile = transFile
-        State.transPath = file.path
+        State.translationFile = file
         State.isOpened = true
 
         // Update recent files
@@ -732,7 +741,7 @@ class Controller : Initializable {
 
         // Auto backup
         taskManager.refresh()
-        val bakDir = File(State.getBakFolder())
+        val bakDir = State.getBakFolder()
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             timer.schedule(taskManager.getTimerTask(), AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
             Logger.info("Scheduled auto-backup", "Controller")
@@ -756,18 +765,18 @@ class Controller : Initializable {
         Logger.info("Saving to ${file.path}, isSilent:$isSilent", "Controller")
 
         // Check folder
-        if (!isSilent) if (file.parent != State.getFileFolder()) {
+        if (!isSilent) if (file.parent != State.getFileFolder().path) {
             val result = showConfirm(I18N["alert.save_to_another_place.content"])
             if (!(result.isPresent && result.get() == ButtonType.YES)) return
         }
 
         // Backup if overwrite
         var bak: File? = null
-        if (State.transPath == file.path) {
-            bak = File(State.transPath + EXTENSION_BAK)
+        if (State.translationFile.path == file.path) {
+            bak = File(State.translationFile.path + EXTENSION_BAK)
 
             try {
-                transfer(File(State.transPath), bak)
+                transfer(State.translationFile, bak)
                 Logger.info("Backed TransFile to ${bak.path}", "Controller")
             } catch (e: Exception) {
                 bak = null
@@ -807,7 +816,7 @@ class Controller : Initializable {
         }
 
         // Update state
-        State.transPath = file.path
+        State.translationFile = file
         State.isChanged = false
 
         // Change title
@@ -851,7 +860,7 @@ class Controller : Initializable {
         Logger.info("Packing to ${file.path}", "Controller")
 
         try {
-            pack(file, State.getFileFolder(), State.transFile)
+            pack(file, State.transFile)
 
             Logger.info("Packed to ${file.path}", "Controller")
             showInfo(I18N["info.exported_successful"])
@@ -872,7 +881,7 @@ class Controller : Initializable {
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
-                    save(File(State.transPath), FileType.getType(State.transPath), false)
+                    save(State.translationFile, FileType.getType(State.translationFile.path), false)
                     State.application.stop()
                 }
                 ButtonType.NO -> {
@@ -934,14 +943,13 @@ class Controller : Initializable {
     fun renderLabelPane() {
         try {
             cLabelPane.render(
-                State.getPicPathNow(),
+                State.getPicFileNow(),
                 State.transFile.groupCount,
                 State.transFile.getTransList(State.currentPicName)
             )
         } catch (e: CLabelPane.LabelPaneException) {
             Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
             showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName))
-            return
         } catch (e: IOException) {
             Logger.error("LabelPane update failed", "Controller")
             Logger.exception(e)
@@ -1046,9 +1054,9 @@ class Controller : Initializable {
         // Write "love you" to comment, once a time
         fun loveYouForever() {
             State.transFile.comment = "I Love You Forever  --Yours, Monika"
-            save(File(State.transPath), FileType.getType(State.transPath), true)
+            save(State.translationFile, FileType.getType(State.translationFile.path), true)
 
-            val monika = Paths.get(State.transPath).parent.resolve("monika.json").toFile()
+            val monika = State.getFileFolder().resolve("monika.json")
             save(monika, FileType.MeoFile, true)
         }
         if (State.isOpened) loveYouForever()

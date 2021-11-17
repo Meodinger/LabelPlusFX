@@ -327,7 +327,7 @@ class CLabelPane : ScrollPane() {
      * @throws IOException when Image load failed
      */
     @Throws(LabelPaneException::class, IOException::class)
-    fun render(picPath: String, layerCount: Int, transLabels: List<TransLabel>) {
+    fun render(picFile: File, layerCount: Int, transLabels: List<TransLabel>) {
         container.isDisable = true
 
         vvalue = 0.0
@@ -335,8 +335,8 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        if (File(picPath).exists()) {
-            setupImage(picPath)
+        if (picFile.exists()) {
+            setupImage(picFile)
             setupLayers(layerCount)
             setupLabels(transLabels)
 
@@ -350,7 +350,7 @@ class CLabelPane : ScrollPane() {
 
             moveToCenter()
 
-            throw LabelPaneException.pictureNotFound(picPath)
+            throw LabelPaneException.pictureNotFound(picFile.path)
         }
     }
 
@@ -364,8 +364,8 @@ class CLabelPane : ScrollPane() {
     }
 
     @Throws(IOException::class)
-    private fun setupImage(path: String) {
-        setupImage(Image(File(path).toURI().toURL().toString()))
+    private fun setupImage(file: File) {
+        setupImage(Image(file.toURI().toURL().toString()))
     }
     private fun setupImage(image: Image) {
         this.image = image

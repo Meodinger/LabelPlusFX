@@ -13,6 +13,7 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
+import java.io.File
 
 
 /**
@@ -72,6 +73,8 @@ open class TransFile @JsonCreator constructor(
         companion object {
             fun pictureNotFound(picName: String) =
                 TransFileException(String.format(I18N["exception.trans_file.picture_not_found.format.s"], picName))
+            fun pictureStillInUse(picName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.picture_in_use.format.s"], picName))
 
             fun transGroupNameRepeated(groupName: String) =
                 TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.format.s"], groupName))
@@ -91,7 +94,27 @@ open class TransFile @JsonCreator constructor(
         }
     }
 
-    // ----- Properties ----- //
+    // ----- File Manage ----- //
+
+    private val fileMap = HashMap<String, File>()
+    fun getFile(picName: String): File {
+        if (!fileMap.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        return fileMap[picName]!!
+    }
+    fun setFile(picName: String, newFile: File) {
+        if (!fileMap.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        fileMap[picName] = newFile
+    }
+    fun addFile(picName: String, file: File) {
+        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        fileMap[picName] = file
+    }
+    fun removeFile(picName: String) {
+        if (transMapObservable.keys.contains(picName)) throw TransFileException.pictureStillInUse(picName)
+        fileMap.remove(picName)
+    }
+
+    // ----- Properties & Init ----- //
 
     val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
     val commentProperty: StringProperty = SimpleStringProperty(comment)
@@ -115,13 +138,6 @@ open class TransFile @JsonCreator constructor(
 
     // ----- TransGroup ----- //
 
-    fun addTransGroup(transGroup: TransGroup) {
-        for (group in groupListObservable)
-            if (group.name == transGroup.name)
-                throw TransFileException.transGroupNameRepeated(transGroup.name)
-
-        groupListObservable.add(transGroup)
-    }
     fun getTransGroup(groupName: String): TransGroup {
         for (group in groupListObservable) if (group.name == groupName) return group
 
@@ -132,6 +148,13 @@ open class TransFile @JsonCreator constructor(
         if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
         return groupListObservable[groupId]
+    }
+    fun addTransGroup(transGroup: TransGroup) {
+        for (group in groupListObservable)
+            if (group.name == transGroup.name)
+                throw TransFileException.transGroupNameRepeated(transGroup.name)
+
+        groupListObservable.add(transGroup)
     }
     fun removeTransGroup(groupName: String) {
         var toRemove: TransGroup? = null
@@ -153,7 +176,11 @@ open class TransFile @JsonCreator constructor(
         throw TransFileException.transGroupNotFound(name)
     }
     fun isGroupUnused(groupName: String): Boolean {
-        return isGroupUnused(getGroupIdByName(groupName))
+        val groupId = getGroupIdByName(groupName)
+        for (key in transMapObservable.keys) for (label in getTransList(key)) {
+            if (label.groupId == groupId) return false
+        }
+        return true
     }
     fun isGroupUnused(groupId: Int): Boolean {
         for (key in transMapObservable.keys) for (label in getTransList(key)) {
@@ -164,11 +191,11 @@ open class TransFile @JsonCreator constructor(
 
     // ----- TransList (TransMap) ----- //
 
-    open fun addTransList(picName: String) {
-        transMapObservable[picName] = ArrayList()
-    }
     open fun getTransList(picName: String): MutableList<TransLabel> {
         return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
+    }
+    open fun addTransList(picName: String) {
+        transMapObservable[picName] = ArrayList()
     }
     open fun removeTransList(picName: String) {
         if (transMapObservable[picName] != null) transMapObservable.remove(picName)
@@ -177,6 +204,11 @@ open class TransFile @JsonCreator constructor(
 
     // ----- TransLabel ----- //
 
+    fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
+        for (label in getTransList(picName)) if (label.index == labelIndex) return label
+
+        throw TransFileException.transLabelNotFound(picName, labelIndex)
+    }
     fun addTransLabel(picName: String, transLabel: TransLabel) {
         val list = getTransList(picName)
 
@@ -185,11 +217,6 @@ open class TransFile @JsonCreator constructor(
         for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
 
         list.add(transLabel)
-    }
-    fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
-        for (label in getTransList(picName)) if (label.index == labelIndex) return label
-
-        throw TransFileException.transLabelNotFound(picName, labelIndex)
     }
     fun removeTransLabel(picName: String, labelIndex: Int) {
         val list = getTransList(picName)

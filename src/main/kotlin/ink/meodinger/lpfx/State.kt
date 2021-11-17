@@ -34,7 +34,7 @@ object State {
     val isOpenedProperty = SimpleBooleanProperty(false)
     val isChangedProperty = SimpleBooleanProperty(false)
     val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_FILE)
-    val transPathProperty = SimpleStringProperty("")
+    val translationFileProperty = SimpleObjectProperty(File(""))
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
@@ -44,7 +44,7 @@ object State {
     var isOpened: Boolean by isOpenedProperty
     var isChanged: Boolean by isChangedProperty
     var transFile: TransFile by transFileProperty
-    var transPath: String by transPathProperty
+    var translationFile: File by translationFileProperty
     var currentPicName: String by currentPicNameProperty
     var currentGroupId: Int by currentGroupIdProperty
     var currentLabelIndex: Int by currentLabelIndexProperty
@@ -56,7 +56,7 @@ object State {
 
         isOpened = false
         transFile = TransFile.DEFAULT_FILE
-        transPath = ""
+        translationFile = File("")
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
@@ -65,6 +65,12 @@ object State {
         viewMode = ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[0])
 
         Logger.info("Reset")
+    }
+
+    fun setComment(comment: String) {
+        transFile.comment = comment
+
+        Logger.info("Set comment @ ${comment.replace("\n", " ")}")
     }
 
     fun addTransGroup(transGroup: TransGroup) {
@@ -92,11 +98,13 @@ object State {
 
     fun addPicture(picName: String) {
         transFile.addTransList(picName)
+        transFile.addFile(picName, getFileFolder().resolve(picName))
 
         Logger.info("Added picture $picName", "State")
     }
     fun removePicture(picName: String) {
         transFile.removeTransList(picName)
+        transFile.removeFile(picName)
 
         Logger.info("Removed picture $picName", "State")
     }
@@ -124,14 +132,8 @@ object State {
         Logger.info("Set $picName->Index=$index @groupId=$groupId", "State")
     }
 
-    fun setComment(comment: String) {
-        transFile.comment = comment
+    fun getPicFileNow(): File = transFile.getFile(currentPicName)
+    fun getFileFolder(): File = translationFile.parentFile
+    fun getBakFolder(): File = translationFile.parentFile.resolve(FOLDER_NAME_BAK)
 
-        Logger.info("Set comment @ ${comment.replace("\n", " ")}")
-    }
-
-    fun getFileFolder(): String = File(transPath).parent
-    fun getBakFolder(): String = getFileFolder() + File.separator + FOLDER_NAME_BAK
-    fun getPicPathOf(picName: String): String = getFileFolder() + File.separator + picName
-    fun getPicPathNow(): String = getPicPathOf(currentPicName)
 }

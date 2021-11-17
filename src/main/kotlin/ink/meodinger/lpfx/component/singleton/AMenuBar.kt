@@ -173,13 +173,13 @@ object AMenuBar : MenuBar() {
     private fun saveTranslation() {
         // save
 
-        State.controller.save(File(State.transPath), FileType.getType(State.transPath), true)
+        State.controller.save(State.translationFile, FileType.getType(State.translationFile.path), true)
     }
     private fun saveAsTranslation() {
         // save
 
         fileChooser.title = I18N["chooser.save"]
-        fileChooser.initialFileName = File(State.transPath).name
+        fileChooser.initialFileName = State.translationFile.name
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.save(file, FileType.getType(file.path), false)
@@ -237,7 +237,7 @@ object AMenuBar : MenuBar() {
     private fun editPictures() {
         // Choose Pics
         val selected = State.transFile.sortedPicNames
-        val unselected = Files.walk(File(State.getFileFolder()).toPath()).filter {
+        val unselected = Files.walk(State.getFileFolder().toPath(), 1).filter {
             if (selected.contains(it.name)) return@filter false
             for (extension in EXTENSIONS_PIC) if (it.name.endsWith(extension)) return@filter true
             false
@@ -257,6 +257,7 @@ object AMenuBar : MenuBar() {
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
 
+            if (toRemove.size == 0 && toAdd.size == 0) return@ifPresent
             if (toRemove.size != 0) {
                 val result = showAlert(I18N["alert.removing_pic"])
                 if (!result.isPresent || result.get() != ButtonType.YES) return@ifPresent

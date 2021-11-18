@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
 /**
  * Author: Meodinger
  * Date: 2021/8/8
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**
@@ -217,6 +217,11 @@ fun showDialog(owner: Window?, type: Int, title: String, header: String?, conten
 
     return dialog.showAndWait()
 }
+const val PRELOAD_DIALOG_CONFIRM = 0
+const val PRELOAD_DIALOG_INFO    = 1
+const val PRELOAD_DIALOG_ALERT   = 2
+const val PRELOAD_DIALOG_ERROR   = 3
+
 
 // Specific dialogs
 

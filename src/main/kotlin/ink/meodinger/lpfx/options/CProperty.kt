@@ -4,10 +4,11 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 
+
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.type
+ * Have fun with my code!
  */
 
 /**

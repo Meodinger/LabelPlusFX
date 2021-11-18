@@ -15,7 +15,7 @@ import kotlin.system.exitProcess
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.options
+ * Have fun with my code!
  */
 
 /**
@@ -95,13 +95,13 @@ object Options {
             Logger.exception(e)
             showDialog(
                 null,
-                2,
+                PRELOAD_DIALOG_ERROR,
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["alert.option.broken.format.s"], FileName_RecentFiles)
+                    String.format(I18N["error.option.broken.format.s"], FileName_RecentFiles)
                 } else {
-                    String.format(I18N["alert.option.load_failed.format.s"], FileName_RecentFiles)
+                    String.format(I18N["error.option.load_failed.format.s"], FileName_RecentFiles)
                 }
             )
         }
@@ -125,13 +125,13 @@ object Options {
             Logger.exception(e)
             showDialog(
                 null,
-                2,
+                PRELOAD_DIALOG_ERROR,
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["alert.option.broken.format.s"], FileName_Preference)
+                    String.format(I18N["error.option.broken.format.s"], FileName_Preference)
                 } else {
-                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Preference)
+                    String.format(I18N["error.option.load_failed.format.s"], FileName_Preference)
                 }
             )
         }
@@ -155,13 +155,13 @@ object Options {
             Logger.exception(e)
             showDialog(
                 null,
-                2,
+                PRELOAD_DIALOG_ERROR,
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["alert.option.broken.format.s"], FileName_Settings)
+                    String.format(I18N["error.option.broken.format.s"], FileName_Settings)
                 } else {
-                    String.format(I18N["alert.option.load_failed.format.s"], FileName_Settings)
+                    String.format(I18N["error.option.load_failed.format.s"], FileName_Settings)
                 }
             )
         }

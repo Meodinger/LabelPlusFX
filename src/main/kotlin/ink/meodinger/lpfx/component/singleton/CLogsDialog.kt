@@ -36,7 +36,7 @@ import kotlin.io.path.name
 /**
  * Author: Meodinger
  * Date: 2021/8/30
- * Location: ink.meodinger.lpfx.component.singleton
+ * Have fun with my code!
  */
 
 /**
@@ -121,7 +121,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
                     Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
-                    showError(String.format(I18N["alert.logs.delete_failed.format.s"], modal.file.name))
+                    showError(String.format(I18N["error.logs.delete_failed.format.s"], modal.file.name))
                     continue
                 }
                 toRemove.add(modal)

@@ -26,7 +26,7 @@ import javafx.scene.shape.Circle
 /**
  * Author: Meodinger
  * Date: 2021/8/30
- * Location: ink.meodinger.lpfx.component.singleton
+ * Have fun with my code!
  */
 
 /**
@@ -149,13 +149,13 @@ object ATreeMenu : ContextMenu() {
     }
     private val l_moveToItem = MenuItem(I18N["context.move_to"])
     private val l_deleteAction = { items: List<TreeItem<String>> ->
-        val result = showConfirm(
+        val confirm = showConfirm(
             I18N["context.delete_label.dialog.title"],
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
             StringBuilder().also { for (item in items) it.appendLine(item.value) }.toString(),
         )
 
-        if (result.isPresent && result.get() == ButtonType.YES) {
+        if (confirm.isPresent && confirm.get() == ButtonType.YES) {
             for (item in items) {
                 val labelIndex = (item as CTreeLabelItem).index
 

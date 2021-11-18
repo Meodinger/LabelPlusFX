@@ -46,7 +46,7 @@ import java.io.IOException
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -342,12 +342,11 @@ class CLabelPane : ScrollPane() {
 
             container.isDisable = false
         } else {
-            scale = initScale
-
             setupImage(INIT_IMAGE)
             setupLayers(0)
             setupLabels(emptyList())
 
+            scale = initScale
             moveToCenter()
 
             throw LabelPaneException.pictureNotFound(picFile.path)

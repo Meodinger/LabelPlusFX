@@ -27,7 +27,7 @@ import kotlin.io.path.name
 /**
  * Author: Meodinger
  * Date: 2021/8/17
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -129,7 +129,7 @@ object AMenuBar : MenuBar() {
         val file = File(path)
 
         if (!file.exists()) {
-            showError(String.format(I18N["alert.file_not_exist.s"], path))
+            showError(String.format(I18N["error.file_not_exist.s"], path))
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)
             return
@@ -245,7 +245,7 @@ object AMenuBar : MenuBar() {
 
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
-                showInfo(I18N["alert.required_at_least_1_pic"])
+                showInfo(I18N["info.required_at_least_1_pic"])
                 return@ifPresent
             }
 
@@ -259,8 +259,8 @@ object AMenuBar : MenuBar() {
 
             if (toRemove.size == 0 && toAdd.size == 0) return@ifPresent
             if (toRemove.size != 0) {
-                val result = showAlert(I18N["alert.removing_pic"])
-                if (!result.isPresent || result.get() != ButtonType.YES) return@ifPresent
+                val confirm = showConfirm(I18N["confirm.removing_pic"])
+                if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
             for (picName in toRemove) State.removePicture(picName)
@@ -322,7 +322,7 @@ object AMenuBar : MenuBar() {
         this.properties[key] = (this.properties[key] as Int) + 1
         if (this.properties[key] as Int >= 5) {
             this.properties[key] = 0
-            val confirm = showAlert(I18N["alert.extra"])
+            val confirm = showConfirm(I18N["confirm.extra"])
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
             } else return

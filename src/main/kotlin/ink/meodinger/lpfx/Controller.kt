@@ -18,6 +18,7 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.accelerator.isControlDown
+import ink.meodinger.lpfx.util.component.does
 import ink.meodinger.lpfx.util.component.expandAll
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
@@ -39,19 +40,21 @@ import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import javafx.stage.FileChooser
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.nio.file.Paths
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx
+ * Have fun with my code!
  */
 
 /**
@@ -316,8 +319,14 @@ class Controller : Initializable {
         })
 
         // Default image auto-centre
-        cLabelPane.widthProperty().addListener(onChange { if (!State.isOpened) cLabelPane.moveToCenter() })
-        cLabelPane.heightProperty().addListener(onChange { if (!State.isOpened) cLabelPane.moveToCenter() })
+        cLabelPane.widthProperty().addListener(onChange {
+            if (!State.isOpened || !State.getPicFileNow().exists())
+                cLabelPane.moveToCenter()
+        })
+        cLabelPane.heightProperty().addListener(onChange {
+            if (!State.isOpened || !State.getPicFileNow().exists())
+                cLabelPane.moveToCenter()
+        })
 
         // Display default image
         cLabelPane.isVisible = false
@@ -615,18 +624,18 @@ class Controller : Initializable {
         // Opened but saved
         if (!State.isChanged) return false
 
-        // Not saved
+        // Opened but not saved
         val result = showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"])
-        if (result.isPresent) {
-            if (result.get() == ButtonType.CANCEL) {
-                return true
-            }
-            if (result.get() == ButtonType.YES) {
+        // Dialog present
+        if (result.isPresent) when (result.get()) {
+            ButtonType.YES -> {
                 save(State.translationFile, FileType.getType(State.translationFile.path), true)
+                return false
             }
-            return false
+            ButtonType.NO -> return false
+            ButtonType.CANCEL -> return true
         }
-        // Closed
+        // Dialog closed
         return true
     }
     fun new(file: File, type: FileType): Boolean {
@@ -648,7 +657,7 @@ class Controller : Initializable {
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Chose none, Cancel", "Controller")
-                showInfo(I18N["alert.required_at_least_1_pic"])
+                showInfo(I18N["info.required_at_least_1_pic"])
                 return false
             }
             pics.addAll(result.get())
@@ -708,10 +717,63 @@ class Controller : Initializable {
         val lost = ArrayList<String>()
         for (picName in transFile.sortedPicNames) {
             val picFile = file.parentFile.resolve(picName)
-            if (picFile.exists()) transFile.addFile(picName, picFile)
-            else lost.add(picName)
+            transFile.addFile(picName, picFile)
+
+            if (!picFile.exists()) lost.add(picName)
         }
-        // todo: lost sepcific
+        if (lost.isNotEmpty()) {
+            val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
+            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
+                val defaultFile = File("")
+                val files = MutableList(lost.size) { defaultFile }
+                val chooser = FileChooser().also {
+                    val extensions = List(EXTENSIONS_PIC.size) { index -> "*${EXTENSIONS_PIC[index]}" }
+                    val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
+                    it.extensionFilters.add(fileFilter)
+                }
+
+                val dialog = Dialog<ButtonType>().also {
+                    it.dialogPane.prefWidth = 600.0
+                    it.dialogPane.prefHeight = 400.0
+                    it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+                    it.dialogPane.content = GridPane().also { gridPane ->
+                        gridPane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
+                        gridPane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
+                        for (i in lost.indices) {
+                            val lostLabel = Label(lost[i])
+                            val fileLabel = Label(defaultFile.path)
+                            val button = Button(I18N["dialog.specify.choose_btn"]) does {
+                                val picFile = chooser.showOpenDialog(State.stage) ?: return@does
+                                fileLabel.text = picFile.path
+                                files[i] = picFile
+                            }
+
+                            gridPane.add(lostLabel, 0, i + 1)
+                            gridPane.add(fileLabel, 1, i + 1)
+                            gridPane.add(button, 2, i + 1)
+                        }
+                    }
+                }
+                val result = dialog.showAndWait()
+
+                if (!result.isPresent || result.get() == ButtonType.CANCEL) {
+                    showInfo(I18N["info.specify_incomplete"])
+                } else if (result.get() == ButtonType.APPLY) {
+                    var uncomplete = false
+                    for (i in lost.indices) {
+                        val picName = lost[i]
+                        val picFile = files[i]
+
+                        if (picFile == defaultFile) {
+                            uncomplete = true
+                            continue
+                        }
+                        transFile.setFile(picName, picFile)
+                    }
+                    if (uncomplete) showInfo(I18N["info.specify_incomplete"])
+                }
+            }
+        }
 
         // Show info if comment not in default list
         if (!RecentFiles.getAll().contains(file.path)) {
@@ -725,7 +787,7 @@ class Controller : Initializable {
             }
             if (isModified) {
                 Logger.info("Showed modified comment", "Controller")
-                showConfirm(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+                showInfo(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
             }
         }
 
@@ -766,8 +828,8 @@ class Controller : Initializable {
 
         // Check folder
         if (!isSilent) if (file.parent != State.getFileFolder().path) {
-            val result = showConfirm(I18N["alert.save_to_another_place.content"])
-            if (!(result.isPresent && result.get() == ButtonType.YES)) return
+            val confirm = showConfirm(I18N["confirm.save_to_another_place"])
+            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
         // Backup if overwrite
@@ -950,6 +1012,7 @@ class Controller : Initializable {
         } catch (e: CLabelPane.LabelPaneException) {
             Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
             showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName))
+            return
         } catch (e: IOException) {
             Logger.error("LabelPane update failed", "Controller")
             Logger.exception(e)
@@ -958,9 +1021,9 @@ class Controller : Initializable {
         }
 
         when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
-            0 -> cLabelPane.scale = 1.0 // 100%
-            1 -> cLabelPane.fitToPane() // Fit
-            2 -> doNothing() // Last
+            Settings.NEW_PIC_SCALE_100  -> cLabelPane.scale = 1.0 // 100%
+            Settings.NEW_PIC_SCALE_FIT  -> cLabelPane.fitToPane() // Fit
+            Settings.NEW_PIC_SCALE_LAST -> doNothing() // Last
         }
 
         cLabelPane.moveToZero()

@@ -9,13 +9,21 @@ import java.io.IOException
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.options
+ * Have fun with my code!
  */
 
 /**
  * The settings that user set through CSettingsDialog
  */
 object Settings : AbstractProperties() {
+
+    // ----- Constants ----- //
+
+    const val NEW_PIC_SCALE_100 = 0
+    const val NEW_PIC_SCALE_FIT = 1
+    const val NEW_PIC_SCALE_LAST = 2
+
+    // ----- Property Names ----- //
 
     const val DefaultGroupNameList = "DefaultGroupNameList"
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
@@ -26,6 +34,8 @@ object Settings : AbstractProperties() {
     const val LabelRadius = "LabelRadius"
     const val LabelAlpha = "LabelAlpha"
     const val LigatureRules = "LigatureRules"
+
+    // ----- Default ----- //
 
     override val default = listOf(
         CProperty(DefaultGroupNameList, "\u6846\u5185", "\u6846\u5916"),

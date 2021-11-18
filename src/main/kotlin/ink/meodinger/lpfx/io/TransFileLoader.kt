@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.io
+ * Have fun with my code!
  */
 
 
@@ -27,9 +27,23 @@ import java.nio.charset.StandardCharsets
  */
 @Throws(IOException::class)
 fun load(file: File, type: FileType): TransFile {
-    return when(type) {
-        FileType.LPFile -> loadLP(file)
-        FileType.MeoFile -> loadMeo(file)
+    return try {
+        when (type) {
+            FileType.LPFile -> loadLP(file)
+            FileType.MeoFile -> loadMeo(file)
+        }
+    } catch (e: IOException) {
+        try {
+            // Try load as another file type
+            when (type) {
+                FileType.LPFile -> loadMeo(file)
+                FileType.MeoFile -> loadLP(file)
+            }
+        } catch (_: Exception) {
+            // Load as another file type failed, but we don't care about actually what problem occurred.
+            // Throw the original exception just like we never tried.
+            throw e
+        }
     }
 }
 

@@ -15,7 +15,7 @@ import kotlin.system.exitProcess
 /**
  * Author: Meodinger
  * Date: 2021/8/1
- * Location: ink.meodinger.lpfx
+ * Have fun with my code!
  */
 
 /**
@@ -45,19 +45,22 @@ abstract class HookedApplication : Application() {
      */
     protected fun runShutdownHooksAndExit() {
 
-        if (shutdownHooks.isEmpty()) Platform.exit()
-        else {
+        if (shutdownHooks.isEmpty()) {
+            Platform.exit()
+        } else {
             val values = shutdownHooks.values.toList()
-            val promise = Promise.all(List(shutdownHooks.size) {
+            Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> values[it] { resolve(Unit) } }
-            })
-
-            promise.finally { Platform.exit() }
+            }) finally {
+                Platform.exit()
+            }
 
             // In case of something unexpected happened and the app cannot be shutdown
             Timer().schedule(object : TimerTask() {
                 override fun run() { exitProcess(0) }
             }, 1000L * 60 * 5)
+
+            clearShutdownHooks()
         }
     }
 

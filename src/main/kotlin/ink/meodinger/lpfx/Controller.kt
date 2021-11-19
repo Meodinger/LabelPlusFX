@@ -653,6 +653,7 @@ class Controller : Initializable {
                 }
             }
         }
+        // todo: use checkPic-like Dialog
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
@@ -713,67 +714,10 @@ class Controller : Initializable {
         }
         Logger.debug("Read TransFile: $transFile", "Controller")
 
-        // Set TransFile.fileMap
-        val lost = ArrayList<String>()
-        for (picName in transFile.sortedPicNames) {
-            val picFile = file.parentFile.resolve(picName)
-            transFile.addFile(picName, picFile)
-
-            if (!picFile.exists()) lost.add(picName)
-        }
-        if (lost.isNotEmpty()) {
-            val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
-            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-                val defaultFile = File("")
-                val files = MutableList(lost.size) { defaultFile }
-                val chooser = FileChooser().also {
-                    val extensions = List(EXTENSIONS_PIC.size) { index -> "*${EXTENSIONS_PIC[index]}" }
-                    val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
-                    it.extensionFilters.add(fileFilter)
-                }
-
-                val dialog = Dialog<ButtonType>().also {
-                    it.dialogPane.prefWidth = 600.0
-                    it.dialogPane.prefHeight = 400.0
-                    it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-                    it.dialogPane.content = GridPane().also { gridPane ->
-                        gridPane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
-                        gridPane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
-                        for (i in lost.indices) {
-                            val lostLabel = Label(lost[i])
-                            val fileLabel = Label(defaultFile.path)
-                            val button = Button(I18N["dialog.specify.choose_btn"]) does {
-                                val picFile = chooser.showOpenDialog(State.stage) ?: return@does
-                                fileLabel.text = picFile.path
-                                files[i] = picFile
-                            }
-
-                            gridPane.add(lostLabel, 0, i + 1)
-                            gridPane.add(fileLabel, 1, i + 1)
-                            gridPane.add(button, 2, i + 1)
-                        }
-                    }
-                }
-                val result = dialog.showAndWait()
-
-                if (!result.isPresent || result.get() == ButtonType.CANCEL) {
-                    showInfo(I18N["info.specify_incomplete"])
-                } else if (result.get() == ButtonType.APPLY) {
-                    var uncomplete = false
-                    for (i in lost.indices) {
-                        val picName = lost[i]
-                        val picFile = files[i]
-
-                        if (picFile == defaultFile) {
-                            uncomplete = true
-                            continue
-                        }
-                        transFile.setFile(picName, picFile)
-                    }
-                    if (uncomplete) showInfo(I18N["info.specify_incomplete"])
-                }
-            }
-        }
+        // Update State
+        State.transFile = transFile
+        State.translationFile = file
+        State.isOpened = true
 
         // Show info if comment not in default list
         if (!RecentFiles.getAll().contains(file.path)) {
@@ -790,11 +734,6 @@ class Controller : Initializable {
                 showInfo(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
             }
         }
-
-        // Update State
-        State.transFile = transFile
-        State.translationFile = file
-        State.isOpened = true
 
         // Update recent files
         CFileChooser.lastDirectory = file.parentFile
@@ -814,6 +753,9 @@ class Controller : Initializable {
 
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
+
+        // Check pic for pic render
+        checkPic()
 
         // Initialize workspace
         renderGroupBar()
@@ -885,6 +827,70 @@ class Controller : Initializable {
         State.stage.title = INFO["application.name"] + " - " + file.name
 
         Logger.info("Saved", "Controller")
+    }
+
+    fun checkPic() {
+        // Set TransFile.fileMap
+        val lost = ArrayList<String>()
+        for (picName in State.transFile.sortedPicNames) {
+            val picFile = State.translationFile.parentFile.resolve(picName)
+            State.transFile.addFile(picName, picFile)
+
+            if (!picFile.exists()) lost.add(picName)
+        }
+        if (lost.isNotEmpty()) {
+            val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
+            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
+                val defaultFile = File("")
+                val files = MutableList(lost.size) { defaultFile }
+                val chooser = FileChooser().also {
+                    val extensions = List(EXTENSIONS_PIC.size) { index -> "*${EXTENSIONS_PIC[index]}" }
+                    val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
+                    it.extensionFilters.add(fileFilter)
+                }
+
+                val dialog = Dialog<ButtonType>().also {
+                    it.dialogPane.prefWidth = 600.0
+                    it.dialogPane.prefHeight = 400.0
+                    it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+                    it.dialogPane.content = GridPane().also { gridPane ->
+                        gridPane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
+                        gridPane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
+                        for (i in lost.indices) {
+                            val lostLabel = Label(lost[i])
+                            val fileLabel = Label(defaultFile.path)
+                            val button = Button(I18N["dialog.specify.choose_btn"]) does {
+                                val picFile = chooser.showOpenDialog(State.stage) ?: return@does
+                                fileLabel.text = picFile.path
+                                files[i] = picFile
+                            }
+
+                            gridPane.add(lostLabel, 0, i + 1)
+                            gridPane.add(fileLabel, 1, i + 1)
+                            gridPane.add(button, 2, i + 1)
+                        }
+                    }
+                }
+                val result = dialog.showAndWait()
+
+                if (!result.isPresent || result.get() == ButtonType.CANCEL) {
+                    showInfo(I18N["info.specify_incomplete"])
+                } else if (result.get() == ButtonType.APPLY) {
+                    var uncomplete = false
+                    for (i in lost.indices) {
+                        val picName = lost[i]
+                        val picFile = files[i]
+
+                        if (picFile == defaultFile) {
+                            uncomplete = true
+                            continue
+                        }
+                        State.transFile.setFile(picName, picFile)
+                    }
+                    if (uncomplete) showInfo(I18N["info.specify_incomplete"])
+                }
+            }
+        }
     }
 
     fun recovery(from: File, to: File) {

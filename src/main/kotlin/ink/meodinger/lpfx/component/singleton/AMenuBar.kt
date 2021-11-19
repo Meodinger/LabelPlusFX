@@ -243,6 +243,7 @@ object AMenuBar : MenuBar() {
             false
         }.map { it.name }.collect(Collectors.toList())
 
+        // todo: use checkPic()
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
                 showInfo(I18N["info.required_at_least_1_pic"])

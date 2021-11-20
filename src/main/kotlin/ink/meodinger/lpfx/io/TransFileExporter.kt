@@ -15,12 +15,13 @@ import java.nio.charset.StandardCharsets
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.io
+ * Have fun with my code!
  */
 
 /**
  * Export TransFile content String in target FileType
  */
+@Throws(IOException::class)
 fun exportAsString(transFile: TransFile, targetType: FileType): String {
 
     /**

@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.util.resource.get
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.scene.control.TextFormatter
+import java.io.File
 import java.util.*
 import kotlin.collections.LinkedHashMap
 import kotlin.system.exitProcess
@@ -88,12 +89,12 @@ const val GRAPHICS_CIRCLE_RADIUS = 8.0
 /**
  * Extensions
  */
-val EXTENSIONS_PIC = listOf(".png", ".jpg", ".jpeg")
-const val EXTENSION_LP = ".txt"
-const val EXTENSION_MEO = ".json"
-const val EXTENSION_PACK = ".zip"
-const val EXTENSION_BAK = ".bak"
-const val FOLDER_NAME_BAK = "bak"
+val EXTENSIONS_PIC = listOf("png", "jpg", "jpeg")
+const val EXTENSION_LP = "txt"
+const val EXTENSION_MEO = "json"
+const val EXTENSION_PACK = "zip"
+const val EXTENSION_BAK = "bak"
+const val FOLDER_NAME_BAK = "backup"
 
 /**
  * Filenames
@@ -164,11 +165,11 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        private fun isLPFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_LP)
-        private fun isMeoFile(filePath: String): Boolean = filePath.endsWith(EXTENSION_MEO)
-        fun getType(path: String): FileType {
-            if (isLPFile(path)) return LPFile
-            if (isMeoFile(path)) return MeoFile
+        private fun isLPFile(file: File): Boolean = file.extension == EXTENSION_LP
+        private fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_MEO
+        fun getType(file: File): FileType {
+            if (isLPFile(file)) return LPFile
+            if (isMeoFile(file)) return MeoFile
             throw IllegalArgumentException(I18N["exception.illegal_argument.invalid_file_extension"])
         }
     }

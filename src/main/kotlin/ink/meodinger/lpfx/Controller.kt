@@ -18,13 +18,13 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.accelerator.isControlDown
-import ink.meodinger.lpfx.util.component.does
-import ink.meodinger.lpfx.util.component.expandAll
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
+import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.*
 
@@ -36,19 +36,26 @@ import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.GridPane
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import java.io.File
 import java.io.IOException
 import java.net.URL
+import java.nio.file.Files
 import java.util.*
+import java.util.stream.Collectors
 import kotlin.collections.ArrayList
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.pathString
 
 
 /**
@@ -95,7 +102,7 @@ class Controller : Initializable {
             return object : TimerTask() {
                 override fun run() {
                     if (State.isChanged) {
-                        val bak = State.getBakFolder().resolve("${Date().time}${EXTENSION_BAK}")
+                        val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
                         try {
                             export(bak, FileType.MeoFile, State.transFile)
                         } catch (e: IOException) {
@@ -611,6 +618,111 @@ class Controller : Initializable {
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
     }
 
+    private fun checkPic() {
+        // Pictures lost?
+        val lost = ArrayList<File>()
+        for (picName in State.transFile.sortedPicNames) {
+            val picFile = State.transFile.getFile(picName)
+            if (!picFile.exists()) lost.add(picFile)
+        }
+        if (lost.isEmpty()) return
+
+        // Specify now?
+        val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
+        if (!confirm.isPresent || confirm.get() != ButtonType.YES) return
+
+        val defaultFile = File("")
+        val files = MutableList(lost.size) { defaultFile }
+        val labels = MutableList(lost.size) { Label().also {
+            it.prefWidth = 300.0
+            it.tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
+                init { bind(it.textProperty()) }
+                override fun computeValue(): Tooltip = Tooltip(it.text)
+            })
+        } }
+
+        val chooser = FileChooser().also {
+            val extensions = List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
+            val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
+            it.extensionFilters.add(fileFilter)
+            it.initialDirectory = State.translationFile.parentFile
+        }
+        val dialog = Dialog<ButtonType>().also {
+            it.dialogPane.prefWidth = 600.0
+            it.dialogPane.prefHeight = 400.0
+            it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+        } withContent BorderPane().apply {
+            val gap = 16.0
+            val gridPane = GridPane().also { pane ->
+                pane.hgap = gap
+                pane.vgap = gap
+                pane.padding = Insets(gap)
+                pane.alignment = Pos.TOP_CENTER
+
+                pane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
+                pane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
+                for (i in lost.indices) {
+                    val lostLabel = Label(lost[i].name)
+                    val button = Button(I18N["dialog.specify.choose_btn"]) does {
+                        val picFile = chooser.showOpenDialog(State.stage) ?: return@does
+                        labels[i].text = picFile.path
+                        files[i] = picFile
+                    }
+
+                    pane.add(lostLabel, 0, i + 1)
+                    pane.add(labels[i], 1, i + 1)
+                    pane.add(button, 2, i + 1)
+                }
+            }
+            val stackPane = StackPane(gridPane)
+            val scrollPane = ScrollPane(stackPane)
+            stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - gap)
+
+            center(scrollPane) { this.style = "-fx-background-color:transparent;" }
+            bottom(HBox()) {
+                this.alignment = Pos.CENTER_RIGHT
+                this.padding = Insets(gap, gap / 2, gap / 2, gap)
+                this.children.add(Button("Specify Project Folder") does {
+                    val confirmPre = showConfirm("Preserve?")
+                    val preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
+                    val directory = DirectoryChooser().showDialog(State.stage) ?: return@does
+
+                    val newPicPaths = Files
+                        .walk(directory.toPath())
+                        .filter { EXTENSIONS_PIC.contains(it.extension.lowercase()) }
+                        .collect(Collectors.toList())
+                    for (i in lost.indices) {
+                        if (preserve && files[i] != defaultFile) continue
+                        for (newPicPath in newPicPaths) {
+                            if (newPicPath.nameWithoutExtension == lost[i].nameWithoutExtension) {
+                                labels[i].text = newPicPath.pathString
+                                files[i] = newPicPath.toFile()
+                            }
+                        }
+                    }
+                })
+            }
+        }
+        val result = dialog.showAndWait()
+
+        if (!result.isPresent || result.get() == ButtonType.CANCEL) {
+            showInfo(I18N["info.specify_incomplete"])
+        } else if (result.get() == ButtonType.APPLY) {
+            var uncomplete = false
+            for (i in lost.indices) {
+                val picName = lost[i].name
+                val picFile = files[i]
+
+                if (picFile == defaultFile) {
+                    uncomplete = true
+                    continue
+                }
+                State.transFile.setFile(picName, picFile)
+            }
+            if (uncomplete) showInfo(I18N["info.specify_incomplete"])
+        }
+    }
+
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         init()
         listen()
@@ -629,7 +741,7 @@ class Controller : Initializable {
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
-                save(State.translationFile, FileType.getType(State.translationFile.path), true)
+                save(State.translationFile, FileType.getType(State.translationFile), true)
                 return false
             }
             ButtonType.NO -> return false
@@ -648,7 +760,7 @@ class Controller : Initializable {
         if (dir.isDirectory && dir.listFiles() != null) {
             val files = dir.listFiles()
             if (files != null) for (f in files) if (f.isFile) {
-                for (extension in EXTENSIONS_PIC) if (f.name.endsWith(extension)) {
+                for (extension in EXTENSIONS_PIC) if (f.extension == extension) {
                     potentialPics.add(f.name)
                 }
             }
@@ -705,6 +817,11 @@ class Controller : Initializable {
         val transFile: TransFile
         try {
             transFile = load(file, type)
+            // Setup PicFiles
+            for (picName in transFile.transMap.keys) {
+                val picFile = file.parentFile.resolve(picName)
+                transFile.addFile(picName, picFile)
+            }
         } catch (e: IOException) {
             Logger.error("Open failed", "Controller")
             Logger.exception(e)
@@ -777,7 +894,7 @@ class Controller : Initializable {
         // Backup if overwrite
         var bak: File? = null
         if (State.translationFile.path == file.path) {
-            bak = File(State.translationFile.path + EXTENSION_BAK)
+            bak = File("${State.translationFile.path}.$EXTENSION_BAK")
 
             try {
                 transfer(State.translationFile, bak)
@@ -829,70 +946,6 @@ class Controller : Initializable {
         Logger.info("Saved", "Controller")
     }
 
-    fun checkPic() {
-        // Set TransFile.fileMap
-        val lost = ArrayList<String>()
-        for (picName in State.transFile.sortedPicNames) {
-            val picFile = State.translationFile.parentFile.resolve(picName)
-            State.transFile.addFile(picName, picFile)
-
-            if (!picFile.exists()) lost.add(picName)
-        }
-        if (lost.isNotEmpty()) {
-            val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
-            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-                val defaultFile = File("")
-                val files = MutableList(lost.size) { defaultFile }
-                val chooser = FileChooser().also {
-                    val extensions = List(EXTENSIONS_PIC.size) { index -> "*${EXTENSIONS_PIC[index]}" }
-                    val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
-                    it.extensionFilters.add(fileFilter)
-                }
-
-                val dialog = Dialog<ButtonType>().also {
-                    it.dialogPane.prefWidth = 600.0
-                    it.dialogPane.prefHeight = 400.0
-                    it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-                    it.dialogPane.content = GridPane().also { gridPane ->
-                        gridPane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
-                        gridPane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
-                        for (i in lost.indices) {
-                            val lostLabel = Label(lost[i])
-                            val fileLabel = Label(defaultFile.path)
-                            val button = Button(I18N["dialog.specify.choose_btn"]) does {
-                                val picFile = chooser.showOpenDialog(State.stage) ?: return@does
-                                fileLabel.text = picFile.path
-                                files[i] = picFile
-                            }
-
-                            gridPane.add(lostLabel, 0, i + 1)
-                            gridPane.add(fileLabel, 1, i + 1)
-                            gridPane.add(button, 2, i + 1)
-                        }
-                    }
-                }
-                val result = dialog.showAndWait()
-
-                if (!result.isPresent || result.get() == ButtonType.CANCEL) {
-                    showInfo(I18N["info.specify_incomplete"])
-                } else if (result.get() == ButtonType.APPLY) {
-                    var uncomplete = false
-                    for (i in lost.indices) {
-                        val picName = lost[i]
-                        val picFile = files[i]
-
-                        if (picFile == defaultFile) {
-                            uncomplete = true
-                            continue
-                        }
-                        State.transFile.setFile(picName, picFile)
-                    }
-                    if (uncomplete) showInfo(I18N["info.specify_incomplete"])
-                }
-            }
-        }
-    }
-
     fun recovery(from: File, to: File) {
         Logger.info("Recovering from ${from.path}", "Controller")
 
@@ -907,7 +960,7 @@ class Controller : Initializable {
             showException(e)
         }
 
-        open(to, FileType.getType(to.path))
+        open(to, FileType.getType(to))
     }
     fun export(file: File, type: FileType) {
         Logger.info("Exporting to ${file.path}", "Controller")
@@ -949,7 +1002,7 @@ class Controller : Initializable {
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
             when (it) {
                 ButtonType.YES -> {
-                    save(State.translationFile, FileType.getType(State.translationFile.path), false)
+                    save(State.translationFile, FileType.getType(State.translationFile), false)
                     State.application.stop()
                 }
                 ButtonType.NO -> {
@@ -1123,7 +1176,7 @@ class Controller : Initializable {
         // Write "love you" to comment, once a time
         fun loveYouForever() {
             State.transFile.comment = "I Love You Forever  --Yours, Monika"
-            save(State.translationFile, FileType.getType(State.translationFile.path), true)
+            save(State.translationFile, FileType.getType(State.translationFile), true)
 
             val monika = State.getFileFolder().resolve("monika.json")
             save(monika, FileType.MeoFile, true)

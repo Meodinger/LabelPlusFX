@@ -1,12 +1,15 @@
 package ink.meodinger.lpfx.util.component
 
 import javafx.scene.Node
+import javafx.scene.control.Dialog
 import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Pane
 
 /**
  * Author: Meodinger
  * Date: 2021/9/30
- * Location: info.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**
@@ -40,3 +43,63 @@ var Node.anchorPaneRight: Double
 var Node.anchorPaneBottom: Double
     get() =  AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
+
+infix fun Pane.withContent(content: Node): Pane {
+    this.children.add(content)
+    return this
+}
+
+infix fun Dialog<*>.withContent(content: Node) : Dialog<*> {
+    this.dialogPane.content = content
+    return this
+}
+
+/**
+ * Apply a node to BorderPane center
+ * @param node Node to apply
+ * @param operation Operation to node (will translate to node.apply(operation))
+ * @return this BorderPane
+ */
+fun <T : Node> BorderPane.center(node : T, operation: T.() -> Unit): BorderPane {
+    return this.apply { this.center = node.apply(operation) }
+}
+
+/**
+ * Apply a node to BorderPane top
+ * @param node Node to apply
+ * @param operation Operation to node (will translate to node.apply(operation))
+ * @return this BorderPane
+ */
+fun <T : Node> BorderPane.top(node : T, operation: T.() -> Unit): BorderPane {
+    return this.apply { this.top = node.apply(operation) }
+}
+
+/**
+ * Apply a node to BorderPane bottom
+ * @param node Node to apply
+ * @param operation Operation to node (will translate to node.apply(operation))
+ * @return this BorderPane
+ */
+fun <T : Node> BorderPane.bottom(node : T, operation: T.() -> Unit): BorderPane {
+    return this.apply { this.bottom = node.apply(operation) }
+}
+
+/**
+ * Apply a node to BorderPane left
+ * @param node Node to apply
+ * @param operation Operation to node (will translate to node.apply(operation))
+ * @return this BorderPane
+ */
+fun <T : Node> BorderPane.left(node : T, operation: T.() -> Unit): BorderPane {
+    return this.apply { this.left = node.apply(operation) }
+}
+
+/**
+ * Apply a node to BorderPane right
+ * @param node Node to apply
+ * @param operation Operation to node (will translate to node.apply(operation))
+ * @return this BorderPane
+ */
+fun <T : Node> BorderPane.right(node : T, operation: T.() -> Unit): BorderPane {
+    return this.apply { this.right = node.apply(operation) }
+}

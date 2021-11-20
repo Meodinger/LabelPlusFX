@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.io
+ * Have fun with my code!
  */
 
 /**
@@ -27,7 +27,7 @@ fun pack(target: File, transFile: TransFile) {
     zip.zip(TEMPLATE_ZH, "/ps_script_res/zh.psd")
     zip.zip(TEMPLATE_EN, "/ps_script_res/en.psd")
 
-    val content = exportAsString(transFile, FileType.getType(target.path))
+    val content = exportAsString(transFile, FileType.getType(target))
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.json")
 
     for (picName in transFile.sortedPicNames) {

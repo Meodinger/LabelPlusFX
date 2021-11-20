@@ -13,7 +13,7 @@ import javafx.scene.text.TextAlignment
 /**
  * Author: Meodinger
  * Date: 2021/9/30
- * Location: info.meodinger.lpfx.util.component
+ * Have fun with my code!
  */
 
 /**
@@ -43,12 +43,6 @@ operator fun Text.invoke(
 
 infix fun Button.does(onAction: Button.() -> Unit): Button {
     this.setOnAction { onAction(this) }
-
-    return this
-}
-
-infix fun Pane.withContent(content: Node): Pane {
-    this.children.add(content)
 
     return this
 }

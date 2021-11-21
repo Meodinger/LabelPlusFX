@@ -1,10 +1,7 @@
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.component.*
-import ink.meodinger.lpfx.component.common.CComboBox
-import ink.meodinger.lpfx.component.common.CFileChooser
-import ink.meodinger.lpfx.component.common.CLigatureArea
-import ink.meodinger.lpfx.component.common.CTextSlider
+import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.component.singleton.AMenuBar
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
@@ -16,6 +13,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.util.TimerTaskManager
 import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.accelerator.isControlDown
 import ink.meodinger.lpfx.util.component.*
@@ -46,6 +44,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
+import javafx.util.Duration
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -95,36 +94,17 @@ class Controller : Initializable {
         setWorkMode(WorkMode.values()[(now + 1) % all])
     }
 
-    private class BackupTaskManager {
-
-        private var task: TimerTask = getNewTask()
-
-        private fun getNewTask(): TimerTask {
-            return object : TimerTask() {
-                override fun run() {
-                    if (State.isChanged) {
-                        val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
-                        try {
-                            export(bak, FileType.MeoFile, State.transFile)
-                        } catch (e: IOException) {
-                            Logger.error("Auto-backup failed")
-                            Logger.exception(e)
-                        }
-                    }
-                }
+    private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
+        if (State.isChanged) {
+            val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
+            try {
+                export(bak, FileType.MeoFile, State.transFile)
+            } catch (e: IOException) {
+                Logger.error("Auto-backup failed")
+                Logger.exception(e)
             }
         }
-
-        fun refresh() {
-            task.cancel()
-            task = getNewTask()
-        }
-
-        fun getTimerTask(): TimerTask = task
-
     }
-    private val taskManager = BackupTaskManager()
-    private val timer = Timer()
 
     /**
      * Component Initialize
@@ -619,26 +599,40 @@ class Controller : Initializable {
     }
 
     private fun checkPic() {
+        // useful variables
+        val unspecified = I18N["specify.unspecified"]
+        val picCount = State.transFile.transMap.size
+        val picNames = State.transFile.sortedPicNames
+
         // Pictures lost?
-        val lost = ArrayList<File>()
-        for (picName in State.transFile.sortedPicNames) {
-            val picFile = State.transFile.getFile(picName)
-            if (!picFile.exists()) lost.add(picFile)
+        var lost = false
+        for (picName in picNames) if (!State.transFile.getFile(picName).exists()) {
+            lost = true
+            break
         }
-        if (lost.isEmpty()) return
+        if (!lost) return
 
         // Specify now?
-        val confirm = showConfirm(I18N["confirm.specify_lost_pictures"])
+        val confirm = showConfirm(I18N["specify.confirm.lost_pictures"])
         if (!confirm.isPresent || confirm.get() != ButtonType.YES) return
 
+        // Prepare workspace
         val defaultFile = File("")
-        val files = MutableList(lost.size) { defaultFile }
-        val labels = MutableList(lost.size) { Label().also {
-            it.prefWidth = 300.0
-            it.tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
-                init { bind(it.textProperty()) }
-                override fun computeValue(): Tooltip = Tooltip(it.text)
+        val files = MutableList(picCount) {
+            val file = State.transFile.getFile(picNames[it])
+            if (file.exists()) file else defaultFile
+        }
+        val labels = MutableList(picCount) { CRollerLabel().also { label ->
+            label.prefWidth = 300.0
+            label.tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
+                init { bind(label.textProperty()) }
+                override fun computeValue(): Tooltip = Tooltip(label.text).also { it.showDelay = Duration(0.0) }
             })
+            label.textFillProperty().bind(object : ObjectBinding<Color>() {
+                init { bind(label.textProperty()) }
+                override fun computeValue(): Color = if (label.text == unspecified) Color.RED else Color.BLACK
+            })
+            if (files[it] != defaultFile) label.text = files[it].path else label.text = unspecified
         } }
 
         val fileChooser = FileChooser().also {
@@ -654,7 +648,8 @@ class Controller : Initializable {
             it.dialogPane.prefWidth = 600.0
             it.dialogPane.prefHeight = 400.0
             it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-        }.withContent(BorderPane()) {
+        }.withContent(BorderPane()) { d ->
+            val dialogWindow = d.dialogPane.scene.window
             val gap = 16.0
             val gridPane = GridPane().also { pane ->
                 pane.hgap = gap
@@ -662,12 +657,13 @@ class Controller : Initializable {
                 pane.padding = Insets(gap)
                 pane.alignment = Pos.TOP_CENTER
 
-                pane.add(Label(I18N["dialog.specify.pic_name"]), 0, 0)
-                pane.add(Label(I18N["dialog.specify.pic_path"]), 1, 0)
-                for (i in lost.indices) {
-                    val lostLabel = Label(lost[i].name)
-                    val button = Button(I18N["dialog.specify.choose_btn"]) does {
-                        val picFile = fileChooser.showOpenDialog(it.dialogPane.scene.window) ?: return@does
+                pane.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
+                pane.add(Label(I18N["specify.dialog.pic_path"]), 1, 0)
+                for (i in 0 until picCount) {
+                    val lostLabel = Label(picNames[i])
+                    val button = Button(I18N["specify.dialog.choose_file"]) does {
+                        // Manually specify pic file
+                        val picFile = fileChooser.showOpenDialog(dialogWindow) ?: return@does
                         labels[i].text = picFile.path
                         files[i] = picFile
                     }
@@ -683,35 +679,41 @@ class Controller : Initializable {
 
             center(scrollPane) { this.style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
-                val dirChooser = DirectoryChooser().also {
-                    it.initialDirectory = fileChooser.initialDirectory
+                val dirChooser = DirectoryChooser().also { chooser ->
+                    chooser.initialDirectory = State.translationFile.parentFile
                 }
                 this.alignment = Pos.CENTER_RIGHT
                 this.padding = Insets(gap, gap / 2, gap / 2, gap)
-                this.children.add(Button("Specify Project Folder") does {
+                this.children.add(Button(I18N["specify.dialog.choose_folder"]) does {
+                    // need show confirm?
                     var show = false
                     for (label in labels) if (label.text.isNotBlank()) {
                         show = true
                         break
                     }
 
+                    // preserve already-set path?
                     var preserve = false
                     if (show) {
-                        val confirmPre = showConfirm("Preserve?")
+                        val confirmPre = showConfirm(I18N["specify.confirm.preserve"])
                         preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
                     }
 
-                    val directory = dirChooser.showDialog(it.dialogPane.scene.window) ?: return@does
+                    // get project folder
+                    val directory = dirChooser.showDialog(dialogWindow) ?: return@does
 
+                    // auto-fill
                     val newPicPaths = Files
                         .walk(directory.toPath())
-                        .filter { EXTENSIONS_PIC.contains(it.extension.lowercase()) }
+                        .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                         .collect(Collectors.toList())
-                    for (i in lost.indices) {
+                    for (i in 0 until picCount) {
                         if (preserve && files[i] != defaultFile) continue
                         for (j in newPicPaths.indices) {
-                            if (newPicPaths[j].name == lost[i].name ||
-                                newPicPaths[j].nameWithoutExtension == lost[i].nameWithoutExtension
+                            val oldPicFile = State.transFile.getFile(picNames[i])
+                            // check full filename & simple filename
+                            if (newPicPaths[j].name == oldPicFile.name ||
+                                newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
                             ) {
                                 labels[i].text = newPicPaths[j].pathString
                                 files[i] = newPicPaths[j].toFile()
@@ -729,11 +731,11 @@ class Controller : Initializable {
         val result = dialog.showAndWait()
 
         if (!result.isPresent || result.get() == ButtonType.CANCEL) {
-            showInfo(I18N["info.specify_incomplete"])
+            showInfo(I18N["specify.info.incomplete"])
         } else if (result.get() == ButtonType.APPLY) {
             var uncomplete = false
-            for (i in lost.indices) {
-                val picName = lost[i].name
+            for (i in 0 until picCount) {
+                val picName = picNames[i]
                 val picFile = files[i]
 
                 if (picFile == defaultFile) {
@@ -742,7 +744,7 @@ class Controller : Initializable {
                 }
                 State.transFile.setFile(picName, picFile)
             }
-            if (uncomplete) showInfo(I18N["info.specify_incomplete"])
+            if (uncomplete) showInfo(I18N["specify.info.incomplete"])
         }
     }
 
@@ -881,10 +883,11 @@ class Controller : Initializable {
         AMenuBar.updateOpenRecent()
 
         // Auto backup
-        taskManager.refresh()
+        backupManager.clear()
         val bakDir = State.getBakFolder()
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
-            timer.schedule(taskManager.getTimerTask(), AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD)
+            backupManager.refresh()
+            backupManager.schedule()
             Logger.info("Scheduled auto-backup", "Controller")
         } else {
             Logger.warning("Auto-backup unavailable", "Controller")
@@ -1038,7 +1041,7 @@ class Controller : Initializable {
         }
     }
     fun reset() {
-        taskManager.refresh()
+        backupManager.clear()
 
         // cSlider
         // cPicBox

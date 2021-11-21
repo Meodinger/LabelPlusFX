@@ -47,17 +47,6 @@ var Node.anchorPaneBottom: Double
 /**
  * Set pane.children
  * @param content Content node of Pane
- * @return this pane ref
- */
-infix fun <T : Node> Pane.withContent(content: T): Pane {
-    this.children.clear()
-    this.children.add(content)
-    return this
-}
-
-/**
- * Set pane.children
- * @param content Content node of Pane
  * @param operation Lambda with arguments of Node as this and Pane as it
  * @return this pane ref
  */
@@ -66,14 +55,9 @@ fun <T : Node> Pane.withContent(content: T, operation: T.(Pane) -> Unit): Pane {
     this.children.add(content.apply { operation.invoke(this, this@withContent) })
     return this
 }
-
-/**
- * Set dialogPane.content
- * @param content Content node of DialogPane
- * @return this dialog ref
- */
-infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
-    this.dialogPane.content = content
+infix fun <T : Node> Pane.withContent(content: T): Pane {
+    this.children.clear()
+    this.children.add(content)
     return this
 }
 
@@ -87,6 +71,10 @@ fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.(Dialog<R>) -> 
     this.dialogPane.content = content.apply { operation.invoke(this, this@withContent) }
     return this
 }
+infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
+    this.dialogPane.content = content
+    return this
+}
 
 /**
  * Apply a node to BorderPane center
@@ -94,8 +82,11 @@ fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.(Dialog<R>) -> 
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.center(node : T, operation: T.() -> Unit): BorderPane {
-    return this.apply { this.center = node.apply(operation) }
+fun <T : Node> BorderPane.center(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
+    return this.apply { this.center = node.also { operation(it, this) } }
+}
+fun <T : Node> BorderPane.center(node: T): BorderPane {
+    return this.apply { this.center = node }
 }
 
 /**
@@ -104,8 +95,11 @@ fun <T : Node> BorderPane.center(node : T, operation: T.() -> Unit): BorderPane 
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.top(node : T, operation: T.() -> Unit): BorderPane {
-    return this.apply { this.top = node.apply(operation) }
+fun <T : Node> BorderPane.top(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
+    return this.apply { this.top = node.also { operation(it, this) } }
+}
+fun <T : Node> BorderPane.top(node: T): BorderPane {
+    return this.apply { this.top = node }
 }
 
 /**
@@ -114,8 +108,11 @@ fun <T : Node> BorderPane.top(node : T, operation: T.() -> Unit): BorderPane {
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.bottom(node : T, operation: T.() -> Unit): BorderPane {
-    return this.apply { this.bottom = node.apply(operation) }
+fun <T : Node> BorderPane.bottom(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
+    return this.apply { this.bottom = node.also { operation(it, this) } }
+}
+fun <T : Node> BorderPane.bottom(node: T): BorderPane {
+    return this.apply { this.bottom = node }
 }
 
 /**
@@ -124,8 +121,11 @@ fun <T : Node> BorderPane.bottom(node : T, operation: T.() -> Unit): BorderPane 
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.left(node : T, operation: T.() -> Unit): BorderPane {
-    return this.apply { this.left = node.apply(operation) }
+fun <T : Node> BorderPane.left(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
+    return this.apply { this.left = node.also { operation(it, this) } }
+}
+fun <T : Node> BorderPane.left(node: T): BorderPane {
+    return this.apply { this.left = node }
 }
 
 /**
@@ -134,6 +134,9 @@ fun <T : Node> BorderPane.left(node : T, operation: T.() -> Unit): BorderPane {
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.right(node : T, operation: T.() -> Unit): BorderPane {
-    return this.apply { this.right = node.apply(operation) }
+fun <T : Node> BorderPane.right(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
+    return this.apply { this.right = node.also { operation(it, this) } }
+}
+fun <T : Node> BorderPane.right(node: T): BorderPane {
+    return this.apply { this.right = node }
 }

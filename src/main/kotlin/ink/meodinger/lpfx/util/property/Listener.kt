@@ -6,10 +6,15 @@ import javafx.beans.value.ChangeListener
 /**
  * Author: Meodinger
  * Date: 2021/10/11
- * Location: info.meodinger.lpfx.util.property
+ * Have fun with my code!
  */
 
 /**
  * For none-argument use
  */
 fun <T> onChange(action: () -> Unit) = ChangeListener<T> { _, _, _ -> action() }
+
+/**
+ * For new-argument use
+ */
+fun <T> onNew(action: (T) -> Unit) = ChangeListener<T> { _, _, new -> action(new) }

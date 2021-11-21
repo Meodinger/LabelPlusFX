@@ -132,7 +132,10 @@ object State {
         Logger.info("Set $picName->Index=$index @groupId=$groupId", "State")
     }
 
-    fun getPicFileNow(): File = transFile.getFile(currentPicName)
+    fun getPicFileNow(): File {
+        if (!isOpened || currentPicName == "") return File("")
+        return transFile.getFile(currentPicName)
+    }
     fun getFileFolder(): File = translationFile.parentFile
     fun getBakFolder(): File = translationFile.parentFile.resolve(FOLDER_NAME_BAK)
 

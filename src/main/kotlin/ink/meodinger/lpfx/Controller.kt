@@ -54,6 +54,7 @@ import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 import kotlin.io.path.extension
+import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 
@@ -331,8 +332,7 @@ class Controller : Initializable {
                 cLabelPane.moveToCenter()
         })
         cLabelPane.heightProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists())
-                cLabelPane.moveToCenter()
+            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
 
         // Display default image
@@ -641,17 +641,20 @@ class Controller : Initializable {
             })
         } }
 
-        val chooser = FileChooser().also {
+        val fileChooser = FileChooser().also {
             val extensions = List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
             val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
             it.extensionFilters.add(fileFilter)
             it.initialDirectory = State.translationFile.parentFile
         }
+
         val dialog = Dialog<ButtonType>().also {
+            it.initOwner(State.stage)
+            it.title = "Specify lost Pictures"
             it.dialogPane.prefWidth = 600.0
             it.dialogPane.prefHeight = 400.0
             it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-        } withContent BorderPane().apply {
+        }.withContent(BorderPane()) {
             val gap = 16.0
             val gridPane = GridPane().also { pane ->
                 pane.hgap = gap
@@ -664,7 +667,7 @@ class Controller : Initializable {
                 for (i in lost.indices) {
                     val lostLabel = Label(lost[i].name)
                     val button = Button(I18N["dialog.specify.choose_btn"]) does {
-                        val picFile = chooser.showOpenDialog(State.stage) ?: return@does
+                        val picFile = fileChooser.showOpenDialog(it.dialogPane.scene.window) ?: return@does
                         labels[i].text = picFile.path
                         files[i] = picFile
                     }
@@ -680,12 +683,25 @@ class Controller : Initializable {
 
             center(scrollPane) { this.style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
+                val dirChooser = DirectoryChooser().also {
+                    it.initialDirectory = fileChooser.initialDirectory
+                }
                 this.alignment = Pos.CENTER_RIGHT
                 this.padding = Insets(gap, gap / 2, gap / 2, gap)
                 this.children.add(Button("Specify Project Folder") does {
-                    val confirmPre = showConfirm("Preserve?")
-                    val preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
-                    val directory = DirectoryChooser().showDialog(State.stage) ?: return@does
+                    var show = false
+                    for (label in labels) if (label.text.isNotBlank()) {
+                        show = true
+                        break
+                    }
+
+                    var preserve = false
+                    if (show) {
+                        val confirmPre = showConfirm("Preserve?")
+                        preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
+                    }
+
+                    val directory = dirChooser.showDialog(it.dialogPane.scene.window) ?: return@does
 
                     val newPicPaths = Files
                         .walk(directory.toPath())
@@ -693,10 +709,17 @@ class Controller : Initializable {
                         .collect(Collectors.toList())
                     for (i in lost.indices) {
                         if (preserve && files[i] != defaultFile) continue
-                        for (newPicPath in newPicPaths) {
-                            if (newPicPath.nameWithoutExtension == lost[i].nameWithoutExtension) {
-                                labels[i].text = newPicPath.pathString
-                                files[i] = newPicPath.toFile()
+                        for (j in newPicPaths.indices) {
+                            if (newPicPaths[j].name == lost[i].name ||
+                                newPicPaths[j].nameWithoutExtension == lost[i].nameWithoutExtension
+                            ) {
+                                labels[i].text = newPicPaths[j].pathString
+                                files[i] = newPicPaths[j].toFile()
+
+                                // swap
+                                val temp = newPicPaths.last()
+                                newPicPaths[newPicPaths.size - 1] = newPicPaths[j]
+                                newPicPaths[j] = temp
                             }
                         }
                     }

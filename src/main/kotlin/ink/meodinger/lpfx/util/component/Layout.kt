@@ -44,13 +44,47 @@ var Node.anchorPaneBottom: Double
     get() =  AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
 
-infix fun Pane.withContent(content: Node): Pane {
+/**
+ * Set pane.children
+ * @param content Content node of Pane
+ * @return this pane ref
+ */
+infix fun <T : Node> Pane.withContent(content: T): Pane {
+    this.children.clear()
     this.children.add(content)
     return this
 }
 
-infix fun Dialog<*>.withContent(content: Node) : Dialog<*> {
+/**
+ * Set pane.children
+ * @param content Content node of Pane
+ * @param operation Lambda with arguments of Node as this and Pane as it
+ * @return this pane ref
+ */
+fun <T : Node> Pane.withContent(content: T, operation: T.(Pane) -> Unit): Pane {
+    this.children.clear()
+    this.children.add(content.apply { operation.invoke(this, this@withContent) })
+    return this
+}
+
+/**
+ * Set dialogPane.content
+ * @param content Content node of DialogPane
+ * @return this dialog ref
+ */
+infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
     this.dialogPane.content = content
+    return this
+}
+
+/**
+ * Set dialogPane.content
+ * @param content Content node of DialogPane
+ * @param operation Lambda with arguments of Node as this and Dialog as it
+ * @return this dialog ref
+ */
+fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.(Dialog<R>) -> Unit): Dialog<R> {
+    this.dialogPane.content = content.apply { operation.invoke(this, this@withContent) }
     return this
 }
 

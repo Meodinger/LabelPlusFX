@@ -3,6 +3,7 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.component.singleton.AMenuBar
+import ink.meodinger.lpfx.component.singleton.ASpecifyDialog
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -22,7 +23,6 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
-import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.*
 
@@ -34,28 +34,17 @@ import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
-import javafx.geometry.Insets
-import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
-import javafx.stage.DirectoryChooser
-import javafx.stage.FileChooser
-import javafx.util.Duration
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.nio.file.Files
 import java.util.*
-import java.util.stream.Collectors
 import kotlin.collections.ArrayList
-import kotlin.io.path.extension
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
 
 
 /**
@@ -598,161 +587,31 @@ class Controller : Initializable {
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
     }
 
-    private fun checkPic() {
-        // useful variables
-        val unspecified = I18N["specify.unspecified"]
-        val picCount = State.transFile.transMap.size
-        val picNames = State.transFile.sortedPicNames
-
-        // Pictures lost?
-        var lost = false
-        for (picName in picNames) if (!State.transFile.getFile(picName).exists()) {
-            lost = true
-            break
-        }
-        if (!lost) return
-
-        // Specify now?
-        val confirm = showConfirm(I18N["specify.confirm.lost_pictures"])
-        if (!confirm.isPresent || confirm.get() != ButtonType.YES) return
-
-        // Prepare workspace
-        val defaultFile = File("")
-        val files = MutableList(picCount) {
-            val file = State.transFile.getFile(picNames[it])
-            if (file.exists()) file else defaultFile
-        }
-        val labels = MutableList(picCount) { CRollerLabel().also { label ->
-            label.prefWidth = 300.0
-            label.tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
-                init { bind(label.textProperty()) }
-                override fun computeValue(): Tooltip = Tooltip(label.text).also { it.showDelay = Duration(0.0) }
-            })
-            label.textFillProperty().bind(object : ObjectBinding<Color>() {
-                init { bind(label.textProperty()) }
-                override fun computeValue(): Color = if (label.text == unspecified) Color.RED else Color.BLACK
-            })
-            if (files[it] != defaultFile) label.text = files[it].path else label.text = unspecified
-        } }
-
-        val fileChooser = FileChooser().also {
-            val extensions = List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
-            val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
-            it.extensionFilters.add(fileFilter)
-            it.initialDirectory = State.translationFile.parentFile
-        }
-
-        val dialog = Dialog<ButtonType>().also {
-            it.initOwner(State.stage)
-            it.title = "Specify lost Pictures"
-            it.dialogPane.prefWidth = 600.0
-            it.dialogPane.prefHeight = 400.0
-            it.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-        }.withContent(BorderPane()) { d ->
-            val dialogWindow = d.dialogPane.scene.window
-            val gap = 16.0
-            val gridPane = GridPane().also { pane ->
-                pane.hgap = gap
-                pane.vgap = gap
-                pane.padding = Insets(gap)
-                pane.alignment = Pos.TOP_CENTER
-
-                pane.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
-                pane.add(Label(I18N["specify.dialog.pic_path"]), 1, 0)
-                for (i in 0 until picCount) {
-                    val lostLabel = Label(picNames[i])
-                    val button = Button(I18N["specify.dialog.choose_file"]) does {
-                        // Manually specify pic file
-                        val picFile = fileChooser.showOpenDialog(dialogWindow) ?: return@does
-                        labels[i].text = picFile.path
-                        files[i] = picFile
-                    }
-
-                    pane.add(lostLabel, 0, i + 1)
-                    pane.add(labels[i], 1, i + 1)
-                    pane.add(button, 2, i + 1)
-                }
-            }
-            val stackPane = StackPane(gridPane)
-            val scrollPane = ScrollPane(stackPane)
-            stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - gap)
-
-            center(scrollPane) { this.style = "-fx-background-color:transparent;" }
-            bottom(HBox()) {
-                val dirChooser = DirectoryChooser().also { chooser ->
-                    chooser.initialDirectory = State.translationFile.parentFile
-                }
-                this.alignment = Pos.CENTER_RIGHT
-                this.padding = Insets(gap, gap / 2, gap / 2, gap)
-                this.children.add(Button(I18N["specify.dialog.choose_folder"]) does {
-                    // need show confirm?
-                    var show = false
-                    for (label in labels) if (label.text.isNotBlank()) {
-                        show = true
-                        break
-                    }
-
-                    // preserve already-set path?
-                    var preserve = false
-                    if (show) {
-                        val confirmPre = showConfirm(I18N["specify.confirm.preserve"])
-                        preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
-                    }
-
-                    // get project folder
-                    val directory = dirChooser.showDialog(dialogWindow) ?: return@does
-
-                    // auto-fill
-                    val newPicPaths = Files
-                        .walk(directory.toPath())
-                        .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
-                        .collect(Collectors.toList())
-                    for (i in 0 until picCount) {
-                        if (preserve && files[i] != defaultFile) continue
-                        for (j in newPicPaths.indices) {
-                            val oldPicFile = State.transFile.getFile(picNames[i])
-                            // check full filename & simple filename
-                            if (newPicPaths[j].name == oldPicFile.name ||
-                                newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
-                            ) {
-                                labels[i].text = newPicPaths[j].pathString
-                                files[i] = newPicPaths[j].toFile()
-
-                                // swap
-                                val temp = newPicPaths.last()
-                                newPicPaths[newPicPaths.size - 1] = newPicPaths[j]
-                                newPicPaths[j] = temp
-                            }
-                        }
-                    }
-                })
-            }
-        }
-        val result = dialog.showAndWait()
-
-        if (!result.isPresent || result.get() == ButtonType.CANCEL) {
-            showInfo(I18N["specify.info.incomplete"])
-        } else if (result.get() == ButtonType.APPLY) {
-            var uncomplete = false
-            for (i in 0 until picCount) {
-                val picName = picNames[i]
-                val picFile = files[i]
-
-                if (picFile == defaultFile) {
-                    uncomplete = true
-                    continue
-                }
-                State.transFile.setFile(picName, picFile)
-            }
-            if (uncomplete) showInfo(I18N["specify.info.incomplete"])
-        }
-    }
-
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         init()
         listen()
         effect()
         transform()
+    }
+
+    fun specifyPicFiles() {
+        val picFiles = ASpecifyDialog.specify(false)
+        if (picFiles.isEmpty()) showInfo(I18N["specify.info.incomplete"], State.stage)
+        else {
+            val picCount = State.transFile.picCount
+            val picNames = State.transFile.sortedPicNames
+            var uncomplete = false
+            for (i in 0 until picCount) {
+                val picName = picNames[i]
+                val picFile = picFiles[i]
+                if (!picFile.exists()) {
+                    uncomplete = true
+                    continue
+                }
+                State.transFile.setFile(picName, picFile)
+            }
+            if (uncomplete) showInfo(I18N["specify.info.incomplete"], State.stage)
+        }
     }
 
     fun stay(): Boolean {
@@ -762,7 +621,7 @@ class Controller : Initializable {
         if (!State.isChanged) return false
 
         // Opened but not saved
-        val result = showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"])
+        val result = showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"], State.stage)
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
@@ -795,7 +654,7 @@ class Controller : Initializable {
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Chose none, Cancel", "Controller")
-                showInfo(I18N["info.required_at_least_1_pic"])
+                showInfo(I18N["info.required_at_least_1_pic"], State.stage)
                 return false
             }
             pics.addAll(result.get())
@@ -826,8 +685,8 @@ class Controller : Initializable {
         } catch (e: IOException) {
             Logger.error("New failed", "Controller")
             Logger.exception(e)
-            showError(I18N["error.new_failed"])
-            showException(e)
+            showError(I18N["error.new_failed"], State.stage)
+            showException(e, State.stage)
             return false
         }
 
@@ -850,8 +709,8 @@ class Controller : Initializable {
         } catch (e: IOException) {
             Logger.error("Open failed", "Controller")
             Logger.exception(e)
-            showError(I18N["error.open_failed"])
-            showException(e)
+            showError(I18N["error.open_failed"], State.stage)
+            showException(e, State.stage)
             return
         }
         Logger.debug("Read TransFile: $transFile", "Controller")
@@ -873,7 +732,7 @@ class Controller : Initializable {
             }
             if (isModified) {
                 Logger.info("Showed modified comment", "Controller")
-                showInfo(I18N["common.info"], I18N["dialog.edited_comment.content"], comment)
+                showInfo(I18N["common.info"], I18N["dialog.edited_comment.content"], comment, State.stage)
             }
         }
 
@@ -891,14 +750,19 @@ class Controller : Initializable {
             Logger.info("Scheduled auto-backup", "Controller")
         } else {
             Logger.warning("Auto-backup unavailable", "Controller")
-            showError(I18N["error.auto_backup_unavailable"])
+            showError(I18N["error.auto_backup_unavailable"], State.stage)
         }
 
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
         // Check pic for pic render
-        checkPic()
+        if (State.transFile.checkLost().isNotEmpty()) {
+            // Specify now?
+            showConfirm(I18N["specify.confirm.lost_pictures"], State.stage).ifPresent {
+                if (it == ButtonType.YES) specifyPicFiles()
+            }
+        }
 
         // Initialize workspace
         renderGroupBar()
@@ -913,7 +777,7 @@ class Controller : Initializable {
 
         // Check folder
         if (!isSilent) if (file.parent != State.getFileFolder().path) {
-            val confirm = showConfirm(I18N["confirm.save_to_another_place"])
+            val confirm = showConfirm(I18N["confirm.save_to_another_place"], State.stage)
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
@@ -930,8 +794,8 @@ class Controller : Initializable {
                 Logger.error("TransFile backup failed", "Controller")
                 Logger.exception(e)
                 if (!isSilent) {
-                    showError(I18N["error.backup_failed"])
-                    showException(e)
+                    showError(I18N["error.backup_failed"], State.stage)
+                    showException(e, State.stage)
                 }
             }
         }
@@ -939,24 +803,24 @@ class Controller : Initializable {
         // Export
         try {
             export(file, type, State.transFile)
-            if (!isSilent) showInfo(I18N["info.saved_successfully"])
+            if (!isSilent) showInfo(I18N["info.saved_successfully"], State.stage)
         } catch (e: IOException) {
             Logger.error("Save failed", "Controller")
             Logger.exception(e)
             if (!isSilent) {
                 if (bak != null) {
-                    showError(String.format(I18N["error.save_failed_backed.format.bak"], bak.path))
+                    showError(String.format(I18N["error.save_failed_backed.format.bak"], bak.path), State.stage)
                 } else {
-                    showError(I18N["error.save_failed"])
+                    showError(I18N["error.save_failed"], State.stage)
                 }
-                showException(e)
+                showException(e, State.stage)
             }
             return
         }
 
         // Remove Backup
         if (bak != null) if (!bak.delete()) {
-            if (!isSilent) showError(I18N["error.backup_clear_failed"])
+            if (!isSilent) showError(I18N["error.backup_clear_failed"], State.stage)
             Logger.error("Backup removed failed", "Controller")
         } else {
             Logger.info("Backup removed", "Controller")
@@ -982,8 +846,8 @@ class Controller : Initializable {
         } catch (e: Exception) {
             Logger.error("Recover failed", "Controller")
             Logger.exception(e)
-            showError(I18N["error.recovery_failed"])
-            showException(e)
+            showError(I18N["error.recovery_failed"], State.stage)
+            showException(e, State.stage)
         }
 
         open(to, FileType.getType(to))
@@ -995,12 +859,12 @@ class Controller : Initializable {
             export(file, type, State.transFile)
 
             Logger.info("Exported to ${file.path}", "Controller")
-            showInfo(I18N["info.exported_successful"])
+            showInfo(I18N["info.exported_successful"], State.stage)
         } catch (e: IOException) {
             Logger.error("Export failed", "Controller")
             Logger.exception(e)
-            showError(I18N["error.export_failed"])
-            showException(e)
+            showError(I18N["error.export_failed"], State.stage)
+            showException(e, State.stage)
         }
     }
     fun pack(file: File) {
@@ -1010,12 +874,12 @@ class Controller : Initializable {
             pack(file, State.transFile)
 
             Logger.info("Packed to ${file.path}", "Controller")
-            showInfo(I18N["info.exported_successful"])
+            showInfo(I18N["info.exported_successful"], State.stage)
         } catch (e : IOException) {
             Logger.error("Pack failed", "Controller")
             Logger.exception(e)
-            showError(I18N["error.export_failed"])
-            showException(e)
+            showError(I18N["error.export_failed"], State.stage)
+            showException(e, State.stage)
         }
     }
 
@@ -1025,7 +889,7 @@ class Controller : Initializable {
             return
         }
 
-        showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"]).ifPresent {
+        showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"], State.stage).ifPresent {
             when (it) {
                 ButtonType.YES -> {
                     save(State.translationFile, FileType.getType(State.translationFile), false)
@@ -1096,12 +960,12 @@ class Controller : Initializable {
             )
         } catch (e: CLabelPane.LabelPaneException) {
             Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
-            showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName))
+            showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName), State.stage)
             return
         } catch (e: IOException) {
             Logger.error("LabelPane update failed", "Controller")
             Logger.exception(e)
-            showException(e)
+            showException(e, State.stage)
             return
         }
 
@@ -1197,7 +1061,6 @@ class Controller : Initializable {
     }
 
     // ----- EXTRA ----- //
-
     fun justMonika() {
         // Write "love you" to comment, once a time
         fun loveYouForever() {

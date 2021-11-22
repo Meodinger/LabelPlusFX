@@ -60,8 +60,8 @@ object Options {
         } catch (e: IOException) {
             Logger.fatal("Options load failed", "Options")
             Logger.exception(e)
-            showError(I18N["error.initialize_options_failed"])
-            showException(e)
+            showError(I18N["error.initialize_options_failed"], null)
+            showException(e, null)
             exitProcess(0)
         }
     }
@@ -93,16 +93,15 @@ object Options {
             RecentFiles.save()
             Logger.warning("Recent Files load failed", "Options")
             Logger.exception(e)
-            showDialog(
-                null,
-                PRELOAD_DIALOG_ERROR,
+            showError(
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
                     String.format(I18N["error.option.broken.format.s"], FileName_RecentFiles)
                 } else {
                     String.format(I18N["error.option.load_failed.format.s"], FileName_RecentFiles)
-                }
+                },
+                null
             )
         }
     }
@@ -123,16 +122,15 @@ object Options {
             Preference.save()
             Logger.warning("Preference load failed, using default", "Options")
             Logger.exception(e)
-            showDialog(
-                null,
-                PRELOAD_DIALOG_ERROR,
+            showError(
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
                     String.format(I18N["error.option.broken.format.s"], FileName_Preference)
                 } else {
                     String.format(I18N["error.option.load_failed.format.s"], FileName_Preference)
-                }
+                },
+                null
             )
         }
     }
@@ -153,16 +151,15 @@ object Options {
             Settings.save()
             Logger.warning("Settings load failed, using default", "Options")
             Logger.exception(e)
-            showDialog(
-                null,
-                PRELOAD_DIALOG_ERROR,
+            showError(
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
                     String.format(I18N["error.option.broken.format.s"], FileName_Settings)
                 } else {
                     String.format(I18N["error.option.load_failed.format.s"], FileName_Settings)
-                }
+                },
+                null
             )
         }
     }

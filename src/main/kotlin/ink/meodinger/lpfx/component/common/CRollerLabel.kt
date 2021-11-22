@@ -72,6 +72,7 @@ class CRollerLabel(contentText: String) : Region() {
             rollerManager.schedule()
         })
 
+        rollerManager.schedule()
     }
 
     private fun roll(text: String): String {

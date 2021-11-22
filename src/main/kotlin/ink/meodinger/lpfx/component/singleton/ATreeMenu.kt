@@ -55,7 +55,7 @@ object ATreeMenu : ContextMenu() {
         r_addGroupDialog.result = null
         r_addGroupDialog.showAndWait().ifPresent { newGroup ->
             if (State.transFile.groupNames.contains(newGroup.name)) {
-                showError(I18N["error.same_group_name"])
+                showError(I18N["error.same_group_name"], State.stage)
                 return@ifPresent
             }
 
@@ -81,7 +81,7 @@ object ATreeMenu : ContextMenu() {
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
             if (State.transFile.groupNames.contains(newName)) {
-                showError(I18N["error.same_group_name"])
+                showError(I18N["error.same_group_name"], State.stage)
                 return@ifPresent
             }
 
@@ -153,6 +153,7 @@ object ATreeMenu : ContextMenu() {
             I18N["context.delete_label.dialog.title"],
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
             StringBuilder().also { for (item in items) it.appendLine(item.value) }.toString(),
+            State.stage
         )
 
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {

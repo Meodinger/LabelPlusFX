@@ -34,56 +34,32 @@ import kotlin.collections.ArrayList
  */
 const val DIALOG_ICON_RADIUS = 32.0
 
-// Common dialogs
-private val confirmDialog = Dialog<ButtonType>().also {
-    it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-    it.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-}
-private val infoDialog = Dialog<ButtonType>().also {
-    it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-}
-private val alertDialog = Dialog<ButtonType>().also {
-    it.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-    it.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-}
-private val errorDialog = Dialog<ButtonType>().also {
-    it.dialogPane.buttonTypes.addAll(ButtonType.OK)
-    it.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
-}
-private val exceptionDialog = Dialog<ButtonType>().also {
-    it.isResizable = true
-    it.dialogPane.buttonTypes.add(ButtonType.OK)
-}
-
-fun initDialogOwner(owner: Window?) {
-    confirmDialog.initOwner(owner)
-    infoDialog.initOwner(owner)
-    alertDialog.initOwner(owner)
-    errorDialog.initOwner(owner)
-    exceptionDialog.initOwner(owner)
-}
-
 /**
  * Show message for confirm
  * @param content Message to show
  * @return ButtonType? YES | NO
  */
-fun showConfirm(content: String): Optional<ButtonType> {
-    return showConfirm(I18N["common.confirm"], null, content)
+fun showConfirm(content: String, owner: Window?): Optional<ButtonType> {
+    return showConfirm(I18N["common.confirm"], null, content, owner)
 }
 /**
  * Show message for confirm
  * @param title Dialog title
  * @param header Header text, nullable
  * @param content Content text
+ * @param owner Owner window
  * @return ButtonType? YES | NO
  */
-fun showConfirm(title: String, header: String?, content: String): Optional<ButtonType> {
-    confirmDialog.title = title
-    confirmDialog.headerText = header
-    confirmDialog.contentText = omitWideText(omitHighText(content), confirmDialog.width / 3 * 2)
-    return confirmDialog.showAndWait()
+fun showConfirm(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+    dialog.title = title
+    dialog.headerText = header
+    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
+
+    return dialog.showAndWait()
 }
 
 /**
@@ -91,21 +67,27 @@ fun showConfirm(title: String, header: String?, content: String): Optional<Butto
  * @param content Info to show
  * @return ButtonType? OK
  */
-fun showInfo(content: String): Optional<ButtonType> {
-    return showInfo(I18N["common.info"], null, content)
+fun showInfo(content: String, owner: Window?): Optional<ButtonType> {
+    return showInfo(I18N["common.info"], null, content, owner)
 }
 /**
  * Show information
  * @param title Dialog title
  * @param header Header text, nullable
  * @param content Content text
+ * @param owner Owner window
  * @return ButtonType? OK
  */
-fun showInfo(title: String, header: String?, content: String): Optional<ButtonType> {
-    infoDialog.title = title
-    infoDialog.headerText = header
-    infoDialog.contentText = omitWideText(omitHighText(content), infoDialog.width / 3 * 2)
-    return infoDialog.showAndWait()
+fun showInfo(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+    dialog.title = title
+    dialog.headerText = header
+    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
+
+    return dialog.showAndWait()
 }
 
 /**
@@ -113,21 +95,27 @@ fun showInfo(title: String, header: String?, content: String): Optional<ButtonTy
  * @param content Alert to show
  * @return ButtonType? YES | NO | CANCEL
  */
-fun showAlert(content: String): Optional<ButtonType> {
-    return showAlert(I18N["common.alert"], null, content)
+fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
+    return showAlert(I18N["common.alert"], null, content, owner)
 }
 /**
  * Show alert
  * @param title Dialog title
  * @param header Header text, nullable
  * @param content Content text
+ * @param owner Owner window
  * @return ButtonType? YES | NO | CANCEL
  */
-fun showAlert(title: String, header: String?, content: String): Optional<ButtonType> {
-    alertDialog.title = title
-    alertDialog.headerText = header
-    alertDialog.contentText = omitWideText(omitHighText(content), alertDialog.width / 3 * 2)
-    return alertDialog.showAndWait()
+fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+    dialog.title = title
+    dialog.headerText = header
+    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+
+    return dialog.showAndWait()
 }
 
 /**
@@ -135,21 +123,27 @@ fun showAlert(title: String, header: String?, content: String): Optional<ButtonT
  * @param content Error to show
  * @return ButtonType? OK
  */
-fun showError(content: String): Optional<ButtonType> {
-    return showError(I18N["common.error"], null, content)
+fun showError(content: String, owner: Window?): Optional<ButtonType> {
+    return showError(I18N["common.error"], null, content, owner)
 }
 /**
  * Show error
  * @param title Dialog title
  * @param header Header text, nullable
  * @param content Content text
- * @return ButtonType? OK
+ * @param owner Owner window
+ * @return ButtonType? Ok
  */
-fun showError(title: String, header: String?, content: String): Optional<ButtonType> {
-    errorDialog.title = title
-    errorDialog.headerText = header
-    errorDialog.contentText = omitWideText(omitHighText(content), errorDialog.width / 3 * 2)
-    return errorDialog.showAndWait()
+fun showError(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+    dialog.title = title
+    dialog.headerText = header
+    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
+
+    return dialog.showAndWait()
 }
 
 /**
@@ -157,7 +151,7 @@ fun showError(title: String, header: String?, content: String): Optional<ButtonT
  * @param e Exception to print
  * @return ButtonType? OK
  */
-fun showException(e: Throwable): Optional<ButtonType> {
+fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
 
     // Get exception stack trace
     val text = e.stackTraceToString()
@@ -187,41 +181,18 @@ fun showException(e: Throwable): Optional<ButtonType> {
 
     content.children.addAll(header, Separator(), Label("The exception stacktrace is:"), textArea)
 
-    exceptionDialog.title = I18N["common.error"]
-    exceptionDialog.headerText = e.javaClass.name
-    exceptionDialog.dialogPane.content = content
-    exceptionDialog.dialogPane.prefWidth = 600.0
-    exceptionDialog.dialogPane.prefHeight = 400.0
+    val dialog = Dialog<ButtonType>().also { it.initOwner(owner) }
 
-    return exceptionDialog.showAndWait()
-}
-
-/**
- * Show dialog
- * @param type 0=Confirm, 1=Info, 2=Alert, 3=Error
- */
-fun showDialog(owner: Window?, type: Int, title: String, header: String?, content: String): Optional<ButtonType> {
-    val dialog = Dialog<ButtonType>()
-
-    dialog.initOwner(owner)
-    dialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.contentText = content
-    when (type) {
-        0 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        1 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        2 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-        3 -> dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
-    }
+    dialog.title = I18N["common.error"]
+    dialog.isResizable = true
+    dialog.headerText = e.javaClass.name
+    dialog.dialogPane.prefWidth = 600.0
+    dialog.dialogPane.prefHeight = 400.0
+    dialog.dialogPane.content = content
+    dialog.dialogPane.buttonTypes.add(ButtonType.OK)
 
     return dialog.showAndWait()
 }
-const val PRELOAD_DIALOG_CONFIRM = 0
-const val PRELOAD_DIALOG_INFO    = 1
-const val PRELOAD_DIALOG_ALERT   = 2
-const val PRELOAD_DIALOG_ERROR   = 3
-
 
 // Specific dialogs
 

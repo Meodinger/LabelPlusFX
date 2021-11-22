@@ -2,7 +2,6 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
-import ink.meodinger.lpfx.util.dialog.initDialogOwner
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
@@ -30,7 +29,7 @@ class LabelPlusFX: HookedApplication() {
 
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
             Logger.exception(e)
-            showException(e)
+            showException(e, State.stage)
         }
 
         State.application = this
@@ -52,7 +51,6 @@ class LabelPlusFX: HookedApplication() {
         }
 
         State.controller = controller
-        initDialogOwner(primaryStage)
 
         primaryStage.show()
 

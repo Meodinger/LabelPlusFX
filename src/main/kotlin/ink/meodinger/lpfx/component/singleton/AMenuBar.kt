@@ -130,7 +130,7 @@ object AMenuBar : MenuBar() {
         val file = File(path)
 
         if (!file.exists()) {
-            showError(String.format(I18N["error.file_not_exist.s"], path))
+            showError(String.format(I18N["error.file_not_exist.s"], path), State.stage)
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)
             return
@@ -247,7 +247,7 @@ object AMenuBar : MenuBar() {
         // todo: use checkPic()
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
-                showInfo(I18N["info.required_at_least_1_pic"])
+                showInfo(I18N["info.required_at_least_1_pic"], State.stage)
                 return@ifPresent
             }
 
@@ -261,7 +261,7 @@ object AMenuBar : MenuBar() {
 
             if (toRemove.size == 0 && toAdd.size == 0) return@ifPresent
             if (toRemove.size != 0) {
-                val confirm = showConfirm(I18N["confirm.removing_pic"])
+                val confirm = showConfirm(I18N["confirm.removing_pic"], State.stage)
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
@@ -273,7 +273,7 @@ object AMenuBar : MenuBar() {
     }
 
     private fun settings() {
-        val list = CSettingsDialog.generateProperties()
+        val list = ASettingsDialog.generateProperties()
 
         var updatePane = false
         var updateRules = false
@@ -291,7 +291,7 @@ object AMenuBar : MenuBar() {
         if (updateRules) State.controller.updateLigatureRules()
     }
     private fun logs() {
-        val list = CLogsDialog.generateProperties()
+        val list = ALogsDialog.generateProperties()
 
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue
@@ -324,7 +324,7 @@ object AMenuBar : MenuBar() {
         this.properties[key] = (this.properties[key] as Int) + 1
         if (this.properties[key] as Int >= 5) {
             this.properties[key] = 0
-            val confirm = showConfirm(I18N["confirm.extra"])
+            val confirm = showConfirm(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
             } else return

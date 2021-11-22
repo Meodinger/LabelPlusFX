@@ -44,7 +44,7 @@ import javafx.scene.text.TextAlignment
 /**
  * A Dialog Singleton for settings
  */
-object CSettingsDialog : AbstractPropertiesDialog() {
+object ASettingsDialog : AbstractPropertiesDialog() {
 
     private const val GAP = 16.0
 

@@ -113,6 +113,11 @@ open class TransFile @JsonCreator constructor(
         if (transMapObservable.keys.contains(picName)) throw TransFileException.pictureStillInUse(picName)
         fileMap.remove(picName)
     }
+    fun checkLost(): List<String> {
+        val lost = ArrayList<String>()
+        fileMap.forEach { (name, file) -> if (!file.exists()) lost.add(name) }
+        return lost
+    }
 
     // ----- Properties & Init ----- //
 
@@ -134,6 +139,8 @@ open class TransFile @JsonCreator constructor(
     val groupCount: Int get() = groupListObservable.size
     val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
     val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
+
+    val picCount: Int get() = transMapObservable.size
     val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList())
 
     // ----- TransGroup ----- //

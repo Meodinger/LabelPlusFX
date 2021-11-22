@@ -42,7 +42,7 @@ import kotlin.io.path.name
 /**
  * A Dialog Singleton for logs set/clean/send
  */
-object CLogsDialog : AbstractPropertiesDialog() {
+object ALogsDialog : AbstractPropertiesDialog() {
 
     private const val GAP = 16.0
     private const val ALIVE = 3 * 24 * 60 * 60 * 1000L
@@ -121,7 +121,7 @@ object CLogsDialog : AbstractPropertiesDialog() {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
                     Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
-                    showError(String.format(I18N["error.logs.delete_failed.format.s"], modal.file.name))
+                    showError(String.format(I18N["error.logs.delete_failed.format.s"], modal.file.name), State.stage)
                     continue
                 }
                 toRemove.add(modal)

@@ -81,4 +81,14 @@ class CRollerLabel(contentText: String) : Region() {
         return text.substring(1, text.length) + text.substring(0, 1)
     }
 
+    fun startRoll() {
+        rollerManager.clear()
+        rollerManager.refresh()
+        rollerManager.schedule()
+    }
+
+    fun stopRoll() {
+        rollerManager.clear()
+    }
+
 }

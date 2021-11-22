@@ -96,9 +96,9 @@ object State {
         Logger.info("Set GroupID=$groupId @color=$color", "State")
     }
 
-    fun addPicture(picName: String) {
+    fun addPicture(picName: String, picFile: File? = null) {
         transFile.addTransList(picName)
-        transFile.addFile(picName, getFileFolder().resolve(picName))
+        transFile.addFile(picName, picFile ?: getFileFolder().resolve(picName))
 
         Logger.info("Added picture $picName", "State")
     }

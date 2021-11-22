@@ -16,7 +16,7 @@ import javafx.scene.text.TextAlignment
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -63,6 +63,7 @@ class CComboBox<T> : HBox() {
 
         if (list.isNotEmpty()) comboBox.selectionModel.select(0)
     }
+
     fun createItem(item: T) {
         items.add(item)
     }

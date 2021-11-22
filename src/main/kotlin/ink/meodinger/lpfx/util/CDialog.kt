@@ -259,7 +259,7 @@ fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<
 fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = ArrayList()): Optional<List<T>> {
     val dialog = Dialog<List<T>>()
     dialog.initOwner(owner)
-    dialog.title = I18N["dialog.choose.title"]
+    dialog.title = I18N["util.dialog.choose.title"]
 
     val left = ListView<T>()
     val right = ListView<T>()
@@ -268,12 +268,11 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
     left.items.addAll(unselected)
     right.items.addAll(selected)
 
-    val add = Button(I18N["dialog.choose.add"])
-    val addAll = Button(I18N["dialog.choose.add_all"])
-    val remove = Button(I18N["dialog.choose.remove"])
-    val removeAll = Button(I18N["dialog.choose.remove_all"])
-    val vBox = VBox(add, addAll, remove, removeAll)
-    vBox.alignment = Pos.CENTER
+    val add = Button(I18N["util.dialog.choose.add"])
+    val addAll = Button(I18N["util.dialog.choose.add_all"])
+    val remove = Button(I18N["util.dialog.choose.remove"])
+    val removeAll = Button(I18N["util.dialog.choose.remove_all"])
+    val vBox = VBox(add, addAll, remove, removeAll).also { it.alignment = Pos.CENTER }
     for (b in vBox.children) {
         val btn = b as Button
         btn.prefWidth = 48.0
@@ -297,12 +296,12 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
     removeAll.onAction = EventHandler { moverAll(right, left) }
 
     val pane = GridPane()
-    pane.add(Label(I18N["dialog.choose.potential"]), 0, 0)
-    pane.add(Label(I18N["dialog.choose.selected"]), 2, 0)
+    pane.add(Label(I18N["util.dialog.choose.potential"]), 0, 0)
+    pane.add(Label(I18N["util.dialog.choose.selected"]), 2, 0)
     pane.add(left, 0, 1)
     pane.add(vBox, 1, 1)
     pane.add(right, 2, 1)
-    pane.hgap = 20.0
+    pane.hgap = 16.0
     pane.prefWidth = 600.0
     pane.prefHeight = 400.0
 

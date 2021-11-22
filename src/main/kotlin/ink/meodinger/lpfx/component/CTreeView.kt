@@ -22,7 +22,7 @@ import kotlin.collections.ArrayList
 /**
  * Author: Meodinger
  * Date: 2021/8/16
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -46,6 +46,8 @@ class CTreeView: TreeView<String>() {
 
     init {
         // Init
+        ATreeMenu.initView(this)
+
         this.selectionModel.selectionMode = SelectionMode.MULTIPLE
         this.contextMenu = ATreeMenu
 

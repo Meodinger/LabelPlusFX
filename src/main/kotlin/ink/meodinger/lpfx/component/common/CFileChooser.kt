@@ -14,7 +14,7 @@ import java.io.File
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -46,15 +46,21 @@ class CFileChooser {
         chooser.initialDirectoryProperty().bind(lastDirectoryProperty)
     }
 
-    fun showOpenDialog(owner: Window? = null): File? {
+    fun showOpenDialog(owner: Window?): File? {
         val file = chooser.showOpenDialog(owner)
         if (file != null) lastDirectory = file.parentFile
         return file
     }
 
-    fun showSaveDialog(owner: Window? = null): File? {
+    fun showSaveDialog(owner: Window?): File? {
         val file = chooser.showSaveDialog(owner)
         if (file != null) lastDirectory = file.parentFile
         return file
+    }
+
+    fun showOpenMultipleDialog(owner: Window?) : List<File>? {
+        val files = chooser.showOpenMultipleDialog(owner)
+        if (files != null) lastDirectory = files.last().parentFile
+        return files
     }
 }

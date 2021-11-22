@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component.singleton
 import ink.meodinger.lpfx.EXTENSIONS_PIC
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.component.common.CRollerLabel
+import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.bottom
 import ink.meodinger.lpfx.util.component.center
 import ink.meodinger.lpfx.util.component.does
@@ -60,10 +61,12 @@ object ASpecifyDialog : Dialog<List<File>>() {
     }
     private val dirChooser = DirectoryChooser()
 
+    private var workingTransFile: TransFile = TransFile.DEFAULT_FILE
+    private var projectFolder: File = defaultFile
     private var picCount: Int = 0
     private var picNames: List<String> = ArrayList()
     private var files: MutableList<File> = ArrayList()
-    private var labels: List<CRollerLabel> = ArrayList()
+    private var labels: MutableList<CRollerLabel> = ArrayList()
 
     init {
         contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - gap)
@@ -72,7 +75,8 @@ object ASpecifyDialog : Dialog<List<File>>() {
             bottom(HBox()) {
                 this.alignment = Pos.CENTER_RIGHT
                 this.padding = Insets(gap, gap / 2, gap / 2, gap)
-                this.children.add(Button(I18N["specify.dialog.choose_folder"]) does {
+
+                val chooseFolderButton = Button(I18N["specify.dialog.choose_folder"]) does {
                     // need show confirm?
                     var show = false
                     for (label in labels) if (label.text != unspecified) {
@@ -98,7 +102,7 @@ object ASpecifyDialog : Dialog<List<File>>() {
                     for (i in 0 until picCount) {
                         if (preserve && files[i] != defaultFile) continue
                         for (j in newPicPaths.indices) {
-                            val oldPicFile = State.transFile.getFile(picNames[i])
+                            val oldPicFile = workingTransFile.getFile(picNames[i])
                             // check full filename & simple filename
                             if (newPicPaths[j].name == oldPicFile.name ||
                                 newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
@@ -113,11 +117,13 @@ object ASpecifyDialog : Dialog<List<File>>() {
                             }
                         }
                     }
-                })
+                }
+
+                this.children.add(chooseFolderButton)
             }
         }
 
-        this.title = "Specify lost Pictures"
+        this.title = I18N["specify.title"]
         this.dialogPane.prefWidth = 600.0
         this.dialogPane.prefHeight = 400.0
         this.dialogPane.content = contentPane
@@ -131,27 +137,19 @@ object ASpecifyDialog : Dialog<List<File>>() {
         }
     }
 
-    fun specify(checkLost: Boolean): List<File> {
+    fun specify(): List<File> {
         // update variables
+        workingTransFile = State.transFile
+        projectFolder = State.translationFile.parentFile
         picCount = State.transFile.picCount
         picNames = State.transFile.sortedPicNames
 
-        // Pictures lost?
-        if (checkLost) {
-            val lost = State.transFile.checkLost()
-            if (lost.isEmpty()) {
-                val result = showConfirm("No lost, still specify?", thisWindow)
-                if (!result.isPresent || result.get() != ButtonType.YES) return emptyList()
-            }
-        }
-
         // prepare
-        val projectFolder = State.translationFile.parentFile
         fileChooser.initialDirectory = projectFolder
         dirChooser.initialDirectory = projectFolder
 
         files = MutableList(picCount) {
-            val file = State.transFile.getFile(picNames[it])
+            val file = workingTransFile.getFile(picNames[it])
             if (file.exists()) file else defaultFile
         }
         labels = MutableList(picCount) { CRollerLabel().also { label ->
@@ -182,7 +180,11 @@ object ASpecifyDialog : Dialog<List<File>>() {
             contentGridPane.add(button, 2, i + 1)
         }
 
+        // manually control label roll to save resource
+        for (label in labels) label.startRoll()
         val result = this.showAndWait()
+        for (label in labels) label.stopRoll()
+
         return if (result.isPresent) result.get() else emptyList()
     }
 

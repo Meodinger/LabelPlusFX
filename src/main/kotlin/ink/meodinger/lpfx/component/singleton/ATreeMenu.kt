@@ -34,6 +34,8 @@ import javafx.scene.shape.Circle
  */
 object ATreeMenu : ContextMenu() {
 
+    private lateinit var view: TreeView<*>
+
     private val r_addGroupField = TextField()
     private val r_addGroupPicker = CColorPicker()
     private val r_addGroupDialog = Dialog<TransGroup>()
@@ -110,6 +112,8 @@ object ATreeMenu : ContextMenu() {
         val groupName = groupItem.value
         val groupId = State.transFile.getGroupIdByName(groupName)
 
+        view.selectionModel.clearSelection()
+
         // Edit data
         for (key in State.transFile.sortedPicNames) for (label in State.transFile.getTransList(key)) {
             if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
@@ -157,6 +161,8 @@ object ATreeMenu : ContextMenu() {
         )
 
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {
+            view.selectionModel.clearSelection()
+
             for (item in items) {
                 val labelIndex = (item as CTreeLabelItem).index
 
@@ -195,6 +201,10 @@ object ATreeMenu : ContextMenu() {
         g_changeColorPicker.valueProperty().addListener { _, _, newValue -> g_changeColorItem.text = newValue.toHex() }
         g_changeColorPicker.setPrefSize(40.0, 20.0)
         g_changeColorItem.graphic = g_changeColorPicker
+    }
+
+    fun initView(view: TreeView<*>) {
+        this.view = view
     }
 
     fun update(selectedItems: ObservableList<TreeItem<String>>) {

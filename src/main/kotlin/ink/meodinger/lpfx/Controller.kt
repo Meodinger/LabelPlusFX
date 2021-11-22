@@ -228,14 +228,18 @@ class Controller : Initializable {
             private var lastMapObservable = State.transFile.transMapObservable
 
             init {
+                // When switch to new TransFile, update
                 bind(State.transFileProperty)
             }
 
             override fun computeValue(): ObservableList<String> {
+                // Abandon the ObservableValue of last TransFile
                 unbind(lastMapObservable)
 
+                // Get new ObservableValue
                 lastMapObservable = State.transFile.transMapObservable
 
+                // Bind to it
                 bind(State.transFile.transMapObservable)
 
                 return FXCollections.observableList(State.transFile.sortedPicNames)
@@ -249,21 +253,23 @@ class Controller : Initializable {
             private val boundGroupNameProperties = ArrayList<StringProperty>()
 
             init {
+                // When switch to new TransFile, update
                 bind(State.transFileProperty)
             }
 
             override fun computeValue(): ObservableList<String> {
+                // Abandon the ObservableValue of last TransFile
                 unbind(lastGroupListObservable)
                 for (property in boundGroupNameProperties) unbind(property)
                 boundGroupNameProperties.clear()
 
+                // Get new ObservableValue
                 lastGroupListObservable = State.transFile.groupListObservable
+                for (group in State.transFile.groupListObservable) boundGroupNameProperties.add(group.nameProperty)
 
+                // Bind to it
                 bind(State.transFile.groupListObservable)
-                for (group in State.transFile.groupListObservable) {
-                    bind(group.nameProperty)
-                    boundGroupNameProperties.add(group.nameProperty)
-                }
+                for (property in boundGroupNameProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupNames)
             }
@@ -275,21 +281,23 @@ class Controller : Initializable {
             private val boundGroupHexProperties = ArrayList<StringProperty>()
 
             init {
+                // When switch to new TransFile, update
                 bind(State.transFileProperty)
             }
 
             override fun computeValue(): ObservableList<String> {
+                // Abandon the ObservableValue of last TransFile
                 unbind(lastGroupListObservable)
                 for (property in boundGroupHexProperties) unbind(property)
                 boundGroupHexProperties.clear()
 
+                // Get new ObservableValue
                 lastGroupListObservable = State.transFile.groupListObservable
+                for (group in State.transFile.groupListObservable) boundGroupHexProperties.add(group.colorHexProperty)
 
+                // Bind to it
                 bind(State.transFile.groupListObservable)
-                for (group in State.transFile.groupListObservable) {
-                    bind(group.colorHexProperty)
-                    boundGroupHexProperties.add(group.colorHexProperty)
-                }
+                for (property in boundGroupHexProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
@@ -324,18 +332,23 @@ class Controller : Initializable {
 
         // currentPicName
         cPicBox.valueProperty.addListener { _, oldValue, newValue ->
+            if (!State.isOpened) return@addListener
+
+            // fixme: unexpected value change when remove first (also current) picture
+            //   want next picture, got last picture
             State.currentPicName = newValue ?:
-                if (!State.isOpened) ""
-                else if (cPicBox.items.contains(oldValue)) oldValue
+                if (cPicBox.items.contains(oldValue)) oldValue
                 else cPicBox.items[0]
         }
 
         // currentGroupId
-        cGroupBox.indexProperty.addListener { _, oldValue, newValue ->
-            State.currentGroupId = if ((newValue as Int) != -1) newValue
-                else if (!State.isOpened) -1
-                else if (cGroupBox.items.size > (oldValue as Int)) oldValue
-                else 0
+        cGroupBox.valueProperty.addListener { _, oldValue, newValue ->
+            if (!State.isOpened) return@addListener
+
+            val newGroupName = newValue ?:
+                if (cGroupBox.items.contains(oldValue)) oldValue // Actually this will never be called
+                else cGroupBox.items[0] // Always goes here
+            State.currentGroupId = State.transFile.getGroupIdByName(newGroupName)
         }
 
         // currentLabelIndex
@@ -595,7 +608,7 @@ class Controller : Initializable {
     }
 
     fun specifyPicFiles() {
-        val picFiles = ASpecifyDialog.specify(false)
+        val picFiles = ASpecifyDialog.specify()
         if (picFiles.isEmpty()) showInfo(I18N["specify.info.incomplete"], State.stage)
         else {
             val picCount = State.transFile.picCount
@@ -649,7 +662,7 @@ class Controller : Initializable {
                 }
             }
         }
-        // todo: use checkPic-like Dialog
+        // todo: use checkPic-like Dialog (ask when current folder have no pics)
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
@@ -732,7 +745,7 @@ class Controller : Initializable {
             }
             if (isModified) {
                 Logger.info("Showed modified comment", "Controller")
-                showInfo(I18N["common.info"], I18N["dialog.edited_comment.content"], comment, State.stage)
+                showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
             }
         }
 

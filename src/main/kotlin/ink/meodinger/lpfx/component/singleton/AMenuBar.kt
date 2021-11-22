@@ -45,12 +45,14 @@ object AMenuBar : MenuBar() {
     private val mClose = MenuItem(I18N["m.close"])
     private val mBakRecover = MenuItem(I18N["m.bak_recovery"])
     private val mExit = MenuItem(I18N["m.exit"])
+    private val mmEdit = Menu(I18N["mm.edit"])
+    private val mEditComment = MenuItem(I18N["m.comment"])
+    private val mEditProjectPictures = MenuItem(I18N["m.projectPics"])
+    private val mAddExternalPicture = MenuItem(I18N["m.externalPic"])
     private val mmExport = Menu(I18N["mm.export"])
     private val mExportAsLp = MenuItem(I18N["m.lp"])
     private val mExportAsMeo = MenuItem(I18N["m.meo"])
     private val mExportAsTransPack = MenuItem(I18N["m.pack"])
-    private val mEditComment = MenuItem(I18N["m.comment"])
-    private val mEditPictures = MenuItem(I18N["m.pictures"])
     private val mmAbout = Menu(I18N["mm.about"])
     private val mSettings = MenuItem(I18N["m.settings"])
     private val mLogs = MenuItem(I18N["m.logs"])
@@ -85,11 +87,12 @@ object AMenuBar : MenuBar() {
         mClose.setOnAction { closeTranslation() }
         mBakRecover.setOnAction { bakRecovery() }
         mExit.setOnAction { State.controller.exit() }
+        mEditComment.setOnAction { editComment() }
+        mEditProjectPictures.setOnAction { editProjectPictures() }
+        mAddExternalPicture.setOnAction { addExternalPicture() }
         mExportAsLp.setOnAction { exportTransFile(it) }
         mExportAsMeo.setOnAction { exportTransFile(it) }
         mExportAsTransPack.setOnAction { exportTransPack() }
-        mEditComment.setOnAction { editComment() }
-        mEditPictures.setOnAction { editPictures() }
         mSettings.setOnAction { settings() }
         mLogs.setOnAction { logs() }
         mAbout.setOnAction { about() }
@@ -98,11 +101,12 @@ object AMenuBar : MenuBar() {
         mSave.disableProperty().bind(!State.isOpenedProperty)
         mSaveAs.disableProperty().bind(!State.isOpenedProperty)
         mClose.disableProperty().bind(!State.isOpenedProperty)
+        mEditComment.disableProperty().bind(!State.isOpenedProperty)
+        mEditProjectPictures.disableProperty().bind(!State.isOpenedProperty)
+        mAddExternalPicture.disableProperty().bind(!State.isOpenedProperty)
         mExportAsLp.disableProperty().bind(!State.isOpenedProperty)
         mExportAsMeo.disableProperty().bind(!State.isOpenedProperty)
         mExportAsTransPack.disableProperty().bind(!State.isOpenedProperty)
-        mEditComment.disableProperty().bind(!State.isOpenedProperty)
-        mEditPictures.disableProperty().bind(!State.isOpenedProperty)
 
         // Set accelerators
         if (isMac) {
@@ -114,9 +118,10 @@ object AMenuBar : MenuBar() {
         }
 
         mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
-        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack, SeparatorMenuItem(), mEditComment, mEditPictures)
+        mmEdit.items.addAll(mEditComment, SeparatorMenuItem(), mEditProjectPictures, mAddExternalPicture)
+        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
-        this.menus.addAll(mmFile, mmExport, mmAbout)
+        this.menus.addAll(mmFile, mmEdit, mmExport, mmAbout)
     }
 
     fun updateOpenRecent() {
@@ -207,35 +212,13 @@ object AMenuBar : MenuBar() {
         State.controller.recovery(bak, rec)
     }
 
-    private fun exportTransFile(event: ActionEvent) {
-        exportChooser.extensionFilters.clear()
-
-        val file: File
-        if (event.source == mExportAsMeo) {
-            exportChooser.extensionFilters.add(meoFilter)
-            exportChooser.initialFileName = "$EXPORT_FILE_NAME.$EXTENSION_MEO"
-            file = exportChooser.showSaveDialog(State.stage) ?: return
-            State.controller.export(file, FileType.MeoFile)
-        } else {
-            exportChooser.extensionFilters.add(lpFilter)
-            exportChooser.initialFileName = "$EXPORT_FILE_NAME. $EXTENSION_LP"
-            file = exportChooser.showSaveDialog(State.stage) ?: return
-            State.controller.export(file, FileType.LPFile)
-        }
-    }
-    private fun exportTransPack() {
-        val file = exportPackChooser.showSaveDialog(State.stage) ?: return
-
-        State.controller.pack(file)
-    }
-
     private fun editComment() {
-        showInputArea(State.stage, I18N["dialog.edit_comment.title"], State.transFile.comment).ifPresent {
+        showInputArea(State.stage, I18N["m.comment.dialog.title"], State.transFile.comment).ifPresent {
             State.setComment(it)
             State.isChanged = true
         }
     }
-    private fun editPictures() {
+    private fun editProjectPictures() {
         // Choose Pics
         val selected = State.transFile.sortedPicNames
         val unselected = Files.walk(State.getFileFolder().toPath(), 1).filter {
@@ -244,7 +227,6 @@ object AMenuBar : MenuBar() {
             false
         }.map { it.name }.collect(Collectors.toList())
 
-        // todo: use checkPic()
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
                 showInfo(I18N["info.required_at_least_1_pic"], State.stage)
@@ -270,6 +252,45 @@ object AMenuBar : MenuBar() {
             // Mark change
             State.isChanged = true
         }
+    }
+    private fun addExternalPicture() {
+        fileChooser.title = I18N["m.externalPic.chooser.title"]
+        fileChooser.initialFileName = ""
+        val files = fileChooser.showOpenMultipleDialog(State.stage) ?: return
+        val picNames = State.transFile.sortedPicNames
+
+        val conflictList = ArrayList<String>()
+        for (file in files) {
+            val picName = file.name
+            if (picNames.contains(picName)) conflictList.add(picName)
+
+            // Edit data
+            State.addPicture(picName, file)
+            // Mark Change
+            State.isChanged = true
+        }
+    }
+
+    private fun exportTransFile(event: ActionEvent) {
+        exportChooser.extensionFilters.clear()
+
+        val file: File
+        if (event.source == mExportAsMeo) {
+            exportChooser.extensionFilters.add(meoFilter)
+            exportChooser.initialFileName = "$EXPORT_FILE_NAME.$EXTENSION_MEO"
+            file = exportChooser.showSaveDialog(State.stage) ?: return
+            State.controller.export(file, FileType.MeoFile)
+        } else {
+            exportChooser.extensionFilters.add(lpFilter)
+            exportChooser.initialFileName = "$EXPORT_FILE_NAME. $EXTENSION_LP"
+            file = exportChooser.showSaveDialog(State.stage) ?: return
+            State.controller.export(file, FileType.LPFile)
+        }
+    }
+    private fun exportTransPack() {
+        val file = exportPackChooser.showSaveDialog(State.stage) ?: return
+
+        State.controller.pack(file)
     }
 
     private fun settings() {
@@ -306,7 +327,7 @@ object AMenuBar : MenuBar() {
     private fun about() {
         showLink(
             State.stage,
-            I18N["dialog.about.title"],
+            I18N["m.about.dialog.title"],
             null,
             StringBuilder()
                 .append(INFO["application.name"]).append(" - ").append(INFO["application.version"]).append("\n")

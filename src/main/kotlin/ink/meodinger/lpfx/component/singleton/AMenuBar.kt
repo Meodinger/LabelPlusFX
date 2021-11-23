@@ -59,21 +59,33 @@ object AMenuBar : MenuBar() {
     private val mAbout = MenuItem(I18N["m.about"])
     private val mCrash = MenuItem("Crash")
 
+    private val picChooser = CFileChooser()
+    private val picFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
+    private val pngFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSIONS_PIC[0]}")
+    private val jpgFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSIONS_PIC[1]}")
+    private val jpegFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSIONS_PIC[2]}")
+
+    private val fileChooser = CFileChooser()
+    private val exportChooser = CFileChooser()
     private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*.${EXTENSION_MEO}", "*.${EXTENSION_LP}")
     private val lpFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_LP}")
     private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_MEO}")
-    private val bakFilter = FileChooser.ExtensionFilter(I18N["filetype.bak"], "*.${EXTENSION_BAK}")
-    private val packFilter = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*.${EXTENSION_PACK}")
-    private val fileChooser = CFileChooser()
-    private val bakChooser = CFileChooser()
-    private val exportChooser = CFileChooser()
+
+    private val backupChooser = CFileChooser()
+    private val bakFilter = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
+
     private val exportPackChooser = CFileChooser()
+    private val packFilter = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*.${EXTENSION_PACK}")
 
     init {
+        picChooser.title = I18N["m.externalPic.chooser.title"]
+        picChooser.extensionFilters.addAll(picFilter, pngFilter, jpgFilter, jpegFilter)
+        // fileChooser's tile will change
         fileChooser.extensionFilters.addAll(fileFilter, meoFilter, lpFilter)
-        bakChooser.title = I18N["chooser.bak"]
-        bakChooser.extensionFilters.add(bakFilter)
+        backupChooser.title = I18N["chooser.bak"]
+        backupChooser.extensionFilters.add(bakFilter)
         exportChooser.title = I18N["chooser.export"]
+        // exportChooser's filter will change
         exportPackChooser.title = I18N["chooser.pack"]
         exportPackChooser.extensionFilters.add(packFilter)
         exportPackChooser.initialFileName = "$PACKAGE_FILE_NAME.$EXTENSION_PACK"
@@ -202,7 +214,7 @@ object AMenuBar : MenuBar() {
 
         State.reset()
 
-        val bak = bakChooser.showOpenDialog(State.stage) ?: return
+        val bak = backupChooser.showOpenDialog(State.stage) ?: return
         CFileChooser.lastDirectory = bak.parentFile.parentFile
 
         fileChooser.title = I18N["chooser.rec"]
@@ -233,41 +245,50 @@ object AMenuBar : MenuBar() {
                 return@ifPresent
             }
 
-            val picNames = State.transFile.sortedPicNames
+            val picNames = State.transFile.picNames
 
             // Edit date
-            val toRemove = ArrayList<String>()
-            for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
+            val toRemove = ArrayList<String>()
+            for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
 
-            if (toRemove.size == 0 && toAdd.size == 0) return@ifPresent
+            if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
             if (toRemove.size != 0) {
                 val confirm = showConfirm(I18N["confirm.removing_pic"], State.stage)
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
-            for (picName in toRemove) State.removePicture(picName)
             for (picName in toAdd) State.addPicture(picName)
+            for (picName in toRemove) State.removePicture(picName)
             // Mark change
             State.isChanged = true
         }
     }
     private fun addExternalPicture() {
-        fileChooser.title = I18N["m.externalPic.chooser.title"]
-        fileChooser.initialFileName = ""
-        val files = fileChooser.showOpenMultipleDialog(State.stage) ?: return
+        val files = picChooser.showOpenMultipleDialog(State.stage) ?: return
         val picNames = State.transFile.sortedPicNames
 
         val conflictList = ArrayList<String>()
         for (file in files) {
             val picName = file.name
-            if (picNames.contains(picName)) conflictList.add(picName)
+            if (picNames.contains(picName)) {
+                conflictList.add(picName)
+                continue
+            }
 
             // Edit data
             State.addPicture(picName, file)
             // Mark Change
             State.isChanged = true
+        }
+        if (conflictList.isNotEmpty()) {
+            showInfo(
+                I18N["common.info"],
+                I18N["m.externalPic.dialog.header"],
+                conflictList.joinToString(",\n"),
+                State.stage
+            )
         }
     }
 

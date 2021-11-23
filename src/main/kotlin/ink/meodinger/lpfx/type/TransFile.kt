@@ -141,6 +141,7 @@ open class TransFile @JsonCreator constructor(
     val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
 
     val picCount: Int get() = transMapObservable.size
+    val picNames: List<String> get() = transMapObservable.keys.toList()
     val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList())
 
     // ----- TransGroup ----- //

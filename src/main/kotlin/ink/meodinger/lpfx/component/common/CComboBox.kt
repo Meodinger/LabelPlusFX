@@ -95,8 +95,8 @@ class CComboBox<T> : HBox() {
     }
 
     fun moveTo(index: Int) {
+        if (comboBox.items.size == 0 && index == 0) return
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
-        else if (comboBox.items.size == 0 && index == 0) doNothing()
         else throw IllegalArgumentException("index $index invalid")
     }
     fun moveTo(item: T) {

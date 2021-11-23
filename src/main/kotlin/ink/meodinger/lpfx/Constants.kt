@@ -87,7 +87,7 @@ const val SCROLL_DELTA = 32.0
 const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
 /**
- * Extensions
+ * Extensions: png, jpg, jpeg
  */
 val EXTENSIONS_PIC = listOf("png", "jpg", "jpeg")
 const val EXTENSION_LP = "txt"

@@ -115,7 +115,7 @@ object ATreeMenu : ContextMenu() {
         view.selectionModel.clearSelection()
 
         // Edit data
-        for (key in State.transFile.sortedPicNames) for (label in State.transFile.getTransList(key)) {
+        for (key in State.transFile.picNames) for (label in State.transFile.getTransList(key)) {
             if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
         }
         State.removeTransGroup(groupName)

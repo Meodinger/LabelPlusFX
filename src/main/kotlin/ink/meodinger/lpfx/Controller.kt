@@ -337,18 +337,20 @@ class Controller : Initializable {
 
             // fixme: unexpected value change when remove first (when also current) picture
             //   want next picture, got last picture
+            val picNames = State.transFile.sortedPicNames
             State.currentPicName = newValue ?:
-                if (cPicBox.items.contains(oldValue)) oldValue
-                else cPicBox.items[0]
+                if (picNames.contains(oldValue)) oldValue
+                else picNames[0]
         }
 
         // currentGroupId
         cGroupBox.valueProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
+            val groupNames = State.transFile.groupNames
             val newGroupName = newValue ?:
-                if (cGroupBox.items.contains(oldValue)) oldValue // Actually this will never be called
-                else cGroupBox.items[0] // Always goes here
+                if (groupNames.contains(oldValue)) oldValue // Actually this will never be called
+                else groupNames[0] // Always goes here
             State.currentGroupId = State.transFile.getGroupIdByName(newGroupName)
         }
 
@@ -383,6 +385,7 @@ class Controller : Initializable {
         // Update cTreeView & cLabelPane when pic change
         State.currentPicNameProperty.addListener { _, _, newValue ->
             if (!State.isOpened) return@addListener
+            if (newValue == null) return@addListener
 
             cPicBox.moveTo(newValue)
 
@@ -399,11 +402,11 @@ class Controller : Initializable {
             // Remove text
             cLabelPane.removeText()
 
+            if (newGroupId as Int == NOT_FOUND) return@addListener
+
             // Select CGroup & GroupBox
-            if ((newGroupId as Int) != NOT_FOUND) {
-                cGroupBox.moveTo(newGroupId)
-                cGroupBar.select(newGroupId)
-            }
+            cGroupBox.moveTo(newGroupId)
+            cGroupBar.select(newGroupId)
 
             labelInfo("Change Group to ${cGroupBox.value}")
         }
@@ -412,13 +415,15 @@ class Controller : Initializable {
         State.currentLabelIndexProperty.addListener { _, _, newIndex ->
             if (!State.isOpened) return@addListener
 
-            val transLabels = State.transFile.getTransList(State.currentPicName)
-
+            // unbind TextArea
             cTransArea.unbindBidirectional()
-            if (newIndex != NOT_FOUND) {
-                val newLabel = transLabels.find { it.index == newIndex }
-                if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
-            }
+
+            if (newIndex == NOT_FOUND) return@addListener
+
+            // bind new property
+            val transLabels = State.transFile.getTransList(State.currentPicName)
+            val newLabel = transLabels.find { it.index == newIndex }
+            if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
 
             labelInfo("Selected label $newIndex")
         }
@@ -751,6 +756,7 @@ class Controller : Initializable {
         // Update State
         State.transFile = transFile
         State.translationFile = file
+        State.projectFolder = file.parentFile
         State.isOpened = true
 
         // Show info if comment not in default list
@@ -1108,7 +1114,7 @@ class Controller : Initializable {
         // Force all text change to "JUST MONIKA"
         fun textReformat() {
             val monika = "JUST MONIKA "
-            for (picName in State.transFile.sortedPicNames)
+            for (picName in State.transFile.picNames)
                 for (transLabel in State.transFile.getTransList(picName))
                     transLabel.text = monika
 

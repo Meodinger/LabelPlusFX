@@ -14,9 +14,11 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
+import javafx.scene.text.Text
 import javafx.stage.Window
 import javafx.util.Callback
 import java.util.*
@@ -33,6 +35,32 @@ import kotlin.collections.ArrayList
  * Constant
  */
 const val DIALOG_ICON_RADIUS = 32.0
+
+val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
+val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
+val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
+val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+fun showDialog(graphic: Node?, title: String, header: String?, content: String, owner: Window?, vararg buttonTypes: ButtonType): Optional<ButtonType> {
+    val dialog = Dialog<ButtonType>()
+    dialog.initOwner(owner)
+    dialog.graphic = graphic
+    dialog.title = title
+    dialog.headerText = header
+    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.dialogPane.buttonTypes.addAll(buttonTypes)
+    dialog.dialogPane.setOnMouseClicked {
+        if (it.clickCount > 1) {
+            val maxWidth = dialog.width / 3 * 2
+            val nowText = Text(dialog.contentText).apply { wrappingWidth = maxWidth }
+            val newText = Text(content).apply { wrappingWidth = maxWidth }
+            val expandHeight = newText.boundsInLocal.height - nowText.boundsInLocal.height
+            dialog.contentText = content
+            dialog.height += expandHeight
+        }
+    }
+
+    return dialog.showAndWait()
+}
 
 /**
  * Show message for confirm
@@ -51,15 +79,7 @@ fun showConfirm(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? YES | NO
  */
 fun showConfirm(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    val dialog = Dialog<ButtonType>()
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
-    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-    dialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO)
-
-    return dialog.showAndWait()
+    return showDialog(confirmImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO)
 }
 
 /**
@@ -79,15 +99,7 @@ fun showInfo(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showInfo(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    val dialog = Dialog<ButtonType>()
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
-    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-    dialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
-
-    return dialog.showAndWait()
+    return showDialog(infoImageView, title, header, content, owner, ButtonType.OK)
 }
 
 /**
@@ -107,15 +119,7 @@ fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? YES | NO | CANCEL
  */
 fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    val dialog = Dialog<ButtonType>()
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
-    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-    dialog.dialogPane.buttonTypes.addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-
-    return dialog.showAndWait()
+    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
 }
 
 /**
@@ -135,15 +139,7 @@ fun showError(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? Ok
  */
 fun showError(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    val dialog = Dialog<ButtonType>()
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
-    dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
-    dialog.dialogPane.buttonTypes.addAll(ButtonType.OK)
-
-    return dialog.showAndWait()
+    return showDialog(errorImageView, title, header, content, owner, ButtonType.OK)
 }
 
 /**

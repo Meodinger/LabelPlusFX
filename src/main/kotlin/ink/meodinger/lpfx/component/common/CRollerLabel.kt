@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
-import ink.meodinger.lpfx.util.TimerTaskManager
+import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import ink.meodinger.lpfx.util.property.*
 
 import javafx.application.Platform

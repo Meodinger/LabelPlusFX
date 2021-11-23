@@ -46,9 +46,6 @@ object ASpecifyDialog : Dialog<List<File>>() {
         it.vgap = gap
         it.padding = Insets(gap)
         it.alignment = Pos.TOP_CENTER
-
-        it.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
-        it.add(Label(I18N["specify.dialog.pic_path"]), 1, 0)
     }
     private val contentStackPane = StackPane(contentGridPane)
     private val contentScrollPane = ScrollPane(contentStackPane)
@@ -139,6 +136,11 @@ object ASpecifyDialog : Dialog<List<File>>() {
     }
 
     fun specify(): List<File> {
+        // clear & re-init
+        contentGridPane.children.clear()
+        contentGridPane.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
+        contentGridPane.add(Label(I18N["specify.dialog.pic_path"]), 1, 0)
+
         // update variables
         workingTransFile = State.transFile
         projectFolder = State.projectFolder

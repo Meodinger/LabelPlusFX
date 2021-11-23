@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.util
+package ink.meodinger.lpfx.util.timer
 
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue

@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: info.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

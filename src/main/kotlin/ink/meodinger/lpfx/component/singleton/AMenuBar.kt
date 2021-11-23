@@ -172,8 +172,8 @@ object AMenuBar : MenuBar() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = FileType.getType(file)
 
-        val newed = State.controller.new(file, type)
-        if (newed) State.controller.open(file, type)
+        val projectFolder = State.controller.new(file, type)
+        if (projectFolder != null) State.controller.open(file, type, projectFolder)
     }
     private fun openTranslation() {
         // open

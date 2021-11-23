@@ -14,7 +14,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.TimerTaskManager
+import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.accelerator.isControlDown
 import ink.meodinger.lpfx.util.component.*
@@ -653,7 +653,14 @@ class Controller : Initializable {
         // Dialog closed
         return true
     }
-    fun new(file: File, type: FileType): Boolean {
+
+    /**
+     * Create a new TransFile file and its FileSystem file.
+     * @param file Which file the TransFile will write to
+     * @param type Which type the Translation file will be
+     * @return ProjectFolder if success, null if fail
+     */
+    fun new(file: File, type: FileType): File? {
         Logger.info("Newing $type to ${file.path}", LOGSRC_CONTROLLER)
 
         // Choose Pics
@@ -679,7 +686,7 @@ class Controller : Initializable {
                     // Do not specify, cancel
                     Logger.info("Cancel (project folder invalid)", LOGSRC_CONTROLLER)
                     showInfo(I18N["common.cancel"], State.stage)
-                    return false
+                    return null
                 }
             } else {
                 // Find some pics, continue procedure
@@ -692,13 +699,13 @@ class Controller : Initializable {
             if (result.get().isEmpty()) {
                 Logger.info("Chose none, Cancel", LOGSRC_CONTROLLER)
                 showInfo(I18N["info.required_at_least_1_pic"], State.stage)
-                return false
+                return null
             }
             selectedPics.addAll(result.get())
         } else {
             Logger.info("Cancel (no selected)", LOGSRC_CONTROLLER)
             showInfo(I18N["common.cancel"], State.stage)
-            return false
+            return null
         }
 
         Logger.debug("Chose pics:", selectedPics, LOGSRC_CONTROLLER)
@@ -725,14 +732,20 @@ class Controller : Initializable {
             Logger.exception(e)
             showError(I18N["error.new_failed"], State.stage)
             showException(e, State.stage)
-            return false
+            return null
         }
 
         Logger.info("Newed TransFile", LOGSRC_CONTROLLER)
 
-        return true
+        return projectFolder
     }
-    fun open(file: File, type: FileType) {
+    /**
+     * Open a translation file
+     * @param file Which file will be open
+     * @param type Which type the file is
+     * @param projectFolder Which folder the pictures locate in; translation file's folder by default
+     */
+    fun open(file: File, type: FileType, projectFolder: File = file.parentFile) {
         Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
 
         // Read File
@@ -740,9 +753,8 @@ class Controller : Initializable {
         try {
             transFile = load(file, type)
             // Setup PicFiles
-            for (picName in transFile.transMap.keys) {
-                val picFile = file.parentFile.resolve(picName)
-                transFile.addFile(picName, picFile)
+            for (picName in transFile.picNames) {
+                transFile.addFile(picName, projectFolder.resolve(picName))
             }
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
@@ -756,7 +768,7 @@ class Controller : Initializable {
         // Update State
         State.transFile = transFile
         State.translationFile = file
-        State.projectFolder = file.parentFile
+        State.projectFolder = projectFolder
         State.isOpened = true
 
         // Show info if comment not in default list
@@ -811,6 +823,12 @@ class Controller : Initializable {
 
         Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
     }
+    /**
+     * Save a TransFile
+     * @param file Which file will the TransFile write to
+     * @param type Which type will the translation file be
+     * @param isSilent Whether the save procedure is done in silence or not
+     */
     fun save(file: File, type: FileType, isSilent: Boolean) {
         Logger.info("Saving to ${file.path}, isSilent:$isSilent", LOGSRC_CONTROLLER)
 
@@ -874,7 +892,11 @@ class Controller : Initializable {
 
         Logger.info("Saved", LOGSRC_CONTROLLER)
     }
-
+    /**
+     * Recover from backup file
+     * @param from The backup file
+     * @param to Which file will the backup recover to
+     */
     fun recovery(from: File, to: File) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
@@ -891,6 +913,11 @@ class Controller : Initializable {
 
         open(to, FileType.getType(to))
     }
+    /**
+     * Export a TransFile in specific type
+     * @param file Which file will the TransFile write to
+     * @param type Which type will the translation file be
+     */
     fun export(file: File, type: FileType) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
@@ -906,6 +933,10 @@ class Controller : Initializable {
             showException(e, State.stage)
         }
     }
+    /**
+     * Generate a zip file with translation file and picture files
+     * @param file Which file will the zip file write to
+     */
     fun pack(file: File) {
         Logger.info("Packing to ${file.path}", LOGSRC_CONTROLLER)
 

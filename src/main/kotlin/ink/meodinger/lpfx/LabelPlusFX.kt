@@ -16,7 +16,7 @@ import javafx.stage.Stage
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx
+ * Have fun with my code!
  */
 
 /**
@@ -54,13 +54,13 @@ class LabelPlusFX: HookedApplication() {
 
         primaryStage.show()
 
-        Logger.info("App start", "Application")
+        Logger.info("App start", LOGSRC_APPLICATION)
     }
 
     override fun stop() {
         State.stage.close()
 
-        Logger.info("App stop", "Application")
+        Logger.info("App stop", LOGSRC_APPLICATION)
 
         Options.save()
 

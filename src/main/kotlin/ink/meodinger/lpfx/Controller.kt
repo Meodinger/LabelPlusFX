@@ -40,6 +40,7 @@ import javafx.scene.input.*
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -89,7 +90,7 @@ class Controller : Initializable {
             try {
                 export(bak, FileType.MeoFile, State.transFile)
             } catch (e: IOException) {
-                Logger.error("Auto-backup failed")
+                Logger.error("Auto-backup failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
             }
         }
@@ -334,7 +335,7 @@ class Controller : Initializable {
         cPicBox.valueProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
-            // fixme: unexpected value change when remove first (also current) picture
+            // fixme: unexpected value change when remove first (when also current) picture
             //   want next picture, got last picture
             State.currentPicName = newValue ?:
                 if (cPicBox.items.contains(oldValue)) oldValue
@@ -648,35 +649,54 @@ class Controller : Initializable {
         return true
     }
     fun new(file: File, type: FileType): Boolean {
-        Logger.info("Newing $type to ${file.path}", "Controller")
+        Logger.info("Newing $type to ${file.path}", LOGSRC_CONTROLLER)
 
         // Choose Pics
+        var projectFolder = file.parentFile
         val potentialPics = ArrayList<String>()
-        val pics = ArrayList<String>()
-        val dir = file.parentFile
-        if (dir.isDirectory && dir.listFiles() != null) {
-            val files = dir.listFiles()
+        val selectedPics = ArrayList<String>()
+        while (potentialPics.isEmpty()) {
+            // Find pictures
+            val files = projectFolder.listFiles()
             if (files != null) for (f in files) if (f.isFile) {
                 for (extension in EXTENSIONS_PIC) if (f.extension == extension) {
                     potentialPics.add(f.name)
                 }
             }
+            if (potentialPics.isEmpty()) {
+                // Find nothing, this folder isn't project folder, confirm to ues another folder
+                val result = showConfirm(I18N["confirm.project_folder_invalid"], State.stage)
+                if (result.isPresent && result.get() == ButtonType.YES) {
+                    // Specify project folder
+                    val newFolder = DirectoryChooser().also { it.initialDirectory = projectFolder }.showDialog(State.stage)
+                    if (newFolder != null) projectFolder = newFolder
+                } else {
+                    // Do not specify, cancel
+                    Logger.info("Cancel (project folder invalid)", LOGSRC_CONTROLLER)
+                    showInfo(I18N["common.cancel"], State.stage)
+                    return false
+                }
+            } else {
+                // Find some pics, continue procedure
+                State.projectFolder = projectFolder
+                Logger.info("Project folder set to ${projectFolder.path}", LOGSRC_CONTROLLER)
+            }
         }
-        // todo: use checkPic-like Dialog (ask when current folder have no pics)
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
-                Logger.info("Chose none, Cancel", "Controller")
+                Logger.info("Chose none, Cancel", LOGSRC_CONTROLLER)
                 showInfo(I18N["info.required_at_least_1_pic"], State.stage)
                 return false
             }
-            pics.addAll(result.get())
+            selectedPics.addAll(result.get())
         } else {
-            Logger.info("Cancel", "Controller")
+            Logger.info("Cancel (no selected)", LOGSRC_CONTROLLER)
+            showInfo(I18N["common.cancel"], State.stage)
             return false
         }
 
-        Logger.debug("Chose pics:", pics, "Controller")
+        Logger.debug("Chose pics:", selectedPics, LOGSRC_CONTROLLER)
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
@@ -686,29 +706,29 @@ class Controller : Initializable {
         for (i in groupNameList.indices) if (groupCreateList[i])
             groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
         val transMap = HashMap<String, MutableList<TransLabel>>()
-        for (pic in pics) transMap[pic] = ArrayList()
+        for (pic in selectedPics) transMap[pic] = ArrayList()
 
         val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
 
-        Logger.debug("Created TransFile: $transFile", "Controller")
+        Logger.debug("Created TransFile: $transFile", LOGSRC_CONTROLLER)
 
         // Export to file
         try {
             export(file, type, transFile)
         } catch (e: IOException) {
-            Logger.error("New failed", "Controller")
+            Logger.error("New failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(I18N["error.new_failed"], State.stage)
             showException(e, State.stage)
             return false
         }
 
-        Logger.info("Newed TransFile", "Controller")
+        Logger.info("Newed TransFile", LOGSRC_CONTROLLER)
 
         return true
     }
     fun open(file: File, type: FileType) {
-        Logger.info("Opening ${file.path}", "Controller")
+        Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
 
         // Read File
         val transFile: TransFile
@@ -720,13 +740,13 @@ class Controller : Initializable {
                 transFile.addFile(picName, picFile)
             }
         } catch (e: IOException) {
-            Logger.error("Open failed", "Controller")
+            Logger.error("Open failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(I18N["error.open_failed"], State.stage)
             showException(e, State.stage)
             return
         }
-        Logger.debug("Read TransFile: $transFile", "Controller")
+        Logger.debug("Read TransFile: $transFile", LOGSRC_CONTROLLER)
 
         // Update State
         State.transFile = transFile
@@ -744,7 +764,7 @@ class Controller : Initializable {
                 }
             }
             if (isModified) {
-                Logger.info("Showed modified comment", "Controller")
+                Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
                 showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
             }
         }
@@ -760,9 +780,9 @@ class Controller : Initializable {
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             backupManager.refresh()
             backupManager.schedule()
-            Logger.info("Scheduled auto-backup", "Controller")
+            Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)
         } else {
-            Logger.warning("Auto-backup unavailable", "Controller")
+            Logger.warning("Auto-backup unavailable", LOGSRC_CONTROLLER)
             showError(I18N["error.auto_backup_unavailable"], State.stage)
         }
 
@@ -783,10 +803,10 @@ class Controller : Initializable {
         cPicBox.moveTo(0)
         cGroupBox.moveTo(0)
 
-        Logger.info("Opened TransFile", "Controller")
+        Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
     }
     fun save(file: File, type: FileType, isSilent: Boolean) {
-        Logger.info("Saving to ${file.path}, isSilent:$isSilent", "Controller")
+        Logger.info("Saving to ${file.path}, isSilent:$isSilent", LOGSRC_CONTROLLER)
 
         // Check folder
         if (!isSilent) if (file.parent != State.getFileFolder().path) {
@@ -796,15 +816,15 @@ class Controller : Initializable {
 
         // Backup if overwrite
         var bak: File? = null
-        if (State.translationFile.path == file.path) {
+        if (State.translationFile == file) {
             bak = File("${State.translationFile.path}.$EXTENSION_BAK")
 
             try {
                 transfer(State.translationFile, bak)
-                Logger.info("Backed TransFile to ${bak.path}", "Controller")
+                Logger.info("Backed TransFile to ${bak.path}", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 bak = null
-                Logger.error("TransFile backup failed", "Controller")
+                Logger.error("TransFile backup failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
                 if (!isSilent) {
                     showError(I18N["error.backup_failed"], State.stage)
@@ -818,7 +838,7 @@ class Controller : Initializable {
             export(file, type, State.transFile)
             if (!isSilent) showInfo(I18N["info.saved_successfully"], State.stage)
         } catch (e: IOException) {
-            Logger.error("Save failed", "Controller")
+            Logger.error("Save failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             if (!isSilent) {
                 if (bak != null) {
@@ -834,9 +854,9 @@ class Controller : Initializable {
         // Remove Backup
         if (bak != null) if (!bak.delete()) {
             if (!isSilent) showError(I18N["error.backup_clear_failed"], State.stage)
-            Logger.error("Backup removed failed", "Controller")
+            Logger.error("Backup removed failed", LOGSRC_CONTROLLER)
         } else {
-            Logger.info("Backup removed", "Controller")
+            Logger.info("Backup removed", LOGSRC_CONTROLLER)
         }
 
         // Update state
@@ -846,18 +866,18 @@ class Controller : Initializable {
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        Logger.info("Saved", "Controller")
+        Logger.info("Saved", LOGSRC_CONTROLLER)
     }
 
     fun recovery(from: File, to: File) {
-        Logger.info("Recovering from ${from.path}", "Controller")
+        Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
             transfer(from, to)
 
-            Logger.info("Recovered to ${to.path}", "Controller")
+            Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
         } catch (e: Exception) {
-            Logger.error("Recover failed", "Controller")
+            Logger.error("Recover failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(I18N["error.recovery_failed"], State.stage)
             showException(e, State.stage)
@@ -866,30 +886,30 @@ class Controller : Initializable {
         open(to, FileType.getType(to))
     }
     fun export(file: File, type: FileType) {
-        Logger.info("Exporting to ${file.path}", "Controller")
+        Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
             export(file, type, State.transFile)
 
-            Logger.info("Exported to ${file.path}", "Controller")
+            Logger.info("Exported to ${file.path}", LOGSRC_CONTROLLER)
             showInfo(I18N["info.exported_successful"], State.stage)
         } catch (e: IOException) {
-            Logger.error("Export failed", "Controller")
+            Logger.error("Export failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(I18N["error.export_failed"], State.stage)
             showException(e, State.stage)
         }
     }
     fun pack(file: File) {
-        Logger.info("Packing to ${file.path}", "Controller")
+        Logger.info("Packing to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
             pack(file, State.transFile)
 
-            Logger.info("Packed to ${file.path}", "Controller")
+            Logger.info("Packed to ${file.path}", LOGSRC_CONTROLLER)
             showInfo(I18N["info.exported_successful"], State.stage)
         } catch (e : IOException) {
-            Logger.error("Pack failed", "Controller")
+            Logger.error("Pack failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(I18N["error.export_failed"], State.stage)
             showException(e, State.stage)
@@ -944,23 +964,23 @@ class Controller : Initializable {
         cGroupBar.render(State.transFile.groupList)
         cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
-        Logger.info("Group bar rendered", "Controller")
+        Logger.info("Group bar rendered", LOGSRC_CONTROLLER)
         Logger.debug("List is", lazy {
             List(State.transFile.groupCount) {
                 TransGroup(State.transFile.groupNames[it], State.transFile.groupColors[it])
             }
-        }, "Controller")
+        }, LOGSRC_CONTROLLER)
     }
 
     fun createGroupBarItem(transGroup: TransGroup) {
         cGroupBar.createGroup(transGroup)
 
-        Logger.info("Created CGroup @ $transGroup", "Controller")
+        Logger.info("Created CGroup @ $transGroup", LOGSRC_CONTROLLER)
     }
     fun removeGroupBarItem(groupName: String) {
         cGroupBar.removeGroup(groupName)
 
-        Logger.info("Removed CGroup @ $groupName", "Controller")
+        Logger.info("Removed CGroup @ $groupName", LOGSRC_CONTROLLER)
     }
 
     // ----- LabelPane ----- //
@@ -972,11 +992,11 @@ class Controller : Initializable {
                 State.transFile.getTransList(State.currentPicName)
             )
         } catch (e: CLabelPane.LabelPaneException) {
-            Logger.error("Picture `${State.currentPicName}` not exists", "Controller")
+            Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
             showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName), State.stage)
             return
         } catch (e: IOException) {
-            Logger.error("LabelPane update failed", "Controller")
+            Logger.error("LabelPane update failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showException(e, State.stage)
             return
@@ -989,28 +1009,28 @@ class Controller : Initializable {
         }
 
         cLabelPane.moveToZero()
-        Logger.info("LabelPane rendered", "Controller")
+        Logger.info("LabelPane rendered", LOGSRC_CONTROLLER)
     }
 
     fun createLabelLayer() {
         cLabelPane.createLabelLayer()
 
-        Logger.info("Created label layer @ ${State.transFile.groupCount - 1}", "Controller")
+        Logger.info("Created label layer @ ${State.transFile.groupCount - 1}", LOGSRC_CONTROLLER)
     }
     fun removeLabelLayer(groupId: Int) {
         cLabelPane.removeLabelLayer(groupId)
 
-        Logger.info("Removed label layer @ $groupId", "Controller")
+        Logger.info("Removed label layer @ $groupId", LOGSRC_CONTROLLER)
     }
     fun createLabel(transLabel: TransLabel) {
         cLabelPane.createLabel(transLabel)
 
-        Logger.info("Created label @ $transLabel", "Controller")
+        Logger.info("Created label @ $transLabel", LOGSRC_CONTROLLER)
     }
     fun removeLabel(labelIndex: Int) {
         cLabelPane.removeLabel(labelIndex)
 
-        Logger.info("Removed label @ $labelIndex", "Controller")
+        Logger.info("Removed label @ $labelIndex", LOGSRC_CONTROLLER)
     }
 
     // ----- TreeView ----- //
@@ -1022,40 +1042,40 @@ class Controller : Initializable {
             // State.viewMode
         )
 
-        Logger.info("TreeView rendered", "Controller")
+        Logger.info("TreeView rendered", LOGSRC_CONTROLLER)
     }
 
     fun createGroupTreeItem(transGroup: TransGroup) {
         cTreeView.createGroupItem(transGroup)
 
-        Logger.info("Created group item @ $transGroup", "Controller")
+        Logger.info("Created group item @ $transGroup", LOGSRC_CONTROLLER)
     }
     fun removeGroupTreeItem(groupName: String) {
         cTreeView.removeGroupItem(groupName)
 
-        Logger.info("Removed group item @ $groupName", "Controller")
+        Logger.info("Removed group item @ $groupName", LOGSRC_CONTROLLER)
     }
     fun createLabelTreeItem(transLabel: TransLabel) {
         cTreeView.createLabelItem(transLabel)
 
-        Logger.info("Created label item @ $transLabel", "Controller")
+        Logger.info("Created label item @ $transLabel", LOGSRC_CONTROLLER)
     }
     fun removeLabelTreeItem(labelIndex: Int) {
         cTreeView.removeLabelItem(labelIndex)
 
-        Logger.info("Removed label item @ $labelIndex", "Controller")
+        Logger.info("Removed label item @ $labelIndex", LOGSRC_CONTROLLER)
     }
     fun moveLabelTreeItem(labelIndex: Int, from: Int, to: Int) {
         cTreeView.moveLabelItem(labelIndex, from, to)
 
-        Logger.info("Moved label item @ $labelIndex @ from=$from, to=$to", "Controller")
+        Logger.info("Moved label item @ $labelIndex @ from=$from, to=$to", LOGSRC_CONTROLLER)
     }
 
     // ----- Mode ----- //
     fun setViewMode(mode: ViewMode) {
         State.viewMode = mode
 
-        Logger.info("Switched view mode to $mode", "Controller")
+        Logger.info("Switched view mode to $mode", LOGSRC_CONTROLLER)
     }
     fun setWorkMode(mode: WorkMode) {
         State.workMode = mode
@@ -1065,7 +1085,7 @@ class Controller : Initializable {
             WorkMode.LabelMode -> ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[1])
         })
 
-        Logger.info("Switched work mode to $mode", "Controller")
+        Logger.info("Switched work mode to $mode", LOGSRC_CONTROLLER)
     }
 
     // ----- Info ----- //

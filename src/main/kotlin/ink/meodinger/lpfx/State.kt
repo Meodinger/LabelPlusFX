@@ -35,34 +35,67 @@ object State {
     val isChangedProperty = SimpleBooleanProperty(false)
     val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_FILE)
     val translationFileProperty = SimpleObjectProperty(File(""))
+    val projectFolderProperty = SimpleObjectProperty(File(""))
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
     val workModeProperty = SimpleObjectProperty(DEFAULT_WORK_MODE)
 
+    /**
+     * Whether opened a TransFile or not
+     */
     var isOpened: Boolean by isOpenedProperty
+    /**
+     * Whether changed a TransFile or not
+     */
     var isChanged: Boolean by isChangedProperty
+    /**
+     * TransFile opened
+     */
     var transFile: TransFile by transFileProperty
+    /**
+     * TransFile's FileSystem file
+     */
     var translationFile: File by translationFileProperty
+    /**
+     * Folder of all project pictures (no external pictures)
+     */
+    var projectFolder: File by projectFolderProperty
+    /**
+     * Name of current selected picture (usually also picture's FileSystem file's name)
+     */
     var currentPicName: String by currentPicNameProperty
+    /**
+     * Index of current selected TransGroup
+     */
     var currentGroupId: Int by currentGroupIdProperty
+    /**
+     * Index of current selected TransLabel
+     */
     var currentLabelIndex: Int by currentLabelIndexProperty
+    /**
+     * Current view mode
+     */
     var viewMode: ViewMode by viewModeProperty
+    /**
+     * Current work mode
+     */
     var workMode: WorkMode by workModeProperty
 
     fun reset() {
         controller.reset()
 
         isOpened = false
+        isChanged = false
         transFile = TransFile.DEFAULT_FILE
         translationFile = File("")
+        projectFolder = File("")
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
-        isChanged = false
-        workMode = WorkMode.InputMode
         viewMode = ViewMode.getMode(Settings[Settings.ViewModePreference].asStringList()[0])
+        workMode = WorkMode.InputMode
 
         Logger.info("Reset")
     }
@@ -76,67 +109,78 @@ object State {
     fun addTransGroup(transGroup: TransGroup) {
         transFile.addTransGroup(transGroup)
 
-        Logger.info("Added $transGroup", "State")
+        Logger.info("Added $transGroup", LOGSRC_STATE)
     }
     fun removeTransGroup(groupName: String) {
         val toRemove = transFile.getTransGroup(groupName)
 
         transFile.removeTransGroup(groupName)
 
-        Logger.info("Removed $toRemove", "State")
+        Logger.info("Removed $toRemove", LOGSRC_STATE)
     }
     fun setTransGroupName(groupId: Int, name: String) {
         transFile.getTransGroup(groupId).name = name
 
-        Logger.info("Set GroupID=$groupId @name=$name", "State")
+        Logger.info("Set GroupID=$groupId @name=$name", LOGSRC_STATE)
     }
     fun setTransGroupColor(groupId: Int, color: String) {
         transFile.getTransGroup(groupId).colorHex = color
 
-        Logger.info("Set GroupID=$groupId @color=$color", "State")
+        Logger.info("Set GroupID=$groupId @color=$color", LOGSRC_STATE)
     }
 
     fun addPicture(picName: String, picFile: File? = null) {
         transFile.addTransList(picName)
-        transFile.addFile(picName, picFile ?: getFileFolder().resolve(picName))
+        transFile.addFile(picName, picFile ?: projectFolder.resolve(picName))
 
-        Logger.info("Added picture $picName", "State")
+        Logger.info("Added picture $picName", LOGSRC_STATE)
     }
     fun removePicture(picName: String) {
         transFile.removeTransList(picName)
         transFile.removeFile(picName)
 
-        Logger.info("Removed picture $picName", "State")
+        Logger.info("Removed picture $picName", LOGSRC_STATE)
     }
 
     fun addTransLabel(picName: String, transLabel: TransLabel) {
         transFile.addTransLabel(picName, transLabel)
 
-        Logger.info("Added $picName @ $transLabel", "State")
+        Logger.info("Added $picName @ $transLabel", LOGSRC_STATE)
     }
     fun removeTransLabel(picName: String, labelIndex: Int) {
         val toRemove = transFile.getTransLabel(picName, labelIndex)
 
         transFile.removeTransLabel(picName, labelIndex)
 
-        Logger.info("Removed $picName @ $toRemove", "State")
+        Logger.info("Removed $picName @ $toRemove", LOGSRC_STATE)
     }
     fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
         transFile.getTransLabel(picName, index).index = newIndex
 
-        Logger.info("Set $picName->Index=$index @index=$newIndex", "State")
+        Logger.info("Set $picName->Index=$index @index=$newIndex", LOGSRC_STATE)
     }
     fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
         transFile.getTransLabel(picName, index).groupId = groupId
 
-        Logger.info("Set $picName->Index=$index @groupId=$groupId", "State")
+        Logger.info("Set $picName->Index=$index @groupId=$groupId", LOGSRC_STATE)
     }
 
+    /**
+     * Get current picture's FileSystem file
+     */
     fun getPicFileNow(): File {
         if (!isOpened || currentPicName == "") return File("")
         return transFile.getFile(currentPicName)
     }
+
+    /**
+     * Get current TransFile's FileSystem file's directory
+     */
     fun getFileFolder(): File = translationFile.parentFile
+
+    /**
+     * Get current TransFile's FileSystem file's backup directory
+     */
     fun getBakFolder(): File = translationFile.parentFile.resolve(FOLDER_NAME_BAK)
 
 }

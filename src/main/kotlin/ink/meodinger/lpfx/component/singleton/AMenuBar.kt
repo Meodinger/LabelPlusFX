@@ -221,7 +221,7 @@ object AMenuBar : MenuBar() {
     private fun editProjectPictures() {
         // Choose Pics
         val selected = State.transFile.sortedPicNames
-        val unselected = Files.walk(State.getFileFolder().toPath(), 1).filter {
+        val unselected = Files.walk(State.projectFolder.toPath(), 1).filter {
             if (selected.contains(it.name)) return@filter false
             for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
             false

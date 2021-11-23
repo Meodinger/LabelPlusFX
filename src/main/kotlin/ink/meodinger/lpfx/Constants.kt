@@ -115,6 +115,10 @@ const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
  */
 const val NOT_FOUND = -1
 
+const val LOGSRC_APPLICATION = "Application"
+const val LOGSRC_CONTROLLER = "Controller"
+const val LOGSRC_STATE = "State"
+
 /**
  * Work Mode
  * @param description Display name for WorkMode

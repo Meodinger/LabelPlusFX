@@ -93,6 +93,7 @@ object ASpecifyDialog : Dialog<List<File>>() {
 
                     // get project folder
                     val directory = dirChooser.showDialog(thisWindow) ?: return@does
+                    if (!preserve) State.projectFolder = directory
 
                     // auto-fill
                     val newPicPaths = Files
@@ -140,7 +141,7 @@ object ASpecifyDialog : Dialog<List<File>>() {
     fun specify(): List<File> {
         // update variables
         workingTransFile = State.transFile
-        projectFolder = State.translationFile.parentFile
+        projectFolder = State.projectFolder
         picCount = State.transFile.picCount
         picNames = State.transFile.sortedPicNames
 

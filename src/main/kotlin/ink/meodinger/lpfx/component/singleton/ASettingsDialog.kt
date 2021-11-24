@@ -1,13 +1,10 @@
 package ink.meodinger.lpfx.component.singleton
 
-import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.ViewMode
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.CLabel
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CInputLabel
-import ink.meodinger.lpfx.getGroupNameFormatter
-import ink.meodinger.lpfx.getPropertyFormatter
 import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Settings
@@ -480,8 +477,8 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         list.addAll(convertMode())
         list.addAll(convertLabel())
 
-        Logger.info("Generated settings", "SettingsDialog")
-        Logger.debug("got", list, "SettingsDialog")
+        Logger.info("Generated settings", LOGSRC_DIALOGS)
+        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         return list
     }

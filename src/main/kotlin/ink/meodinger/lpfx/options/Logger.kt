@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.LOGSRC_LOGGER
 import ink.meodinger.lpfx.util.string.deleteTail
 
 import java.io.*
@@ -56,11 +57,11 @@ object Logger {
     fun start() {
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
-        info("Logger start", "Logger")
+        info("Logger start", LOGSRC_LOGGER)
     }
 
     fun stop() {
-        info("Logger exit", "Logger")
+        info("Logger exit", LOGSRC_LOGGER)
 
         writer.close()
     }

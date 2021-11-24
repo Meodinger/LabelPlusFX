@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component.singleton
 
+import ink.meodinger.lpfx.LOGSRC_DIALOGS
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.io.LogSender
@@ -120,7 +121,7 @@ object ALogsDialog : AbstractPropertiesDialog() {
             for (modal in tableLog.items) {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
-                    Logger.warning("Delete ${modal.file.path} failed", "LogsDialog")
+                    Logger.error("Delete ${modal.file.path} failed", LOGSRC_DIALOGS)
                     showError(String.format(I18N["error.logs.delete_failed.format.s"], modal.file.name), State.stage)
                     continue
                 }
@@ -128,8 +129,8 @@ object ALogsDialog : AbstractPropertiesDialog() {
             }
             tableLog.items.removeAll(toRemove)
 
-            Logger.info("Cleaned logs", "LogsDialog")
-            Logger.debug("Cleaned", toRemove, "LogsDialog")
+            Logger.info("Cleaned logs", LOGSRC_DIALOGS)
+            Logger.debug("Cleaned", toRemove, LOGSRC_DIALOGS)
         }
 
         //    0      1           2     3
@@ -176,8 +177,8 @@ object ALogsDialog : AbstractPropertiesDialog() {
 
         list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))
 
-        Logger.info("Generated settings", "LogsDialog")
-        Logger.debug("got", list, "LogsDialog")
+        Logger.info("Generated settings", LOGSRC_DIALOGS)
+        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         return list
     }

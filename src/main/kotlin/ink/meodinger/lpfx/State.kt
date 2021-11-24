@@ -130,10 +130,12 @@ object State {
     }
 
     fun addPicture(picName: String, picFile: File? = null) {
-        transFile.addTransList(picName)
-        transFile.addFile(picName, picFile ?: projectFolder.resolve(picName))
+        val file = picFile ?: projectFolder.resolve(picName)
 
-        Logger.info("Added picture $picName", LOGSRC_STATE)
+        transFile.addTransList(picName)
+        transFile.addFile(picName, file)
+
+        Logger.info("Added picture $picName with path ${file.path}", LOGSRC_STATE)
     }
     fun removePicture(picName: String) {
         transFile.removeTransList(picName)

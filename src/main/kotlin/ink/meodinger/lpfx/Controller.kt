@@ -631,6 +631,11 @@ class Controller : Initializable {
             }
             if (uncomplete) showInfo(I18N["specify.info.incomplete"], State.stage)
         }
+        if (State.isOpened) {
+            if (State.currentPicName.isNotEmpty()) // in case of open but not set currentPicName
+                if (State.transFile.getFile(State.currentPicName).exists())
+                    renderLabelPane()
+        }
     }
 
     fun stay(): Boolean {
@@ -697,7 +702,7 @@ class Controller : Initializable {
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
-                Logger.info("Chose none, Cancel", LOGSRC_CONTROLLER)
+                Logger.info("Cancel (choose none)", LOGSRC_CONTROLLER)
                 showInfo(I18N["info.required_at_least_1_pic"], State.stage)
                 return null
             }
@@ -890,7 +895,7 @@ class Controller : Initializable {
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        Logger.info("Saved", LOGSRC_CONTROLLER)
+        Logger.info("Saved to ${file.path}", LOGSRC_CONTROLLER)
     }
     /**
      * Recover from backup file

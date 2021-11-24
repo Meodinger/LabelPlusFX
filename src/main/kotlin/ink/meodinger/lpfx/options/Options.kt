@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.LOGSRC_OPTIONS
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -54,11 +55,11 @@ object Options {
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
-            Logger.debug("RecentFiles got:", RecentFiles.getAll(), "Options")
-            Logger.debug("Preference got:", Preference.properties, "Options")
-            Logger.debug("Settings got:", Settings.properties, "Options")
+            Logger.debug("RecentFiles got:", RecentFiles.getAll(), LOGSRC_OPTIONS)
+            Logger.debug("Preference got:", Preference.properties, LOGSRC_OPTIONS)
+            Logger.debug("Settings got:", Settings.properties, LOGSRC_OPTIONS)
         } catch (e: IOException) {
-            Logger.fatal("Options load failed", "Options")
+            Logger.fatal("Options load failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(I18N["error.initialize_options_failed"], null)
             showException(e, null)
@@ -68,13 +69,13 @@ object Options {
 
     fun save() {
         RecentFiles.save()
-        Logger.info("RecentFiles saved", "Options")
+        Logger.info("RecentFiles saved", LOGSRC_OPTIONS)
 
         Preference.save()
-        Logger.info("Preference saved", "Options")
+        Logger.info("Preference saved", LOGSRC_OPTIONS)
 
         Settings.save()
-        Logger.info("Settings saved", "Options")
+        Logger.info("Settings saved", LOGSRC_OPTIONS)
     }
 
     @Throws(IOException::class)
@@ -87,11 +88,11 @@ object Options {
             RecentFiles.load()
             RecentFiles.check()
 
-            Logger.info("RecentFiles loaded", "Options")
+            Logger.info("RecentFiles loaded", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             RecentFiles.useDefault()
             RecentFiles.save()
-            Logger.warning("Recent Files load failed", "Options")
+            Logger.error("Recent Files load failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],
@@ -116,11 +117,11 @@ object Options {
             Preference.load()
             Preference.check()
 
-            Logger.info("Preference loaded", "Options")
+            Logger.info("Preference loaded", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             Preference.useDefault()
             Preference.save()
-            Logger.warning("Preference load failed, using default", "Options")
+            Logger.error("Preference load failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],
@@ -145,11 +146,11 @@ object Options {
             Settings.load()
             Settings.check()
 
-            Logger.info("Settings loaded", "Options")
+            Logger.info("Settings loaded", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             Settings.useDefault()
             Settings.save()
-            Logger.warning("Settings load failed, using default", "Options")
+            Logger.error("Settings load failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],

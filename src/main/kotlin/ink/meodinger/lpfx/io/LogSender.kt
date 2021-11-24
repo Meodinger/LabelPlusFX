@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.io
 
+import ink.meodinger.lpfx.LOGSRC_SENDER
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 
@@ -65,12 +66,12 @@ object LogSender {
         val task = SendTask(log)
 
         task.setOnFailed {
-            Logger.error("Log sent failed", "LogSender")
+            Logger.error("Log sent failed", LOGSRC_SENDER)
             Logger.exception(it)
         }
 
         task.setOnSucceeded {
-            Logger.info("Sent Log ${log.name}", "LogSender")
+            Logger.info("Sent Log ${log.name}", LOGSRC_SENDER)
         }
 
         task.startInNewThread()

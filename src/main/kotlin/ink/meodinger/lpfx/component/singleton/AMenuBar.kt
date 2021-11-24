@@ -49,6 +49,7 @@ object AMenuBar : MenuBar() {
     private val mEditComment = MenuItem(I18N["m.comment"])
     private val mEditProjectPictures = MenuItem(I18N["m.projectPics"])
     private val mAddExternalPicture = MenuItem(I18N["m.externalPic"])
+    private val mSpecifyPictures = MenuItem(I18N["m.specify"])
     private val mmExport = Menu(I18N["mm.export"])
     private val mExportAsLp = MenuItem(I18N["m.lp"])
     private val mExportAsMeo = MenuItem(I18N["m.meo"])
@@ -102,6 +103,7 @@ object AMenuBar : MenuBar() {
         mEditComment.setOnAction { editComment() }
         mEditProjectPictures.setOnAction { editProjectPictures() }
         mAddExternalPicture.setOnAction { addExternalPicture() }
+        mSpecifyPictures.setOnAction { State.controller.specifyPicFiles() }
         mExportAsLp.setOnAction { exportTransFile(it) }
         mExportAsMeo.setOnAction { exportTransFile(it) }
         mExportAsTransPack.setOnAction { exportTransPack() }
@@ -116,6 +118,7 @@ object AMenuBar : MenuBar() {
         mEditComment.disableProperty().bind(!State.isOpenedProperty)
         mEditProjectPictures.disableProperty().bind(!State.isOpenedProperty)
         mAddExternalPicture.disableProperty().bind(!State.isOpenedProperty)
+        mSpecifyPictures.disableProperty().bind(!State.isOpenedProperty)
         mExportAsLp.disableProperty().bind(!State.isOpenedProperty)
         mExportAsMeo.disableProperty().bind(!State.isOpenedProperty)
         mExportAsTransPack.disableProperty().bind(!State.isOpenedProperty)
@@ -130,7 +133,7 @@ object AMenuBar : MenuBar() {
         }
 
         mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
-        mmEdit.items.addAll(mEditComment, SeparatorMenuItem(), mEditProjectPictures, mAddExternalPicture)
+        mmEdit.items.addAll(mEditComment, SeparatorMenuItem(), mEditProjectPictures, mAddExternalPicture, mSpecifyPictures)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
         this.menus.addAll(mmFile, mmEdit, mmExport, mmAbout)

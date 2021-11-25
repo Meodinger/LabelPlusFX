@@ -11,13 +11,14 @@ import kotlin.system.exitProcess
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx
+ * Have fun with my code!
  */
 
 /**
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    // for shutdown hooks
     Platform.setImplicitExit(false)
 
     Options.init()

@@ -52,7 +52,7 @@
             <version>1.6.0</version>
         </dependency>
 
-        <!-- jackson 2.13.0 has problem with kotlin (multi-release) -->
+        <!-- jackson 2.13.0 has problem with kotlin (multi-release KT-48027) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>

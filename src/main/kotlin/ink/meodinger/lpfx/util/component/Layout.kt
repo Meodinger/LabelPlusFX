@@ -2,9 +2,9 @@ package ink.meodinger.lpfx.util.component
 
 import javafx.scene.Node
 import javafx.scene.control.Dialog
-import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Pane
+import javafx.scene.control.SplitPane
+import javafx.scene.layout.*
+
 
 /**
  * Author: Meodinger
@@ -12,12 +12,16 @@ import javafx.scene.layout.Pane
  * Have fun with my code!
  */
 
+////////////////////////////////////////////////////////////
+///// AnchorPane Anchor / Layout
+////////////////////////////////////////////////////////////
+
 /**
  * Get AnchorPane anchor - Left
  * @return LayoutX if null
  */
 var Node.anchorPaneLeft: Double
-    get() =  AnchorPane.getLeftAnchor(this) ?: layoutX
+    get() = AnchorPane.getLeftAnchor(this) ?: layoutX
     set(value) { AnchorPane.setLeftAnchor(this, value) }
 
 /**
@@ -25,7 +29,7 @@ var Node.anchorPaneLeft: Double
  * @return LayoutY if null
  */
 var Node.anchorPaneTop: Double
-    get() =  AnchorPane.getTopAnchor(this) ?: layoutY
+    get() = AnchorPane.getTopAnchor(this) ?: layoutY
     set(value) { AnchorPane.setTopAnchor(this, value) }
 
 /**
@@ -41,8 +45,24 @@ var Node.anchorPaneRight: Double
  * @return LayoutY + localBoundsHeight if null
  */
 var Node.anchorPaneBottom: Double
-    get() =  AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
+    get() = AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
+
+////////////////////////////////////////////////////////////
+///// HGrow / VGrow
+////////////////////////////////////////////////////////////
+
+var Node.hGrow: Priority
+    get() = HBox.getHgrow(this) ?: Priority.NEVER
+    set(value) { HBox.setHgrow(this, value) }
+
+var Node.vGrow: Priority
+    get() = VBox.getVgrow(this) ?: Priority.NEVER
+    set(value) { VBox.setVgrow(this, value) }
+
+////////////////////////////////////////////////////////////
+///// Pane/DialogPane content
+////////////////////////////////////////////////////////////
 
 /**
  * Set pane.children
@@ -50,15 +70,17 @@ var Node.anchorPaneBottom: Double
  * @param operation Lambda with arguments of Node as this and Pane as it
  * @return this pane ref
  */
-fun <T : Node> Pane.withContent(content: T, operation: T.(Pane) -> Unit): Pane {
-    this.children.clear()
-    this.children.add(content.apply { operation.invoke(this, this@withContent) })
-    return this
+fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit): Pane {
+    return apply {
+        children.clear()
+        children.add(content.also { operation(it) })
+    }
 }
 infix fun <T : Node> Pane.withContent(content: T): Pane {
-    this.children.clear()
-    this.children.add(content)
-    return this
+    return apply {
+        children.clear()
+        children.add(content)
+    }
 }
 
 /**
@@ -67,14 +89,16 @@ infix fun <T : Node> Pane.withContent(content: T): Pane {
  * @param operation Lambda with arguments of Node as this and Dialog as it
  * @return this dialog ref
  */
-fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.(Dialog<R>) -> Unit): Dialog<R> {
-    this.dialogPane.content = content.apply { operation.invoke(this, this@withContent) }
-    return this
+fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit): Dialog<R> {
+    return apply { dialogPane.content = content.also(operation) }
 }
 infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
-    this.dialogPane.content = content
-    return this
+    return apply { dialogPane.content = content }
 }
+
+////////////////////////////////////////////////////////////
+///// BorderPane
+////////////////////////////////////////////////////////////
 
 /**
  * Apply a node to BorderPane center
@@ -82,61 +106,37 @@ infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
  * @param operation Operation to node (will translate to node.apply(operation))
  * @return this BorderPane
  */
-fun <T : Node> BorderPane.center(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
-    return this.apply { this.center = node.also { operation(it, this) } }
+fun <T : Node> BorderPane.center(node : T, operation: T.() -> Unit = {}): BorderPane {
+    return apply { center = node.also(operation) }
 }
-fun <T : Node> BorderPane.center(node: T): BorderPane {
-    return this.apply { this.center = node }
+fun <T : Node> BorderPane.top(node : T, operation: T.() -> Unit = {}): BorderPane {
+    return apply { top = node.also(operation) }
 }
-
-/**
- * Apply a node to BorderPane top
- * @param node Node to apply
- * @param operation Operation to node (will translate to node.apply(operation))
- * @return this BorderPane
- */
-fun <T : Node> BorderPane.top(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
-    return this.apply { this.top = node.also { operation(it, this) } }
+fun <T : Node> BorderPane.bottom(node : T, operation: T.() -> Unit = {}): BorderPane {
+    return apply { bottom = node.also(operation) }
 }
-fun <T : Node> BorderPane.top(node: T): BorderPane {
-    return this.apply { this.top = node }
+fun <T : Node> BorderPane.left(node : T, operation: T.() -> Unit = {}): BorderPane {
+    return apply { left = node.also(operation) }
+}
+fun <T : Node> BorderPane.right(node : T, operation: T.() -> Unit = {}): BorderPane {
+    return apply { right = node.also(operation) }
 }
 
-/**
- * Apply a node to BorderPane bottom
- * @param node Node to apply
- * @param operation Operation to node (will translate to node.apply(operation))
- * @return this BorderPane
- */
-fun <T : Node> BorderPane.bottom(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
-    return this.apply { this.bottom = node.also { operation(it, this) } }
-}
-fun <T : Node> BorderPane.bottom(node: T): BorderPane {
-    return this.apply { this.bottom = node }
+////////////////////////////////////////////////////////////
+///// SplitPane
+////////////////////////////////////////////////////////////
+
+fun <T : Node> SplitPane.add(node: T, operation: T.() -> Unit = {}): SplitPane {
+    return apply { items.add(node.also(operation)) }
 }
 
-/**
- * Apply a node to BorderPane left
- * @param node Node to apply
- * @param operation Operation to node (will translate to node.apply(operation))
- * @return this BorderPane
- */
-fun <T : Node> BorderPane.left(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
-    return this.apply { this.left = node.also { operation(it, this) } }
-}
-fun <T : Node> BorderPane.left(node: T): BorderPane {
-    return this.apply { this.left = node }
-}
+////////////////////////////////////////////////////////////
+///// HBox / VBox
+////////////////////////////////////////////////////////////
 
-/**
- * Apply a node to BorderPane right
- * @param node Node to apply
- * @param operation Operation to node (will translate to node.apply(operation))
- * @return this BorderPane
- */
-fun <T : Node> BorderPane.right(node : T, operation: T.(BorderPane) -> Unit): BorderPane {
-    return this.apply { this.right = node.also { operation(it, this) } }
+fun <T : Node> HBox.add(node: T, operation: T.() -> Unit = {}): HBox {
+    return apply { children.add(node.also(operation)) }
 }
-fun <T : Node> BorderPane.right(node: T): BorderPane {
-    return this.apply { this.right = node }
+fun <T : Node> VBox.add(node: T, operation: T.() -> Unit = {}): VBox {
+    return apply { children.add(node.also(operation)) }
 }

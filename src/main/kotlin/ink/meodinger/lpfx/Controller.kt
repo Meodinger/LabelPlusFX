@@ -57,7 +57,7 @@ import kotlin.collections.ArrayList
 /**
  * Main controller for lpfx
  */
-class Controller : Initializable {
+class Controller() : Initializable {
 
     @FXML private lateinit var root: BorderPane
     @FXML private lateinit var bSwitchViewMode: Button
@@ -82,6 +82,29 @@ class Controller : Initializable {
         val now = WorkMode.values().indexOf(State.workMode)
         val all = WorkMode.values().size
         setWorkMode(WorkMode.values()[(now + 1) % all])
+    }
+
+    constructor(view : View) : this() {
+        if (this::root.isInitialized) throw IllegalStateException("Initialize twice")
+
+        this.root            = view
+        this.bSwitchViewMode = view.bSwitchViewMode
+        this.bSwitchWorkMode = view.bSwitchWorkMode
+        this.lInfo           = view.lInfo
+        this.pMain           = view.pMain
+        this.pRight          = view.pRight
+        this.cGroupBar       = view.cGroupBar
+        this.cLabelPane      = view.cLabelPane
+        this.cSlider         = view.cSlider
+        this.cPicBox         = view.cPicBox
+        this.cGroupBox       = view.cGroupBox
+        this.cTreeView       = view.cTreeView
+        this.cTransArea      = view.cTransArea
+
+        this.bSwitchViewMode.setOnAction { switchViewMode() }
+        this.bSwitchWorkMode.setOnAction { switchWorkMode() }
+
+        initialize(null, null)
     }
 
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
@@ -111,12 +134,14 @@ class Controller : Initializable {
         // Set last used dir
         var lastFilePath = RecentFiles.getLastOpenFile()
         while (lastFilePath != null) {
-            val lastDirectory = File(lastFilePath).parentFile
-            if (lastDirectory.exists()) {
-                CFileChooser.lastDirectory = lastDirectory
+            val file = File(lastFilePath)
+            if (file.exists() && file.parentFile.exists()) {
+                CFileChooser.lastDirectory = file.parentFile
                 break
+            } else {
+                RecentFiles.remove(lastFilePath)
+                lastFilePath = RecentFiles.getLastOpenFile()
             }
-            lastFilePath = RecentFiles.getLastOpenFile()
         }
 
         // Load rules
@@ -214,12 +239,13 @@ class Controller : Initializable {
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
 
-        // View Mode
+        // Mode
         val viewModes = Settings[Settings.ViewModePreference].asStringList()
         State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
         cTreeView.viewModeProperty.bind(State.viewModeProperty)
-        bSwitchWorkMode.text = I18N["mode.work.input"]
+        // mode text
         bSwitchViewMode.text = State.viewMode.toString()
+        bSwitchWorkMode.text = State.workMode.toString()
 
         // TreeView Root Name
         cTreeView.picNameProperty.bind(State.currentPicNameProperty)

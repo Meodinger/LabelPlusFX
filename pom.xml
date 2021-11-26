@@ -132,11 +132,6 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
-                        <configuration>
-                            <args>
-                                <arg>-Xjavac-arguments=-g:lines</arg>
-                            </args>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>

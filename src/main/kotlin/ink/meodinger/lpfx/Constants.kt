@@ -3,9 +3,9 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.timer.genTask
 
 import javafx.application.Application
-import javafx.application.Platform
 import javafx.scene.control.TextFormatter
 import java.io.File
 import java.util.*
@@ -28,38 +28,40 @@ abstract class HookedApplication : Application() {
     /**
      * Clear all shutdown hooks
      */
-    fun clearShutdownHooks() = shutdownHooks.clear()
+    fun clearShutdownHooks() {
+        shutdownHooks.clear()
+    }
 
     /**
      * Add a shutdown hook
      * Should use the resolve function as callback
      */
-    fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) = shutdownHooks.put(key, onShutdown)
+    fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) {
+        shutdownHooks[key] = onShutdown
+    }
 
     /**
      * Remove a shutdown hook
      */
-    fun removeShutdownHook(key: String) = shutdownHooks.remove(key)
-
+    fun removeShutdownHook(key: String) {
+        shutdownHooks.remove(key)
+    }
     /**
      * MUST run this before exit or hooks will not be executed
      */
     protected fun runShutdownHooksAndExit() {
-
         if (shutdownHooks.isEmpty()) {
-            Platform.exit()
+            exitProcess(0)
         } else {
             val values = shutdownHooks.values.toList()
             Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> values[it] { resolve(Unit) } }
             }) finally {
-                Platform.exit()
+                exitProcess(0)
             }
 
             // In case of something unexpected happened and the app cannot be shutdown
-            Timer().schedule(object : TimerTask() {
-                override fun run() { exitProcess(0) }
-            }, 1000L * 60 * 5)
+            Timer().schedule(genTask { exitProcess(0) }, 1000L * 60 * 5)
 
             clearShutdownHooks()
         }
@@ -186,17 +188,21 @@ enum class FileType(private val description: String) {
 /**
  * Get a TextFormatter for TransGroup name
  */
-fun getGroupNameFormatter() = TextFormatter<String> { change ->
-    change.text = change.text.trim().replace(Regex("[| ]"), "_")
+fun getGroupNameFormatter(): TextFormatter<String> {
+    return TextFormatter<String> { change ->
+        change.text = change.text.trim().replace(Regex("[| ]"), "_")
 
-    change
+        change
+    }
 }
 
 /**
  * Get a TextFormatter for CProperty
  */
-fun getPropertyFormatter() = TextFormatter<String> { change ->
-    change.text = change.text.trim().replace(Regex("[|, ]"), "_")
+fun getPropertyFormatter(): TextFormatter<String> {
+    return  TextFormatter<String> { change ->
+        change.text = change.text.trim().replace(Regex("[|, ]"), "_")
 
-    change
+        change
+    }
 }

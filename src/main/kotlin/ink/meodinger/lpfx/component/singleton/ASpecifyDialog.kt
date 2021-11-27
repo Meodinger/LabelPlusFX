@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component.singleton
 
-import ink.meodinger.lpfx.EXTENSIONS_PIC
-import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.add
@@ -39,13 +38,12 @@ object ASpecifyDialog : Dialog<List<File>>() {
 
     private val unspecified = I18N["specify.unspecified"]
     private val defaultFile = File("")
-    private const val gap = 16.0
 
     private val contentPane = BorderPane()
     private val contentGridPane = GridPane().also {
-        it.hgap = gap
-        it.vgap = gap
-        it.padding = Insets(gap)
+        it.hgap = COMMON_GAP
+        it.vgap = COMMON_GAP
+        it.padding = Insets(COMMON_GAP)
         it.alignment = Pos.TOP_CENTER
     }
     private val contentStackPane = StackPane(contentGridPane)
@@ -67,12 +65,12 @@ object ASpecifyDialog : Dialog<List<File>>() {
     private var labels: MutableList<CRollerLabel> = ArrayList()
 
     init {
-        contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - gap)
+        contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - COMMON_GAP)
         contentPane.apply {
             center(contentScrollPane) { style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
                 alignment = Pos.CENTER_RIGHT
-                padding = Insets(gap, gap / 2, gap / 2, gap)
+                padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
 
                 add(Button(I18N["specify.dialog.choose_folder"])) {
                     does {
@@ -96,7 +94,7 @@ object ASpecifyDialog : Dialog<List<File>>() {
 
                         // auto-fill
                         val newPicPaths = Files
-                            .walk(directory.toPath())
+                            .walk(directory.toPath(),1)
                             .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
@@ -123,8 +121,8 @@ object ASpecifyDialog : Dialog<List<File>>() {
         }
 
         this.title = I18N["specify.title"]
-        this.dialogPane.prefWidth = 600.0
-        this.dialogPane.prefHeight = 400.0
+        this.dialogPane.prefWidth = DIALOG_WIDTH
+        this.dialogPane.prefHeight = DIALOG_HEIGHT
         this.dialogPane.content = contentPane
         this.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
 

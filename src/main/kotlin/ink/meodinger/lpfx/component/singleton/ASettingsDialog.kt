@@ -43,8 +43,6 @@ import javafx.scene.text.TextAlignment
  */
 object ASettingsDialog : AbstractPropertiesDialog() {
 
-    private const val GAP = 16.0
-
     private val tabPane = TabPane()
 
     private val groupTab = Tab(I18N["settings.group.title"])
@@ -89,60 +87,60 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
         // ----- Group ----- //
         // initGroupTab()
-        gGridPane.padding = Insets(GAP)
-        gGridPane.vgap = GAP
-        gGridPane.hgap = GAP
+        gGridPane.padding = Insets(COMMON_GAP)
+        gGridPane.vgap = COMMON_GAP
+        gGridPane.hgap = COMMON_GAP
         gGridPane.alignment = Pos.TOP_CENTER
         gButtonAdd.setOnAction { createGroupRow() }
         val gStackPane = StackPane(gGridPane)
         val gScrollPane = ScrollPane(gStackPane)
-        gStackPane.prefWidthProperty().bind(gScrollPane.widthProperty() - GAP)
+        gStackPane.prefWidthProperty().bind(gScrollPane.widthProperty() - COMMON_GAP)
         gScrollPane.style = "-fx-background-color:transparent;"
         gBorderPane.center = gScrollPane
         gBorderPane.bottom = HBox(gButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(GAP, GAP / 2, GAP / 2, GAP)
+            it.padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
         }
         groupTab.content = gBorderPane
 
         // ----- Ligature Rule ----- //
         // initLigatureTab()
-        rGridPane.padding = Insets(GAP)
-        rGridPane.vgap = GAP
-        rGridPane.hgap = GAP
+        rGridPane.padding = Insets(COMMON_GAP)
+        rGridPane.vgap = COMMON_GAP
+        rGridPane.hgap = COMMON_GAP
         rGridPane.alignment = Pos.TOP_CENTER
         rButtonAdd.setOnAction { createLigatureRow() }
         val rStackPane = StackPane(rGridPane)
         val rScrollPane = ScrollPane(rStackPane)
-        rStackPane.prefWidthProperty().bind(rScrollPane.widthProperty() - GAP)
+        rStackPane.prefWidthProperty().bind(rScrollPane.widthProperty() - COMMON_GAP)
         rScrollPane.style = "-fx-background-color:transparent;"
         rBorderPane.center = rScrollPane
         rBorderPane.bottom = HBox(rLabelSample, HBox().also { HBox.setHgrow(it, Priority.ALWAYS) }, rButtonAdd).also {
             it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(GAP, GAP / 2, GAP / 2, GAP)
+            it.padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
         }
         ruleTab.content = rBorderPane
 
         // ----- Mode ----- //
         initModeTab()
-        mGridPane.padding = Insets(GAP)
-        mGridPane.vgap = GAP
-        mGridPane.hgap = GAP
+        mGridPane.padding = Insets(COMMON_GAP)
+        mGridPane.vgap = COMMON_GAP
+        mGridPane.hgap = COMMON_GAP
         mGridPane.alignment = Pos.TOP_CENTER
         modeTab.content = mGridPane
 
         // ----- Label ----- //
         initLabelTab()
-        lGridPane.padding = Insets(GAP, GAP, 0.0, GAP)
-        lGridPane.vgap = GAP
-        lGridPane.hgap = GAP
+        lGridPane.padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
+        lGridPane.vgap = COMMON_GAP
+        lGridPane.hgap = COMMON_GAP
         lGridPane.alignment = Pos.CENTER
         labelTab.content = lGridPane
 
         // ----- Tab ----- //
         tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-        tabPane.prefHeight = 400.0
-        tabPane.prefWidth = 600.0
+        tabPane.prefWidth = DIALOG_WIDTH
+        tabPane.prefHeight = DIALOG_HEIGHT
         tabPane.tabs.addAll(groupTab, ruleTab, modeTab, labelTab)
 
         initProperties()

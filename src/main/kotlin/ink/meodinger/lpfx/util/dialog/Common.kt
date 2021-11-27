@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.util.dialog
 
+import ink.meodinger.lpfx.DIALOG_HEIGHT
+import ink.meodinger.lpfx.DIALOG_WIDTH
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.does
 import ink.meodinger.lpfx.util.image.resizeByRadius
@@ -182,8 +184,8 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
     dialog.headerText = e.javaClass.name
-    dialog.dialogPane.prefWidth = 600.0
-    dialog.dialogPane.prefHeight = 400.0
+    dialog.dialogPane.prefWidth = DIALOG_WIDTH
+    dialog.dialogPane.prefHeight = DIALOG_HEIGHT
     dialog.dialogPane.content = content
     dialog.dialogPane.buttonTypes.add(ButtonType.OK)
 

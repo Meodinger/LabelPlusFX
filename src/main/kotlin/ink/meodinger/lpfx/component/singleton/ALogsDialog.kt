@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component.singleton
 
-import ink.meodinger.lpfx.LOGSRC_DIALOGS
-import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.CProperty
@@ -45,7 +44,6 @@ import kotlin.io.path.name
  */
 object ALogsDialog : AbstractPropertiesDialog() {
 
-    private const val GAP = 16.0
     private const val ALIVE = 3 * 24 * 60 * 60 * 1000L
 
     private val root = GridPane()
@@ -68,16 +66,16 @@ object ALogsDialog : AbstractPropertiesDialog() {
         initOwner(State.stage)
 
         initLogPane()
-        root.padding = Insets(GAP)
-        root.vgap = GAP
-        root.hgap = GAP
+        root.padding = Insets(COMMON_GAP)
+        root.vgap = COMMON_GAP
+        root.hgap = COMMON_GAP
         root.alignment = Pos.TOP_CENTER
 
         initProperties()
 
         this.title = I18N["logs.title"]
-        this.dialogPane.prefWidth = 600.0
-        this.dialogPane.prefHeight = 400.0
+        this.dialogPane.prefWidth = DIALOG_WIDTH
+        this.dialogPane.prefHeight = DIALOG_HEIGHT
         this.dialogPane.content = root
         this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
     }

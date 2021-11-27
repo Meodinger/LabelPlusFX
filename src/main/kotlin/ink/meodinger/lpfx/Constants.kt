@@ -73,10 +73,13 @@ abstract class HookedApplication : Application() {
 }
 
 /**
- * Stage size
+ * Size related constants
  */
-const val WIDTH = 900.0
-const val HEIGHT = 600.0
+const val WINDOW_WIDTH = 900.0
+const val WINDOW_HEIGHT = 600.0
+const val DIALOG_WIDTH = 600.0
+const val DIALOG_HEIGHT = 400.0
+const val COMMON_GAP = 16.0
 
 /**
  * Scroll Delta Default

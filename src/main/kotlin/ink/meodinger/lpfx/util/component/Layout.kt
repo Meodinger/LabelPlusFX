@@ -49,18 +49,6 @@ var Node.anchorPaneBottom: Double
     set(value) { AnchorPane.setBottomAnchor(this, value) }
 
 ////////////////////////////////////////////////////////////
-///// HGrow / VGrow
-////////////////////////////////////////////////////////////
-
-var Node.hGrow: Priority
-    get() = HBox.getHgrow(this) ?: Priority.NEVER
-    set(value) { HBox.setHgrow(this, value) }
-
-var Node.vGrow: Priority
-    get() = VBox.getVgrow(this) ?: Priority.NEVER
-    set(value) { VBox.setVgrow(this, value) }
-
-////////////////////////////////////////////////////////////
 ///// Pane/DialogPane content
 ////////////////////////////////////////////////////////////
 
@@ -131,6 +119,17 @@ fun <T : Node> SplitPane.add(node: T, operation: T.() -> Unit = {}): SplitPane {
 }
 
 ////////////////////////////////////////////////////////////
+///// GridPane
+////////////////////////////////////////////////////////////
+
+fun <T : Node> GridPane.add(node: T, col: Int, row: Int, colSpan: Int, rowSpan: Int, operation: T.() -> Unit = {}): GridPane {
+    return apply { add(node.also(operation), col, row, colSpan, rowSpan) }
+}
+fun <T : Node> GridPane.add(node: T, col: Int, row: Int, operation: T.() -> Unit = {}): GridPane {
+    return add(node, col, row, 1, 1, operation)
+}
+
+////////////////////////////////////////////////////////////
 ///// HBox / VBox
 ////////////////////////////////////////////////////////////
 
@@ -140,3 +139,11 @@ fun <T : Node> HBox.add(node: T, operation: T.() -> Unit = {}): HBox {
 fun <T : Node> VBox.add(node: T, operation: T.() -> Unit = {}): VBox {
     return apply { children.add(node.also(operation)) }
 }
+
+var Node.hGrow: Priority
+    get() = HBox.getHgrow(this) ?: Priority.NEVER
+    set(value) { HBox.setHgrow(this, value) }
+
+var Node.vGrow: Priority
+    get() = VBox.getVgrow(this) ?: Priority.NEVER
+    set(value) { VBox.setVgrow(this, value) }

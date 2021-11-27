@@ -58,7 +58,7 @@ object AMenuBar : MenuBar() {
     private val mSettings = MenuItem(I18N["m.settings"])
     private val mLogs = MenuItem(I18N["m.logs"])
     private val mAbout = MenuItem(I18N["m.about"])
-    private val mCrash = MenuItem("Crash")
+    private val mCrash = MenuItem(I18N["m.crash"])
 
     private val picChooser = CFileChooser()
     private val picFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })

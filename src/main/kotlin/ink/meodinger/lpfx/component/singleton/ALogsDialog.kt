@@ -142,15 +142,16 @@ object ALogsDialog : AbstractPropertiesDialog() {
         // 4  |                             |
         //    -------------------------------
         // 5   <    >            Send  Clean
+        root.apply {
+            add(Label(I18N["logs.label.level"]), 0, 0)
+            add(comboLevel, 1, 0)
 
-        root.add(Label(I18N["logs.label.level"]), 0, 0)
-        root.add(comboLevel, 1, 0)
-
-        root.add(Label(I18N["logs.label.recorded"]), 0, 1)
-        root.add(tableLog, 0, 2, 4, 3)
-        root.add(labelSent, 0, 5, 2 , 1)
-        root.add(buttonSend, 2, 5)
-        root.add(buttonClean, 3, 5)
+            add(Label(I18N["logs.label.recorded"]), 0, 1)
+            add(tableLog, 0, 2, 4, 3)
+            add(labelSent, 0, 5, 2 , 1)
+            add(buttonSend, 2, 5)
+            add(buttonClean, 3, 5)
+        }
     }
 
     override fun initProperties() {

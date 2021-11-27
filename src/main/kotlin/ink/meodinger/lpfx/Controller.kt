@@ -85,8 +85,6 @@ class Controller() : Initializable {
     }
 
     constructor(view : View) : this() {
-        if (this::root.isInitialized) throw IllegalStateException("Initialize twice")
-
         this.root            = view
         this.bSwitchViewMode = view.bSwitchViewMode
         this.bSwitchWorkMode = view.bSwitchWorkMode
@@ -361,12 +359,13 @@ class Controller() : Initializable {
         cPicBox.valueProperty.addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
-            // fixme: unexpected value change when remove first (when also current) picture
-            //   want next picture, got last picture
+            // fixme: unexpected value change when remove first (when also current) picture.
+            //   want the new first picture, got last picture
             val picNames = State.transFile.sortedPicNames
-            State.currentPicName = newValue ?:
+            val newPicName = newValue ?:
                 if (picNames.contains(oldValue)) oldValue
                 else picNames[0]
+            State.currentPicName = newPicName
         }
 
         // currentGroupId

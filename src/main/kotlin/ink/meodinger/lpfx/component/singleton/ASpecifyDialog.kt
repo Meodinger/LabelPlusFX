@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.EXTENSIONS_PIC
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
+import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.bottom
 import ink.meodinger.lpfx.util.component.center
 import ink.meodinger.lpfx.util.component.does
@@ -68,56 +69,56 @@ object ASpecifyDialog : Dialog<List<File>>() {
     init {
         contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - gap)
         contentPane.apply {
-            center(contentScrollPane) { this.style = "-fx-background-color:transparent;" }
+            center(contentScrollPane) { style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
-                this.alignment = Pos.CENTER_RIGHT
-                this.padding = Insets(gap, gap / 2, gap / 2, gap)
+                alignment = Pos.CENTER_RIGHT
+                padding = Insets(gap, gap / 2, gap / 2, gap)
 
-                val chooseFolderButton = Button(I18N["specify.dialog.choose_folder"]) does {
-                    // need show confirm?
-                    var show = false
-                    for (label in labels) if (label.text != unspecified) {
-                        show = true
-                        break
-                    }
+                add(Button(I18N["specify.dialog.choose_folder"])) {
+                    does {
+                        // need show confirm?
+                        var show = false
+                        for (label in labels) if (label.text != unspecified) {
+                            show = true
+                            break
+                        }
 
-                    // preserve already-set path?
-                    var preserve = false
-                    if (show) {
-                        val confirmPre = showConfirm(I18N["specify.confirm.preserve"], thisWindow)
-                        preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
-                    }
+                        // preserve already-set path?
+                        var preserve = false
+                        if (show) {
+                            val confirmPre = showConfirm(I18N["specify.confirm.preserve"], thisWindow)
+                            preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
+                        }
 
-                    // get project folder
-                    val directory = dirChooser.showDialog(thisWindow) ?: return@does
-                    if (!preserve) State.projectFolder = directory
+                        // get project folder
+                        val directory = dirChooser.showDialog(thisWindow) ?: return@does
+                        if (!preserve) State.projectFolder = directory
 
-                    // auto-fill
-                    val newPicPaths = Files
-                        .walk(directory.toPath())
-                        .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
-                        .collect(Collectors.toList())
-                    for (i in 0 until picCount) {
-                        if (preserve && files[i] != defaultFile) continue
-                        for (j in newPicPaths.indices) {
-                            val oldPicFile = workingTransFile.getFile(picNames[i])
-                            // check full filename & simple filename
-                            if (newPicPaths[j].name == oldPicFile.name ||
-                                newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
-                            ) {
-                                labels[i].text = newPicPaths[j].pathString
-                                files[i] = newPicPaths[j].toFile()
+                        // auto-fill
+                        val newPicPaths = Files
+                            .walk(directory.toPath())
+                            .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
+                            .collect(Collectors.toList())
+                        for (i in 0 until picCount) {
+                            if (preserve && files[i] != defaultFile) continue
+                            for (j in newPicPaths.indices) {
+                                val oldPicFile = workingTransFile.getFile(picNames[i])
+                                // check full filename & simple filename
+                                if (newPicPaths[j].name == oldPicFile.name ||
+                                    newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
+                                ) {
+                                    labels[i].text = newPicPaths[j].pathString
+                                    files[i] = newPicPaths[j].toFile()
 
-                                // swap
-                                val temp = newPicPaths.last()
-                                newPicPaths[newPicPaths.size - 1] = newPicPaths[j]
-                                newPicPaths[j] = temp
+                                    // swap
+                                    val temp = newPicPaths.last()
+                                    newPicPaths[newPicPaths.size - 1] = newPicPaths[j]
+                                    newPicPaths[j] = temp
+                                }
                             }
                         }
                     }
                 }
-
-                this.children.add(chooseFolderButton)
             }
         }
 

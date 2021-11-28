@@ -25,19 +25,19 @@ class CRollerLabel(contentText: String) : Region() {
     private val label = Label(contentText)
     private var displayText: String by label.textProperty()
 
-    val shiftPeriodProperty: LongProperty = SimpleLongProperty(320)
+    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(320)
     fun shiftPeriodProperty(): LongProperty = shiftPeriodProperty
     var shiftPeriod: Long by shiftPeriodProperty
 
-    val tooltipProperty: ObjectProperty<Tooltip> = label.tooltipProperty()
+    private val tooltipProperty: ObjectProperty<Tooltip> = label.tooltipProperty()
     fun tooltipProperty(): ObjectProperty<Tooltip> = tooltipProperty
     var tooltip: Tooltip by tooltipProperty
 
-    val textFillProperty: ObjectProperty<Paint> = label.textFillProperty()
+    private val textFillProperty: ObjectProperty<Paint> = label.textFillProperty()
     fun textFillProperty(): ObjectProperty<Paint> = textFillProperty
     var textFill: Paint by textFillProperty
 
-    val textProperty: StringProperty = SimpleStringProperty(contentText)
+    private val textProperty: StringProperty = SimpleStringProperty(contentText)
     fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 

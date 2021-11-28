@@ -358,7 +358,7 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         lCLabel.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             lCLabel.cursor = Cursor.HAND
         }
-        lCLabel.radiusProperty.addListener(onChange {
+        lCLabel.radiusProperty().addListener(onChange {
             val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
             val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
             if (lCLabel.anchorPaneLeft > limitX) lCLabel.anchorPaneLeft = limitX
@@ -453,9 +453,9 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         // Mode
         val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
         val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
-        mComboInput.moveTo(preferenceList[0])
-        mComboLabel.moveTo(preferenceList[1])
-        mComboScale.moveTo(Settings[Settings.ScaleOnNewPicture].asInteger())
+        mComboInput.select(preferenceList[0])
+        mComboLabel.select(preferenceList[1])
+        mComboScale.select(Settings[Settings.ScaleOnNewPicture].asInteger())
 
         // Label
         lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2

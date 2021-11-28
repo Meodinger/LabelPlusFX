@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component.common
 
-import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -28,16 +27,20 @@ class CComboBox<T> : HBox() {
     private val back = Button("<")
     private val next = Button(">")
 
-    val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
+    private val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
+    fun valueProperty(): ObjectProperty<T> = valueProperty
     val value: T by valueProperty
 
-    val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
+    private val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
+    fun indexProperty(): ReadOnlyIntegerProperty = indexProperty
     val index: Int by indexProperty
 
-    val isWrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    private val isWrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun wrappedProperty(): BooleanProperty = isWrappedProperty
     var isWrapped: Boolean by isWrappedProperty
 
-    val itemsProperty: ObjectProperty<ObservableList<T>> = comboBox.itemsProperty()
+    private val itemsProperty: ObjectProperty<ObservableList<T>> = comboBox.itemsProperty()
+    fun itemsProperty(): ObjectProperty<ObservableList<T>> = itemsProperty
     val items: ObservableList<T> by itemsProperty
 
     val selectionModel: SelectionModel<T> get() = comboBox.selectionModel
@@ -94,12 +97,12 @@ class CComboBox<T> : HBox() {
         }
     }
 
-    fun moveTo(index: Int) {
+    fun select(index: Int) {
         if (comboBox.items.size == 0 && index == 0) return
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
         else throw IllegalArgumentException("index $index invalid")
     }
-    fun moveTo(item: T) {
+    fun select(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
         else throw IllegalArgumentException("no item `$item`")
     }

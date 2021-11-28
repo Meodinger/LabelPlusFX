@@ -6,6 +6,7 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
@@ -15,7 +16,7 @@ import java.util.function.Consumer
 /**
  * Author: Meodinger
  * Date: 2021/9/30
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -29,7 +30,8 @@ class CGroupBar : HBox() {
         const val C_GROUP_ID = "C_GROUP_ID"
     }
 
-    val onGroupSelectProperty = SimpleObjectProperty<Consumer<String>>(Consumer {})
+    private val onGroupSelectProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
+    fun onGroupSelectedProperty(): ObjectProperty<Consumer<String>> = onGroupSelectProperty
     val onGroupSelect: Consumer<String> by onGroupSelectProperty
     fun setOnGroupSelect(consumer: Consumer<String>) {
         onGroupSelectProperty.value = consumer
@@ -79,8 +81,8 @@ class CGroupBar : HBox() {
 
         cGroup.setOnMouseClicked { onGroupSelect.accept(cGroup.name) }
 
-        cGroup.nameProperty.bind(transGroup.nameProperty)
-        cGroup.colorProperty.bind(Bindings.createObjectBinding(
+        cGroup.nameProperty().bind(transGroup.nameProperty)
+        cGroup.colorProperty().bind(Bindings.createObjectBinding(
             { Color.web(transGroup.colorHex) },
             transGroup.colorHexProperty
         ))

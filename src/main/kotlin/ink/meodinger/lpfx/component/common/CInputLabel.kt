@@ -3,22 +3,19 @@ package ink.meodinger.lpfx.component.common
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.control.TextFormatter
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.Pane
-import javafx.util.Callback
+import java.util.function.Consumer
 
 
 /**
  * Author: Meodinger
  * Date: 2021/9/26
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -34,16 +31,22 @@ class CInputLabel : Pane() {
     private val label = Label()
     private val field = TextField()
 
-    val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
+    private val textFormatterProperty: ObjectProperty<TextFormatter<String>> = SimpleObjectProperty()
+    fun textFormatterProperty(): ObjectProperty<TextFormatter<String>> = textFormatterProperty
     var textFormatter: TextFormatter<String> by textFormatterProperty
 
-    val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
+    private val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun editingProperty(): BooleanProperty = isEditingProperty
     var isEditing: Boolean by isEditingProperty
 
-    fun labelTextProperty() = label.textProperty()
-    fun fieldTextProperty() = field.textProperty()
-    var labelText: String by label.textProperty()
-    var fieldText: String by field.textProperty()
+    private val labelTextProperty: StringProperty = label.textProperty()
+    fun labelTextProperty(): StringProperty = labelTextProperty
+    var labelText: String by labelTextProperty
+
+    private val fieldTextProperty: StringProperty = field.textProperty()
+    fun fieldTextProperty(): StringProperty = fieldTextProperty
+    var fieldText: String by fieldTextProperty
+
     var text: String
         get() {
             return if (isEditing) fieldText else labelText
@@ -52,15 +55,17 @@ class CInputLabel : Pane() {
             if (isEditing) fieldText = value else labelText = value
         }
 
-    val onChangeStartProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty(Callback {})
-    val onChangeStart: Callback<String, Unit> by onChangeStartProperty
-    fun setOnChangeStart(callback: Callback<String, Unit>) {
+    private val onChangeStartProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
+    fun onChangeStartProperty(): ObjectProperty<Consumer<String>> = onChangeStartProperty
+    val onChangeStart: Consumer<String> by onChangeStartProperty
+    fun setOnChangeStart(callback: Consumer<String>) {
         onChangeStartProperty.value = callback
     }
 
-    val onChangeFinishProperty: ObjectProperty<Callback<String, Unit>> = SimpleObjectProperty(Callback {})
-    val onChangeFinish: Callback<String, Unit> by onChangeFinishProperty
-    fun setOnChangeFinish(callback: Callback<String, Unit>) {
+    private val onChangeFinishProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
+    fun onChangeFinishProperty(): ObjectProperty<Consumer<String>> = onChangeFinishProperty
+    val onChangeFinish: Consumer<String> by onChangeFinishProperty
+    fun setOnChangeFinish(callback: Consumer<String>) {
         onChangeFinishProperty.value = callback
     }
 
@@ -71,9 +76,9 @@ class CInputLabel : Pane() {
         label.prefHeightProperty().bind(this.prefHeightProperty())
         field.prefWidthProperty().bind(this.prefWidthProperty())
         field.prefHeightProperty().bind(this.prefHeightProperty())
-        field.textFormatterProperty().bind(textFormatterProperty)
+        field.textFormatterProperty().bind(this.textFormatterProperty)
 
-        isEditingProperty.addListener { _, _, newValue ->
+        this.isEditingProperty.addListener { _, _, newValue ->
             this.children.clear()
             this.children.add(if (newValue) field else label)
         }
@@ -86,14 +91,14 @@ class CInputLabel : Pane() {
 
             isEditing = true
 
-            onChangeStart.call(labelText)
+            onChangeStart.accept(labelText)
         }
         field.setOnAction {
             labelText = fieldText
 
             isEditing = false
 
-            onChangeFinish.call(fieldText)
+            onChangeFinish.accept(fieldText)
         }
 
         this.children.add(label)

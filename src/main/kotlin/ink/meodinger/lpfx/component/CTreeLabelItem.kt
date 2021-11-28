@@ -4,8 +4,10 @@ import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.scene.control.TreeItem
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -14,7 +16,7 @@ import javafx.scene.shape.Circle
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -22,10 +24,12 @@ import javafx.scene.shape.Circle
  */
 class CTreeLabelItem(index: Int, text: String, color: Color? = null) : TreeItem<String>() {
 
-    val indexProperty = SimpleIntegerProperty(index)
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
+    fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
-    val textProperty = SimpleStringProperty(text)
+    private val textProperty: StringProperty = SimpleStringProperty(text)
+    fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 
     init {

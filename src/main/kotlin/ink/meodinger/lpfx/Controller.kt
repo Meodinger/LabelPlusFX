@@ -164,18 +164,18 @@ class Controller() : Initializable {
         cLabelPane.disableProperty().bind(!State.isOpenedProperty)
 
         // cSlider - cLabelPane#scale
-        cSlider.initScaleProperty.bindBidirectional(cLabelPane.initScaleProperty)
-        cSlider.minScaleProperty.bindBidirectional(cLabelPane.minScaleProperty)
-        cSlider.maxScaleProperty.bindBidirectional(cLabelPane.maxScaleProperty)
-        cSlider.scaleProperty.bindBidirectional(cLabelPane.scaleProperty)
+        cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
+        cSlider.minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
+        cSlider.maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
+        cSlider.scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
 
         // Update OpenRecent
         AMenuBar.updateOpenRecent()
 
         // Register handler
-        cLabelPane.onLabelPlace = EventHandler {
-            if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            if (State.transFile.groupCount == 0) return@EventHandler
+        cLabelPane.setOnLabelPlace {
+            if (State.workMode != WorkMode.LabelMode) return@setOnLabelPlace
+            if (State.transFile.groupCount == 0) return@setOnLabelPlace
 
             val transLabel = TransLabel(
                 it.labelIndex,
@@ -190,8 +190,8 @@ class Controller() : Initializable {
             // Mark change
             State.isChanged = true
         }
-        cLabelPane.onLabelRemove = EventHandler {
-            if (State.workMode != WorkMode.LabelMode) return@EventHandler
+        cLabelPane.setOnLabelRemove {
+            if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
             // Edit data
             State.removeTransLabel(State.currentPicName, it.labelIndex)
@@ -206,7 +206,7 @@ class Controller() : Initializable {
             // Mark change
             State.isChanged = true
         }
-        cLabelPane.onLabelPointed = EventHandler {
+        cLabelPane.setOnLabelPointed {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
 
             // Text display
@@ -220,24 +220,24 @@ class Controller() : Initializable {
                 }
             }
         }
-        cLabelPane.onLabelClicked = EventHandler {
-            if (State.workMode != WorkMode.InputMode) return@EventHandler
+        cLabelPane.setOnLabelClicked {
+            if (State.workMode != WorkMode.InputMode) return@setOnLabelClicked
 
             if (it.source.clickCount > 1) cLabelPane.moveToLabel(it.labelIndex)
 
             cTreeView.select(it.labelIndex)
         }
-        cLabelPane.onLabelOther = EventHandler {
-            if (State.workMode != WorkMode.LabelMode) return@EventHandler
-            if (State.transFile.groupCount == 0) return@EventHandler
+        cLabelPane.setOnLabelMove {
+            State.isChanged = true
+        }
+        cLabelPane.setOnLabelOther {
+            if (State.workMode != WorkMode.LabelMode) return@setOnLabelOther
+            if (State.transFile.groupCount == 0) return@setOnLabelOther
 
             val transGroup = State.transFile.getTransGroup(State.currentGroupId)
 
             cLabelPane.removeText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
-        }
-        cLabelPane.onLabelMove = EventHandler {
-            State.isChanged = true
         }
 
         // Preferences
@@ -248,16 +248,16 @@ class Controller() : Initializable {
         // Mode
         val viewModes = Settings[Settings.ViewModePreference].asStringList()
         State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
-        cTreeView.viewModeProperty.bind(State.viewModeProperty)
+        cTreeView.viewModeProperty().bind(State.viewModeProperty)
         // mode text
         bSwitchViewMode.text = State.viewMode.toString()
         bSwitchWorkMode.text = State.workMode.toString()
 
         // TreeView Root Name
-        cTreeView.picNameProperty.bind(State.currentPicNameProperty)
+        cTreeView.picNameProperty().bind(State.currentPicNameProperty)
 
         // PictureBox Names
-        cPicBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+        cPicBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastMapObservable = State.transFile.transMapObservable
 
             init {
@@ -281,7 +281,7 @@ class Controller() : Initializable {
         })
 
         // GroupBox Names
-        cGroupBox.itemsProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+        cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<StringProperty>()
 
@@ -309,7 +309,7 @@ class Controller() : Initializable {
         })
 
         // LabelPane ColorList
-        cLabelPane.colorHexListProperty.bind(object : ObjectBinding<ObservableList<String>>() {
+        cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupHexProperties = ArrayList<StringProperty>()
 
@@ -364,11 +364,13 @@ class Controller() : Initializable {
         })
 
         // currentPicName
-        cPicBox.valueProperty.addListener { _, oldValue, newValue ->
+        cPicBox.valueProperty().addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
             // fixme: unexpected value change when remove first (when also current) picture.
             //   want the new first picture, got last picture
+            // Above issues possibly are related to LINE:427
+            // NOTE: Maybe should listen to both items and value
             val picNames = State.transFile.sortedPicNames
             val newPicName = newValue ?:
                 if (picNames.contains(oldValue)) oldValue
@@ -377,9 +379,15 @@ class Controller() : Initializable {
         }
 
         // currentGroupId
-        cGroupBox.valueProperty.addListener { _, oldValue, newValue ->
+        cGroupBox.valueProperty().addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
+            // fixme: unexpected value change when REMOVE first (when also current) picture.
+            //   want the new first group, got null
+            // fixme: unexpected value change when CHANGE first (when also current) picture.
+            //   want the new name displayed in GroupBox, but not
+            // Above issues possibly are related to LINE:439
+            // NOTE: Maybe should listen to both items and index
             val groupNames = State.transFile.groupNames
             val newGroupName = newValue ?:
                 if (groupNames.contains(oldValue)) oldValue // Actually this will never be called
@@ -420,7 +428,7 @@ class Controller() : Initializable {
             if (!State.isOpened) return@addListener
             if (newValue == null) return@addListener
 
-            cPicBox.moveTo(newValue)
+            cPicBox.select(newValue)
 
             renderTreeView()
             renderLabelPane()
@@ -437,9 +445,10 @@ class Controller() : Initializable {
 
             if (newGroupId as Int == NOT_FOUND) return@addListener
 
-            // Select CGroup & GroupBox
-            cGroupBox.moveTo(newGroupId)
+            // Select CGroup, GroupBox, CTreeView
+            cGroupBox.select(newGroupId)
             cGroupBar.select(newGroupId)
+            cTreeView.select(State.transFile.getTransGroup(newGroupId).name)
 
             labelInfo("Change Group to ${cGroupBox.value}")
         }
@@ -541,7 +550,7 @@ class Controller() : Initializable {
         // CTreeView selectionModal -> select Group
         cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
             if (newValue != null && newValue is CTreeGroupItem)
-                cGroupBox.moveTo(State.transFile.getGroupIdByName(newValue.name))
+                cGroupBox.select(State.transFile.getGroupIdByName(newValue.name))
         }
 
         // Transform tab pressed in CTreeView to ViewModeBtn clicked
@@ -567,12 +576,12 @@ class Controller() : Initializable {
 
             val index = it.text.toInt() - 1
             if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
-            cGroupBox.moveTo(it.text.toInt() - 1)
+            cGroupBox.select(it.text.toInt() - 1)
         }
 
         // Transform CGroup select to CGroupBox selected
         cGroupBar.setOnGroupSelect {
-            cGroupBox.moveTo(it)
+            cGroupBox.select(it)
         }
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button clicked
@@ -856,8 +865,8 @@ class Controller() : Initializable {
         // Initialize workspace
         renderGroupBar()
 
-        cPicBox.moveTo(0)
-        cGroupBox.moveTo(0)
+        cPicBox.select(0)
+        cGroupBox.select(0)
 
         Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
     }

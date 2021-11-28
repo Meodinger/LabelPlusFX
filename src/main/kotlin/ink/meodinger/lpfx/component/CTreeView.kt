@@ -10,8 +10,10 @@ import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.scene.control.*
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.paint.Color
@@ -32,10 +34,12 @@ import kotlin.collections.ArrayList
  */
 class CTreeView: TreeView<String>() {
 
-    val picNameProperty = SimpleStringProperty("")
+    private val picNameProperty: StringProperty = SimpleStringProperty("")
+    fun picNameProperty(): StringProperty = picNameProperty
     var picName: String by picNameProperty
 
-    val viewModeProperty = SimpleObjectProperty(State.DEFAULT_VIEW_MODE)
+    private val viewModeProperty: ObjectProperty<ViewMode> = SimpleObjectProperty(State.DEFAULT_VIEW_MODE)
+    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
     var viewMode: ViewMode by viewModeProperty
 
     private val transGroups: MutableList<TransGroup> = ArrayList()
@@ -111,8 +115,8 @@ class CTreeView: TreeView<String>() {
             ViewMode.GroupMode -> {
                 val groupItem = CTreeGroupItem(transGroup.name, Color.web(transGroup.colorHex))
 
-                groupItem.nameProperty.bind(transGroup.nameProperty)
-                groupItem.colorProperty.bind(Bindings.createObjectBinding(
+                groupItem.nameProperty().bind(transGroup.nameProperty)
+                groupItem.colorProperty().bind(Bindings.createObjectBinding(
                     { Color.web(transGroup.colorHex) },
                     transGroup.colorHexProperty
                 ))
@@ -127,8 +131,8 @@ class CTreeView: TreeView<String>() {
 
         val labelItem = CTreeLabelItem(transLabel.index, transLabel.text)
 
-        labelItem.indexProperty.bind(transLabel.indexProperty)
-        labelItem.textProperty.bind(transLabel.textProperty)
+        labelItem.indexProperty().bind(transLabel.indexProperty)
+        labelItem.textProperty().bind(transLabel.textProperty)
 
         when (viewMode) {
             ViewMode.IndexMode -> {

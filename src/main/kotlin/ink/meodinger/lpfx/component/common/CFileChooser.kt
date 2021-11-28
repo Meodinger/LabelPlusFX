@@ -23,6 +23,8 @@ import java.io.File
 class CFileChooser {
 
     companion object {
+        private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
+        fun lastDirectoryProperty(): ObjectProperty<File> = lastDirectoryProperty
         var lastDirectory : File?
             get() = lastDirectoryProperty.value
             set(value) {
@@ -31,8 +33,6 @@ class CFileChooser {
                 if (value.isDirectory) lastDirectoryProperty.set(value)
                 else lastDirectoryProperty.set(value.parentFile)
             }
-
-        val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
     }
 
     private val chooser = FileChooser()

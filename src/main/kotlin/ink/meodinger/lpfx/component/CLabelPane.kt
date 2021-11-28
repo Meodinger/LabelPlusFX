@@ -143,19 +143,14 @@ class CLabelPane : ScrollPane() {
 
     // ----- properties ----- //
 
-    val initScaleProperty:      DoubleProperty = SimpleDoubleProperty(NOT_SET)
-    val minScaleProperty:       DoubleProperty = SimpleDoubleProperty(NOT_SET)
-    val maxScaleProperty:       DoubleProperty = SimpleDoubleProperty(NOT_SET)
-    val scaleProperty:          DoubleProperty = SimpleDoubleProperty(1.0)
-    val onLabelPlaceProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelRemoveProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelPointedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelClickedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelOtherProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val onLabelMoveProperty:    ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    val colorHexListProperty:   ListProperty<String>   = SimpleListProperty(FXCollections.observableArrayList())
-    val defaultCursorProperty:  ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
-
+    private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    private val minScaleProperty:  DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    private val maxScaleProperty:  DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    private val scaleProperty:     DoubleProperty = SimpleDoubleProperty(1.0)
+    fun initScaleProperty():       DoubleProperty = initScaleProperty
+    fun minScaleProperty():        DoubleProperty = minScaleProperty
+    fun maxScaleProperty():        DoubleProperty = maxScaleProperty
+    fun scaleProperty():           DoubleProperty = scaleProperty
     var initScale: Double
         get() = initScaleProperty.value
         set(value) {
@@ -192,17 +187,55 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.value = temp
             }
         }
-    var onLabelPlace:   EventHandler<LabelEvent> by onLabelPlaceProperty
-    var onLabelRemove:  EventHandler<LabelEvent> by onLabelRemoveProperty
-    var onLabelPointed: EventHandler<LabelEvent> by onLabelPointedProperty
-    var onLabelClicked: EventHandler<LabelEvent> by onLabelClickedProperty
-    var onLabelOther:   EventHandler<LabelEvent> by onLabelOtherProperty
-    var onLabelMove:    EventHandler<LabelEvent> by onLabelMoveProperty
-    var colorHexList:   ObservableList<String>   by colorHexListProperty
-    var defaultCursor:  Cursor                   by defaultCursorProperty
-    var image:          Image                    by view.imageProperty()
 
-    private val imageWidth:  Double get() = image.width
+
+    private val onLabelPlaceProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelRemoveProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelPointedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelClickedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelMoveProperty:    ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelOtherProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    fun onLabelPlaceProperty():         ObjectProperty<EventHandler<LabelEvent>> = onLabelPlaceProperty
+    fun onLabelRemoveProperty():        ObjectProperty<EventHandler<LabelEvent>> = onLabelRemoveProperty
+    fun onLabelPointedProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelPointedProperty
+    fun onLabelClickedProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelClickedProperty
+    fun onLabelMoveProperty():          ObjectProperty<EventHandler<LabelEvent>> = onLabelMoveProperty
+    fun onLabelOtherProperty():         ObjectProperty<EventHandler<LabelEvent>> = onLabelOtherProperty
+    val onLabelPlace:                                  EventHandler<LabelEvent> by onLabelPlaceProperty
+    val onLabelRemove:                                 EventHandler<LabelEvent> by onLabelRemoveProperty
+    val onLabelPointed:                                EventHandler<LabelEvent> by onLabelPointedProperty
+    val onLabelClicked:                                EventHandler<LabelEvent> by onLabelClickedProperty
+    val onLabelMove:                                   EventHandler<LabelEvent> by onLabelMoveProperty
+    val onLabelOther:                                  EventHandler<LabelEvent> by onLabelOtherProperty
+    fun setOnLabelPlace(handler: EventHandler<LabelEvent>) {
+        onLabelPlaceProperty.value = handler
+    }
+    fun setOnLabelRemove(handler: EventHandler<LabelEvent>) {
+        onLabelRemoveProperty.value = handler
+    }
+    fun setOnLabelPointed(handler: EventHandler<LabelEvent>) {
+        onLabelPointedProperty.value = handler
+    }
+    fun setOnLabelClicked(handler: EventHandler<LabelEvent>) {
+        onLabelClickedProperty.value = handler
+    }
+    fun setOnLabelMove(handler: EventHandler<LabelEvent>) {
+        onLabelMoveProperty.value = handler
+    }
+    fun setOnLabelOther(handler: EventHandler<LabelEvent>) {
+        onLabelOtherProperty.value = handler
+    }
+
+    private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
+    fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
+    var colorHexList: ObservableList<String> by colorHexListProperty
+
+    private val defaultCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
+    fun defaultCursorProperty(): ObjectProperty<Cursor> = defaultCursorProperty
+    var defaultCursor: Cursor by defaultCursorProperty
+
+    private var image: Image by view.imageProperty()
+    private val imageWidth: Double get() = image.width
     private val imageHeight: Double get() = image.height
 
     init {
@@ -381,8 +414,8 @@ class CLabelPane : ScrollPane() {
     }
     private fun setupLabels(transLabels: List<TransLabel>) {
         for (label in labels) {
-            label.indexProperty.unbind()
-            label.colorProperty.unbind()
+            label.indexProperty().unbind()
+            label.colorProperty().unbind()
         }
         labels.clear()
 
@@ -503,8 +536,8 @@ class CLabelPane : ScrollPane() {
         labels.add(label)
 
         // Bind property
-        label.indexProperty.bind(transLabel.indexProperty)
-        label.colorProperty.bind(Bindings.createObjectBinding(
+        label.indexProperty().bind(transLabel.indexProperty)
+        label.colorProperty().bind(Bindings.createObjectBinding(
             { Color.web(colorHexList[transLabel.groupId] + alpha) },
             colorHexListProperty, transLabel.groupIdProperty
         ))
@@ -563,8 +596,8 @@ class CLabelPane : ScrollPane() {
         val groupId = getLabelGroup(label)
 
         // Unbind
-        label.indexProperty.unbind()
-        label.colorProperty.unbind()
+        label.indexProperty().unbind()
+        label.colorProperty().unbind()
 
         // Remove label in list
         labels.remove(label)

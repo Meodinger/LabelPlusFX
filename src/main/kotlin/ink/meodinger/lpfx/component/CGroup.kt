@@ -4,8 +4,10 @@ import ink.meodinger.lpfx.util.component.invoke
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.geometry.Insets
 import javafx.geometry.VPos
 import javafx.scene.layout.*
@@ -17,7 +19,7 @@ import javafx.scene.text.TextAlignment
 /**
  * Author: Meodinger
  * Date: 2021/9/20
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -45,10 +47,12 @@ class CGroup(name: String, color: Color) : Region() {
 
     private val text: Text = Text(name)(color, TextAlignment.CENTER, VPos.CENTER)
 
-    val nameProperty = SimpleStringProperty(name)
+    private val nameProperty: StringProperty = SimpleStringProperty(name)
+    fun nameProperty(): StringProperty = nameProperty
     var name: String by nameProperty
 
-    val colorProperty = SimpleObjectProperty(color)
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(color)
+    fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
     init {

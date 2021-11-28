@@ -153,7 +153,7 @@ object ALogsDialog : AbstractPropertiesDialog() {
     }
 
     override fun initProperties() {
-        comboLevel.moveTo(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
+        comboLevel.select(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
 
         val toRemove = ArrayList<Path>()
         val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())

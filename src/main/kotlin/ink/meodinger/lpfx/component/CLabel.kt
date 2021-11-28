@@ -4,9 +4,7 @@ import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import javafx.geometry.VPos
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -20,7 +18,7 @@ import javafx.scene.text.TextAlignment
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -43,13 +41,16 @@ class CLabel(
     private val circle = Circle()
     private val text = Text()
 
-    val indexProperty = SimpleIntegerProperty(index)
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
+    fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
-    val radiusProperty = SimpleDoubleProperty(radius)
+    private val radiusProperty: DoubleProperty = SimpleDoubleProperty(radius)
+    fun radiusProperty(): DoubleProperty = radiusProperty
     var radius: Double by radiusProperty
 
-    val colorProperty = SimpleObjectProperty(color)
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(color)
+    fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
     init {

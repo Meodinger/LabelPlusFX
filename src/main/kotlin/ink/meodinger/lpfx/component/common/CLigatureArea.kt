@@ -13,7 +13,7 @@ import javafx.scene.control.TextFormatter
 /**
  * Author: Meodinger
  * Date: 2021/8/16
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -31,13 +31,16 @@ class CLigatureArea: TextArea() {
     private var ligatureStart: Int = 0
     private var ligatureString: String = ""
 
-    val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
+    private val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
+    fun ligatureMaxLengthProperty(): IntegerProperty = ligatureMaxLengthProperty
     var ligatureMaxLength: Int by ligatureMaxLengthProperty
 
-    val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList(DEFAULT_RULES))
+    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList(DEFAULT_RULES))
+    fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
-    val ligatureMarkProperty: StringProperty = SimpleStringProperty(LIGATURE_MARK)
+    private val ligatureMarkProperty: StringProperty = SimpleStringProperty(LIGATURE_MARK)
+    fun ligatureMarkProperty(): StringProperty = ligatureMarkProperty
     var ligatureMark: String by ligatureMarkProperty
 
     private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)

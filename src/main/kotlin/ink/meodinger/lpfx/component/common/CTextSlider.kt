@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -28,22 +28,28 @@ class CTextSlider : HBox() {
     private val slider = Slider()
     private val label = Label()
 
-    val initScaleProperty = SimpleDoubleProperty(0.0)
-    val minScaleProperty: DoubleProperty = slider.minProperty()
-    val maxScaleProperty: DoubleProperty = slider.maxProperty()
-    val scaleProperty: DoubleProperty = slider.valueProperty()
-
+    private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(0.0)
+    fun initScaleProperty(): DoubleProperty = initScaleProperty
     var initScale: Double
-        get() = initScaleProperty.value
+        get() = initScaleProperty().value
         set(value) {
             if (value >= 0) {
-                initScaleProperty.value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
+                initScaleProperty().value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
             } else {
                 throw IllegalArgumentException(I18N["exception.illegal_argument.negative_scale"])
             }
         }
+
+    private val minScaleProperty: DoubleProperty = slider.minProperty()
+    fun minScaleProperty(): DoubleProperty = minScaleProperty
     var minScale: Double by minScaleProperty
+
+    private val maxScaleProperty: DoubleProperty = slider.maxProperty()
+    fun maxScaleProperty(): DoubleProperty = maxScaleProperty
     var maxScale: Double by maxScaleProperty
+
+    private val scaleProperty: DoubleProperty = slider.valueProperty()
+    fun scaleProperty(): DoubleProperty = scaleProperty
     var scale: Double by scaleProperty
 
     init {

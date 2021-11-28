@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component.common
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.string.repeat
 
+import javafx.beans.property.StringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
@@ -16,7 +17,7 @@ import java.util.stream.Collectors
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -25,8 +26,8 @@ import java.util.stream.Collectors
  */
 class CColorPicker() : ColorPicker() {
 
-    private val colorHexField = TextField()
-    private val colorHexProperty = colorHexField.textProperty()
+    private val colorHexField: TextField = TextField()
+    private val colorHexProperty: StringProperty = colorHexField.textProperty()
 
     constructor(color: Color): this() { this.value = color }
 

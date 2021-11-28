@@ -59,6 +59,14 @@ import kotlin.collections.ArrayList
  */
 class Controller() : Initializable {
 
+    companion object {
+        /**
+         * Auto-save
+         */
+        private const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
+        private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
+    }
+
     @FXML private lateinit var root: BorderPane
     @FXML private lateinit var bSwitchViewMode: Button
     @FXML private lateinit var bSwitchWorkMode: Button
@@ -659,7 +667,7 @@ class Controller() : Initializable {
         if (State.isOpened) {
             if (State.currentPicName.isNotEmpty()) // in case of open but not set currentPicName
                 if (State.transFile.getFile(State.currentPicName).exists())
-                    renderLabelPane()
+                    renderLabelPane() // Re-render picture
         }
     }
 

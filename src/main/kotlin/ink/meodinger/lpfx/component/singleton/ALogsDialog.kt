@@ -44,7 +44,7 @@ import kotlin.io.path.name
  */
 object ALogsDialog : AbstractPropertiesDialog() {
 
-    private const val ALIVE = 3 * 24 * 60 * 60 * 1000L
+    private const val ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
 
     private val root = GridPane()
     private val comboLevel = CComboBox<LogType>()

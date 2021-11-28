@@ -62,15 +62,15 @@ object AMenuBar : MenuBar() {
 
     private val picChooser = CFileChooser()
     private val picFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
-    private val pngFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSIONS_PIC[0]}")
-    private val jpgFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSIONS_PIC[1]}")
-    private val jpegFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSIONS_PIC[2]}")
+    private val pngFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSION_PIC_PNG}")
+    private val jpgFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
+    private val jpegFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
 
     private val fileChooser = CFileChooser()
     private val exportChooser = CFileChooser()
-    private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"], "*.${EXTENSION_MEO}", "*.${EXTENSION_LP}")
-    private val lpFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_LP}")
-    private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_MEO}")
+    private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
+    private val lpFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_FILE_LP}")
+    private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_FILE_MEO}")
 
     private val backupChooser = CFileChooser()
     private val bakFilter = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
@@ -171,7 +171,7 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.new"]
-        fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_MEO"
+        fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = FileType.getType(file)
 
@@ -221,7 +221,7 @@ object AMenuBar : MenuBar() {
         CFileChooser.lastDirectory = bak.parentFile.parentFile
 
         fileChooser.title = I18N["chooser.rec"]
-        fileChooser.initialFileName = "$RECOVERY_FILE_NAME.$EXTENSION_MEO"
+        fileChooser.initialFileName = "$RECOVERY_FILE_NAME.$EXTENSION_FILE_MEO"
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.recovery(bak, rec)
@@ -301,12 +301,12 @@ object AMenuBar : MenuBar() {
         val file: File
         if (event.source == mExportAsMeo) {
             exportChooser.extensionFilters.add(meoFilter)
-            exportChooser.initialFileName = "$EXPORT_FILE_NAME.$EXTENSION_MEO"
+            exportChooser.initialFileName = "$EXPORT_FILE_NAME.$EXTENSION_FILE_MEO"
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.MeoFile)
         } else {
             exportChooser.extensionFilters.add(lpFilter)
-            exportChooser.initialFileName = "$EXPORT_FILE_NAME. $EXTENSION_LP"
+            exportChooser.initialFileName = "$EXPORT_FILE_NAME. $EXTENSION_FILE_LP"
             file = exportChooser.showSaveDialog(State.stage) ?: return
             State.controller.export(file, FileType.LPFile)
         }

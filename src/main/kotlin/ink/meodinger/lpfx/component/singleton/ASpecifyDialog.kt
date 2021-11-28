@@ -65,6 +65,8 @@ object ASpecifyDialog : Dialog<List<File>>() {
     private var labels: MutableList<CRollerLabel> = ArrayList()
 
     init {
+        initOwner(State.stage)
+
         contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - COMMON_GAP)
         contentPane.apply {
             center(contentScrollPane) { style = "-fx-background-color:transparent;" }

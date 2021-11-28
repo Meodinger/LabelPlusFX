@@ -3,12 +3,10 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.timer.genTask
 
 import javafx.application.Application
 import javafx.scene.control.TextFormatter
 import java.io.File
-import java.util.*
 import kotlin.collections.LinkedHashMap
 import kotlin.system.exitProcess
 
@@ -26,13 +24,6 @@ abstract class HookedApplication : Application() {
     private val shutdownHooks = LinkedHashMap<String, (() -> Unit) -> Unit>()
 
     /**
-     * Clear all shutdown hooks
-     */
-    fun clearShutdownHooks() {
-        shutdownHooks.clear()
-    }
-
-    /**
      * Add a shutdown hook
      * Should use the resolve function as callback
      */
@@ -46,6 +37,14 @@ abstract class HookedApplication : Application() {
     fun removeShutdownHook(key: String) {
         shutdownHooks.remove(key)
     }
+
+    /**
+     * Clear all shutdown hooks
+     */
+    fun clearShutdownHooks() {
+        shutdownHooks.clear()
+    }
+
     /**
      * MUST run this before exit or hooks will not be executed
      */
@@ -53,15 +52,15 @@ abstract class HookedApplication : Application() {
         if (shutdownHooks.isEmpty()) {
             exitProcess(0)
         } else {
-            val values = shutdownHooks.values.toList()
+            val hooks = shutdownHooks.values.toList()
             Promise.all(List(shutdownHooks.size) {
-                Promise<Unit> { resolve, _ -> values[it] { resolve(Unit) } }
+                Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
             }) finally {
                 exitProcess(0)
             }
 
             // In case of something unexpected happened and the app cannot be shutdown
-            Timer().schedule(genTask { exitProcess(0) }, 1000L * 60 * 5)
+            // Timer().schedule(genTask { exitProcess(0) }, 1000L * 60 * 5)
 
             clearShutdownHooks()
         }
@@ -91,15 +90,20 @@ const val SCROLL_DELTA = 32.0
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
+const val FOLDER_NAME_BAK = "backup"
+const val EXTENSION_PIC_PNG = "png"
+const val EXTENSION_PIC_JPG = "jpg"
+const val EXTENSION_PIC_JPEG = "jpeg"
+const val EXTENSION_FILE_LP = "txt"
+const val EXTENSION_FILE_MEO = "json"
+const val EXTENSION_PACK = "zip"
+const val EXTENSION_BAK = "bak"
+
 /**
  * Extensions: png, jpg, jpeg
  */
-val EXTENSIONS_PIC = listOf("png", "jpg", "jpeg")
-const val EXTENSION_LP = "txt"
-const val EXTENSION_MEO = "json"
-const val EXTENSION_PACK = "zip"
-const val EXTENSION_BAK = "bak"
-const val FOLDER_NAME_BAK = "backup"
+val EXTENSIONS_PIC = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG)
+val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 
 /**
  * Filenames
@@ -108,12 +112,6 @@ const val INITIAL_FILE_NAME = "New Translation"
 const val RECOVERY_FILE_NAME = "Recovery"
 const val PACKAGE_FILE_NAME = "Package"
 const val EXPORT_FILE_NAME = "Export"
-
-/**
- * Auto-save
- */
-const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
-const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
 
 /**
  * For label/group not found
@@ -146,7 +144,6 @@ enum class WorkMode(val description: String) {
         }
     }
 }
-val DEFAULT_WORK_MODE = WorkMode.InputMode
 
 /**
  * Label View Mode
@@ -166,7 +163,6 @@ enum class ViewMode(private val description: String) {
         }
     }
 }
-val DEFAULT_VIEW_MODE = ViewMode.IndexMode
 
 /**
  * Translation File Type
@@ -178,8 +174,8 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        private fun isLPFile(file: File): Boolean = file.extension == EXTENSION_LP
-        private fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_MEO
+        private fun isLPFile(file: File): Boolean = file.extension == EXTENSION_FILE_LP
+        private fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_FILE_MEO
         fun getType(file: File): FileType {
             if (isLPFile(file)) return LPFile
             if (isMeoFile(file)) return MeoFile

@@ -27,6 +27,9 @@ import java.io.File
  */
 object State {
 
+    val DEFAULT_WORK_MODE = WorkMode.InputMode
+    val DEFAULT_VIEW_MODE = ViewMode.IndexMode
+
     lateinit var application: HookedApplication
     lateinit var controller: Controller
     lateinit var stage: Stage

@@ -64,8 +64,8 @@ object ASettingsDialog : AbstractPropertiesDialog() {
     private val rLabelSample = Label(I18N["settings.ligature.sample"])
     private val rButtonAdd = Button(I18N["settings.ligature.add"])
     private const val rRowShift = 1
-    private const val rIsFrom = "isFrom"
-    private const val rRuleIndex = "ruleIndex"
+    private const val rIsFrom = "C_Is_From"
+    private const val rRuleIndex = "C_Rule_Index"
 
     private val modeTab = Tab(I18N["settings.mode.title"])
     private val mGridPane = GridPane()

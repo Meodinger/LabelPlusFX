@@ -35,7 +35,7 @@ class CTreeView: TreeView<String>() {
     val picNameProperty = SimpleStringProperty("")
     var picName: String by picNameProperty
 
-    val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
+    val viewModeProperty = SimpleObjectProperty(State.DEFAULT_VIEW_MODE)
     var viewMode: ViewMode by viewModeProperty
 
     private val transGroups: MutableList<TransGroup> = ArrayList()
@@ -62,7 +62,7 @@ class CTreeView: TreeView<String>() {
         this.root = null
 
         if (!this.picNameProperty.isBound) this.picName = ""
-        if (!this.viewModeProperty.isBound) this.viewMode = DEFAULT_VIEW_MODE
+        if (!this.viewModeProperty.isBound) this.viewMode = State.DEFAULT_VIEW_MODE
 
         this.transGroups.clear()
         this.transLabels.clear()

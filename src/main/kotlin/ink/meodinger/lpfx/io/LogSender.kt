@@ -13,7 +13,7 @@ import java.util.*
 /**
  * Author: Meodinger
  * Date: 2021/8/31
- * Location: ink.meodinger.lpfx.io
+ * Have fun with my code!
  */
 
 /**
@@ -21,7 +21,7 @@ import java.util.*
  */
 object LogSender {
 
-    class SendTask(log: File) : LPFXTask<Unit>({
+    fun sendSync(log: File) {
         // properties
         val host = "smtp.163.com"
         val reportUser = "labelplusfx_report@163.com"
@@ -60,10 +60,10 @@ object LogSender {
         message.setContent(content)
 
         Transport.send(message, reportUser, reportAuth)
-    })
+    }
 
-    fun sendLog(log: File) {
-        val task = SendTask(log)
+    fun send(log: File) {
+        val task = LPFXTask { sendSync(log) }
 
         task.setOnFailed {
             Logger.error("Log sent failed", LOGSRC_SENDER)
@@ -72,6 +72,38 @@ object LogSender {
 
         task.setOnSucceeded {
             Logger.info("Sent Log ${log.name}", LOGSRC_SENDER)
+        }
+
+        task.startInNewThread()
+    }
+    fun send(log: File, callback: () -> Unit) {
+        val task = LPFXTask { sendSync(log) }
+
+        task.setOnFailed {
+            Logger.error("Log sent failed", LOGSRC_SENDER)
+            Logger.exception(it)
+            callback()
+        }
+
+        task.setOnSucceeded {
+            Logger.info("Sent Log ${log.name}", LOGSRC_SENDER)
+            callback()
+        }
+
+        task.startInNewThread()
+    }
+    fun send(log: File, onFailed: () -> Unit, onSucceeded: () -> Unit) {
+        val task = LPFXTask { sendSync(log) }
+
+        task.setOnFailed {
+            Logger.error("Log sent failed", LOGSRC_SENDER)
+            Logger.exception(it)
+            onFailed()
+        }
+
+        task.setOnSucceeded {
+            Logger.info("Sent Log ${log.name}", LOGSRC_SENDER)
+            onSucceeded()
         }
 
         task.startInNewThread()

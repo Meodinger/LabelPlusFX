@@ -13,7 +13,7 @@ import java.util.*
 /**
  * Author: Meodinger
  * Date: 2021/8/28
- * Location: ink.meodinger.lpfx.options
+ * Have fun with my code!
  */
 
 /**
@@ -42,24 +42,29 @@ object Logger {
         }
     }
 
+    private lateinit var logfile: File
     private lateinit var writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
-    val log: File
+    val log: File get() = logfile
     var level: LogType = LogType.DEBUG
 
-    init {
+    fun start() {
         val path = Options.logs.resolve(Date().time.toString())
         if (Files.notExists(path)) Files.createFile(path)
-        log = path.toFile()
-    }
-
-    fun start() {
+        logfile = path.toFile()
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
+
+        val builder = StringBuilder()
+        builder.append("\n")
+        builder.append("RT Version: ").append(Runtime.version()).append(";\n")
+        builder.append("OS Name: ").append(System.getProperty("os.name")).append(", ")
+        builder.append("OS Version: ").append(System.getProperty("os.version")).append(", ")
+        builder.append("OS Arch: ").append(System.getProperty("os.arch")).append(";\n")
+        info(builder.toString())
 
         info("Logger start", LOGSRC_LOGGER)
     }
-
     fun stop() {
         info("Logger exit", LOGSRC_LOGGER)
 
@@ -85,10 +90,6 @@ object Logger {
         writer.flush()
     }
 
-    fun debug(message: String, lazy: Lazy<List<*>>, from: String? = null) {
-        debug(message, lazy.value, from)
-    }
-
     fun debug(message: String, list: List<*>, from: String? = null) {
         val builder = StringBuilder()
         for (e in list) builder.appendLine(e)
@@ -96,25 +97,43 @@ object Logger {
 
         log(LogType.DEBUG, "$message\n$builder", from)
     }
+    fun debug(message: String, lazy: Lazy<List<*>>, from: String? = null) {
+        debug(message, lazy.value, from)
+    }
 
     fun debug(message: String, from: String? = null) {
         log(LogType.DEBUG, message, from)
+    }
+    fun debug(obj: Any?, from: String? = null) {
+        debug(obj.toString(), from)
     }
 
     fun info(message: String, from: String? = null) {
         log(LogType.INFO, message, from)
     }
+    fun info(obj: Any?, from: String? = null) {
+        info(obj.toString(), from)
+    }
 
     fun warning(message: String, from: String? = null) {
         log(LogType.WARNING, message, from)
+    }
+    fun warning(obj: Any?, from: String? = null) {
+        warning(obj.toString(), from)
     }
 
     fun error(message: String, from: String? = null) {
         log(LogType.ERROR, message, from)
     }
+    fun error(obj: Any?, from: String? = null) {
+        error(obj.toString(), from)
+    }
 
     fun fatal(message: String, from: String? = null) {
         log(LogType.FATAL, message, from)
+    }
+    fun fatal(obj: Any?, from: String? = null) {
+        fatal(obj.toString(), from)
     }
 
     fun exception(e: Throwable) {

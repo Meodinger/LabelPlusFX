@@ -189,6 +189,8 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
     private var value: T? = null
     private var exception: Throwable? = null
 
+    val thread: Thread
+
     init {
         Thread {
             try {
@@ -196,6 +198,8 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
             } catch (e: Throwable) {
                 reject(e)
             }
+        }.also {
+            this.thread = it
         }.start()
     }
 

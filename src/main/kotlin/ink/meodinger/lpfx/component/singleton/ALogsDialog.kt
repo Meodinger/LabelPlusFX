@@ -111,7 +111,7 @@ object ALogsDialog : AbstractPropertiesDialog() {
         buttonSend.setOnAction {
             val log = tableLog.selectionModel.selectedItem?.file ?: return@setOnAction
 
-            LogSender.sendLog(log)
+            LogSender.send(log)
             labelSent.text = "${I18N["logs.sent"]} ${log.name}"
         }
         buttonClean.setOnAction {

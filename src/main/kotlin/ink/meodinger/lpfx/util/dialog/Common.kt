@@ -165,7 +165,7 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
         HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
         sentLabel,
         Button(I18N["logs.button.send"]) does {
-            LogSender.sendLog(Logger.log)
+            LogSender.send(Logger.log)
             sentLabel.text = I18N["logs.sent"]
         }
     ).also {

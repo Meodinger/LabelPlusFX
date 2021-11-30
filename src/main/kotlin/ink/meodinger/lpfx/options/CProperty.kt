@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.options
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
+import kotlin.collections.HashMap
 
 
 /**
@@ -15,6 +16,8 @@ import ink.meodinger.lpfx.util.string.deleteTail
  * A data class for property storage
  */
 class CProperty(val key: String, var value: String = UNINITIALIZED) {
+
+    // NOTE: Will be deprecated in 3.x (planned in 2022). May use serialize/java.util.properties instead.
 
     companion object {
         private const val LIST_SEPARATOR = "|"

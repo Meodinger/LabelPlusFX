@@ -532,7 +532,8 @@ object ASettingsDialog : AbstractPropertiesDialog() {
                 else toList[ruleIndex] = node.text
             }
         }
-        val rules = List(size) { fromList[it] to toList[it] }
+        // Abandon repeated rule-from
+        val rules = List(size) { fromList[it] to toList[it] }.toMap().toList()
 
         list.add(CProperty(Settings.LigatureRules, rules))
 

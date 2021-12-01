@@ -209,7 +209,7 @@ class Controller(val root: View) {
 
             if (it.source.clickCount > 1) cLabelPane.moveToLabel(it.labelIndex)
 
-            cTreeView.select(it.labelIndex)
+            cTreeView.selectLabel(it.labelIndex)
         }
         cLabelPane.setOnLabelMove {
             State.isChanged = true
@@ -432,7 +432,7 @@ class Controller(val root: View) {
             // Select CGroup, GroupBox, CTreeView
             cGroupBox.select(newGroupId)
             cGroupBar.select(newGroupId)
-            cTreeView.select(State.transFile.getTransGroup(newGroupId).name)
+            if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(State.transFile.getTransGroup(newGroupId).name)
 
             labelInfo("Change Group to ${cGroupBox.value}")
         }
@@ -630,6 +630,19 @@ class Controller(val root: View) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
+
+        // Transform Ctrl + Enter to Ctrl + Down
+        val enterKeyTransformerHandler = EventHandler<KeyEvent> {
+            if (isControlDown(it) && it.code == KeyCode.ENTER) {
+                cLabelPane.fireEvent(KeyEvent(
+                    it.source, it.target, it.eventType,
+                    "\u0000", "", KeyCode.DOWN,
+                    it.isShiftDown, it.isControlDown, it.isAltDown, it.isMetaDown
+                ))
+            }
+        }
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
     }
 
     fun specifyPicFiles() {
@@ -890,7 +903,7 @@ class Controller(val root: View) {
             Logger.exception(e)
             if (!isSilent) {
                 if (bak != null) {
-                    showError(String.format(I18N["error.save_failed_backed.format.bak"], bak.path), State.stage)
+                    showError(String.format(I18N["error.save_failed_backed.bak"], bak.path), State.stage)
                 } else {
                     showError(I18N["error.save_failed"], State.stage)
                 }
@@ -1054,7 +1067,7 @@ class Controller(val root: View) {
             )
         } catch (e: CLabelPane.LabelPaneException) {
             Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-            showError(String.format(I18N["error.picture_not_exists.format.s"], State.currentPicName), State.stage)
+            showError(String.format(I18N["error.picture_not_exists.s"], State.currentPicName), State.stage)
             return
         } catch (e: IOException) {
             Logger.error("LabelPane update failed", LOGSRC_CONTROLLER)
@@ -1106,6 +1119,16 @@ class Controller(val root: View) {
         Logger.info("TreeView rendered", LOGSRC_CONTROLLER)
     }
 
+    fun registerGroup(transGroup: TransGroup) {
+        cTreeView.registerGroup(transGroup)
+
+        Logger.info("Registered group item @ $transGroup", LOGSRC_CONTROLLER)
+    }
+    fun unregisterGroup(groupName: String) {
+        cTreeView.unregisterGroup(groupName)
+
+        Logger.info("Unregistered group item @ $groupName", LOGSRC_CONTROLLER)
+    }
     fun createGroupTreeItem(transGroup: TransGroup) {
         cTreeView.createGroupItem(transGroup)
 

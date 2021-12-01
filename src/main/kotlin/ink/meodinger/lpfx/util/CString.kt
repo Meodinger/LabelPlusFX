@@ -125,7 +125,7 @@ fun omitHighText(longText: String, maxRowCount: Int = 10): String {
 
     val builder = StringBuilder()
     for (i in 0 until maxRowCount - 1) builder.appendLine(lines[i])
-    builder.append(String.format(I18N["util.long_text.format.i"], lines.size - maxRowCount - 1))
+    builder.append(String.format(I18N["util.long_text.i"], lines.size - (maxRowCount - 1)))
 
     return builder.toString()
 }

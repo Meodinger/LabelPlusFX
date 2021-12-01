@@ -4,6 +4,8 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ObjectProperty
@@ -111,7 +113,7 @@ class CGroupBar : HBox() {
     fun select(groupId: Int) {
         if (groupId in 0 until groups.size) select(groups[groupId].name)
         else if (groups.size == 0 && groupId == 0) doNothing()
-        else throw IllegalArgumentException("GroupId $groupId invalid")
+        else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
     }
     fun select(groupName: String) {
         for (node in groups)

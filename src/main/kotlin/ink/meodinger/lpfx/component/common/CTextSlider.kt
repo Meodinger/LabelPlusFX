@@ -36,7 +36,7 @@ class CTextSlider : HBox() {
             if (value >= 0) {
                 initScaleProperty().value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
             } else {
-                throw IllegalArgumentException(I18N["exception.illegal_argument.negative_scale"])
+                throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
             }
         }
 

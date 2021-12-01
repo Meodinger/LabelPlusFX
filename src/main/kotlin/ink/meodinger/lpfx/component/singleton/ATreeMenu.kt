@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
 import ink.meodinger.lpfx.getGroupNameFormatter
@@ -45,7 +46,7 @@ object ATreeMenu : ContextMenu() {
         if (colorHexList.isEmpty()) colorHexList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
 
         val newGroupId = State.transFile.groupCount
-        var newName = String.format(I18N["context.add_group.new_group.format.i"], newGroupId + 1)
+        var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
         if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
             if (!State.transFile.groupNames.contains(nameList[newGroupId])) {
                 newName = nameList[newGroupId]
@@ -66,7 +67,10 @@ object ATreeMenu : ContextMenu() {
             // Update view
             State.controller.createLabelLayer()
             State.controller.createGroupBarItem(newGroup)
-            State.controller.createGroupTreeItem(newGroup)
+            when (State.viewMode) {
+                ViewMode.IndexMode -> State.controller.registerGroup(newGroup)
+                ViewMode.GroupMode -> State.controller.createGroupTreeItem(newGroup)
+            }
             // Mark change
             State.isChanged = true
         }

@@ -134,7 +134,7 @@ private fun loadLP(file: File): TransFile {
 
             for (l in transLabels) {
                 if (l.index == label.index) {
-                    throw IOException(String.format(I18N["exception.loader.repeated_index.format.i"], label.index))
+                    throw IOException(String.format(I18N["exception.loader.repeated_index.i"], label.index))
                 }
             }
             transLabels.add(label)
@@ -163,7 +163,7 @@ private fun loadLP(file: File): TransFile {
         val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupCount - 1])
 
         groupList.forEach {
-            if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.format.s"], group.name))
+            if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], group.name))
         }
         groupList.add(group)
 

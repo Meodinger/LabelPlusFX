@@ -98,9 +98,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.format.s"], FileName_RecentFiles)
+                    String.format(I18N["error.option.broken.s"], FileName_RecentFiles)
                 } else {
-                    String.format(I18N["error.option.load_failed.format.s"], FileName_RecentFiles)
+                    String.format(I18N["error.option.load_failed.s"], FileName_RecentFiles)
                 },
                 null
             )
@@ -127,9 +127,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.format.s"], FileName_Preference)
+                    String.format(I18N["error.option.broken.s"], FileName_Preference)
                 } else {
-                    String.format(I18N["error.option.load_failed.format.s"], FileName_Preference)
+                    String.format(I18N["error.option.load_failed.s"], FileName_Preference)
                 },
                 null
             )
@@ -156,9 +156,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.format.s"], FileName_Settings)
+                    String.format(I18N["error.option.broken.s"], FileName_Settings)
                 } else {
-                    String.format(I18N["error.option.load_failed.format.s"], FileName_Settings)
+                    String.format(I18N["error.option.load_failed.s"], FileName_Settings)
                 },
                 null
             )

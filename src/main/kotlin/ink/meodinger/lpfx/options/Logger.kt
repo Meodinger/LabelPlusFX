@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 
 import java.io.*
@@ -37,7 +39,7 @@ object Logger {
                 WARNING.type -> WARNING
                 ERROR.type -> ERROR
                 FATAL.type -> FATAL
-                else -> throw IllegalArgumentException("No such log type")
+                else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.no_such_log_type.s"], type))
             }
         }
     }

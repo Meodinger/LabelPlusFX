@@ -2,6 +2,8 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.*
 import javafx.collections.ObservableList
@@ -100,11 +102,11 @@ class CComboBox<T> : HBox() {
     fun select(index: Int) {
         if (comboBox.items.size == 0 && index == 0) return
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
-        else throw IllegalArgumentException("index $index invalid")
+        else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
     }
     fun select(item: T) {
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
-        else throw IllegalArgumentException("no item `$item`")
+        else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }
 
 }

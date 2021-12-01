@@ -34,9 +34,9 @@ class TransGroup @JsonCreator constructor(
     class TransGroupException(message: String) : RuntimeException(message) {
         companion object {
             fun nameInvalid(groupName: String) =
-                TransGroupException(String.format(I18N["exception.trans_group.name_invalid.format.s"], groupName))
+                TransGroupException(String.format(I18N["exception.trans_group.name_invalid.s"], groupName))
             fun colorInvalid(color: String) =
-                TransGroupException(String.format(I18N["exception.trans_group.color_invalid.format.s"], color))
+                TransGroupException(String.format(I18N["exception.trans_group.color_invalid.s"], color))
         }
     }
 

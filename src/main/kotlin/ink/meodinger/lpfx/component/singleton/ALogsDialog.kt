@@ -120,7 +120,7 @@ object ALogsDialog : AbstractPropertiesDialog() {
                 if (modal.file.name == Logger.log.name) continue
                 if (!modal.file.delete()) {
                     Logger.error("Delete ${modal.file.path} failed", LOGSRC_DIALOGS)
-                    showError(String.format(I18N["error.logs.delete_failed.format.s"], modal.file.name), State.stage)
+                    showError(String.format(I18N["error.logs.delete_failed.s"], modal.file.name), State.stage)
                     continue
                 }
                 toRemove.add(modal)

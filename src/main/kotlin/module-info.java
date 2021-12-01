@@ -8,7 +8,6 @@ module lpfx {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.media;
-    requires javafx.fxml;
     requires jakarta.mail;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
@@ -22,9 +21,6 @@ module lpfx {
     uses javazoom.spi.vorbis.sampled.file.VorbisAudioFileReader;
     uses javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider;
 
-    opens ink.meodinger.lpfx to javafx.fxml;
-    opens ink.meodinger.lpfx.component to javafx.fxml;
-    opens ink.meodinger.lpfx.component.common to javafx.fxml;
     opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports ink.meodinger.lpfx;

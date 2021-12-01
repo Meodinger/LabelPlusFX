@@ -7,8 +7,6 @@ import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
-import javafx.fxml.FXMLLoader
-import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Stage
 
@@ -38,16 +36,8 @@ class LabelPlusFX: HookedApplication() {
     override fun start(primaryStage: Stage) {
         State.stage = primaryStage
 
-        var root: Parent
-        var controller: Controller
-        try {
-            val loader = FXMLLoader(javaClass.getResource("Window.fxml"))
-            root = loader.load()
-            controller = loader.getController()
-        } catch (_ : Exception) {
-            root = View()
-            controller = Controller(root)
-        }
+        val root = View()
+        val controller = Controller(root)
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)

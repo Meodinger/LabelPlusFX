@@ -32,18 +32,14 @@ import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
-import javafx.fxml.FXML
-import javafx.fxml.Initializable
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.input.*
-import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
-import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -57,7 +53,7 @@ import kotlin.collections.ArrayList
 /**
  * Main controller for lpfx
  */
-class Controller() : Initializable {
+class Controller(val root: View) {
 
     companion object {
         /**
@@ -67,51 +63,18 @@ class Controller() : Initializable {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
     }
 
-    @FXML private lateinit var root: BorderPane
-    @FXML private lateinit var bSwitchViewMode: Button
-    @FXML private lateinit var bSwitchWorkMode: Button
-    @FXML private lateinit var lInfo: Label
-    @FXML private lateinit var pMain: SplitPane
-    @FXML private lateinit var pRight: SplitPane
-    @FXML private lateinit var cGroupBar: CGroupBar
-    @FXML private lateinit var cLabelPane: CLabelPane
-    @FXML private lateinit var cSlider: CTextSlider
-    @FXML private lateinit var cPicBox: CComboBox<String>
-    @FXML private lateinit var cGroupBox: CComboBox<String>
-    @FXML private lateinit var cTreeView: CTreeView
-    @FXML private lateinit var cTransArea: CLigatureArea
-
-    @FXML private fun switchViewMode() {
-        val now = ViewMode.values().indexOf(State.viewMode)
-        val all = ViewMode.values().size
-        setViewMode(ViewMode.values()[(now + 1) % all])
-    }
-    @FXML private fun switchWorkMode() {
-        val now = WorkMode.values().indexOf(State.workMode)
-        val all = WorkMode.values().size
-        setWorkMode(WorkMode.values()[(now + 1) % all])
-    }
-
-    constructor(view : View) : this() {
-        this.root            = view
-        this.bSwitchViewMode = view.bSwitchViewMode
-        this.bSwitchWorkMode = view.bSwitchWorkMode
-        this.lInfo           = view.lInfo
-        this.pMain           = view.pMain
-        this.pRight          = view.pRight
-        this.cGroupBar       = view.cGroupBar
-        this.cLabelPane      = view.cLabelPane
-        this.cSlider         = view.cSlider
-        this.cPicBox         = view.cPicBox
-        this.cGroupBox       = view.cGroupBox
-        this.cTreeView       = view.cTreeView
-        this.cTransArea      = view.cTransArea
-
-        this.bSwitchViewMode.setOnAction { switchViewMode() }
-        this.bSwitchWorkMode.setOnAction { switchWorkMode() }
-
-        initialize(null, null)
-    }
+    private val bSwitchViewMode: Button      = root.bSwitchViewMode
+    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode
+    private val lInfo: Label                 = root.lInfo
+    private val pMain: SplitPane             = root.pMain
+    private val pRight: SplitPane            = root.pRight
+    private val cGroupBar: CGroupBar         = root.cGroupBar
+    private val cLabelPane: CLabelPane       = root.cLabelPane
+    private val cSlider: CTextSlider         = root.cSlider
+    private val cPicBox: CComboBox<String>   = root.cPicBox
+    private val cGroupBox: CComboBox<String> = root.cGroupBox
+    private val cTreeView: CTreeView         = root.cTreeView
+    private val cTransArea: CLigatureArea    = root.cTransArea
 
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (State.isChanged) {
@@ -123,6 +86,27 @@ class Controller() : Initializable {
                 Logger.exception(e)
             }
         }
+    }
+
+    private fun switchViewMode() {
+        val now = ViewMode.values().indexOf(State.viewMode)
+        val all = ViewMode.values().size
+        setViewMode(ViewMode.values()[(now + 1) % all])
+    }
+    private fun switchWorkMode() {
+        val now = WorkMode.values().indexOf(State.workMode)
+        val all = WorkMode.values().size
+        setWorkMode(WorkMode.values()[(now + 1) % all])
+    }
+
+    init {
+        this.bSwitchViewMode.setOnAction { switchViewMode() }
+        this.bSwitchWorkMode.setOnAction { switchWorkMode() }
+
+        init()
+        listen()
+        effect()
+        transform()
     }
 
     /**
@@ -646,13 +630,6 @@ class Controller() : Initializable {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
-    }
-
-    override fun initialize(location: URL?, resources: ResourceBundle?) {
-        init()
-        listen()
-        effect()
-        transform()
     }
 
     fun specifyPicFiles() {

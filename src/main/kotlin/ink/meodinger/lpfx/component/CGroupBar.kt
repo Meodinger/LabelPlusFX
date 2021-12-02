@@ -28,6 +28,8 @@ import java.util.function.Consumer
  */
 class CGroupBar : HBox() {
 
+    // TODO: Scrollable or multi-row when inefficient space
+
     companion object {
         const val C_GROUP_ID = "C_GROUP_ID"
     }

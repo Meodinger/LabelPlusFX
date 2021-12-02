@@ -24,6 +24,8 @@ import javafx.scene.text.TextAlignment
 
 /**
  * A Region that displays a TransGroup
+ *
+ * Bind Status: All bind
  */
 class CGroup(name: String, color: Color) : Region() {
 

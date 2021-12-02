@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
+import ink.meodinger.lpfx.component.CTreeView
 import ink.meodinger.lpfx.getGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
@@ -35,7 +36,7 @@ import javafx.scene.shape.Circle
  */
 object ATreeMenu : ContextMenu() {
 
-    private lateinit var view: TreeView<*>
+    private lateinit var view: CTreeView
 
     private val r_addGroupField = TextField()
     private val r_addGroupPicker = CColorPicker()
@@ -207,7 +208,7 @@ object ATreeMenu : ContextMenu() {
         g_changeColorItem.graphic = g_changeColorPicker
     }
 
-    fun initView(view: TreeView<*>) {
+    fun initView(view: CTreeView) {
         this.view = view
     }
 

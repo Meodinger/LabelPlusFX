@@ -100,11 +100,13 @@ class CComboBox<T> : HBox() {
     }
 
     fun select(index: Int) {
+        comboBox.selectionModel.clearSelection()
         if (comboBox.items.size == 0 && index == 0) return
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
     }
     fun select(item: T) {
+        comboBox.selectionModel.clearSelection()
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }

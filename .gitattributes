@@ -1,2 +1,4 @@
 *.java text eol=crlf
 *.kt text eol=crlf
+
+*.sh text eol=lf

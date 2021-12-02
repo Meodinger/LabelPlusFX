@@ -40,6 +40,7 @@ import javafx.scene.text.Font
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -353,8 +354,7 @@ class Controller(val root: View) {
 
             // fixme: unexpected value change when remove first (when also current) picture.
             //   want the new first picture, got last picture
-            // Above issues possibly are related to LINE:427
-            // NOTE: Maybe should listen to both items and value
+            // 2021/12/02 NOTE: Maybe should listen to both items and value
             val picNames = State.transFile.sortedPicNames
             val newPicName = newValue ?:
                 if (picNames.contains(oldValue)) oldValue
@@ -363,20 +363,22 @@ class Controller(val root: View) {
         }
 
         // currentGroupId
-        cGroupBox.valueProperty().addListener { _, oldValue, newValue ->
+        cGroupBox.indexProperty().addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
 
             // fixme: unexpected value change when REMOVE first (when also current) picture.
             //   want the new first group, got null
             // fixme: unexpected value change when CHANGE first (when also current) picture.
             //   want the new name displayed in GroupBox, but not
-            // Above issues possibly are related to LINE:439
-            // NOTE: Maybe should listen to both items and index
-            val groupNames = State.transFile.groupNames
-            val newGroupName = newValue ?:
-                if (groupNames.contains(oldValue)) oldValue // Actually this will never be called
-                else groupNames[0] // Always goes here
-            State.currentGroupId = State.transFile.getGroupIdByName(newGroupName)
+
+            // 2021/12/02 NOTE: Maybe should listen to both items and index
+            // 2021/12/02 NOTE: Use groupId cause name may change
+
+            val newGroupId = if ((newValue as Int) != NOT_FOUND) newValue
+                else if ((oldValue as Int) < State.transFile.groupCount) oldValue
+                else 0
+
+            State.currentGroupId = newGroupId
         }
 
         // currentLabelIndex
@@ -864,60 +866,66 @@ class Controller(val root: View) {
      * Save a TransFile
      * @param file Which file will the TransFile write to
      * @param type Which type will the translation file be
-     * @param isSilent Whether the save procedure is done in silence or not
+     * @param silent Whether the save procedure is done in silence or not
      */
-    fun save(file: File, type: FileType, isSilent: Boolean) {
-        Logger.info("Saving to ${file.path}, isSilent:$isSilent", LOGSRC_CONTROLLER)
+    fun save(file: File, type: FileType, silent: Boolean) {
+        val overwrite = State.translationFile == file
+
+        Logger.info("Saving to ${file.path}, isSilent:$silent, isOverwrite:$overwrite", LOGSRC_CONTROLLER)
 
         // Check folder
-        if (!isSilent) if (file.parent != State.getFileFolder().path) {
+        if (!silent) if (file.parent != State.getFileFolder().path) {
             val confirm = showConfirm(I18N["confirm.save_to_another_place"], State.stage)
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
-        // Backup if overwrite
-        var bak: File? = null
-        if (State.translationFile == file) {
-            bak = File("${State.translationFile.path}.$EXTENSION_BAK")
-
+        // Use temp if overwrite
+        val exportDest = if (overwrite) File("${State.translationFile.path}.temp") else file
+        fun removeTemp() {
             try {
-                transfer(State.translationFile, bak)
-                Logger.info("Backed TransFile to ${bak.path}", LOGSRC_CONTROLLER)
+                Files.delete(exportDest.toPath())
+                Logger.info("Temp file removed", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
-                bak = null
-                Logger.error("TransFile backup failed", LOGSRC_CONTROLLER)
-                Logger.exception(e)
-                if (!isSilent) {
-                    showError(I18N["error.backup_failed"], State.stage)
-                    showException(e, State.stage)
-                }
+                Logger.error("Temp file remove failed", LOGSRC_CONTROLLER)
+                if (!silent) showError(String.format(I18N["error.save_temp_remove_failed.s"], exportDest.path), State.stage)
             }
         }
 
         // Export
         try {
-            export(file, type, State.transFile)
-            if (!isSilent) showInfo(I18N["info.saved_successfully"], State.stage)
+            export(exportDest, type, State.transFile)
+            if (!silent) showInfo(I18N["info.saved_successfully"], State.stage)
+            Logger.info("Exported translation")
         } catch (e: IOException) {
-            Logger.error("Save failed", LOGSRC_CONTROLLER)
+            Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            if (!isSilent) {
-                if (bak != null) {
-                    showError(String.format(I18N["error.save_failed_backed.bak"], bak.path), State.stage)
-                } else {
-                    showError(I18N["error.save_failed"], State.stage)
-                }
-                showException(e, State.stage)
-            }
+            showError(I18N["error.save_failed"], State.stage)
+            showException(e, State.stage)
+
+            // Delete the temp file
+            if (overwrite) removeTemp()
+
+            Logger.info("Save failed")
             return
         }
 
-        // Remove Backup
-        if (bak != null) if (!bak.delete()) {
-            if (!isSilent) showError(I18N["error.backup_clear_failed"], State.stage)
-            Logger.error("Backup removed failed", LOGSRC_CONTROLLER)
-        } else {
-            Logger.info("Backup removed", LOGSRC_CONTROLLER)
+        if (overwrite) {
+            // Transfer to original file if export success
+            try {
+                transfer(exportDest, file)
+                Logger.info("Transferred temp file")
+            } catch (e: Exception) {
+                Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
+                Logger.exception(e)
+                showError(I18N["error.save_temp_transfer_failed"], State.stage)
+                showException(e, State.stage)
+
+                Logger.info("Save failed")
+                return
+            }
+
+            // Delete the temp file
+            removeTemp()
         }
 
         // Update state

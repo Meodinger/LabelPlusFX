@@ -171,7 +171,11 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.new"]
-        fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
+        when (fileChooser.selectedFilter) {
+            lpFilter -> fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_LP"
+            else -> fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
+        }
+
         val file = fileChooser.showSaveDialog(State.stage) ?: return
         val type = FileType.getType(file)
 

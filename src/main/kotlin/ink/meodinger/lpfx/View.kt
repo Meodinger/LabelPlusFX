@@ -26,6 +26,9 @@ import javafx.scene.layout.Priority
  * Have fun with my code!
  */
 
+/**
+ * Main View
+ */
 class View : BorderPane() {
 
     val bSwitchViewMode = Button(State.viewMode.toString())

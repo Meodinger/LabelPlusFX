@@ -39,8 +39,8 @@ class CFileChooser {
 
     var title: String by chooser.titleProperty()
     var initialFileName: String by chooser.initialFileNameProperty()
+    var selectedFilter: FileChooser.ExtensionFilter? = chooser.selectedExtensionFilter
     val extensionFilters: ObservableList<FileChooser.ExtensionFilter> = chooser.extensionFilters
-    val selectedFilter: FileChooser.ExtensionFilter? = chooser.selectedExtensionFilter
 
     init {
         chooser.initialDirectoryProperty().bind(lastDirectoryProperty)

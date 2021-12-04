@@ -52,9 +52,9 @@ import kotlin.collections.ArrayList
  */
 
 /**
- * Main controller for lpfx
+ * Main controller
  */
-class Controller(val root: View) {
+class Controller(private val root: View) {
 
     companion object {
         /**
@@ -942,11 +942,15 @@ class Controller(val root: View) {
      * @param from The backup file
      * @param to Which file will the backup recover to
      */
-    fun recovery(from: File, to: File) {
+    fun recovery(from: File, to: File, type: FileType) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
-            transfer(from, to)
+            val tempFile = File.createTempFile("temp", type.name)
+            val transFile = load(from, FileType.MeoFile)
+
+            export(tempFile, type, transFile)
+            transfer(tempFile, to)
 
             Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
         } catch (e: Exception) {
@@ -956,7 +960,7 @@ class Controller(val root: View) {
             showException(e, State.stage)
         }
 
-        open(to, FileType.getType(to))
+        open(to, type)
     }
     /**
      * Export a TransFile in specific type

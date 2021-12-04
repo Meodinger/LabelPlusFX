@@ -171,16 +171,12 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.new"]
-        when (fileChooser.selectedFilter) {
-            lpFilter -> fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_LP"
-            else -> fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
-        }
-
+        fileChooser.selectedFilter = fileFilter
+        fileChooser.initialFileName = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
         val file = fileChooser.showSaveDialog(State.stage) ?: return
-        val type = FileType.getType(file)
 
-        val projectFolder = State.controller.new(file, type)
-        if (projectFolder != null) State.controller.open(file, type, projectFolder)
+        val projectFolder = State.controller.new(file, FileType.getType(file))
+        if (projectFolder != null) State.controller.open(file, FileType.getType(file), projectFolder)
     }
     private fun openTranslation() {
         // open
@@ -190,6 +186,7 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         fileChooser.title = I18N["chooser.open"]
+        fileChooser.selectedFilter = fileFilter
         fileChooser.initialFileName = ""
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
@@ -204,6 +201,7 @@ object AMenuBar : MenuBar() {
         // save
 
         fileChooser.title = I18N["chooser.save"]
+        fileChooser.selectedFilter = fileFilter
         fileChooser.initialFileName = State.translationFile.name
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
@@ -225,10 +223,11 @@ object AMenuBar : MenuBar() {
         CFileChooser.lastDirectory = bak.parentFile.parentFile
 
         fileChooser.title = I18N["chooser.rec"]
+        fileChooser.selectedFilter = fileFilter
         fileChooser.initialFileName = "$RECOVERY_FILE_NAME.$EXTENSION_FILE_MEO"
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 
-        State.controller.recovery(bak, rec)
+        State.controller.recovery(bak, rec, FileType.getType(rec))
     }
 
     private fun editComment() {

@@ -61,7 +61,7 @@ object Options {
         } catch (e: IOException) {
             Logger.fatal("Options load failed", LOGSRC_OPTIONS)
             Logger.exception(e)
-            showError(I18N["error.initialize_options_failed"], null)
+            showError(I18N["error.options.load_failed"], null)
             showException(e, null)
             exitProcess(0)
         }
@@ -98,9 +98,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.s"], FileName_RecentFiles)
+                    String.format(I18N["error.options.broken.s"], FileName_RecentFiles)
                 } else {
-                    String.format(I18N["error.option.load_failed.s"], FileName_RecentFiles)
+                    String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles)
                 },
                 null
             )
@@ -127,9 +127,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.s"], FileName_Preference)
+                    String.format(I18N["error.options.broken.s"], FileName_Preference)
                 } else {
-                    String.format(I18N["error.option.load_failed.s"], FileName_Preference)
+                    String.format(I18N["error.options.load_failed.s"], FileName_Preference)
                 },
                 null
             )
@@ -156,9 +156,9 @@ object Options {
                 I18N["common.alert"],
                 null,
                 if (e is CPropertyException) {
-                    String.format(I18N["error.option.broken.s"], FileName_Settings)
+                    String.format(I18N["error.options.broken.s"], FileName_Settings)
                 } else {
-                    String.format(I18N["error.option.load_failed.s"], FileName_Settings)
+                    String.format(I18N["error.options.load_failed.s"], FileName_Settings)
                 },
                 null
             )

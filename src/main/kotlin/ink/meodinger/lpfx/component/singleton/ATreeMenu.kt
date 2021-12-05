@@ -59,7 +59,7 @@ object ATreeMenu : ContextMenu() {
         r_addGroupDialog.result = null
         r_addGroupDialog.showAndWait().ifPresent { newGroup ->
             if (State.transFile.groupNames.contains(newGroup.name)) {
-                showError(I18N["error.same_group_name"], State.stage)
+                showError(I18N["context.error.same_group_name"], State.stage)
                 return@ifPresent
             }
 
@@ -88,7 +88,7 @@ object ATreeMenu : ContextMenu() {
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
             if (State.transFile.groupNames.contains(newName)) {
-                showError(I18N["error.same_group_name"], State.stage)
+                showError(I18N["context.error.same_group_name"], State.stage)
                 return@ifPresent
             }
 

@@ -39,7 +39,7 @@ object Logger {
                 WARNING.type -> WARNING
                 ERROR.type -> ERROR
                 FATAL.type -> FATAL
-                else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.no_such_log_type.s"], type))
+                else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.invalid_log_type.s"], type))
             }
         }
     }

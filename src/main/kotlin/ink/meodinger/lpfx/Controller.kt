@@ -946,7 +946,7 @@ class Controller(private val root: View) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
-            val tempFile = File.createTempFile("temp", type.name)
+            val tempFile = File.createTempFile("temp", type.name).also { it.deleteOnExit() }
             val transFile = load(from, FileType.MeoFile)
 
             export(tempFile, type, transFile)

@@ -12,7 +12,6 @@ import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
-import java.util.function.Consumer
 
 
 /**
@@ -34,10 +33,10 @@ class CGroupBar : HBox() {
         const val C_GROUP_ID = "C_GROUP_ID"
     }
 
-    private val onGroupSelectProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
-    fun onGroupSelectedProperty(): ObjectProperty<Consumer<String>> = onGroupSelectProperty
-    val onGroupSelect: Consumer<String> by onGroupSelectProperty
-    fun setOnGroupSelect(consumer: Consumer<String>) {
+    private val onGroupSelectProperty: ObjectProperty<(String) -> Unit> = SimpleObjectProperty {}
+    fun onGroupSelectedProperty(): ObjectProperty<(String) -> Unit> = onGroupSelectProperty
+    val onGroupSelect: (String) -> Unit by onGroupSelectProperty
+    fun setOnGroupSelect(consumer: (String) -> Unit) {
         onGroupSelectProperty.value = consumer
     }
 
@@ -83,7 +82,7 @@ class CGroupBar : HBox() {
             Color.web(transGroup.colorHex)
         ).also { tagCGroupId(it, groups.size) }
 
-        cGroup.setOnMouseClicked { onGroupSelect.accept(cGroup.name) }
+        cGroup.setOnMouseClicked { onGroupSelect(cGroup.name) }
 
         cGroup.nameProperty().bind(transGroup.nameProperty)
         cGroup.colorProperty().bind(Bindings.createObjectBinding(

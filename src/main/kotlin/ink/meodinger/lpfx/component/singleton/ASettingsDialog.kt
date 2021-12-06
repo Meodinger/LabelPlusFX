@@ -20,6 +20,7 @@ import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.isMathematicalDecimal
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -35,7 +36,7 @@ import javafx.scene.text.TextAlignment
 /**
  * Author: Meodinger
  * Date: 2021/8/25
- * Location: ink.meodinger.lpfx.component
+ * Have fun with my code!
  */
 
 /**
@@ -368,15 +369,13 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         lLabelPane.children.add(lCLabel)
 
         lLabelRadius.textFormatter = TextFormatter { change ->
-            if (change.isAdded) {
-                val builder = StringBuilder()
-                for (c in change.text.toCharArray()) {
-                    if ((c in '0'..'9') || (c == '.' && !lLabelRadius.fieldText.contains(c))) {
-                        builder.append(c)
-                    }
-                }
-                change.text = builder.toString()
-            }
+            if (!change.isAdded) return@TextFormatter change
+
+            if (!change.text.isMathematicalDecimal())
+                return@TextFormatter change.also { it.text = "" }
+            if (!change.controlNewText.isMathematicalDecimal())
+                return@TextFormatter change.also { it.text = "" }
+
             change
         }
         lLabelRadius.setOnChangeFinish {
@@ -390,28 +389,17 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         lSliderRadius.max = 48.0
 
         lLabelAlpha.textFormatter = TextFormatter { change ->
-            if (change.isAdded) {
-                if (lLabelAlpha.fieldText.length == 2) {
-                    change.text = ""
-                    return@TextFormatter change
-                }
+            if (!change.isAdded) return@TextFormatter change
 
-                val builder = StringBuilder()
-                for (c in change.text.uppercase().toCharArray()) {
-                    if (c in '0'..'9' || c in 'A'..'F') {
-                        builder.append(c)
-                    }
-                }
-                change.text = builder.toString()
+            if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
+                return@TextFormatter change.also { it.text = "" }
+            if (change.controlText.length + change.text.length > 2)
+                return@TextFormatter change.also { it.text = "" }
 
-                if (lLabelAlpha.fieldText.length + change.text.length > 2) {
-                    change.text = ""
-                }
-            }
-            change
+            return@TextFormatter change
         }
         lLabelAlpha.setOnChangeStart {
-            lLabelAlpha.fieldText = it.replace("0x", "")
+            fieldText = it.replace("0x", "")
         }
         lLabelAlpha.setOnChangeFinish {
             lSliderAlpha.value = it.toInt(16) / 255.0
@@ -467,19 +455,6 @@ object ASettingsDialog : AbstractPropertiesDialog() {
     }
 
     // ----- Result convert ---- //
-    override fun convertResult(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
-        list.addAll(convertGroup())
-        list.addAll(convertLigatureRule())
-        list.addAll(convertMode())
-        list.addAll(convertLabel())
-
-        Logger.info("Generated settings", LOGSRC_DIALOGS)
-        Logger.debug("got", list, LOGSRC_DIALOGS)
-
-        return list
-    }
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
@@ -558,4 +533,18 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
         return list
     }
+    override fun convertResult(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.addAll(convertGroup())
+        list.addAll(convertLigatureRule())
+        list.addAll(convertMode())
+        list.addAll(convertLabel())
+
+        Logger.info("Generated settings", LOGSRC_DIALOGS)
+        Logger.debug("got", list, LOGSRC_DIALOGS)
+
+        return list
+    }
+
 }

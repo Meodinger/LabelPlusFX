@@ -1,9 +1,9 @@
 package ink.meodinger.lpfx.util.dialog
 
+import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.DIALOG_HEIGHT
 import ink.meodinger.lpfx.DIALOG_WIDTH
 import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.util.component.does
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
@@ -11,6 +11,8 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.io.LogSender
+import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.vGrow
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -150,35 +152,7 @@ fun showError(title: String, header: String?, content: String, owner: Window?): 
  * @return ButtonType? OK
  */
 fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
-
-    // Get exception stack trace
-    val text = e.stackTraceToString()
-
-    // Create pane
-    val content = VBox(8.0)
-
-    val sentLabel = Label().also {
-        it.padding = Insets(0.0, 8.0, 0.0, 0.0)
-    }
-    val header = HBox(
-        Label(omitWideText(e.message ?: e.javaClass.name, 400.0)),
-        HBox().also { HBox.setHgrow(it, Priority.ALWAYS) },
-        sentLabel,
-        Button(I18N["logs.button.send"]) does {
-            LogSender.send(Logger.log)
-            sentLabel.text = I18N["logs.sent"]
-        }
-    ).also {
-        it.alignment = Pos.CENTER_LEFT
-    }
-    val textArea = TextArea(text).also {
-        it.isEditable = false
-        it.prefWidthProperty().bind(content.widthProperty())
-        it.prefHeightProperty().bind(content.heightProperty())
-    }
-
-    content.children.addAll(header, Separator(), Label("The exception stacktrace is:"), textArea)
-
+    val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.APPLY)
     val dialog = Dialog<ButtonType>().also { it.initOwner(owner) }
 
     dialog.title = I18N["common.error"]
@@ -186,8 +160,24 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     dialog.headerText = e.javaClass.name
     dialog.dialogPane.prefWidth = DIALOG_WIDTH
     dialog.dialogPane.prefHeight = DIALOG_HEIGHT
-    dialog.dialogPane.content = content
-    dialog.dialogPane.buttonTypes.add(ButtonType.OK)
+    dialog.dialogPane.content = VBox().apply {
+        spacing = COMMON_GAP / 2
+        add(Label(omitWideText(e.message ?: e.javaClass.name, 400.0)))
+        add(Separator())
+        add(Label("The exception stacktrace is:"))
+        add(TextArea(e.stackTraceToString())) {
+            isEditable = false
+            vGrow = Priority.ALWAYS
+        }
+    }
+    dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.OK)
+
+    val applyBtn = dialog.dialogPane.lookupButton(sendBtnType) as Button
+    applyBtn.addEventFilter(ActionEvent.ACTION) {
+        LogSender.send(Logger.log)
+        (it.source as Button).text = I18N["common.sent"]
+        it.consume()
+    }
 
     return dialog.showAndWait()
 }

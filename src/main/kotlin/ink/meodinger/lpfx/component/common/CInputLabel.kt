@@ -9,7 +9,6 @@ import javafx.scene.control.TextField
 import javafx.scene.control.TextFormatter
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.Pane
-import java.util.function.Consumer
 
 
 /**
@@ -55,32 +54,32 @@ class CInputLabel : Pane() {
             if (isEditing) fieldText = value else labelText = value
         }
 
-    private val onChangeStartProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
-    fun onChangeStartProperty(): ObjectProperty<Consumer<String>> = onChangeStartProperty
-    val onChangeStart: Consumer<String> by onChangeStartProperty
-    fun setOnChangeStart(callback: Consumer<String>) {
+    private val onChangeStartProperty: ObjectProperty<CInputLabel.(String) -> Unit> = SimpleObjectProperty {}
+    fun onChangeStartProperty(): ObjectProperty<CInputLabel.(String) -> Unit> = onChangeStartProperty
+    val onChangeStart: CInputLabel.(String) -> Unit by onChangeStartProperty
+    fun setOnChangeStart(callback: CInputLabel.(String) -> Unit) {
         onChangeStartProperty.value = callback
     }
 
-    private val onChangeFinishProperty: ObjectProperty<Consumer<String>> = SimpleObjectProperty(Consumer {})
-    fun onChangeFinishProperty(): ObjectProperty<Consumer<String>> = onChangeFinishProperty
-    val onChangeFinish: Consumer<String> by onChangeFinishProperty
-    fun setOnChangeFinish(callback: Consumer<String>) {
+    private val onChangeFinishProperty: ObjectProperty<CInputLabel.(String) -> Unit> = SimpleObjectProperty {}
+    fun onChangeFinishProperty(): ObjectProperty<CInputLabel.(String) -> Unit> = onChangeFinishProperty
+    val onChangeFinish: CInputLabel.(String) -> Unit by onChangeFinishProperty
+    fun setOnChangeFinish(callback: CInputLabel.(String) -> Unit) {
         onChangeFinishProperty.value = callback
     }
 
     init {
-        this.setPrefSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+        setPrefSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
 
-        label.prefWidthProperty().bind(this.prefWidthProperty())
-        label.prefHeightProperty().bind(this.prefHeightProperty())
-        field.prefWidthProperty().bind(this.prefWidthProperty())
-        field.prefHeightProperty().bind(this.prefHeightProperty())
-        field.textFormatterProperty().bind(this.textFormatterProperty)
+        label.prefWidthProperty().bind(prefWidthProperty())
+        label.prefHeightProperty().bind(prefHeightProperty())
+        field.prefWidthProperty().bind(prefWidthProperty())
+        field.prefHeightProperty().bind(prefHeightProperty())
+        field.textFormatterProperty().bind(textFormatterProperty)
 
-        this.isEditingProperty.addListener { _, _, newValue ->
-            this.children.clear()
-            this.children.add(if (newValue) field else label)
+        isEditingProperty.addListener { _, _, newValue ->
+            children.clear()
+            children.add(if (newValue) field else label)
         }
 
         label.setOnMouseClicked {
@@ -91,16 +90,16 @@ class CInputLabel : Pane() {
 
             isEditing = true
 
-            onChangeStart.accept(labelText)
+            onChangeStart(this, labelText)
         }
         field.setOnAction {
             labelText = fieldText
 
             isEditing = false
 
-            onChangeFinish.accept(fieldText)
+            onChangeFinish(this, fieldText)
         }
 
-        this.children.add(label)
+        children.add(label)
     }
 }

@@ -24,9 +24,11 @@ import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.onChange
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.*
 
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
@@ -64,8 +66,8 @@ class Controller(private val root: View) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
     }
 
-    private val bSwitchViewMode: Button      = root.bSwitchViewMode
-    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode
+    private val bSwitchViewMode: Button      = root.bSwitchViewMode does { switchViewMode() }
+    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode does { switchWorkMode() }
     private val lInfo: Label                 = root.lInfo
     private val pMain: SplitPane             = root.pMain
     private val pRight: SplitPane            = root.pRight
@@ -101,9 +103,6 @@ class Controller(private val root: View) {
     }
 
     init {
-        this.bSwitchViewMode.setOnAction { switchViewMode() }
-        this.bSwitchWorkMode.setOnAction { switchWorkMode() }
-
         init()
         listen()
         effect()
@@ -122,7 +121,7 @@ class Controller(private val root: View) {
         // MenuBar
         root.top = AMenuBar
 
-        // Set last used dir
+        // RecentFiles
         var lastFilePath = RecentFiles.getLastOpenFile()
         while (lastFilePath != null) {
             val file = File(lastFilePath)
@@ -134,8 +133,16 @@ class Controller(private val root: View) {
                 lastFilePath = RecentFiles.getLastOpenFile()
             }
         }
+        AMenuBar.updateOpenRecent()
 
-        // Load rules
+        // Preferences
+        cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
+        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
+        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
+
+        // Settings
+        val viewModes = Settings[Settings.ViewModePreference].asStringList()
+        State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
         updateLigatureRules()
 
         // Set components disabled
@@ -153,9 +160,6 @@ class Controller(private val root: View) {
         cSlider.minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
         cSlider.maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
         cSlider.scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
-
-        // Update OpenRecent
-        AMenuBar.updateOpenRecent()
 
         // Register handler
         cLabelPane.setOnLabelPlace {
@@ -225,23 +229,23 @@ class Controller(private val root: View) {
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
 
-        // Preferences
-        cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
-        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
-        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
+        // Switch Button text
+        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
+            labelInfo("Switch work mode to ${State.viewMode}")
+            when (State.workMode) {
+                WorkMode.InputMode -> I18N["mode.work.input"]
+                WorkMode.LabelMode -> I18N["mode.work.label"]
+            }
+        }, State.workModeProperty))
+        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding({
+            labelInfo("Switch view mode to ${State.viewMode}")
+            when (State.viewMode) {
+                ViewMode.IndexMode -> I18N["mode.view.index"]
+                ViewMode.GroupMode -> I18N["mode.view.group"]
+            }
+        }, State.viewModeProperty))
 
-        // Mode
-        val viewModes = Settings[Settings.ViewModePreference].asStringList()
-        State.viewMode = ViewMode.getMode(viewModes[WorkMode.InputMode.ordinal])
-        cTreeView.viewModeProperty().bind(State.viewModeProperty)
-        // mode text
-        bSwitchViewMode.text = State.viewMode.toString()
-        bSwitchWorkMode.text = State.workMode.toString()
-
-        // TreeView Root Name
-        cTreeView.picNameProperty().bind(State.currentPicNameProperty)
-
-        // PictureBox Names
+        // PictureBox
         cPicBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastMapObservable = State.transFile.transMapObservable
 
@@ -265,7 +269,7 @@ class Controller(private val root: View) {
 
         })
 
-        // GroupBox Names
+        // GroupBox
         cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<StringProperty>()
@@ -293,7 +297,11 @@ class Controller(private val root: View) {
             }
         })
 
-        // LabelPane ColorList
+        // TreeView
+        cTreeView.picNameProperty().bind(State.currentPicNameProperty)
+        cTreeView.viewModeProperty().bind(State.viewModeProperty)
+
+        // LabelPane
         cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupHexProperties = ArrayList<StringProperty>()
@@ -320,15 +328,12 @@ class Controller(private val root: View) {
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
         })
-
-        // Default image auto-centre
-        cLabelPane.widthProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists())
-                cLabelPane.moveToCenter()
-        })
-        cLabelPane.heightProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
-        })
+        cLabelPane.defaultCursorProperty().bind(Bindings.createObjectBinding({
+                when (State.workMode) {
+                    WorkMode.LabelMode -> Cursor.CROSSHAIR
+                    WorkMode.InputMode -> Cursor.DEFAULT
+                }
+            }, State.workModeProperty))
 
         // Display default image
         cLabelPane.isVisible = false
@@ -336,6 +341,15 @@ class Controller(private val root: View) {
             cLabelPane.moveToCenter()
             cLabelPane.isVisible = true
         }
+        // Default image auto-center
+        cLabelPane.widthProperty().addListener(onChange {
+            if (!State.isOpened || !State.getPicFileNow().exists())
+                cLabelPane.moveToCenter()
+        })
+        cLabelPane.heightProperty().addListener(onChange {
+            if (!State.isOpened || !State.getPicFileNow().exists())
+                cLabelPane.moveToCenter()
+        })
     }
     /**
      * Property listen
@@ -343,11 +357,6 @@ class Controller(private val root: View) {
      * State & Preference will change with specific property
      */
     private fun listen() {
-        // isChanged
-        cTransArea.textProperty().addListener(onChange {
-            if (cTransArea.isBound) State.isChanged = true
-        })
-
         // currentPicName
         cPicBox.valueProperty().addListener { _, oldValue, newValue ->
             if (!State.isOpened) return@addListener
@@ -386,22 +395,27 @@ class Controller(private val root: View) {
             // Clear selected when change pic
             State.currentLabelIndex = NOT_FOUND
         })
-        cTreeView.selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-            if (newValue != null && newValue is CTreeLabelItem) {
-                State.currentLabelIndex = newValue.index
+        cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
+            if (it != null && it is CTreeLabelItem) {
+                State.currentLabelIndex = it.index
             }
-        }
+        })
+
+        // isChanged
+        cTransArea.textProperty().addListener(onChange {
+            if (cTransArea.isBound) State.isChanged = true
+        })
 
         // Preferences
-        cTransArea.fontProperty().addListener { _, _, newValue ->
-            Preference[Preference.TEXTAREA_FONT_SIZE] = newValue.size.toInt()
-        }
-        pMain.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Preference[Preference.MAIN_DIVIDER] = newValue
-        }
-        pRight.dividers[0].positionProperty().addListener { _, _, newValue ->
-            Preference[Preference.RIGHT_DIVIDER] = newValue
-        }
+        cTransArea.fontProperty().addListener(onNew {
+            Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt()
+        })
+        pMain.dividers[0].positionProperty().addListener(onNew {
+            Preference[Preference.MAIN_DIVIDER] = it
+        })
+        pRight.dividers[0].positionProperty().addListener(onNew {
+            Preference[Preference.RIGHT_DIVIDER] = it
+        })
     }
     /**
      * Effect on view
@@ -440,52 +454,21 @@ class Controller(private val root: View) {
         }
 
         // Update text area when label change
-        State.currentLabelIndexProperty.addListener { _, _, newIndex ->
-            if (!State.isOpened) return@addListener
+        State.currentLabelIndexProperty.addListener(onNew {
+            if (!State.isOpened) return@onNew
 
             // unbind TextArea
             cTransArea.unbindBidirectional()
 
-            if (newIndex == NOT_FOUND) return@addListener
+            if (it == NOT_FOUND) return@onNew
 
             // bind new property
             val transLabels = State.transFile.getTransList(State.currentPicName)
-            val newLabel = transLabels.find { it.index == newIndex }
+            val newLabel = transLabels.find { label -> label.index == it }
             if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
 
-            labelInfo("Selected label $newIndex")
-        }
-
-        // Update cLabelPane default cursor when work mode change
-        State.workModeProperty.addListener { _, _, newMode ->
-            if (!State.isOpened) return@addListener
-
-            bSwitchWorkMode.text = when (newMode!!) {
-                WorkMode.InputMode -> I18N["mode.work.input"]
-                WorkMode.LabelMode -> I18N["mode.work.label"]
-            }
-
-            when (newMode) {
-                WorkMode.LabelMode -> cLabelPane.defaultCursor = Cursor.CROSSHAIR
-                WorkMode.InputMode -> cLabelPane.defaultCursor = Cursor.DEFAULT
-            }
-
-            labelInfo("Switch work mode to $newMode")
-        }
-
-        // Update CTreeView when view mode change
-        State.viewModeProperty.addListener { _, _, newMode ->
-            if (!State.isOpened) return@addListener
-
-            bSwitchViewMode.text = when (newMode!!) {
-                ViewMode.IndexMode -> I18N["mode.view.index"]
-                ViewMode.GroupMode -> I18N["mode.view.group"]
-            }
-
-            // renderTreeView()
-
-            labelInfo("Switch view mode to $newMode")
-        }
+            labelInfo("Selected label $it")
+        })
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {

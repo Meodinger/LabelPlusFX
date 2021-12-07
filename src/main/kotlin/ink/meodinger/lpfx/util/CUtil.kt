@@ -332,3 +332,12 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
         }
     }
 }
+
+/**
+ * Logic Boolean Value Implementations
+ * Use JavaScript Standard
+ */
+fun Boolean.logic(): Boolean { return this }
+fun Number.logic(): Boolean  = this != 0 && !this.toDouble().isNaN()
+fun String.logic(): Boolean  = this.isNotEmpty()
+fun Any?.logic(): Boolean    = this != null

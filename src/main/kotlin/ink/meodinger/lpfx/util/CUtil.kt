@@ -341,3 +341,35 @@ fun Boolean.logic(): Boolean { return this }
 fun Number.logic(): Boolean  = this != 0 && !this.toDouble().isNaN()
 fun String.logic(): Boolean  = this.isNotEmpty()
 fun Any?.logic(): Boolean    = this != null
+
+class AnyIf(value: Any?, ifBlock: () -> Unit) {
+
+    val value: Any? = value
+    val ifBlock: () -> Unit = ifBlock
+    var elseBlock: () -> Unit = {}
+
+    infix fun AnyElse(elseBlock: () -> Unit): AnyIf {
+        return this.also { it.elseBlock = elseBlock }
+    }
+
+    infix fun AnyElse(anyIf: AnyIf): AnyIf {
+        return AnyElse { anyIf.fire() }
+    }
+
+    private fun toBoolean(nullable: Any?): Boolean {
+        return when (nullable) {
+            is Boolean -> nullable.logic()
+            is Number  -> nullable.logic()
+            is String  -> nullable.logic()
+            else       -> nullable.logic()
+        }
+    }
+
+    fun fire() {
+        if (toBoolean(value))
+            ifBlock()
+        else
+            elseBlock()
+    }
+
+}

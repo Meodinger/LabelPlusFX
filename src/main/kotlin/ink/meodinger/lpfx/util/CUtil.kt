@@ -337,39 +337,48 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
  * Logic Boolean Value Implementations
  * Use JavaScript Standard
  */
-fun Boolean.logic(): Boolean { return this }
-fun Number.logic(): Boolean  = this != 0 && !this.toDouble().isNaN()
-fun String.logic(): Boolean  = this.isNotEmpty()
-fun Any?.logic(): Boolean    = this != null
+open class _if_<T>(private val value: Any?, private val ifBlock: () -> T) {
 
-class AnyIf(value: Any?, ifBlock: () -> Unit) {
+    companion object {
+        fun Any?.logic(): Boolean {
+            return when (this) {
+                is Boolean -> this
+                is Number  -> this != 0 && !this.toDouble().isNaN()
+                is String  -> this.isNotEmpty()
+                else       -> this != null
+            }
+        }
 
-    val value: Any? = value
-    val ifBlock: () -> Unit = ifBlock
-    var elseBlock: () -> Unit = {}
-
-    infix fun AnyElse(elseBlock: () -> Unit): AnyIf {
-        return this.also { it.elseBlock = elseBlock }
+        private val DEFAULT_BLOCK: () -> Nothing = { throw IllegalStateException("not implemented") }
     }
 
-    infix fun AnyElse(anyIf: AnyIf): AnyIf {
-        return AnyElse { anyIf.fire() }
+    private var parent: _if_<T>? = null
+    private var elseBlock: () -> T = DEFAULT_BLOCK
+
+    infix fun _else_(elseBlock: () -> T): _if_<T> {
+        if (this.elseBlock != DEFAULT_BLOCK) throw IllegalStateException("multi else")
+        return this.apply { this.elseBlock = elseBlock }
     }
 
-    private fun toBoolean(nullable: Any?): Boolean {
-        return when (nullable) {
-            is Boolean -> nullable.logic()
-            is Number  -> nullable.logic()
-            is String  -> nullable.logic()
-            else       -> nullable.logic()
+    infix fun _else_(ifA: _if_<T>): _if_<T> {
+        return ifA.also {
+            it.parent = this
+            _else_ { it.eval() }
         }
     }
 
-    fun fire() {
-        if (toBoolean(value))
-            ifBlock()
-        else
-            elseBlock()
+    private fun eval(): T {
+        return if (value.logic()) ifBlock() else elseBlock()
+    }
+
+    operator fun invoke(): T {
+        var root: _if_<T> = this
+        while (root.parent != null) root = root.parent!!
+        return root.eval()
     }
 
 }
+class _if_not_<T>(value: Any?, ifBlock: () -> T) : _if_<T>(!value.logic(), ifBlock)
+class _if_null_<T>(value: Any?, ifBlock: () -> T) : _if_<T>(value == null, ifBlock)
+class _if_zero_<T>(value: Int, ifBlock: () -> T) : _if_<T>(value == 0, ifBlock)
+class _if_neg1_<T>(value: Int, ifBlock: () -> T) : _if_<T>(value == -1, ifBlock)

@@ -360,8 +360,8 @@ open class _if_<T>(private val value: Any?, private val ifBlock: () -> T) {
         return this.apply { this.elseBlock = elseBlock }
     }
 
-    infix fun _else_(ifA: _if_<T>): _if_<T> {
-        return ifA.also {
+    infix fun _else_(_if_: _if_<T>): _if_<T> {
+        return _if_.also {
             it.parent = this
             _else_ { it.eval() }
         }
@@ -382,3 +382,11 @@ class _if_not_<T>(value: Any?, ifBlock: () -> T) : _if_<T>(!value.logic(), ifBlo
 class _if_null_<T>(value: Any?, ifBlock: () -> T) : _if_<T>(value == null, ifBlock)
 class _if_zero_<T>(value: Int, ifBlock: () -> T) : _if_<T>(value == 0, ifBlock)
 class _if_neg1_<T>(value: Int, ifBlock: () -> T) : _if_<T>(value == -1, ifBlock)
+
+infix fun <T> _if_<T>.`else`(elseBlock: () -> T): _if_<T> = this._else_(elseBlock)
+infix fun <T> _if_<T>.`else`(_if_: _if_<T>): _if_<T> = this._else_(_if_)
+typealias `if`<T> = _if_<T>
+typealias `if not`<T> = _if_not_<T>
+typealias `if null`<T> = _if_null_<T>
+typealias `if is 0`<T> = _if_zero_<T>
+typealias `if is -1`<T> = _if_neg1_<T>

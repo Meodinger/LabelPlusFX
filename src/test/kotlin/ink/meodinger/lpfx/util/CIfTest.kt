@@ -150,19 +150,19 @@ class CIfTest {
 
     @Test
     fun ifAll() {
-        val a = (_if_(false) {
+        val a = (`if`(false) {
             0
-        } _else_ _if_(false) {
+        } `else` `if`(false) {
             1
-        } _else_ _if_not_(true) {
+        } `else` `if not`(true) {
             2
-        } _else_ _if_null_(true) {
+        } `else` `if null`(true) {
             3
-        } _else_ _if_zero_(-1) {
+        } `else` `if is 0`(-1) {
             4
-        } _else_ _if_neg1_(0) {
+        } `else` `if is -1`(0) {
             5
-        } _else_ {
+        } `else` {
             6
         })()
         assertEquals(a, 6)

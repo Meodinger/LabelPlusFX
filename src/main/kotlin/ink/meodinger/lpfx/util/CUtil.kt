@@ -15,12 +15,14 @@ import java.util.concurrent.ConcurrentLinkedDeque
 inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
     val manager = ResourceManager()
     try {
-        // use manager's auto close
+        // Use manager's auto close
         manager.use(block)
     } catch (t: Throwable) {
+        // Exception thrown in try block
         manager.throwable = t
     }
-    return manager.getCatcher()
+
+    return Catcher(manager.throwable)
 }
 class ResourceManager : AutoCloseable {
 
@@ -28,6 +30,7 @@ class ResourceManager : AutoCloseable {
     var throwable: Throwable? = null
 
     fun <T: AutoCloseable> T.autoClose(): T {
+        // The last opened Steam is the first closed
         resourceQueue.addFirst(this)
         return this
     }
@@ -37,6 +40,7 @@ class ResourceManager : AutoCloseable {
             try {
                 closeable.close()
             } catch (t: Throwable) {
+                // Exception thrown when close (also in try block)
                 if (this.throwable == null) {
                     this.throwable = t
                 } else {
@@ -45,28 +49,21 @@ class ResourceManager : AutoCloseable {
             }
         }
     }
-
-    fun getCatcher(): Catcher {
-        return Catcher(this)
-    }
 }
-class Catcher(manager: ResourceManager) {
-    var throwable: Throwable? = null
+class Catcher(var throwable: Throwable? = null) {
+
     var thrown: Throwable? = null
 
-    init {
-        throwable = manager.throwable
-    }
-
     inline infix fun <reified T : Throwable> catch(block: (T) -> Unit): Catcher {
-        if (throwable is T) {
+        if (this.throwable is T) {
             try {
-                block(throwable as T)
+                block(this.throwable as T)
             } catch (thrown: Throwable) {
+                // Exception thrown in catch block
                 this.thrown = thrown
             } finally {
                 // It's been caught, so set it to null
-                throwable = null
+                this.throwable = null
             }
         }
         return this
@@ -76,35 +73,30 @@ class Catcher(manager: ResourceManager) {
         try {
             block()
         } catch (thrown: Throwable) {
-            if (throwable == null) {
+            if (this.throwable == null) {
                 // we've caught the exception, or none was thrown
                 if (this.thrown == null) {
                     // No exception was thrown in the catch blocks
                     throw thrown
                 } else {
                     // An exception was thrown in the catch block
-                    this.thrown!!.let {
-                        it.addSuppressed(thrown)
-                        throw it
-                    }
+                    throw this.thrown!!.apply { addSuppressed(thrown) }
                 }
             } else {
                 // We never caught the exception
                 // So this.thrown is also null
-                throwable!!.let {
-                    it.addSuppressed(thrown)
-                    throw it
-                }
+                throw this.throwable!!.apply { addSuppressed(thrown) }
             }
         }
 
         // At this point the `finally` block did not throw an exception
         // We need to see if there are still any exceptions left to throw
-        throwable?.let { t ->
-            thrown?.let { t.addSuppressed(it) }
-            throw t
+        this.throwable?.let {
+            thrown?.apply { it.addSuppressed(this) }
+            throw it
+        } ?: this.thrown?.let {
+            throw it
         }
-        thrown?.let { throw it }
     }
 }
 

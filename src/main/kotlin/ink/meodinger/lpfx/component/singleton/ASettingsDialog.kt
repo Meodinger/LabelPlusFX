@@ -76,7 +76,7 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
     private val labelTab = Tab(I18N["settings.label.title"])
     private val lGridPane = GridPane()
-    private val lCLabel = CLabel(8)
+    private val lCLabel = CLabel(index = 8)
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
     private val lSliderAlpha = Slider()

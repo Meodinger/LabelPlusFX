@@ -25,9 +25,9 @@ import javafx.scene.text.TextAlignment
  * A Label component for LabelPane
  */
 class CLabel(
-    index: Int = DEFAULT_INDEX,
+    index:  Int    = DEFAULT_INDEX,
     radius: Double = DEFAULT_RADIUS,
-    color: Color = Color.web(DEFAULT_COLOR)
+    color:  Color  = Color.web(DEFAULT_COLOR)
 ) : Region() {
 
     companion object {

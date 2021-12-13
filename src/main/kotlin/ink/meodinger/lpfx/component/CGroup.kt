@@ -27,9 +27,15 @@ import javafx.scene.text.TextAlignment
  *
  * Bind Status: All bind
  */
-class CGroup(name: String, color: Color) : Region() {
+class CGroup(
+    name:  String = DEFAULT_NAME,
+    color: Color  = Color.web(DEFAULT_COLOR_HEX)
+) : Region() {
 
     companion object {
+        private const val DEFAULT_NAME = ""
+        private const val DEFAULT_COLOR_HEX = "66CCFFFF"
+
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0
         private const val PADDING = 4.0

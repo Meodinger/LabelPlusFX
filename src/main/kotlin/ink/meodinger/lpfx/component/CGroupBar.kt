@@ -45,10 +45,10 @@ class CGroupBar : HBox() {
      * Leave it here to make this component fit to reset-render-update standard (Like CTreeView)
      */
     private val transGroups: MutableList<TransGroup> = ArrayList()
-    private val groups: MutableList<CGroup> = ArrayList()
+    private val cGroups: MutableList<CGroup> = ArrayList()
 
     fun reset() {
-        this.groups.clear()
+        this.cGroups.clear()
         this.transGroups.clear()
 
         this.children.clear()
@@ -59,7 +59,7 @@ class CGroupBar : HBox() {
         update(transGroups)
     }
     fun update(transGroups: List<TransGroup> = this.transGroups.toList()) {
-        this.groups.clear()
+        this.cGroups.clear()
         this.transGroups.clear()
 
         this.children.clear()
@@ -77,47 +77,55 @@ class CGroupBar : HBox() {
     fun createGroup(transGroup: TransGroup) {
         this.transGroups.add(transGroup)
 
-        val cGroup = CGroup(
-            transGroup.name,
-            Color.web(transGroup.colorHex)
-        ).also { tagCGroupId(it, groups.size) }
+        val cGroup = CGroup().also {
+            tagCGroupId(it, cGroups.size)
 
-        cGroup.setOnMouseClicked { onGroupSelect(cGroup.name) }
+            it.setOnMouseClicked { _ -> onGroupSelect(it.name) }
 
-        cGroup.nameProperty().bind(transGroup.nameProperty)
-        cGroup.colorProperty().bind(Bindings.createObjectBinding(
-            { Color.web(transGroup.colorHex) },
-            transGroup.colorHexProperty
-        ))
+            it.nameProperty().bind(transGroup.nameProperty)
+            it.colorProperty().bind(Bindings.createObjectBinding(
+                { Color.web(transGroup.colorHex) },
+                transGroup.colorHexProperty
+            ))
+        }
 
-        groups.add(cGroup)
+        cGroups.add(cGroup)
         children.add(cGroup)
 
-        if (groups.size == 1) select(0)
+        if (cGroups.size == 1) select(0)
     }
     fun removeGroup(oldName: String) {
         var groupId: Int = NOT_FOUND
-        for (i in groups.indices) if (groups[i].name == oldName) groupId = i
+        for (i in cGroups.indices) if (cGroups[i].name == oldName) groupId = i
 
         if (groupId == NOT_FOUND) return
 
-        for (cGroup in groups) {
+        // Edit tags
+        for (cGroup in cGroups) {
             val tag = useCGroupId(cGroup)
             if (tag > groupId) tagCGroupId(cGroup, tag - 1)
         }
 
-        children.remove(groups[groupId])
-        groups.remove(groups[groupId])
+        val cGroup = cGroups[groupId]
+
+        // Unbind
+        cGroup.nameProperty().unbind()
+        cGroup.colorProperty().unbind()
+
+        // Remove view
+        children.remove(cGroup)
+        // Remove data
+        cGroups.remove(cGroup)
         transGroups.removeAt(groupId)
     }
 
     fun select(groupId: Int) {
-        if (groupId in 0 until groups.size) select(groups[groupId].name)
-        else if (groups.size == 0 && groupId == 0) doNothing()
+        if (groupId in 0 until cGroups.size) select(cGroups[groupId].name)
+        else if (cGroups.size == 0 && groupId == 0) doNothing()
         else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
     }
     fun select(groupName: String) {
-        for (node in groups)
+        for (node in cGroups)
             if (node.name == groupName) {
                 node.select()
             } else {

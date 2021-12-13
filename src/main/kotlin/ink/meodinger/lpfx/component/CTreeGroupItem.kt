@@ -22,7 +22,15 @@ import javafx.scene.shape.Circle
 /**
  * A TreeItem for TransGroup containing
  */
-class CTreeGroupItem(name: String, color: Color) : TreeItem<String>() {
+class CTreeGroupItem(
+    name:  String = DEFAULT_NAME,
+    color: Color  = Color.web(DEFAULT_COLOR_HEX)
+) : TreeItem<String>() {
+
+    companion object {
+        private const val DEFAULT_NAME = ""
+        private const val DEFAULT_COLOR_HEX = "66CCFFFF"
+    }
 
     private val nameProperty: StringProperty = SimpleStringProperty(name)
     fun nameProperty(): StringProperty = nameProperty

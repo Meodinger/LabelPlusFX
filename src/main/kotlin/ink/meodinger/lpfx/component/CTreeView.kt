@@ -145,7 +145,7 @@ class CTreeView: TreeView<String>() {
         if (viewMode == ViewMode.IndexMode)
             throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
 
-        val groupItem = CTreeGroupItem(transGroup.name, Color.web(transGroup.colorHex)).also {
+        val groupItem = CTreeGroupItem().also {
             it.nameProperty().bind(transGroup.nameProperty)
             it.colorProperty().bind(Bindings.createObjectBinding(
                 { Color.web(transGroup.colorHex) },
@@ -166,6 +166,10 @@ class CTreeView: TreeView<String>() {
 
         val groupItem = getGroupItem(groupName)
 
+        // Unbind
+        groupItem.nameProperty().unbind()
+        groupItem.colorProperty().unbind()
+
         // Remove view
         root.children.remove(groupItem)
         // Remove data
@@ -181,7 +185,7 @@ class CTreeView: TreeView<String>() {
     }
 
     fun createLabelItem(transLabel: TransLabel) {
-        val labelItem = CTreeLabelItem(transLabel.index, transLabel.text).also {
+        val labelItem = CTreeLabelItem().also {
             it.indexProperty().bind(transLabel.indexProperty)
             it.textProperty().bind(transLabel.textProperty)
         }
@@ -189,10 +193,6 @@ class CTreeView: TreeView<String>() {
         // Add view
         when (viewMode) {
             ViewMode.IndexMode -> {
-                labelItem.graphic = Circle(
-                    GRAPHICS_CIRCLE_RADIUS,
-                    Color.web(transGroups[transLabel.groupId].colorHex)
-                )
                 labelItem.graphicProperty().bind(Bindings.createObjectBinding(
                     { Circle(
                         GRAPHICS_CIRCLE_RADIUS,
@@ -213,6 +213,11 @@ class CTreeView: TreeView<String>() {
     fun removeLabelItem(labelIndex: Int) {
         val labelItem = getLabelItem(labelIndex)
         val transLabel = transLabels.first { it.index == labelIndex }
+
+        // Unbind
+        labelItem.indexProperty().unbind()
+        labelItem.textProperty().unbind()
+        if (viewMode == ViewMode.IndexMode) labelItem.graphicProperty().unbind()
 
         // Remove view
         when (viewMode) {

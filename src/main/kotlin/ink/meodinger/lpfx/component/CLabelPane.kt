@@ -440,11 +440,15 @@ class CLabelPane : ScrollPane() {
         val radius = Settings[Settings.LabelRadius].asDouble()
         val alpha = Settings[Settings.LabelAlpha].asString()
 
-        val label = CLabel(
-            transLabel.index,
-            radius,
-            Color.web(colorHexList[transLabel.groupId] + alpha)
-        )
+        val label = CLabel(radius = radius).also {
+            it.indexProperty().bind(transLabel.indexProperty)
+            it.colorProperty().bind(Bindings.createObjectBinding(
+                { Color.web(colorHexList[transLabel.groupId] + alpha) },
+                colorHexListProperty, transLabel.groupIdProperty
+            ))
+            transLabel.xProperty.bind((it.layoutXProperty() + radius) / view.image.widthProperty())
+            transLabel.yProperty.bind((it.layoutYProperty() + radius) / view.image.heightProperty())
+        }
 
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
@@ -534,15 +538,6 @@ class CLabelPane : ScrollPane() {
 
         // Add label in list
         labels.add(label)
-
-        // Bind property
-        label.indexProperty().bind(transLabel.indexProperty)
-        label.colorProperty().bind(Bindings.createObjectBinding(
-            { Color.web(colorHexList[transLabel.groupId] + alpha) },
-            colorHexListProperty, transLabel.groupIdProperty
-        ))
-        transLabel.xProperty.bind((label.layoutXProperty() + radius) / view.image.widthProperty())
-        transLabel.yProperty.bind((label.layoutYProperty() + radius) / view.image.heightProperty())
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
@@ -599,10 +594,10 @@ class CLabelPane : ScrollPane() {
         label.indexProperty().unbind()
         label.colorProperty().unbind()
 
-        // Remove label in list
-        labels.remove(label)
-        // Remove label comp
+        // Remove view
         labelLayers[groupId].children.remove(label)
+        // Remove data
+        labels.remove(label)
     }
     fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)

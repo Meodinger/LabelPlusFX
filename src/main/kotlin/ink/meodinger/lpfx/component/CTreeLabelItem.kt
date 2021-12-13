@@ -22,7 +22,16 @@ import javafx.scene.shape.Circle
 /**
  * A TreeItem for TransLabel containing
  */
-class CTreeLabelItem(index: Int, text: String, color: Color? = null) : TreeItem<String>() {
+class CTreeLabelItem(
+    index: Int    = DEFAULT_INDEX,
+    text:  String = DEFAULT_TEXT,
+    color: Color? = null
+) : TreeItem<String>() {
+
+    companion object {
+        const val DEFAULT_INDEX = -1
+        const val DEFAULT_TEXT = ""
+    }
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
     fun indexProperty(): IntegerProperty = indexProperty

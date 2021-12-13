@@ -12,7 +12,7 @@ import java.io.IOException
 /**
  * Author: Meodinger
  * Date: 2021/8/24
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

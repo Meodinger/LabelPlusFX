@@ -13,7 +13,7 @@ import javax.sound.sampled.LineEvent
 /**
  * Author: Meodinger
  * Date: 2021/10/15
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

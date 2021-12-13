@@ -9,7 +9,7 @@ import javafx.scene.input.KeyEvent
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

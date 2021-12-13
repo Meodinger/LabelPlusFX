@@ -6,7 +6,7 @@ import javafx.scene.paint.Color
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 
@@ -25,16 +25,14 @@ fun Color.toHex(): String {
 
 /**
  * Is a string ColorHex
- *
- * @param hex HEX String to judge
  */
-fun isColorHex(hex: String?): Boolean {
-    if (hex == null) return false
+fun String?.isColorHex(): Boolean {
+    if (this == null) return false
 
-    val length = hex.length
+    val length = this.length
     if (length != 6 && length != 8) return false
 
-    val chars = hex.uppercase().toCharArray()
+    val chars = this.uppercase().toCharArray()
     for (c in chars) if (c !in '0'..'9' && c !in 'A'..'F') return false
 
     return true

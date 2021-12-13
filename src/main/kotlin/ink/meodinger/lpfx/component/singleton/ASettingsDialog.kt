@@ -177,7 +177,7 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
         val groupId = newRowIndex - gRowShift
         val colorHex =
-            if (isColorHex(color))
+            if (color.isColorHex())
                 color
             else {
                 var defaultColorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList()

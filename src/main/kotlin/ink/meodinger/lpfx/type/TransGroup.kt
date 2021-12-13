@@ -14,7 +14,7 @@ import javafx.beans.property.SimpleStringProperty
 /**
  * Author: Meodinger
  * Date: 2021/7/30
- * Location: ink.meodinger.lpfx.type
+ * Have fun with my code!
  */
 
 /**
@@ -57,7 +57,7 @@ class TransGroup @JsonCreator constructor(
         get() = colorHexProperty.value
         //@JsonSetter("color")
         set(value) {
-            if (!isColorHex(value)) throw TransGroupException.colorInvalid(value)
+            if (!value.isColorHex()) throw TransGroupException.colorInvalid(value)
             colorHexProperty.value = value
         }
 

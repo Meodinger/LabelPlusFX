@@ -7,7 +7,7 @@ import javafx.scene.image.WritableImage
 /**
  * Author: Meodinger
  * Date: 2021/8/2
- * Location: ink.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

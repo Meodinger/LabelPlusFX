@@ -64,10 +64,10 @@ class CRollerLabel(contentText: String) : Region() {
         this.children.add(label)
 
         textProperty.addListener(onChange { changed = true })
-        shiftPeriodProperty.addListener(onNew {
+        shiftPeriodProperty.addListener(onNew<Number, Long> {
             rollerManager.clear()
-            rollerManager.delay = it.toLong()
-            rollerManager.period = it.toLong()
+            rollerManager.delay = it
+            rollerManager.period = it
             rollerManager.refresh()
             rollerManager.schedule()
         })

@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableNumberValue
 
+
 /**
  * Author: Meodinger
  * Date: 2021/9/30

@@ -132,8 +132,14 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
     pane.prefHeight = 400.0
 
     dialog.dialogPane.content = pane
-    dialog.dialogPane.buttonTypes.add(ButtonType.APPLY)
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
 
-    dialog.resultConverter = Callback { ArrayList(right.items) }
+    dialog.resultConverter = Callback {
+        when(it) {
+            ButtonType.CANCEL -> selected
+            ButtonType.APPLY -> ArrayList<T>(right.items)
+            else -> throw IllegalStateException("Should not reach here")
+        }
+    }
     return dialog.showAndWait()
 }

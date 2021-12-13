@@ -17,4 +17,5 @@ fun <T> onChange(action: () -> Unit) = ChangeListener<T> { _, _, _ -> action() }
 /**
  * For new-argument use
  */
-fun <T> onNew(action: (T) -> Unit) = ChangeListener<T> { _, _, new -> action(new) }
+@Suppress("UNCHECKED_CAST")
+fun <T, U : T> onNew(action: (U) -> Unit) = ChangeListener<T> { _, _, new -> action(new as U) }

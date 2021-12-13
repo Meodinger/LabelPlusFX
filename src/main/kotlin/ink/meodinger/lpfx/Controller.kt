@@ -23,6 +23,7 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
+import ink.meodinger.lpfx.util.property.RuledGenericBidirectionalBindingListener
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.*
@@ -268,6 +269,18 @@ class Controller(private val root: View) {
             }
 
         })
+        RuledGenericBidirectionalBindingListener.bind(
+            cPicBox.valueProperty(),
+            { o, _, n, _ ->
+                val a = n ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
+
+                // Indicate current item was removed
+                if (n == null) Platform.runLater { o.value = a }
+
+                a
+            },
+            State.currentPicNameProperty, { _, _, n, _ -> n!! }
+        )
 
         // GroupBox
         cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
@@ -341,6 +354,7 @@ class Controller(private val root: View) {
             cLabelPane.moveToCenter()
             cLabelPane.isVisible = true
         }
+
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
             if (!State.isOpened || !State.getPicFileNow().exists())
@@ -357,19 +371,6 @@ class Controller(private val root: View) {
      * State & Preference will change with specific property
      */
     private fun listen() {
-        // currentPicName
-        cPicBox.valueProperty().addListener { _, oldValue, newValue ->
-            if (!State.isOpened) return@addListener
-
-            // fixme: unexpected value change when remove first (when also current) picture.
-            //   want the new first picture, got last picture
-            // 2021/12/02 NOTE: Maybe should listen to both items and value
-            val picNames = State.transFile.sortedPicNames
-            val newPicName = newValue ?:
-                if (picNames.contains(oldValue)) oldValue
-                else picNames[0]
-            State.currentPicName = newPicName
-        }
 
         // currentGroupId
         cGroupBox.indexProperty().addListener { _, oldValue, newValue ->
@@ -424,37 +425,36 @@ class Controller(private val root: View) {
      */
     private fun effect() {
         // Update cTreeView & cLabelPane when pic change
-        State.currentPicNameProperty.addListener { _, _, newValue ->
-            if (!State.isOpened) return@addListener
-            if (newValue == null) return@addListener
-
-            cPicBox.select(newValue)
+        State.currentPicNameProperty.addListener(onNew {
+            if (!State.isOpened || it == null) return@onNew
 
             renderTreeView()
             renderLabelPane()
 
-            labelInfo("Change picture to $newValue")
-        }
+            labelInfo("Change picture to $it")
+        })
 
         // Clear text layer & re-select CGroup when group change
-        State.currentGroupIdProperty.addListener { _, _, newGroupId ->
-            if (!State.isOpened) return@addListener
+        State.currentGroupIdProperty.addListener(onNew<Number, Int> {
+            if (!State.isOpened) return@onNew
 
             // Remove text
             cLabelPane.removeText()
 
-            if (newGroupId as Int == NOT_FOUND) return@addListener
+            if (it == NOT_FOUND) return@onNew
 
-            // Select CGroup, GroupBox, CTreeView
-            cGroupBox.select(newGroupId)
-            cGroupBar.select(newGroupId)
-            if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(State.transFile.getTransGroup(newGroupId).name)
+            // Select GroupBar, GroupBox, CTreeView
+            cGroupBar.select(it)
+            cGroupBox.select(it)
+            if (State.viewMode != ViewMode.IndexMode) {
+                cTreeView.selectGroup(State.transFile.getTransGroup(it).name)
+            }
 
             labelInfo("Change Group to ${cGroupBox.value}")
-        }
+        })
 
         // Update text area when label change
-        State.currentLabelIndexProperty.addListener(onNew {
+        State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
             if (!State.isOpened) return@onNew
 
             // unbind TextArea
@@ -462,7 +462,7 @@ class Controller(private val root: View) {
 
             if (it == NOT_FOUND) return@onNew
 
-            // bind new property
+            // bind new text property
             val transLabels = State.transFile.getTransList(State.currentPicName)
             val newLabel = transLabels.find { label -> label.index == it }
             if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
@@ -839,8 +839,8 @@ class Controller(private val root: View) {
 
         // Initialize workspace
         renderGroupBar()
+        State.currentPicName = State.transFile.sortedPicNames[0]
 
-        cPicBox.select(0)
         cGroupBox.select(0)
 
         Logger.info("Opened TransFile", LOGSRC_CONTROLLER)

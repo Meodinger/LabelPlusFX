@@ -101,7 +101,7 @@ class Catcher(var throwable: Throwable? = null) {
 }
 
 /**
- * Placeholder for when expression
+ * Placeholder
  */
 fun doNothing() {}
 

@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
+import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -26,7 +27,7 @@ class CFileChooser {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
         fun lastDirectoryProperty(): ObjectProperty<File> = lastDirectoryProperty
         var lastDirectory : File?
-            get() = lastDirectoryProperty.get()
+            get() = lastDirectoryProperty.get().existsOrNull()
             set(value) {
                 if (value == null) return
                 if (!value.exists()) return

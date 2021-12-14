@@ -32,3 +32,9 @@ fun transfer(from: File, to: File) {
     input.close()
     output.close()
 }
+
+fun File?.existsOrNull(): File? {
+    if (this == null) return null
+    if (!this.exists()) return null
+    return this
+}

@@ -26,7 +26,7 @@ class CFileChooser {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
         fun lastDirectoryProperty(): ObjectProperty<File> = lastDirectoryProperty
         var lastDirectory : File?
-            get() = lastDirectoryProperty.value
+            get() = lastDirectoryProperty.get()
             set(value) {
                 if (value == null) return
                 if (!value.exists()) return

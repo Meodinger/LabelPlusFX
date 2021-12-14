@@ -19,10 +19,7 @@ import java.util.*
  *
  * All implementations should not have public constructors
  */
-abstract class BidirectionalBinding<T> protected constructor(
-    property1: Property<T>,
-    property2: Property<T>
-) : ChangeListener<T>, WeakListener {
+abstract class BidirectionalBinding<T> protected constructor() : ChangeListener<T>, WeakListener {
 
     companion object {
         private fun checkParameters(property1: Property<*>?, property2: Property<*>?) {
@@ -44,7 +41,7 @@ abstract class BidirectionalBinding<T> protected constructor(
         private class UntypedGenericBidirectionalBinding(
             private val propertyA: Property<Any?>,
             private val propertyB: Property<Any?>
-        ): BidirectionalBinding<Any?>(propertyA, propertyB) {
+        ): BidirectionalBinding<Any?>() {
             override val property1: Property<Any?> get() = propertyA
             override val property2: Property<Any?> get() = propertyB
 
@@ -54,11 +51,7 @@ abstract class BidirectionalBinding<T> protected constructor(
         }
     }
 
-    private var cachedHashCode = 0
-
-    init {
-        cachedHashCode = property1.hashCode() * property2.hashCode()
-    }
+    private val cachedHashCode by lazy { property1!!.hashCode() * property2!!.hashCode() }
 
     protected abstract val property1: Property<T>?
     protected abstract val property2: Property<T>?
@@ -89,7 +82,7 @@ abstract class BidirectionalBinding<T> protected constructor(
 open class TypedGenericBidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
-) : BidirectionalBinding<T>(property1, property2) {
+) : BidirectionalBinding<T>() {
 
     companion object {
         fun <T> bind(property1: Property<T>, property2: Property<T>) {
@@ -100,17 +93,12 @@ open class TypedGenericBidirectionalBinding<T> protected constructor(
         }
     }
 
-    private val propertyRef1: WeakReference<Property<T>>
-    private val propertyRef2: WeakReference<Property<T>>
-    protected var updating = false
-
     override val property1: Property<T>? get() = propertyRef1.get()
     override val property2: Property<T>? get() = propertyRef2.get()
 
-    init {
-        propertyRef1 = WeakReference(property1)
-        propertyRef2 = WeakReference(property2)
-    }
+    private val propertyRef1: WeakReference<Property<T>> = WeakReference(property1)
+    private val propertyRef2: WeakReference<Property<T>> = WeakReference(property2)
+    protected var updating = false
 
     override fun changed(sourceProperty: ObservableValue<out T>, oldValue: T, newValue: T) {
         if (updating) return
@@ -151,7 +139,6 @@ open class TypedGenericBidirectionalBinding<T> protected constructor(
         }
     }
 }
-
 class RuledGenericBidirectionalBinding<T> private constructor(
     property1: Property<T>,
     private val rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
@@ -161,10 +148,8 @@ class RuledGenericBidirectionalBinding<T> private constructor(
 
     companion object {
         fun <T> bind(
-            property1: Property<T>,
-            rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
-            property2: Property<T>,
-            rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
+            property1: Property<T>, rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
+            property2: Property<T>, rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
         ) {
             RuledGenericBidirectionalBinding(property1, rule1, property2, rule2).also {
                 property1.addListener(it)
@@ -186,6 +171,63 @@ class RuledGenericBidirectionalBinding<T> private constructor(
                 if (p1 === sourceProperty) rule1(p1, oldValue, newValue, p2)
                 else rule2(p2, oldValue, newValue, p1)
             super.changed(sourceProperty, oldValue, newRuledValue)
+        }
+    }
+
+}
+
+/**
+ * Provide a convenient way to bind two ReadonlyProperty (or other) (by lambdas)
+ *
+ * @param lambda1 Lambda to change o2 when o1 change
+ * @param lambda2 Lambda to change o1 when o2 change
+ */
+class BidirectionalBindingByLambda<T>(
+    observable1: ObservableValue<T>,
+    private val lambda1: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
+    observable2: ObservableValue<T>,
+    private val lambda2: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
+) : BidirectionalBinding<T>() {
+
+    companion object {
+        fun <T> bind(
+            observable1: ObservableValue<T>, lambda1: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
+            observable2: ObservableValue<T>, lambda2: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit
+        ) {
+            BidirectionalBindingByLambda(observable1, lambda1, observable2, lambda2).also {
+                observable1.addListener(it)
+                observable2.addListener(it)
+            }
+        }
+    }
+
+    override val property1: Property<T> get() = throw IllegalStateException()
+    override val property2: Property<T> get() = throw IllegalStateException()
+
+    private val observableRef1: WeakReference<ObservableValue<T>> = WeakReference(observable1)
+    private val observableRef2: WeakReference<ObservableValue<T>> = WeakReference(observable2)
+    private var updating = false
+
+    override fun changed(sourceProperty: ObservableValue<out T>?, oldValue: T, newValue: T) {
+        if (updating) return
+
+        val o1 = observableRef1.get()
+        val o2 = observableRef2.get()
+        if (o1 == null || o2 == null) {
+            o1?.removeListener(this)
+            o2?.removeListener(this)
+        } else {
+            try {
+                updating = true
+                if (o1 === sourceProperty)
+                    lambda1(o1, oldValue, newValue)
+                else
+                    lambda2(o2, oldValue, newValue)
+            } catch (e: RuntimeException) {
+                throw RuntimeException("Bidirectional binding lambdas failed", e)
+            } finally {
+                updating = false
+            }
         }
     }
 

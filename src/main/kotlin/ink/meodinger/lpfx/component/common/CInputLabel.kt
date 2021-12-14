@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
@@ -57,16 +58,12 @@ class CInputLabel : Pane() {
     private val onChangeStartProperty: ObjectProperty<CInputLabel.(String) -> Unit> = SimpleObjectProperty {}
     fun onChangeStartProperty(): ObjectProperty<CInputLabel.(String) -> Unit> = onChangeStartProperty
     val onChangeStart: CInputLabel.(String) -> Unit by onChangeStartProperty
-    fun setOnChangeStart(callback: CInputLabel.(String) -> Unit) {
-        onChangeStartProperty.value = callback
-    }
+    fun setOnChangeStart(callback: CInputLabel.(String) -> Unit) = onChangeStartProperty.set(callback)
 
     private val onChangeFinishProperty: ObjectProperty<CInputLabel.(String) -> Unit> = SimpleObjectProperty {}
     fun onChangeFinishProperty(): ObjectProperty<CInputLabel.(String) -> Unit> = onChangeFinishProperty
     val onChangeFinish: CInputLabel.(String) -> Unit by onChangeFinishProperty
-    fun setOnChangeFinish(callback: CInputLabel.(String) -> Unit) {
-        onChangeFinishProperty.value = callback
-    }
+    fun setOnChangeFinish(callback: CInputLabel.(String) -> Unit) = onChangeFinishProperty.set(callback)
 
     init {
         setPrefSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
@@ -77,10 +74,10 @@ class CInputLabel : Pane() {
         field.prefHeightProperty().bind(prefHeightProperty())
         field.textFormatterProperty().bind(textFormatterProperty)
 
-        isEditingProperty.addListener { _, _, newValue ->
+        isEditingProperty.addListener(onNew {
             children.clear()
-            children.add(if (newValue) field else label)
-        }
+            children.add(if (it) field else label)
+        })
 
         label.setOnMouseClicked {
             if (it.button != MouseButton.PRIMARY) return@setOnMouseClicked

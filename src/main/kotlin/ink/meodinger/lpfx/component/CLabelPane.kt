@@ -8,15 +8,12 @@ import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.platform.MonoFont
-import ink.meodinger.lpfx.util.property.div
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INIT_IMAGE
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.plus
-import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
@@ -152,39 +149,39 @@ class CLabelPane : ScrollPane() {
     fun maxScaleProperty():        DoubleProperty = maxScaleProperty
     fun scaleProperty():           DoubleProperty = scaleProperty
     var initScale: Double
-        get() = initScaleProperty.value
+        get() = initScaleProperty.get()
         set(value) {
             if (value >= 0) {
                 var temp = value
                 if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
                 if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
-                initScaleProperty.value = temp
+                initScaleProperty.set(temp)
             } else {
                 throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
             }
         }
     var minScale: Double
-        get() = minScaleProperty.value
+        get() = minScaleProperty.get()
         set(value) {
             if (value < 0) return
             if (maxScale != NOT_SET && value > maxScale) return
-            minScaleProperty.value = value
+            minScaleProperty.set(value)
         }
     var maxScale: Double
-        get() = maxScaleProperty.value
+        get() = maxScaleProperty.get()
         set(value) {
             if (value < 0) return
             if (minScale != NOT_SET && value < minScale) return
-            maxScaleProperty.value = value
+            maxScaleProperty.set(value)
         }
     var scale: Double
-        get() = scaleProperty.value
+        get() = scaleProperty.get()
         set(value) {
             if (value >= 0) {
                 var temp = value
                 if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
                 if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
-                scaleProperty.value = temp
+                scaleProperty.set(temp)
             }
         }
 
@@ -207,24 +204,12 @@ class CLabelPane : ScrollPane() {
     val onLabelClicked:                                EventHandler<LabelEvent> by onLabelClickedProperty
     val onLabelMove:                                   EventHandler<LabelEvent> by onLabelMoveProperty
     val onLabelOther:                                  EventHandler<LabelEvent> by onLabelOtherProperty
-    fun setOnLabelPlace(handler: EventHandler<LabelEvent>) {
-        onLabelPlaceProperty.value = handler
-    }
-    fun setOnLabelRemove(handler: EventHandler<LabelEvent>) {
-        onLabelRemoveProperty.value = handler
-    }
-    fun setOnLabelPointed(handler: EventHandler<LabelEvent>) {
-        onLabelPointedProperty.value = handler
-    }
-    fun setOnLabelClicked(handler: EventHandler<LabelEvent>) {
-        onLabelClickedProperty.value = handler
-    }
-    fun setOnLabelMove(handler: EventHandler<LabelEvent>) {
-        onLabelMoveProperty.value = handler
-    }
-    fun setOnLabelOther(handler: EventHandler<LabelEvent>) {
-        onLabelOtherProperty.value = handler
-    }
+    fun setOnLabelPlace(handler: EventHandler<LabelEvent>)                       = onLabelPlaceProperty.set(handler)
+    fun setOnLabelRemove(handler: EventHandler<LabelEvent>)                      = onLabelRemoveProperty.set(handler)
+    fun setOnLabelPointed(handler: EventHandler<LabelEvent>)                     = onLabelPointedProperty.set(handler)
+    fun setOnLabelClicked(handler: EventHandler<LabelEvent>)                     = onLabelClickedProperty.set(handler)
+    fun setOnLabelMove(handler: EventHandler<LabelEvent>)                        = onLabelMoveProperty.set(handler)
+    fun setOnLabelOther(handler: EventHandler<LabelEvent>)                       = onLabelOtherProperty.set(handler)
 
     private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
     fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
@@ -258,11 +243,10 @@ class CLabelPane : ScrollPane() {
         }
 
         // Scale
-        scaleProperty.addListener { _, _, newValue ->
-            val newScale = newValue as Double
-            root.scaleX = newScale
-            root.scaleY = newScale
-        }
+        scaleProperty.addListener(onNew<Number, Double> {
+            root.scaleX = it
+            root.scaleY = it
+        })
         root.addEventFilter(ScrollEvent.SCROLL) {
             if (isAltDown(it)) {
                 scale += it.deltaY / (10 * SCROLL_DELTA)
@@ -300,7 +284,7 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
             root.cursor = defaultCursor
-            this.removeText()
+            removeText()
         }
 
         // Handle
@@ -495,7 +479,7 @@ class CLabelPane : ScrollPane() {
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
             label.cursor = defaultCursor
-            this.removeText()
+            removeText()
         }
 
         // Event handle

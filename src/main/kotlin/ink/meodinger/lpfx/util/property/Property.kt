@@ -11,4 +11,4 @@ import javafx.beans.property.Property
 /**
  * Is a property was bound (bidirectional not included)
  */
-val <T> Property<T>.isNotBound: Boolean get() = !isBound
+inline val <T> Property<T>.isNotBound: Boolean get() = !isBound

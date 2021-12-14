@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.util.component.invoke
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -24,8 +25,6 @@ import javafx.scene.text.TextAlignment
 
 /**
  * A Region that displays a TransGroup
- *
- * Bind Status: All bind
  */
 class CGroup(
     name:  String = DEFAULT_NAME,
@@ -64,22 +63,21 @@ class CGroup(
     var color: Color by colorProperty
 
     init {
-        this.padding = Insets(PADDING)
-        this.border = borderDefault
-        this.hoverProperty().addListener { _, _, isHover ->
-            if (isHover) this.border = Border(BorderStroke(
+        padding = Insets(PADDING)
+        border = borderDefault
+        hoverProperty().addListener(onNew {
+            border = if (it) Border(BorderStroke(
                 color,
                 BorderStrokeStyle.SOLID,
                 CornerRadii(CORNER_RADII),
                 BorderWidths(BORDER_WIDTH)
-            ))
-            else this.border = borderDefault
-        }
+            )) else borderDefault
+        })
 
-        nameProperty.addListener { _ ,_ , newName -> update(name = newName) }
-        colorProperty.addListener { _ ,_ , newColor -> update(color = newColor) }
+        nameProperty.addListener(onNew { update(name = it) })
+        colorProperty.addListener(onNew { update(color = it) })
 
-        this.children.add(text)
+        children.add(text)
 
         update()
     }
@@ -93,16 +91,16 @@ class CGroup(
         val prefW = textW + (BORDER_WIDTH + PADDING) * 2
         val prefH = textH + (BORDER_WIDTH + PADDING) * 2
 
-        this.setPrefSize(prefW, prefH)
+        setPrefSize(prefW, prefH)
         text.layoutX = (-textW + prefW) / 2
         text.layoutY = prefH / 2
     }
 
     fun select() {
-        this.background = backgroundSelected
+        background = backgroundSelected
     }
 
     fun unselect() {
-        this.background = null
+        background = null
     }
 }

@@ -122,13 +122,13 @@ object ASpecifyDialog : Dialog<List<File>>() {
             }
         }
 
-        this.title = I18N["specify.title"]
-        this.dialogPane.prefWidth = DIALOG_WIDTH
-        this.dialogPane.prefHeight = DIALOG_HEIGHT
-        this.dialogPane.content = contentPane
-        this.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+        title = I18N["specify.title"]
+        dialogPane.prefWidth = DIALOG_WIDTH
+        dialogPane.prefHeight = DIALOG_HEIGHT
+        dialogPane.content = contentPane
+        dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
 
-        this.setResultConverter {
+        setResultConverter {
             when (it) {
                 ButtonType.APPLY -> files
                 else -> emptyList()
@@ -186,7 +186,7 @@ object ASpecifyDialog : Dialog<List<File>>() {
 
         // manually control label roll to save resource
         for (label in labels) label.startRoll()
-        val result = this.showAndWait()
+        val result = showAndWait()
         for (label in labels) label.stopRoll()
 
         return if (result.isPresent) result.get() else emptyList()

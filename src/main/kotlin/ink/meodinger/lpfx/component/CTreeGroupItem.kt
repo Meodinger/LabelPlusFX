@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -41,17 +42,17 @@ class CTreeGroupItem(
     var color: Color by colorProperty
 
     init {
-        this.graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
+        graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
 
-        nameProperty.addListener { _, _, newName -> update(name = newName) }
-        colorProperty.addListener { _, _, newColor -> update(color = newColor) }
+        nameProperty.addListener(onNew { update(name = it) })
+        colorProperty.addListener(onNew { update(color = it) })
 
         update()
     }
 
     private fun update(name: String = this.name, color: Color = this.color) {
-        this.value = name
-        (this.graphic as Circle).fill = color
+        value = name
+        (graphic as Circle).fill = color
     }
 
 }

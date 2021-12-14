@@ -17,6 +17,7 @@ import ink.meodinger.lpfx.util.component.invoke
 import ink.meodinger.lpfx.util.component.does
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import ink.meodinger.lpfx.util.resource.get
@@ -146,9 +147,9 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
         initProperties()
 
-        this.title = I18N["settings.title"]
-        this.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-        this.dialogPane.content = tabPane
+        title = I18N["settings.title"]
+        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+        dialogPane.content = tabPane
     }
 
     // ----- Group ----- //
@@ -192,7 +193,7 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         val button = Button(I18N["common.delete"]) does { removeGroupRow(GridPane.getRowIndex(this)) }
 
         checkBox.disableProperty().bind(textField.textProperty().isEmpty)
-        textField.textProperty().addListener { _ ,_ ,newValue -> if (newValue.isEmpty()) checkBox.isSelected = false }
+        textField.textProperty().addListener(onNew { if (it.isEmpty()) checkBox.isSelected = false })
 
         //   0       1             2        3
         // 0 Name    Color         isCreate
@@ -381,10 +382,10 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         lLabelRadius.setOnChangeFinish {
             lSliderRadius.value = it.toDouble()
         }
-        lSliderRadius.valueProperty().addListener { _, _, newValue ->
-            lLabelRadius.text = String.format("%05.2f", newValue as Double)
-            lCLabel.radius = newValue
-        }
+        lSliderRadius.valueProperty().addListener(onNew<Number, Double> {
+            lLabelRadius.text = String.format("%05.2f",  it)
+            lCLabel.radius = it
+        })
         lSliderRadius.min = 8.0
         lSliderRadius.max = 48.0
 
@@ -404,12 +405,12 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         lLabelAlpha.setOnChangeFinish {
             lSliderAlpha.value = it.toInt(16) / 255.0
         }
-        lSliderAlpha.valueProperty().addListener { _, _, newValue ->
-            val str = (newValue as Double * 255.0).toInt().toString(16).uppercase()
+        lSliderAlpha.valueProperty().addListener(onNew<Number, Double> {
+            val str = (it * 255.0).toInt().toString(16).uppercase()
             lLabelAlpha.labelText = if (str.length == 1) "0x0$str" else "0x$str"
             lLabelAlpha.fieldText = str
             lCLabel.color = if (str.length == 1) Color.web("FF00000$str") else Color.web("FF0000$str")
-        }
+        })
         lSliderAlpha.min = 0.0
         lSliderAlpha.max = 1.0
 

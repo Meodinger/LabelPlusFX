@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.util.component.expandAll
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.isNotBound
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -64,33 +65,34 @@ class CTreeView: TreeView<String>() {
     }
 
     fun reset() {
-        this.root = null
+        root = null
 
-        if (!this.picNameProperty.isBound) this.picName = ""
-        if (!this.viewModeProperty.isBound) this.viewMode = State.DEFAULT_VIEW_MODE
+        if (picNameProperty.isNotBound) picName = ""
+        if (viewModeProperty.isNotBound) viewMode = State.DEFAULT_VIEW_MODE
 
-        this.transGroups.clear()
-        this.transLabels.clear()
+        transGroups.clear()
+        transLabels.clear()
 
-        this.groupItems.clear()
-        this.labelItems.clear()
+        groupItems.clear()
+        labelItems.clear()
     }
     fun render(picName: String = this.picName, transGroups: List<TransGroup>, transLabels: List<TransLabel>, viewMode: ViewMode = this.viewMode) {
         reset()
 
-        if (!this.picNameProperty.isBound) this.picName = picName
-        if (!this.viewModeProperty.isBound) this.viewMode = viewMode
+        if (picNameProperty.isNotBound) this.picName = picName
+        if (viewModeProperty.isNotBound) this.viewMode = viewMode
 
         update(transGroups, transLabels)
     }
     fun update(transGroups: List<TransGroup> = this.transGroups.toList(), transLabels: List<TransLabel> = this.transLabels.toList()) {
-        this.root = TreeItem(picName)
+        // NOTE: toList() to make a copy
+        root = TreeItem(picName)
 
         this.transGroups.clear()
         this.transLabels.clear()
 
-        this.groupItems.clear()
-        this.labelItems.clear()
+        groupItems.clear()
+        labelItems.clear()
 
         for (transGroup in transGroups) when (viewMode) {
             ViewMode.IndexMode -> registerGroup(transGroup)
@@ -100,13 +102,13 @@ class CTreeView: TreeView<String>() {
             createLabelItem(transLabel)
         }
 
-        this.root.expandAll()
+        root.expandAll()
     }
 
     private fun select(item: TreeItem<String>, scrollTo: Boolean) {
         selectionModel.clearSelection()
         selectionModel.select(item)
-        if (scrollTo) this.scrollTo(getRow(item))
+        if (scrollTo) scrollTo(getRow(item))
     }
     private fun getGroupItem(groupName: String): CTreeGroupItem {
         for (item in groupItems) if (item.name == groupName) return item

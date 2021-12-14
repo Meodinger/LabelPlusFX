@@ -280,8 +280,7 @@ class Controller(private val root: View) {
 
         })
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(),
-            { o, _, n, _ ->
+            cPicBox.valueProperty(), { o, _, n, _ ->
                 val a = n ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
 
                 // Indicate current item was removed (run later to avoid Issue#5)

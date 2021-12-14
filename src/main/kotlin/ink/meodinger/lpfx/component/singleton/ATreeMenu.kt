@@ -255,6 +255,7 @@ object ATreeMenu : ContextMenu() {
             items.add(g_deleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)
+            // NOTE: toList() to make a not observable copy
             l_moveToItem.setOnAction { l_moveToAction(selectedItems.toList()) }
             l_deleteItem.setOnAction { l_deleteAction(selectedItems.toList()) }
 

@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
@@ -58,11 +59,11 @@ class CLabel(
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to avoid edit layoutY
 
-        indexProperty.addListener { _, _, newIndex -> update(index = newIndex as Int) }
-        radiusProperty.addListener { _, _, newRadius -> update(radius = newRadius as Double) }
-        colorProperty.addListener { _, _, newColor -> update(color = newColor) }
+        indexProperty.addListener(onNew<Number, Int> { update(index = it) })
+        radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })
+        colorProperty.addListener(onNew { update(color = it) })
 
-        this.children.setAll(circle, text)
+        children.setAll(circle, text)
         update()
     }
 

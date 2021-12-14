@@ -91,7 +91,7 @@ object AMenuBar : MenuBar() {
         exportPackChooser.extensionFilters.add(packFilter)
         exportPackChooser.initialFileName = "$PACKAGE_FILE_NAME.$EXTENSION_PACK"
 
-        this.disableMnemonicParsingForAll()
+        disableMnemonicParsingForAll()
 
         mNew.setOnAction { newTranslation() }
         mOpen.setOnAction { openTranslation() }
@@ -136,7 +136,7 @@ object AMenuBar : MenuBar() {
         mmEdit.items.addAll(mEditComment, SeparatorMenuItem(), mEditProjectPictures, mAddExternalPicture, mSpecifyPictures)
         mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack)
         mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
-        this.menus.addAll(mmFile, mmEdit, mmExport, mmAbout)
+        menus.addAll(mmFile, mmEdit, mmExport, mmAbout)
     }
 
     fun updateOpenRecent() {
@@ -367,11 +367,11 @@ object AMenuBar : MenuBar() {
     }
     private fun crash() {
         val key = "C_Crash_Count"
-        if (this.properties[key] == null) this.properties[key] = 0
+        if (properties[key] == null) properties[key] = 0
 
-        this.properties[key] = (this.properties[key] as Int) + 1
-        if (this.properties[key] as Int >= 5) {
-            this.properties[key] = 0
+        properties[key] = (properties[key] as Int) + 1
+        if (properties[key] as Int >= 5) {
+            properties[key] = 0
             val confirm = showConfirm(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()

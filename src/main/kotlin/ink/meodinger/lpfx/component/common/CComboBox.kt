@@ -1,9 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.isNotBound
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -51,8 +48,10 @@ class CComboBox<T> : HBox() {
     var isWrapped: Boolean by isWrappedProperty
 
     init {
-        indexProperty.addListener(onNew<Number, Int> { comboBox.selectionModel.select(it) })
-        comboBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int> { indexProperty.set(it) })
+        BidirectionalBindingByLambda.bind(
+            indexProperty, { _, _, n -> comboBox.selectionModel.select(n as Int) },
+            comboBox.selectionModel.selectedIndexProperty(), { _, _, n -> indexProperty.set(n as Int) }
+        )
 
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }

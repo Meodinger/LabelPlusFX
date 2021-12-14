@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHex
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.string.repeat
 
 import javafx.beans.property.StringProperty
@@ -29,7 +30,7 @@ class CColorPicker() : ColorPicker() {
     private val colorHexField: TextField = TextField()
     private val colorHexProperty: StringProperty = colorHexField.textProperty()
 
-    constructor(color: Color): this() { this.value = color }
+    constructor(color: Color): this() { value = color }
 
     init {
         colorHexField.textFormatter = TextFormatter<String> { change ->
@@ -51,20 +52,20 @@ class CColorPicker() : ColorPicker() {
             hide()
         }
 
-        colorHexProperty.addListener { _, _, newValue ->
-            when (newValue.length) {
-                1 -> value = Color.web(newValue.repeat(6))
-                2 -> value = Color.web(newValue.repeat(3))
+        colorHexProperty.addListener(onNew {
+            when (it.length) {
+                1 -> value = Color.web(it.repeat(6))
+                2 -> value = Color.web(it.repeat(3))
                 3 -> {
                     val builder = StringBuilder()
-                    for (c in newValue.toCharArray()) {
+                    for (c in it.toCharArray()) {
                         builder.append(c.repeat(2))
                     }
                     value = Color.web(builder.toString())
                 }
-                6 -> value = Color.web(newValue)
+                6 -> value = Color.web(it)
             }
-        }
+        })
 
         addEventHandler(ON_SHOWN) { colorHexProperty.set(value.toHex()) }
         addEventHandler(ON_HIDDEN) { colorHexProperty.set(value.toHex()) }

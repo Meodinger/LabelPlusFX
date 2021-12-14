@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -42,16 +43,16 @@ class CTreeLabelItem(
     var text: String by textProperty
 
     init {
-        if (color != null) this.graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
+        if (color != null) graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
 
-        indexProperty.addListener { _, _, newIndex -> update(index = newIndex as Int) }
-        textProperty.addListener { _, _, newText -> update(text = newText) }
+        indexProperty.addListener(onNew<Number, Int> { update(index = it) })
+        textProperty.addListener(onNew { update(text = it) })
 
         update()
     }
 
     private fun update(index: Int = this.index, text: String = this.text) {
-        this.value = "${String.format("%02d", index)}: ${text.replace("\n", " ")}"
+        value = "${String.format("%02d", index)}: ${text.replace("\n", " ")}"
     }
 
 }

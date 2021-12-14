@@ -22,8 +22,6 @@ import javafx.scene.paint.Color
 
 /**
  * A ToolBar to display groups
- *
- * Bind Status: All bind
  */
 class CGroupBar : HBox() {
 
@@ -36,9 +34,7 @@ class CGroupBar : HBox() {
     private val onGroupSelectProperty: ObjectProperty<(String) -> Unit> = SimpleObjectProperty {}
     fun onGroupSelectedProperty(): ObjectProperty<(String) -> Unit> = onGroupSelectProperty
     val onGroupSelect: (String) -> Unit by onGroupSelectProperty
-    fun setOnGroupSelect(consumer: (String) -> Unit) {
-        onGroupSelectProperty.value = consumer
-    }
+    fun setOnGroupSelect(consumer: (String) -> Unit) = onGroupSelectProperty.set(consumer)
 
     /**
      * This field now have no effect, but may be used in the future
@@ -48,10 +44,10 @@ class CGroupBar : HBox() {
     private val cGroups: MutableList<CGroup> = ArrayList()
 
     fun reset() {
-        this.cGroups.clear()
-        this.transGroups.clear()
+        cGroups.clear()
+        transGroups.clear()
 
-        this.children.clear()
+        children.clear()
     }
     fun render(transGroups: List<TransGroup>) {
         reset()
@@ -59,10 +55,10 @@ class CGroupBar : HBox() {
         update(transGroups)
     }
     fun update(transGroups: List<TransGroup> = this.transGroups.toList()) {
-        this.cGroups.clear()
         this.transGroups.clear()
+        cGroups.clear()
 
-        this.children.clear()
+        children.clear()
 
         for (transGroup in transGroups) createGroup(transGroup)
     }
@@ -75,12 +71,12 @@ class CGroupBar : HBox() {
     }
 
     fun createGroup(transGroup: TransGroup) {
-        this.transGroups.add(transGroup)
+        transGroups.add(transGroup)
 
         val cGroup = CGroup().also {
             tagCGroupId(it, cGroups.size)
 
-            it.setOnMouseClicked { _ -> onGroupSelect(it.name) }
+            it.setOnMouseClicked { _ -> onGroupSelect(it.name) } // _ for replace of it
 
             it.nameProperty().bind(transGroup.nameProperty)
             it.colorProperty().bind(Bindings.createObjectBinding(

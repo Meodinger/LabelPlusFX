@@ -9,7 +9,7 @@ import javafx.scene.control.Dialog
 /**
  * Author: Meodinger
  * Date: 2021/9/20
- * Location: ink.meodinger.lpfx.component.singleton
+ * Have fun with my code!
  */
 
 /**
@@ -18,7 +18,7 @@ import javafx.scene.control.Dialog
 abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
 
     init {
-        this.setResultConverter {
+        setResultConverter {
             when (it) {
                 ButtonType.OK -> convertResult()
                 else -> emptyList()
@@ -33,7 +33,7 @@ abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
     fun generateProperties(): List<CProperty> {
         initProperties()
 
-        val result = this.showAndWait()
+        val result = showAndWait()
         return if (result.isPresent) result.get() else emptyList()
     }
 }

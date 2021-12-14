@@ -57,11 +57,11 @@ class CRollerLabel(contentText: String) : Region() {
     constructor(): this("")
 
     init {
-        // label.layoutXProperty().bind(- this.widthProperty() / 2)
-        // label.layoutYProperty().bind(- this.heightProperty() / 2)
-        label.prefWidthProperty().bind(this.widthProperty())
-        label.prefHeightProperty().bind(this.heightProperty())
-        this.children.add(label)
+        // label.layoutXProperty().bind(- widthProperty() / 2)
+        // label.layoutYProperty().bind(- heightProperty() / 2)
+        label.prefWidthProperty().bind(widthProperty())
+        label.prefHeightProperty().bind(heightProperty())
+        children.add(label)
 
         textProperty.addListener(onChange { changed = true })
         shiftPeriodProperty.addListener(onNew<Number, Long> {

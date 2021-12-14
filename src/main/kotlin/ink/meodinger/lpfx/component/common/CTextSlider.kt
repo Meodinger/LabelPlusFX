@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component.common
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.DoubleProperty
@@ -31,10 +32,10 @@ class CTextSlider : HBox() {
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(0.0)
     fun initScaleProperty(): DoubleProperty = initScaleProperty
     var initScale: Double
-        get() = initScaleProperty().value
+        get() = initScaleProperty().get()
         set(value) {
             if (value >= 0) {
-                initScaleProperty().value = value.coerceAtLeast(minScale).coerceAtMost(maxScale)
+                initScaleProperty().set(value.coerceAtLeast(minScale).coerceAtMost(maxScale))
             } else {
                 throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
             }
@@ -53,9 +54,7 @@ class CTextSlider : HBox() {
     var scale: Double by scaleProperty
 
     init {
-        scaleProperty.addListener { _, _, newValue ->
-            label.text = (newValue as Double * 100).roundToInt().toString() + "%"
-        }
+        scaleProperty.addListener(onNew<Number, Double> { label.text = (it * 100).roundToInt().toString() + "%" })
 
         alignment = Pos.CENTER
         children.addAll(slider, label)

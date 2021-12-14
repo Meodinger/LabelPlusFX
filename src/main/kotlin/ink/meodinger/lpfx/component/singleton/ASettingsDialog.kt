@@ -279,11 +279,11 @@ object ASettingsDialog : AbstractPropertiesDialog() {
     private fun initModeTab() {
         val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
 
-        mComboInput.setList(viewModeList)
+        mComboInput.items.setAll(viewModeList)
         mComboInput.isWrapped = true
-        mComboLabel.setList(viewModeList)
+        mComboLabel.items.setAll(viewModeList)
         mComboLabel.isWrapped = true
-        mComboScale.setList(listOf(
+        mComboScale.items.setAll(listOf(
             I18N["settings.mode.scale.100"],
             I18N["settings.mode.scale.fit"],
             I18N["settings.mode.scale.last"]

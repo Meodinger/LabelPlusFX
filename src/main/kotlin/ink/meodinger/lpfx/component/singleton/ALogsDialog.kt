@@ -63,7 +63,7 @@ object ALogsDialog : AbstractPropertiesDialog() {
     init {
         initOwner(State.stage)
 
-        comboLevel.setList(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
+        comboLevel.items.setAll(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
         val labelSent = Label()
         val buttonSend = Button(I18N["logs.button.send"]) does  {
             val log = tableLog.selectionModel.selectedItem?.file ?: return@does

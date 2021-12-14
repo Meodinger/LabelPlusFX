@@ -14,7 +14,12 @@ import java.util.*
  * Have fun with my code!
  */
 
-abstract class BidirectionalBindingListener<T>(
+/**
+ * Base class for bidirectional bindings (listener based)
+ *
+ * All implementations should not have public constructors
+ */
+abstract class BidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
 ) : ChangeListener<T>, WeakListener {
@@ -39,7 +44,7 @@ abstract class BidirectionalBindingListener<T>(
         private class UntypedGenericBidirectionalBinding(
             private val propertyA: Property<Any?>,
             private val propertyB: Property<Any?>
-        ): BidirectionalBindingListener<Any?>(propertyA, propertyB) {
+        ): BidirectionalBinding<Any?>(propertyA, propertyB) {
             override val property1: Property<Any?> get() = propertyA
             override val property2: Property<Any?> get() = propertyB
 
@@ -68,7 +73,7 @@ abstract class BidirectionalBindingListener<T>(
         val propertyA2 = property2
         if (propertyA1 == null || propertyA2 == null) return false
 
-        if (other is BidirectionalBindingListener<*>) {
+        if (other is BidirectionalBinding<*>) {
             val propertyB1 = other.property1
             val propertyB2 = other.property2
             if (propertyB1 == null || propertyB2 == null) return false
@@ -81,14 +86,14 @@ abstract class BidirectionalBindingListener<T>(
 
 }
 
-open class TypedGenericBidirectionalBindingListener<T> protected constructor(
+open class TypedGenericBidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
-) : BidirectionalBindingListener<T>(property1, property2) {
+) : BidirectionalBinding<T>(property1, property2) {
 
     companion object {
         fun <T> bind(property1: Property<T>, property2: Property<T>) {
-            TypedGenericBidirectionalBindingListener(property1, property2).also {
+            TypedGenericBidirectionalBinding(property1, property2).also {
                 property1.addListener(it)
                 property2.addListener(it)
             }
@@ -147,12 +152,12 @@ open class TypedGenericBidirectionalBindingListener<T> protected constructor(
     }
 }
 
-class RuledGenericBidirectionalBindingListener<T> private constructor(
+class RuledGenericBidirectionalBinding<T> private constructor(
     property1: Property<T>,
     private val rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
     property2: Property<T>,
     private val rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
-) : TypedGenericBidirectionalBindingListener<T>(property1, property2) {
+) : TypedGenericBidirectionalBinding<T>(property1, property2) {
 
     companion object {
         fun <T> bind(
@@ -161,7 +166,7 @@ class RuledGenericBidirectionalBindingListener<T> private constructor(
             property2: Property<T>,
             rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
         ) {
-            RuledGenericBidirectionalBindingListener(property1, rule1, property2, rule2).also {
+            RuledGenericBidirectionalBinding(property1, rule1, property2, rule2).also {
                 property1.addListener(it)
                 property2.addListener(it)
             }

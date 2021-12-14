@@ -103,10 +103,10 @@ class CTreeView: TreeView<String>() {
         this.root.expandAll()
     }
 
-    private fun select(item: TreeItem<String>) {
-        this.selectionModel.clearSelection()
-        this.selectionModel.select(item)
-        this.scrollTo(getRow(item))
+    private fun select(item: TreeItem<String>, scrollTo: Boolean) {
+        selectionModel.clearSelection()
+        selectionModel.select(item)
+        if (scrollTo) this.scrollTo(getRow(item))
     }
     private fun getGroupItem(groupName: String): CTreeGroupItem {
         for (item in groupItems) if (item.name == groupName) return item
@@ -176,12 +176,12 @@ class CTreeView: TreeView<String>() {
         groupItems.remove(groupItem)
         unregisterGroup(groupName)
     }
-    fun selectGroup(groupName: String) {
+    fun selectGroup(groupName: String, scrollTo: Boolean) {
         // In IndexMode this will not available
         if (viewMode == ViewMode.IndexMode)
             throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
 
-        select(getGroupItem(groupName))
+        select(getGroupItem(groupName), scrollTo)
     }
 
     fun createLabelItem(transLabel: TransLabel) {
@@ -228,8 +228,8 @@ class CTreeView: TreeView<String>() {
         labelItems[transLabel.groupId].remove(labelItem)
         transLabels.remove(transLabel)
     }
-    fun selectLabel(labelIndex: Int) {
-        select(getLabelItem(labelIndex))
+    fun selectLabel(labelIndex: Int, scrollTo: Boolean) {
+        select(getLabelItem(labelIndex), scrollTo)
     }
 
     fun moveLabelItem(labelIndex: Int, from: Int, to: Int) {

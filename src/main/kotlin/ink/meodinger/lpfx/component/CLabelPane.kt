@@ -8,15 +8,15 @@ import ink.meodinger.lpfx.util.accelerator.isAltDown
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.platform.MonoFont
+import ink.meodinger.lpfx.util.property.div
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INIT_IMAGE
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.div
 import ink.meodinger.lpfx.util.property.plus
+import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
@@ -446,8 +446,6 @@ class CLabelPane : ScrollPane() {
                 { Color.web(colorHexList[transLabel.groupId] + alpha) },
                 colorHexListProperty, transLabel.groupIdProperty
             ))
-            transLabel.xProperty.bind((it.layoutXProperty() + radius) / view.image.widthProperty())
-            transLabel.yProperty.bind((it.layoutYProperty() + radius) / view.image.heightProperty())
         }
 
         // Draggable
@@ -535,6 +533,10 @@ class CLabelPane : ScrollPane() {
         label.layoutX = imageWidth * transLabel.x - radius
         label.layoutY = imageHeight * transLabel.y - radius
         labelLayers[transLabel.groupId].children.add(label)
+
+        // Bind
+        transLabel.xProperty.bind((label.layoutXProperty() + radius) / view.image.widthProperty())
+        transLabel.yProperty.bind((label.layoutYProperty() + radius) / view.image.heightProperty())
 
         // Add label in list
         labels.add(label)

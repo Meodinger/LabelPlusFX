@@ -8,4 +8,7 @@ import javafx.beans.property.Property
  * Have fun with my code!
  */
 
+/**
+ * Is a property was bound (bidirectional not included)
+ */
 val <T> Property<T>.isNotBound: Boolean get() = !isBound

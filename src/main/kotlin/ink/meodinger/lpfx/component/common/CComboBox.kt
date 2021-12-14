@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.isNotBound
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -35,21 +36,24 @@ class CComboBox<T> : HBox() {
 
     private val itemsProperty: ObjectProperty<ObservableList<T>> = comboBox.itemsProperty()
     fun itemsProperty(): ObjectProperty<ObservableList<T>> = itemsProperty
-    val items: ObservableList<T> by itemsProperty
+    var items: ObservableList<T> by itemsProperty
 
     private val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
     fun valueProperty(): ObjectProperty<T> = valueProperty
-    val value: T by valueProperty
+    var value: T by valueProperty
 
-    private val indexProperty: ReadOnlyIntegerProperty = comboBox.selectionModel.selectedIndexProperty()
-    fun indexProperty(): ReadOnlyIntegerProperty = indexProperty
-    val index: Int by indexProperty
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(comboBox.selectionModel.selectedIndex)
+    fun indexProperty(): IntegerProperty = indexProperty
+    var index: Int by indexProperty
 
     private val isWrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun wrappedProperty(): BooleanProperty = isWrappedProperty
     var isWrapped: Boolean by isWrappedProperty
 
     init {
+        indexProperty.addListener(onNew<Number, Int> { comboBox.selectionModel.select(it) })
+        comboBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int> { indexProperty.set(it) })
+
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
 
@@ -63,17 +67,6 @@ class CComboBox<T> : HBox() {
     fun reset() {
         if (itemsProperty.isNotBound) comboBox.items.clear()
         if (valueProperty.isNotBound) comboBox.selectionModel.clearSelection()
-    }
-
-    fun setList(list: List<T>) {
-        items.setAll(list)
-        if (list.isNotEmpty()) comboBox.selectionModel.select(0)
-    }
-    fun createItem(item: T) {
-        items.add(item)
-    }
-    fun removeItem(item: T) {
-        items.remove(item)
     }
 
     fun back() {
@@ -92,15 +85,12 @@ class CComboBox<T> : HBox() {
     }
 
     fun select(index: Int) {
-        comboBox.selectionModel.clearSelection()
         if (comboBox.items.size == 0 && index == 0) return
 
         if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
     }
     fun select(item: T) {
-        comboBox.selectionModel.clearSelection()
-
         if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }

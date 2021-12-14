@@ -17,7 +17,6 @@ import java.io.IOException
 
 /**
  * Transfer a File to another File
- *
  * @param from File that transfer from
  * @param to   File that transfer to
  */

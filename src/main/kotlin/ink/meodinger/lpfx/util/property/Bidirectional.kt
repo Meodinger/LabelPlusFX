@@ -18,14 +18,16 @@ import java.util.*
  * Base class for bidirectional bindings (listener based)
  *
  * All implementations should not have public constructors
+ *
+ * This class is a copy of com.sun.javafx.binding.BidirectionalBinding.
+ * It functions as the origin class but doesn't have constructors to calc HashCode
  */
-abstract class BidirectionalBinding<T> protected constructor() : ChangeListener<T>, WeakListener {
+abstract class BidirectionalBinding<T> : ChangeListener<T>, WeakListener {
 
     companion object {
         private fun checkParameters(property1: Property<*>?, property2: Property<*>?) {
             Objects.requireNonNull(property1, "Both properties must be specified.")
             Objects.requireNonNull(property2, "Both properties must be specified.")
-
             require(property1 !== property2) { "Cannot bind property to itself" }
         }
 
@@ -33,7 +35,10 @@ abstract class BidirectionalBinding<T> protected constructor() : ChangeListener<
             checkParameters(property1, property2)
 
             @Suppress("UNCHECKED_CAST")
-            val binding = UntypedGenericBidirectionalBinding(property1 as Property<Any?>, property2 as Property<Any?>)
+            val binding = UntypedGenericBidirectionalBinding(
+                property1 as Property<Any?>,
+                property2 as Property<Any?>
+            )
             property1.removeListener(binding)
             property2.removeListener(binding)
         }
@@ -44,20 +49,19 @@ abstract class BidirectionalBinding<T> protected constructor() : ChangeListener<
         ): BidirectionalBinding<Any?>() {
             override val property1: Property<Any?> get() = propertyA
             override val property2: Property<Any?> get() = propertyB
-
             override fun changed(observable: ObservableValue<out Any?>?, oldValue: Any?, newValue: Any?) {
                 throw RuntimeException("Should not reach here")
             }
         }
     }
 
-    private val cachedHashCode by lazy { property1!!.hashCode() * property2!!.hashCode() }
-
     protected abstract val property1: Property<T>?
     protected abstract val property2: Property<T>?
+    private val cachedHashCode by lazy { property1!!.hashCode() * property2!!.hashCode() }
+
+    init { cachedHashCode }
 
     override fun wasGarbageCollected(): Boolean = property1 == null || property2 == null
-
     override fun hashCode(): Int = cachedHashCode
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -74,6 +78,7 @@ abstract class BidirectionalBinding<T> protected constructor() : ChangeListener<
             if (propertyA1 === propertyB1 && propertyA2 === propertyB2) return true
             if (propertyA1 === propertyB2 && propertyA2 === propertyB1) return true
         }
+
         return false
     }
 
@@ -93,11 +98,10 @@ open class TypedGenericBidirectionalBinding<T> protected constructor(
         }
     }
 
-    override val property1: Property<T>? get() = propertyRef1.get()
-    override val property2: Property<T>? get() = propertyRef2.get()
-
     private val propertyRef1: WeakReference<Property<T>> = WeakReference(property1)
     private val propertyRef2: WeakReference<Property<T>> = WeakReference(property2)
+    override val property1: Property<T>? get() = propertyRef1.get()
+    override val property2: Property<T>? get() = propertyRef2.get()
     protected var updating = false
 
     override fun changed(sourceProperty: ObservableValue<out T>, oldValue: T, newValue: T) {
@@ -179,6 +183,10 @@ class RuledGenericBidirectionalBinding<T> private constructor(
 /**
  * Provide a convenient way to bind two ReadonlyProperty (or other) (by lambdas)
  *
+ * Actually, this binding is to add a listener to both of the given observables.
+ * Sometimes a property cannot be changed by its property but can via another way.
+ * (Like the selectedIndexProperty of ComboBox) So this Binding is useful when
+ * you don't want to manually add listener to the properties to be bound together
  * @param lambda1 Lambda to change o2 when o1 change
  * @param lambda2 Lambda to change o1 when o2 change
  */
@@ -187,7 +195,7 @@ class BidirectionalBindingByLambda<T>(
     private val lambda1: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
     observable2: ObservableValue<T>,
     private val lambda2: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
-) : BidirectionalBinding<T>() {
+) : ChangeListener<T>, WeakListener {
 
     companion object {
         fun <T> bind(
@@ -199,14 +207,30 @@ class BidirectionalBindingByLambda<T>(
                 observable2.addListener(it)
             }
         }
-    }
 
-    override val property1: Property<T> get() = throw IllegalStateException()
-    override val property2: Property<T> get() = throw IllegalStateException()
+        fun <T> unbind(observable1: ObservableValue<T>?, observable2: ObservableValue<T>?) {
+            Objects.requireNonNull(observable1, "Both properties must be specified.")
+            Objects.requireNonNull(observable2, "Both properties must be specified.")
+            require(observable1 !== observable2) { "Cannot bind property to itself" }
+
+            @Suppress("UNCHECKED_CAST")
+            val binding = BidirectionalBindingByLambda(
+                observable1 as ObservableValue<Any?>, { _, _, _ -> throw RuntimeException("Should not reach here") },
+                observable2 as ObservableValue<Any?>, { _, _, _ -> throw RuntimeException("Should not reach here") },
+            )
+            observable1.removeListener(binding)
+            observable2.removeListener(binding)
+        }
+    }
 
     private val observableRef1: WeakReference<ObservableValue<T>> = WeakReference(observable1)
     private val observableRef2: WeakReference<ObservableValue<T>> = WeakReference(observable2)
-    private var updating = false
+    private val observable1: ObservableValue<T>? get() = observableRef1.get()
+    private val observable2: ObservableValue<T>? get() = observableRef2.get()
+    private val cachedHashCode: Int by lazy { observable1.hashCode() * observable2.hashCode() }
+    private var updating: Boolean = false
+
+    init { cachedHashCode }
 
     override fun changed(sourceProperty: ObservableValue<out T>?, oldValue: T, newValue: T) {
         if (updating) return
@@ -219,16 +243,38 @@ class BidirectionalBindingByLambda<T>(
         } else {
             try {
                 updating = true
-                if (o1 === sourceProperty)
+                if (o1 === sourceProperty) {
                     lambda1(o1, oldValue, newValue)
-                else
+                } else {
                     lambda2(o2, oldValue, newValue)
+                }
             } catch (e: RuntimeException) {
-                throw RuntimeException("Bidirectional binding lambdas failed", e)
+                throw RuntimeException("Bidirectional binding lambda invoke failed", e)
             } finally {
                 updating = false
             }
         }
+    }
+
+    override fun wasGarbageCollected(): Boolean = observable1 == null || observable2 == null
+    override fun hashCode(): Int = cachedHashCode
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+
+        val oA1 = observable1
+        val oA2 = observable2
+        if (oA1 == null || oA2 == null) return false
+
+        if (other is BidirectionalBindingByLambda<*>) {
+            val oB1 = other.observable1
+            val oB2 = other.observable2
+            if (oB1 == null || oB2 == null) return false
+
+            if (oA1 === oB1 && oA2 === oB2) return true
+            if (oA1 === oB2 && oA2 === oB1) return true
+        }
+
+        return false
     }
 
 }

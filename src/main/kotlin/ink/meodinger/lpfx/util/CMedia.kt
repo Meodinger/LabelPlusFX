@@ -37,8 +37,6 @@ fun playMediaTracks(mediaList: List<Media>, callback: () -> Unit = {}) {
 
 /**
  * Play ogg media
- *
- * Play music list please use playOggList
  */
 fun playOgg(mediaStream: InputStream, callback: () -> Unit = {}) {
     val rawStream = AudioSystem.getAudioInputStream(mediaStream)

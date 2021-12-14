@@ -102,7 +102,7 @@ object Settings : AbstractProperties() {
 
         val viewModePreferenceList = this[ViewModePreference].asStringList()
         for (preference in viewModePreferenceList) try {
-            ViewMode.getMode(preference)
+            ViewMode.getViewMode(preference)
         } catch (e: Exception) {
             throw CPropertyException.propertyValueInvalid(ViewModePreference, preference).initCause(e)
         }

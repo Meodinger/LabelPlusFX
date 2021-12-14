@@ -11,14 +11,33 @@ import javafx.beans.value.ObservableNumberValue
 /**
  * Author: Meodinger
  * Date: 2021/9/30
- * Location: info.meodinger.lpfx.util.property
+ * Have fun with my code!
  */
 
-/**
- * Kotlin will translate `!` to `.not()`
- * So this operator function is unnecessary
- */
+// Kotlin will translate `!` to `.not()`. So this operator function is unnecessary
 // operator fun BooleanProperty.not(): BooleanBinding = not()
+
+operator fun NumberBinding.unaryMinus(): NumberBinding = negate()
+operator fun NumberBinding.plus(other: ObservableNumberValue): NumberBinding = add(other)
+operator fun NumberBinding.plus(other: Int): NumberBinding = add(other)
+operator fun NumberBinding.plus(other: Long): NumberBinding = add(other)
+operator fun NumberBinding.plus(other: Float): NumberBinding = add(other)
+operator fun NumberBinding.plus(other: Double): NumberBinding = add(other)
+operator fun NumberBinding.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
+operator fun NumberBinding.minus(other: Int): NumberBinding = subtract(other)
+operator fun NumberBinding.minus(other: Long): NumberBinding = subtract(other)
+operator fun NumberBinding.minus(other: Float): NumberBinding = subtract(other)
+operator fun NumberBinding.minus(other: Double): NumberBinding = subtract(other)
+operator fun NumberBinding.times(other: ObservableNumberValue): NumberBinding = multiply(other)
+operator fun NumberBinding.times(other: Int): NumberBinding = multiply(other)
+operator fun NumberBinding.times(other: Long): NumberBinding = multiply(other)
+operator fun NumberBinding.times(other: Float): NumberBinding = multiply(other)
+operator fun NumberBinding.times(other: Double): NumberBinding = multiply(other)
+operator fun NumberBinding.div(other: ObservableNumberValue): NumberBinding = divide(other)
+operator fun NumberBinding.div(other: Int): NumberBinding = divide(other)
+operator fun NumberBinding.div(other: Long): NumberBinding = divide(other)
+operator fun NumberBinding.div(other: Float): NumberBinding = divide(other)
+operator fun NumberBinding.div(other: Double): NumberBinding = divide(other)
 
 operator fun IntegerExpression.unaryMinus(): IntegerBinding = negate()
 operator fun IntegerExpression.plus(other: ObservableNumberValue): NumberBinding = add(other)
@@ -84,31 +103,7 @@ operator fun DoubleExpression.times(other: Number): DoubleBinding = multiply(oth
 operator fun DoubleExpression.div(other: ObservableNumberValue): NumberBinding = divide(other)
 operator fun DoubleExpression.div(other: Number): DoubleBinding = divide(other.toDouble())
 
-/*
- * NumberBinding has ambiguous overload with above
- *
-operator fun NumberBinding.unaryMinus(): NumberBinding = negate()
-operator fun NumberBinding.plus(other: ObservableNumberValue): NumberBinding = add(other)
-operator fun NumberBinding.plus(other: Int): NumberBinding = add(other)
-operator fun NumberBinding.plus(other: Long): NumberBinding = add(other)
-operator fun NumberBinding.plus(other: Float): NumberBinding = add(other)
-operator fun NumberBinding.plus(other: Double): NumberBinding = add(other)
-operator fun NumberBinding.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
-operator fun NumberBinding.minus(other: Int): NumberBinding = subtract(other)
-operator fun NumberBinding.minus(other: Long): NumberBinding = subtract(other)
-operator fun NumberBinding.minus(other: Float): NumberBinding = subtract(other)
-operator fun NumberBinding.minus(other: Double): NumberBinding = subtract(other)
-operator fun NumberBinding.times(other: ObservableNumberValue): NumberBinding = multiply(other)
-operator fun NumberBinding.times(other: Int): NumberBinding = multiply(other)
-operator fun NumberBinding.times(other: Long): NumberBinding = multiply(other)
-operator fun NumberBinding.times(other: Float): NumberBinding = multiply(other)
-operator fun NumberBinding.times(other: Double): NumberBinding = multiply(other)
-operator fun NumberBinding.div(other: ObservableNumberValue): NumberBinding = divide(other)
-operator fun NumberBinding.div(other: Int): NumberBinding = divide(other)
-operator fun NumberBinding.div(other: Long): NumberBinding = divide(other)
-operator fun NumberBinding.div(other: Float): NumberBinding = divide(other)
-operator fun NumberBinding.div(other: Double): NumberBinding = divide(other)
-*/
+// Boolean bindings
 
 infix fun BooleanExpression.and(other: Boolean): BooleanBinding = and(SimpleBooleanProperty(other))
 infix fun BooleanExpression.and(other: ObservableBooleanValue): BooleanBinding = and(other)

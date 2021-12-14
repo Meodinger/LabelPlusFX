@@ -9,13 +9,6 @@ import javafx.scene.paint.Color
  * Have fun with my code!
  */
 
-
-/**
- * Custom colors
- */
-val CC_66CFFF = Color.web("66CCFF")
-
-
 /**
  * Get color RGB in hex
  */

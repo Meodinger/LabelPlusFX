@@ -69,6 +69,7 @@ abstract class HookedApplication : Application() {
     override fun stop() {
         runShutdownHooksAndExit()
     }
+
 }
 
 /**
@@ -156,7 +157,7 @@ enum class ViewMode(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        fun getMode(description: String): ViewMode = when (description) {
+        fun getViewMode(description: String): ViewMode = when (description) {
             IndexMode.description -> IndexMode
             GroupMode.description -> GroupMode
             else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
@@ -188,20 +189,16 @@ enum class FileType(private val description: String) {
  * Get a TextFormatter for TransGroup name
  */
 fun getGroupNameFormatter(): TextFormatter<String> {
-    return TextFormatter<String> { change ->
-        change.text = change.text.trim().replace(Regex("[| ]"), "_")
-
-        change
-    }
+    return TextFormatter<String> { it.also {
+        it.text = it.text.trim().replace(Regex("[| ]"), "_")
+    } }
 }
 
 /**
  * Get a TextFormatter for CProperty
  */
 fun getPropertyFormatter(): TextFormatter<String> {
-    return  TextFormatter<String> { change ->
-        change.text = change.text.trim().replace(Regex("[|, ]"), "_")
-
-        change
-    }
+    return  TextFormatter<String> { it.also {
+        it.text = it.text.trim().replace(Regex("[|, ]"), "_")
+    } }
 }

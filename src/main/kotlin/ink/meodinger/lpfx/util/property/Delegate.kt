@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty
 /**
  * Author: Meodinger
  * Date: 2021/9/27
- * Location: info.meodinger.lpfx.util
+ * Have fun with my code!
  */
 
 /**

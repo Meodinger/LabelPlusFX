@@ -441,7 +441,7 @@ object ASettingsDialog : AbstractPropertiesDialog() {
 
         // Mode
         val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
-        val preferenceList = List(preferenceStringList.size) { ViewMode.getMode(preferenceStringList[it]) }
+        val preferenceList = List(preferenceStringList.size) { ViewMode.getViewMode(preferenceStringList[it]) }
         mComboInput.select(preferenceList[0])
         mComboLabel.select(preferenceList[1])
         mComboScale.select(Settings[Settings.ScaleOnNewPicture].asInteger())

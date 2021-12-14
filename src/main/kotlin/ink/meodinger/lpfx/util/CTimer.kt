@@ -27,7 +27,6 @@ inline fun genTask(crossinline task: () -> Unit): TimerTask {
     }
 }
 
-
 /**
  * Generate a Timer only has one task
  *
@@ -61,12 +60,12 @@ class TimerTaskManager(
     }
 
     fun schedule() {
-        this.schedule(timerTask, delay, period)
+        schedule(timerTask, delay, period)
     }
 
     fun clear() {
         timerTask.cancel()
-        this.purge()
+        purge()
     }
 
 }

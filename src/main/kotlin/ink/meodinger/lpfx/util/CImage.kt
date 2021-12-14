@@ -12,7 +12,6 @@ import javafx.scene.image.WritableImage
 
 /**
  * Scale by ratio
- *
  * @param ratio Scale ratio
  * @return scaled Image
  */
@@ -20,7 +19,6 @@ fun Image.scale(ratio: Double) = Image(this.url, this.width * ratio, this.height
 
 /**
  * Scale according to width
- *
  * @param width Width that the image width should scale to
  * @return scaled Image
  */
@@ -28,7 +26,6 @@ fun Image.resizeByWidth(width: Double) = this.scale(width / this.width)
 
 /**
  * Scale according to height
- *
  * @param height Height that the image height should scale to
  * @return scaled Image
  */
@@ -36,7 +33,6 @@ fun Image.resizeByHeight(height: Double) = this.scale(height / this.height)
 
 /**
  * Scale according to max radius
- *
  * @param radius Radius that the image radius should scale to
  * @return scaled Image
  */
@@ -44,7 +40,6 @@ fun Image.resizeByRadius(radius: Double) = this.scale((radius * 2) / this.height
 
 /**
  * Resize image
- *
  * @param width Width that the image should scale to
  * @param height Height that the image should scale to
  */
@@ -57,12 +52,10 @@ fun Image.resize(width: Double, height: Double) = Image(this.url, width, height,
 fun Image.toGreyScale(): Image {
     val width = this.width.toInt()
     val height = this.height.toInt()
-
     val grayImage = WritableImage(width, height)
 
     val reader = this.pixelReader
     val writer = grayImage.pixelWriter
-
     for (y in 0 until height) {
         for (x in 0 until width) {
             val pixel = reader.getArgb(x, y)

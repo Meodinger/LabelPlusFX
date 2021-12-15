@@ -56,4 +56,91 @@ class CStringKtTest {
         // val sorted3 = sortByDigit(names3)
         // for (i in sorted3.indices) assertEquals(expected3[i], sorted3[i])
     }
+
+    @Test
+    fun isMathNatural()  {
+        assertTrue("123".isMathematicalNatural())
+
+        assertFalse("-123".isMathematicalNatural())
+        assertFalse(".123".isMathematicalNatural())
+        assertFalse("1.23".isMathematicalNatural())
+        assertFalse("-.123".isMathematicalNatural())
+        assertFalse("-1.23".isMathematicalNatural())
+
+        assertFalse("-123.".isMathematicalNatural())
+        assertFalse(".123.".isMathematicalNatural())
+        assertFalse("1.23.".isMathematicalNatural())
+        assertFalse("-.123.".isMathematicalNatural())
+        assertFalse("-1.23.".isMathematicalNatural())
+
+        assertFalse("-123-".isMathematicalNatural())
+        assertFalse(".123-".isMathematicalNatural())
+        assertFalse("1.23-".isMathematicalNatural())
+        assertFalse("-.123-".isMathematicalNatural())
+        assertFalse("-1.23-".isMathematicalNatural())
+    }
+
+    @Test
+    fun isMathInt()  {
+        assertTrue("123".isMathematicalInteger())
+
+        assertTrue("-123".isMathematicalInteger())
+        assertFalse(".123".isMathematicalInteger())
+        assertFalse("1.23".isMathematicalInteger())
+        assertFalse("-.123".isMathematicalInteger())
+        assertFalse("-1.23".isMathematicalInteger())
+
+        assertFalse("-123.".isMathematicalInteger())
+        assertFalse(".123.".isMathematicalInteger())
+        assertFalse("1.23.".isMathematicalInteger())
+        assertFalse("-.123.".isMathematicalInteger())
+        assertFalse("-1.23.".isMathematicalInteger())
+
+        assertFalse("-123-".isMathematicalInteger())
+        assertFalse(".123-".isMathematicalInteger())
+        assertFalse("1.23-".isMathematicalInteger())
+        assertFalse("-.123-".isMathematicalInteger())
+        assertFalse("-1.23-".isMathematicalInteger())
+    }
+
+    @Test
+    fun isMathDecimal()  {
+        assertTrue("123".isMathematicalDecimal())
+
+        assertTrue("-123".isMathematicalDecimal())
+        assertTrue(".123".isMathematicalDecimal())
+        assertTrue("1.23".isMathematicalDecimal())
+        assertTrue("-.123".isMathematicalDecimal())
+        assertTrue("-1.23".isMathematicalDecimal())
+
+        assertTrue("-123.".isMathematicalDecimal())
+        assertFalse(".123.".isMathematicalDecimal())
+        assertFalse("1.23.".isMathematicalDecimal())
+        assertFalse("-.123.".isMathematicalDecimal())
+        assertFalse("-1.23.".isMathematicalDecimal())
+
+        assertFalse("-123-".isMathematicalDecimal())
+        assertFalse(".123-".isMathematicalDecimal())
+        assertFalse("1.23-".isMathematicalDecimal())
+        assertFalse("-.123-".isMathematicalDecimal())
+        assertFalse("-1.23-".isMathematicalDecimal())
+    }
+
+    @Test
+    fun deleteTail() {
+        // Empty tail
+        assertEquals("1", StringBuilder("1").deleteTail("").toString())
+        assertEquals("", StringBuilder("").deleteTail("").toString())
+
+        // Empty this
+        assertEquals("", StringBuilder("").deleteTail("1").toString())
+
+        // Incorrect tail
+        assertEquals("1", StringBuilder("1").deleteTail("0").toString())
+
+        // run
+        assertEquals("12", StringBuilder("123").deleteTail("3").toString())
+        assertEquals("1", StringBuilder("123").deleteTail("23").toString())
+        assertEquals("", StringBuilder("123").deleteTail("123").toString())
+    }
 }

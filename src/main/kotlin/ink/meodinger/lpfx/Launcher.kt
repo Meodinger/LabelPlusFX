@@ -22,30 +22,25 @@ import java.awt.BorderLayout
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
-    // FX Thread not started, cannot use dialog or other FX things
-
-    // for shutdown hooks
-    Platform.setImplicitExit(false)
-    // Init options
-    Options.init()
-
-    // Logger start
-    Logger.start()
-
+    // Immediately log exception and send if Logger started successfully
+    // Note that we can only get exception information from log file if happened in this period
+    // And if Options or Logger init failed, we can only get information from Swing window
     Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
-        // Immediately log exception and send (Something fatal happened)
-        // Note that we can only get exception information from log file if happened in this period
-        Logger.fatal("Launch failed")
-        Logger.exception(e)
-        LogSender.sendSync(Logger.log)
+        if (Logger.isStarted) {
+            Logger.fatal("Launch failed")
+            Logger.exception(e)
+            LogSender.sendSync(Logger.log)
+        }
 
+        // FX Thread not started, cannot use dialog or other FX things
         // Use swing as alternative alter window
         JFrame("ERROR").also {
             it.contentPane.layout = BorderLayout()
             it.contentPane.add(JPanel().apply {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
                 add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
-                add(JLabel("(User Log Has Been Automatically Sent)", JLabel.CENTER))
+                add(JLabel("----------------------------------------", JLabel.CENTER))
+                add(JLabel(e.javaClass.name + ": " + e.message, JLabel.CENTER))
             }, BorderLayout.CENTER)
             it.setSize(300, 120)
             it.setLocationRelativeTo(null)
@@ -54,8 +49,14 @@ fun main(vararg args: String) {
             it.isVisible = true
         }
     }
-    Application.launch(LabelPlusFX::class.java, *args)
 
-    // Logger stop
+    // For shutdown hooks
+    Platform.setImplicitExit(false)
+
+    // Init options
+    Options.init()
+
+    Logger.start()
+    Application.launch(LabelPlusFX::class.java, *args)
     Logger.stop()
 }

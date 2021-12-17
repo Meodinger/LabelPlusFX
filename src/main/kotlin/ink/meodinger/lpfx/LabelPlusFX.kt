@@ -27,6 +27,7 @@ class LabelPlusFX: HookedApplication() {
 
         Options.load()
 
+        // Cannot catch Exceptions occurred when starting
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
             Logger.exception(e)
             showException(e, State.stage)
@@ -42,8 +43,17 @@ class LabelPlusFX: HookedApplication() {
 
         State.stage = primaryStage
 
-        val root = View()
-        val controller = Controller(root)
+        val root: View
+        val controller: Controller
+        try {
+            root = View()
+            controller = Controller(root)
+        } catch (e: Throwable) {
+            Logger.exception(e)
+            showException(e, null)
+            stop()
+            return
+        }
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)

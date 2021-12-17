@@ -44,17 +44,23 @@ object Logger {
         }
     }
 
-    private lateinit var logfile: File
     private lateinit var writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
-    val log: File get() = logfile
-    var level: LogType = LogType.DEBUG
+    private var depth = 0
+    private var mark = depth
 
-    fun start() {
+    val log: File
+    var level: LogType = LogType.DEBUG
+    val isStarted: Boolean get() = this::writer.isInitialized
+
+    init {
         val path = Options.logs.resolve(Date().time.toString())
         if (Files.notExists(path)) Files.createFile(path)
-        logfile = path.toFile()
+        log = path.toFile()
+    }
+
+    fun start() {
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
         val builder = StringBuilder()
@@ -77,19 +83,20 @@ object Logger {
         if (!this::writer.isInitialized) return
         if (type < level) return
 
-        val builder = StringBuilder()
+        val logHead = StringBuilder()
+            .append("[").append(formatter.format(Date())).append("] ")
+            .append("[").append(String.format("%-7s", type)).append("] ")
+        if (from != null) logHead
+            .append("[").append(String.format("%-11s", from)).append("] ")
+            .toString()
 
-        builder.append("[").append(formatter.format(Date())).append("] ")
+        val logText = StringBuilder()
+            .append(logHead)
+            .append("--".repeat(depth)).append("> ")
+            .appendLine(text)
+            .toString()
 
-        builder.append("[")
-        builder.append(String.format("%12s", from ?: ""))
-        builder.append("/")
-        builder.append(String.format("%-8s", type))
-        builder.append("] ")
-
-        builder.appendLine(text)
-
-        writer.write(builder.toString())
+        writer.write(logText)
         writer.flush()
     }
 

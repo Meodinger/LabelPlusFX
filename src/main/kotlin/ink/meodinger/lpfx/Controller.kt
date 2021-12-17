@@ -130,11 +130,13 @@ class Controller(private val root: View) {
 
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
+        Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
         // MenuBar
         root.top = AMenuBar
+        Logger.info("Added MenuBar", LOGSRC_CONTROLLER)
 
-        // RecentFiles
+        // Last directory
         var lastFilePath = RecentFiles.getLastOpenFile()
         while (lastFilePath != null) {
             val file = File(lastFilePath)
@@ -146,17 +148,23 @@ class Controller(private val root: View) {
                 lastFilePath = RecentFiles.getLastOpenFile()
             }
         }
+        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOGSRC_CONTROLLER)
+
+        // RecentFiles
         AMenuBar.updateOpenRecent()
+        Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
 
         // Preferences
         cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
+        Logger.info("Loaded Preferences", LOGSRC_CONTROLLER)
 
         // Settings
         val viewModes = Settings[Settings.ViewModePreference].asStringList()
         State.viewMode = ViewMode.getViewMode(viewModes[WorkMode.InputMode.ordinal])
         updateLigatureRules()
+        Logger.info("Loaded Settings", LOGSRC_CONTROLLER)
 
         // Register handler
         cLabelPane.setOnLabelPlace {
@@ -225,6 +233,7 @@ class Controller(private val root: View) {
             cLabelPane.removeText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
+        Logger.info("Registered CLabelPane Handler", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' bindings
@@ -241,12 +250,14 @@ class Controller(private val root: View) {
         cGroupBox.disableProperty().bind(!State.isOpenedProperty)
         cSlider.disableProperty().bind(!State.isOpenedProperty)
         cLabelPane.disableProperty().bind(!State.isOpenedProperty)
+        Logger.info("Bound disabled", LOGSRC_CONTROLLER)
 
         // CSlider - CLabelPane#scale
         cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
         cSlider.minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
         cSlider.maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
         cSlider.scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
+        Logger.info("Bound scale", LOGSRC_CONTROLLER)
 
         // Switch Button text
         bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
@@ -263,6 +274,7 @@ class Controller(private val root: View) {
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
         }, State.viewModeProperty))
+        Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         // PictureBox - CurrentPicName
         cPicBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
@@ -300,6 +312,7 @@ class Controller(private val root: View) {
                 n!!
             }
         )
+        Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // GroupBox - CurrentGroupId
         cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
@@ -342,10 +355,12 @@ class Controller(private val root: View) {
                 n!!
             }
         )
+        Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // TreeView
         cTreeView.picNameProperty().bind(State.currentPicNameProperty)
         cTreeView.viewModeProperty().bind(State.viewModeProperty)
+        Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
         cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
@@ -380,7 +395,7 @@ class Controller(private val root: View) {
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
         }, State.workModeProperty))
-
+        Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' listeners (for unbindable)
@@ -397,6 +412,7 @@ class Controller(private val root: View) {
             if (!State.isOpened || !State.getPicFileNow().exists())
                 cLabelPane.moveToCenter()
         })
+        Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
         // currentLabelIndex
         State.currentPicNameProperty.addListener(onChange {
@@ -408,11 +424,13 @@ class Controller(private val root: View) {
                 State.currentLabelIndex = it.index
             }
         })
+        Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
 
         // isChanged
         cTransArea.textProperty().addListener(onChange {
             if (cTransArea.isBound) State.isChanged = true
         })
+        Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
 
         // Preferences
         cTransArea.fontProperty().addListener(onNew {
@@ -424,6 +442,7 @@ class Controller(private val root: View) {
         pRight.dividers[0].positionProperty().addListener(onNew {
             Preference[Preference.RIGHT_DIVIDER] = it
         })
+        Logger.info("Listened for Preferences", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' effect on view
@@ -440,6 +459,7 @@ class Controller(private val root: View) {
 
             labelInfo("Change picture to $it")
         })
+        Logger.info("Set effect on CurrentPicName change", LOGSRC_CONTROLLER)
 
         // Clear text layer & re-select CGroup when group change
         State.currentGroupIdProperty.addListener(onNew<Number, Int> {
@@ -457,6 +477,7 @@ class Controller(private val root: View) {
 
             labelInfo("Change Group to $name")
         })
+        Logger.info("Set effect on CurrentGroupId change", LOGSRC_CONTROLLER)
 
         // Update text area when label change
         State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
@@ -474,6 +495,7 @@ class Controller(private val root: View) {
 
             labelInfo("Selected label $it")
         })
+        Logger.info("Set effect on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
@@ -489,6 +511,7 @@ class Controller(private val root: View) {
 
             labelInfo("Text font size set to $newSize")
         }
+        Logger.info("Set effect on Ctrl/Alt/Meta + Scroll", LOGSRC_CONTROLLER)
 
         // Bind Label and Tree
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -514,6 +537,7 @@ class Controller(private val root: View) {
                 cLabelPane.moveToLabel(item.index)
             }
         }
+        Logger.info("Set effect on CTreeLabelItem selected", LOGSRC_CONTROLLER)
     }
     /**
      * Transformations
@@ -526,6 +550,7 @@ class Controller(private val root: View) {
             if (it != null && it is CTreeGroupItem)
                 cGroupBox.select(State.transFile.getGroupIdByName(it.name))
         })
+        Logger.info("Transformed CTreeGroupItem selected", LOGSRC_CONTROLLER)
 
         // Transform tab press in CTreeView to ViewModeBtn click
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -534,6 +559,7 @@ class Controller(private val root: View) {
             switchViewMode()
             it.consume()
         }
+        Logger.info("Transformed Tab on CTreeView", LOGSRC_CONTROLLER)
 
         // Transform tab press in CLabelPane to WorkModeBtn click
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -543,6 +569,7 @@ class Controller(private val root: View) {
             switchWorkMode()
             it.consume()
         }
+        Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
         // Transform number key press to CGroupBox select
         root.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -552,9 +579,11 @@ class Controller(private val root: View) {
             if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
             cGroupBox.select(it.text.toInt() - 1)
         }
+        Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
         // Transform CGroup select to CGroupBox select
         cGroupBar.setOnGroupSelect { cGroupBox.select(it) }
+        Logger.info("Transformed CGroupBar selected", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
@@ -570,6 +599,7 @@ class Controller(private val root: View) {
         }
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        Logger.info("Transformed Ctrl + Left/Right", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Up/Down KeyEvent to CTreeView select
         fun getNextLabelItemIndex(from: Int, direction: Int): Int {
@@ -618,6 +648,7 @@ class Controller(private val root: View) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
+        Logger.info("Transformed Ctrl + Up/Down", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Enter to Ctrl + Down
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
@@ -631,6 +662,7 @@ class Controller(private val root: View) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
+        Logger.info("Transformed Ctrl + Enter", LOGSRC_CONTROLLER)
     }
 
     fun specifyPicFiles() {

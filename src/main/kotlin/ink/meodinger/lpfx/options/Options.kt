@@ -55,11 +55,11 @@ object Options {
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
-            Logger.debug("RecentFiles got:", RecentFiles.getAll(), LOGSRC_OPTIONS)
-            Logger.debug("Preference got:", Preference.properties, LOGSRC_OPTIONS)
-            Logger.debug("Settings got:", Settings.properties, LOGSRC_OPTIONS)
+            Logger.debug("Got RecentFiles:", RecentFiles.getAll(), LOGSRC_OPTIONS)
+            Logger.debug("Got Preference:", Preference.properties, LOGSRC_OPTIONS)
+            Logger.debug("Got Settings:", Settings.properties, LOGSRC_OPTIONS)
         } catch (e: IOException) {
-            Logger.fatal("Options load failed", LOGSRC_OPTIONS)
+            Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(I18N["error.options.load_failed"], null)
             showException(e, null)
@@ -69,13 +69,13 @@ object Options {
 
     fun save() {
         RecentFiles.save()
-        Logger.info("RecentFiles saved", LOGSRC_OPTIONS)
+        Logger.info("Saved RecentFiles", LOGSRC_OPTIONS)
 
         Preference.save()
-        Logger.info("Preference saved", LOGSRC_OPTIONS)
+        Logger.info("Saved Preference", LOGSRC_OPTIONS)
 
         Settings.save()
-        Logger.info("Settings saved", LOGSRC_OPTIONS)
+        Logger.info("Saved Settings", LOGSRC_OPTIONS)
     }
 
     @Throws(IOException::class)
@@ -88,11 +88,11 @@ object Options {
             RecentFiles.load()
             RecentFiles.check()
 
-            Logger.info("RecentFiles loaded", LOGSRC_OPTIONS)
+            Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             RecentFiles.useDefault()
             RecentFiles.save()
-            Logger.error("Recent Files load failed", LOGSRC_OPTIONS)
+            Logger.error("Load Recent Files failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],
@@ -117,11 +117,11 @@ object Options {
             Preference.load()
             Preference.check()
 
-            Logger.info("Preference loaded", LOGSRC_OPTIONS)
+            Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             Preference.useDefault()
             Preference.save()
-            Logger.error("Preference load failed, using default", LOGSRC_OPTIONS)
+            Logger.error("Load Preference failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],
@@ -146,11 +146,11 @@ object Options {
             Settings.load()
             Settings.check()
 
-            Logger.info("Settings loaded", LOGSRC_OPTIONS)
+            Logger.info("Loaded Settings", LOGSRC_OPTIONS)
         } catch (e: Exception) {
             Settings.useDefault()
             Settings.save()
-            Logger.error("Settings load failed, using default", LOGSRC_OPTIONS)
+            Logger.error("Load Settings failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 I18N["common.alert"],

@@ -75,11 +75,11 @@ abstract class HookedApplication : Application() {
 /**
  * Size related constants
  */
-const val WINDOW_WIDTH = 900.0
+const val WINDOW_WIDTH  = 900.0
 const val WINDOW_HEIGHT = 600.0
-const val DIALOG_WIDTH = 600.0
+const val DIALOG_WIDTH  = 600.0
 const val DIALOG_HEIGHT = 400.0
-const val COMMON_GAP = 16.0
+const val COMMON_GAP    = 16.0
 
 /**
  * Scroll Delta Default
@@ -91,28 +91,28 @@ const val SCROLL_DELTA = 32.0
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
-const val FOLDER_NAME_BAK = "backup"
-const val EXTENSION_PIC_PNG = "png"
-const val EXTENSION_PIC_JPG = "jpg"
+const val FOLDER_NAME_BAK    = "backup"
+const val EXTENSION_PIC_PNG  = "png"
+const val EXTENSION_PIC_JPG  = "jpg"
 const val EXTENSION_PIC_JPEG = "jpeg"
-const val EXTENSION_FILE_LP = "txt"
+const val EXTENSION_FILE_LP  = "txt"
 const val EXTENSION_FILE_MEO = "json"
-const val EXTENSION_PACK = "zip"
-const val EXTENSION_BAK = "bak"
+const val EXTENSION_PACK     = "zip"
+const val EXTENSION_BAK      = "bak"
 
 /**
  * Extensions: png, jpg, jpeg
  */
-val EXTENSIONS_PIC = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG)
+val EXTENSIONS_PIC  = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG)
 val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 
 /**
  * Filenames
  */
-const val INITIAL_FILE_NAME = "New Translation"
+const val INITIAL_FILE_NAME  = "New Translation"
 const val RECOVERY_FILE_NAME = "Recovery"
-const val PACKAGE_FILE_NAME = "Package"
-const val EXPORT_FILE_NAME = "Export"
+const val PACKAGE_FILE_NAME  = "Package"
+const val EXPORT_FILE_NAME   = "Export"
 
 /**
  * For label/group not found
@@ -120,12 +120,12 @@ const val EXPORT_FILE_NAME = "Export"
 const val NOT_FOUND = -1
 
 const val LOGSRC_APPLICATION = "Application"
-const val LOGSRC_CONTROLLER = "Controller"
-const val LOGSRC_STATE = "State"
-const val LOGSRC_OPTIONS = "Options"
-const val LOGSRC_DIALOGS = "Dialog"
-const val LOGSRC_SENDER = "LogSender"
-const val LOGSRC_LOGGER = "Logger"
+const val LOGSRC_CONTROLLER  = "Controller"
+const val LOGSRC_STATE       = "State"
+const val LOGSRC_OPTIONS     = "Options"
+const val LOGSRC_DIALOGS     = "Dialog"
+const val LOGSRC_LOGGER      = "Logger"
+const val LOGSRC_SENDER      = "Sender"
 
 /**
  * Work Mode

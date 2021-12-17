@@ -5,7 +5,6 @@ import javafx.beans.property.Property
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import java.lang.ref.WeakReference
-import java.util.*
 
 
 /**
@@ -28,8 +27,8 @@ abstract class BidirectionalBinding<T>(
 
     companion object {
         private fun checkParameters(property1: Property<*>?, property2: Property<*>?) {
-            Objects.requireNonNull(property1, "Both properties must be specified.")
-            Objects.requireNonNull(property2, "Both properties must be specified.")
+            requireNotNull(property1) { "Both properties must be specified." }
+            requireNotNull(property2) { "Both properties must be specified." }
             require(property1 !== property2) { "Cannot bind property to itself" }
         }
 
@@ -211,8 +210,8 @@ class BidirectionalBindingByLambda<T>(
         }
 
         fun <T> unbind(observable1: ObservableValue<T>?, observable2: ObservableValue<T>?) {
-            Objects.requireNonNull(observable1, "Both properties must be specified.")
-            Objects.requireNonNull(observable2, "Both properties must be specified.")
+            requireNotNull(observable1) { "Both properties must be specified." }
+            requireNotNull(observable2) { "Both properties must be specified." }
             require(observable1 !== observable2) { "Cannot bind property to itself" }
 
             @Suppress("UNCHECKED_CAST")

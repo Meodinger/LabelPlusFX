@@ -169,8 +169,9 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
 
     val applyBtn = dialog.dialogPane.lookupButton(sendBtnType) as Button
     applyBtn.addEventFilter(ActionEvent.ACTION) {
-        LogSender.send(Logger.log)
-        (it.source as Button).text = I18N["common.sent"]
+        val button = it.source as Button
+        button.text = I18N["common.sending"]
+        LogSender.send(Logger.log) { button.text = I18N["common.sent"] }
         it.consume()
     }
 

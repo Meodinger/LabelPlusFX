@@ -20,9 +20,11 @@ import java.util.*
  * All implementations should not have public constructors
  *
  * This class is a copy of com.sun.javafx.binding.BidirectionalBinding.
- * It functions as the origin class but doesn't have constructors to calc HashCode
  */
-abstract class BidirectionalBinding<T> : ChangeListener<T>, WeakListener {
+abstract class BidirectionalBinding<T>(
+    property1: Property<T>,
+    property2: Property<T>
+) : ChangeListener<T>, WeakListener {
 
     companion object {
         private fun checkParameters(property1: Property<*>?, property2: Property<*>?) {
@@ -44,11 +46,11 @@ abstract class BidirectionalBinding<T> : ChangeListener<T>, WeakListener {
         }
 
         private class UntypedGenericBidirectionalBinding(
-            private val propertyA: Property<Any?>,
-            private val propertyB: Property<Any?>
-        ): BidirectionalBinding<Any?>() {
-            override val property1: Property<Any?> get() = propertyA
-            override val property2: Property<Any?> get() = propertyB
+            propertyA: Property<Any?>,
+            propertyB: Property<Any?>
+        ): BidirectionalBinding<Any?>(propertyA, propertyB) {
+            override val property1: Property<Any?> = propertyA
+            override val property2: Property<Any?> = propertyB
             override fun changed(observable: ObservableValue<out Any?>?, oldValue: Any?, newValue: Any?) {
                 throw RuntimeException("Should not reach here")
             }
@@ -57,7 +59,7 @@ abstract class BidirectionalBinding<T> : ChangeListener<T>, WeakListener {
 
     protected abstract val property1: Property<T>?
     protected abstract val property2: Property<T>?
-    private val cachedHashCode by lazy { property1!!.hashCode() * property2!!.hashCode() }
+    private val cachedHashCode by lazy { property1.hashCode() * property2.hashCode() }
 
     init { cachedHashCode }
 
@@ -87,7 +89,7 @@ abstract class BidirectionalBinding<T> : ChangeListener<T>, WeakListener {
 open class TypedGenericBidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
-) : BidirectionalBinding<T>() {
+) : BidirectionalBinding<T>(property1, property2) {
 
     companion object {
         fun <T> bind(property1: Property<T>, property2: Property<T>) {

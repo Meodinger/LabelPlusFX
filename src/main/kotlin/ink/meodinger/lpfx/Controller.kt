@@ -104,11 +104,15 @@ class Controller(private val root: View) {
     }
 
     init {
+        Logger.info("Controller initializing...", LOGSRC_CONTROLLER)
+
         init()
         bind()
         listen()
         effect()
         transform()
+
+        Logger.info("Controller initialized", LOGSRC_CONTROLLER)
 
         // Display default image
         cLabelPane.isVisible = false
@@ -122,6 +126,8 @@ class Controller(private val root: View) {
      * Components Initialize
      */
     private fun init() {
+        Logger.info("Initializing components...", LOGSRC_CONTROLLER)
+
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
 
@@ -224,6 +230,8 @@ class Controller(private val root: View) {
      * Properties' bindings
      */
     private fun bind() {
+        Logger.info("Binding properties...", LOGSRC_CONTROLLER)
+
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty)
         bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty)
@@ -378,6 +386,8 @@ class Controller(private val root: View) {
      * Properties' listeners (for unbindable)
      */
     private fun listen() {
+        Logger.info("Attaching Listeners...", LOGSRC_CONTROLLER)
+
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
             if (!State.isOpened || !State.getPicFileNow().exists())
@@ -419,6 +429,8 @@ class Controller(private val root: View) {
      * Properties' effect on view
      */
     private fun effect() {
+        Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
+
         // Update cTreeView & cLabelPane when pic change
         State.currentPicNameProperty.addListener(onNew {
             if (!State.isOpened || it == null) return@onNew
@@ -507,6 +519,8 @@ class Controller(private val root: View) {
      * Transformations
      */
     private fun transform() {
+        Logger.info("Applying Transformations...", LOGSRC_CONTROLLER)
+
         // Transform CTreeView group selection to CGroupBox select
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
             if (it != null && it is CTreeGroupItem)

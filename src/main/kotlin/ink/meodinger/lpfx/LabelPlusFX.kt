@@ -23,6 +23,8 @@ import javafx.stage.Stage
 class LabelPlusFX: HookedApplication() {
 
     init {
+        Logger.info("App initializing...", LOGSRC_APPLICATION)
+
         Options.load()
 
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
@@ -31,9 +33,13 @@ class LabelPlusFX: HookedApplication() {
         }
 
         State.application = this
+
+        Logger.info("App initialized", LOGSRC_APPLICATION)
     }
 
     override fun start(primaryStage: Stage) {
+        Logger.info("App starting...", LOGSRC_APPLICATION)
+
         State.stage = primaryStage
 
         val root = View()
@@ -51,15 +57,17 @@ class LabelPlusFX: HookedApplication() {
 
         primaryStage.show()
 
-        Logger.info("App start", LOGSRC_APPLICATION)
+        Logger.info("App started", LOGSRC_APPLICATION)
     }
 
     override fun stop() {
+        Logger.info("App stopping...", LOGSRC_APPLICATION)
+
         State.stage.close()
 
-        Logger.info("App stop", LOGSRC_APPLICATION)
-
         Options.save()
+
+        Logger.info("App stopped", LOGSRC_APPLICATION)
 
         runShutdownHooksAndExit()
     }

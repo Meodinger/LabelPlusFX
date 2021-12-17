@@ -82,8 +82,9 @@ object Logger {
         builder.append("[").append(formatter.format(Date())).append("] ")
 
         builder.append("[")
-        if (from != null) builder.append(from).append("/")
-        builder.append(type)
+        builder.append(String.format("%12s", from ?: ""))
+        builder.append("/")
+        builder.append(String.format("%-8s", type))
         builder.append("] ")
 
         builder.appendLine(text)

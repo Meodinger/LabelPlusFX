@@ -63,20 +63,23 @@ class CStringKtTest {
 
         assertFalse("-123".isMathematicalNatural())
         assertFalse(".123".isMathematicalNatural())
-        assertFalse("1.23".isMathematicalNatural())
         assertFalse("-.123".isMathematicalNatural())
+        assertFalse(".-123".isMathematicalNatural())
+        assertFalse("1.23".isMathematicalNatural())
         assertFalse("-1.23".isMathematicalNatural())
 
         assertFalse("-123.".isMathematicalNatural())
         assertFalse(".123.".isMathematicalNatural())
-        assertFalse("1.23.".isMathematicalNatural())
         assertFalse("-.123.".isMathematicalNatural())
+        assertFalse(".-123.".isMathematicalNatural())
+        assertFalse("1.23.".isMathematicalNatural())
         assertFalse("-1.23.".isMathematicalNatural())
 
         assertFalse("-123-".isMathematicalNatural())
         assertFalse(".123-".isMathematicalNatural())
-        assertFalse("1.23-".isMathematicalNatural())
         assertFalse("-.123-".isMathematicalNatural())
+        assertFalse(".-123-".isMathematicalNatural())
+        assertFalse("1.23-".isMathematicalNatural())
         assertFalse("-1.23-".isMathematicalNatural())
     }
 
@@ -86,20 +89,23 @@ class CStringKtTest {
 
         assertTrue("-123".isMathematicalInteger())
         assertFalse(".123".isMathematicalInteger())
-        assertFalse("1.23".isMathematicalInteger())
         assertFalse("-.123".isMathematicalInteger())
+        assertFalse(".-123".isMathematicalInteger())
+        assertFalse("1.23".isMathematicalInteger())
         assertFalse("-1.23".isMathematicalInteger())
 
         assertFalse("-123.".isMathematicalInteger())
         assertFalse(".123.".isMathematicalInteger())
-        assertFalse("1.23.".isMathematicalInteger())
         assertFalse("-.123.".isMathematicalInteger())
+        assertFalse(".-123.".isMathematicalInteger())
+        assertFalse("1.23.".isMathematicalInteger())
         assertFalse("-1.23.".isMathematicalInteger())
 
         assertFalse("-123-".isMathematicalInteger())
         assertFalse(".123-".isMathematicalInteger())
-        assertFalse("1.23-".isMathematicalInteger())
         assertFalse("-.123-".isMathematicalInteger())
+        assertFalse(".-123-".isMathematicalInteger())
+        assertFalse("1.23-".isMathematicalInteger())
         assertFalse("-1.23-".isMathematicalInteger())
     }
 
@@ -109,20 +115,23 @@ class CStringKtTest {
 
         assertTrue("-123".isMathematicalDecimal())
         assertTrue(".123".isMathematicalDecimal())
-        assertTrue("1.23".isMathematicalDecimal())
         assertTrue("-.123".isMathematicalDecimal())
+        assertFalse(".-123".isMathematicalDecimal())
+        assertTrue("1.23".isMathematicalDecimal())
         assertTrue("-1.23".isMathematicalDecimal())
 
         assertTrue("-123.".isMathematicalDecimal())
         assertFalse(".123.".isMathematicalDecimal())
-        assertFalse("1.23.".isMathematicalDecimal())
         assertFalse("-.123.".isMathematicalDecimal())
+        assertFalse(".-123.".isMathematicalDecimal())
+        assertFalse("1.23.".isMathematicalDecimal())
         assertFalse("-1.23.".isMathematicalDecimal())
 
         assertFalse("-123-".isMathematicalDecimal())
         assertFalse(".123-".isMathematicalDecimal())
-        assertFalse("1.23-".isMathematicalDecimal())
         assertFalse("-.123-".isMathematicalDecimal())
+        assertFalse(".-123-".isMathematicalDecimal())
+        assertFalse("1.23-".isMathematicalDecimal())
         assertFalse("-1.23-".isMathematicalDecimal())
     }
 

@@ -34,12 +34,17 @@ fun String.isMathematicalInteger(): Boolean {
  */
 fun String.isMathematicalDecimal(): Boolean {
     val chars = this.toCharArray()
-    val isNegative = chars[0] == '-'
+
+    var index = 0
+    val isNegative = chars[index] == '-'
+    if (isNegative) index++
+    val isSimplifiedDecimal = chars[index] == '.'
+    if (isSimplifiedDecimal) index++
 
     val iterator = chars.iterator()
-    if (isNegative) iterator.nextChar()
+    while (--index >= 0) iterator.nextChar()
 
-    var dot = false
+    var dot = isSimplifiedDecimal
     while (iterator.hasNext()) {
         val char = iterator.nextChar()
         if (char == '.') {

@@ -288,7 +288,9 @@ class Controller(private val root: View) {
 
                 a
             },
-            State.currentPicNameProperty, { _, _, n, _ -> n!! }
+            State.currentPicNameProperty, { _, _, n, _ ->
+                n!!
+            }
         )
 
         // GroupBox - CurrentGroupId
@@ -328,7 +330,9 @@ class Controller(private val root: View) {
 
                 a
             },
-            State.currentGroupIdProperty, { _, _, n, _ -> n!! }
+            State.currentGroupIdProperty, { _, _, n, _ ->
+                n!!
+            }
         )
 
         // TreeView

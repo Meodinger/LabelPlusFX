@@ -39,7 +39,7 @@ fun main(vararg args: String) {
         Logger.exception(e)
         LogSender.sendSync(Logger.log)
 
-        // Use swing as alternative window
+        // Use swing as alternative alter window
         JFrame("ERROR").also {
             it.contentPane.layout = BorderLayout()
             it.contentPane.add(JPanel().apply {

@@ -47,8 +47,9 @@ object Logger {
     private lateinit var writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
-    private var depth = 0
-    private var mark = depth
+    // Maybe use for
+    // private var depth = 0
+    // private var mark = depth
 
     val log: File
     var level: LogType = LogType.DEBUG
@@ -92,7 +93,7 @@ object Logger {
 
         val logText = StringBuilder()
             .append(logHead)
-            .append("--".repeat(depth)).append("> ")
+          //.append("--".repeat(depth)).append("> ")
             .appendLine(text)
             .toString()
 

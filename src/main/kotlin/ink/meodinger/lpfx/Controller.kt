@@ -158,13 +158,13 @@ class Controller(private val root: View) {
         cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
         pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
         pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
-        Logger.info("Loaded Preferences", LOGSRC_CONTROLLER)
+        Logger.info("Applied Preferences", LOGSRC_CONTROLLER)
 
         // Settings
         val viewModes = Settings[Settings.ViewModePreference].asStringList()
         State.viewMode = ViewMode.getViewMode(viewModes[WorkMode.InputMode.ordinal])
         updateLigatureRules()
-        Logger.info("Loaded Settings", LOGSRC_CONTROLLER)
+        Logger.info("Applied Settings", LOGSRC_CONTROLLER)
 
         // Register handler
         cLabelPane.setOnLabelPlace {
@@ -459,7 +459,7 @@ class Controller(private val root: View) {
 
             labelInfo("Change picture to $it")
         })
-        Logger.info("Set effect on CurrentPicName change", LOGSRC_CONTROLLER)
+        Logger.info("Added effect on CurrentPicName change", LOGSRC_CONTROLLER)
 
         // Clear text layer & re-select CGroup when group change
         State.currentGroupIdProperty.addListener(onNew<Number, Int> {
@@ -477,7 +477,7 @@ class Controller(private val root: View) {
 
             labelInfo("Change Group to $name")
         })
-        Logger.info("Set effect on CurrentGroupId change", LOGSRC_CONTROLLER)
+        Logger.info("Added effect on CurrentGroupId change", LOGSRC_CONTROLLER)
 
         // Update text area when label change
         State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
@@ -495,7 +495,7 @@ class Controller(private val root: View) {
 
             labelInfo("Selected label $it")
         })
-        Logger.info("Set effect on CurrentLabelIndex change", LOGSRC_CONTROLLER)
+        Logger.info("Added effect on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
@@ -511,7 +511,7 @@ class Controller(private val root: View) {
 
             labelInfo("Text font size set to $newSize")
         }
-        Logger.info("Set effect on Ctrl/Alt/Meta + Scroll", LOGSRC_CONTROLLER)
+        Logger.info("Added effect on Ctrl/Alt/Meta + Scroll", LOGSRC_CONTROLLER)
 
         // Bind Label and Tree
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -537,7 +537,7 @@ class Controller(private val root: View) {
                 cLabelPane.moveToLabel(item.index)
             }
         }
-        Logger.info("Set effect on CTreeLabelItem selected", LOGSRC_CONTROLLER)
+        Logger.info("Added effect on CTreeLabelItem selected", LOGSRC_CONTROLLER)
     }
     /**
      * Transformations

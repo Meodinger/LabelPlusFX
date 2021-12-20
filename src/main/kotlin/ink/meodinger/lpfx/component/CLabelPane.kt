@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.SCROLL_DELTA
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.accelerator.isAltDown
+import ink.meodinger.lpfx.util.event.isAltDown
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.platform.MonoFont

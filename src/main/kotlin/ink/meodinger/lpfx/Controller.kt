@@ -15,11 +15,12 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
-import ink.meodinger.lpfx.util.accelerator.isAltDown
-import ink.meodinger.lpfx.util.accelerator.isControlDown
+import ink.meodinger.lpfx.util.event.isAltDown
+import ink.meodinger.lpfx.util.event.isControlDown
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
+import ink.meodinger.lpfx.util.event.keyEvent
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
@@ -650,13 +651,23 @@ class Controller(private val root: View) {
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         Logger.info("Transformed Ctrl + Up/Down", LOGSRC_CONTROLLER)
 
-        // Transform Ctrl + Enter to Ctrl + Down
+        // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
             if (isControlDown(it) && it.code == KeyCode.ENTER) {
-                cLabelPane.fireEvent(KeyEvent(
-                    it.source, it.target, it.eventType,
-                    "\u0000", "", KeyCode.DOWN,
-                    it.isShiftDown, it.isControlDown, it.isAltDown, it.isMetaDown
+                val isShiftDown = it.isShiftDown
+                val direction = if (isShiftDown) -1 else 1
+
+                val selectedItemIndex = cTreeView.selectionModel.selectedIndex
+                val nextLabelItemIndex = getNextLabelItemIndex(selectedItemIndex, direction)
+
+                val code = if (nextLabelItemIndex == -1) {
+                    if (isShiftDown) KeyCode.LEFT else KeyCode.RIGHT
+                } else {
+                    if (isShiftDown) KeyCode.UP else KeyCode.DOWN
+                }
+
+                cLabelPane.fireEvent(keyEvent(
+                    it, character = "\u0000", text = "", code = code
                 ))
             }
         }

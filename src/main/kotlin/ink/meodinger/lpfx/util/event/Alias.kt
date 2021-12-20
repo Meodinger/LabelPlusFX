@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.util.accelerator
+package ink.meodinger.lpfx.util.event
 
 import ink.meodinger.lpfx.util.platform.isMac
 

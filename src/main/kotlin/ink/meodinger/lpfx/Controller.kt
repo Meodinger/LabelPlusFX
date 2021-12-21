@@ -15,12 +15,10 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
-import ink.meodinger.lpfx.util.event.isAltDown
-import ink.meodinger.lpfx.util.event.isControlDown
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.event.keyEvent
+import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
@@ -453,7 +451,7 @@ class Controller(private val root: View) {
 
         // Update cTreeView & cLabelPane when pic change
         State.currentPicNameProperty.addListener(onNew {
-            if (!State.isOpened || it == null) return@onNew
+            if (!State.isOpened || it.isEmpty()) return@onNew
 
             renderTreeView()
             renderLabelPane()
@@ -500,7 +498,7 @@ class Controller(private val root: View) {
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
-            if (!(isControlDown(it) || isAltDown(it))) return@addEventFilter
+            if (!(it.isControlOrMetaDown || it.isAltOrMetaDown)) return@addEventFilter
 
             val newSize = ((cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt())
                 .coerceAtLeast(12)
@@ -588,7 +586,7 @@ class Controller(private val root: View) {
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
-            if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
+            if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
 
             when (it.code) {
                 KeyCode.LEFT -> cPicBox.back()
@@ -620,7 +618,7 @@ class Controller(private val root: View) {
             return index
         }
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
-            if (!(isControlDown(it) && it.code.isArrowKey)) return@EventHandler
+            if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
             if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
 
             var selectedIndex = cTreeView.selectionModel.selectedIndex
@@ -653,7 +651,7 @@ class Controller(private val root: View) {
 
         // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
-            if (isControlDown(it) && it.code == KeyCode.ENTER) {
+            if (it.isControlOrMetaDown && it.code == KeyCode.ENTER) {
                 val isShiftDown = it.isShiftDown
                 val direction = if (isShiftDown) -1 else 1
 
@@ -669,6 +667,13 @@ class Controller(private val root: View) {
                 cLabelPane.fireEvent(keyEvent(
                     it, character = "\u0000", text = "", code = code
                 ))
+
+                // Back to last
+                if (code == KeyCode.LEFT) {
+                    cLabelPane.fireEvent(keyEvent(
+                        it, character = "\u0000", text = "", code = KeyCode.UP
+                    ))
+                }
             }
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)

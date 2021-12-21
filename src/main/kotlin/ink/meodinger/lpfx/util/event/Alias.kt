@@ -12,42 +12,43 @@ import javafx.scene.input.KeyEvent
  * Have fun with my code!
  */
 
+
 /**
- * Alias isMetaDown
+ * For multi-platform use
  */
-fun isControlDown(event: GestureEvent): Boolean {
-    if (event.isControlDown) return true
-    if (isMac && event.isMetaDown) return true
+val GestureEvent.isControlOrMetaDown: Boolean get() {
+    if (isControlDown) return true
+    if (isMac && isMetaDown) return true
 
     return false
 }
 
 /**
- * Alias isMetaDown
+ * For multi-platform use
  */
-fun isControlDown(event: KeyEvent): Boolean {
-    if (event.isControlDown) return true
-    if (isMac && event.isMetaDown) return true
+val KeyEvent.isControlOrMetaDown: Boolean get() {
+    if (isControlDown) return true
+    if (isMac && isMetaDown) return true
 
     return false
 }
 
 /**
- * Alias isMetaDown
+ * For multi-platform use
  */
-fun isAltDown(event: GestureEvent): Boolean {
-    if (event.isAltDown) return true
-    if (isMac && event.isMetaDown) return true
+val GestureEvent.isAltOrMetaDown: Boolean get() {
+    if (isAltDown) return true
+    if (isMac && isMetaDown) return true
 
     return false
 }
 
 /**
- * Alias isMetaDown
+ * For multi-platform use
  */
-fun isAltDown(event: KeyEvent): Boolean {
-    if (event.isAltDown) return true
-    if (isMac && event.isMetaDown) return true
+val KeyEvent.isAltOrMetaDown: Boolean get() {
+    if (isAltDown) return true
+    if (isMac && isMetaDown) return true
 
     return false
 }

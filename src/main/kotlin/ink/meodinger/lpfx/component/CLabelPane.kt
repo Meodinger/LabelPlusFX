@@ -4,9 +4,9 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.SCROLL_DELTA
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.event.isAltDown
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.event.isAltOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
@@ -248,7 +248,7 @@ class CLabelPane : ScrollPane() {
             root.scaleY = it
         })
         root.addEventFilter(ScrollEvent.SCROLL) {
-            if (isAltDown(it)) {
+            if (it.isAltOrMetaDown) {
                 scale += it.deltaY / (10 * SCROLL_DELTA)
                 it.consume()
             }

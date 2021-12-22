@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
@@ -147,7 +148,10 @@ private fun loadLP(file: File): TransFile {
     }
 
     // Version
-    val v = lines[pointer].split(LPTransFile.SPLIT)
+    val v = lines[pointer].split(LPTransFile.SPLIT).also {
+        if (it.size != 2) throw IOException(String.format(I18N["exception.loader.invalid_version_head.s"], lines[pointer]))
+        it.forEach { v -> if (!v.isMathematicalNatural()) throw IOException(String.format(I18N["exception.loader.invalid_version_text.s"], v)) }
+    }
     val version = intArrayOf(v[0].trim().toInt(), v[1].trim().toInt())
     pointer++
 
@@ -162,9 +166,7 @@ private fun loadLP(file: File): TransFile {
 
         val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupCount - 1])
 
-        groupList.forEach {
-            if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], group.name))
-        }
+        groupList.forEach { if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], group.name)) }
         groupList.add(group)
 
         groupCount++
@@ -200,9 +202,7 @@ private fun loadLP(file: File): TransFile {
  */
 @Throws(IOException::class)
 private fun loadMeo(file: File): TransFile {
-    val mapper = ObjectMapper()
-
-    mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-
-    return mapper.readValue(file, TransFile::class.java)
+    return ObjectMapper()
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .readValue(file, TransFile::class.java)
 }

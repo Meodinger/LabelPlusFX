@@ -127,6 +127,28 @@ class Controller(private val root: View) {
     private fun init() {
         Logger.info("Initializing components...", LOGSRC_CONTROLLER)
 
+        // Drag and Drop
+        root.setOnDragOver {
+            if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
+            it.consume()
+        }
+        root.setOnDragDropped {
+            if (stay()) return@setOnDragDropped
+
+            State.reset()
+
+            val board = it.dragboard
+            if (board.hasFiles()) {
+                val file = board.files.firstOrNull { f ->
+                    EXTENSIONS_FILE.contains(f.extension)
+                } ?: return@setOnDragDropped
+
+                Platform.runLater { open(file, FileType.getType(file)) }
+                it.isDropCompleted = true
+            }
+            it.consume()
+        }
+
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)

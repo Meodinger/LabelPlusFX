@@ -100,13 +100,13 @@ object State {
         viewMode = ViewMode.getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
         workMode = WorkMode.InputMode
 
-        Logger.info("Reset")
+        Logger.info("Reset", LOGSRC_STATE)
     }
 
     fun setComment(comment: String) {
         transFile.comment = comment
 
-        Logger.info("Set comment @ ${comment.replace("\n", " ")}")
+        Logger.info("Set comment @ ${comment.replace("\n", " ")}", LOGSRC_STATE)
     }
 
     fun addTransGroup(transGroup: TransGroup) {

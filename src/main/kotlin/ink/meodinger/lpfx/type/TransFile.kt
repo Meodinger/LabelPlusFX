@@ -94,7 +94,7 @@ open class TransFile @JsonCreator constructor(
         }
     }
 
-    // ----- File Manage ----- //
+    // ----- Project Files Management ----- //
 
     private val fileMap = HashMap<String, File>()
     fun getFile(picName: String): File {
@@ -119,7 +119,7 @@ open class TransFile @JsonCreator constructor(
         return lost
     }
 
-    // ----- Properties & Init ----- //
+    // ----- Properties ----- //
 
     val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
     val commentProperty: StringProperty = SimpleStringProperty(comment)

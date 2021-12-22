@@ -137,8 +137,9 @@ private fun exportLP(file: File, transFile: TransFile) {
 @Throws(IOException::class)
 private fun exportMeo(file: File, transFile: TransFile) {
     using {
-        val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
-        writer.write(exportAsString(transFile, FileType.MeoFile))
+        BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8))
+            .autoClose()
+            .write(exportAsString(transFile, FileType.MeoFile))
     } catch { e: IOException ->
         throw e
     } finally {

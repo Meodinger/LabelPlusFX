@@ -102,6 +102,24 @@ fun showInfo(title: String, header: String?, content: String, owner: Window?): O
 }
 
 /**
+ * Show warning
+ */
+fun showWarning(content: String, owner: Window?): Optional<ButtonType> {
+    return showWarning(I18N["common.warning"], null, content, owner)
+}
+/**
+ * Show warning
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @param owner Owner window
+ * @return ButtonType? YES | CLOSE
+ */
+fun showWarning(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.CLOSE)
+}
+
+/**
  * Show alert
  * @param content Alert to show
  * @return ButtonType? YES | NO | CANCEL

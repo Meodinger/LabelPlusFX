@@ -85,7 +85,10 @@ object Options {
         }
         try {
             RecentFiles.load()
-            RecentFiles.checkAndFix()
+            if (RecentFiles.checkAndFix()) {
+                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_RecentFiles), null)
+                Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
+            }
 
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
         } catch (e: IOException) {
@@ -110,7 +113,10 @@ object Options {
         }
         try {
             Preference.load()
-            Preference.checkAndFix()
+            if (Preference.checkAndFix()) {
+                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_Preference), null)
+                Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
+            }
 
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
         } catch (e: IOException) {
@@ -135,7 +141,10 @@ object Options {
         }
         try {
             Settings.load()
-            Settings.checkAndFix()
+            if (Settings.checkAndFix()) {
+                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_Settings), null)
+                Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
+            }
 
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
         } catch (e: IOException) {

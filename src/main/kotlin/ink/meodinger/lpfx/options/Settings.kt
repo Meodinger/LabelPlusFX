@@ -74,7 +74,9 @@ object Settings : AbstractProperties() {
         LabelRadius          to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF"
     ))
 
-    override fun checkAndFix() {
+    override fun checkAndFix(): Boolean {
+        var fixed = false
+
         var groupInvalid = false
         run checkGroup@ {
             val groupNameList = this[DefaultGroupNameList].asStringList()
@@ -94,17 +96,21 @@ object Settings : AbstractProperties() {
             this[DefaultGroupNameList] = default[DefaultGroupNameList]!!
             this[DefaultGroupColorHexList] = default[DefaultGroupColorHexList]!!
             this[IsGroupCreateOnNewTrans] = default[IsGroupCreateOnNewTrans]!!
+            fixed = true
         }
 
         val scaleOnNewPicture = this[ScaleOnNewPicture].asInteger()
-        if (scaleOnNewPicture < 0 || scaleOnNewPicture > 2)
+        if (scaleOnNewPicture < 0 || scaleOnNewPicture > 2) {
             this[ScaleOnNewPicture] = default[ScaleOnNewPicture]!!
+            fixed = true
+        }
 
         val viewModePreferenceList = this[ViewModePreference].asStringList()
         for (preference in viewModePreferenceList) try {
             ViewMode.getViewMode(preference)
         } catch (e: Exception) {
             this[ViewModePreference] = default[ViewModePreference]!!
+            fixed = true
             break
         }
 
@@ -113,18 +119,28 @@ object Settings : AbstractProperties() {
             Logger.LogType.getType(logLevel)
         } catch (e: Exception) {
             this[LogLevelPreference] = default[LogLevelPreference]!!
+            fixed = true
         }
 
         val labelRadius = this[LabelRadius].asDouble()
-        if (labelRadius < 8 || labelRadius > 48)
+        if (labelRadius < 8 || labelRadius > 48) {
             this[LabelRadius] = default[LabelRadius]!!
+            fixed = true
+        }
 
         val labelAlpha = this[LabelAlpha].asInteger(16)
-        if (labelAlpha < 0 || labelAlpha > 255)
+        if (labelAlpha < 0 || labelAlpha > 255) {
             this[LabelAlpha] = default[LabelAlpha]!!
+            fixed = true
+        }
 
         val ligatureRules = this[LigatureRules].asPairList()
-        for (pair in ligatureRules) if (pair.first.contains(Regex("[|, ]")))
+        for (pair in ligatureRules) if (pair.first.contains(Regex("[|, ]"))) {
             this[LigatureRules] = default[LigatureRules]!!
+            fixed = true
+        }
+
+        return fixed
     }
+
 }

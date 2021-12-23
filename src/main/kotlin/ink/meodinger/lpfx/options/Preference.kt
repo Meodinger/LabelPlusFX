@@ -32,17 +32,27 @@ object Preference : AbstractProperties() {
     @Throws(IOException::class)
     override fun save() = save(Options.preference, this)
 
-    override fun checkAndFix() {
+    override fun checkAndFix(): Boolean {
+        var fixed = false
+
         val mainDivider = this[MAIN_DIVIDER].asDouble()
-        if (mainDivider < 0 || mainDivider > 1)
+        if (mainDivider < 0 || mainDivider > 1) {
             this[MAIN_DIVIDER] = default[MAIN_DIVIDER]!!
+            fixed = true
+        }
 
         val rightDivider = this[RIGHT_DIVIDER].asDouble()
-        if (rightDivider < 0 || rightDivider > 1)
+        if (rightDivider < 0 || rightDivider > 1) {
             this[RIGHT_DIVIDER] = default[RIGHT_DIVIDER]!!
+            fixed = true
+        }
 
         val textAreaFontSize = this[TEXTAREA_FONT_SIZE].asInteger()
-        if (textAreaFontSize < 12 || textAreaFontSize > 64)
+        if (textAreaFontSize < 12 || textAreaFontSize > 64) {
             this[TEXTAREA_FONT_SIZE] = default[TEXTAREA_FONT_SIZE]!!
+            fixed = true
+        }
+
+        return fixed
     }
 }

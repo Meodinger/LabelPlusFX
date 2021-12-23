@@ -97,7 +97,7 @@ abstract class AbstractProperties {
     @Throws(IOException::class)
     abstract fun save()
 
-    abstract fun checkAndFix()
+    abstract fun checkAndFix(): Boolean
 
     fun useDefault() {
         properties.clear()

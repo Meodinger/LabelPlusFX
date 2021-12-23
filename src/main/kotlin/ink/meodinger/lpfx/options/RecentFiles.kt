@@ -40,7 +40,7 @@ object RecentFiles : AbstractProperties() {
         save(Options.recentFiles, this)
     }
 
-    override fun checkAndFix() {
+    override fun checkAndFix(): Boolean {
         val toRemove = HashSet<String>()
         recent.forEach {
             try {
@@ -51,6 +51,8 @@ object RecentFiles : AbstractProperties() {
         }
         recent.removeAll(toRemove)
         this[RECENT] = recent
+
+        return toRemove.size != 0
     }
 
     fun getAll(): List<String> {

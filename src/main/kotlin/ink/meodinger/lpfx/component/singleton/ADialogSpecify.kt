@@ -34,7 +34,7 @@ import kotlin.io.path.*
  * Have fun with my code!
  */
 
-object ASpecifyDialog : Dialog<List<File>>() {
+object ADialogSpecify : Dialog<List<File>>() {
 
     private val unspecified = I18N["specify.unspecified"]
     private val defaultFile = File("")

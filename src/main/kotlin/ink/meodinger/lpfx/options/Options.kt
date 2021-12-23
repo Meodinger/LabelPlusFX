@@ -138,7 +138,7 @@ object Options {
             Settings.checkAndFix()
 
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Settings.useDefault()
             Settings.save()
             Logger.error("Load Settings failed, using default", LOGSRC_OPTIONS)

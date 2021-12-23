@@ -20,13 +20,21 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
     companion object {
         private const val LIST_SEPARATOR = "|"
         private const val PAIR_SEPARATOR = ","
+        private const val PAIR_START     = "<"
+        private const val PAIR_STOP      = ">"
 
         const val UNINITIALIZED = "<@Uninitialized@>"
         const val EMPTY = ""
 
         fun parseList(values: List<*>): String {
             val builder = StringBuilder()
-            for (value in values) builder.append(value).append(LIST_SEPARATOR)
+            for (value in values) {
+                val content = if (value is Pair<*,*>) {
+                    PAIR_START + value.first + PAIR_SEPARATOR + value.second + PAIR_STOP
+                } else value.toString()
+
+                builder.append(content).append(LIST_SEPARATOR)
+            }
             return builder.deleteTail(LIST_SEPARATOR).toString()
         }
 
@@ -86,8 +94,11 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
             val pair = list[it]
             val sepIndex = pair.indexOf(PAIR_SEPARATOR)
 
+            var spaces = 0
+            while (pair[sepIndex + spaces + 1] == ' ') spaces++
+
             val first = pair.substring(1, sepIndex)
-            val second = pair.substring(sepIndex + 2, pair.length - 1)
+            val second = pair.substring(sepIndex + spaces + 1, pair.length - 1)
             Pair(first, second)
         }
     }

@@ -43,7 +43,7 @@ import kotlin.io.path.name
 /**
  * A Dialog Singleton for logs set/clean/send
  */
-object ALogsDialog : AbstractPropertiesDialog() {
+object ADialogLogs : AbstractPropertiesDialog() {
 
     private const val ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -170,9 +170,6 @@ object ALogsDialog : AbstractPropertiesDialog() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))
-
-        Logger.info("Generated settings", LOGSRC_DIALOGS)
-        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         return list
     }

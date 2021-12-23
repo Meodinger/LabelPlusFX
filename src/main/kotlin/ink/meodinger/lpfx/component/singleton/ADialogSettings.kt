@@ -6,7 +6,6 @@ import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CInputLabel
 import ink.meodinger.lpfx.options.CProperty
-import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.color.isColorHex
@@ -43,7 +42,7 @@ import javafx.scene.text.TextAlignment
 /**
  * A Dialog Singleton for settings
  */
-object ASettingsDialog : AbstractPropertiesDialog() {
+object ADialogSettings : AbstractPropertiesDialog() {
 
     private val tabPane = TabPane()
 
@@ -541,9 +540,6 @@ object ASettingsDialog : AbstractPropertiesDialog() {
         list.addAll(convertLigatureRule())
         list.addAll(convertMode())
         list.addAll(convertLabel())
-
-        Logger.info("Generated settings", LOGSRC_DIALOGS)
-        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         return list
     }

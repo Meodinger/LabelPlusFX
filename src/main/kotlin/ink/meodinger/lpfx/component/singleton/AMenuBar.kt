@@ -323,7 +323,10 @@ object AMenuBar : MenuBar() {
     }
 
     private fun settings() {
-        val list = ASettingsDialog.generateProperties()
+        val list = ADialogSettings.generateProperties()
+
+        Logger.info("Generated common settings", LOGSRC_DIALOGS)
+        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         var updatePane = false
         var updateRules = false
@@ -341,7 +344,10 @@ object AMenuBar : MenuBar() {
         if (updateRules) State.controller.updateLigatureRules()
     }
     private fun logs() {
-        val list = ALogsDialog.generateProperties()
+        val list = ADialogLogs.generateProperties()
+
+        Logger.info("Generated logs settings", LOGSRC_DIALOGS)
+        Logger.debug("got", list, LOGSRC_DIALOGS)
 
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue

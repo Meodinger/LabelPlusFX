@@ -3,7 +3,7 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.component.singleton.AMenuBar
-import ink.meodinger.lpfx.component.singleton.ASpecifyDialog
+import ink.meodinger.lpfx.component.singleton.ADialogSpecify
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -706,7 +706,7 @@ class Controller(private val root: View) {
     }
 
     fun specifyPicFiles() {
-        val picFiles = ASpecifyDialog.specify()
+        val picFiles = ADialogSpecify.specify()
         if (picFiles.isEmpty()) showInfo(I18N["specify.info.incomplete"], State.stage)
         else {
             val picCount = State.transFile.picCount

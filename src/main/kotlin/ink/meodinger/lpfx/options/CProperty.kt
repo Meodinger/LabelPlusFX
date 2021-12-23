@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 import kotlin.collections.HashMap
 
@@ -17,7 +15,7 @@ import kotlin.collections.HashMap
  */
 class CProperty(val key: String, var value: String = UNINITIALIZED) {
 
-    // NOTE: Will be deprecated in 3.x (planned in 2022). May use serialize/java.util.properties instead.
+    // NOTE: May be deprecated in 3.x versions. May use serialize/java.util.properties instead.
 
     companion object {
         private const val LIST_SEPARATOR = "|"
@@ -32,21 +30,6 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
             return builder.deleteTail(LIST_SEPARATOR).toString()
         }
 
-    }
-
-    // ----- Exception ----- //
-
-    class CPropertyException(message: String) : RuntimeException(message) {
-        companion object {
-            fun propertyNotFound(key: String) =
-                CPropertyException(String.format(I18N["exception.property.property_not_found.k"], key))
-            fun propertyValueInvalid(key: String, value: Any) =
-                CPropertyException(String.format(I18N["exception.property.property_value_invalid.vk"], value.toString(), key))
-            fun propertyElementInvalid(key: String, element: Any) =
-                CPropertyException(String.format(I18N["exception.property.property_element_invalid.ek"], element.toString(), key))
-            fun propertyListSizeInvalid(key: String, size: Int) =
-                CPropertyException(String.format(I18N["exception.property.property_list_size_invalid.sk"], size, key))
-        }
     }
 
     // ----- Constructors ----- //

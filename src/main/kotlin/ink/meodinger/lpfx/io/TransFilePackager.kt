@@ -2,7 +2,7 @@ package ink.meodinger.lpfx.io
 
 import ink.meodinger.lpfx.FileType
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.util.CZip
+import ink.meodinger.lpfx.util.file.CZip
 import ink.meodinger.lpfx.util.resource.*
 
 import java.io.File

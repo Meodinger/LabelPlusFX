@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.LOGSRC_OPTIONS
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.options.CProperty.CPropertyException
 
 import java.io.IOException
 import java.nio.file.Files
@@ -55,9 +54,9 @@ object Options {
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
-            Logger.debug("Got RecentFiles:", RecentFiles.getAll(), LOGSRC_OPTIONS)
-            Logger.debug("Got Preference:", Preference.properties, LOGSRC_OPTIONS)
-            Logger.debug("Got Settings:", Settings.properties, LOGSRC_OPTIONS)
+            Logger.debug("Got RecentFiles:", AbstractProperties.getProperties(RecentFiles), LOGSRC_OPTIONS)
+            Logger.debug("Got Preference:", AbstractProperties.getProperties(Preference), LOGSRC_OPTIONS)
+            Logger.debug("Got Settings:", AbstractProperties.getProperties(Settings), LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
             Logger.exception(e)
@@ -86,10 +85,10 @@ object Options {
         }
         try {
             RecentFiles.load()
-            RecentFiles.check()
+            RecentFiles.checkAndFix()
 
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             RecentFiles.useDefault()
             RecentFiles.save()
             Logger.error("Load Recent Files failed", LOGSRC_OPTIONS)
@@ -97,11 +96,7 @@ object Options {
             showError(
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) {
-                    String.format(I18N["error.options.broken.s"], FileName_RecentFiles)
-                } else {
-                    String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles)
-                },
+                String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles),
                 null
             )
         }
@@ -115,10 +110,10 @@ object Options {
         }
         try {
             Preference.load()
-            Preference.check()
+            Preference.checkAndFix()
 
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Preference.useDefault()
             Preference.save()
             Logger.error("Load Preference failed, using default", LOGSRC_OPTIONS)
@@ -126,11 +121,7 @@ object Options {
             showError(
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) {
-                    String.format(I18N["error.options.broken.s"], FileName_Preference)
-                } else {
-                    String.format(I18N["error.options.load_failed.s"], FileName_Preference)
-                },
+                String.format(I18N["error.options.load_failed.s"], FileName_Preference),
                 null
             )
         }
@@ -144,7 +135,7 @@ object Options {
         }
         try {
             Settings.load()
-            Settings.check()
+            Settings.checkAndFix()
 
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
         } catch (e: Exception) {
@@ -155,11 +146,7 @@ object Options {
             showError(
                 I18N["common.alert"],
                 null,
-                if (e is CPropertyException) {
-                    String.format(I18N["error.options.broken.s"], FileName_Settings)
-                } else {
-                    String.format(I18N["error.options.load_failed.s"], FileName_Settings)
-                },
+                String.format(I18N["error.options.load_failed.s"], FileName_Settings),
                 null
             )
         }

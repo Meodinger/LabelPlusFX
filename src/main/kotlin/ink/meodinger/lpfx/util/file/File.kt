@@ -17,15 +17,15 @@ import java.io.IOException
 
 /**
  * Transfer a File to another File
- * @param from File that transfer from
- * @param to   File that transfer to
+ * @param ori File that transfer from
+ * @param dst File that transfer to
  */
 @Throws(IOException::class)
-fun transfer(from: File, to: File) {
-    if (from.isDirectory || to.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
+fun transfer(ori: File, dst: File) {
+    if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
 
-    val input = FileInputStream(from).channel
-    val output = FileOutputStream(to).channel
+    val input = FileInputStream(ori).channel
+    val output = FileOutputStream(dst).channel
 
     output.transferFrom(input, 0, input.size())
 
@@ -33,6 +33,10 @@ fun transfer(from: File, to: File) {
     output.close()
 }
 
+/**
+ * Whether this file exists. If not, return null
+ */
+@Throws(IOException::class)
 fun File?.existsOrNull(): File? {
     if (this == null) return null
     if (!this.exists()) return null

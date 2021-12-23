@@ -1,14 +1,14 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.options.CProperty.CPropertyException
-
 import java.io.IOException
+import java.nio.file.InvalidPathException
+import java.nio.file.Path
 
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.io
+ * Have fun with my code!
  */
 
 /**
@@ -19,17 +19,13 @@ object RecentFiles : AbstractProperties() {
     private const val MAX_SIZE = 10
     private const val RECENT = "recent"
 
-    override val default = listOf(CProperty(RECENT))
+    private val recent = ArrayDeque<String>()
 
-    private val recent = ArrayList<String>()
+    override val default = listOf(CProperty(RECENT, "")).toPropertiesMap()
 
-    init {
-        this.properties.addAll(listOf(
-            CProperty(RECENT)
-        ))
-    }
+    init { useDefault() }
 
-    @Throws(IOException::class, CPropertyException::class)
+    @Throws(IOException::class)
     override fun load() {
         load(Options.recentFiles, this)
 
@@ -39,9 +35,22 @@ object RecentFiles : AbstractProperties() {
 
     @Throws(IOException::class)
     override fun save() {
-        this[RECENT].set(recent)
+        this[RECENT] = recent
 
         save(Options.recentFiles, this)
+    }
+
+    override fun checkAndFix() {
+        val toRemove = HashSet<String>()
+        recent.forEach {
+            try {
+                Path.of(it)
+            } catch (e: InvalidPathException) {
+                toRemove.add(it)
+            }
+        }
+        recent.removeAll(toRemove)
+        this[RECENT] = recent
     }
 
     fun getAll(): List<String> {
@@ -49,15 +58,14 @@ object RecentFiles : AbstractProperties() {
     }
 
     fun getLastOpenFile(): String? {
-        if (recent.size == 0) return null
-        return recent[0]
+        return recent.firstOrNull()
     }
 
     fun add(path: String) {
         recent.remove(path)
-        recent.add(0, path)
+        recent.addFirst(path)
         if (recent.size > MAX_SIZE) {
-            recent.removeAt(MAX_SIZE)
+            recent.removeLast()
         }
     }
 

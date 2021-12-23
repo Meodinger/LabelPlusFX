@@ -143,11 +143,13 @@ class Controller(private val root: View) {
                     EXTENSIONS_FILE.contains(f.extension)
                 } ?: return@setOnDragDropped
 
+                // To avoid exception cannot be caught
                 Platform.runLater { open(file, FileType.getType(file)) }
                 it.isDropCompleted = true
             }
             it.consume()
         }
+        Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
 
         // Global event catch, prevent mnemonic parsing and the beep
         root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
@@ -282,14 +284,14 @@ class Controller(private val root: View) {
 
         // Switch Button text
         bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
-            labelInfo("Switch work mode to ${State.viewMode}")
+            labelInfo("Switched work mode to ${State.viewMode}")
             when (State.workMode) {
                 WorkMode.InputMode -> I18N["mode.work.input"]
                 WorkMode.LabelMode -> I18N["mode.work.label"]
             }
         }, State.workModeProperty))
         bSwitchViewMode.textProperty().bind(Bindings.createStringBinding({
-            labelInfo("Switch view mode to ${State.viewMode}")
+            labelInfo("Switched view mode to ${State.viewMode}")
             when (State.viewMode) {
                 ViewMode.IndexMode -> I18N["mode.view.index"]
                 ViewMode.GroupMode -> I18N["mode.view.group"]
@@ -478,7 +480,7 @@ class Controller(private val root: View) {
             renderTreeView()
             renderLabelPane()
 
-            labelInfo("Change picture to $it")
+            labelInfo("Changed picture to $it")
         })
         Logger.info("Added effect on CurrentPicName change", LOGSRC_CONTROLLER)
 
@@ -496,7 +498,7 @@ class Controller(private val root: View) {
             if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(name, false)
             cGroupBar.select(name)
 
-            labelInfo("Change Group to $name")
+            labelInfo("Selected group to $name")
         })
         Logger.info("Added effect on CurrentGroupId change", LOGSRC_CONTROLLER)
 
@@ -530,7 +532,7 @@ class Controller(private val root: View) {
             cTransArea.positionCaret(0)
             it.consume()
 
-            labelInfo("Text font size set to $newSize")
+            labelInfo("Set text font size to $newSize")
         }
         Logger.info("Added effect on Ctrl/Alt/Meta + Scroll", LOGSRC_CONTROLLER)
 
@@ -843,7 +845,7 @@ class Controller(private val root: View) {
     fun open(file: File, type: FileType, projectFolder: File = file.parentFile) {
         Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
 
-        // Read File
+        // Load File
         val transFile: TransFile
         try {
             transFile = load(file, type)
@@ -869,16 +871,12 @@ class Controller(private val root: View) {
         // Show info if comment not in default list
         if (!RecentFiles.getAll().contains(file.path)) {
             val comment = transFile.comment.trim()
-            var isModified = true
             for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
                 if (comment == defaultComment) {
-                    isModified = false
+                    Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
+                    showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
                     break
                 }
-            }
-            if (isModified) {
-                Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
-                showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
             }
         }
 

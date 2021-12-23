@@ -1,13 +1,12 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.options.CProperty.CPropertyException
-
 import java.io.IOException
+
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.options
+ * Have fun with my code!
  */
 
 /**
@@ -23,34 +22,27 @@ object Preference : AbstractProperties() {
         CProperty(MAIN_DIVIDER, 0.63),
         CProperty(RIGHT_DIVIDER, 0.6),
         CProperty(TEXTAREA_FONT_SIZE, 12)
-    )
+    ).toPropertiesMap()
 
-    init {
-        this.properties.addAll(listOf(
-            CProperty(MAIN_DIVIDER),
-            CProperty(RIGHT_DIVIDER),
-            CProperty(TEXTAREA_FONT_SIZE)
-        ))
-    }
+    init { useDefault() }
 
-    @Throws(IOException::class, CPropertyException::class)
+    @Throws(IOException::class)
     override fun load() = load(Options.preference, this)
+
     @Throws(IOException::class)
     override fun save() = save(Options.preference, this)
-    @Throws(CPropertyException::class)
-    override fun check() {
-        super.check()
 
+    override fun checkAndFix() {
         val mainDivider = this[MAIN_DIVIDER].asDouble()
         if (mainDivider < 0 || mainDivider > 1)
-            throw CPropertyException.propertyValueInvalid(MAIN_DIVIDER, mainDivider)
+            this[MAIN_DIVIDER] = default[MAIN_DIVIDER]!!
 
         val rightDivider = this[RIGHT_DIVIDER].asDouble()
         if (rightDivider < 0 || rightDivider > 1)
-            throw CPropertyException.propertyValueInvalid(RIGHT_DIVIDER, rightDivider)
+            this[RIGHT_DIVIDER] = default[RIGHT_DIVIDER]!!
 
         val textAreaFontSize = this[TEXTAREA_FONT_SIZE].asInteger()
-        if (textAreaFontSize < 0)
-            throw CPropertyException.propertyValueInvalid(TEXTAREA_FONT_SIZE, textAreaFontSize)
+        if (textAreaFontSize < 12 || textAreaFontSize > 64)
+            this[TEXTAREA_FONT_SIZE] = default[TEXTAREA_FONT_SIZE]!!
     }
 }

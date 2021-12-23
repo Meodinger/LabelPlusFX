@@ -33,7 +33,7 @@ fun main(vararg args: String) {
         }
 
         // FX Thread not started, cannot use dialog or other FX things
-        // Use swing as alternative alter window
+        // Use swing as alternative alert window
         JFrame("ERROR").also {
             it.contentPane.layout = BorderLayout()
             it.contentPane.add(JPanel().apply {

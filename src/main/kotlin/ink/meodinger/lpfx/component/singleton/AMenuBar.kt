@@ -196,6 +196,7 @@ object AMenuBar : MenuBar() {
         // save
 
         State.controller.save(State.translationFile, FileType.getType(State.translationFile), true)
+        State.controller.labelInfo(I18N["info.saved_successfully"])
     }
     private fun saveAsTranslation() {
         // save
@@ -206,6 +207,7 @@ object AMenuBar : MenuBar() {
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
         State.controller.save(file, FileType.getType(file), false)
+        State.controller.labelInfo(I18N["info.saved_successfully"])
     }
     private fun closeTranslation() {
         if (State.controller.stay()) return

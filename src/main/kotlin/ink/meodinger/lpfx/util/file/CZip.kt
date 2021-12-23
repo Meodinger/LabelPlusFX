@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.util
+package ink.meodinger.lpfx.util.file
 
 import java.io.*
 import java.util.zip.ZipEntry

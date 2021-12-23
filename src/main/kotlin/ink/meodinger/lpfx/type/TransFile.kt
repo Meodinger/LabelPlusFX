@@ -238,12 +238,10 @@ open class TransFile @JsonCreator constructor(
     // ----- Other ----- //
 
     fun toJsonString(): String {
-        val mapper = ObjectMapper()
-
-        mapper.enable(SerializationFeature.INDENT_OUTPUT)
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-
-        return mapper.writeValueAsString(this.clone())
+        return ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .writeValueAsString(this.clone())
     }
 
     fun clone(): TransFile {

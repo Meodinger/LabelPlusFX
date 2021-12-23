@@ -1,17 +1,21 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.options.CProperty.CPropertyException
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.options
+ * Have fun with my code!
  */
 
 /**
@@ -24,7 +28,7 @@ abstract class AbstractProperties {
         private const val KV_SPILT = "="
         private const val COMMENT_HEAD = "#"
 
-        @Throws(IOException::class, CPropertyException::class)
+        @Throws(IOException::class)
         fun load(path: Path, instance: AbstractProperties) {
             try {
                 val lines = Files.newBufferedReader(path).readLines()
@@ -35,8 +39,12 @@ abstract class AbstractProperties {
                     val prop = line.split(KV_SPILT, limit = 2)
                     instance[prop[0]] = prop[1]
                 }
-            } catch (e: Exception) {
-                throw e
+            } catch (e: IndexOutOfBoundsException) {
+                throw IOException("Load properties failed: KV format invalid").initCause(e)
+            } catch (e: SecurityException) {
+                throw IOException("Load properties failed: Security manager installed, check first").initCause(e)
+            } catch (e: IOException) {
+                throw IOException("Save properties failed").initCause(e)
             }
         }
 
@@ -46,43 +54,55 @@ abstract class AbstractProperties {
                 val writer = Files.newBufferedWriter(path).autoClose()
                 for (property in instance.properties) {
                     if (comments[property.key] != null) {
-                        writer.write(StringBuilder()
-                            .append("\n").append(COMMENT_HEAD).append(" ")
-                            .append(comments[property.key]?.replace("\n", "\n$COMMENT_HEAD "))
-                            .append("\n")
-                            .toString()
+                        writer.write(
+                            StringBuilder()
+                                .append("\n").append(COMMENT_HEAD).append(" ")
+                                .append(comments[property.key]?.replace("\n", "\n$COMMENT_HEAD "))
+                                .append("\n")
+                                .toString()
                         )
                     }
-                    writer.write(StringBuilder()
-                        .append(property.key)
-                        .append(KV_SPILT)
-                        .append(property.value)
-                        .append("\n")
-                        .toString()
+                    writer.write(
+                        StringBuilder()
+                            .append(property.key)
+                            .append(KV_SPILT)
+                            .append(property.value)
+                            .append("\n")
+                            .toString()
                     )
                 }
+            } catch { e: SecurityException ->
+                throw IOException("Save properties failed: Security manager installed, check first").initCause(e)
             } catch { e: Exception ->
-                throw e
-            } finally {
-
+                throw IOException("Save properties failed").initCause(e)
             }
         }
+
+        fun List<CProperty>.toPropertiesMap(): Map<String, String> {
+            val map = HashMap<String, String>()
+            for (property in this) map[property.key] = property.value
+            return map
+        }
+
+        /**
+         * Be careful!
+         */
+        fun getProperties(properties: AbstractProperties): List<CProperty> = properties.properties
     }
 
-    val properties = ArrayList<CProperty>()
-    abstract val default: List<CProperty>
+    protected abstract val default: Map<String, String>
+    protected val properties = ArrayList<CProperty>()
 
-    @Throws(CPropertyException::class, IOException::class)
+    @Throws(IOException::class)
     abstract fun load()
     @Throws(IOException::class)
     abstract fun save()
-    @Throws(CPropertyException::class)
-    open fun check() {
-        for (property in default) if (this[property.key].isUninitialized()) this[property.key] = property
-    }
+
+    abstract fun checkAndFix()
+
     fun useDefault() {
         properties.clear()
-        properties.addAll(default)
+        default.forEach { (k, v) -> properties.add(CProperty(k, v)) }
     }
 
     operator fun get(key: String): CProperty {
@@ -91,7 +111,7 @@ abstract class AbstractProperties {
                 return property
             }
         }
-        throw CPropertyException.propertyNotFound(key)
+        throw RuntimeException(String.format(I18N["exception.property.property_not_found.k"], key))
     }
     operator fun set(key: String, value: String) {
         get(key).value = value

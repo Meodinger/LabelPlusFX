@@ -103,6 +103,8 @@ fun showInfo(title: String, header: String?, content: String, owner: Window?): O
 
 /**
  * Show warning
+ * @param content Warning to show
+ * @return ButtonType? YES | CLOSE
  */
 fun showWarning(content: String, owner: Window?): Optional<ButtonType> {
     return showWarning(I18N["common.warning"], null, content, owner)

@@ -150,6 +150,7 @@ object Logger {
     fun exception(e: Throwable) {
         val str = e.stackTraceToString()
 
+        System.err.print("<Logger>: ")
         System.err.println(str)
         writer.write(str)
         writer.flush()

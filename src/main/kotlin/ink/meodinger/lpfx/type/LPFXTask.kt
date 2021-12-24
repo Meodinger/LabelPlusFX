@@ -6,7 +6,7 @@ import javafx.concurrent.Task
 /**
  * Author: Meodinger
  * Date: 2021/8/31
- * Location: info.meodinger.lpfx.type
+ * Have fun with my code!
  */
 
 /**

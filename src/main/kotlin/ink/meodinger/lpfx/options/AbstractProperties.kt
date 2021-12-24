@@ -78,7 +78,7 @@ abstract class AbstractProperties {
         }
 
         fun List<CProperty>.toPropertiesMap(): Map<String, String> {
-            val map = HashMap<String, String>()
+            val map = LinkedHashMap<String, String>()
             for (property in this) map[property.key] = property.value
             return map
         }

@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.util.dialog
 
+import ink.meodinger.lpfx.DIALOG_HEIGHT
+import ink.meodinger.lpfx.DIALOG_WIDTH
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -7,6 +9,7 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
@@ -25,14 +28,15 @@ import java.util.Optional
 /**
  * Show a link
  * @param owner Owner
+ * @param graphics Graphics node
  * @param title Dialog title
  * @param header Dialog header
  * @param content Dialog content
  * @param link Link text
  * @param handler Handler for link
- * @return ButtonType? OK
+ * @return ButtonType? OK | CLOSE
  */
-fun showLink(owner: Window?, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+fun showLink(owner: Window?, graphics: Node? = null, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
 
@@ -42,8 +46,9 @@ fun showLink(owner: Window?, title: String, header: String?, content: String?, l
     val box = VBox(label, separator, hyperlink)
 
     dialog.title = title
+    dialog.graphic = graphics
     dialog.headerText = header
-    dialog.dialogPane.buttonTypes.add(ButtonType.OK)
+    dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CLOSE)
     dialog.dialogPane.content = box
 
     return dialog.showAndWait()

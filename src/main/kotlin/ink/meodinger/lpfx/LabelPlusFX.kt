@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.util.dialog.showException
@@ -66,6 +67,8 @@ class LabelPlusFX: HookedApplication() {
         State.controller = controller
 
         primaryStage.show()
+
+        UpdateChecker.check()
 
         Logger.info("App started", LOGSRC_APPLICATION)
     }

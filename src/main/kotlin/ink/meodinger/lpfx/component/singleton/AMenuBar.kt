@@ -362,6 +362,7 @@ object AMenuBar : MenuBar() {
     private fun about() {
         showLink(
             State.stage,
+            null,
             I18N["m.about.dialog.title"],
             null,
             StringBuilder()
@@ -380,7 +381,7 @@ object AMenuBar : MenuBar() {
         properties[key] = (properties[key] as Int) + 1
         if (properties[key] as Int >= 5) {
             properties[key] = 0
-            val confirm = showConfirm(I18N["confirm.extra"], State.stage)
+            val confirm = showWarning(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
             } else return

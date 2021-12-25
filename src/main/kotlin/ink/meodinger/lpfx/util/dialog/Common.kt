@@ -10,9 +10,10 @@ import ink.meodinger.lpfx.util.string.omitWideText
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.resource.loadAsImage
-import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.vGrow
+import ink.meodinger.lpfx.util.resource.ICON
+import ink.meodinger.lpfx.io.LogSender
 
 import javafx.event.ActionEvent
 import javafx.scene.Node
@@ -35,6 +36,7 @@ import java.util.Optional
  */
 const val DIALOG_ICON_RADIUS = 32.0
 
+val iconImageView    = ImageView(ICON.resizeByRadius(DIALOG_ICON_RADIUS))
 val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))

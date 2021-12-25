@@ -5,7 +5,6 @@ import ink.meodinger.lpfx.LOGSRC_CHECKER
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
-import ink.meodinger.lpfx.util.Promise
 import ink.meodinger.lpfx.util.dialog.infoImageView
 import ink.meodinger.lpfx.util.dialog.showLink
 import ink.meodinger.lpfx.util.resource.I18N
@@ -13,9 +12,11 @@ import ink.meodinger.lpfx.util.resource.get
 
 import javafx.application.Platform
 import java.io.IOException
-import java.net.MalformedURLException
+import java.net.ConnectException
 import java.net.NoRouteToHostException
+import java.net.SocketTimeoutException
 import java.net.URL
+import java.util.regex.Pattern
 
 
 /**
@@ -29,16 +30,36 @@ object UpdateChecker {
     private const val API: String = "https://api.github.com/repos/Meodinger/LabelPlusFX/releases"
     private const val RELEASES: String = "https://github.com/Meodinger/LabelPlusFX/releases"
     private val V0 = Version(0, 0, 0)
-    private val V = Version(2, 2, 2)
+
+    val V = Version(2, 2, 2)
 
     data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
 
         companion object {
-            fun of(version: String): Version? {
-                if (!version.matches(Regex("[vV]?[0-9].[0-9].[0-9]"))) return null
-                val l = version.split(".")
-                return Version(l[0].substring(1).toInt(), l[1].toInt(), l[2].toInt())
+            private val pattern = Pattern.compile("(v)?[0-9]{1,2}.[0-9]{1,2}.[0-9]{1,2}", Pattern.CASE_INSENSITIVE)
+            private fun check(i : Int): Int {
+                if (i !in 0..99)
+                    throw IllegalArgumentException("Version number must in 0..99, got $i")
+                return i
             }
+
+            fun of(version: String): Version {
+                if (!pattern.matcher(version).matches()) return V0
+
+                val l = version.split(".")
+                val hasPrefix = version.startsWith("v", true)
+
+                val a = check(l[0].substring(if (hasPrefix) 1 else 0).toInt())
+                val b = check(l[1].toInt())
+                val c = check(l[2].toInt())
+                return Version(a, b, c)
+            }
+        }
+
+        init {
+            check(a)
+            check(b)
+            check(c)
         }
 
         override fun toString(): String = "v$a.$b.$c"
@@ -52,14 +73,15 @@ object UpdateChecker {
     fun fetchSync(): Version {
         try {
             val jsonNode = ObjectMapper().readTree(URL(API))
-            if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText()) ?: V0
-        } catch (e: MalformedURLException) {
-            Logger.error("Malformed fetch api url", LOGSRC_CHECKER)
-            Logger.exception(e)
+            if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {
             Logger.warning("No network connection, check failed", LOGSRC_CHECKER)
+        } catch (e: SocketTimeoutException) {
+            Logger.warning("Connect timeout", LOGSRC_CHECKER)
+        } catch (e: ConnectException) {
+            Logger.warning("Connect failed", LOGSRC_CHECKER)
         } catch (e: IOException) {
-            Logger.error("Fetch I/O failed", LOGSRC_CHECKER)
+            Logger.warning("Fetch I/O failed", LOGSRC_CHECKER)
             Logger.exception(e)
         }
         return V0

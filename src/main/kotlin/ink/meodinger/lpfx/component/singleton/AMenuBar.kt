@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CFileChooser
+import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
@@ -12,6 +13,7 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
+import javafx.beans.binding.Bindings
 import javafx.event.ActionEvent
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
@@ -36,29 +38,36 @@ import kotlin.io.path.name
  */
 object AMenuBar : MenuBar() {
 
-    private val mmFile = Menu(I18N["mm.file"])
-    private val mNew = MenuItem(I18N["m.new"])
-    private val mOpen = MenuItem(I18N["m.open"])
-    private val mOpenRecent = Menu(I18N["m.recent"])
-    private val mSave = MenuItem(I18N["m.save"])
-    private val mSaveAs = MenuItem(I18N["m.save_as"])
-    private val mClose = MenuItem(I18N["m.close"])
-    private val mBakRecover = MenuItem(I18N["m.bak_recovery"])
-    private val mExit = MenuItem(I18N["m.exit"])
-    private val mmEdit = Menu(I18N["mm.edit"])
-    private val mEditComment = MenuItem(I18N["m.comment"])
+    // ----- Menus ----- //
+
+    private val mmFile               = Menu(I18N["mm.file"])
+    private val mNew                 = MenuItem(I18N["m.new"])
+    private val mOpen                = MenuItem(I18N["m.open"])
+    private val mOpenRecent          = Menu(I18N["m.recent"])
+    private val mSave                = MenuItem(I18N["m.save"])
+    private val mSaveAs              = MenuItem(I18N["m.save_as"])
+    private val mClose               = MenuItem(I18N["m.close"])
+    private val mBakRecover          = MenuItem(I18N["m.bak_recovery"])
+    private val mExit                = MenuItem(I18N["m.exit"])
+
+    private val mmEdit               = Menu(I18N["mm.edit"])
+    private val mEditComment         = MenuItem(I18N["m.comment"])
     private val mEditProjectPictures = MenuItem(I18N["m.projectPics"])
-    private val mAddExternalPicture = MenuItem(I18N["m.externalPic"])
-    private val mSpecifyPictures = MenuItem(I18N["m.specify"])
-    private val mmExport = Menu(I18N["mm.export"])
-    private val mExportAsLp = MenuItem(I18N["m.lp"])
-    private val mExportAsMeo = MenuItem(I18N["m.meo"])
-    private val mExportAsTransPack = MenuItem(I18N["m.pack"])
-    private val mmAbout = Menu(I18N["mm.about"])
-    private val mSettings = MenuItem(I18N["m.settings"])
-    private val mLogs = MenuItem(I18N["m.logs"])
-    private val mAbout = MenuItem(I18N["m.about"])
-    private val mCrash = MenuItem(I18N["m.crash"])
+    private val mAddExternalPicture  = MenuItem(I18N["m.externalPic"])
+    private val mSpecifyPictures     = MenuItem(I18N["m.specify"])
+
+    private val mmExport             = Menu(I18N["mm.export"])
+    private val mExportAsLp          = MenuItem(I18N["m.lp"])
+    private val mExportAsMeo         = MenuItem(I18N["m.meo"])
+    private val mExportAsTransPack   = MenuItem(I18N["m.pack"])
+
+    private val mmAbout              = Menu(I18N["mm.about"])
+    private val mSettings            = MenuItem(I18N["m.settings"])
+    private val mLogs                = MenuItem(I18N["m.logs"])
+    private val mAbout               = MenuItem(I18N["m.about"])
+    private val mCrash               = MenuItem(I18N["m.crash"])
+
+    // ----- Choosers ----- //
 
     private val picChooser = CFileChooser()
     private val picFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
@@ -111,6 +120,10 @@ object AMenuBar : MenuBar() {
         mLogs.setOnAction { logs() }
         mAbout.setOnAction { about() }
         mCrash.setOnAction { crash() }
+
+        mOpenRecent.disableProperty().bind(Bindings.createBooleanBinding(
+            { mOpenRecent.items.isNotEmpty() }, mOpenRecent.items
+        ))
 
         mSave.disableProperty().bind(!State.isOpenedProperty)
         mSaveAs.disableProperty().bind(!State.isOpenedProperty)
@@ -362,11 +375,11 @@ object AMenuBar : MenuBar() {
     private fun about() {
         showLink(
             State.stage,
-            null,
+            iconImageView,
             I18N["m.about.dialog.title"],
             null,
             StringBuilder()
-                .append(INFO["application.name"]).append(" - ").append(INFO["application.version"]).append("\n")
+                .append(INFO["application.name"]).append(" - ").append(UpdateChecker.V).append("\n")
                 .append("Developed By ").append(INFO["application.vendor"]).append("\n")
                 .toString(),
             INFO["application.link"]

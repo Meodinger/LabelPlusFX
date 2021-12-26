@@ -17,11 +17,13 @@ object Preference : AbstractProperties() {
     const val MAIN_DIVIDER = "MainDivider"
     const val RIGHT_DIVIDER = "RightDivider"
     const val TEXTAREA_FONT_SIZE = "TextAreaFontSize"
+    const val LAST_UPDATE_NOTICE = "LastUpdateNotice"
 
     override val default = listOf(
         CProperty(MAIN_DIVIDER, 0.63),
         CProperty(RIGHT_DIVIDER, 0.6),
-        CProperty(TEXTAREA_FONT_SIZE, 12)
+        CProperty(TEXTAREA_FONT_SIZE, 12),
+        CProperty(LAST_UPDATE_NOTICE, 0)
     ).toPropertiesMap()
 
     init { useDefault() }
@@ -50,6 +52,13 @@ object Preference : AbstractProperties() {
         val textAreaFontSize = this[TEXTAREA_FONT_SIZE].asInteger()
         if (textAreaFontSize < 12 || textAreaFontSize > 64) {
             this[TEXTAREA_FONT_SIZE] = default[TEXTAREA_FONT_SIZE]!!
+            fixed = true
+        }
+
+        val lastUpdateNotice = this[LAST_UPDATE_NOTICE].asLong()
+        if (lastUpdateNotice < 0) {
+            // Don't fix too large last notice time, make it possible to disable notice
+            this[LAST_UPDATE_NOTICE] = default[LAST_UPDATE_NOTICE]!!
             fixed = true
         }
 

@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.util.string.deleteTail
-import kotlin.collections.HashMap
 
 
 /**
@@ -57,11 +56,11 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
     fun asBoolean(): Boolean {
         return value.toBoolean()
     }
-    fun asInteger(): Int {
-        return value.toInt()
-    }
-    fun asInteger(radix: Int): Int {
+    fun asInteger(radix: Int = 10): Int {
         return value.toInt(radix)
+    }
+    fun asLong(): Long {
+        return value.toLong()
     }
     fun asDouble(): Double {
         return value.toDouble()
@@ -80,6 +79,11 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
         if (value.isBlank()) return emptyList()
         val rawList = value.split(LIST_SEPARATOR)
         return List(rawList.size) { rawList[it].toInt() }
+    }
+    fun asLongList(): List<Long> {
+        if (value.isBlank()) return emptyList()
+        val rawList = value.split(LIST_SEPARATOR)
+        return List(rawList.size) { rawList[it].toLong() }
     }
     fun asDoubleList(): List<Double> {
         if (value.isBlank()) return emptyList()
@@ -101,34 +105,6 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
             val second = pair.substring(sepIndex + spaces + 1, pair.length - 1)
             Pair(first, second)
         }
-    }
-    fun asStringMap(): Map<String, String> {
-        val list = asPairList()
-        val map = HashMap<String, String>()
-        for (pair in list) map[pair.first] = pair.second
-
-        return map
-    }
-    fun asBooleanMap(): Map<String, Boolean> {
-        val list = asPairList()
-        val map = HashMap<String, Boolean>()
-        for (pair in list) map[pair.first] = pair.second.toBoolean()
-
-        return map
-    }
-    fun asIntegerMap(): Map<String, Int> {
-        val list = asPairList()
-        val map = HashMap<String, Int>()
-        for (pair in list) map[pair.first] = pair.second.toInt()
-
-        return map
-    }
-    fun asDoubleMap(): Map<String, Double> {
-        val list = asPairList()
-        val map = HashMap<String, Double>()
-        for (pair in list) map[pair.first] = pair.second.toDouble()
-
-        return map
     }
 
     fun set(value: String) {

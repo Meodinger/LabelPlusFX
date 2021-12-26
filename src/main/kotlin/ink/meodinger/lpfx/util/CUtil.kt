@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.util
 
+import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
+import kotlin.system.exitProcess
 
 
 /**
@@ -8,6 +10,61 @@ import java.util.concurrent.ConcurrentLinkedDeque
  * Date: 2021/7/29
  * Have fun with my code!
  */
+
+/**
+ * Hooked Application
+ */
+abstract class HookedApplication : Application() {
+    private val shutdownHooks = LinkedHashMap<String, (() -> Unit) -> Unit>()
+
+    /**
+     * Add a shutdown hook
+     * Should use the resolve function as callback
+     */
+    fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) {
+        shutdownHooks[key] = onShutdown
+    }
+
+    /**
+     * Remove a shutdown hook
+     */
+    fun removeShutdownHook(key: String) {
+        shutdownHooks.remove(key)
+    }
+
+    /**
+     * Clear all shutdown hooks
+     */
+    fun clearShutdownHooks() {
+        shutdownHooks.clear()
+    }
+
+    /**
+     * MUST run this before exit or hooks will not be executed
+     */
+    protected fun runShutdownHooksAndExit() {
+        if (shutdownHooks.isEmpty()) {
+            exitProcess(0)
+        } else {
+            val hooks = shutdownHooks.values.toList()
+            Promise.all(List(shutdownHooks.size) {
+                Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
+            }) finally {
+                exitProcess(0)
+            }
+
+            // In case of something unexpected happened and the app cannot be shutdown
+            // Timer().schedule(genTask { exitProcess(0) }, 1000L * 60 * 5)
+
+            clearShutdownHooks()
+        }
+    }
+
+    override fun stop() {
+        runShutdownHooksAndExit()
+    }
+
+}
 
 /**
  * All streams want to be auto-closed should run `autoClose()`

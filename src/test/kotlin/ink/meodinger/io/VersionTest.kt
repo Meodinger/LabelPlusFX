@@ -13,6 +13,33 @@ import org.junit.Test
 
 class VersionTest {
 
+    private fun <T : Throwable> assertThrow(clazz: Class<T>, callable: () -> Unit) {
+        try {
+            callable()
+        } catch (e: Throwable) {
+            assertTrue(clazz.isInstance(e))
+        }
+    }
+
+    private fun assertNotThrow(callable: () -> Unit) {
+        try {
+            callable()
+        } catch (e: Throwable) {
+            assertTrue(false)
+        }
+    }
+
+
+    @Test
+    fun testConstruct() {
+        assertThrow(IllegalArgumentException::class.java) { Version(1, 1, 100) }
+        assertThrow(IllegalArgumentException::class.java) { Version(1, 1, -1) }
+
+        assertNotThrow { Version(1, 1, 1) }
+        assertNotThrow { Version(1, 1, 0) }
+        assertNotThrow { Version(1, 1, 99) }
+    }
+
     @Test
     fun testOf() {
         val z0 = Version.of("v1.2.4")
@@ -20,8 +47,11 @@ class VersionTest {
         assertEquals(z0, Version.of("V1.2.4"))
         assertEquals(z0, Version.of("1.2.4"))
 
-        assertEquals(null, Version.of("z1.2.4"))
-        assertEquals(null, Version.of("a-1.2.4"))
+        assertEquals(Version.V0, Version.of("z1.2.4"))
+        assertEquals(Version.V0, Version.of("a-1.2.4"))
+
+        assertThrow(IllegalArgumentException::class.java) { Version.of("v1.1.100") }
+        assertThrow(IllegalArgumentException::class.java) { Version.of("100.1.1") }
     }
 
     @Test

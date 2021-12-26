@@ -1,6 +1,8 @@
 package ink.meodinger.io
 
 import ink.meodinger.lpfx.io.UpdateChecker.Version
+import test.lpfx.assertThrow
+import test.lpfx.assertNotThrow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -12,23 +14,6 @@ import org.junit.Test
  */
 
 class VersionTest {
-
-    private fun <T : Throwable> assertThrow(clazz: Class<T>, callable: () -> Unit) {
-        try {
-            callable()
-        } catch (e: Throwable) {
-            assertTrue(clazz.isInstance(e))
-        }
-    }
-
-    private fun assertNotThrow(callable: () -> Unit) {
-        try {
-            callable()
-        } catch (e: Throwable) {
-            assertTrue(false)
-        }
-    }
-
 
     @Test
     fun testConstruct() {
@@ -42,16 +27,20 @@ class VersionTest {
 
     @Test
     fun testOf() {
-        val z0 = Version.of("v1.2.4")
-        assertEquals(z0, Version.of("v1.2.4"))
-        assertEquals(z0, Version.of("V1.2.4"))
-        assertEquals(z0, Version.of("1.2.4"))
-
         assertEquals(Version.V0, Version.of("z1.2.4"))
-        assertEquals(Version.V0, Version.of("a-1.2.4"))
+        assertEquals(Version.V0, Version.of("v-1.2.4"))
 
         assertThrow(IllegalArgumentException::class.java) { Version.of("v1.1.100") }
-        assertThrow(IllegalArgumentException::class.java) { Version.of("100.1.1") }
+        assertThrow(IllegalArgumentException::class.java) { Version.of("v1.100.1") }
+        assertThrow(IllegalArgumentException::class.java) { Version.of("v100.1.1") }
+
+        val z0 = Version(1, 4, 9)
+        assertEquals(z0, Version.of("v1.4.9"))
+        assertEquals(z0, Version.of("V1.4.9"))
+
+        assertEquals(Version(11, 11, 1), Version.of("v11.11.1"))
+        assertEquals(Version(11, 1, 11), Version.of("v11.1.11"))
+        assertEquals(Version(1, 11, 11), Version.of("v1.11.11"))
     }
 
     @Test

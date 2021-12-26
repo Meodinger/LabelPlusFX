@@ -20,7 +20,7 @@ import java.net.ConnectException
 import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
 import java.net.URL
-import java.util.*
+import java.util.Date
 import java.util.regex.Pattern
 
 
@@ -43,13 +43,17 @@ object UpdateChecker {
         companion object {
             val V0 = Version(0, 0, 0)
 
-            private val pattern = Pattern.compile("(v)?[0-9].[0-9].[0-9]", Pattern.CASE_INSENSITIVE)
+            private val pattern = Pattern.compile("v[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{1,2}", Pattern.CASE_INSENSITIVE)
             private fun check(i : Int): Int {
                 if (i !in 0..99)
                     throw IllegalArgumentException("Version number must in 0..99, got $i")
                 return i
             }
 
+            /**
+             * Return a Version by String, case-insensitive
+             * @param version Start with 'v', with three number parts that split by '.' and max-length = 2.
+             */
             fun of(version: String): Version {
                 if (!pattern.matcher(version).matches()) return V0
 
@@ -72,7 +76,7 @@ object UpdateChecker {
         override fun toString(): String = "v$a.$b.$c"
 
         override operator fun compareTo(other: Version): Int {
-            return (this.c - other.c) + (this.b - other.b) * 100 + (this.a - other.a) * 10000
+            return (this.a - other.a) * 10000 + (this.b - other.b) * 100 + (this.c - other.c)
         }
 
     }

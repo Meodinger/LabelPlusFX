@@ -22,38 +22,34 @@ import java.util.*
 object LogSender {
 
     fun sendSync(log: File) {
-        // properties
-        val host = "smtp.163.com"
+        // Account owned by Meodinger Wang
+        // DO NOT USE FOR PRIVATE, I trust you.
         val reportUser = "labelplusfx_report@163.com"
         val reportAuth = "SUWAYUTJSKWQNDOF"
         val targetUser = "meodinger@qq.com"
+
+        // properties
         val props = Properties()
         props.setProperty("mail.transport.protocol", "smtp")
         props.setProperty("mail.smtp.auth", "true")
-        props.setProperty("mail.smtp.host", host)
-
-        // main variables
-        val textPart = MimeBodyPart()
-        val filePart = MimeBodyPart()
-        val content = MimeMultipart()
-        val message = MimeMessage(Session.getInstance(props))
+        props.setProperty("mail.smtp.host", "smtp.163.com")
 
         // text part
-        val builder = StringBuilder()
-        builder.append(System.getProperty("os.name")).append("-")
-        builder.append(System.getProperty("os.version")).append("-")
-        builder.append(System.getProperty("os.arch"))
-        textPart.setText(builder.toString())
+        val textPart = MimeBodyPart()
+        textPart.setText("Got a problem! (or not)\nFrom LPFX ${UpdateChecker.V}")
 
         // file part
+        val filePart = MimeBodyPart()
         filePart.attachFile(log)
         filePart.fileName = "${log.name}.txt"
 
         // content
+        val content = MimeMultipart()
         content.addBodyPart(textPart)
         content.addBodyPart(filePart)
 
         // message
+        val message = MimeMessage(Session.getInstance(props))
         message.subject = "LPFX log report - ${System.getProperty("user.name")}"
         message.setFrom(reportUser)
         message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(targetUser))

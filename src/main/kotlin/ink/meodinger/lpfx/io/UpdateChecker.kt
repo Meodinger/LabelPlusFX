@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.LOGSRC_CHECKER
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
@@ -52,18 +53,13 @@ object UpdateChecker {
 
             /**
              * Return a Version by String, case-insensitive
-             * @param version Start with 'v', with three number parts that split by '.' and max-length = 2.
+             * @param version Start with 'v', with three number parts that split by '.' and value between 0 and 99
              */
             fun of(version: String): Version {
                 if (!pattern.matcher(version).matches()) return V0
-
                 val l = version.split(".")
-                val hasPrefix = version.startsWith("v", true)
 
-                val a = check(l[0].substring(if (hasPrefix) 1 else 0).toInt())
-                val b = check(l[1].toInt())
-                val c = check(l[2].toInt())
-                return Version(a, b, c)
+                return Version(l[0].substring(1).toInt(), l[1].toInt(), l[2].toInt())
             }
         }
 
@@ -129,7 +125,7 @@ object UpdateChecker {
                     dialog.dialogPane.content = VBox().apply {
                         add(Label(String.format(I18N["update.dialog.content.s"], version)))
                         add(Separator()) {
-                            padding = Insets(8.0, 0.0, 8.0, 0.0)
+                            padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0)
                         }
                         add(Hyperlink(I18N["update.dialog.link"])) {
                             padding = Insets(0.0)

@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.util.dialog
 
-import ink.meodinger.lpfx.DIALOG_HEIGHT
-import ink.meodinger.lpfx.DIALOG_WIDTH
+import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -36,12 +35,12 @@ import java.util.Optional
  * @param handler Handler for link
  * @return ButtonType? OK | CLOSE
  */
-fun showLink(owner: Window?, graphics: Node? = null, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
 
     val label = Label(content)
-    val separator = Separator().also { it.padding = Insets(8.0, 0.0, 8.0, 0.0) }
+    val separator = Separator().also { it.padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
     val hyperlink = Hyperlink(link).also { it.onAction = handler; it.padding = Insets(0.0) }
     val box = VBox(label, separator, hyperlink)
 

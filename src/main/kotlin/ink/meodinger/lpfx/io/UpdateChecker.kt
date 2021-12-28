@@ -104,7 +104,7 @@ object UpdateChecker {
             val version = fetchSync()
             if (version != Version.V0) Logger.info("Got latest version: $version", LOGSRC_CHECKER)
 
-            if (version < V) {
+            if (version > V) {
                 val time = Date().time
                 val last = Preference[Preference.LAST_UPDATE_NOTICE].asLong()
                 if (last != 0L && time - last < DELAY) {

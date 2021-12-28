@@ -128,21 +128,23 @@ open class TransFile @JsonCreator constructor(
 
     // ----- Accessible Fields ----- //
 
-    val groupListObservable: ObservableList<TransGroup> by groupListProperty
-    val transMapObservable: ObservableMap<String, MutableList<TransLabel>> by transMapProperty
-
     val version: IntArray by versionProperty
     var comment: String by commentProperty
-    val groupList: List<TransGroup> by groupListObservable
-    val transMap: Map<String, List<TransLabel>> by transMapObservable
+    val groupListObservable: ObservableList<TransGroup> by groupListProperty
+    val transMapObservable: ObservableMap<String, MutableList<TransLabel>> by transMapProperty
 
     val groupCount: Int get() = groupListObservable.size
     val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
     val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
 
     val picCount: Int get() = transMapObservable.size
-    val picNames: List<String> get() = transMapObservable.keys.toList()
-    val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList())
+    val picNames: List<String> get() = transMapObservable.keys.toList() // copy
+    val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList()) // copy
+
+    // ----- JSON Getters ----- //
+
+    protected val groupList: List<TransGroup> by groupListObservable
+    protected val transMap: Map<String, List<TransLabel>> by transMapObservable
 
     // ----- TransGroup ----- //
 
@@ -185,10 +187,7 @@ open class TransFile @JsonCreator constructor(
     }
     fun isGroupUnused(groupName: String): Boolean {
         val groupId = getGroupIdByName(groupName)
-        for (key in transMapObservable.keys) for (label in getTransList(key)) {
-            if (label.groupId == groupId) return false
-        }
-        return true
+        return isGroupUnused(groupId)
     }
     fun isGroupUnused(groupId: Int): Boolean {
         for (key in transMapObservable.keys) for (label in getTransList(key)) {

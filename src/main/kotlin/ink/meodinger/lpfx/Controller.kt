@@ -1100,7 +1100,7 @@ class Controller(private val root: View) {
     // ----- GroupBar ----- //
     fun renderGroupBar() {
         cGroupBar.reset()
-        cGroupBar.render(State.transFile.groupList)
+        cGroupBar.render(State.transFile.groupListObservable)
         cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         Logger.info("Group bar rendered", LOGSRC_CONTROLLER)
@@ -1174,11 +1174,10 @@ class Controller(private val root: View) {
 
     // ----- TreeView ----- //
     fun renderTreeView() {
+        // PicName and ViewMode were bound
         cTreeView.render(
-            // State.currentPicName,
-            transGroups = State.transFile.groupList,
+            transGroups = State.transFile.groupListObservable,
             transLabels = State.transFile.getTransList(State.currentPicName),
-            // State.viewMode
         )
 
         Logger.info("TreeView rendered", LOGSRC_CONTROLLER)

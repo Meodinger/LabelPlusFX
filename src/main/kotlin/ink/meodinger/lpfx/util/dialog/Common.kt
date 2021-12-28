@@ -193,7 +193,10 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     applyBtn.addEventFilter(ActionEvent.ACTION) {
         val button = it.source as Button
         button.text = I18N["common.sending"]
-        LogSender.send(Logger.log) { button.text = I18N["common.sent"] }
+        LogSender.send(Logger.log,
+            { button.text = I18N["common.sent"] },
+            { button.text = I18N["common.failed"] }
+        )
         it.consume()
     }
 

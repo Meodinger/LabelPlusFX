@@ -69,7 +69,11 @@ object ADialogLogs : AbstractPropertiesDialog() {
             val log = tableLog.selectionModel.selectedItem?.file ?: return@does
 
             labelSent.text = I18N["common.sending"]
-            LogSender.send(log) { labelSent.text = "${I18N["common.sent"]} ${log.name}" }
+            LogSender.send(log,
+                { labelSent.text = I18N["common.sent"] + " " + log.name },
+                { labelSent.text = I18N["common.failed"] }
+            )
+
         }
         val buttonClean = Button(I18N["logs.button.clean"]) does {
             val toRemove = ArrayList<LogFile>()

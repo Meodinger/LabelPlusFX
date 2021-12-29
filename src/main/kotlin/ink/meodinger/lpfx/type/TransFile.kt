@@ -19,7 +19,7 @@ import java.io.File
 /**
  * Author: Meodinger
  * Date: 2021/7/29
- * Location: ink.meodinger.lpfx.type
+ * Have fun with my code!
  */
 
 /**
@@ -143,8 +143,8 @@ open class TransFile @JsonCreator constructor(
 
     // ----- JSON Getters ----- //
 
-    protected val groupList: List<TransGroup> by groupListObservable
-    protected val transMap: Map<String, List<TransLabel>> by transMapObservable
+    @Suppress("unused") protected val groupList: List<TransGroup> by groupListObservable
+    @Suppress("unused") protected val transMap: Map<String, List<TransLabel>> by transMapObservable
 
     // ----- TransGroup ----- //
 
@@ -236,13 +236,6 @@ open class TransFile @JsonCreator constructor(
 
     // ----- Other ----- //
 
-    fun toJsonString(): String {
-        return ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .writeValueAsString(this.clone())
-    }
-
     fun clone(): TransFile {
         val version = this.version.clone()
         val comment = this.comment
@@ -255,6 +248,14 @@ open class TransFile @JsonCreator constructor(
         }
 
         return TransFile(version, comment, groupList, transMap)
+    }
+
+
+    fun toJsonString(): String {
+        return ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .writeValueAsString(this.clone())
     }
 
     override fun toString(): String = ObjectMapper().writeValueAsString(this)

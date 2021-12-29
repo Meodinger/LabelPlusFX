@@ -55,28 +55,28 @@ class TransLabel @JsonCreator constructor(
     val textProperty = SimpleStringProperty(text)
 
     var index: Int
-        get() = indexProperty.value
+        get() = indexProperty.get()
         set(value) {
             if (value < 0) throw TransLabelException.indexInvalid(value)
-            indexProperty.value = value
+            indexProperty.set(value)
         }
     var groupId: Int
-        get() = groupIdProperty.value
+        get() = groupIdProperty.get()
         set(value) {
             if (value < 0) throw TransLabelException.groupIdInvalid(value)
-            groupIdProperty.value = value
+            groupIdProperty.set(value)
         }
     var x: Double
-        get() = xProperty.value
+        get() = xProperty.get()
         set(value) {
             if (value < 0 || value > 1) throw TransLabelException.xInvalid(value)
-            xProperty.value = value
+            xProperty.set(value)
         }
     var y: Double
-        get() = yProperty.value
+        get() = yProperty.get()
         set(value) {
             if (value < 0 || value > 1) throw TransLabelException.yInvalid(value)
-            yProperty.value = value
+            yProperty.set(value)
         }
     var text: String by textProperty
 
@@ -113,12 +113,12 @@ class TransLabel @JsonCreator constructor(
         return result
     }
 
-    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replace("\n", ",")})"
+    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replace("\n", "\\n")})"
 
     // ----- Destruction----- //
 
-    operator fun component1(): Int = index
-    operator fun component2(): Int = groupId
+    operator fun component1(): Int    = index
+    operator fun component2(): Int    = groupId
     operator fun component3(): Double = x
     operator fun component4(): Double = y
     operator fun component5(): String = text

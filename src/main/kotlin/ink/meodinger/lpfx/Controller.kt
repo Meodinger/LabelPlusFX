@@ -948,7 +948,7 @@ class Controller(private val root: View) {
         try {
             export(exportDest, type, State.transFile)
             if (!silent) showInfo(I18N["info.saved_successfully"], State.stage)
-            Logger.info("Exported translation")
+            Logger.info("Exported translation", LOGSRC_CONTROLLER)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -958,7 +958,7 @@ class Controller(private val root: View) {
             // Delete the temp file
             if (overwrite) removeTemp()
 
-            Logger.info("Save failed")
+            Logger.info("Save failed", LOGSRC_CONTROLLER)
             return
         }
 
@@ -966,14 +966,14 @@ class Controller(private val root: View) {
             // Transfer to original file if export success
             try {
                 transfer(exportDest, file)
-                Logger.info("Transferred temp file")
+                Logger.info("Transferred temp file", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
                 showError(I18N["error.save_temp_transfer_failed"], State.stage)
                 showException(e, State.stage)
 
-                Logger.info("Save failed")
+                Logger.info("Save failed", LOGSRC_CONTROLLER)
                 return
             }
 

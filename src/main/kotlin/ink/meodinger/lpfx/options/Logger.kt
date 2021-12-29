@@ -34,11 +34,11 @@ object Logger {
 
         companion object {
             fun getType(type: String): LogType = when (type) {
-                DEBUG.type -> DEBUG
-                INFO.type -> INFO
+                DEBUG.type   -> DEBUG
+                INFO.type    -> INFO
                 WARNING.type -> WARNING
-                ERROR.type -> ERROR
-                FATAL.type -> FATAL
+                ERROR.type   -> ERROR
+                FATAL.type   -> FATAL
                 else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.invalid_log_type.s"], type))
             }
         }
@@ -65,12 +65,13 @@ object Logger {
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
 
         val builder = StringBuilder()
-        builder.append("\n")
-        builder.append("RT Version: ").append(Runtime.version()).append(";\n")
-        builder.append("OS Name: ").append(System.getProperty("os.name")).append(", ")
-        builder.append("OS Version: ").append(System.getProperty("os.version")).append(", ")
-        builder.append("OS Arch: ").append(System.getProperty("os.arch")).append(";\n")
-        info(builder.toString())
+        builder.append("\n========== System Info ==========")
+        builder.append("\nRT Version: ").append(Runtime.version()).append(";")
+        builder.append("\nOS Name: ").append(System.getProperty("os.name")).append(", ")
+            .append("Version: ").append(System.getProperty("os.version")).append(", ")
+            .append("Arch: ").append(System.getProperty("os.arch")).append(";")
+        builder.append("\n============== End ==============")
+        info(builder.toString(), "Logger Init")
 
         info("Logger start", LOGSRC_LOGGER)
     }
@@ -80,14 +81,12 @@ object Logger {
         writer.close()
     }
 
-    private fun log(type: LogType, text: String, from: String? = null) {
-        if (!this::writer.isInitialized) return
-        if (type < level) return
+    private fun log(type: LogType, text: String, from: String) {
+        if (!isStarted || type < level) return
 
         val logHead = StringBuilder()
             .append("[").append(formatter.format(Date())).append("] ")
             .append("[").append(String.format("%-7s", type)).append("] ")
-        if (from != null) logHead
             .append("[").append(String.format("%-11s", from)).append("] ")
             .toString()
 
@@ -101,49 +100,49 @@ object Logger {
         writer.flush()
     }
 
-    fun debug(message: String, list: List<*>, from: String? = null) {
+    fun debug(message: String, list: List<*>, from: String) {
         val builder = StringBuilder()
         for (e in list) builder.appendLine(e)
         if (builder.isNotEmpty()) builder.deleteTail("\n")
 
         log(LogType.DEBUG, "$message\n$builder", from)
     }
-    fun debug(message: String, lazy: Lazy<List<*>>, from: String? = null) {
+    fun debug(message: String, lazy: Lazy<List<*>>, from: String) {
         debug(message, lazy.value, from)
     }
 
-    fun debug(message: String, from: String? = null) {
+    fun debug(message: String, from: String) {
         log(LogType.DEBUG, message, from)
     }
-    fun debug(obj: Any?, from: String? = null) {
+    fun debug(obj: Any?, from: String) {
         debug(obj.toString(), from)
     }
 
-    fun info(message: String, from: String? = null) {
+    fun info(message: String, from: String) {
         log(LogType.INFO, message, from)
     }
-    fun info(obj: Any?, from: String? = null) {
+    fun info(obj: Any?, from: String) {
         info(obj.toString(), from)
     }
 
-    fun warning(message: String, from: String? = null) {
+    fun warning(message: String, from: String) {
         log(LogType.WARNING, message, from)
     }
-    fun warning(obj: Any?, from: String? = null) {
+    fun warning(obj: Any?, from: String) {
         warning(obj.toString(), from)
     }
 
-    fun error(message: String, from: String? = null) {
+    fun error(message: String, from: String) {
         log(LogType.ERROR, message, from)
     }
-    fun error(obj: Any?, from: String? = null) {
+    fun error(obj: Any?, from: String) {
         error(obj.toString(), from)
     }
 
-    fun fatal(message: String, from: String? = null) {
+    fun fatal(message: String, from: String) {
         log(LogType.FATAL, message, from)
     }
-    fun fatal(obj: Any?, from: String? = null) {
+    fun fatal(obj: Any?, from: String) {
         fatal(obj.toString(), from)
     }
 

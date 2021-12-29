@@ -1,13 +1,10 @@
 package ink.meodinger.lpfx.type
 
+import com.fasterxml.jackson.annotation.*
 import ink.meodinger.lpfx.util.color.isColorHex
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonGetter
 import javafx.beans.property.SimpleStringProperty
 
 
@@ -46,19 +43,17 @@ class TransGroup @JsonCreator constructor(
     val colorHexProperty = SimpleStringProperty()
 
     var name: String
-        get() = nameProperty.value
+        get() = nameProperty.get()
         set(value) {
             if (value.isEmpty()) throw TransGroupException.nameInvalid(value)
             for (c in value.toCharArray()) if (c == '|' || c.isWhitespace()) throw TransGroupException.nameInvalid(value)
-            nameProperty.value = value
+            nameProperty.set(value)
         }
     var colorHex: String
-        @JsonGetter("color")
-        get() = colorHexProperty.value
-        //@JsonSetter("color")
-        set(value) {
+        @JsonGetter("color") get() = colorHexProperty.get()
+        @JsonSetter("color") set(value) {
             if (!value.isColorHex()) throw TransGroupException.colorInvalid(value)
-            colorHexProperty.value = value
+            colorHexProperty.set(value)
         }
 
     init {
@@ -85,5 +80,10 @@ class TransGroup @JsonCreator constructor(
     }
 
     override fun toString(): String = "TransGroup(name=$name, color=$colorHex)"
+
+    // ----- Destruction----- //
+
+    operator fun component1(): String = name
+    operator fun component2(): String = colorHex
 
 }

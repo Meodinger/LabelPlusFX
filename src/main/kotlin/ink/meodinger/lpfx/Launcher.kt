@@ -27,7 +27,7 @@ fun main(vararg args: String) {
     // And if Options or Logger init failed, we can only get information from Swing window
     Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
         if (Logger.isStarted) {
-            Logger.fatal("Launch failed")
+            Logger.fatal("Launch failed", "Main")
             Logger.exception(e)
             LogSender.sendSync(Logger.log)
         }

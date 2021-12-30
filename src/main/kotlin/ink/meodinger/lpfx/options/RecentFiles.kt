@@ -21,7 +21,7 @@ object RecentFiles : AbstractProperties() {
 
     private val recent = ArrayDeque<String>()
 
-    override val default = listOf(CProperty(RECENT, "")).toPropertiesMap()
+    override val default = listOf(CProperty(RECENT, CProperty.EMPTY)).toPropertiesMap()
 
     init { useDefault() }
 

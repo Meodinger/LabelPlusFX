@@ -933,20 +933,20 @@ class Controller(private val root: View) {
         }
 
         // Use temp if overwrite
-        val exportDest = if (overwrite) File("${State.translationFile.path}.temp") else file
+        val exportTemp = if (overwrite) File("${State.translationFile.path}.temp") else file
         fun removeTemp() {
             try {
-                Files.delete(exportDest.toPath())
+                Files.delete(exportTemp.toPath())
                 Logger.info("Temp file removed", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.error("Temp file remove failed", LOGSRC_CONTROLLER)
-                if (!silent) showError(String.format(I18N["error.save_temp_remove_failed.s"], exportDest.path), State.stage)
+                if (!silent) showError(String.format(I18N["error.save_temp_remove_failed.s"], exportTemp.path), State.stage)
             }
         }
 
         // Export
         try {
-            export(exportDest, type, State.transFile)
+            export(exportTemp, type, State.transFile)
             if (!silent) showInfo(I18N["info.saved_successfully"], State.stage)
             Logger.info("Exported translation", LOGSRC_CONTROLLER)
         } catch (e: IOException) {
@@ -965,7 +965,7 @@ class Controller(private val root: View) {
         if (overwrite) {
             // Transfer to original file if export success
             try {
-                transfer(exportDest, file)
+                transfer(exportTemp, file)
                 Logger.info("Transferred temp file", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)

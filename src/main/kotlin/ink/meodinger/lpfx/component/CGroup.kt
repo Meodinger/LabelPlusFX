@@ -33,7 +33,7 @@ class CGroup(
 
     companion object {
         private const val DEFAULT_NAME = ""
-        private const val DEFAULT_COLOR_HEX = "66CCFFFF"
+        private const val DEFAULT_COLOR_HEX = "66CCFF"
 
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0

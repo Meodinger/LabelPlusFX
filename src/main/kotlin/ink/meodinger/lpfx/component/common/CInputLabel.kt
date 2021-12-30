@@ -24,8 +24,8 @@ import javafx.scene.layout.Pane
 class CInputLabel : Pane() {
 
     companion object {
-        const val DEFAULT_WIDTH: Double = 48.0
-        const val DEFAULT_HEIGHT: Double = 24.0
+        private const val DEFAULT_WIDTH: Double = 48.0
+        private const val DEFAULT_HEIGHT: Double = 24.0
     }
 
     private val label = Label()

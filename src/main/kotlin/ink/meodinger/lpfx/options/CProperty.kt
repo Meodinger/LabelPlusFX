@@ -22,10 +22,10 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
         private const val PAIR_START     = "<"
         private const val PAIR_STOP      = ">"
 
-        const val UNINITIALIZED = "<@Uninitialized@>"
+        private const val UNINITIALIZED = "<@Uninitialized@>"
         const val EMPTY = ""
 
-        fun parseList(values: List<*>): String {
+        private fun parseList(values: List<*>): String {
             val builder = StringBuilder()
             for (value in values) {
                 val content = if (value is Pair<*,*>) {

@@ -56,16 +56,16 @@ class CLabelPane : ScrollPane() {
     companion object {
 
         // scale
-        const val NOT_SET = -1.0
+        private const val NOT_SET = -1.0
 
         // text display
         /**
          * Rect based shift
          */
-        const val SHIFT_X = 20.0
-        const val TEXT_INSET = 10.0
-        const val TEXT_ALPHA = "A0"
-        val TEXT_FONT = Font(MonoFont, 32.0)
+        private const val SHIFT_X = 20.0
+        private const val TEXT_INSET = 10.0
+        private const val TEXT_ALPHA = "A0"
+        private val TEXT_FONT = Font(MonoFont, 32.0)
     }
 
     // ----- Exception ----- //

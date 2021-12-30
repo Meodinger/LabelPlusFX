@@ -32,9 +32,9 @@ class CLabel(
 ) : Region() {
 
     companion object {
-        const val DEFAULT_INDEX = -1
-        const val DEFAULT_RADIUS = 16.0
-        const val DEFAULT_COLOR = "66CCFFFF"
+        private const val DEFAULT_INDEX = -1
+        private const val DEFAULT_RADIUS = 16.0
+        private const val DEFAULT_COLOR = "66CCFF"
 
         const val MIN_PICK_RADIUS = 16.0
     }
@@ -57,7 +57,7 @@ class CLabel(
     init {
         text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
-        text.textOrigin = VPos.CENTER // to avoid edit layoutY
+        text.textOrigin = VPos.CENTER // to get rid of editing layoutY
 
         indexProperty.addListener(onNew<Number, Int> { update(index = it) })
         radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })

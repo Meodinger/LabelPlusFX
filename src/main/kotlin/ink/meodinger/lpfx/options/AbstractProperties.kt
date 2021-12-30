@@ -113,18 +113,18 @@ abstract class AbstractProperties {
         throw RuntimeException(String.format(I18N["exception.property.property_not_found.k"], key))
     }
     operator fun set(key: String, value: String) {
-        get(key).value = value
+        get(key).set(value)
     }
     operator fun set(key: String, value: Boolean) {
-        set(key, value.toString())
+        get(key).set(value)
     }
     operator fun set(key: String, value: Number) {
-        set(key, value.toString())
+        get(key).set(value)
     }
     operator fun set(key: String, value: List<*>) {
-        set(key, CProperty.parseList(value))
+        get(key).set(value)
     }
     operator fun set(key: String, another: CProperty) {
-        set(key, another.value)
+        get(key).set(another)
     }
 }

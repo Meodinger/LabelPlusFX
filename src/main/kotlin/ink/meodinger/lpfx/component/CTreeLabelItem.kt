@@ -30,8 +30,8 @@ class CTreeLabelItem(
 ) : TreeItem<String>() {
 
     companion object {
-        const val DEFAULT_INDEX = -1
-        const val DEFAULT_TEXT = ""
+        private const val DEFAULT_INDEX = -1
+        private const val DEFAULT_TEXT = ""
     }
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)

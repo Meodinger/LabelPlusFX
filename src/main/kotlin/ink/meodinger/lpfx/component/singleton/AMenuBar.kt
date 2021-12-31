@@ -339,7 +339,7 @@ object AMenuBar : MenuBar() {
         val list = ADialogSettings.generateProperties()
 
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
-        Logger.debug("got", list, LOGSRC_DIALOGS)
+        Logger.debug("got $list", LOGSRC_DIALOGS)
 
         var updatePane = false
         var updateRules = false
@@ -360,7 +360,7 @@ object AMenuBar : MenuBar() {
         val list = ADialogLogs.generateProperties()
 
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)
-        Logger.debug("got", list, LOGSRC_DIALOGS)
+        Logger.debug("got $list", LOGSRC_DIALOGS)
 
         for (property in list) {
             if (Settings[property.key].asString() == property.value) continue

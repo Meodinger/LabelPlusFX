@@ -1,9 +1,9 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
+import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.string.deleteTail
 
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -66,10 +66,10 @@ object Logger {
 
         val builder = StringBuilder()
         builder.append("\n========== System Info ==========")
-        builder.append("\nRT Version: ").append(Runtime.version()).append(";")
         builder.append("\nOS Name: ").append(System.getProperty("os.name")).append(", ")
             .append("Version: ").append(System.getProperty("os.version")).append(", ")
             .append("Arch: ").append(System.getProperty("os.arch")).append(";")
+        builder.append("\nApplication Version: ").append(UpdateChecker.V).append(";")
         builder.append("\n============== End ==============")
         info(builder.toString(), "Logger Init")
 
@@ -99,51 +99,20 @@ object Logger {
         writer.write(logText)
         writer.flush()
     }
-
-    fun debug(message: String, list: List<*>, from: String) {
-        val builder = StringBuilder()
-        for (e in list) builder.appendLine(e)
-        if (builder.isNotEmpty()) builder.deleteTail("\n")
-
-        log(LogType.DEBUG, "$message\n$builder", from)
-    }
-    fun debug(message: String, lazy: Lazy<List<*>>, from: String) {
-        debug(message, lazy.value, from)
-    }
-
     fun debug(message: String, from: String) {
         log(LogType.DEBUG, message, from)
     }
-    fun debug(obj: Any?, from: String) {
-        debug(obj.toString(), from)
-    }
-
     fun info(message: String, from: String) {
         log(LogType.INFO, message, from)
     }
-    fun info(obj: Any?, from: String) {
-        info(obj.toString(), from)
-    }
-
     fun warning(message: String, from: String) {
         log(LogType.WARNING, message, from)
     }
-    fun warning(obj: Any?, from: String) {
-        warning(obj.toString(), from)
-    }
-
     fun error(message: String, from: String) {
         log(LogType.ERROR, message, from)
     }
-    fun error(obj: Any?, from: String) {
-        error(obj.toString(), from)
-    }
-
     fun fatal(message: String, from: String) {
         log(LogType.FATAL, message, from)
-    }
-    fun fatal(obj: Any?, from: String) {
-        fatal(obj.toString(), from)
     }
 
     fun exception(e: Throwable) {

@@ -805,8 +805,6 @@ class Controller(private val root: View) {
             return null
         }
 
-        Logger.debug("Chose pics:", selectedPics, LOGSRC_CONTROLLER)
-
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
         val groupNameList = Settings[Settings.DefaultGroupNameList].asStringList()
@@ -818,8 +816,6 @@ class Controller(private val root: View) {
         for (pic in selectedPics) transMap[pic] = ArrayList()
 
         val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
-
-        Logger.debug("Created TransFile: $transFile", LOGSRC_CONTROLLER)
 
         // Export to file
         try {
@@ -860,7 +856,6 @@ class Controller(private val root: View) {
             showException(e, State.stage)
             return
         }
-        Logger.debug("Read TransFile: $transFile", LOGSRC_CONTROLLER)
 
         // Update State
         State.transFile = transFile
@@ -870,13 +865,17 @@ class Controller(private val root: View) {
 
         // Show info if comment not in default list
         if (!RecentFiles.getAll().contains(file.path)) {
+            var modified = true
             val comment = transFile.comment.trim()
             for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
                 if (comment == defaultComment) {
-                    Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
-                    showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
+                    modified = false
                     break
                 }
+            }
+            if (modified) {
+                Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
+                showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
             }
         }
 
@@ -1104,11 +1103,6 @@ class Controller(private val root: View) {
         cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         Logger.info("Group bar rendered", LOGSRC_CONTROLLER)
-        Logger.debug("List is", lazy {
-            List(State.transFile.groupCount) {
-                TransGroup(State.transFile.groupNames[it], State.transFile.groupColors[it])
-            }
-        }, LOGSRC_CONTROLLER)
     }
 
     fun createGroupBarItem(transGroup: TransGroup) {

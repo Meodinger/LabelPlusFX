@@ -89,7 +89,6 @@ object ADialogLogs : AbstractPropertiesDialog() {
             tableLog.items.removeAll(toRemove)
 
             Logger.info("Cleaned logs", LOGSRC_DIALOGS)
-            Logger.debug("Cleaned", toRemove, LOGSRC_DIALOGS)
         }
 
         val startTimeCol = TableColumn<LogFile, String>(I18N["logs.table.startTime"]).also { column ->

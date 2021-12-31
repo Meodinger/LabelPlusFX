@@ -40,7 +40,7 @@ fun load(file: File, type: FileType): TransFile {
                 FileType.LPFile -> loadMeo(file)
                 FileType.MeoFile -> loadLP(file)
             }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             // Load as another file type failed, but we don't care about actually what problem occurred.
             // Throw the original exception just like we never tried.
             throw e
@@ -58,8 +58,7 @@ private fun loadLP(file: File): TransFile {
     // Remove BOM (EF BB BF)
     val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
     val buf = ByteArray(3)
-    val fis = FileInputStream(file)
-    val len = fis.read(buf, 0, 3)
+    val len = FileInputStream(file).read(buf, 0, 3)
     if (len != 3) throw IOException(I18N["exception.loader.unexpected_eof"])
     if (bom.contentEquals(buf)) reader.read(CharArray(3), 0, 1)
 

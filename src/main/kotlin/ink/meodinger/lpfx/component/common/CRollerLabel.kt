@@ -18,14 +18,18 @@ import javafx.scene.text.Text
  * Have fun with my code!
  */
 
-class CRollerLabel(contentText: String) : Region() {
+class CRollerLabel(contentText: String = "") : Region() {
+
+    companion object {
+        private const val SHIFT_PERIOD_DEFAULT: Long = 400L
+    }
 
     private var changed = false
     private var clipped = false
     private val label = Label(contentText)
     private var displayText: String by label.textProperty()
 
-    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(320)
+    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(SHIFT_PERIOD_DEFAULT)
     fun shiftPeriodProperty(): LongProperty = shiftPeriodProperty
     var shiftPeriod: Long by shiftPeriodProperty
 
@@ -54,8 +58,6 @@ class CRollerLabel(contentText: String) : Region() {
         }
     }
 
-    constructor(): this("")
-
     init {
         // label.layoutXProperty().bind(- widthProperty() / 2)
         // label.layoutYProperty().bind(- heightProperty() / 2)
@@ -76,13 +78,14 @@ class CRollerLabel(contentText: String) : Region() {
     }
 
     private fun roll(text: String): String {
-        if (!clipped) return text
-        if (text.length <= 1) return text
-        return text.substring(1, text.length) + text.substring(0, 1)
+        return if (!clipped) {
+            stopRoll()
+            return text.trim()
+        } else text.substring(1, text.length) + text.substring(0, 1)
     }
 
     fun startRoll() {
-        rollerManager.clear()
+        stopRoll()
         rollerManager.refresh()
         rollerManager.schedule()
     }

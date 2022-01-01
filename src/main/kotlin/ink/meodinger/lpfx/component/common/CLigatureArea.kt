@@ -22,32 +22,30 @@ import javafx.scene.control.TextFormatter
 class CLigatureArea: TextArea() {
 
     companion object {
-        private const val LIGATURE_MAX_LENGTH: Int = 10
         private const val LIGATURE_MARK: String = "\\"
-        private val DEFAULT_RULES: List<Pair<String, String>> = listOf("cc" to "◎")
+        private const val LIGATURE_MAX_LENGTH: Int = 10
     }
-
-    private var ligaturing: Boolean = false
-    private var ligatureStart: Int = 0
-    private var ligatureString: String = ""
-
-    private val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
-    fun ligatureMaxLengthProperty(): IntegerProperty = ligatureMaxLengthProperty
-    var ligatureMaxLength: Int by ligatureMaxLengthProperty
-
-    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList(DEFAULT_RULES))
-    fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
-    var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
     private val ligatureMarkProperty: StringProperty = SimpleStringProperty(LIGATURE_MARK)
     fun ligatureMarkProperty(): StringProperty = ligatureMarkProperty
     var ligatureMark: String by ligatureMarkProperty
 
-    private val boundTextPropertyProperty = SimpleObjectProperty<StringProperty>(null)
-    private var boundTextProperty: StringProperty? by boundTextPropertyProperty
-    val boundProperty: StringProperty? get() = boundTextProperty
-    val isBound: Boolean get() = boundTextProperty != null
+    private val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
+    fun ligatureMaxLengthProperty(): IntegerProperty = ligatureMaxLengthProperty
+    var ligatureMaxLength: Int by ligatureMaxLengthProperty
 
+    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList())
+    fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
+    var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
+
+    private val boundTextPropertyProperty: ObjectProperty<StringProperty> = SimpleObjectProperty(null)
+    val isBound: Boolean get() = boundTextPropertyProperty.get() != null
+
+    // ----- Ligature ----- //
+
+    private var ligaturing: Boolean = false
+    private var ligatureStart: Int = 0
+    private var ligatureString: String = ""
     private val defaultTextFormatter = TextFormatter<String> { change ->
         if (change.isAdded) {
             if (change.text == ligatureMark) {
@@ -90,21 +88,9 @@ class CLigatureArea: TextArea() {
 
         change
     }
-
-    init {
-        resetFormatter()
-    }
-
-    fun reset() {
-        unbindBidirectional()
-    }
-    fun resetFormatter() {
-        textFormatter = defaultTextFormatter
-    }
-
-    private fun ligatureStart(startCaret: Int) {
+    private fun ligatureStart(caret: Int) {
         ligaturing = true
-        ligatureStart = startCaret
+        ligatureStart = caret
         ligatureString = ""
     }
     private fun ligatureEnd() {
@@ -113,15 +99,31 @@ class CLigatureArea: TextArea() {
         ligatureString = ""
     }
 
+    init {
+        textFormatter = defaultTextFormatter
+    }
+
+    fun reset() {
+        unbindBidirectional()
+        textFormatter = defaultTextFormatter
+    }
+
+    /**
+     * Bind the StringProperty of this TextArea to another StringProperty bidirectionally.
+     */
     fun bindBidirectional(property: StringProperty) {
         textProperty().bindBidirectional(property)
-        boundTextProperty = property
+        boundTextPropertyProperty.set(property)
     }
-    fun unbindBidirectional() {
-        if (boundTextProperty == null)  return
 
-        textProperty().unbindBidirectional(boundTextProperty)
-        boundTextProperty = null
+    /**
+     * Unbind the bound StringProperty (if not null), and clear text.
+     */
+    fun unbindBidirectional() {
+        val bound = boundTextPropertyProperty.get() ?: return
+
+        textProperty().unbindBidirectional(bound)
+        boundTextPropertyProperty.set(null)
         text = ""
     }
 

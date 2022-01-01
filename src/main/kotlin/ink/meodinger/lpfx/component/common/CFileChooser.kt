@@ -6,6 +6,7 @@ import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.StringProperty
 import javafx.collections.ObservableList
 import javafx.stage.FileChooser
 import javafx.stage.Window
@@ -23,6 +24,8 @@ import java.io.File
  */
 class CFileChooser {
 
+    /// FileChooser is final class, extension unavailable
+
     companion object {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
         fun lastDirectoryProperty(): ObjectProperty<File> = lastDirectoryProperty
@@ -38,13 +41,23 @@ class CFileChooser {
 
     private val chooser = FileChooser()
 
-    var title: String by chooser.titleProperty()
-    var initialFileName: String by chooser.initialFileNameProperty()
-    var selectedFilter: FileChooser.ExtensionFilter? = chooser.selectedExtensionFilter
+    private val initialDirectoryProperty: ObjectProperty<File> = chooser.initialDirectoryProperty()
+    fun initialDirectoryProperty(): ObjectProperty<File> = initialDirectoryProperty
+    var initialDirectory: File by initialDirectoryProperty
+
+    private val initialFilenameProperty: ObjectProperty<String> = chooser.initialFileNameProperty()
+    fun initialFilenameProperty(): ObjectProperty<String> = initialFilenameProperty
+    var initialFilename: String by initialFilenameProperty
+
+    private val titleProperty: StringProperty = chooser.titleProperty()
+    fun titleProperty(): StringProperty = titleProperty
+    var title: String by titleProperty
+
     val extensionFilters: ObservableList<FileChooser.ExtensionFilter> = chooser.extensionFilters
+    var selectedExtensionFilter: FileChooser.ExtensionFilter? = chooser.selectedExtensionFilter
 
     init {
-        chooser.initialDirectoryProperty().bind(lastDirectoryProperty)
+        initialDirectoryProperty.bind(lastDirectoryProperty)
     }
 
     fun showOpenDialog(owner: Window?): File? {

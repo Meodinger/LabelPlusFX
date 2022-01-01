@@ -33,7 +33,7 @@ class CLabel(
 
     companion object {
         private const val DEFAULT_INDEX = -1
-        private const val DEFAULT_RADIUS = 16.0
+        private const val DEFAULT_RADIUS = 24.0
         private const val DEFAULT_COLOR = "66CCFF"
 
         const val MIN_PICK_RADIUS = 16.0

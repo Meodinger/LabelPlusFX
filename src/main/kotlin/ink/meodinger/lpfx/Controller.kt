@@ -1275,10 +1275,9 @@ class Controller(private val root: View) {
             }
         }
         if (State.isOpened) textReformat()
-        State.isOpenedProperty.addListener { _, _, newValue ->
-            // Restore default formatter
-            if (!newValue) cTransArea.resetFormatter()
-        }
+
+        // Restore default formatter if closed (State reset)
+        State.isOpenedProperty.addListener(onNew { if (!it) cTransArea.reset() })
 
         State.application.addShutdownHook("JustMonika") {
             playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it)

@@ -2,6 +2,8 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHex
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.repeat
 
 import javafx.beans.property.StringProperty
@@ -22,13 +24,20 @@ import java.util.stream.Collectors
  */
 
 /**
- * A ColorPicker costumed to can be applied to ContextMenu
- * Replace color link with hex TextField
+ * JavaFX ColorPicker will throw an Exception when be applied to
+ * a MenuItem and click the 'custom color' link. This ColorPicker
+ * replaces the link with a ColorHex TextField which can be used
+ * to enter a hex string.
+ *
+ * @see <a href="https://stackoverflow.com/questions/42812471/javafx-colorpicker-nullpointerexception">colorpicker-nullpointerexception</a>
  */
 class CColorPicker() : ColorPicker() {
 
     private val colorHexField: TextField = TextField()
+
     private val colorHexProperty: StringProperty = colorHexField.textProperty()
+    fun colorHexProperty(): StringProperty = colorHexProperty
+    var colorHex: String by colorHexProperty
 
     constructor(color: Color): this() { value = color }
 

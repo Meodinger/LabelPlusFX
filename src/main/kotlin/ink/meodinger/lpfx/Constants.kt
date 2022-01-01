@@ -23,6 +23,13 @@ const val DIALOG_HEIGHT = 400.0
 const val COMMON_GAP    = 16.0
 
 /**
+ * CLabel Radius Range
+ */
+const val LABEL_RADIUS_MIN = 8.0
+const val LABEL_RADIUS_MAX = 48.0
+
+
+/**
  * Scroll Delta Default
  */
 const val SCROLL_DELTA = 32.0

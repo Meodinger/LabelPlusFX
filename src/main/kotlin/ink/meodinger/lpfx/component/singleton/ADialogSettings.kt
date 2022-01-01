@@ -378,37 +378,44 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
             change
         }
-        lLabelRadius.setOnChangeFinish {
-            lSliderRadius.value = it.toDouble()
+        lLabelRadius.setOnChangeToLabel {
+            val radius = fieldText.toDouble()
+            lSliderRadius.value = radius
+
+            String.format("%05.2f", radius)
         }
         lSliderRadius.valueProperty().addListener(onNew<Number, Double> {
-            lLabelRadius.text = String.format("%05.2f",  it)
+            lLabelRadius.text = String.format("%05.2f", it)
             lCLabel.radius = it
         })
-        lSliderRadius.min = 8.0
-        lSliderRadius.max = 48.0
+        lSliderRadius.min = LABEL_RADIUS_MIN
+        lSliderRadius.max = LABEL_RADIUS_MAX
 
         lLabelAlpha.textFormatter = TextFormatter { change ->
             if (!change.isAdded) return@TextFormatter change
 
             if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
                 return@TextFormatter change.also { it.text = "" }
-            if (change.controlText.length + change.text.length > 2)
+            if (change.controlNewText.length > 2)
                 return@TextFormatter change.also { it.text = "" }
 
             return@TextFormatter change
         }
-        lLabelAlpha.setOnChangeStart {
-            fieldText = it.replace("0x", "")
+        lLabelAlpha.setOnChangeToField {
+            labelText.substring(2)
         }
-        lLabelAlpha.setOnChangeFinish {
-            lSliderAlpha.value = it.toInt(16) / 255.0
+        lLabelAlpha.setOnChangeToLabel {
+            val alphaStr = fieldText
+            lSliderAlpha.value = alphaStr.toInt(16) / 255.0
+
+            "0x" + if (alphaStr.isEmpty()) "00" else if (alphaStr.length == 1) "0$alphaStr" else alphaStr
         }
         lSliderAlpha.valueProperty().addListener(onNew<Number, Double> {
-            val str = (it * 255.0).toInt().toString(16).uppercase()
-            lLabelAlpha.labelText = if (str.length == 1) "0x0$str" else "0x$str"
-            lLabelAlpha.fieldText = str
-            lCLabel.color = if (str.length == 1) Color.web("FF00000$str") else Color.web("FF0000$str")
+            val alphaStr = (it * 255.0).toInt().toString(16)
+            val alphaPart = if (alphaStr.length == 1) "0$alphaStr" else alphaStr
+
+            lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
+            lCLabel.color = Color.web("FF0000$alphaPart")
         })
         lSliderAlpha.min = 0.0
         lSliderAlpha.max = 1.0
@@ -448,10 +455,16 @@ object ADialogSettings : AbstractPropertiesDialog() {
         // Label
         lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
         lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
+
+        val radius = Settings[Settings.LabelRadius].asDouble()
         lLabelRadius.isEditing = false
+        lLabelRadius.text = String.format("%05.2f", radius)
+        lSliderRadius.value = radius
+
+        val alpha = Settings[Settings.LabelAlpha].asString()
         lLabelAlpha.isEditing = false
-        lSliderRadius.value = Settings[Settings.LabelRadius].asDouble()
-        lSliderAlpha.value = Settings[Settings.LabelAlpha].asInteger(16) / 255.0
+        lLabelAlpha.text = "0x$alpha"
+        lSliderAlpha.value = alpha.toInt(16) / 255.0
     }
 
     // ----- Result convert ---- //

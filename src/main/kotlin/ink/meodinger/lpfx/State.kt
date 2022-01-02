@@ -37,9 +37,9 @@ object State {
 
     val isOpenedProperty = SimpleBooleanProperty(false)
     val isChangedProperty = SimpleBooleanProperty(false)
-    val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_FILE)
-    val translationFileProperty = SimpleObjectProperty(File(""))
-    val projectFolderProperty = SimpleObjectProperty(File(""))
+    val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
+    val translationFileProperty = SimpleObjectProperty(DEFAULT_FILE)
+    val projectFolderProperty = SimpleObjectProperty(DEFAULT_FILE)
     val currentPicNameProperty = SimpleStringProperty("")
     val currentGroupIdProperty = SimpleIntegerProperty(0)
     val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
@@ -92,9 +92,9 @@ object State {
 
         isOpened = false
         isChanged = false
-        transFile = TransFile.DEFAULT_FILE
-        translationFile = File("")
-        projectFolder = File("")
+        transFile = TransFile.DEFAULT_TRANSFILE
+        translationFile = DEFAULT_FILE
+        projectFolder = DEFAULT_FILE
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
@@ -175,7 +175,7 @@ object State {
      * Get current picture's FileSystem file
      */
     fun getPicFileNow(): File {
-        if (!isOpened || currentPicName == "") return File("")
+        if (!isOpened || currentPicName == "") return DEFAULT_FILE
         return transFile.getFile(currentPicName)
     }
 

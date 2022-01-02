@@ -2,8 +2,10 @@ package ink.meodinger.lpfx.util.timer
 
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import javafx.beans.property.BooleanProperty
 
 import javafx.beans.property.LongProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleLongProperty
 import java.util.*
 
@@ -47,11 +49,16 @@ class TimerTaskManager(
 
     private var timerTask: TimerTask = genTask(task)
 
-    val delayProperty: LongProperty = SimpleLongProperty(delay)
+    private val runningProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun runningProperty(): BooleanProperty = runningProperty
+    var running: Boolean by runningProperty
+        private set
+
+    private val delayProperty: LongProperty = SimpleLongProperty(delay)
     fun delayProperty(): LongProperty = delayProperty
     var delay: Long by delayProperty
 
-    val periodProperty: LongProperty = SimpleLongProperty(period)
+    private val periodProperty: LongProperty = SimpleLongProperty(period)
     fun periodProperty(): LongProperty = periodProperty
     var period: Long by periodProperty
 
@@ -61,11 +68,15 @@ class TimerTaskManager(
 
     fun schedule() {
         schedule(timerTask, delay, period)
+
+        running = true
     }
 
     fun clear() {
         timerTask.cancel()
         purge()
+
+        running = false
     }
 
 }

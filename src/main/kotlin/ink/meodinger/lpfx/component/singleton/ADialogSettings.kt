@@ -83,7 +83,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
         dialogPane.content = TabPane().apply {
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
-            add(Tab(I18N["settings.group.title"])) {
+            add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(gGridPane.apply {
                         padding = Insets(COMMON_GAP)
@@ -94,19 +94,15 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
 
-                    center(scrollPane) {
-                        style = "-fx-background-color:transparent;"
-                    }
+                    center(scrollPane) { style = "-fx-background-color:transparent;" }
                     bottom(HBox()) {
                         alignment = Pos.CENTER_RIGHT
                         padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
-                        add(Button(I18N["settings.group.add"])) {
-                            does { createGroupRow() }
-                        }
+                        add(Button(I18N["settings.group.add"])) { does { createGroupRow() } }
                     }
                 }
             }
-            add(Tab(I18N["settings.ligature.title"])) {
+            add(I18N["settings.ligature.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(rGridPane.apply {
                         padding = Insets(COMMON_GAP)
@@ -117,23 +113,17 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
 
-                    center(scrollPane) {
-                        style = "-fx-background-color:transparent;"
-                    }
+                    center(scrollPane) { style = "-fx-background-color:transparent;" }
                     bottom(HBox()) {
                         alignment = Pos.CENTER_RIGHT
                         padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
                         add(Label(I18N["settings.ligature.sample"]))
-                        add(HBox()) {
-                            hGrow = Priority.ALWAYS
-                        }
-                        add(Button(I18N["settings.ligature.add"])) {
-                            does { createLigatureRow() }
-                        }
+                        add(HBox()) { hGrow = Priority.ALWAYS }
+                        add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
                     }
                 }
             }
-            add(Tab(I18N["settings.mode.title"])) {
+            add(I18N["settings.mode.title"]) {
                 withContent(GridPane()) {
                     val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
 
@@ -172,7 +162,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     }
                 }
             }
-            add(Tab(I18N["settings.label.title"])) {
+            add(I18N["settings.label.title"]) {
                 withContent(GridPane()) {
                     padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
                     vgap = COMMON_GAP
@@ -263,7 +253,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             if (!change.controlNewText.isMathematicalDecimal())
                                 return@TextFormatter change.also { it.text = "" }
 
-                            change
+                            return@TextFormatter change
                         }
                         setOnChangeToLabel {
                             val radius = fieldText.toDouble()
@@ -330,7 +320,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun createGroupRow(createOnNew: Boolean = false, name: String = "", color: String = "") {
         val newRowIndex = if (gGridPane.rowCount == 0) 1 else gGridPane.rowCount
 
-        if (gGridPane.children.size == 1 || gGridPane.rowCount == 0) { // Only hint
+        if (gGridPane.children.size == 1 || gGridPane.rowCount == 0) { // Only hint or nothing
             gGridPane.children.clear()
             gGridPane.add(gLabelName, 0, 0)
             gGridPane.add(gLabelColor, 1, 0)
@@ -338,11 +328,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
         }
 
         val groupId = newRowIndex - gRowShift
-        val colorHex =
-            if (color.isColorHex())
-                color
-            else
-                gDefaultColorHexList[groupId % gDefaultColorHexList.size]
+        val colorHex = if (color.isColorHex()) color else gDefaultColorHexList[groupId % gDefaultColorHexList.size]
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }

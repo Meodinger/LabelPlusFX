@@ -6,7 +6,7 @@ import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
-import ink.meodinger.lpfx.util.component.disableMnemonicParsingForAll
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.resource.I18N
@@ -14,7 +14,6 @@ import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
-import javafx.event.ActionEvent
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
@@ -38,118 +37,138 @@ import kotlin.io.path.name
  */
 object AMenuBar : MenuBar() {
 
-    // ----- Menus ----- //
+    // ----- Recent ----- //
 
-    private val mmFile               = Menu(I18N["mm.file"])
-    private val mNew                 = MenuItem(I18N["m.new"])
-    private val mOpen                = MenuItem(I18N["m.open"])
-    private val mOpenRecent          = Menu(I18N["m.recent"])
-    private val mSave                = MenuItem(I18N["m.save"])
-    private val mSaveAs              = MenuItem(I18N["m.save_as"])
-    private val mClose               = MenuItem(I18N["m.close"])
-    private val mBakRecover          = MenuItem(I18N["m.bak_recovery"])
-    private val mExit                = MenuItem(I18N["m.exit"])
-
-    private val mmEdit               = Menu(I18N["mm.edit"])
-    private val mEditComment         = MenuItem(I18N["m.comment"])
-    private val mEditProjectPictures = MenuItem(I18N["m.projectPics"])
-    private val mAddExternalPicture  = MenuItem(I18N["m.externalPic"])
-    private val mSpecifyPictures     = MenuItem(I18N["m.specify"])
-
-    private val mmExport             = Menu(I18N["mm.export"])
-    private val mExportAsLp          = MenuItem(I18N["m.lp"])
-    private val mExportAsMeo         = MenuItem(I18N["m.meo"])
-    private val mExportAsTransPack   = MenuItem(I18N["m.pack"])
-
-    private val mmAbout              = Menu(I18N["mm.about"])
-    private val mSettings            = MenuItem(I18N["m.settings"])
-    private val mLogs                = MenuItem(I18N["m.logs"])
-    private val mAbout               = MenuItem(I18N["m.about"])
-    private val mCrash               = MenuItem(I18N["m.crash"])
+    private val mOpenRecent = Menu(I18N["m.recent"])
 
     // ----- Choosers ----- //
 
-    private val picChooser = CFileChooser()
-    private val picFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
-    private val pngFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSION_PIC_PNG}")
-    private val jpgFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
-    private val jpegFilter = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
+    private val picChooser        = CFileChooser()
+    private val picFilter         = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
+    private val pngFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSION_PIC_PNG}")
+    private val jpgFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
+    private val jpegFilter        = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
 
-    private val fileChooser = CFileChooser()
-    private val exportChooser = CFileChooser()
-    private val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
-    private val lpFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_FILE_LP}")
-    private val meoFilter = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_FILE_MEO}")
+    private val fileChooser       = CFileChooser()
+    private val exportChooser     = CFileChooser()
+    private val fileFilter        = FileChooser.ExtensionFilter(I18N["filetype.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
+    private val lpFilter          = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_FILE_LP}")
+    private val meoFilter         = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_FILE_MEO}")
 
-    private val backupChooser = CFileChooser()
-    private val bakFilter = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
+    private val backupChooser     = CFileChooser()
+    private val bakFilter         = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
 
     private val exportPackChooser = CFileChooser()
-    private val packFilter = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*.${EXTENSION_PACK}")
+    private val packFilter        = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*.${EXTENSION_PACK}")
 
     init {
         picChooser.title = I18N["m.externalPic.chooser.title"]
         picChooser.extensionFilters.addAll(picFilter, pngFilter, jpgFilter, jpegFilter)
+
         // fileChooser's tile will change
         fileChooser.extensionFilters.addAll(fileFilter, meoFilter, lpFilter)
+
         backupChooser.title = I18N["chooser.bak"]
         backupChooser.extensionFilters.add(bakFilter)
+
         exportChooser.title = I18N["chooser.export"]
         // exportChooser's filter will change
+
         exportPackChooser.title = I18N["chooser.pack"]
         exportPackChooser.extensionFilters.add(packFilter)
         exportPackChooser.initialFilename = "$PACKAGE_FILE_NAME.$EXTENSION_PACK"
 
         disableMnemonicParsingForAll()
-
-        mNew.setOnAction { newTranslation() }
-        mOpen.setOnAction { openTranslation() }
-        mSave.setOnAction { saveTranslation() }
-        mSaveAs.setOnAction { saveAsTranslation() }
-        mClose.setOnAction { closeTranslation() }
-        mBakRecover.setOnAction { bakRecovery() }
-        mExit.setOnAction { State.controller.exit() }
-        mEditComment.setOnAction { editComment() }
-        mEditProjectPictures.setOnAction { editProjectPictures() }
-        mAddExternalPicture.setOnAction { addExternalPicture() }
-        mSpecifyPictures.setOnAction { State.controller.specifyPicFiles() }
-        mExportAsLp.setOnAction { exportTransFile(it) }
-        mExportAsMeo.setOnAction { exportTransFile(it) }
-        mExportAsTransPack.setOnAction { exportTransPack() }
-        mSettings.setOnAction { settings() }
-        mLogs.setOnAction { logs() }
-        mAbout.setOnAction { about() }
-        mCrash.setOnAction { crash() }
-
-        mOpenRecent.disableProperty().bind(Bindings.createBooleanBinding(
-            { mOpenRecent.items.isNotEmpty() }, mOpenRecent.items
-        ))
-
-        mSave.disableProperty().bind(!State.isOpenedProperty)
-        mSaveAs.disableProperty().bind(!State.isOpenedProperty)
-        mClose.disableProperty().bind(!State.isOpenedProperty)
-        mEditComment.disableProperty().bind(!State.isOpenedProperty)
-        mEditProjectPictures.disableProperty().bind(!State.isOpenedProperty)
-        mAddExternalPicture.disableProperty().bind(!State.isOpenedProperty)
-        mSpecifyPictures.disableProperty().bind(!State.isOpenedProperty)
-        mExportAsLp.disableProperty().bind(!State.isOpenedProperty)
-        mExportAsMeo.disableProperty().bind(!State.isOpenedProperty)
-        mExportAsTransPack.disableProperty().bind(!State.isOpenedProperty)
-
-        // Set accelerators
-        if (isMac) {
-            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN)
-            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN, KeyCombination.SHIFT_DOWN)
-        } else {
-            mSave.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
-            mSaveAs.accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN)
+        menu(I18N["mm.file"]) {
+            item(I18N["m.new"]) {
+                does { newTranslation() }
+            }
+            item(I18N["m.open"]) {
+                does { openTranslation() }
+            }
+            this.menu(mOpenRecent) {
+                disableProperty().bind(Bindings.createBooleanBinding({ items.isNotEmpty() }, items))
+            }
+            item(I18N["m.close"]) {
+                does { closeTranslation() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            separator()
+            item(I18N["m.save"]) {
+                does { saveTranslation() }
+                disableProperty().bind(!State.isOpenedProperty)
+                accelerator = KeyCodeCombination(
+                    KeyCode.S,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
+            }
+            item(I18N["m.save_as"]) {
+                does { saveAsTranslation() }
+                disableProperty().bind(!State.isOpenedProperty)
+                accelerator = KeyCodeCombination(
+                    KeyCode.S,
+                    KeyCombination.SHIFT_DOWN,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
+            }
+            separator()
+            item(I18N["m.bak_recovery"]) {
+                does { bakRecovery() }
+            }
+            separator()
+            item(I18N["m.exit"]) {
+                does { State.controller.exit() }
+            }
         }
-
-        mmFile.items.addAll(mNew, mOpen, mOpenRecent, mClose, SeparatorMenuItem(), mSave, mSaveAs, SeparatorMenuItem(), mBakRecover, SeparatorMenuItem(), mExit)
-        mmEdit.items.addAll(mEditComment, SeparatorMenuItem(), mEditProjectPictures, mAddExternalPicture, mSpecifyPictures)
-        mmExport.items.addAll(mExportAsLp, mExportAsMeo, mExportAsTransPack)
-        mmAbout.items.addAll(mSettings, mLogs, SeparatorMenuItem(), mAbout, SeparatorMenuItem(), mCrash)
-        menus.addAll(mmFile, mmEdit, mmExport, mmAbout)
+        menu(I18N["mm.edit"]) {
+            item(I18N["m.comment"]) {
+                does { editComment() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            separator()
+            item(I18N["m.projectPics"]) {
+                does { editProjectPictures() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            item(I18N["m.externalPic"]) {
+                does { addExternalPicture() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            item(I18N["m.specify"]) {
+                does { State.controller.specifyPicFiles() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+        }
+        menu(I18N["mm.export"]) {
+            item(I18N["m.lp"]) {
+                does { exportTransFile(FileType.LPFile) }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            item(I18N["m.meo"]) {
+                does { exportTransFile(FileType.MeoFile) }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            item(I18N["m.pack"]) {
+                does { exportTransPack() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+        }
+        menu(I18N["mm.about"]) {
+            item(I18N["m.settings"]) {
+                does { settings() }
+            }
+            item(I18N["m.logs"]) {
+                does { logs() }
+            }
+            separator()
+            item(I18N["m.about"]) {
+                does { about() }
+            }
+            separator()
+            item(I18N["m.crash"]) {
+                does { crash() }
+            }
+        }
     }
 
     fun updateOpenRecent() {
@@ -313,21 +332,21 @@ object AMenuBar : MenuBar() {
         }
     }
 
-    private fun exportTransFile(event: ActionEvent) {
+    private fun exportTransFile(type: FileType) {
         exportChooser.extensionFilters.clear()
 
-        val file: File
-        if (event.source == mExportAsMeo) {
-            exportChooser.extensionFilters.add(meoFilter)
-            exportChooser.initialFilename = "$EXPORT_FILE_NAME.$EXTENSION_FILE_MEO"
-            file = exportChooser.showSaveDialog(State.stage) ?: return
-            State.controller.export(file, FileType.MeoFile)
-        } else {
-            exportChooser.extensionFilters.add(lpFilter)
-            exportChooser.initialFilename = "$EXPORT_FILE_NAME. $EXTENSION_FILE_LP"
-            file = exportChooser.showSaveDialog(State.stage) ?: return
-            State.controller.export(file, FileType.LPFile)
+        when (type) {
+            FileType.MeoFile -> {
+                exportChooser.extensionFilters.add(meoFilter)
+                exportChooser.initialFilename = "$EXPORT_FILE_NAME.$EXTENSION_FILE_MEO"
+            }
+            FileType.LPFile -> {
+                exportChooser.extensionFilters.add(lpFilter)
+                exportChooser.initialFilename = "$EXPORT_FILE_NAME. $EXTENSION_FILE_LP"
+            }
         }
+        val file = exportChooser.showSaveDialog(State.stage) ?: return
+        State.controller.export(file, type)
     }
     private fun exportTransPack() {
         val file = exportPackChooser.showSaveDialog(State.stage) ?: return

@@ -46,7 +46,7 @@ open class TransFile @JsonCreator constructor(
             "由MoeTra.com导出"
         )
 
-        val DEFAULT_FILE = TransFile()
+        val DEFAULT_TRANSFILE = TransFile()
 
         object LPTransFile {
             const val PIC_START   = ">>>>>>>>["

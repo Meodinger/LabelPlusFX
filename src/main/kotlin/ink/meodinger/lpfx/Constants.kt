@@ -28,6 +28,10 @@ const val COMMON_GAP    = 16.0
 const val LABEL_RADIUS_MIN = 8.0
 const val LABEL_RADIUS_MAX = 48.0
 
+/**
+ * Default File Object
+ */
+val DEFAULT_FILE = File("")
 
 /**
  * Scroll Delta Default

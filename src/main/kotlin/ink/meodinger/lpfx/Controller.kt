@@ -705,29 +705,31 @@ class Controller(private val root: View) {
         Logger.info("Transformed Ctrl + Enter", LOGSRC_CONTROLLER)
     }
 
-    fun specifyPicFiles() {
+    fun specifyPicFiles(): Boolean {
         val picFiles = ADialogSpecify.specify()
-        if (picFiles.isEmpty()) showInfo(I18N["specify.info.incomplete"], State.stage)
-        else {
-            val picCount = State.transFile.picCount
-            val picNames = State.transFile.sortedPicNames
-            var uncomplete = false
-            for (i in 0 until picCount) {
-                val picName = picNames[i]
-                val picFile = picFiles[i]
-                if (!picFile.exists()) {
-                    uncomplete = true
-                    continue
-                }
-                State.transFile.setFile(picName, picFile)
+
+        // Closed or Cancelled
+        if (picFiles.isEmpty()) {
+            showInfo(I18N["specify.info.cancelled"], State.stage)
+            return false
+        }
+
+        val picCount = State.transFile.picCount
+        val picNames = State.transFile.sortedPicNames
+        var uncomplete = false
+        for (i in 0 until picCount) {
+            val picFile = picFiles[i]
+            if (!picFile.exists()) {
+                uncomplete = true
+                continue
             }
-            if (uncomplete) showInfo(I18N["specify.info.incomplete"], State.stage)
+            State.transFile.setFile(picNames[i], picFile)
         }
-        if (State.isOpened) {
-            if (State.currentPicName.isNotEmpty()) // in case of open but not set currentPicName
-                if (State.transFile.getFile(State.currentPicName).exists())
-                    renderLabelPane() // Re-render picture
-        }
+        if (uncomplete) showInfo(I18N["specify.info.incomplete"], State.stage)
+
+        // Re-render picture
+        if (State.isOpened) if (State.getPicFileNow().exists()) renderLabelPane()
+        return true
     }
 
     fun stay(): Boolean {

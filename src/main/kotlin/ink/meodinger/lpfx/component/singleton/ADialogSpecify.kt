@@ -36,18 +36,7 @@ import kotlin.io.path.*
 
 object ADialogSpecify : Dialog<List<File>>() {
 
-    private val unspecified = I18N["specify.unspecified"]
-    private val defaultFile = File("")
-
-    private val contentPane = BorderPane()
-    private val contentGridPane = GridPane().also {
-        it.hgap = COMMON_GAP
-        it.vgap = COMMON_GAP
-        it.padding = Insets(COMMON_GAP)
-        it.alignment = Pos.TOP_CENTER
-    }
-    private val contentStackPane = StackPane(contentGridPane)
-    private val contentScrollPane = ScrollPane(contentStackPane)
+    private val contentGridPane = GridPane()
 
     private val thisWindow = dialogPane.scene.window
     private val fileChooser = FileChooser().also {
@@ -57,19 +46,32 @@ object ADialogSpecify : Dialog<List<File>>() {
     }
     private val dirChooser = DirectoryChooser()
 
-    private var workingTransFile: TransFile = TransFile.DEFAULT_FILE
-    private var projectFolder: File = defaultFile
+    private var workingTransFile: TransFile = TransFile.DEFAULT_TRANSFILE
+    private var projectFolder: File = DEFAULT_FILE
     private var picCount: Int = 0
     private var picNames: List<String> = ArrayList()
     private var files: MutableList<File> = ArrayList()
     private var labels: MutableList<CRollerLabel> = ArrayList()
 
+    private val unspecified = I18N["specify.unspecified"]
+
     init {
         initOwner(State.stage)
 
-        contentStackPane.prefWidthProperty().bind(contentScrollPane.widthProperty() - COMMON_GAP)
-        contentPane.apply {
-            center(contentScrollPane) { style = "-fx-background-color:transparent;" }
+        title = I18N["specify.title"]
+        dialogPane.prefWidth = DIALOG_WIDTH
+        dialogPane.prefHeight = DIALOG_HEIGHT
+        dialogPane.content = BorderPane().apply {
+            val stackPane = StackPane(contentGridPane.apply {
+                hgap = COMMON_GAP
+                vgap = COMMON_GAP
+                padding = Insets(COMMON_GAP)
+                alignment = Pos.TOP_CENTER
+            })
+            val scrollPane = ScrollPane(stackPane)
+            stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+
+            center(scrollPane) { style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
                 alignment = Pos.CENTER_RIGHT
                 padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
@@ -100,7 +102,7 @@ object ADialogSpecify : Dialog<List<File>>() {
                             .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
-                            if (preserve && files[i] != defaultFile) continue
+                            if (preserve && files[i] != DEFAULT_FILE) continue
                             for (j in newPicPaths.indices) {
                                 val oldPicFile = workingTransFile.getFile(picNames[i])
                                 // check full filename & simple filename
@@ -121,11 +123,6 @@ object ADialogSpecify : Dialog<List<File>>() {
                 }
             }
         }
-
-        title = I18N["specify.title"]
-        dialogPane.prefWidth = DIALOG_WIDTH
-        dialogPane.prefHeight = DIALOG_HEIGHT
-        dialogPane.content = contentPane
         dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
 
         setResultConverter {
@@ -154,7 +151,7 @@ object ADialogSpecify : Dialog<List<File>>() {
 
         files = MutableList(picCount) {
             val file = workingTransFile.getFile(picNames[it])
-            if (file.exists()) file else defaultFile
+            if (file.exists()) file else DEFAULT_FILE
         }
         labels = MutableList(picCount) { CRollerLabel().also { label ->
             label.prefWidth = 300.0
@@ -166,7 +163,7 @@ object ADialogSpecify : Dialog<List<File>>() {
                 init { bind(label.textProperty()) }
                 override fun computeValue(): Color = if (label.text == unspecified) Color.RED else Color.BLACK
             })
-            if (files[it] != defaultFile) label.text = files[it].path else label.text = unspecified
+            if (files[it] != DEFAULT_FILE) label.text = files[it].path else label.text = unspecified
         } }
 
         // add

@@ -88,11 +88,11 @@ object ADialogLogs : AbstractPropertiesDialog() {
 
             add(Label(I18N["logs.label.level"]), 0, 0)
             add(comboLevel, 1, 0) {
-                items.setAll(listOf(LogType.DEBUG, LogType.INFO, LogType.WARNING, LogType.ERROR, LogType.FATAL))
+                items.setAll(LogType.values().toList())
             }
 
             val labelSent = Label()
-            add(Label(I18N["logs.label.recorded"]), 0, 1) {
+            add(Label(I18N["logs.label.recorded"]), 0, 1, 4, 1) {
                 font = font.bold()
             }
             add(tableLog, 0, 2, 4, 3) {

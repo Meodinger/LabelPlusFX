@@ -24,14 +24,9 @@ class CRollerLabel(contentText: String = "") : Region() {
         private const val SHIFT_PERIOD_DEFAULT: Long = 400L
     }
 
-    private var changed = false
-    private var clipped = false
     private val label = Label(contentText)
     private var displayText: String by label.textProperty()
-
-    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(SHIFT_PERIOD_DEFAULT)
-    fun shiftPeriodProperty(): LongProperty = shiftPeriodProperty
-    var shiftPeriod: Long by shiftPeriodProperty
+    private var clipped = false
 
     private val tooltipProperty: ObjectProperty<Tooltip> = label.tooltipProperty()
     fun tooltipProperty(): ObjectProperty<Tooltip> = tooltipProperty
@@ -45,27 +40,24 @@ class CRollerLabel(contentText: String = "") : Region() {
     fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 
-    private val rollerManager = TimerTaskManager(shiftPeriod, shiftPeriod) {
-        Platform.runLater {
-            if (changed) {
-                changed = false
-                clipped = Text(text).boundsInLocal.width >= this@CRollerLabel.prefWidth
+    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(SHIFT_PERIOD_DEFAULT)
+    fun shiftPeriodProperty(): LongProperty = shiftPeriodProperty
+    var shiftPeriod: Long by shiftPeriodProperty
 
-                displayText = roll(" $text ")
-            } else {
-                displayText = roll(displayText)
-            }
-        }
+    private val rollerManager = TimerTaskManager(shiftPeriod, shiftPeriod) {
+        Platform.runLater { displayText = roll(displayText) }
     }
 
     init {
-        // label.layoutXProperty().bind(- widthProperty() / 2)
-        // label.layoutYProperty().bind(- heightProperty() / 2)
         label.prefWidthProperty().bind(widthProperty())
         label.prefHeightProperty().bind(heightProperty())
         children.add(label)
 
-        textProperty.addListener(onChange { changed = true })
+        textProperty.addListener(onNew {
+            clipped = Text(it).boundsInLocal.width >= prefWidth
+            displayText = roll(" $text ")
+            if (clipped) startRoll()
+        })
         shiftPeriodProperty.addListener(onNew<Number, Long> {
             rollerManager.clear()
             rollerManager.delay = it
@@ -80,12 +72,16 @@ class CRollerLabel(contentText: String = "") : Region() {
     private fun roll(text: String): String {
         return if (!clipped) {
             stopRoll()
-            return text.trim()
-        } else text.substring(1, text.length) + text.substring(0, 1)
+            text.trim()
+        } else {
+            text.substring(1, text.length) + text.substring(0, 1)
+        }
     }
 
     fun startRoll() {
-        stopRoll()
+        if (rollerManager.running) return
+
+        rollerManager.clear()
         rollerManager.refresh()
         rollerManager.schedule()
     }

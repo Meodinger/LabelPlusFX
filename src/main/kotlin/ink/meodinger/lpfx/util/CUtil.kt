@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.util
 
 import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
-import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 
@@ -443,7 +442,7 @@ class _if_neg1_<T>(condition: () -> Int, ifBlock: () -> T) : _if_<T>({ condition
 // typealias `if is -1`<T> = _if_neg1_<T>
 
 /**
- * Lazy
+ * Refreshable Lazy
  */
 class ReLazy<T>(private val initializer: () -> T) : Lazy<T> {
 

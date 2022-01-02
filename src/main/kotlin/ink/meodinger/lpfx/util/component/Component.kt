@@ -4,6 +4,7 @@ import javafx.event.ActionEvent
 import javafx.geometry.VPos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.control.MenuItem
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
@@ -20,28 +21,30 @@ import javafx.scene.text.TextAlignment
  */
 operator fun Label.invoke(
     isWrap: Boolean = false,
-    textAlignment: TextAlignment = TextAlignment.LEFT
+    textAlign: TextAlignment = TextAlignment.LEFT
 ): Label {
-    this.isWrapText = isWrap
-    this.textAlignment = textAlignment
-
-    return this
+    return apply {
+        isWrapText = isWrap
+        textAlignment = textAlign
+    }
 }
 
 operator fun Text.invoke(
     color: Color = Color.BLACK,
-    textAlignment: TextAlignment = TextAlignment.LEFT,
-    textOrigin: VPos = VPos.BASELINE
+    textAlign: TextAlignment = TextAlignment.LEFT,
+    textOri: VPos = VPos.BASELINE
 ): Text {
-    this.fill = color
-    this.textAlignment = textAlignment
-    this.textOrigin = textOrigin
-
-    return this
+    return apply {
+        fill = color
+        textAlignment = textAlign
+        textOrigin = textOri
+    }
 }
 
 infix fun Button.does(onAction: Button.(ActionEvent) -> Unit): Button {
-    this.setOnAction { onAction(this, it) }
+    return apply { setOnAction { onAction(this, it) } }
+}
 
-    return this
+infix fun MenuItem.does(onAction: MenuItem.(ActionEvent) -> Unit): MenuItem {
+    return apply { setOnAction { onAction(this, it) } }
 }

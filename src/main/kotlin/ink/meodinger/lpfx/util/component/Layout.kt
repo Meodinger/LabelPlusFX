@@ -56,7 +56,7 @@ var Node.anchorPaneBottom: Double
 
 /**
  * Add pane#children
- * @param node node of Pane
+ * @param node Node of Pane
  * @param operation Lambda with arguments of Node as this
  * @return this pane ref
  */
@@ -79,7 +79,7 @@ infix fun <T : Node> Pane.withContent(content: T): Pane {
 ////////////////////////////////////////////////////////////
 
 /**
- * Set dialogPane.content
+ * Add dialogPane.content
  * @param content Content node of DialogPane
  * @param operation Lambda with arguments of Node as this and Dialog as it
  * @return this dialog ref
@@ -159,8 +159,11 @@ var Node.vGrow: Priority
 ///// TabPane
 ////////////////////////////////////////////////////////////
 
-fun TabPane.add(node: Tab, operation: Tab.() -> Unit = {}): TabPane {
-    return apply { tabs.add(node.apply(operation)) }
+fun TabPane.add(tab: Tab, operation: Tab.() -> Unit = {}): TabPane {
+    return apply { tabs.add(tab.apply(operation)) }
+}
+fun TabPane.add(title: String, operation: Tab.() -> Unit = {}): TabPane {
+    return apply { add(Tab(title), operation) }
 }
 
 fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
@@ -176,13 +179,34 @@ fun <S, D> TableView<S>.addColumn(title: String, getter: (TableColumn.CellDataFe
 }
 
 ////////////////////////////////////////////////////////////
-///// Menu
+///// Menu/MenuBar
 ////////////////////////////////////////////////////////////
 
-fun <T : MenuItem> Menu.item(item: T, operation: T.() -> Unit = {}): Menu {
-    return apply { items.add(item.apply(operation)) }
+fun MenuBar.menu(menu: Menu, operation: Menu.() -> Unit): MenuBar {
+    return apply { menus.add(menu.apply(operation)) }
+}
+fun MenuBar.menu(text: String, operation: Menu.() -> Unit): MenuBar {
+    return apply { menu(Menu(text), operation) }
 }
 
+fun <T : MenuItem> Menu.add(item: T, operation: T.() -> Unit = {}): Menu {
+    return apply { items.add(item.apply(operation)) }
+}
+fun Menu.item(item: MenuItem, operation: MenuItem.() -> Unit = {}): Menu {
+    return apply { add(item, operation) }
+}
+fun Menu.item(text: String, operation: MenuItem.() -> Unit = {}): Menu {
+    return apply { item(MenuItem(text), operation) }
+}
+fun Menu.menu(menu: Menu, operation: Menu.() -> Unit = {}): Menu {
+    return apply { add(menu, operation) }
+}
+fun Menu.menu(text: String, operation: Menu.() -> Unit = {}): Menu {
+    return apply { menu(Menu(text), operation) }
+}
+fun Menu.separator(): Menu {
+    return apply { add(SeparatorMenuItem()) }
+}
 
 ////////////////////////////////////////////////////////////
 ///// Font

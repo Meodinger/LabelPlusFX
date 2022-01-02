@@ -1,9 +1,11 @@
 package ink.meodinger.lpfx.util.component
 
+import javafx.beans.value.ObservableValue
 import javafx.scene.Node
-import javafx.scene.control.Dialog
-import javafx.scene.control.SplitPane
+import javafx.scene.control.*
 import javafx.scene.layout.*
+import javafx.scene.text.Font
+import javafx.scene.text.FontWeight
 
 
 /**
@@ -49,27 +51,32 @@ var Node.anchorPaneBottom: Double
     set(value) { AnchorPane.setBottomAnchor(this, value) }
 
 ////////////////////////////////////////////////////////////
-///// Pane/DialogPane content
+///// Pane/StackPane content
 ////////////////////////////////////////////////////////////
 
 /**
- * Set pane.children
- * @param content Content node of Pane
- * @param operation Lambda with arguments of Node as this and Pane as it
+ * Add pane#children
+ * @param node node of Pane
+ * @param operation Lambda with arguments of Node as this
  * @return this pane ref
  */
-fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit): Pane {
+fun <T : Node> Pane.add(node: T, operation: T.() -> Unit = {}): Pane {
+    return apply { children.add(node.apply(operation)) }
+}
+
+fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit = {}): Pane {
     return apply {
         children.clear()
-        children.add(content.also { operation(it) })
+        add(content, operation)
     }
 }
 infix fun <T : Node> Pane.withContent(content: T): Pane {
-    return apply {
-        children.clear()
-        children.add(content)
-    }
+    return withContent(content) {}
 }
+
+////////////////////////////////////////////////////////////
+///// Dialog
+////////////////////////////////////////////////////////////
 
 /**
  * Set dialogPane.content
@@ -77,8 +84,8 @@ infix fun <T : Node> Pane.withContent(content: T): Pane {
  * @param operation Lambda with arguments of Node as this and Dialog as it
  * @return this dialog ref
  */
-fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit): Dialog<R> {
-    return apply { dialogPane.content = content.also(operation) }
+fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}): Dialog<R> {
+    return apply { dialogPane.content = content.apply(operation) }
 }
 infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
     return apply { dialogPane.content = content }
@@ -95,19 +102,19 @@ infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
  * @return this BorderPane
  */
 fun <T : Node> BorderPane.center(node : T, operation: T.() -> Unit = {}): BorderPane {
-    return apply { center = node.also(operation) }
+    return apply { center = node.apply(operation) }
 }
 fun <T : Node> BorderPane.top(node : T, operation: T.() -> Unit = {}): BorderPane {
-    return apply { top = node.also(operation) }
+    return apply { top = node.apply(operation) }
 }
 fun <T : Node> BorderPane.bottom(node : T, operation: T.() -> Unit = {}): BorderPane {
-    return apply { bottom = node.also(operation) }
+    return apply { bottom = node.apply(operation) }
 }
 fun <T : Node> BorderPane.left(node : T, operation: T.() -> Unit = {}): BorderPane {
-    return apply { left = node.also(operation) }
+    return apply { left = node.apply(operation) }
 }
 fun <T : Node> BorderPane.right(node : T, operation: T.() -> Unit = {}): BorderPane {
-    return apply { right = node.also(operation) }
+    return apply { right = node.apply(operation) }
 }
 
 ////////////////////////////////////////////////////////////
@@ -115,7 +122,7 @@ fun <T : Node> BorderPane.right(node : T, operation: T.() -> Unit = {}): BorderP
 ////////////////////////////////////////////////////////////
 
 fun <T : Node> SplitPane.add(node: T, operation: T.() -> Unit = {}): SplitPane {
-    return apply { items.add(node.also(operation)) }
+    return apply { items.add(node.apply(operation)) }
 }
 
 ////////////////////////////////////////////////////////////
@@ -123,7 +130,7 @@ fun <T : Node> SplitPane.add(node: T, operation: T.() -> Unit = {}): SplitPane {
 ////////////////////////////////////////////////////////////
 
 fun <T : Node> GridPane.add(node: T, col: Int, row: Int, colSpan: Int, rowSpan: Int, operation: T.() -> Unit = {}): GridPane {
-    return apply { add(node.also(operation), col, row, colSpan, rowSpan) }
+    return apply { add(node.apply(operation), col, row, colSpan, rowSpan) }
 }
 fun <T : Node> GridPane.add(node: T, col: Int, row: Int, operation: T.() -> Unit = {}): GridPane {
     return add(node, col, row, 1, 1, operation)
@@ -134,10 +141,10 @@ fun <T : Node> GridPane.add(node: T, col: Int, row: Int, operation: T.() -> Unit
 ////////////////////////////////////////////////////////////
 
 fun <T : Node> HBox.add(node: T, operation: T.() -> Unit = {}): HBox {
-    return apply { children.add(node.also(operation)) }
+    return apply { children.add(node.apply(operation)) }
 }
 fun <T : Node> VBox.add(node: T, operation: T.() -> Unit = {}): VBox {
-    return apply { children.add(node.also(operation)) }
+    return apply { children.add(node.apply(operation)) }
 }
 
 var Node.hGrow: Priority
@@ -147,3 +154,40 @@ var Node.hGrow: Priority
 var Node.vGrow: Priority
     get() = VBox.getVgrow(this) ?: Priority.NEVER
     set(value) { VBox.setVgrow(this, value) }
+
+////////////////////////////////////////////////////////////
+///// TabPane
+////////////////////////////////////////////////////////////
+
+fun TabPane.add(node: Tab, operation: Tab.() -> Unit = {}): TabPane {
+    return apply { tabs.add(node.apply(operation)) }
+}
+
+fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
+    return apply { content = node.apply(operation) }
+}
+
+////////////////////////////////////////////////////////////
+///// Table View
+////////////////////////////////////////////////////////////
+
+fun <S, D> TableView<S>.addColumn(title: String, getter: (TableColumn.CellDataFeatures<S, D>) -> ObservableValue<D>): TableView<S> {
+    return apply { columns.add(TableColumn<S, D>(title).apply { setCellValueFactory(getter) }) }
+}
+
+////////////////////////////////////////////////////////////
+///// Menu
+////////////////////////////////////////////////////////////
+
+fun <T : MenuItem> Menu.item(item: T, operation: T.() -> Unit = {}): Menu {
+    return apply { items.add(item.apply(operation)) }
+}
+
+
+////////////////////////////////////////////////////////////
+///// Font
+////////////////////////////////////////////////////////////
+
+fun Font.f(family: String): Font = Font.font(family, size)
+fun Font.s(size: Double): Font = Font.font(family, size)
+fun Font.bold(): Font = Font.font(family, FontWeight.BOLD, size)

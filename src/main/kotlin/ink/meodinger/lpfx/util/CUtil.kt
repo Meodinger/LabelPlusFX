@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.util
 
 import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
+import kotlin.reflect.KProperty
 import kotlin.system.exitProcess
 
 
@@ -440,3 +441,28 @@ class _if_neg1_<T>(condition: () -> Int, ifBlock: () -> T) : _if_<T>({ condition
 // typealias `if null`<T> = _if_null_<T>
 // typealias `if is 0`<T> = _if_zero_<T>
 // typealias `if is -1`<T> = _if_neg1_<T>
+
+/**
+ * Lazy
+ */
+class ReLazy<T>(private val initializer: () -> T) : Lazy<T> {
+
+    private var _initialized: Boolean = false
+    private var _value: T? = null
+
+    override fun isInitialized(): Boolean = _initialized
+
+    override val value: T
+        get() = synchronized(this) get@ {
+            if (!_initialized) {
+                _value = initializer()
+                _initialized = true
+            }
+
+            return@get _value ?: throw IllegalStateException("Should not bu null")
+        }
+
+    fun refresh() {
+        _initialized = false
+    }
+}

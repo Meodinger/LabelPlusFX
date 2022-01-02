@@ -170,7 +170,6 @@ object ADialogSpecify : Dialog<List<File>>() {
         } }
 
         // add
-
         for (i in 0 until picCount) {
             val button = Button(I18N["specify.dialog.choose_file"]) does {
                 // Manually specify pic file

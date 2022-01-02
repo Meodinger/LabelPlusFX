@@ -8,12 +8,10 @@ import ink.meodinger.lpfx.component.common.CInputLabel
 import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
+import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.color.isColorHex
 import ink.meodinger.lpfx.util.color.toHex
-import ink.meodinger.lpfx.util.component.anchorPaneLeft
-import ink.meodinger.lpfx.util.component.anchorPaneTop
-import ink.meodinger.lpfx.util.component.invoke
-import ink.meodinger.lpfx.util.component.does
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
@@ -44,38 +42,31 @@ import javafx.scene.text.TextAlignment
  */
 object ADialogSettings : AbstractPropertiesDialog() {
 
-    private val tabPane = TabPane()
-
-    private val groupTab = Tab(I18N["settings.group.title"])
-    private val gBorderPane = BorderPane()
+    private const val gRowShift = 1
     private val gLabelHint = Label(I18N["settings.group.hint"])
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
     private val gLabelName = Label(I18N["settings.group.name"])
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
-    private val gButtonAdd = Button(I18N["settings.group.add"])
-    private const val gRowShift = 1
+    private val gDefaultColorHexListLazy = ReLazy {
+        Settings[Settings.DefaultGroupColorHexList].asStringList().ifEmpty {
+            TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
+        }
+    }
+    private val gDefaultColorHexList by gDefaultColorHexListLazy
 
-    private val ruleTab = Tab(I18N["settings.ligature.title"])
-    private val rBorderPane = BorderPane()
+    private const val rRowShift = 1
+    private const val rIsFrom = "C_Is_From"
+    private const val rRuleIndex = "C_Rule_Index"
     private val rLabelHint = Label(I18N["settings.ligature.hint"])
     private val rLabelFrom = Label(I18N["settings.ligature.from"])
     private val rLabelTo = Label(I18N["settings.ligature.to"])
     private val rGridPane = GridPane()
-    private val rLabelSample = Label(I18N["settings.ligature.sample"])
-    private val rButtonAdd = Button(I18N["settings.ligature.add"])
-    private const val rRowShift = 1
-    private const val rIsFrom = "C_Is_From"
-    private const val rRuleIndex = "C_Rule_Index"
 
-    private val modeTab = Tab(I18N["settings.mode.title"])
-    private val mGridPane = GridPane()
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
     private val mComboScale = CComboBox<String>()
 
-    private val labelTab = Tab(I18N["settings.label.title"])
-    private val lGridPane = GridPane()
     private val lCLabel = CLabel(index = 8)
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
@@ -86,69 +77,240 @@ object ADialogSettings : AbstractPropertiesDialog() {
     init {
         initOwner(State.stage)
 
-        // ----- Group ----- //
-        // initGroupTab()
-        gGridPane.padding = Insets(COMMON_GAP)
-        gGridPane.vgap = COMMON_GAP
-        gGridPane.hgap = COMMON_GAP
-        gGridPane.alignment = Pos.TOP_CENTER
-        gButtonAdd.setOnAction { createGroupRow() }
-        val gStackPane = StackPane(gGridPane)
-        val gScrollPane = ScrollPane(gStackPane)
-        gStackPane.prefWidthProperty().bind(gScrollPane.widthProperty() - COMMON_GAP)
-        gScrollPane.style = "-fx-background-color:transparent;"
-        gBorderPane.center = gScrollPane
-        gBorderPane.bottom = HBox(gButtonAdd).also {
-            it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+        title = I18N["settings.title"]
+        dialogPane.prefWidth = DIALOG_WIDTH
+        dialogPane.prefHeight = DIALOG_HEIGHT
+        dialogPane.content = TabPane().apply {
+            tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
+
+            add(Tab(I18N["settings.group.title"])) {
+                withContent(BorderPane()) {
+                    val stackPane = StackPane(gGridPane.apply {
+                        padding = Insets(COMMON_GAP)
+                        vgap = COMMON_GAP
+                        hgap = COMMON_GAP
+                        alignment = Pos.TOP_CENTER
+                    })
+                    val scrollPane = ScrollPane(stackPane)
+                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+
+                    center(scrollPane) {
+                        style = "-fx-background-color:transparent;"
+                    }
+                    bottom(HBox()) {
+                        alignment = Pos.CENTER_RIGHT
+                        padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+                        add(Button(I18N["settings.group.add"])) {
+                            does { createGroupRow() }
+                        }
+                    }
+                }
+            }
+            add(Tab(I18N["settings.ligature.title"])) {
+                withContent(BorderPane()) {
+                    val stackPane = StackPane(rGridPane.apply {
+                        padding = Insets(COMMON_GAP)
+                        vgap = COMMON_GAP
+                        hgap = COMMON_GAP
+                        alignment = Pos.TOP_CENTER
+                    })
+                    val scrollPane = ScrollPane(stackPane)
+                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+
+                    center(scrollPane) {
+                        style = "-fx-background-color:transparent;"
+                    }
+                    bottom(HBox()) {
+                        alignment = Pos.CENTER_RIGHT
+                        padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+                        add(Label(I18N["settings.ligature.sample"]))
+                        add(HBox()) {
+                            hGrow = Priority.ALWAYS
+                        }
+                        add(Button(I18N["settings.ligature.add"])) {
+                            does { createLigatureRow() }
+                        }
+                    }
+                }
+            }
+            add(Tab(I18N["settings.mode.title"])) {
+                withContent(GridPane()) {
+                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
+
+                    padding = Insets(COMMON_GAP)
+                    vgap = COMMON_GAP
+                    hgap = COMMON_GAP
+                    alignment = Pos.TOP_CENTER
+                    //   0         1
+                    // 0 WorkMode  ViewMode
+                    // 1 Input     | input | < > (ViewMode)
+                    // 2 Label     | label | < > (ViewMode)
+                    // 3
+                    // 4 Scale on new picture
+                    // 5 | selection | < >       (String)
+                    add(Label(I18N["mode.work"]), 0, 0)
+                    add(Label(I18N["mode.view"]), 1, 0)
+                    add(Label(I18N["mode.work.input"]), 0, 1)
+                    add(Label(I18N["mode.work.label"]), 0, 2)
+                    add(mComboInput, 1, 1) {
+                        items.setAll(viewModeList)
+                        isWrapped = true
+                    }
+                    add(mComboLabel, 1, 2) {
+                        items.setAll(viewModeList)
+                        isWrapped = true
+                    }
+                    add(HBox(), 0, 3)
+                    add(Label(I18N["settings.mode.scale.label"]), 0, 4, 2, 1)
+                    add(mComboScale, 0, 5, 2, 1) {
+                        items.setAll(listOf(
+                            I18N["settings.mode.scale.100"],
+                            I18N["settings.mode.scale.fit"],
+                            I18N["settings.mode.scale.last"]
+                        ))
+                        isWrapped = true
+                    }
+                }
+            }
+            add(Tab(I18N["settings.label.title"])) {
+                withContent(GridPane()) {
+                    padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
+                    vgap = COMMON_GAP
+                    hgap = COMMON_GAP
+                    alignment = Pos.CENTER
+
+                    // lGridPane.isGridLinesVisible = true
+                    //   0         1           2
+                    // 0 --------  Radius
+                    // 1 |      |  ----O------ 24.0
+                    // 2 |      |  Alpha
+                    // 3 |      |  ------O---- 0x80
+                    // 4 --------  *TEXT*
+                    add(lLabelPane, 0, 0, 1, 5) {
+                        val lLabelPaneBorderWidth = 2.0
+
+                        border = Border(BorderStroke(
+                            Color.DARKGRAY,
+                            BorderStrokeStyle.SOLID,
+                            CornerRadii(0.0),
+                            BorderWidths(lLabelPaneBorderWidth)
+                        ))
+                        background = Background(BackgroundImage(
+                            SAMPLE_IMAGE,
+                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            BackgroundSize.DEFAULT
+                        ))
+
+                        setPrefSize(320.0, 320.0)
+                        add(lCLabel) {
+                            // Draggable & drag-limitation
+                            var shiftX = 0.0
+                            var shiftY = 0.0
+                            addEventHandler(MouseEvent.MOUSE_PRESSED) {
+                                it.consume()
+
+                                cursor = Cursor.MOVE
+
+                                shiftX = anchorPaneLeft - it.sceneX
+                                shiftY = anchorPaneTop - it.sceneY
+                            }
+                            addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+                                it.consume()
+
+                                val newLayoutX = shiftX + it.sceneX
+                                val newLayoutY = shiftY + it.sceneY
+
+                                //  0--L-----    0 LR LR |
+                                //  |  R         LR      |
+                                //  |LR|-----    LR      |
+                                //  |  |         --------|
+                                val limitX = SAMPLE_IMAGE.width - prefWidth - 2 * lLabelPaneBorderWidth
+                                val limitY = SAMPLE_IMAGE.height - prefHeight - 2 * lLabelPaneBorderWidth
+                                if (newLayoutX < 0 || newLayoutX > limitX) return@addEventHandler
+                                if (newLayoutY < 0 || newLayoutY > limitY) return@addEventHandler
+
+                                anchorPaneLeft = newLayoutX
+                                anchorPaneTop = newLayoutY
+                            }
+                            addEventHandler(MouseEvent.MOUSE_RELEASED) {
+                                cursor = Cursor.HAND
+                            }
+                            radiusProperty().addListener(onChange {
+                                val limitX = SAMPLE_IMAGE.width - prefWidth - 2 * lLabelPaneBorderWidth
+                                val limitY = SAMPLE_IMAGE.height - prefHeight - 2 * lLabelPaneBorderWidth
+                                if (anchorPaneLeft > limitX) anchorPaneLeft = limitX
+                                if (anchorPaneTop > limitY) anchorPaneTop = limitY
+                            })
+                        }
+                    }
+                    add(Label(I18N["settings.label.helpText"])(true, TextAlignment.CENTER), 1, 4, 2, 1)
+                    add(Label(I18N["settings.label.radius"]), 1, 0)
+                    add(lSliderRadius, 1, 1) {
+                        min = LABEL_RADIUS_MIN
+                        max = LABEL_RADIUS_MAX
+                        valueProperty().addListener(onNew<Number, Double> {
+                            lLabelRadius.text = String.format("%05.2f", it)
+                            lCLabel.radius = it
+                        })
+                    }
+                    add(lLabelRadius, 2, 1) {
+                        textFormatter = TextFormatter { change ->
+                            if (!change.isAdded) return@TextFormatter change
+
+                            if (!change.text.isMathematicalDecimal())
+                                return@TextFormatter change.also { it.text = "" }
+                            if (!change.controlNewText.isMathematicalDecimal())
+                                return@TextFormatter change.also { it.text = "" }
+
+                            change
+                        }
+                        setOnChangeToLabel {
+                            val radius = fieldText.toDouble()
+                            lSliderRadius.value = radius
+
+                            String.format("%05.2f", radius)
+                        }
+                    }
+                    add(Label(I18N["settings.label.alpha"]), 1, 2)
+                    add(lSliderAlpha, 1, 3) {
+                        min = 0.0
+                        max = 1.0
+                        valueProperty().addListener(onNew<Number, Double> {
+                            val alphaStr = (it * 255.0).toInt().toString(16)
+                            val alphaPart = if (alphaStr.length == 1) "0$alphaStr" else alphaStr
+
+                            lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
+                            lCLabel.color = Color.web("FF0000$alphaPart")
+                        })
+                    }
+                    add(lLabelAlpha, 2, 3) {
+                        textFormatter = TextFormatter { change ->
+                            if (!change.isAdded) return@TextFormatter change
+
+                            if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
+                                return@TextFormatter change.also { it.text = "" }
+                            if (change.controlNewText.length > 2)
+                                return@TextFormatter change.also { it.text = "" }
+
+                            return@TextFormatter change
+                        }
+                        setOnChangeToField {
+                            labelText.substring(2)
+                        }
+                        setOnChangeToLabel {
+                            val alphaStr = fieldText
+                            lSliderAlpha.value = alphaStr.toInt(16) / 255.0
+
+                            "0x" + if (alphaStr.isEmpty()) "00" else if (alphaStr.length == 1) "0$alphaStr" else alphaStr
+                        }
+                    }
+                }
+            }
         }
-        groupTab.content = gBorderPane
-
-        // ----- Ligature Rule ----- //
-        // initLigatureTab()
-        rGridPane.padding = Insets(COMMON_GAP)
-        rGridPane.vgap = COMMON_GAP
-        rGridPane.hgap = COMMON_GAP
-        rGridPane.alignment = Pos.TOP_CENTER
-        rButtonAdd.setOnAction { createLigatureRow() }
-        val rStackPane = StackPane(rGridPane)
-        val rScrollPane = ScrollPane(rStackPane)
-        rStackPane.prefWidthProperty().bind(rScrollPane.widthProperty() - COMMON_GAP)
-        rScrollPane.style = "-fx-background-color:transparent;"
-        rBorderPane.center = rScrollPane
-        rBorderPane.bottom = HBox(rLabelSample, HBox().also { HBox.setHgrow(it, Priority.ALWAYS) }, rButtonAdd).also {
-            it.alignment = Pos.CENTER_RIGHT
-            it.padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
-        }
-        ruleTab.content = rBorderPane
-
-        // ----- Mode ----- //
-        initModeTab()
-        mGridPane.padding = Insets(COMMON_GAP)
-        mGridPane.vgap = COMMON_GAP
-        mGridPane.hgap = COMMON_GAP
-        mGridPane.alignment = Pos.TOP_CENTER
-        modeTab.content = mGridPane
-
-        // ----- Label ----- //
-        initLabelTab()
-        lGridPane.padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
-        lGridPane.vgap = COMMON_GAP
-        lGridPane.hgap = COMMON_GAP
-        lGridPane.alignment = Pos.CENTER
-        labelTab.content = lGridPane
-
-        // ----- Tab ----- //
-        tabPane.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-        tabPane.prefWidth = DIALOG_WIDTH
-        tabPane.prefHeight = DIALOG_HEIGHT
-        tabPane.tabs.addAll(groupTab, ruleTab, modeTab, labelTab)
+        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
 
         initProperties()
-
-        title = I18N["settings.title"]
-        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-        dialogPane.content = tabPane
     }
 
     // ----- Group ----- //
@@ -179,12 +341,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
         val colorHex =
             if (color.isColorHex())
                 color
-            else {
-                var defaultColorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList()
-                if (defaultColorHexList.isEmpty()) defaultColorHexList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
-
-                defaultColorHexList[groupId % defaultColorHexList.size]
-            }
+            else
+                gDefaultColorHexList[groupId % gDefaultColorHexList.size]
 
         val checkBox = CheckBox().also { it.isSelected = createOnNew }
         val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
@@ -275,171 +433,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
         }
     }
 
-    // ----- Mode ----- //
-    private fun initModeTab() {
-        val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
-
-        mComboInput.items.setAll(viewModeList)
-        mComboInput.isWrapped = true
-        mComboLabel.items.setAll(viewModeList)
-        mComboLabel.isWrapped = true
-        mComboScale.items.setAll(listOf(
-            I18N["settings.mode.scale.100"],
-            I18N["settings.mode.scale.fit"],
-            I18N["settings.mode.scale.last"]
-        ))
-        mComboScale.isWrapped = true
-
-        //   0         1
-        // 0 WorkMode  ViewMode
-        // 1 Input     | input | < > (ViewMode)
-        // 2 Label     | label | < > (ViewMode)
-        // 3
-        // 4 Scale on new picture
-        // 5 | selection | < >       (String)
-        mGridPane.add(Label(I18N["mode.work"]), 0, 0)
-        mGridPane.add(Label(I18N["mode.view"]), 1, 0)
-        mGridPane.add(Label(I18N["mode.work.input"]), 0, 1)
-        mGridPane.add(Label(I18N["mode.work.label"]), 0, 2)
-        mGridPane.add(mComboInput, 1, 1)
-        mGridPane.add(mComboLabel, 1, 2)
-        mGridPane.add(HBox(), 0, 3)
-        mGridPane.add(Label(I18N["settings.mode.scale.label"]), 0, 4, 2, 1)
-        mGridPane.add(mComboScale, 0, 5, 2, 1)
-    }
-
-    // ----- Label ----- //
-    private fun initLabelTab() {
-        val lLabelPaneEdgeLength = 320.0
-        val lLabelPaneBorderWidth = 2.0
-
-        lLabelPane.setPrefSize(lLabelPaneEdgeLength, lLabelPaneEdgeLength)
-        lLabelPane.border = Border(BorderStroke(
-            Color.DARKGRAY,
-            BorderStrokeStyle.SOLID,
-            CornerRadii(0.0),
-            BorderWidths(lLabelPaneBorderWidth)
-        ))
-        lLabelPane.background = Background(BackgroundImage(
-            SAMPLE_IMAGE,
-            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.CENTER,
-            BackgroundSize.DEFAULT
-        ))
-
-        // Draggable & drag-limitation
-        var shiftX = 0.0
-        var shiftY = 0.0
-        lCLabel.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            it.consume()
-
-            lCLabel.cursor = Cursor.MOVE
-
-            shiftX = lCLabel.anchorPaneLeft - it.sceneX
-            shiftY = lCLabel.anchorPaneTop - it.sceneY
-        }
-        lCLabel.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            it.consume()
-
-            val newLayoutX = shiftX + it.sceneX
-            val newLayoutY = shiftY + it.sceneY
-
-            //  0--L-----    0 LR LR |
-            //  |  R         LR      |
-            //  |LR|-----    LR      |
-            //  |  |         --------|
-            val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
-            val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
-            if (newLayoutX < 0 || newLayoutX > limitX) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > limitY) return@addEventHandler
-
-            lCLabel.anchorPaneLeft = newLayoutX
-            lCLabel.anchorPaneTop = newLayoutY
-        }
-        lCLabel.addEventHandler(MouseEvent.MOUSE_RELEASED) {
-            lCLabel.cursor = Cursor.HAND
-        }
-        lCLabel.radiusProperty().addListener(onChange {
-            val limitX = SAMPLE_IMAGE.width - lCLabel.prefWidth - 2 * lLabelPaneBorderWidth
-            val limitY = SAMPLE_IMAGE.height - lCLabel.prefHeight - 2 * lLabelPaneBorderWidth
-            if (lCLabel.anchorPaneLeft > limitX) lCLabel.anchorPaneLeft = limitX
-            if (lCLabel.anchorPaneTop > limitY) lCLabel.anchorPaneTop = limitY
-        })
-
-        lLabelPane.children.add(lCLabel)
-
-        lLabelRadius.textFormatter = TextFormatter { change ->
-            if (!change.isAdded) return@TextFormatter change
-
-            if (!change.text.isMathematicalDecimal())
-                return@TextFormatter change.also { it.text = "" }
-            if (!change.controlNewText.isMathematicalDecimal())
-                return@TextFormatter change.also { it.text = "" }
-
-            change
-        }
-        lLabelRadius.setOnChangeToLabel {
-            val radius = fieldText.toDouble()
-            lSliderRadius.value = radius
-
-            String.format("%05.2f", radius)
-        }
-        lSliderRadius.valueProperty().addListener(onNew<Number, Double> {
-            lLabelRadius.text = String.format("%05.2f", it)
-            lCLabel.radius = it
-        })
-        lSliderRadius.min = LABEL_RADIUS_MIN
-        lSliderRadius.max = LABEL_RADIUS_MAX
-
-        lLabelAlpha.textFormatter = TextFormatter { change ->
-            if (!change.isAdded) return@TextFormatter change
-
-            if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
-                return@TextFormatter change.also { it.text = "" }
-            if (change.controlNewText.length > 2)
-                return@TextFormatter change.also { it.text = "" }
-
-            return@TextFormatter change
-        }
-        lLabelAlpha.setOnChangeToField {
-            labelText.substring(2)
-        }
-        lLabelAlpha.setOnChangeToLabel {
-            val alphaStr = fieldText
-            lSliderAlpha.value = alphaStr.toInt(16) / 255.0
-
-            "0x" + if (alphaStr.isEmpty()) "00" else if (alphaStr.length == 1) "0$alphaStr" else alphaStr
-        }
-        lSliderAlpha.valueProperty().addListener(onNew<Number, Double> {
-            val alphaStr = (it * 255.0).toInt().toString(16)
-            val alphaPart = if (alphaStr.length == 1) "0$alphaStr" else alphaStr
-
-            lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
-            lCLabel.color = Color.web("FF0000$alphaPart")
-        })
-        lSliderAlpha.min = 0.0
-        lSliderAlpha.max = 1.0
-
-        // lGridPane.isGridLinesVisible = true
-        //   0         1           2
-        // 0 --------  Radius
-        // 1 |      |  ----O------ 24.0
-        // 2 |      |  Alpha
-        // 3 |      |  ------O---- 0x80
-        // 4 --------  *TEXT*
-        lGridPane.add(lLabelPane, 0, 0, 1, 5)
-        lGridPane.add(Label(I18N["settings.label.helpText"])(true, TextAlignment.CENTER), 1, 4, 2, 1)
-        lGridPane.add(Label(I18N["settings.label.radius"]), 1, 0)
-        lGridPane.add(lSliderRadius, 1, 1)
-        lGridPane.add(lLabelRadius, 2, 1)
-        lGridPane.add(Label(I18N["settings.label.alpha"]), 1, 2)
-        lGridPane.add(lSliderAlpha, 1, 3)
-        lGridPane.add(lLabelAlpha, 2, 3)
-    }
-
     // ----- Initialize Properties ----- //
     override fun initProperties() {
         // Group
+        gDefaultColorHexListLazy.refresh()
         initGroupTab()
 
         // Ligature Rule

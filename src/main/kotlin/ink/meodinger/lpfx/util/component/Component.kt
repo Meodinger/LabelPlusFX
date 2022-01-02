@@ -1,10 +1,9 @@
 package ink.meodinger.lpfx.util.component
 
+import javafx.event.ActionEvent
 import javafx.geometry.VPos
-import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.scene.text.TextAlignment
@@ -41,8 +40,8 @@ operator fun Text.invoke(
     return this
 }
 
-infix fun Button.does(onAction: Button.() -> Unit): Button {
-    this.setOnAction { onAction(this) }
+infix fun Button.does(onAction: Button.(ActionEvent) -> Unit): Button {
+    this.setOnAction { onAction(this, it) }
 
     return this
 }

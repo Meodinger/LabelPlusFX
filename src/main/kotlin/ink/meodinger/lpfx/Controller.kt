@@ -174,7 +174,7 @@ class Controller(private val root: View) {
         Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOGSRC_CONTROLLER)
 
         // RecentFiles
-        AMenuBar.updateOpenRecent()
+        AMenuBar.updateRecentFiles()
         Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
 
         // Preferences
@@ -884,7 +884,7 @@ class Controller(private val root: View) {
         // Update recent files
         CFileChooser.lastDirectory = file.parentFile
         RecentFiles.add(file.path)
-        AMenuBar.updateOpenRecent()
+        AMenuBar.updateRecentFiles()
 
         // Auto backup
         backupManager.clear()

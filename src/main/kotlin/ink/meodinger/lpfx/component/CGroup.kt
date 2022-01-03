@@ -5,10 +5,8 @@ import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.binding.Bindings
+import javafx.beans.property.*
 import javafx.geometry.Insets
 import javafx.geometry.VPos
 import javafx.scene.layout.*
@@ -40,18 +38,6 @@ class CGroup(
         private const val PADDING = 4.0
     }
 
-    private val backgroundSelected: Background = Background(BackgroundFill(
-        Color.LIGHTGRAY,
-        CornerRadii(CORNER_RADII),
-        Insets(0.0)
-    ))
-    private val borderDefault: Border = Border(BorderStroke(
-        Color.TRANSPARENT,
-        BorderStrokeStyle.NONE,
-        CornerRadii(CORNER_RADII),
-        BorderWidths(BORDER_WIDTH)
-    ))
-
     private val text: Text = Text(name)(color, TextAlignment.CENTER, VPos.CENTER)
 
     private val nameProperty: StringProperty = SimpleStringProperty(name)
@@ -62,20 +48,31 @@ class CGroup(
     fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
+    private val selectedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun selectedProperty(): BooleanProperty = selectedProperty
+    var selected: Boolean by selectedProperty
+
     init {
         padding = Insets(PADDING)
-        border = borderDefault
-        hoverProperty().addListener(onNew {
-            border = if (it) Border(BorderStroke(
-                color,
-                BorderStrokeStyle.SOLID,
-                CornerRadii(CORNER_RADII),
-                BorderWidths(BORDER_WIDTH)
-            )) else borderDefault
-        })
 
         nameProperty.addListener(onNew { update(name = it) })
         colorProperty.addListener(onNew { update(color = it) })
+
+        backgroundProperty().bind(Bindings.createObjectBinding({
+            if (selected) Background(BackgroundFill(
+                Color.LIGHTGRAY,
+                CornerRadii(CORNER_RADII),
+                Insets(0.0)
+            )) else null
+        }, selectedProperty))
+        borderProperty().bind(Bindings.createObjectBinding({
+            Border(BorderStroke(
+                if (isHover) color else Color.TRANSPARENT,
+                BorderStrokeStyle.SOLID,
+                CornerRadii(CORNER_RADII),
+                BorderWidths(BORDER_WIDTH)
+            ))
+        }, hoverProperty()))
 
         children.add(text)
 
@@ -97,10 +94,10 @@ class CGroup(
     }
 
     fun select() {
-        background = backgroundSelected
+        selected = true
     }
 
     fun unselect() {
-        background = null
+        selected = false
     }
 }

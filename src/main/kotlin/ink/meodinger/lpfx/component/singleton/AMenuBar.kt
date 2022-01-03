@@ -86,8 +86,8 @@ object AMenuBar : MenuBar() {
             item(I18N["m.open"]) {
                 does { openTranslation() }
             }
-            this.menu(mOpenRecent) {
-                disableProperty().bind(Bindings.createBooleanBinding({ items.isNotEmpty() }, items))
+            menu(mOpenRecent) {
+                disableProperty().bind(Bindings.createBooleanBinding({ items.isEmpty() }, items))
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
@@ -171,13 +171,16 @@ object AMenuBar : MenuBar() {
         }
     }
 
-    fun updateOpenRecent() {
+    fun updateRecentFiles() {
         mOpenRecent.items.clear()
         for (path in RecentFiles.getAll()) {
-            mOpenRecent.items.add(MenuItem(path).also { it.setOnAction { _ -> openRecentTranslation(it) } })
+            mOpenRecent.items.add(MenuItem(path).apply {
+                setOnAction { openRecentTranslation(this) }
+            })
         }
     }
     private fun openRecentTranslation(item: MenuItem) {
+        /// Use item, remove will be more convenient
         val path = item.text
         val file = File(path)
 

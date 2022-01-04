@@ -169,7 +169,7 @@ fun showError(title: String, header: String?, content: String, owner: Window?): 
  * @return ButtonType? OK
  */
 fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
-    val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.NO)
+    val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
     val dialog = Dialog<ButtonType>().also { it.initOwner(owner) }
 
     dialog.title = I18N["common.error"]

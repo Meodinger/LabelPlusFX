@@ -173,8 +173,12 @@ class RuledGenericBidirectionalBinding<T> private constructor(
             p2?.removeListener(this)
         } else {
             val newRuledValue: T =
-                if (p1 === sourceProperty) rule1(p1, oldValue, newValue, p2)
-                else rule2(p2, oldValue, newValue, p1)
+                if (p1 === sourceProperty)
+                    rule1(p1, oldValue, newValue, p2)
+                else
+                    rule2(p2, oldValue, newValue, p1)
+
+            // Use super to set value
             super.changed(sourceProperty, oldValue, newRuledValue)
         }
     }

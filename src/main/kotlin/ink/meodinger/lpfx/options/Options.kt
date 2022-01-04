@@ -29,13 +29,17 @@ object Options {
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_Logs = "logs"
 
-    private lateinit var profileDir: Path
-    val preference: Path get() = profileDir.resolve(FileName_Preference)
-    val settings: Path get() = profileDir.resolve(FileName_Settings)
+    lateinit var profileDir: Path
+        private set
+
+    val preference:  Path get() = profileDir.resolve(FileName_Preference)
+    val settings:    Path get() = profileDir.resolve(FileName_Settings)
     val recentFiles: Path get() = profileDir.resolve(FileName_RecentFiles)
-    val logs: Path get() = profileDir.resolve(FolderName_Logs)
+    val logs:        Path get() = profileDir.resolve(FolderName_Logs)
 
     fun init(dirname: String = LPFX) {
+        if (this::profileDir.isInitialized) throw IllegalStateException("Already set profile dirname")
+
         profileDir = Paths.get(System.getProperty("user.home")).resolve(dirname)
 
         // project data folder
@@ -45,11 +49,8 @@ object Options {
 
     fun load() {
         try {
-            // recent_files
             loadRecentFiles()
-            // config
             loadPreference()
-            // settings
             loadSettings()
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
@@ -62,7 +63,7 @@ object Options {
             Logger.exception(e)
             showError(I18N["error.options.load_failed"], null)
             showException(e, null)
-            exitProcess(0)
+            exitProcess(-1)
         }
     }
 
@@ -86,7 +87,7 @@ object Options {
         try {
             RecentFiles.load()
             if (RecentFiles.checkAndFix()) {
-                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_RecentFiles), null)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles), null)
                 Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
             }
 
@@ -114,7 +115,7 @@ object Options {
         try {
             Preference.load()
             if (Preference.checkAndFix()) {
-                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_Preference), null)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Preference), null)
                 Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
             }
 
@@ -142,7 +143,7 @@ object Options {
         try {
             Settings.load()
             if (Settings.checkAndFix()) {
-                showWarning(String.format(I18N["alert.options.fixed.s"], FileName_Settings), null)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Settings), null)
                 Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
             }
 

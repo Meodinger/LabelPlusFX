@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.util
 
 import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
-import kotlin.system.exitProcess
 
 
 /**
@@ -15,6 +14,8 @@ import kotlin.system.exitProcess
  * Hooked Application
  */
 abstract class HookedApplication : Application() {
+
+    private var shuttingDown: Boolean = false
     private val shutdownHooks = LinkedHashMap<String, (() -> Unit) -> Unit>()
 
     /**
@@ -22,6 +23,7 @@ abstract class HookedApplication : Application() {
      * Should use the resolve function as callback
      */
     fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) {
+        if (shuttingDown) return
         shutdownHooks[key] = onShutdown
     }
 
@@ -29,6 +31,7 @@ abstract class HookedApplication : Application() {
      * Remove a shutdown hook
      */
     fun removeShutdownHook(key: String) {
+        if (shuttingDown) return
         shutdownHooks.remove(key)
     }
 
@@ -36,32 +39,31 @@ abstract class HookedApplication : Application() {
      * Clear all shutdown hooks
      */
     fun clearShutdownHooks() {
+        if (shuttingDown) return
         shutdownHooks.clear()
     }
 
     /**
-     * MUST run this before exit or hooks will not be executed
+     * This method should be called in stop().
+     *
+     * You MUST run this before stop or hooks will not be executed.
+     * And you should actually shut the app down in the callback function.
      */
-    protected fun runShutdownHooksAndExit() {
+    protected fun runHooks(callback: () -> Unit) {
+        if (shuttingDown) return
+
+        shuttingDown = true
+
         if (shutdownHooks.isEmpty()) {
-            exitProcess(0)
+            callback()
         } else {
             val hooks = shutdownHooks.values.toList()
             Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
             }) finally {
-                exitProcess(0)
+                callback()
             }
-
-            // In case of something unexpected happened and the app cannot be shutdown
-            // Timer().schedule(genTask { exitProcess(0) }, 1000L * 60 * 5)
-
-            clearShutdownHooks()
         }
-    }
-
-    override fun stop() {
-        runShutdownHooksAndExit()
     }
 
 }

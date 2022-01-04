@@ -56,11 +56,11 @@ fun playOgg(mediaURL: URL, callback: () -> Unit = {}) = playOgg(mediaURL.openStr
  * Play ogg list
  */
 fun playOggList(mediaStreamList: List<InputStream>, callback: () -> Unit = {}) {
+    val count = mediaStreamList.size
     val clipList = ArrayList<Clip>()
 
     fun play(index: Int) {
-        if (index >= mediaStreamList.size) callback()
-        clipList[index].start()
+        if (index >= count) callback() else clipList[index].start()
     }
 
     for (i in mediaStreamList.indices) {
@@ -69,11 +69,10 @@ fun playOggList(mediaStreamList: List<InputStream>, callback: () -> Unit = {}) {
         val rate: Float = raw.format.sampleRate
         val format = AudioFormat(AudioFormat.Encoding.PCM_SIGNED, rate, 16, ch, ch * 2, rate, false)
 
-        val clip = AudioSystem.getClip()
-        clip.addLineListener { e -> if (e.type == LineEvent.Type.STOP) play(i + 1) }
-        clip.open(AudioSystem.getAudioInputStream(format, raw))
-
-        clipList.add(clip)
+        clipList.add(AudioSystem.getClip().apply {
+            addLineListener { e -> if (e.type == LineEvent.Type.STOP) play(i + 1) }
+            open(AudioSystem.getAudioInputStream(format, raw))
+        })
     }
 
     play(0)

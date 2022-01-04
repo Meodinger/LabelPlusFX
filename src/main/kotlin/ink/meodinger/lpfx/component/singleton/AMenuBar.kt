@@ -173,11 +173,10 @@ object AMenuBar : MenuBar() {
 
     fun updateRecentFiles() {
         mOpenRecent.items.clear()
-        for (path in RecentFiles.getAll()) {
-            mOpenRecent.items.add(MenuItem(path).apply {
-                setOnAction { openRecentTranslation(this) }
-            })
-        }
+
+        for (path in RecentFiles.getAll())
+            if (File(path).exists())
+                mOpenRecent.items.add(MenuItem(path) does { openRecentTranslation(this) })
     }
     private fun openRecentTranslation(item: MenuItem) {
         /// Use item, remove will be more convenient
@@ -345,7 +344,7 @@ object AMenuBar : MenuBar() {
             }
             FileType.LPFile -> {
                 exportChooser.extensionFilters.add(lpFilter)
-                exportChooser.initialFilename = "$EXPORT_FILE_NAME. $EXTENSION_FILE_LP"
+                exportChooser.initialFilename = "$EXPORT_FILE_NAME.$EXTENSION_FILE_LP"
             }
         }
         val file = exportChooser.showSaveDialog(State.stage) ?: return

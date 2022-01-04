@@ -7,14 +7,10 @@ import ink.meodinger.lpfx.component.singleton.ADialogSpecify
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
-import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.options.Preference
-import ink.meodinger.lpfx.options.RecentFiles
-import ink.meodinger.lpfx.options.Settings
+import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
@@ -25,7 +21,9 @@ import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.RuledGenericBidirectionalBinding
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.once
 import ink.meodinger.lpfx.util.resource.*
+import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
@@ -323,16 +321,16 @@ class Controller(private val root: View) {
 
         })
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), { o, _, n, _ ->
-                val a = n ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
+            cPicBox.valueProperty(), { observable, _, newValue, _ ->
+                val a = newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
 
                 // Indicate current item was removed (run later to avoid Issue#5)
-                if (n == null) Platform.runLater { o.value = a }
+                if (newValue == null) Platform.runLater { observable.value = a }
 
                 a
             },
-            State.currentPicNameProperty, { _, _, n, _ ->
-                n!!
+            State.currentPicNameProperty, { _, _, newValue, _ ->
+                newValue!!
             }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
@@ -365,17 +363,17 @@ class Controller(private val root: View) {
             }
         })
         RuledGenericBidirectionalBinding.bind(
-            cGroupBox.indexProperty(), { o, _, nv, _ ->
-                val n = nv as Int
+            cGroupBox.indexProperty(), { observable, _, newValue, _ ->
+                val n = newValue as Int
                 val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else -1
 
                 // Indicate current item was removed (run later to avoid Issue#5)
-                if (n == NOT_FOUND) Platform.runLater { o.value = a }
+                if (n == NOT_FOUND) Platform.runLater { observable.value = a }
 
                 a
             },
-            State.currentGroupIdProperty, { _, _, n, _ ->
-                n!!
+            State.currentGroupIdProperty, { _, _, newValue, _ ->
+                newValue!!
             }
         )
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
@@ -847,7 +845,8 @@ class Controller(private val root: View) {
         val transFile: TransFile
         try {
             transFile = load(file, type)
-            // Setup PicFiles
+            // We assume that all pics are in the project folder.
+            // If not, TransFile.checkLost() will find them out.
             for (picName in transFile.picNames) {
                 transFile.addFile(picName, projectFolder.resolve(picName))
             }
@@ -859,13 +858,14 @@ class Controller(private val root: View) {
             return
         }
 
-        // Update State
+        // Opened, update State
         State.transFile = transFile
         State.translationFile = file
         State.projectFolder = projectFolder
         State.isOpened = true
 
         // Show info if comment not in default list
+        // Should do this before update RecentFiles
         if (!RecentFiles.getAll().contains(file.path)) {
             var modified = true
             val comment = transFile.comment.trim()
@@ -895,13 +895,10 @@ class Controller(private val root: View) {
             Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)
         } else {
             Logger.warning("Auto-backup unavailable", LOGSRC_CONTROLLER)
-            showError(I18N["error.auto_backup_unavailable"], State.stage)
+            showWarning(I18N["warning.auto_backup_unavailable"], State.stage)
         }
 
-        // Change title
-        State.stage.title = INFO["application.name"] + " - " + file.name
-
-        // Check pic for pic render
+        // Check lost
         if (State.transFile.checkLost().isNotEmpty()) {
             // Specify now?
             showConfirm(I18N["specify.confirm.lost_pictures"], State.stage).ifPresent {
@@ -914,6 +911,9 @@ class Controller(private val root: View) {
         State.currentPicName = State.transFile.sortedPicNames[0]
         State.currentGroupId = 0
 
+        // Change title
+        State.stage.title = INFO["application.name"] + " - " + file.name
+
         Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
     }
     /**
@@ -923,31 +923,32 @@ class Controller(private val root: View) {
      * @param silent Whether the save procedure is done in silence or not
      */
     fun save(file: File, type: FileType, silent: Boolean) {
-        val overwrite = State.translationFile == file
+        // Whether overwriting existing file
+        val overwrite = file.exists()
 
         Logger.info("Saving to ${file.path}, isSilent:$silent, isOverwrite:$overwrite", LOGSRC_CONTROLLER)
 
         // Check folder
-        if (!silent) if (file.parent != State.getFileFolder().path) {
+        if (!silent) if (file.parentFile != State.projectFolder) {
             val confirm = showConfirm(I18N["confirm.save_to_another_place"], State.stage)
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
         // Use temp if overwrite
-        val exportTemp = if (overwrite) File("${State.translationFile.path}.temp") else file
+        val exportDest = if (overwrite) File("${file.path}.temp") else file
         fun removeTemp() {
             try {
-                Files.delete(exportTemp.toPath())
+                Files.delete(exportDest.toPath())
                 Logger.info("Temp file removed", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
-                Logger.error("Temp file remove failed", LOGSRC_CONTROLLER)
-                if (!silent) showError(String.format(I18N["error.save_temp_remove_failed.s"], exportTemp.path), State.stage)
+                Logger.warning("Temp file remove failed", LOGSRC_CONTROLLER)
+                if (!silent) showWarning(String.format(I18N["warning.save_temp_remove_failed.s"], exportDest.path), State.stage)
             }
         }
 
         // Export
         try {
-            export(exportTemp, type, State.transFile)
+            export(exportDest, type, State.transFile)
             if (!silent) showInfo(I18N["info.saved_successfully"], State.stage)
             Logger.info("Exported translation", LOGSRC_CONTROLLER)
         } catch (e: IOException) {
@@ -964,9 +965,9 @@ class Controller(private val root: View) {
         }
 
         if (overwrite) {
-            // Transfer to original file if export success
+            // Transfer to origin file if export success
             try {
-                transfer(exportTemp, file)
+                transfer(exportDest, file)
                 Logger.info("Transferred temp file", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
@@ -1244,7 +1245,7 @@ class Controller(private val root: View) {
             State.transFile.comment = "I Love You Forever  --Yours, Monika"
             save(State.translationFile, FileType.getType(State.translationFile), true)
 
-            val monika = State.getFileFolder().resolve("monika.json")
+            val monika = Options.profileDir.resolve("monika.json").toFile()
             save(monika, FileType.MeoFile, true)
         }
         if (State.isOpened) loveYouForever()
@@ -1279,11 +1280,9 @@ class Controller(private val root: View) {
         if (State.isOpened) textReformat()
 
         // Restore default formatter if closed (State reset)
-        State.isOpenedProperty.addListener(onNew { if (!it) cTransArea.reset() })
+        State.isOpenedProperty.once(onNew { if (!it) cTransArea.reset() })
 
-        State.application.addShutdownHook("JustMonika") {
-            playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it)
-        }
+        State.application.addShutdownHook("JustMonika") { playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it) }
     }
 
 }

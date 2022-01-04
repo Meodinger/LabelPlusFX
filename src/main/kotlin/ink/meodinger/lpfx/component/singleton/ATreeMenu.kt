@@ -14,6 +14,7 @@ import ink.meodinger.lpfx.util.dialog.showChoice
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.dialog.showInput
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -203,7 +204,7 @@ object ATreeMenu : ContextMenu() {
                 null
         }
 
-        g_changeColorPicker.valueProperty().addListener { _, _, newValue -> g_changeColorItem.text = newValue.toHex() }
+        g_changeColorPicker.valueProperty().addListener(onNew { g_changeColorItem.text = it.toHex() })
         g_changeColorPicker.setPrefSize(40.0, 20.0)
         g_changeColorItem.graphic = g_changeColorPicker
     }

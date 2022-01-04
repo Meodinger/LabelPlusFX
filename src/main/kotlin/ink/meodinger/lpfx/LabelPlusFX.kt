@@ -11,6 +11,7 @@ import ink.meodinger.lpfx.util.resource.get
 
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlin.system.exitProcess
 
 
 /**
@@ -83,6 +84,6 @@ class LabelPlusFX: HookedApplication() {
 
         Logger.info("App stopped", LOGSRC_APPLICATION)
 
-        runShutdownHooksAndExit()
+        runHooks { exitProcess(0) }
     }
 }

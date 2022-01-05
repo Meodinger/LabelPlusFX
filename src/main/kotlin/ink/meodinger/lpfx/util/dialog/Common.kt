@@ -163,10 +163,15 @@ fun showError(title: String, header: String?, content: String, owner: Window?): 
     return showDialog(errorImageView, title, header, content, owner, ButtonType.OK)
 }
 
+
+////////////////////////////////////////////////////////////
+///// Others
+////////////////////////////////////////////////////////////
+
 /**
  * Show stack trace in expandable content
  * @param e Exception to print
- * @return ButtonType? OK
+ * @return ButtonType? Cancel
  */
 fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
@@ -174,6 +179,7 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
 
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
+    dialog.graphic = errorImageView
     dialog.headerText = e.javaClass.name
     dialog.dialogPane.prefWidth = DIALOG_WIDTH
     dialog.dialogPane.prefHeight = DIALOG_HEIGHT
@@ -187,17 +193,22 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
             vGrow = Priority.ALWAYS
         }
     }
-    dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.OK)
+    dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
+
+    for (buttonType in dialog.dialogPane.buttonTypes) {
+        val button = dialog.dialogPane.lookupButton(buttonType) as Button
+        button.isDefaultButton = buttonType != sendBtnType
+    }
 
     val applyBtn = dialog.dialogPane.lookupButton(sendBtnType) as Button
-    applyBtn.addEventFilter(ActionEvent.ACTION) {
-        val button = it.source as Button
+    applyBtn.addEventFilter(ActionEvent.ACTION) { event ->
+        val button = event.source as Button
         button.text = I18N["common.sending"]
         LogSender.send(Logger.log,
             { button.text = I18N["common.sent"] },
             { button.text = I18N["common.failed"] }
         )
-        it.consume()
+        event.consume()
     }
 
     return dialog.showAndWait()

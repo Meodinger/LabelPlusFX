@@ -31,6 +31,8 @@ class CLabel(
     color:  Color  = Color.web(DEFAULT_COLOR)
 ) : Region() {
 
+    /// TODO: Custom Text Color
+
     companion object {
         private const val DEFAULT_INDEX = -1
         private const val DEFAULT_RADIUS = 24.0

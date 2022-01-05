@@ -18,7 +18,6 @@ import ink.meodinger.lpfx.util.platform.isWin
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -29,12 +28,10 @@ import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
 
 
@@ -48,8 +45,6 @@ import kotlin.io.path.name
  * A Dialog Singleton for logs set/clean/send
  */
 object ADialogLogs : AbstractPropertiesDialog() {
-
-    private const val ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
 
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     private class LogFile(val file: File) {
@@ -122,7 +117,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
                     labelSent.text = I18N["common.sending"]
                     LogSender.send(log,
                         { labelSent.text = I18N["common.sent"] + " " + log.name },
-                        { labelSent.text = I18N["common.failed"] }
+                        { labelSent.text = "${I18N["common.failed"]} - ${(it.cause ?: it)::class.simpleName}" }
                     )
                 }
             }
@@ -152,20 +147,14 @@ object ADialogLogs : AbstractPropertiesDialog() {
     override fun initProperties() {
         comboLevel.select(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
 
-        val toRemove = ArrayList<Path>()
-        val paths = Files.walk(Options.logs).filter { it.name != Options.logs.name }.collect(Collectors.toList())
-        for (path in paths) {
-            if (!path.name.isMathematicalNatural()) toRemove.add(path)
-            else if (Date().time - path.toFile().lastModified() > ALIVE) toRemove.add(path)
-        }
-        for (path in toRemove) path.deleteIfExists()
-        paths.removeAll(toRemove)
+        val files = Files.walk(Options.logs, 1)
+            .filter { it.name != Options.logs.name }
+            .map { it.toFile() }
+            .collect(Collectors.toList())
+            .apply { sortByDescending { it.lastModified() } }
 
-        val data = MutableList(paths.size) { LogFile(paths[it].toFile()) }.also {
-            it.sortByDescending { modal -> modal.file.lastModified() }
-        }
         tableLog.items.clear()
-        tableLog.items.addAll(data)
+        tableLog.items.addAll(MutableList(files.size) { LogFile(files[it]) })
     }
 
     override fun convertResult(): List<CProperty> {

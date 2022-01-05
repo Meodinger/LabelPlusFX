@@ -24,7 +24,6 @@ import javafx.util.Duration
 import java.io.File
 import java.nio.file.Files
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 import kotlin.io.path.*
 
 
@@ -97,24 +96,25 @@ object ADialogSpecify : Dialog<List<File>>() {
                         if (!preserve) State.projectFolder = directory
 
                         // auto-fill
-                        val newPicPaths = Files
-                            .walk(directory.toPath(),1)
+                        val newPicPaths = Files.walk(directory.toPath(), 1)
                             .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
                             if (preserve && files[i] != DEFAULT_FILE) continue
+
+                            val lastIndex = newPicPaths.size - 1
                             for (j in newPicPaths.indices) {
                                 val oldPicFile = workingTransFile.getFile(picNames[i])
                                 // check full filename & simple filename
-                                if (newPicPaths[j].name == oldPicFile.name ||
-                                    newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
-                                ) {
+                                val fit =
+                                    newPicPaths[j].name == oldPicFile.name || newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
+                                if (fit) {
                                     labels[i].text = newPicPaths[j].pathString
                                     files[i] = newPicPaths[j].toFile()
 
                                     // swap
                                     val temp = newPicPaths.last()
-                                    newPicPaths[newPicPaths.size - 1] = newPicPaths[j]
+                                    newPicPaths[lastIndex] = newPicPaths[j]
                                     newPicPaths[j] = temp
                                 }
                             }

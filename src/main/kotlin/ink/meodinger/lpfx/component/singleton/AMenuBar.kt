@@ -82,9 +82,17 @@ object AMenuBar : MenuBar() {
         menu(I18N["mm.file"]) {
             item(I18N["m.new"]) {
                 does { newTranslation() }
+                accelerator = KeyCodeCombination(
+                    KeyCode.N,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
             }
             item(I18N["m.open"]) {
                 does { openTranslation() }
+                accelerator = KeyCodeCombination(
+                    KeyCode.O,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
             }
             menu(mOpenRecent) {
                 disableProperty().bind(Bindings.createBooleanBinding({ items.isEmpty() }, items))
@@ -143,14 +151,29 @@ object AMenuBar : MenuBar() {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
                 disableProperty().bind(!State.isOpenedProperty)
+                accelerator = KeyCodeCombination(
+                    KeyCode.E,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
             }
             item(I18N["m.meo"]) {
                 does { exportTransFile(FileType.MeoFile) }
                 disableProperty().bind(!State.isOpenedProperty)
+                accelerator = KeyCodeCombination(
+                    KeyCode.E,
+                    KeyCombination.SHIFT_DOWN,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
             }
+            separator()
             item(I18N["m.pack"]) {
                 does { exportTransPack() }
                 disableProperty().bind(!State.isOpenedProperty)
+                accelerator = KeyCodeCombination(
+                    KeyCode.S,
+                    KeyCombination.ALT_DOWN,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
             }
         }
         menu(I18N["mm.about"]) {
@@ -275,11 +298,14 @@ object AMenuBar : MenuBar() {
     private fun editProjectPictures() {
         // Choose Pics
         val selected = State.transFile.sortedPicNames
-        val unselected = Files.walk(State.projectFolder.toPath(), 1).filter {
-            if (selected.contains(it.name)) return@filter false
-            for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
-            false
-        }.map { it.name }.collect(Collectors.toList())
+        val unselected = Files.walk(State.projectFolder.toPath(), 1)
+            .filter {
+                if (selected.contains(it.name)) return@filter false
+                for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
+                false
+            }
+            .map { it.name }
+            .collect(Collectors.toList())
 
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {

@@ -4,11 +4,17 @@ import ink.meodinger.lpfx.LOGSRC_OPTIONS
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
+import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
+import java.util.*
+import java.util.stream.Collectors
+import kotlin.collections.ArrayList
+import kotlin.io.path.name
 import kotlin.system.exitProcess
 
 
@@ -28,6 +34,8 @@ object Options {
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_Logs = "logs"
+    private const val Logfile_MAXCOUNT = 20
+    private const val Logfile_ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
 
     lateinit var profileDir: Path
         private set
@@ -52,6 +60,7 @@ object Options {
             loadRecentFiles()
             loadPreference()
             loadSettings()
+            cleanLogs()
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
@@ -87,8 +96,8 @@ object Options {
         try {
             RecentFiles.load()
             if (RecentFiles.checkAndFix()) {
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles), null)
                 Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles), null)
             }
 
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
@@ -115,8 +124,8 @@ object Options {
         try {
             Preference.load()
             if (Preference.checkAndFix()) {
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Preference), null)
                 Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Preference), null)
             }
 
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
@@ -143,8 +152,8 @@ object Options {
         try {
             Settings.load()
             if (Settings.checkAndFix()) {
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Settings), null)
                 Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
+                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Settings), null)
             }
 
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
@@ -159,6 +168,37 @@ object Options {
                 String.format(I18N["error.options.load_failed.s"], FileName_Settings),
                 null
             )
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun cleanLogs() {
+        val failed = ArrayList<File>()
+
+        try {
+            Files.walk(logs, 1)
+                .filter { it.name != logs.name }
+                .map { it.toFile() }
+                .collect(Collectors.toList())
+                .apply { sortByDescending { it.lastModified() } }
+                .forEachIndexed { index, file ->
+                    val del = index > Logfile_MAXCOUNT || !file.name.isMathematicalNatural() || Date().time - file.lastModified() > Logfile_ALIVE
+                    if (del && !file.delete()) failed.add(file)
+                }
+        } catch (e : IOException) {
+            Logger.warning("Error occurred when checking old logs, clean procedure cancelled", LOGSRC_OPTIONS)
+            Logger.exception(e)
+            return
+        }
+
+        if (failed.isNotEmpty()) {
+            // Try another time
+            failed.forEach { it.deleteOnExit() }
+
+            val names = failed.joinToString("\n") { it.name }
+            Logger.warning("Some error occurred when cleaning following old logs: \n$names", LOGSRC_OPTIONS)
+        } else {
+            Logger.info("Old logs cleaned", LOGSRC_OPTIONS)
         }
     }
 

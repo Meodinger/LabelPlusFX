@@ -324,8 +324,10 @@ class Controller(private val root: View) {
             cPicBox.valueProperty(), { observable, _, newValue, _ ->
                 val a = newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
 
-                // Indicate current item was removed (run later to avoid Issue#5)
-                if (newValue == null) Platform.runLater { observable.value = a }
+                // Indicate current item was removed
+                // Use run later to avoid Issue#5 (Reason unclear).
+                // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
+                if (State.isOpened && newValue == null) Platform.runLater { observable.value = a }
 
                 a
             },
@@ -367,8 +369,10 @@ class Controller(private val root: View) {
                 val n = newValue as Int
                 val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else -1
 
-                // Indicate current item was removed (run later to avoid Issue#5)
-                if (n == NOT_FOUND) Platform.runLater { observable.value = a }
+                // Indicate current item was removed
+                // Use run later to avoid Issue#5 (Reason unclear).
+                // Check opened to avoid accidentally set "Close time -1" to "Open time index"
+                if (State.isOpened && n == NOT_FOUND) Platform.runLater { observable.value = a }
 
                 a
             },

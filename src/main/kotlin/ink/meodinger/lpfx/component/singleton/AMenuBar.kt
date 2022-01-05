@@ -179,18 +179,18 @@ object AMenuBar : MenuBar() {
                 mOpenRecent.items.add(MenuItem(path) does { openRecentTranslation(this) })
     }
     private fun openRecentTranslation(item: MenuItem) {
-        /// Use item, remove will be more convenient
+        // Open recent, remove item if not exist
+
+        if (State.controller.stay()) return
+
         val path = item.text
         val file = File(path)
-
         if (!file.exists()) {
             showError(String.format(I18N["error.file_not_exist.s"], path), State.stage)
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)
             return
         }
-
-        if (State.controller.stay()) return
 
         State.reset()
 

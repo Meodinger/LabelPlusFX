@@ -137,6 +137,7 @@ open class TransFile @JsonCreator constructor(
     val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
     val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
 
+    /// NOTE: sortedPicNames is slow, find a way to make it faster (maybe use ReLazy)
     val picCount: Int get() = transMapObservable.size
     val picNames: List<String> get() = transMapObservable.keys.toList() // copy
     val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList()) // copy

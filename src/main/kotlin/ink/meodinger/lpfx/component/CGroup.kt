@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.util.component.invoke
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.binding.Bindings
@@ -76,6 +77,8 @@ class CGroup(
 
         children.add(text)
 
+        widthProperty().addListener(onChange { text.layoutX = (width - text.boundsInLocal.width) / 2 })
+
         update()
     }
 
@@ -88,9 +91,14 @@ class CGroup(
         val prefW = textW + (BORDER_WIDTH + PADDING) * 2
         val prefH = textH + (BORDER_WIDTH + PADDING) * 2
 
-        setPrefSize(prefW, prefH)
-        text.layoutX = (-textW + prefW) / 2
+        // TEXT----
+        // |      |
+        // --------
+        // Layout first to avoid width listener overwrite value set there
+        text.layoutX = BORDER_WIDTH + PADDING
         text.layoutY = prefH / 2
+
+        setPrefSize(prefW, prefH)
     }
 
     fun select() {

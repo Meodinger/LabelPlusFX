@@ -84,6 +84,26 @@ fun showConfirm(title: String, header: String?, content: String, owner: Window?)
 }
 
 /**
+ * Show alert
+ * @param content Alert to show
+ * @return ButtonType? YES | NO | CANCEL
+ */
+fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
+    return showAlert(I18N["common.alert"], null, content, owner)
+}
+/**
+ * Show alert
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @param owner Owner window
+ * @return ButtonType? YES | NO | CANCEL
+ */
+fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
+    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+}
+
+/**
  * Show information
  * @param content Info to show
  * @return ButtonType? OK
@@ -124,26 +144,6 @@ fun showWarning(title: String, header: String?, content: String, owner: Window?)
 }
 
 /**
- * Show alert
- * @param content Alert to show
- * @return ButtonType? YES | NO | CANCEL
- */
-fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
-    return showAlert(I18N["common.alert"], null, content, owner)
-}
-/**
- * Show alert
- * @param title Dialog title
- * @param header Header text, nullable
- * @param content Content text
- * @param owner Owner window
- * @return ButtonType? YES | NO | CANCEL
- */
-fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-}
-
-/**
  * Show error
  * @param content Error to show
  * @return ButtonType? OK
@@ -179,7 +179,6 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
 
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
-    dialog.graphic = errorImageView
     dialog.headerText = e.javaClass.name
     dialog.dialogPane.prefWidth = DIALOG_WIDTH
     dialog.dialogPane.prefHeight = DIALOG_HEIGHT

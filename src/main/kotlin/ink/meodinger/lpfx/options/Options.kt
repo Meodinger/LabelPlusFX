@@ -192,7 +192,7 @@ object Options {
         }
 
         if (failed.isNotEmpty()) {
-            // Try another time
+            // Try one more time
             failed.forEach { it.deleteOnExit() }
 
             val names = failed.joinToString("\n") { it.name }

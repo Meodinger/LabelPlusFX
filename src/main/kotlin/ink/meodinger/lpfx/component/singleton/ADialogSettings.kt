@@ -529,6 +529,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
         return list
     }
+
     override fun convertResult(): List<CProperty> {
         val list = ArrayList<CProperty>()
 

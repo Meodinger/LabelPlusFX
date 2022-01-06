@@ -14,6 +14,48 @@ import javafx.scene.text.FontWeight
  * Have fun with my code!
  */
 
+
+////////////////////////////////////////////////////////////
+///// Dialog
+////////////////////////////////////////////////////////////
+
+/**
+ * Add dialogPane.content
+ * @param content Content node of DialogPane
+ * @param operation Lambda with arguments of Node as this and Dialog as it
+ * @return this dialog ref
+ */
+fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}): Dialog<R> {
+    return apply { dialogPane.content = content.apply(operation) }
+}
+infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
+    return apply { dialogPane.content = content }
+}
+
+////////////////////////////////////////////////////////////
+///// Pane content
+////////////////////////////////////////////////////////////
+
+/**
+ * Add pane#children
+ * @param node Node of Pane
+ * @param operation Lambda with arguments of Node as this
+ * @return this pane ref
+ */
+fun <T : Node> Pane.add(node: T, operation: T.() -> Unit = {}): Pane {
+    return apply { children.add(node.apply(operation)) }
+}
+
+fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit = {}): Pane {
+    return apply {
+        children.clear()
+        add(content, operation)
+    }
+}
+infix fun <T : Node> Pane.withContent(content: T): Pane {
+    return withContent(content) {}
+}
+
 ////////////////////////////////////////////////////////////
 ///// AnchorPane Anchor / Layout
 ////////////////////////////////////////////////////////////
@@ -49,47 +91,6 @@ var Node.anchorPaneRight: Double
 var Node.anchorPaneBottom: Double
     get() = AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
-
-////////////////////////////////////////////////////////////
-///// Pane/StackPane content
-////////////////////////////////////////////////////////////
-
-/**
- * Add pane#children
- * @param node Node of Pane
- * @param operation Lambda with arguments of Node as this
- * @return this pane ref
- */
-fun <T : Node> Pane.add(node: T, operation: T.() -> Unit = {}): Pane {
-    return apply { children.add(node.apply(operation)) }
-}
-
-fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit = {}): Pane {
-    return apply {
-        children.clear()
-        add(content, operation)
-    }
-}
-infix fun <T : Node> Pane.withContent(content: T): Pane {
-    return withContent(content) {}
-}
-
-////////////////////////////////////////////////////////////
-///// Dialog
-////////////////////////////////////////////////////////////
-
-/**
- * Add dialogPane.content
- * @param content Content node of DialogPane
- * @param operation Lambda with arguments of Node as this and Dialog as it
- * @return this dialog ref
- */
-fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}): Dialog<R> {
-    return apply { dialogPane.content = content.apply(operation) }
-}
-infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
-    return apply { dialogPane.content = content }
-}
 
 ////////////////////////////////////////////////////////////
 ///// BorderPane
@@ -137,6 +138,32 @@ fun <T : Node> GridPane.add(node: T, col: Int, row: Int, operation: T.() -> Unit
 }
 
 ////////////////////////////////////////////////////////////
+///// ScrollPane
+////////////////////////////////////////////////////////////
+
+fun <T : Node> ScrollPane.withContent(content: T, operation: T.() -> Unit = {}): ScrollPane {
+    return apply { this.content = content.apply(operation) }
+}
+infix fun <T : Node> ScrollPane.withContent(content: T): ScrollPane {
+    return withContent(content) {}
+}
+
+////////////////////////////////////////////////////////////
+///// TabPane
+////////////////////////////////////////////////////////////
+
+fun TabPane.add(tab: Tab, operation: Tab.() -> Unit = {}): TabPane {
+    return apply { tabs.add(tab.apply(operation)) }
+}
+fun TabPane.add(title: String, operation: Tab.() -> Unit = {}): TabPane {
+    return apply { add(Tab(title), operation) }
+}
+
+fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
+    return apply { content = node.apply(operation) }
+}
+
+////////////////////////////////////////////////////////////
 ///// HBox / VBox
 ////////////////////////////////////////////////////////////
 
@@ -154,21 +181,6 @@ var Node.hGrow: Priority
 var Node.vGrow: Priority
     get() = VBox.getVgrow(this) ?: Priority.NEVER
     set(value) { VBox.setVgrow(this, value) }
-
-////////////////////////////////////////////////////////////
-///// TabPane
-////////////////////////////////////////////////////////////
-
-fun TabPane.add(tab: Tab, operation: Tab.() -> Unit = {}): TabPane {
-    return apply { tabs.add(tab.apply(operation)) }
-}
-fun TabPane.add(title: String, operation: Tab.() -> Unit = {}): TabPane {
-    return apply { add(Tab(title), operation) }
-}
-
-fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
-    return apply { content = node.apply(operation) }
-}
 
 ////////////////////////////////////////////////////////////
 ///// Table View

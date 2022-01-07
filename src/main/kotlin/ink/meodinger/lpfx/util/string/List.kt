@@ -70,5 +70,5 @@ fun sortByDigit(strings: List<String>): List<String> {
     }
 
     // default
-    return strings.toMutableList().sorted()
+    return strings.sorted()
 }

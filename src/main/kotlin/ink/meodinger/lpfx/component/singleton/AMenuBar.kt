@@ -392,10 +392,13 @@ object AMenuBar : MenuBar() {
         var updateRules = false
 
         for (property in list) {
+            /// Too slow, find a faster way
             if (Settings[property.key].asString() == property.value) continue
 
-            if (property.key == Settings.LabelAlpha || property.key == Settings.LabelRadius) updatePane = true
-            if (property.key == Settings.LigatureRules) updateRules = true
+            when (property.key) {
+                Settings.LabelAlpha, Settings.LabelRadius -> updatePane = true
+                Settings.LigatureRules -> updateRules = true
+            }
 
             Settings[property.key] = property
         }
@@ -410,6 +413,7 @@ object AMenuBar : MenuBar() {
         Logger.debug("got $list", LOGSRC_DIALOGS)
 
         for (property in list) {
+            /// Too slow, find a faster way
             if (Settings[property.key].asString() == property.value) continue
 
             when (property.key) {
@@ -418,6 +422,8 @@ object AMenuBar : MenuBar() {
 
             Settings[property.key] = property
         }
+
+        Logger.level = Logger.LogType.getType(Settings[Settings.LogLevelPreference].asString())
     }
     private fun about() {
         showLink(
@@ -435,12 +441,11 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun crash() {
-        val key = "C_Crash_Count"
-        if (properties[key] == null) properties[key] = 0
+        if (properties[CrashCount] == null) properties[CrashCount] = 0
 
-        properties[key] = (properties[key] as Int) + 1
-        if (properties[key] as Int >= 5) {
-            properties[key] = 0
+        properties[CrashCount] = (properties[CrashCount] as Int) + 1
+        if (properties[CrashCount] as Int >= 5) {
+            properties[CrashCount] = 0
             val confirm = showWarning(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
@@ -449,4 +454,6 @@ object AMenuBar : MenuBar() {
 
         throw RuntimeException("Crash")
     }
+    private const val CrashCount = "C_Crash_Count"
+
 }

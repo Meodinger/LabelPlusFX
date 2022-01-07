@@ -158,10 +158,6 @@ object ADialogLogs : AbstractPropertiesDialog() {
     }
 
     override fun convertResult(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
-        list.add(CProperty(Settings.LogLevelPreference, comboLevel.value))
-
-        return list
+        return listOf(CProperty(Settings.LogLevelPreference, comboLevel.value))
     }
 }

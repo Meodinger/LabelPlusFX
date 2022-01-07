@@ -16,10 +16,7 @@ fun StringBuilder.deleteTail(tail: String): StringBuilder {
     if (this.isEmpty()) return this
     if (!this.endsWith(tail)) return this
 
-    val tailLength = tail.length
-    val builderLength = this.length
-
-    return this.deleteRange(builderLength - tailLength, builderLength)
+    return this.deleteRange(length - tail.length, length)
 }
 
 /**

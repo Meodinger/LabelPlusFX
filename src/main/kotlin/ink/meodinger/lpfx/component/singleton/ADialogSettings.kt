@@ -10,7 +10,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.color.isColorHex
-import ink.meodinger.lpfx.util.color.toHex
+import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
@@ -472,7 +472,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
             when (node) {
                 is CheckBox -> isCreateList[groupId] = node.isSelected
                 is TextField -> nameList[groupId] = node.text
-                is ColorPicker -> colorList[groupId] = node.value.toHex()
+                is ColorPicker -> colorList[groupId] = node.value.toHexRGB()
             }
         }
 
@@ -531,14 +531,12 @@ object ADialogSettings : AbstractPropertiesDialog() {
     }
 
     override fun convertResult(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
-        list.addAll(convertGroup())
-        list.addAll(convertLigatureRule())
-        list.addAll(convertMode())
-        list.addAll(convertLabel())
-
-        return list
+        return ArrayList<CProperty>().apply {
+            addAll(convertGroup())
+            addAll(convertLigatureRule())
+            addAll(convertMode())
+            addAll(convertLabel())
+        }
     }
 
 }

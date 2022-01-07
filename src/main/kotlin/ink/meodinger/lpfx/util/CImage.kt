@@ -22,21 +22,21 @@ fun Image.scale(ratio: Double) = Image(this.url, this.width * ratio, this.height
  * @param width Width that the image width should scale to
  * @return scaled Image
  */
-fun Image.resizeByWidth(width: Double) = this.scale(width / this.width)
+fun Image.resizeByWidth(width: Double) = scale(width / this.width)
 
 /**
  * Scale according to height
  * @param height Height that the image height should scale to
  * @return scaled Image
  */
-fun Image.resizeByHeight(height: Double) = this.scale(height / this.height)
+fun Image.resizeByHeight(height: Double) = scale(height / this.height)
 
 /**
  * Scale according to max radius
  * @param radius Radius that the image radius should scale to
  * @return scaled Image
  */
-fun Image.resizeByRadius(radius: Double) = this.scale((radius * 2) / this.height.coerceAtMost(this.width))
+fun Image.resizeByRadius(radius: Double) = scale((radius * 2) / this.height.coerceAtMost(this.width))
 
 /**
  * Resize image
@@ -61,9 +61,9 @@ fun Image.toGreyScale(): Image {
             val pixel = reader.getArgb(x, y)
 
             val alpha = pixel shr 24 and 0xff
-            val red = pixel shr 16 and 0xff
-            val green = pixel shr 8 and 0xff
-            val blue = pixel and 0xff
+            val red   = pixel shr 16 and 0xff
+            val green = pixel shr  8 and 0xff
+            val blue  = pixel        and 0xff
 
             val grayLevel = (0.2162 * red + 0.7152 * green + 0.0722 * blue).toInt()
             val gray = (alpha shl 24) + (grayLevel shl 16) + (grayLevel shl 8) + grayLevel

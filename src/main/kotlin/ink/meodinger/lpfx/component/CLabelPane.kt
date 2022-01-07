@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.SCROLL_DELTA
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.color.toHex
+import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.event.isAltOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
@@ -48,8 +48,6 @@ import java.io.IOException
 
 /**
  * A scalable, draggable ScrollPane that can display image, text and labels
- *
- * Bind Status: Semi-bind (ColorHexList)
  */
 class CLabelPane : ScrollPane() {
 
@@ -552,7 +550,7 @@ class CLabelPane : ScrollPane() {
             shapeY = y - shapeH
         }
 
-        gc.fill = Color.web(Color.WHEAT.toHex() + TEXT_ALPHA)
+        gc.fill = Color.web(Color.WHEAT.toHexRGB() + TEXT_ALPHA)
         gc.fillRect(shapeX, shapeY, shapeW, shapeH)
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)

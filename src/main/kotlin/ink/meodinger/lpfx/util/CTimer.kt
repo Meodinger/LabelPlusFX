@@ -21,13 +21,7 @@ import java.util.*
  * @param task What the TimerTask to do
  * @return A TimerTask
  */
-inline fun genTask(crossinline task: () -> Unit): TimerTask {
-    return object : TimerTask() {
-        override fun run() {
-            task()
-        }
-    }
-}
+inline fun genTask(crossinline task: () -> Unit): TimerTask = object : TimerTask() { override fun run() = task() }
 
 /**
  * Generate a Timer only has one task

@@ -31,8 +31,6 @@ import javafx.scene.shape.Circle
 
 /**
  * A TreeView for tree-style label display
- *
- * Bind Status: Semi-bind (PicName, ViewMode)
  */
 class CTreeView: TreeView<String>() {
 

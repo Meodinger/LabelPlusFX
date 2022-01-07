@@ -10,10 +10,17 @@ import javafx.scene.paint.Color
  */
 
 /**
+ * Get color RGBA in hex
+ */
+fun Color.toHexRGBA(): String {
+    return this.toString().uppercase()
+}
+
+/**
  * Get color RGB in hex
  */
-fun Color.toHex(): String {
-    return this.toString().substring(2, 8).uppercase()
+fun Color.toHexRGB(): String {
+    return this.toHexRGBA().substring(2, 8)
 }
 
 /**
@@ -22,7 +29,6 @@ fun Color.toHex(): String {
 fun String?.isColorHex(): Boolean {
     if (this == null) return false
 
-    val length = this.length
     if (length != 6 && length != 8) return false
 
     val chars = this.uppercase().toCharArray()

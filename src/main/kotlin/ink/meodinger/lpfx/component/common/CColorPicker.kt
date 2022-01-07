@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
-import ink.meodinger.lpfx.util.color.toHex
+import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
@@ -76,8 +76,8 @@ class CColorPicker() : ColorPicker() {
             }
         })
 
-        addEventHandler(ON_SHOWN) { colorHexProperty.set(value.toHex()) }
-        addEventHandler(ON_HIDDEN) { colorHexProperty.set(value.toHex()) }
+        addEventHandler(ON_SHOWN) { colorHexProperty.set(value.toHexRGB()) }
+        addEventHandler(ON_HIDDEN) { colorHexProperty.set(value.toHexRGB()) }
     }
 
     override fun createDefaultSkin(): Skin<*> {

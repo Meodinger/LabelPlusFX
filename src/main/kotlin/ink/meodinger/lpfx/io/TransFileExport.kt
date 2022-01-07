@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.FileType
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.using
@@ -78,24 +79,23 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
             return tBuilder.toString()
         }
 
-        val builder = StringBuilder()
         val vString = exportVersion()
         val gString = exportGroup()
         val tString = exportTranslation()
 
-        builder.append(vString).append("\n")
-            .append(LPTransFile.SEPARATOR).append("\n")
-            .append(gString).append("\n")
-            .append(LPTransFile.SEPARATOR).append("\n")
-            .append(transFile.comment).append("\n")
-            .append("\n").append("\n")
-            .append(tString)
-
-        return builder.toString()
+        return StringBuilder()
+            .appendLine(vString)
+            .appendLine(LPTransFile.SEPARATOR)
+            .appendLine(gString)
+            .appendLine(LPTransFile.SEPARATOR)
+            .appendLine(transFile.comment)
+            .appendLine("\n")
+            .appendLine(tString)
+            .toString()
     }
 
     return when(targetType) {
-        FileType.LPFile -> buildLPFile(transFile)
+        FileType.LPFile  -> buildLPFile(transFile)
         FileType.MeoFile -> transFile.toJsonString()
     }
 }
@@ -106,7 +106,7 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
 @Throws(IOException::class)
 fun export(file: File, type: FileType, transFile: TransFile) {
     when(type) {
-        FileType.LPFile -> exportLP(file, transFile)
+        FileType.LPFile  -> exportLP(file, transFile)
         FileType.MeoFile -> exportMeo(file, transFile)
     }
 }
@@ -117,18 +117,18 @@ fun export(file: File, type: FileType, transFile: TransFile) {
 @Throws(IOException::class)
 private fun exportLP(file: File, transFile: TransFile) {
     using {
+        // UTF-8 BOM (EF BB BF)
+        val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        val text = exportAsString(transFile, FileType.LPFile)
+
         val fos = FileOutputStream(file).autoClose()
         val writer = BufferedWriter(OutputStreamWriter(fos, StandardCharsets.UTF_8)).autoClose()
 
-        // write BOM (EF BB BF)
-        fos.write(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()))
-        // write content
-        writer.write(exportAsString(transFile, FileType.LPFile))
+        fos.write(bom)
+        writer.write(text)
     } catch { e : IOException ->
         throw e
-    } finally {
-
-    }
+    } finally ::doNothing
 }
 
 /**
@@ -137,12 +137,9 @@ private fun exportLP(file: File, transFile: TransFile) {
 @Throws(IOException::class)
 private fun exportMeo(file: File, transFile: TransFile) {
     using {
-        BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8))
-            .autoClose()
+        BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
             .write(exportAsString(transFile, FileType.MeoFile))
     } catch { e: IOException ->
         throw e
-    } finally {
-
-    }
+    } finally ::doNothing
 }

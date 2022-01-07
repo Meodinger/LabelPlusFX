@@ -9,7 +9,7 @@ import ink.meodinger.lpfx.getGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.color.toHex
+import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.dialog.showChoice
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.dialog.showError
@@ -109,7 +109,7 @@ object ATreeMenu : ContextMenu() {
         val groupId = State.transFile.getGroupIdByName(groupItem.value)
 
         // Edit data
-        State.setTransGroupColor(groupId, newColor.toHex())
+        State.setTransGroupColor(groupId, newColor.toHexRGB())
         // Mark change
         State.isChanged = true
     }
@@ -199,12 +199,12 @@ object ATreeMenu : ContextMenu() {
         r_addGroupDialog.dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
         r_addGroupDialog.setResultConverter {
             if (it == ButtonType.FINISH)
-                TransGroup(r_addGroupField.text, r_addGroupPicker.value.toHex())
+                TransGroup(r_addGroupField.text, r_addGroupPicker.value.toHexRGB())
             else
                 null
         }
 
-        g_changeColorPicker.valueProperty().addListener(onNew { g_changeColorItem.text = it.toHex() })
+        g_changeColorPicker.valueProperty().addListener(onNew { g_changeColorItem.text = it.toHexRGB() })
         g_changeColorPicker.setPrefSize(40.0, 20.0)
         g_changeColorItem.graphic = g_changeColorPicker
     }
@@ -244,7 +244,7 @@ object ATreeMenu : ContextMenu() {
             val groupItem = selectedItems[0]
 
             g_renameItem.setOnAction { g_renameAction(groupItem) }
-            g_changeColorItem.text = g_changeColorPicker.value.toHex()
+            g_changeColorItem.text = g_changeColorPicker.value.toHexRGB()
             g_changeColorPicker.value = (groupItem.graphic as Circle).fill as Color
             g_changeColorPicker.setOnAction { g_changeColorAction(groupItem) }
             g_deleteItem.isDisable = !State.transFile.isGroupUnused(groupItem.value)

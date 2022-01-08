@@ -192,22 +192,22 @@ class RuledGenericBidirectionalBinding<T> private constructor(
  * Sometimes a property cannot be changed by its property but can via another way.
  * (Like the selectedIndexProperty of ComboBox) So this Binding is useful when
  * you don't want to manually add listener to the properties to be bound together
- * @param lambda1 Lambda to change o2 when o1 change
- * @param lambda2 Lambda to change o1 when o2 change
+ * @param listener1 Lambda to change o2 when o1 change
+ * @param listener2 Lambda to change o1 when o2 change
  */
-class BidirectionalBindingByLambda<T>(
+class BidirectionalBindingByListener<T>(
     observable1: ObservableValue<T>,
-    private val lambda1: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
+    private val listener1: ChangeListener<T>,
     observable2: ObservableValue<T>,
-    private val lambda2: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
+    private val listener2: ChangeListener<T>,
 ) : ChangeListener<T>, WeakListener {
 
     companion object {
         fun <T> bind(
-            observable1: ObservableValue<T>, lambda1: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit,
-            observable2: ObservableValue<T>, lambda2: (observable: ObservableValue<T>, oldV: T?, newV: T?) -> Unit
+            observable1: ObservableValue<T>, lambda1: ChangeListener<T>,
+            observable2: ObservableValue<T>, lambda2: ChangeListener<T>
         ) {
-            BidirectionalBindingByLambda(observable1, lambda1, observable2, lambda2).also {
+            BidirectionalBindingByListener(observable1, lambda1, observable2, lambda2).also {
                 observable1.addListener(it)
                 observable2.addListener(it)
             }
@@ -219,9 +219,9 @@ class BidirectionalBindingByLambda<T>(
             require(observable1 !== observable2) { "Cannot bind property to itself" }
 
             @Suppress("UNCHECKED_CAST")
-            val binding = BidirectionalBindingByLambda(
-                observable1 as ObservableValue<Any?>, { _, _, _ -> throw RuntimeException("Should not reach here") },
-                observable2 as ObservableValue<Any?>, { _, _, _ -> throw RuntimeException("Should not reach here") },
+            val binding = BidirectionalBindingByListener(
+                observable1 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
+                observable2 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
             )
             observable1.removeListener(binding)
             observable2.removeListener(binding)
@@ -249,9 +249,9 @@ class BidirectionalBindingByLambda<T>(
             try {
                 updating = true
                 if (o1 === sourceProperty) {
-                    lambda1(o1, oldValue, newValue)
+                    listener1.changed(o1, oldValue, newValue)
                 } else {
-                    lambda2(o2, oldValue, newValue)
+                    listener2.changed(o2, oldValue, newValue)
                 }
             } catch (e: RuntimeException) {
                 throw RuntimeException("Bidirectional binding lambda invoke failed", e)
@@ -270,7 +270,7 @@ class BidirectionalBindingByLambda<T>(
         val oA2 = observable2
         if (oA1 == null || oA2 == null) return false
 
-        if (other is BidirectionalBindingByLambda<*>) {
+        if (other is BidirectionalBindingByListener<*>) {
             val oB1 = other.observable1
             val oB2 = other.observable2
             if (oB1 == null || oB2 == null) return false

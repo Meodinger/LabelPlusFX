@@ -422,9 +422,9 @@ class CLabelPane : ScrollPane() {
         val radius = Settings[Settings.LabelRadius].asDouble()
         val alpha = Settings[Settings.LabelAlpha].asString()
 
-        val label = CLabel(radius = radius).also {
-            it.indexProperty().bind(transLabel.indexProperty)
-            it.colorProperty().bind(Bindings.createObjectBinding(
+        val label = CLabel(radius = radius).apply {
+            indexProperty().bind(transLabel.indexProperty)
+            colorProperty().bind(Bindings.createObjectBinding(
                 { Color.web(colorHexList[transLabel.groupId] + alpha) },
                 colorHexListProperty, transLabel.groupIdProperty
             ))

@@ -176,11 +176,10 @@ object Options {
         val failed = ArrayList<File>()
 
         try {
-            Files.walk(logs, 1)
-                .filter { it.name != logs.name }
-                .map { it.toFile() }
-                .collect(Collectors.toList())
-                .apply { sortByDescending { it.lastModified() } }
+            Files
+                .walk(logs, 1).filter { it.name != logs.name }
+                .map(Path::toFile).collect(Collectors.toList())
+                .apply { sortByDescending(File::lastModified) }
                 .forEachIndexed { index, file ->
                     val del = index > Logfile_MAXCOUNT || !file.name.isMathematicalNatural() || Date().time - file.lastModified() > Logfile_ALIVE
                     if (del && !file.delete()) failed.add(file)
@@ -193,7 +192,7 @@ object Options {
 
         if (failed.isNotEmpty()) {
             // Try one more time
-            failed.forEach { it.deleteOnExit() }
+            failed.forEach(File::deleteOnExit)
 
             val names = failed.joinToString("\n") { it.name }
             Logger.warning("Some error occurred when cleaning following old logs: \n$names", LOGSRC_OPTIONS)

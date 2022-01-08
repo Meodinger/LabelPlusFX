@@ -34,10 +34,9 @@ import java.util.stream.Collectors
 class CColorPicker() : ColorPicker() {
 
     private val colorHexField: TextField = TextField()
-
     private val colorHexProperty: StringProperty = colorHexField.textProperty()
-    fun colorHexProperty(): StringProperty = colorHexProperty
-    var colorHex: String by colorHexProperty
+    // fun colorHexProperty(): StringProperty = colorHexProperty
+    // var colorHex: String by colorHexProperty
 
     constructor(color: Color): this() { value = color }
 

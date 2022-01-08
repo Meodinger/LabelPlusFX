@@ -12,16 +12,12 @@ import javafx.scene.paint.Color
 /**
  * Get color RGBA in hex
  */
-fun Color.toHexRGBA(): String {
-    return this.toString().uppercase()
-}
+fun Color.toHexRGBA(): String = toString().uppercase()
 
 /**
  * Get color RGB in hex
  */
-fun Color.toHexRGB(): String {
-    return this.toHexRGBA().substring(2, 8)
-}
+fun Color.toHexRGB(): String = toHexRGBA().substring(2, 8)
 
 /**
  * Is a string ColorHex

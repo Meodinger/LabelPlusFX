@@ -34,7 +34,7 @@ fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String
     val lines = longText.split("\n")
     val builder = StringBuilder()
 
-    val t = Text().also { it.font = font }
+    val t = Text().apply { this.font = font }
     val b = StringBuilder()
     var p: Int
     for (line in lines) {

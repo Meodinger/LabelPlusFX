@@ -98,9 +98,9 @@ private fun loadLP(file: File): TransFile {
 
         /*
            Re-arrange label index when loading, ignore file data
-           Line  54: index define
-           Line 100: index inc
-           Line 169: index reset
+           Line  68: index define
+           Line 114: index inc
+           Line 183: index reset
          */
 
         // val index = s[0].replace(LPTransFile.LABEL_START, "").trim().toInt()

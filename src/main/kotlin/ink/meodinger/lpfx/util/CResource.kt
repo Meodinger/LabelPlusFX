@@ -17,16 +17,12 @@ import java.util.*
 /**
  * Load file in module as URL
  */
-fun loadAsURL(fileName: String): URL {
-    return LabelPlusFX::class.java.getResource(fileName)!!
-}
+fun loadAsURL(fileName: String): URL = LabelPlusFX::class.java.getResource(fileName)!!
 
 /**
  * Load file in module as InputStream
  */
-fun loadAsStream(fileName: String): InputStream {
-    return LabelPlusFX::class.java.getResourceAsStream(fileName)!!
-}
+fun loadAsStream(fileName: String): InputStream = LabelPlusFX::class.java.getResourceAsStream(fileName)!!
 
 /**
  * Load file in module as ByteArray
@@ -41,10 +37,7 @@ fun loadAsBytes(fileName: String): ByteArray {
 /**
  * Load file in module as Image
  */
-fun loadAsImage(imageFileName: String): Image {
-    val imgUrl = loadAsURL(imageFileName)
-    return Image(imgUrl.toString())
-}
+fun loadAsImage(imageFileName: String): Image = Image(loadAsURL(imageFileName).toString())
 
 val ICON = loadAsImage("/file/image/icon.png")
 val INIT_IMAGE = loadAsImage("/file/image/init_image.png")

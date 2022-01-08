@@ -89,9 +89,7 @@ class TransLabel @JsonCreator constructor(
 
     // ----- Object ----- //
 
-    fun clone(): TransLabel {
-        return TransLabel(index, groupId, x, y, text)
-    }
+    fun clone(): TransLabel = TransLabel(index, groupId, x, y, text)
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false

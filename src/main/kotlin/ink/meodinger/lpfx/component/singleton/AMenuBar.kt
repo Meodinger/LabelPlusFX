@@ -21,6 +21,7 @@ import javafx.scene.input.KeyCombination
 import javafx.stage.FileChooser
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.stream.Collectors
 import kotlin.io.path.extension
 import kotlin.io.path.name
@@ -95,7 +96,7 @@ object AMenuBar : MenuBar() {
                 )
             }
             menu(mOpenRecent) {
-                disableProperty().bind(Bindings.createBooleanBinding({ items.isEmpty() }, items))
+                disableProperty().bind(Bindings.createBooleanBinding(items::isEmpty, items))
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
@@ -303,9 +304,7 @@ object AMenuBar : MenuBar() {
                 if (selected.contains(it.name)) return@filter false
                 for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
                 false
-            }
-            .map { it.name }
-            .collect(Collectors.toList())
+            }.map(Path::name).collect(Collectors.toList())
 
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {

@@ -24,15 +24,15 @@ object Settings : AbstractProperties() {
 
     // ----- Property Names ----- //
 
-    const val DefaultGroupNameList = "DefaultGroupNameList"
+    const val DefaultGroupNameList     = "DefaultGroupNameList"
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
-    const val IsGroupCreateOnNewTrans = "isGroupCreateOnNew"
-    const val ScaleOnNewPicture = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
-    const val ViewModePreference = "ViewModePreference"  // Input, Label
-    const val LogLevelPreference = "LogLevelPreference"
-    const val LabelRadius = "LabelRadius"
-    const val LabelAlpha = "LabelAlpha"
-    const val LigatureRules = "LigatureRules"
+    const val IsGroupCreateOnNewTrans  = "isGroupCreateOnNew"
+    const val ScaleOnNewPicture        = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
+    const val ViewModePreference       = "ViewModePreference"  // Input, Label
+    const val LogLevelPreference       = "LogLevelPreference"
+    const val LabelRadius              = "LabelRadius"
+    const val LabelAlpha               = "LabelAlpha"
+    const val LigatureRules            = "LigatureRules"
 
     // ----- Default ----- //
 
@@ -46,16 +46,16 @@ object Settings : AbstractProperties() {
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
-            "(" to "\u300c",
-            ")" to "\u300d",
+            "("      to "\u300c",
+            ")"      to "\u300d",
             "\uff08" to "\u300e",
             "\uff09" to "\u300f",
-            "star" to "\u2b50",
+            "star"   to "\u2b50",
             "square" to "\u2662",
-            "heart" to "\u2661",
-            "music" to "\u266a",
-            "cc" to "\u25ce",
-            "*" to "\u203b",
+            "heart"  to "\u2661",
+            "music"  to "\u266a",
+            "cc"     to "\u25ce",
+            "*"      to "\u203b",
         ),
     ).toPropertiesMap()
 

@@ -48,9 +48,9 @@ class CComboBox<T> : HBox() {
     var isWrapped: Boolean by isWrappedProperty
 
     init {
-        BidirectionalBindingByLambda.bind(
-            indexProperty, { _, _, n -> comboBox.selectionModel.select(n as Int) },
-            comboBox.selectionModel.selectedIndexProperty(), { _, _, n -> indexProperty.set(n as Int) }
+        BidirectionalBindingByListener.bind(
+            indexProperty, onNew<Number, Int> { comboBox.selectionModel.select(it) },
+            comboBox.selectionModel.selectedIndexProperty(), onNew<Number, Int> { indexProperty.set(it) }
         )
 
         back.setOnMouseClicked { back() }

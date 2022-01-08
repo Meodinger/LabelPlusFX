@@ -46,9 +46,8 @@ object UpdateChecker {
 
             private val pattern = Pattern.compile("v[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{1,2}", Pattern.CASE_INSENSITIVE)
             private fun check(i : Int): Int {
-                if (i !in 0..99)
-                    throw IllegalArgumentException("Version number must in 0..99, got $i")
-                return i
+                if (i in 0..99) return i
+                throw IllegalArgumentException("Version number must in 0..99, got $i")
             }
 
             /**

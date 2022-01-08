@@ -94,7 +94,9 @@ enum class WorkMode(val description: String) {
         fun getWorkMode(description: String): WorkMode = when (description) {
             InputMode.description -> InputMode
             LabelMode.description -> LabelMode
-            else -> throw IllegalArgumentException("exception.illegal_argument.invalid_work_mode")
+            else -> throw IllegalArgumentException(
+                String.format(I18N["exception.work_mode.invalid_description.s"], description)
+            )
         }
     }
 }
@@ -113,7 +115,9 @@ enum class ViewMode(private val description: String) {
         fun getViewMode(description: String): ViewMode = when (description) {
             IndexMode.description -> IndexMode
             GroupMode.description -> GroupMode
-            else -> throw IllegalArgumentException("exception.illegal_argument.invalid_view_mode")
+            else -> throw IllegalArgumentException(
+                String.format(I18N["exception.view_mode.invalid_description.s"], description)
+            )
         }
     }
 }
@@ -128,12 +132,15 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        private fun isLPFile(file: File): Boolean = file.extension == EXTENSION_FILE_LP
-        private fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_FILE_MEO
-        fun getType(file: File): FileType {
-            if (isLPFile(file)) return LPFile
-            if (isMeoFile(file)) return MeoFile
-            throw IllegalArgumentException(String.format(I18N["exception.file_type.invalid_file_extension.s"], file.extension))
+        fun isLPFile(file: File): Boolean = file.extension == EXTENSION_FILE_LP
+        fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_FILE_MEO
+
+        fun getType(file: File): FileType = when (file.extension) {
+            EXTENSION_FILE_MEO -> MeoFile
+            EXTENSION_FILE_LP -> LPFile
+            else -> throw IllegalArgumentException(
+                String.format(I18N["exception.file_type.invalid_file_extension.s"], file.extension)
+            )
         }
     }
 }
@@ -141,17 +148,17 @@ enum class FileType(private val description: String) {
 /**
  * Get a TextFormatter for TransGroup name
  */
-fun getGroupNameFormatter(): TextFormatter<String> {
-    return TextFormatter<String> { it.also {
-        it.text = it.text.trim().replace(Regex("[| ]"), "_")
+fun genGroupNameFormatter(): TextFormatter<String> {
+    return TextFormatter<String> { it.apply {
+        text = text.trim().replace(Regex("[| ]"), "_")
     } }
 }
 
 /**
  * Get a TextFormatter for CProperty
  */
-fun getPropertyFormatter(): TextFormatter<String> {
-    return  TextFormatter<String> { it.also {
-        it.text = it.text.trim().replace(Regex("[|, ]"), "_")
+fun genPropertyFormatter(): TextFormatter<String> {
+    return  TextFormatter<String> { it.apply {
+        text = text.trim().replace(Regex("[|, ]"), "_")
     } }
 }

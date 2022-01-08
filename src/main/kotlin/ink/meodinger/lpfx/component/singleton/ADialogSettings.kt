@@ -249,9 +249,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             if (!change.isAdded) return@TextFormatter change
 
                             if (!change.text.isMathematicalDecimal())
-                                return@TextFormatter change.also { it.text = "" }
+                                return@TextFormatter change.apply { text = "" }
                             if (!change.controlNewText.isMathematicalDecimal())
-                                return@TextFormatter change.also { it.text = "" }
+                                return@TextFormatter change.apply { text = "" }
 
                             return@TextFormatter change
                         }
@@ -279,9 +279,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             if (!change.isAdded) return@TextFormatter change
 
                             if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
-                                return@TextFormatter change.also { it.text = "" }
+                                return@TextFormatter change.apply { text = "" }
                             if (change.controlNewText.length > 2)
-                                return@TextFormatter change.also { it.text = "" }
+                                return@TextFormatter change.apply { text = "" }
 
                             return@TextFormatter change
                         }
@@ -330,8 +330,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
         val groupId = newRowIndex - gRowShift
         val colorHex = if (color.isColorHex()) color else gDefaultColorHexList[groupId % gDefaultColorHexList.size]
 
-        val checkBox = CheckBox().also { it.isSelected = createOnNew }
-        val textField = TextField(name).also { it.textFormatter = getGroupNameFormatter() }
+        val checkBox = CheckBox().apply { isSelected = createOnNew }
+        val textField = TextField(name).apply { textFormatter = genGroupNameFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button(I18N["common.delete"]) does { removeGroupRow(GridPane.getRowIndex(this)) }
 
@@ -382,15 +382,15 @@ object ADialogSettings : AbstractPropertiesDialog() {
             rGridPane.add(rLabelTo, 1, 0)
         }
 
-        val fromField = TextField(from).also {
-            it.textFormatter = getPropertyFormatter()
-            it.properties[rRuleIndex] = newRowIndex - rRowShift
-            it.properties[rIsFrom] = true
+        val fromField = TextField(from).apply {
+            textFormatter = genPropertyFormatter()
+            properties[rRuleIndex] = newRowIndex - rRowShift
+            properties[rIsFrom] = true
         }
-        val toField = TextField(to).also {
-            it.textFormatter = getPropertyFormatter()
-            it.properties[rRuleIndex] = newRowIndex - rRowShift
-            it.properties[rIsFrom] = false
+        val toField = TextField(to).apply {
+            textFormatter = genPropertyFormatter()
+            properties[rRuleIndex] = newRowIndex - rRowShift
+            properties[rIsFrom] = false
         }
         val button = Button(I18N["common.delete"]) does { removeLigatureRow(GridPane.getRowIndex(this)) }
 

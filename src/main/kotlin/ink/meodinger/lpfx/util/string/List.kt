@@ -49,7 +49,7 @@ fun trimSame(strings: List<String>): List<String> {
 }
 
 /**
- * Sort a list of string by their int value
+ * Sort a list of string by their long value
  */
 fun sortByDigit(strings: List<String>): List<String> {
     val trimmed = trimSame(strings)
@@ -63,7 +63,7 @@ fun sortByDigit(strings: List<String>): List<String> {
             }
         }
         if (canCastToIntList) {
-            val sorted = trimmed.subList(2, trimmed.size).sortedBy { it.toInt() }
+            val sorted = trimmed.subList(2, trimmed.size).sortedBy(String::toLong)
 
             return List(sorted.size) { trimmed[0] + sorted[it] + trimmed[1] }
         }

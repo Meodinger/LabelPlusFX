@@ -61,9 +61,7 @@ class TransGroup @JsonCreator constructor(
         this.colorHex = colorHex
     }
 
-    fun clone(): TransGroup {
-        return TransGroup(name, colorHex)
-    }
+    fun clone(): TransGroup = TransGroup(name, colorHex)
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false

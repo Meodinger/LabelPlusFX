@@ -24,7 +24,7 @@ import java.io.File
  */
 class CFileChooser {
 
-    /// FileChooser is final class, extension unavailable
+    /// FileChooser is final class, inherit it is unavailable
 
     companion object {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))

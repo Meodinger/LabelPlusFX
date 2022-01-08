@@ -71,13 +71,13 @@ class CGroupBar : HBox() {
     fun createGroup(transGroup: TransGroup) {
         transGroups.add(transGroup)
 
-        val cGroup = CGroup().also {
-            tagCGroupId(it, cGroups.size)
+        val cGroup = CGroup().apply {
+            tagCGroupId(this, cGroups.size)
 
-            it.setOnMouseClicked { _ -> onGroupSelect(it.name) } // _ for replace of it
+            setOnMouseClicked { onGroupSelect(this@apply.name) }
 
-            it.nameProperty().bind(transGroup.nameProperty)
-            it.colorProperty().bind(Bindings.createObjectBinding(
+            nameProperty().bind(transGroup.nameProperty)
+            colorProperty().bind(Bindings.createObjectBinding(
                 { Color.web(transGroup.colorHex) },
                 transGroup.colorHexProperty
             ))

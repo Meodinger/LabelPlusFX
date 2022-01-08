@@ -5,7 +5,7 @@ import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
 import ink.meodinger.lpfx.component.CTreeView
-import ink.meodinger.lpfx.getGroupNameFormatter
+import ink.meodinger.lpfx.genGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
@@ -85,7 +85,7 @@ object ATreeMenu : ContextMenu() {
             I18N["context.rename_group.dialog.title"],
             I18N["context.rename_group.dialog.header"],
             groupItem.value,
-            getGroupNameFormatter()
+            genGroupNameFormatter()
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
             if (State.transFile.groupNames.contains(newName)) {
@@ -122,7 +122,9 @@ object ATreeMenu : ContextMenu() {
 
         // Edit data
         for (key in State.transFile.picNames) for (label in State.transFile.getTransList(key)) {
-            if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
+            if (label.groupId >= groupId) {
+                State.setTransLabelGroup(key, label.index, label.groupId - 1)
+            }
         }
         State.removeTransGroup(groupName)
         // Update view
@@ -162,7 +164,7 @@ object ATreeMenu : ContextMenu() {
         val confirm = showConfirm(
             I18N["context.delete_label.dialog.title"],
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
-            StringBuilder().also { for (item in items) it.appendLine(item.value) }.toString(),
+            StringBuilder().apply { for (item in items) appendLine(item.value) }.toString(),
             State.stage
         )
 
@@ -191,7 +193,7 @@ object ATreeMenu : ContextMenu() {
     private val l_deleteItem = MenuItem(I18N["context.delete_label"])
 
     init {
-        r_addGroupField.textFormatter = getGroupNameFormatter()
+        r_addGroupField.textFormatter = genGroupNameFormatter()
         r_addGroupPicker.hide()
         r_addGroupDialog.title = I18N["context.add_group.dialog.title"]
         r_addGroupDialog.headerText = I18N["context.add_group.dialog.header"]

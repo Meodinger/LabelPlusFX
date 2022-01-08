@@ -40,8 +40,8 @@ fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, co
     dialog.initOwner(owner)
 
     val label = Label(content)
-    val separator = Separator().also { it.padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
-    val hyperlink = Hyperlink(link).also { it.onAction = handler; it.padding = Insets(0.0) }
+    val separator = Separator().apply { padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
+    val hyperlink = Hyperlink(link).apply { onAction = handler; padding = Insets(0.0) }
     val box = VBox(label, separator, hyperlink)
 
     dialog.title = title
@@ -72,8 +72,7 @@ fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
 
     dialog.resultConverter = Callback { buttonType ->
-        if (buttonType == ButtonType.OK) textArea.text
-        else placeholder
+        if (buttonType == ButtonType.OK) textArea.text else placeholder
     }
     return dialog.showAndWait()
 }
@@ -102,7 +101,7 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
     val addAll = Button(I18N["util.dialog.choose.add_all"])
     val remove = Button(I18N["util.dialog.choose.remove"])
     val removeAll = Button(I18N["util.dialog.choose.remove_all"])
-    val vBox = VBox(add, addAll, remove, removeAll).also { it.alignment = Pos.CENTER }
+    val vBox = VBox(add, addAll, remove, removeAll).apply { alignment = Pos.CENTER }
     for (b in vBox.children) {
         val btn = b as Button
         btn.prefWidth = 48.0

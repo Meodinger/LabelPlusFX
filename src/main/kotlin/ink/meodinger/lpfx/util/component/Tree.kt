@@ -23,8 +23,7 @@ val <T> TreeItem<T>.root: TreeItem<T>
  * Expand all items under it
  */
 fun TreeItem<*>.expandAll() {
-    this.isExpanded = true
-    for (i in this.children) {
-        i.expandAll()
-    }
+    isExpanded = true
+
+    for (i in children) i.expandAll()
 }

@@ -30,9 +30,7 @@ fun pack(target: File, transFile: TransFile) {
     val content = exportAsString(transFile, FileType.getType(target))
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.json")
 
-    for (picName in transFile.sortedPicNames) {
-        zip.zip(transFile.getFile(picName), "/images/$picName")
-    }
+    for (picName in transFile.sortedPicNames) zip.zip(transFile.getFile(picName), "/images/$picName")
 
     zip.close()
 }

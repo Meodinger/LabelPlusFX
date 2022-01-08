@@ -11,6 +11,4 @@ package ink.meodinger.lpfx.util.string
  *
  * @param n times to repeat
  */
-fun Char.repeat(n: Int): String {
-    return this.toString().repeat(n)
-}
+fun Char.repeat(n: Int): String = toString().repeat(n)

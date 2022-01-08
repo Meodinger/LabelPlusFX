@@ -175,7 +175,7 @@ fun showError(title: String, header: String?, content: String, owner: Window?): 
  */
 fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
-    val dialog = Dialog<ButtonType>().also { it.initOwner(owner) }
+    val dialog = Dialog<ButtonType>().apply { initOwner(owner) }
 
     dialog.title = I18N["common.error"]
     dialog.isResizable = true

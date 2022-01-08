@@ -38,10 +38,11 @@ object ADialogSpecify : Dialog<List<File>>() {
     private val contentGridPane = GridPane()
 
     private val thisWindow = dialogPane.scene.window
-    private val fileChooser = FileChooser().also {
-        val extensions = List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
-        val fileFilter = FileChooser.ExtensionFilter(I18N["filetype.pictures"], extensions)
-        it.extensionFilters.add(fileFilter)
+    private val fileChooser = FileChooser().apply {
+        extensionFilters.add(FileChooser.ExtensionFilter(
+            I18N["filetype.pictures"],
+            List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
+        ))
     }
     private val dirChooser = DirectoryChooser()
 
@@ -153,17 +154,17 @@ object ADialogSpecify : Dialog<List<File>>() {
             val file = workingTransFile.getFile(picNames[it])
             if (file.exists()) file else DEFAULT_FILE
         }
-        labels = MutableList(picCount) { CRollerLabel().also { label ->
-            label.prefWidth = 300.0
-            label.tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
-                init { bind(label.textProperty()) }
-                override fun computeValue(): Tooltip = Tooltip(label.text).also { it.showDelay = Duration(0.0) }
+        labels = MutableList(picCount) { CRollerLabel().apply {
+            prefWidth = 300.0
+            text = if (files[it] != DEFAULT_FILE) files[it].path else unspecified
+            tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
+                init { bind(this@apply.textProperty()) }
+                override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }
             })
-            label.textFillProperty().bind(object : ObjectBinding<Color>() {
-                init { bind(label.textProperty()) }
-                override fun computeValue(): Color = if (label.text == unspecified) Color.RED else Color.BLACK
+            textFillProperty().bind(object : ObjectBinding<Color>() {
+                init { bind(this@apply.textProperty()) }
+                override fun computeValue(): Color = if (this@apply.text == unspecified) Color.RED else Color.BLACK
             })
-            if (files[it] != DEFAULT_FILE) label.text = files[it].path else label.text = unspecified
         } }
 
         // add

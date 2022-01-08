@@ -66,9 +66,8 @@ object RecentFiles : AbstractProperties() {
     fun add(path: String) {
         recent.remove(path)
         recent.addFirst(path)
-        if (recent.size > MAX_SIZE) {
-            recent.removeLast()
-        }
+
+        if (recent.size > MAX_SIZE) recent.removeLast()
     }
 
     fun remove(path: String) {

@@ -28,6 +28,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.stream.Collectors
@@ -147,11 +148,10 @@ object ADialogLogs : AbstractPropertiesDialog() {
     override fun initProperties() {
         comboLevel.select(LogType.getType(Settings[Settings.LogLevelPreference].asString()))
 
-        val files = Files.walk(Options.logs, 1)
-            .filter { it.name != Options.logs.name }
-            .map { it.toFile() }
-            .collect(Collectors.toList())
-            .apply { sortByDescending { it.lastModified() } }
+        val files = Files
+            .walk(Options.logs, 1).filter { it.name != Options.logs.name }
+            .map(Path::toFile).collect(Collectors.toList())
+            .apply { sortByDescending(File::lastModified) }
 
         tableLog.items.clear()
         tableLog.items.addAll(MutableList(files.size) { LogFile(files[it]) })

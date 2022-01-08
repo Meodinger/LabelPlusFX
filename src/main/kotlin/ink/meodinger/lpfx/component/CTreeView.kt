@@ -145,9 +145,9 @@ class CTreeView: TreeView<String>() {
         if (viewMode == ViewMode.IndexMode)
             throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
 
-        val groupItem = CTreeGroupItem().also {
-            it.nameProperty().bind(transGroup.nameProperty)
-            it.colorProperty().bind(Bindings.createObjectBinding(
+        val groupItem = CTreeGroupItem().apply {
+            nameProperty().bind(transGroup.nameProperty)
+            colorProperty().bind(Bindings.createObjectBinding(
                 { Color.web(transGroup.colorHex) },
                 transGroup.colorHexProperty
             ))
@@ -185,9 +185,9 @@ class CTreeView: TreeView<String>() {
     }
 
     fun createLabelItem(transLabel: TransLabel) {
-        val labelItem = CTreeLabelItem().also {
-            it.indexProperty().bind(transLabel.indexProperty)
-            it.textProperty().bind(transLabel.textProperty)
+        val labelItem = CTreeLabelItem().apply {
+            indexProperty().bind(transLabel.indexProperty)
+            textProperty().bind(transLabel.textProperty)
         }
 
         // Add view

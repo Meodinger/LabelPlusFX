@@ -1,9 +1,8 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHexRGB
+import ink.meodinger.lpfx.util.event.actionEvent
 import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.repeat
 
 import javafx.beans.property.StringProperty
@@ -57,7 +56,8 @@ class CColorPicker() : ColorPicker() {
         colorHexField.setOnAction {
             if (!customColors.contains(value)) customColors.add(value)
 
-            hide()
+            fireEvent(actionEvent(it, source = this))
+            hide() // Manually invoke hide() to let PopupControl really hide
         }
 
         colorHexProperty.addListener(onNew {
@@ -86,21 +86,12 @@ class CColorPicker() : ColorPicker() {
                 val colorPalette: Region = super.getPopupContent() as Region
 
                 // This ColorPalette contains a VBox which contains the Hyperlink we want to remove.
-                val nVBoxes: List<Node> = colorPalette.childrenUnmodifiable
-                    .stream()
-                    .filter { e -> e is VBox }
-                    .collect(Collectors.toList())
-                for (node in nVBoxes) {
-                    val vbox: VBox = node as VBox
-                    val hyperlinks: List<Node> = vbox.children
-                        .stream()
-                        .filter { e -> e is Hyperlink }
-                        .collect(Collectors.toList())
-                    if (hyperlinks.isNotEmpty()) {
-                        vbox.children.removeAll(hyperlinks) // Remove the hyperlink
-                        vbox.alignment = Pos.CENTER
-                        vbox.children.add(colorHexField)
-                    }
+                val vbox = colorPalette.childrenUnmodifiable.find { it is VBox } as VBox
+                val hyperlink = vbox.children.find { it is Hyperlink } as Hyperlink?
+                if (hyperlink != null) {
+                    vbox.children.removeAll(hyperlink) // Remove the hyperlink
+                    vbox.alignment = Pos.CENTER
+                    vbox.children.add(colorHexField)
                 }
                 return colorPalette
             }

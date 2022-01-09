@@ -437,8 +437,8 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_PRESSED) {
             it.consume()
 
-            shiftX = label.layoutX -  it.sceneX / scale
-            shiftY = label.layoutY -it.sceneY / scale
+            shiftX = label.layoutX - it.sceneX / scale
+            shiftY = label.layoutY - it.sceneY / scale
             label.cursor = Cursor.MOVE
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
@@ -512,8 +512,8 @@ class CLabelPane : ScrollPane() {
         //  |    |
 
         // Layout
-        label.layoutX = imageWidth * transLabel.x - radius
-        label.layoutY = imageHeight * transLabel.y - radius
+        label.layoutX = -radius + transLabel.x * imageWidth
+        label.layoutY = -radius + transLabel.y * imageHeight
         labelLayers[transLabel.groupId].children.add(label)
 
         // Bind
@@ -526,7 +526,7 @@ class CLabelPane : ScrollPane() {
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val s = omitWideText(omitHighText(text), (imageWidth - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
-        val t = Text(s).also { it.font = TEXT_FONT }
+        val t = Text(s).apply { font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
@@ -593,19 +593,15 @@ class CLabelPane : ScrollPane() {
 
         val label = getLabel(labelIndex)
 
-        //
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
-        //
         val fakeX = imageWidth / 2 * (1 - scale) + label.layoutX * scale
         val fakeY = imageHeight / 2 * (1 - scale) + label.layoutY * scale
 
-        //
         // To center
         // -> Scroll / 2 = Layout + Fake
         // -> Layout = Scroll / 2 - Fake
-        //
         root.layoutX = width / 2 - fakeX
         root.layoutY = height / 2 - fakeY
     }

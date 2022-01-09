@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
@@ -58,6 +59,8 @@ class LabelPlusFX: HookedApplication() {
             return
         }
 
+        State.controller = controller
+
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -66,9 +69,9 @@ class LabelPlusFX: HookedApplication() {
             it.consume()
         }
 
-        State.controller = controller
-
         primaryStage.show()
+
+        controller.labelInfo(I18N["common.ready"])
 
         UpdateChecker.check()
 

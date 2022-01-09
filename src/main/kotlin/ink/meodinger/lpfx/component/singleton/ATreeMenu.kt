@@ -98,15 +98,19 @@ object ATreeMenu : ContextMenu() {
     private val l_deleteItem = MenuItem(I18N["context.delete_label"])
 
     init {
-        val rAddGroupField = TextField().apply { textFormatter = genGroupNameFormatter() }
-        val rAddGroupPicker = CColorPicker().apply { hide() }
+        val rAddGroupField = TextField().apply {
+            textFormatter = genGroupNameFormatter()
+        }
+        val rAddGroupPicker = CColorPicker().apply {
+            hide()
+        }
         val rAddGroupDialog = Dialog<TransGroup>().apply {
             title = I18N["context.add_group.dialog.title"]
             headerText = I18N["context.add_group.dialog.header"]
             dialogPane.content = HBox(rAddGroupField, rAddGroupPicker).also { box -> box.alignment = Pos.CENTER }
             dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
-            setResultConverter {
-                when (it) {
+            setResultConverter converter@{
+                return@converter when (it) {
                     ButtonType.FINISH -> TransGroup(rAddGroupField.text, rAddGroupPicker.value.toHexRGB())
                     else -> null
                 }

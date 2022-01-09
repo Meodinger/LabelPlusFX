@@ -187,8 +187,7 @@ open class TransFile @JsonCreator constructor(
         throw TransFileException.transGroupNotFound(name)
     }
     fun isGroupUnused(groupName: String): Boolean {
-        val groupId = getGroupIdByName(groupName)
-        return isGroupUnused(groupId)
+        return isGroupUnused(getGroupIdByName(groupName))
     }
     fun isGroupUnused(groupId: Int): Boolean {
         for (key in transMapObservable.keys) for (label in getTransList(key)) {

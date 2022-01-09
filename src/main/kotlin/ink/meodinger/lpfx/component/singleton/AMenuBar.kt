@@ -218,7 +218,7 @@ object AMenuBar : MenuBar() {
 
         State.reset()
 
-        State.controller.open(file, FileType.getType(file))
+        State.controller.open(file)
     }
 
     private fun newTranslation() {
@@ -233,8 +233,8 @@ object AMenuBar : MenuBar() {
         fileChooser.initialFilename = "$INITIAL_FILE_NAME.$EXTENSION_FILE_MEO"
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
-        val projectFolder = State.controller.new(file, FileType.getType(file))
-        if (projectFolder != null) State.controller.open(file, FileType.getType(file), projectFolder)
+        val projectFolder = State.controller.new(file)
+        if (projectFolder != null) State.controller.open(file, projectFolder = projectFolder)
     }
     private fun openTranslation() {
         // open
@@ -248,12 +248,12 @@ object AMenuBar : MenuBar() {
         fileChooser.initialFilename = ""
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
-        State.controller.open(file, FileType.getType(file))
+        State.controller.open(file)
     }
     private fun saveTranslation() {
         // save
 
-        State.controller.save(State.translationFile, FileType.getType(State.translationFile), true)
+        State.controller.save(State.translationFile, silent = true)
         State.controller.labelInfo(I18N["info.saved_successfully"])
     }
     private fun saveAsTranslation() {
@@ -264,7 +264,7 @@ object AMenuBar : MenuBar() {
         fileChooser.initialFilename = State.translationFile.name
         val file = fileChooser.showSaveDialog(State.stage) ?: return
 
-        State.controller.save(file, FileType.getType(file), false)
+        State.controller.save(file)
         State.controller.labelInfo(I18N["info.saved_successfully"])
     }
     private fun closeTranslation() {
@@ -287,7 +287,7 @@ object AMenuBar : MenuBar() {
         fileChooser.initialFilename = "$RECOVERY_FILE_NAME.$EXTENSION_FILE_MEO"
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
 
-        State.controller.recovery(bak, rec, FileType.getType(rec))
+        State.controller.recovery(bak, rec)
     }
 
     private fun editComment() {

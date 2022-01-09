@@ -127,10 +127,10 @@ class CTreeView: TreeView<String>() {
     }
     fun unregisterGroup(groupName: String) {
         var groupId = NOT_FOUND
-        transGroups.forEachIndexed { index, transGroup ->
-            if (transGroup.name == groupName) {
-                groupId = index
-                return@forEachIndexed
+        for (i in transGroups.indices) {
+            if (transGroups[i].name == groupName) {
+                groupId = i
+                break
             }
         }
 

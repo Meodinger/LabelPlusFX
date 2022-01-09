@@ -119,11 +119,11 @@ class CGroupBar : HBox() {
         else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
     }
     fun select(groupName: String) {
-        for (node in cGroups)
-            if (node.name == groupName) {
-                node.select()
+        for (cGroup in cGroups)
+            if (cGroup.name == groupName) {
+                cGroup.select()
             } else {
-                node.unselect()
+                cGroup.unselect()
             }
     }
     fun unselectAll() {

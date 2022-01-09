@@ -142,7 +142,7 @@ class Controller(private val root: View) {
                 } ?: return@setOnDragDropped
 
                 // To avoid exception cannot be caught
-                Platform.runLater { open(file, FileType.getType(file)) }
+                Platform.runLater { open(file) }
                 it.isDropCompleted = true
             }
             it.consume()
@@ -745,7 +745,7 @@ class Controller(private val root: View) {
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
-                save(State.translationFile, FileType.getType(State.translationFile), true)
+                save(State.translationFile, silent = true)
                 return false
             }
             ButtonType.NO -> return false
@@ -761,7 +761,7 @@ class Controller(private val root: View) {
      * @param type Which type the Translation file will be
      * @return ProjectFolder if success, null if fail
      */
-    fun new(file: File, type: FileType): File? {
+    fun new(file: File, type: FileType = FileType.getType(file)): File? {
         Logger.info("Newing $type to ${file.path}", LOGSRC_CONTROLLER)
 
         // Choose Pics
@@ -842,7 +842,7 @@ class Controller(private val root: View) {
      * @param type Which type the file is
      * @param projectFolder Which folder the pictures locate in; translation file's folder by default
      */
-    fun open(file: File, type: FileType, projectFolder: File = file.parentFile) {
+    fun open(file: File, type: FileType = FileType.getType(file), projectFolder: File = file.parentFile) {
         Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
 
         // Load File
@@ -926,7 +926,7 @@ class Controller(private val root: View) {
      * @param type Which type will the translation file be
      * @param silent Whether the save procedure is done in silence or not
      */
-    fun save(file: File, type: FileType, silent: Boolean) {
+    fun save(file: File, type: FileType = FileType.getType(file), silent: Boolean = false) {
         // Whether overwriting existing file
         val overwrite = file.exists()
 
@@ -1001,7 +1001,7 @@ class Controller(private val root: View) {
      * @param from The backup file
      * @param to Which file will the backup recover to
      */
-    fun recovery(from: File, to: File, type: FileType) {
+    fun recovery(from: File, to: File, type: FileType = FileType.getType(to)) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
@@ -1026,7 +1026,7 @@ class Controller(private val root: View) {
      * @param file Which file will the TransFile write to
      * @param type Which type will the translation file be
      */
-    fun export(file: File, type: FileType) {
+    fun export(file: File, type: FileType = FileType.getType(file)) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
@@ -1070,7 +1070,7 @@ class Controller(private val root: View) {
         showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"], State.stage).ifPresent {
             when (it) {
                 ButtonType.YES -> {
-                    save(State.translationFile, FileType.getType(State.translationFile), false)
+                    save(State.translationFile)
                     State.application.stop()
                 }
                 ButtonType.NO -> {
@@ -1247,7 +1247,7 @@ class Controller(private val root: View) {
         // Write "love you" to comment, once a time
         fun loveYouForever() {
             State.transFile.comment = "I Love You Forever  --Yours, Monika"
-            save(State.translationFile, FileType.getType(State.translationFile), true)
+            save(State.translationFile, silent = true)
 
             val monika = Options.profileDir.resolve("monika.json").toFile()
             save(monika, FileType.MeoFile, true)

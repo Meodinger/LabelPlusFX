@@ -6,6 +6,7 @@ import ink.meodinger.lpfx.util.resource.get
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 
+
 /**
  * Author: Meodinger
  * Date: 2021/12/5

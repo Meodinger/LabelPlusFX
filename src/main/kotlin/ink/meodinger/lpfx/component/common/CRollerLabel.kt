@@ -62,7 +62,6 @@ class CRollerLabel(contentText: String = "") : Region() {
             rollerManager.clear()
             rollerManager.delay = it
             rollerManager.period = it
-            rollerManager.refresh()
             rollerManager.schedule()
         })
 
@@ -79,15 +78,11 @@ class CRollerLabel(contentText: String = "") : Region() {
     }
 
     fun startRoll() {
-        if (rollerManager.running) return
-
-        rollerManager.clear()
-        rollerManager.refresh()
-        rollerManager.schedule()
+        if (!rollerManager.running) rollerManager.schedule()
     }
 
     fun stopRoll() {
-        rollerManager.clear()
+        if (rollerManager.running) rollerManager.clear()
     }
 
 }

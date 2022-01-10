@@ -2,8 +2,8 @@ package ink.meodinger.lpfx.util.timer
 
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
-import javafx.beans.property.BooleanProperty
 
+import javafx.beans.property.BooleanProperty
 import javafx.beans.property.LongProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleLongProperty
@@ -26,7 +26,7 @@ inline fun genTask(crossinline task: () -> Unit): TimerTask = object : TimerTask
 /**
  * Generate a Timer only has one task
  *
- * Clear -> Refresh -> Schedule
+ * Clear -> Schedule -> Clear
  *
  * @param task What the only TimerTask to do
  */
@@ -45,32 +45,52 @@ class TimerTaskManager(
 
     private val runningProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun runningProperty(): BooleanProperty = runningProperty
+
+    /**
+     * Indicate whether the task is running.
+     *
+     * This boolean will be true if the task is scheduled and running,
+     * and will be false when the task is not scheduled or cancelled.
+     */
     var running: Boolean by runningProperty
         private set
 
     private val delayProperty: LongProperty = SimpleLongProperty(delay)
     fun delayProperty(): LongProperty = delayProperty
-    var delay: Long by delayProperty
+    var delay: Long
+        get() = delayProperty.get()
+        set(value) {
+            if (running) throw IllegalStateException("You cannot change the delay when task is running")
+            if (value < 0) throw IllegalArgumentException("Delay must not be negative")
+            delayProperty.set(value)
+        }
 
     private val periodProperty: LongProperty = SimpleLongProperty(period)
     fun periodProperty(): LongProperty = periodProperty
-    var period: Long by periodProperty
-
-    fun refresh() {
-        timerTask = genTask(task)
-    }
+    var period: Long
+        get() = periodProperty.get()
+        set(value) {
+            if (running) throw IllegalStateException("You cannot change the period when task is running")
+            if (value < 0) throw IllegalArgumentException("Period must not be negative")
+            periodProperty.set(value)
+        }
 
     fun schedule() {
-        schedule(timerTask, delay, period)
+        if (running) throw IllegalStateException("Task already scheduled")
 
+        schedule(timerTask, delay, period)
         running = true
     }
 
     fun clear() {
+        if (!running) throw IllegalStateException("Task not running")
+
         timerTask.cancel()
         purge()
-
         running = false
+
+        // Re-generate the timer task for the next turn
+        timerTask = genTask(task)
     }
 
 }

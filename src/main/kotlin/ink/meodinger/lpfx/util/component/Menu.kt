@@ -23,9 +23,8 @@ fun MenuBar.disableMnemonicParsingForAll() {
  */
 fun Menu.disableMnemonicParsing() {
     isMnemonicParsing = false
-    for (item in this.items) {
-        if (item is MenuItem) item.disableMnemonicParsing()
-        if (item is Menu) item.disableMnemonicParsing()
+    for (item in this.items) when (item) {
+        is Menu, is MenuItem -> item.disableMnemonicParsing()
     }
 }
 

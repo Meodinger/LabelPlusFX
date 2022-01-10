@@ -894,7 +894,6 @@ class Controller(private val root: View) {
         backupManager.clear()
         val bakDir = State.getBakFolder()
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
-            backupManager.refresh()
             backupManager.schedule()
             Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)
         } else {

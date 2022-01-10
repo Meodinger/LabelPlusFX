@@ -12,12 +12,11 @@ import javafx.scene.control.TreeItem
 /**
  * Returns the root of it
  */
-val <T> TreeItem<T>.root: TreeItem<T>
-    get() {
-        var root: TreeItem<T> = this
-        while (root.parent != null) root = root.parent
-        return root
-    }
+val <T> TreeItem<T>.root: TreeItem<T> get() {
+    var root: TreeItem<T> = this
+    while (root.parent != null) root = root.parent
+    return root
+}
 
 /**
  * Expand all items under it

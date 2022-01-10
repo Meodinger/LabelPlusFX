@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.util.string
 
+
 /**
  * Author: Meodinger
  * Date: 2021/12/5

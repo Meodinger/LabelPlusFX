@@ -162,6 +162,9 @@ fun TabPane.add(title: String, operation: Tab.() -> Unit = {}): TabPane {
 fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
     return apply { content = node.apply(operation) }
 }
+infix fun <T : Node> Tab.withContent(node: T): Tab {
+    return withContent(node) {}
+}
 
 ////////////////////////////////////////////////////////////
 ///// HBox / VBox

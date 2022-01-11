@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.util.component
 
+import ink.meodinger.lpfx.util.doNothing
+
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
@@ -25,6 +27,7 @@ fun Menu.disableMnemonicParsing() {
     isMnemonicParsing = false
     for (item in this.items) when (item) {
         is Menu, is MenuItem -> item.disableMnemonicParsing()
+        else -> doNothing()
     }
 }
 

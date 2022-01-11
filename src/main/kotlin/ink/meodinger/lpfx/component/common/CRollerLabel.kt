@@ -78,11 +78,11 @@ class CRollerLabel(contentText: String = "") : Region() {
     }
 
     fun startRoll() {
-        if (!rollerManager.running) rollerManager.schedule()
+        rollerManager.schedule()
     }
 
     fun stopRoll() {
-        if (rollerManager.running) rollerManager.clear()
+        rollerManager.clear()
     }
 
 }

@@ -31,9 +31,7 @@ open class LPFXTask<T>(private val task: () -> T) : Task<T>() {
         return this
     }
 
-    fun startInNewThread() {
-        Thread(this).start()
-    }
+    fun startInNewThread() = Thread(this).start()
 
     override fun call(): T = task()
 

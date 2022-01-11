@@ -234,7 +234,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             })
                         }
                     }
-                    add(Label(I18N["settings.label.helpText"])(true, TextAlignment.CENTER), 1, 4, 2, 1)
+                    add(Label(I18N["settings.label.helpText"]), 1, 4, 2, 1) {
+                        isWrapText = true
+                        textAlignment = TextAlignment.CENTER
+                    }
                     add(Label(I18N["settings.label.radius"]), 1, 0)
                     add(lSliderRadius, 1, 1) {
                         min = LABEL_RADIUS_MIN

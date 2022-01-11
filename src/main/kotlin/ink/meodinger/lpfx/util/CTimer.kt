@@ -76,14 +76,16 @@ class TimerTaskManager(
         }
 
     fun schedule() {
-        if (running) throw IllegalStateException("Task already scheduled")
+        // if (running) throw IllegalStateException("Task already scheduled")
+        if (running) return
 
         schedule(timerTask, delay, period)
         running = true
     }
 
     fun clear() {
-        if (!running) throw IllegalStateException("Task not running")
+        // if (!running) throw IllegalStateException("Task not running")
+        if (!running) return
 
         timerTask.cancel()
         purge()

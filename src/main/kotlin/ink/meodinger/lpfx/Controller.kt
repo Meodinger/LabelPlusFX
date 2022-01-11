@@ -367,7 +367,7 @@ class Controller(private val root: View) {
         RuledGenericBidirectionalBinding.bind(
             cGroupBox.indexProperty(), { observable, _, newValue, _ ->
                 val n = newValue as Int
-                val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else -1
+                val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else NOT_FOUND
 
                 // Indicate current item was removed
                 // Use run later to avoid Issue#5 (Reason unclear).
@@ -532,7 +532,7 @@ class Controller(private val root: View) {
 
             cTransArea.font = Font.font(TextFont, newSize.toDouble())
             cTransArea.positionCaret(0)
-            it.consume()
+            it.consume() // consume it
 
             labelInfo("Set text font size to $newSize")
         }
@@ -582,7 +582,6 @@ class Controller(private val root: View) {
             if (it.code != KeyCode.TAB) return@addEventHandler
 
             switchViewMode()
-            it.consume()
         }
         Logger.info("Transformed Tab on CTreeView", LOGSRC_CONTROLLER)
 
@@ -592,7 +591,6 @@ class Controller(private val root: View) {
 
             cLabelPane.removeText()
             switchWorkMode()
-            it.consume()
         }
         Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
@@ -627,47 +625,63 @@ class Controller(private val root: View) {
         Logger.info("Transformed Ctrl + Left/Right", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Up/Down KeyEvent to CTreeView select
+        /**
+         * Find next LabelItem as int index.
+         * @return NOT_FOUND when have no next
+         */
         fun getNextLabelItemIndex(from: Int, direction: Int): Int {
+            // Make sure we have items to select
+            cTreeView.getTreeItem(from).apply { this?.expandAll() }
+
+            // TODO: Loop when no labels
+
             var index = from
             var item: TreeItem<String>?
             do {
                 index += direction
                 item = cTreeView.getTreeItem(index)
+                item?.expandAll()
 
-                if (item != null) {
-                    item.expandAll()
-                } else {
-                    return -1
-                }
+                if (item == null) return NOT_FOUND
             } while (item !is CTreeLabelItem)
 
             return index
         }
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
             if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
-            if (it.code == KeyCode.LEFT || it.code == KeyCode.RIGHT) return@EventHandler
 
-            var selectedIndex = cTreeView.selectionModel.selectedIndex
-            cTreeView.selectionModel.clearSelection()
-
-            if (selectedIndex == -1) selectedIndex = when (it.code) {
-                KeyCode.UP -> cTreeView.expandedItemCount
-                KeyCode.DOWN -> 0
+            val shift = when (it.code) {
+                KeyCode.UP -> -1
+                KeyCode.DOWN -> 1
                 else -> return@EventHandler
             }
 
-            val shift = if (it.code == KeyCode.UP) -1 else 1
-            var labelItemIndex = selectedIndex + shift
+            val selectedIndex = cTreeView.selectionModel.selectedIndex
+            var labelItemIndex = when (it.code) {
+                // if not selected, return first or last;
+                KeyCode.UP   -> shift + if (selectedIndex != NOT_FOUND) selectedIndex else cTreeView.expandedItemCount
+                KeyCode.DOWN -> shift + if (selectedIndex != NOT_FOUND) selectedIndex else 0
+                else -> throw IllegalStateException("Should not be here")
+            }
 
-            val item = cTreeView.getTreeItem(labelItemIndex)
-            if (item == null) labelItemIndex = getNextLabelItemIndex(labelItemIndex, -shift)
-            if (item !is CTreeLabelItem) labelItemIndex = getNextLabelItemIndex(labelItemIndex, shift)
+            var item: TreeItem<String>? = cTreeView.getTreeItem(labelItemIndex)
+            while (item !is CTreeLabelItem) {
+                // if selected first and try getting previous, return last;
+                // if selected last and try getting next, return first;
+                labelItemIndex = getNextLabelItemIndex(when (it.code) {
+                    KeyCode.UP   -> if (labelItemIndex != NOT_FOUND) labelItemIndex else cTreeView.expandedItemCount
+                    KeyCode.DOWN -> if (labelItemIndex != NOT_FOUND) labelItemIndex else 0
+                    else -> throw IllegalStateException("Should not be here")
+                }, shift)
+                item = cTreeView.getTreeItem(labelItemIndex)
+            }
 
-            if (labelItemIndex == -1) return@EventHandler
+            if (labelItemIndex == NOT_FOUND) return@EventHandler
 
             cLabelPane.moveToLabel((cTreeView.getTreeItem(labelItemIndex) as CTreeLabelItem).index)
-            cTreeView.scrollTo(labelItemIndex)
+            cTreeView.selectionModel.clearSelection()
             cTreeView.selectionModel.select(labelItemIndex)
+            cTreeView.scrollTo(labelItemIndex)
 
             it.consume()
         }
@@ -677,29 +691,23 @@ class Controller(private val root: View) {
 
         // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
-            if (it.isControlOrMetaDown && it.code == KeyCode.ENTER) {
-                val isShiftDown = it.isShiftDown
-                val direction = if (isShiftDown) -1 else 1
+            if (!(it.isControlOrMetaDown && it.code == KeyCode.ENTER)) return@EventHandler
 
-                val selectedItemIndex = cTreeView.selectionModel.selectedIndex
-                val nextLabelItemIndex = getNextLabelItemIndex(selectedItemIndex, direction)
+            val isShiftDown = it.isShiftDown
+            val selectedItemIndex = cTreeView.selectionModel.selectedIndex
+            val nextLabelItemIndex = getNextLabelItemIndex(selectedItemIndex, if (isShiftDown) -1 else 1)
 
-                val code = if (nextLabelItemIndex == -1) {
-                    if (isShiftDown) KeyCode.LEFT else KeyCode.RIGHT
-                } else {
-                    if (isShiftDown) KeyCode.UP else KeyCode.DOWN
-                }
+            val code = if (nextLabelItemIndex == NOT_FOUND) {
+                if (isShiftDown) KeyCode.LEFT else KeyCode.RIGHT
+            } else {
+                if (isShiftDown) KeyCode.UP else KeyCode.DOWN
+            }
 
-                cLabelPane.fireEvent(keyEvent(
-                    it, character = "\u0000", text = "", code = code
-                ))
-
-                // Back to last
-                if (code == KeyCode.LEFT) {
-                    cLabelPane.fireEvent(keyEvent(
-                        it, character = "\u0000", text = "", code = KeyCode.UP
-                    ))
-                }
+            cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = code))
+            when (code) {
+                KeyCode.LEFT  -> cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = KeyCode.UP))
+                KeyCode.RIGHT -> cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = KeyCode.DOWN))
+                else -> doNothing()
             }
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)

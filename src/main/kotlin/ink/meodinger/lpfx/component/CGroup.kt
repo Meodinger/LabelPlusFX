@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.util.component.invoke
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onChange
@@ -39,7 +38,11 @@ class CGroup(
         private const val PADDING = 4.0
     }
 
-    private val text: Text = Text(name)(color, TextAlignment.CENTER, VPos.CENTER)
+    private val text: Text = Text(name).apply {
+        fill = color
+        textAlignment = TextAlignment.CENTER
+        textOrigin = VPos.CENTER
+    }
 
     private val nameProperty: StringProperty = SimpleStringProperty(name)
     fun nameProperty(): StringProperty = nameProperty

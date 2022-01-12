@@ -633,8 +633,6 @@ class Controller(private val root: View) {
             // Make sure we have items to select
             cTreeView.getTreeItem(from).apply { this?.expandAll() }
 
-            // TODO: Loop when no labels
-
             var index = from
             var item: TreeItem<String>?
             do {
@@ -649,6 +647,9 @@ class Controller(private val root: View) {
         }
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
             if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
+
+            // Make sure we'll not get into endless LabelItem find loop
+            if (State.transFile.getTransList(State.currentPicName).isEmpty()) return@EventHandler
 
             val shift = when (it.code) {
                 KeyCode.UP -> -1

@@ -35,4 +35,6 @@ open class LPFXTask<T>(private val task: () -> T) : Task<T>() {
 
     override fun call(): T = task()
 
+    operator fun invoke() = startInNewThread()
+
 }

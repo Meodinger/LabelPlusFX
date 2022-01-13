@@ -143,7 +143,7 @@ object UpdateChecker {
                     }
                 }
             }
-        }.startInNewThread()
+        }()
     }
 
 }

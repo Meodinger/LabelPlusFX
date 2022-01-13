@@ -710,6 +710,8 @@ class Controller(private val root: View) {
                 KeyCode.RIGHT -> cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = KeyCode.DOWN))
                 else -> doNothing()
             }
+
+            it.consume()
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)

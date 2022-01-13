@@ -70,23 +70,20 @@ class LabelPlusFX: HookedApplication() {
         }
 
         primaryStage.show()
-
         controller.labelInfo(I18N["common.ready"])
 
-        UpdateChecker.check()
-
         Logger.info("App started", LOGSRC_APPLICATION)
+
+        UpdateChecker.check()
     }
 
     override fun stop() {
         Logger.info("App stopping...", LOGSRC_APPLICATION)
 
         State.stage.close()
-
         Options.save()
 
         Logger.info("App stopped", LOGSRC_APPLICATION)
-
         runHooks { exitProcess(0) }
     }
 }

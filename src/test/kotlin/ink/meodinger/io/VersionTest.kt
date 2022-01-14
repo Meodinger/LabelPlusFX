@@ -45,13 +45,11 @@ class VersionTest {
 
     @Test
     fun testCompare() {
-        assertTrue(Version(1, 2, 4) == Version(1, 2, 4))
-        assertTrue(Version(1, 2, 4) > Version(0, 2, 4))
-        assertTrue(Version(1, 2, 4) > Version(1, 1, 4))
-        assertTrue(Version(1, 2, 4) > Version(1, 2, 3))
-        assertTrue(Version(1, 2, 4) < Version(2, 2, 4))
-        assertTrue(Version(1, 2, 4) < Version(1, 3, 4))
-        assertTrue(Version(1, 2, 4) < Version(1, 2, 5))
+        assertTrue(Version(1, 2, 3) == Version(1, 2, 3))
+        assertTrue(Version(1, 2, 3) > Version(0, 2, 3))
+        assertTrue(Version(1, 2, 3) > Version(1, 1, 3))
+        assertTrue(Version(1, 2, 3) > Version(1, 2, 2))
+        assertTrue(Version(1, 0, 0) > Version(0, 99, 99))
     }
 
 }

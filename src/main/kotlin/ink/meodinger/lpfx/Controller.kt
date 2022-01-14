@@ -128,7 +128,7 @@ class Controller(private val root: View) {
         // Drag and Drop
         root.setOnDragOver {
             if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
-            it.consume()
+            it.consume() // Consume used event
         }
         root.setOnDragDropped {
             if (stay()) return@setOnDragDropped
@@ -145,7 +145,7 @@ class Controller(private val root: View) {
                 Platform.runLater { open(file) }
                 it.isDropCompleted = true
             }
-            it.consume()
+            it.consume() // Consume used event
         }
         Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
 
@@ -524,7 +524,7 @@ class Controller(private val root: View) {
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
-            if (!(it.isControlOrMetaDown || it.isAltOrMetaDown)) return@addEventFilter
+            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventFilter
 
             val newSize = ((cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt())
                 .coerceAtLeast(12)
@@ -532,7 +532,6 @@ class Controller(private val root: View) {
 
             cTransArea.font = Font.font(TextFont, newSize.toDouble())
             cTransArea.positionCaret(0)
-            it.consume() // consume it
 
             labelInfo("Set text font size to $newSize")
         }
@@ -582,6 +581,7 @@ class Controller(private val root: View) {
             if (it.code != KeyCode.TAB) return@addEventHandler
 
             switchViewMode()
+            it.consume() // Disable tab shift
         }
         Logger.info("Transformed Tab on CTreeView", LOGSRC_CONTROLLER)
 
@@ -591,6 +591,7 @@ class Controller(private val root: View) {
 
             cLabelPane.removeText()
             switchWorkMode()
+            it.consume() // Disable tab shift
         }
         Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
@@ -618,7 +619,7 @@ class Controller(private val root: View) {
                 else -> return@EventHandler
             }
 
-            it.consume()
+            it.consume() // Consume used event
         }
         root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
@@ -684,7 +685,7 @@ class Controller(private val root: View) {
             cTreeView.selectionModel.select(labelItemIndex)
             cTreeView.scrollTo(labelItemIndex)
 
-            it.consume()
+            it.consume() // Consume used event
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
@@ -711,7 +712,7 @@ class Controller(private val root: View) {
                 else -> doNothing()
             }
 
-            it.consume()
+            it.consume() // Consume used event
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)

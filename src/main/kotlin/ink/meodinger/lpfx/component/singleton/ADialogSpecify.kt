@@ -33,6 +33,7 @@ import kotlin.io.path.*
 object ADialogSpecify : Dialog<List<File>>() {
 
     private val contentGridPane = GridPane()
+    private const val rowShift = 1
 
     private val thisWindow = dialogPane.scene.window
     private val fileChooser = FileChooser().apply {
@@ -173,9 +174,9 @@ object ADialogSpecify : Dialog<List<File>>() {
                 files[i] = picFile
             }
 
-            contentGridPane.add(Label(picNames[i]), 0, i + 1)
-            contentGridPane.add(labels[i], 1, i + 1)
-            contentGridPane.add(button, 2, i + 1)
+            contentGridPane.add(Label(picNames[i]), 0, i + rowShift)
+            contentGridPane.add(labels[i], 1, i + rowShift)
+            contentGridPane.add(button, 2, i + rowShift)
         }
 
         // manually control label roll to save resource

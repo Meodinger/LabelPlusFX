@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.io
 
 import ink.meodinger.lpfx.LOGSRC_SENDER
+import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 
@@ -36,7 +37,7 @@ object LogSender {
 
         // text part
         val textPart = MimeBodyPart()
-        textPart.setText("Got a problem! (or not)\nFrom LPFX ${UpdateChecker.V}")
+        textPart.setText("Got a problem! (or not)\nFrom LPFX $V")
 
         // file part
         val filePart = MimeBodyPart()

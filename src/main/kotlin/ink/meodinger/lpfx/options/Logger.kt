@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
-import ink.meodinger.lpfx.io.UpdateChecker
+import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -69,7 +69,7 @@ object Logger {
         builder.append("\nOS Name: ").append(System.getProperty("os.name")).append(", ")
             .append("Version: ").append(System.getProperty("os.version")).append(", ")
             .append("Arch: ").append(System.getProperty("os.arch")).append(";")
-        builder.append("\nApplication Version: ").append(UpdateChecker.V).append(";")
+        builder.append("\nApplication Version: ").append(V).append(";")
         builder.append("\n============== End ==============")
         info(builder.toString(), "Logger Init")
 

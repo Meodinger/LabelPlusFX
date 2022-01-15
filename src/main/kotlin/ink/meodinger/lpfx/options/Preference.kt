@@ -14,8 +14,8 @@ import java.io.IOException
  */
 object Preference : AbstractProperties() {
 
-    const val MAIN_DIVIDER = "MainDivider"
-    const val RIGHT_DIVIDER = "RightDivider"
+    const val MAIN_DIVIDER       = "MainDivider"
+    const val RIGHT_DIVIDER      = "RightDivider"
     const val TEXTAREA_FONT_SIZE = "TextAreaFontSize"
     const val LAST_UPDATE_NOTICE = "LastUpdateNotice"
 

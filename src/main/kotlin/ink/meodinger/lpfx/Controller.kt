@@ -137,9 +137,7 @@ class Controller(private val root: View) {
 
             val board = it.dragboard
             if (board.hasFiles()) {
-                val file = board.files.firstOrNull { f ->
-                    EXTENSIONS_FILE.contains(f.extension)
-                } ?: return@setOnDragDropped
+                val file = board.files.firstOrNull { f -> EXTENSIONS_FILE.contains(f.extension) } ?: return@setOnDragDropped
 
                 // To avoid exception cannot be caught
                 Platform.runLater { open(file) }
@@ -192,10 +190,7 @@ class Controller(private val root: View) {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelPlace
             if (State.transFile.groupCount == 0) return@setOnLabelPlace
 
-            val transLabel = TransLabel(
-                it.labelIndex,
-                State.currentGroupId, it.labelX, it.labelY, ""
-            )
+            val transLabel = TransLabel(it.labelIndex, State.currentGroupId, it.labelX, it.labelY, "")
 
             // Edit data
             State.addTransLabel(State.currentPicName, transLabel)
@@ -229,8 +224,7 @@ class Controller(private val root: View) {
             when (State.workMode) {
                 WorkMode.InputMode -> cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
                 WorkMode.LabelMode -> {
-                    val groupId = transLabel.groupId
-                    val transGroup = State.transFile.getTransGroup(groupId)
+                    val transGroup = State.transFile.getTransGroup(transLabel.groupId)
                     cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
                 }
             }
@@ -281,16 +275,16 @@ class Controller(private val root: View) {
         Logger.info("Bound scale", LOGSRC_CONTROLLER)
 
         // Switch Button text
-        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
+        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding(binding@{
             labelInfo("Switched work mode to ${State.viewMode}")
-            when (State.workMode) {
+            return@binding when (State.workMode) {
                 WorkMode.InputMode -> I18N["mode.work.input"]
                 WorkMode.LabelMode -> I18N["mode.work.label"]
             }
         }, State.workModeProperty))
-        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding({
+        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding(binding@{
             labelInfo("Switched view mode to ${State.viewMode}")
-            when (State.viewMode) {
+            return@binding when (State.viewMode) {
                 ViewMode.IndexMode -> I18N["mode.view.index"]
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
@@ -321,7 +315,7 @@ class Controller(private val root: View) {
 
         })
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), { observable, _, newValue, _ ->
+            cPicBox.valueProperty(), a@{ observable, _, newValue, _ ->
                 val a = newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
 
                 // Indicate current item was removed
@@ -329,11 +323,9 @@ class Controller(private val root: View) {
                 // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
                 if (State.isOpened && newValue == null) Platform.runLater { observable.value = a }
 
-                a
+                return@a a
             },
-            State.currentPicNameProperty, { _, _, newValue, _ ->
-                newValue!!
-            }
+            State.currentPicNameProperty, { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
@@ -376,9 +368,7 @@ class Controller(private val root: View) {
 
                 a
             },
-            State.currentGroupIdProperty, { _, _, newValue, _ ->
-                newValue!!
-            }
+            State.currentGroupIdProperty, { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
@@ -414,8 +404,8 @@ class Controller(private val root: View) {
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
         })
-        cLabelPane.defaultCursorProperty().bind(Bindings.createObjectBinding({
-            when (State.workMode) {
+        cLabelPane.defaultCursorProperty().bind(Bindings.createObjectBinding(binding@{
+            return@binding when (State.workMode) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
@@ -430,12 +420,10 @@ class Controller(private val root: View) {
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists())
-                cLabelPane.moveToCenter()
+            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         cLabelPane.heightProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists())
-                cLabelPane.moveToCenter()
+            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
@@ -445,9 +433,7 @@ class Controller(private val root: View) {
             State.currentLabelIndex = NOT_FOUND
         })
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
-            if (it != null && it is CTreeLabelItem) {
-                State.currentLabelIndex = it.index
-            }
+            if (it != null && it is CTreeLabelItem) State.currentLabelIndex = it.index
         })
         Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
 
@@ -458,15 +444,9 @@ class Controller(private val root: View) {
         Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
 
         // Preferences
-        cTransArea.fontProperty().addListener(onNew {
-            Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt()
-        })
-        pMain.dividers[0].positionProperty().addListener(onNew {
-            Preference[Preference.MAIN_DIVIDER] = it
-        })
-        pRight.dividers[0].positionProperty().addListener(onNew {
-            Preference[Preference.RIGHT_DIVIDER] = it
-        })
+        cTransArea.fontProperty().addListener(onNew { Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt() })
+        pMain.dividers[0].positionProperty().addListener(onNew(Preference[Preference.MAIN_DIVIDER]::set))
+        pRight.dividers[0].positionProperty().addListener(onNew(Preference[Preference.RIGHT_DIVIDER]::set))
         Logger.info("Listened for Preferences", LOGSRC_CONTROLLER)
     }
     /**
@@ -526,9 +506,8 @@ class Controller(private val root: View) {
         cTransArea.addEventFilter(ScrollEvent.SCROLL) {
             if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventFilter
 
-            val newSize = ((cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt())
-                .coerceAtLeast(12)
-                .coerceAtMost(64)
+            val newSize = (cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt()
+                .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
 
             cTransArea.font = Font.font(TextFont, newSize.toDouble())
             cTransArea.positionCaret(0)
@@ -543,23 +522,18 @@ class Controller(private val root: View) {
             if (it.clickCount < 2) return@addEventHandler
 
             val item = cTreeView.selectionModel.selectedItem
-            if (item != null && item is CTreeLabelItem) {
-                cLabelPane.moveToLabel(item.index)
-            }
+            if (item != null && item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
         }
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (!it.code.isArrowKey) return@addEventHandler
-
-            val item = cTreeView.getTreeItem(
-                cTreeView.selectionModel.selectedIndex + when (it.code) {
-                    KeyCode.UP -> -1
-                    KeyCode.DOWN -> 1
-                    else -> 0
-                }
-            )
-            if (item != null && item is CTreeLabelItem) {
-                cLabelPane.moveToLabel(item.index)
+            val direction = when (it.code) {
+                KeyCode.UP -> -1
+                KeyCode.DOWN -> 1
+                else -> return@addEventHandler
             }
+
+            val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + direction)
+            if (item != null && item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
         }
         Logger.info("Added effect on CTreeLabelItem selected", LOGSRC_CONTROLLER)
     }
@@ -571,8 +545,7 @@ class Controller(private val root: View) {
 
         // Transform CTreeView group selection to CGroupBox select
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
-            if (it != null && it is CTreeGroupItem)
-                cGroupBox.select(State.transFile.getGroupIdByName(it.name))
+            if (it != null && it is CTreeGroupItem) cGroupBox.select(State.transFile.getGroupIdByName(it.name))
         })
         Logger.info("Transformed CTreeGroupItem selected", LOGSRC_CONTROLLER)
 
@@ -719,6 +692,10 @@ class Controller(private val root: View) {
         Logger.info("Transformed Ctrl + Enter", LOGSRC_CONTROLLER)
     }
 
+    /**
+     * Specify pictures of current translation file
+     * @return True if submitted, false if cancelled
+     */
     fun specifyPicFiles(): Boolean {
         val picFiles = ADialogSpecify.specify()
 
@@ -746,6 +723,9 @@ class Controller(private val root: View) {
         return true
     }
 
+    /**
+     * Whether stay here or not
+     */
     fun stay(): Boolean {
         // Not open
         if (!State.isOpened) return false
@@ -1106,7 +1086,7 @@ class Controller(private val root: View) {
 
         State.stage.title = INFO["application.name"]
 
-        labelInfo("Reset")
+        labelInfo(I18N["common.ready"])
     }
 
     // ----- Update component properties ----- //

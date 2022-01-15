@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.util
 
 import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.regex.Pattern
 
 
 /**
@@ -9,6 +10,47 @@ import java.util.concurrent.ConcurrentLinkedDeque
  * Date: 2021/7/29
  * Have fun with my code!
  */
+
+/**
+ * Version
+ */
+data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
+
+    companion object {
+        val V0 = Version(0, 0, 0)
+
+        private val pattern = Pattern.compile("v[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{1,2}", Pattern.CASE_INSENSITIVE)
+        private fun check(i : Int): Int {
+            if (i in 0..99) return i
+            throw IllegalArgumentException("Version number must in 0..99, got $i")
+        }
+
+        /**
+         * Return a Version by String like "v0.1.99", case-insensitive
+         * @param version Start with 'v', with three number parts that split by '.' and value between 0 and 99
+         * @return Version, V0 if format invalid
+         */
+        fun of(version: String): Version {
+            if (!pattern.matcher(version).matches()) return V0
+            val l = version.split(".")
+
+            return Version(l[0].substring(1).toInt(), l[1].toInt(), l[2].toInt())
+        }
+    }
+
+    init {
+        check(a)
+        check(b)
+        check(c)
+    }
+
+    override fun toString(): String = "v$a.$b.$c"
+
+    override operator fun compareTo(other: Version): Int {
+        return (this.a - other.a) * 10000 + (this.b - other.b) * 100 + (this.c - other.c)
+    }
+
+}
 
 /**
  * Hooked Application

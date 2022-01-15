@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CFileChooser
-import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
@@ -431,7 +430,7 @@ object AMenuBar : MenuBar() {
             I18N["m.about.dialog.title"],
             null,
             StringBuilder()
-                .append(INFO["application.name"]).append(" - ").append(UpdateChecker.V).append("\n")
+                .append(INFO["application.name"]).append(" - ").append(V).append("\n")
                 .append("Developed By ").append(INFO["application.vendor"]).append("\n")
                 .toString(),
             INFO["application.link"]

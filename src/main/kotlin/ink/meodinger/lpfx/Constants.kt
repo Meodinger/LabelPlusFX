@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -12,6 +13,9 @@ import java.io.File
  * Date: 2021/8/1
  * Have fun with my code!
  */
+
+// Current Version
+val V = Version(2, 2, 2)
 
 /**
  * Size related constants
@@ -27,6 +31,12 @@ const val COMMON_GAP    = 16.0
  */
 const val LABEL_RADIUS_MIN = 8.0
 const val LABEL_RADIUS_MAX = 48.0
+
+/**
+ * TextArea Font Size Range
+ */
+const val FONT_SIZE_MIN = 12
+const val FONT_SIZE_MAX = 64
 
 /**
  * Default File Object

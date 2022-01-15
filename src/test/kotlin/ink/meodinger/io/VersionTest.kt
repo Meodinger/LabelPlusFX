@@ -1,6 +1,6 @@
 package ink.meodinger.io
 
-import ink.meodinger.lpfx.io.UpdateChecker.Version
+import ink.meodinger.lpfx.util.Version
 import test.lpfx.assertThrow
 import test.lpfx.assertNotThrow
 import org.junit.Assert.assertEquals

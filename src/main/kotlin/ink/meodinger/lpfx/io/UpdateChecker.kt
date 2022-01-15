@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.infoImageView
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -51,8 +52,9 @@ object UpdateChecker {
             }
 
             /**
-             * Return a Version by String, case-insensitive
+             * Return a Version by String like "v0.1.99", case-insensitive
              * @param version Start with 'v', with three number parts that split by '.' and value between 0 and 99
+             * @return Version, V0 if format invalid
              */
             fun of(version: String): Version {
                 if (!pattern.matcher(version).matches()) return V0
@@ -121,7 +123,7 @@ object UpdateChecker {
                     dialog.title = I18N["update.dialog.title"]
                     dialog.graphic = infoImageView
                     dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
-                    dialog.dialogPane.content = VBox().apply {
+                    dialog.withContent(VBox()) {
                         add(Label(String.format(I18N["update.dialog.content.s"], version)))
                         add(Separator()) {
                             padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0)

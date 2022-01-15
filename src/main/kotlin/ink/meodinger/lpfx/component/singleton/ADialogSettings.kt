@@ -80,7 +80,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
         title = I18N["settings.title"]
         dialogPane.prefWidth = DIALOG_WIDTH
         dialogPane.prefHeight = DIALOG_HEIGHT
-        dialogPane.content = TabPane().apply {
+        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+        withContent(TabPane()) {
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
             add(I18N["settings.group.title"]) {
@@ -301,7 +302,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
                 }
             }
         }
-        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
 
         initProperties()
     }

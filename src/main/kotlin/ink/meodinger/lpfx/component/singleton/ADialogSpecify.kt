@@ -3,10 +3,7 @@ package ink.meodinger.lpfx.component.singleton
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.bottom
-import ink.meodinger.lpfx.util.component.center
-import ink.meodinger.lpfx.util.component.does
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.resource.I18N
@@ -61,7 +58,8 @@ object ADialogSpecify : Dialog<List<File>>() {
         title = I18N["specify.title"]
         dialogPane.prefWidth = DIALOG_WIDTH
         dialogPane.prefHeight = DIALOG_HEIGHT
-        dialogPane.content = BorderPane().apply {
+        dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+        withContent(BorderPane()) {
             val stackPane = StackPane(contentGridPane.apply {
                 hgap = COMMON_GAP
                 vgap = COMMON_GAP
@@ -124,7 +122,6 @@ object ADialogSpecify : Dialog<List<File>>() {
                 }
             }
         }
-        dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
 
         setResultConverter {
             when (it) {

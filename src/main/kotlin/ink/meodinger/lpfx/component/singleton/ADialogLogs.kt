@@ -8,10 +8,7 @@ import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Logger.LogType
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Settings
-import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.addColumn
-import ink.meodinger.lpfx.util.component.bold
-import ink.meodinger.lpfx.util.component.does
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.platform.isWin
@@ -66,7 +63,8 @@ object ADialogLogs : AbstractPropertiesDialog() {
         title = I18N["logs.title"]
         dialogPane.prefWidth = DIALOG_WIDTH
         dialogPane.prefHeight = DIALOG_HEIGHT
-        dialogPane.content = GridPane().apply {
+        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+        withContent(GridPane()) {
             //    0      1           2     3
             // 0  Label  ComboBox
             // 1  Label
@@ -98,15 +96,13 @@ object ADialogLogs : AbstractPropertiesDialog() {
                 addColumn<LogFile, String>(I18N["logs.table.name"]) { it.value.nameProperty }
                 selectionModel.selectionMode = SelectionMode.SINGLE
                 selectionModel.selectedItemProperty().addListener(onChange { labelSent.text = "" })
-                setRowFactory { _ ->
-                    TableRow<LogFile>().also { row -> row.setOnMouseClicked {
-                        if (it.clickCount > 1) Runtime.getRuntime().exec(
-                            if (isWin) "notepad ${row.item.file.absolutePath}"
-                            else if (isMac) "open -t ${row.item.file.absolutePath}"
-                            else "vi ${row.item.file.absolutePath}"
-                        )
-                    } }
-                }
+                setRowFactory { TableRow<LogFile>().apply { setOnMouseClicked { e ->
+                    if (e.clickCount > 1) Runtime.getRuntime().exec(
+                        if (isWin) "notepad ${item.file.absolutePath}"
+                        else if (isMac) "open -t ${item.file.absolutePath}"
+                        else "vi ${item.file.absolutePath}"
+                    )
+                } } }
             }
             add(labelSent, 0, 5, 2 , 1) {
                 textFill = Color.BLUE
@@ -140,7 +136,6 @@ object ADialogLogs : AbstractPropertiesDialog() {
                 }
             }
         }
-        dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
 
         initProperties()
     }

@@ -1,6 +1,9 @@
 package ink.meodinger.lpfx.util.dialog
 
 import ink.meodinger.lpfx.COMMON_GAP
+import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.does
+import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -38,17 +41,15 @@ import java.util.Optional
 fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
-
-    val label = Label(content)
-    val separator = Separator().apply { padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
-    val hyperlink = Hyperlink(link).apply { onAction = handler; padding = Insets(0.0) }
-    val box = VBox(label, separator, hyperlink)
-
     dialog.title = title
     dialog.graphic = graphics
     dialog.headerText = header
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CLOSE)
-    dialog.dialogPane.content = box
+    dialog.withContent(VBox()) {
+        add(Label(content))
+        add(Separator()) { padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
+        add(Hyperlink(link)) { onAction = handler; padding = Insets(0.0) }
+    }
 
     return dialog.showAndWait()
 }
@@ -59,17 +60,17 @@ fun showInput(owner: Window?, title: String, header: String, placeholder: String
     dialog.title = title
     dialog.headerText = header
     dialog.editor.textFormatter = formatter
+
     return dialog.showAndWait()
 }
 
 fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<String> {
+    val textArea = TextArea(placeholder)
     val dialog = Dialog<String>()
     dialog.initOwner(owner)
     dialog.title = title
-
-    val textArea = TextArea(placeholder)
-    dialog.dialogPane.content = HBox(textArea)
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+    dialog withContent HBox(textArea)
 
     dialog.resultConverter = Callback { buttonType ->
         if (buttonType == ButtonType.OK) textArea.text else placeholder
@@ -82,60 +83,55 @@ fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<
     dialog.initOwner(owner)
     dialog.title = title
     dialog.contentText = header
+
     return dialog.showAndWait()
 }
 
 fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = ArrayList()): Optional<List<T>> {
-    val dialog = Dialog<List<T>>()
-    dialog.initOwner(owner)
-    dialog.title = I18N["util.dialog.choose.title"]
-
     val left = ListView<T>()
     val right = ListView<T>()
-    left.selectionModel.selectionMode = SelectionMode.MULTIPLE
-    right.selectionModel.selectionMode = SelectionMode.MULTIPLE
-    left.items.addAll(unselected)
-    right.items.addAll(selected)
-
-    val add = Button(I18N["util.dialog.choose.add"])
-    val addAll = Button(I18N["util.dialog.choose.add_all"])
-    val remove = Button(I18N["util.dialog.choose.remove"])
-    val removeAll = Button(I18N["util.dialog.choose.remove_all"])
-    val vBox = VBox(add, addAll, remove, removeAll).apply { alignment = Pos.CENTER }
-    for (b in vBox.children) {
-        val btn = b as Button
-        btn.prefWidth = 48.0
-        btn.prefHeight = 48.0
-    }
 
     val mover: (ListView<T>, ListView<T>) -> Unit = { from, to ->
-        ArrayList(from.selectionModel.selectedItems).forEach { item ->
-            from.items.remove(item)
-            to.items.add(item)
-        }
+        val items = from.selectionModel.selectedItems
+        to.items.addAll(items)
+        from.items.removeAll(items)
     }
     val moverAll: (ListView<T>, ListView<T>) -> Unit = { from, to ->
         to.items.addAll(from.items)
         from.items.clear()
     }
 
-    add.onAction = EventHandler { mover(left, right) }
-    addAll.onAction = EventHandler { moverAll(left, right) }
-    remove.onAction = EventHandler { mover(right, left) }
-    removeAll.onAction = EventHandler { moverAll(right, left) }
-
-    val pane = GridPane()
-    pane.add(Label(I18N["util.dialog.choose.potential"]), 0, 0)
-    pane.add(Label(I18N["util.dialog.choose.selected"]), 2, 0)
-    pane.add(left, 0, 1)
-    pane.add(vBox, 1, 1)
-    pane.add(right, 2, 1)
-    pane.hgap = 16.0
-    pane.prefWidth = 600.0
-    pane.prefHeight = 400.0
-
-    dialog.dialogPane.content = pane
+    val dialog = Dialog<List<T>>()
+    dialog.initOwner(owner)
+    dialog.title = I18N["util.dialog.choose.title"]
     dialog.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
+    dialog.withContent(GridPane()) {
+        hgap = 16.0
+        prefWidth = 600.0
+        prefHeight = 400.0
+        add(Label(I18N["util.dialog.choose.potential"]), 0, 0)
+        add(Label(I18N["util.dialog.choose.selected"]), 2, 0)
+        add(left, 0, 1) {
+            selectionModel.selectionMode = SelectionMode.MULTIPLE
+            items.addAll(unselected)
+        }
+        add(VBox(), 1, 1) {
+            alignment = Pos.CENTER
+            add(Button(I18N["util.dialog.choose.add"])) { does { mover(left, right) } }
+            add(Button(I18N["util.dialog.choose.add_all"])) { does { moverAll(left, right) } }
+            add(Button(I18N["util.dialog.choose.remove"])) { does { mover(right, left) } }
+            add(Button(I18N["util.dialog.choose.remove_all"])) { does { moverAll(right, left) } }
+            for (node in children) {
+                val btn = node as Button
+                btn.prefWidth = 48.0
+                btn.prefHeight = 48.0
+            }
+        }
+        add(right, 2, 1) {
+            selectionModel.selectionMode = SelectionMode.MULTIPLE
+            items.addAll(selected)
+        }
+    }
 
     dialog.resultConverter = Callback {
         when(it) {

@@ -10,6 +10,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.color.toHexRGB
+import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.showChoice
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.dialog.showError
@@ -107,8 +108,9 @@ object ATreeMenu : ContextMenu() {
         val rAddGroupDialog = Dialog<TransGroup>().apply {
             title = I18N["context.add_group.dialog.title"]
             headerText = I18N["context.add_group.dialog.header"]
-            dialogPane.content = HBox(rAddGroupField, rAddGroupPicker).also { box -> box.alignment = Pos.CENTER }
             dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
+            withContent(HBox(rAddGroupField, rAddGroupPicker)) { alignment = Pos.CENTER }
+
             setResultConverter converter@{
                 return@converter when (it) {
                     ButtonType.FINISH -> TransGroup(rAddGroupField.text, rAddGroupPicker.value.toHexRGB())

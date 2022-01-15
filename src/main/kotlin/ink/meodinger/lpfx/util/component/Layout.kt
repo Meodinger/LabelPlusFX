@@ -16,8 +16,15 @@ import javafx.scene.text.FontWeight
 
 
 ////////////////////////////////////////////////////////////
-///// Dialog
+///// Dialog / DialogPane
 ////////////////////////////////////////////////////////////
+
+fun <T : Node> DialogPane.withContent(content: T, operation: T.() -> Unit = {}): DialogPane {
+    return apply { this.content = content.apply(operation) }
+}
+infix fun <T : Node> DialogPane.withContent(content: T) : DialogPane {
+    return apply { this.content = content }
+}
 
 /**
  * Add dialogPane.content
@@ -26,10 +33,10 @@ import javafx.scene.text.FontWeight
  * @return this dialog ref
  */
 fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}): Dialog<R> {
-    return apply { dialogPane.content = content.apply(operation) }
+    return apply { dialogPane.withContent(content, operation) }
 }
 infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
-    return apply { dialogPane.content = content }
+    return apply { dialogPane.withContent(content) }
 }
 
 ////////////////////////////////////////////////////////////
@@ -177,6 +184,13 @@ fun <T : Node> VBox.add(node: T, operation: T.() -> Unit = {}): VBox {
     return apply { children.add(node.apply(operation)) }
 }
 
+fun HBox.addAll(vararg nodes: Node): HBox {
+    return apply { children.addAll(*nodes) }
+}
+fun VBox.addAll(vararg nodes: Node): VBox {
+    return apply { children.addAll(*nodes) }
+}
+
 var Node.hGrow: Priority
     get() = HBox.getHgrow(this) ?: Priority.NEVER
     set(value) { HBox.setHgrow(this, value) }
@@ -189,8 +203,8 @@ var Node.vGrow: Priority
 ///// Table View
 ////////////////////////////////////////////////////////////
 
-fun <S, D> TableView<S>.addColumn(title: String, getter: (TableColumn.CellDataFeatures<S, D>) -> ObservableValue<D>): TableView<S> {
-    return apply { columns.add(TableColumn<S, D>(title).apply { setCellValueFactory(getter) }) }
+fun <S, T> TableView<S>.addColumn(title: String, getter: (TableColumn.CellDataFeatures<S, T>) -> ObservableValue<T>): TableView<S> {
+    return apply { columns.add(TableColumn<S, T>(title).apply { setCellValueFactory(getter) }) }
 }
 
 ////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.vGrow
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.io.LogSender
+import ink.meodinger.lpfx.util.component.withContent
 
 import javafx.event.ActionEvent
 import javafx.scene.Node
@@ -182,7 +183,8 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     dialog.headerText = e.javaClass.name
     dialog.dialogPane.prefWidth = DIALOG_WIDTH
     dialog.dialogPane.prefHeight = DIALOG_HEIGHT
-    dialog.dialogPane.content = VBox().apply {
+    dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
+    dialog.withContent(VBox()) {
         spacing = COMMON_GAP / 2
         add(Label(omitWideText(e.message ?: e.javaClass.name, 400.0)))
         add(Separator())
@@ -192,7 +194,6 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
             vGrow = Priority.ALWAYS
         }
     }
-    dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
 
     for (buttonType in dialog.dialogPane.buttonTypes) {
         val button = dialog.dialogPane.lookupButton(buttonType) as Button

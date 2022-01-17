@@ -72,6 +72,7 @@ Add
 # 2.2.3
 
 TODO:
+ - Ctrl+D 启用网络Dict
  - 更多地使用Binding
  - 增加全文搜索替换功能
 

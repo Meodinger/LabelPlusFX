@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.util.platform.isMac
 
 import javafx.scene.input.GestureEvent
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 
 
 /**
@@ -51,4 +52,11 @@ val KeyEvent.isAltOrMetaDown: Boolean get() {
     if (isMac && isMetaDown) return true
 
     return false
+}
+
+/**
+ * If click count equals 2
+ */
+val MouseEvent.isDoubleClick: Boolean get() {
+    return clickCount == 2
 }

@@ -232,7 +232,7 @@ class Controller(private val root: View) {
         cLabelPane.setOnLabelClicked {
             if (State.workMode != WorkMode.InputMode) return@setOnLabelClicked
 
-            if (it.source.clickCount > 1) cLabelPane.moveToLabel(it.labelIndex)
+            if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 
             cTreeView.selectLabel(it.labelIndex, true)
         }
@@ -519,7 +519,7 @@ class Controller(private val root: View) {
         // Bind Label and Tree
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button != MouseButton.PRIMARY) return@addEventHandler
-            if (it.clickCount < 2) return@addEventHandler
+            if (!it.isDoubleClick) return@addEventHandler
 
             val item = cTreeView.selectionModel.selectedItem
             if (item != null && item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
@@ -574,7 +574,7 @@ class Controller(private val root: View) {
 
             val index = it.text.toInt() - 1
             if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
-            cGroupBox.select(it.text.toInt() - 1)
+            cGroupBox.select(index)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
@@ -1052,27 +1052,6 @@ class Controller(private val root: View) {
         }
     }
 
-    fun exit() {
-        if (!State.isChanged) {
-            State.application.stop()
-            return
-        }
-
-        showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"], State.stage).ifPresent {
-            when (it) {
-                ButtonType.YES -> {
-                    save(State.translationFile)
-                    State.application.stop()
-                }
-                ButtonType.NO -> {
-                    State.application.stop()
-                }
-                ButtonType.CANCEL -> {
-                    return@ifPresent
-                }
-            }
-        }
-    }
     fun reset() {
         backupManager.clear()
 

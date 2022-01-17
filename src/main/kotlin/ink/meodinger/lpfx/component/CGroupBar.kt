@@ -1,7 +1,10 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.type.TransGroup
+import ink.meodinger.lpfx.util.addAtLast
+import ink.meodinger.lpfx.util.component.hGrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.resource.I18N
@@ -11,6 +14,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
 
@@ -41,6 +45,14 @@ class CGroupBar : HBox() {
     private val transGroups: MutableList<TransGroup> = ArrayList()
     private val cGroups: MutableList<CGroup> = ArrayList()
 
+    private val placeHolder: HBox = HBox().apply {
+        hGrow = Priority.ALWAYS
+    }
+    private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
+        setOnMouseClicked { ATreeMenu.toggleGroupCreate() }
+    }
+    private val vShift = 2
+
     fun reset() {
         cGroups.clear()
         transGroups.clear()
@@ -69,6 +81,12 @@ class CGroupBar : HBox() {
     }
 
     fun createGroup(transGroup: TransGroup) {
+        // If first add
+        if (transGroups.isEmpty()) {
+            children.addAtLast(placeHolder)
+            children.addAtLast(addItem)
+        }
+
         transGroups.add(transGroup)
 
         val cGroup = CGroup().apply {
@@ -84,7 +102,7 @@ class CGroupBar : HBox() {
         }
 
         cGroups.add(cGroup)
-        children.add(cGroup)
+        children.addAtLast(cGroup, vShift)
 
         if (cGroups.size == 1) select(0)
     }
@@ -111,6 +129,9 @@ class CGroupBar : HBox() {
         // Remove data
         cGroups.remove(cGroup)
         transGroups.removeAt(groupId)
+
+        // Clear when empty
+        if (transGroups.isEmpty()) children.removeAll(placeHolder, addItem)
     }
 
     fun select(groupId: Int) {

@@ -65,8 +65,7 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT)
         primaryStage.setOnCloseRequest {
-            controller.exit()
-            it.consume()
+            if (!controller.stay()) stop() else it.consume()
         }
 
         primaryStage.show()

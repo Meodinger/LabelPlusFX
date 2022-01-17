@@ -3,27 +3,29 @@ package ink.meodinger.lpfx.util.dialog
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.DIALOG_HEIGHT
 import ink.meodinger.lpfx.DIALOG_WIDTH
+import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.util.image.resizeByRadius
-import ink.meodinger.lpfx.util.string.omitHighText
-import ink.meodinger.lpfx.util.string.omitWideText
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.vGrow
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.event.isDoubleClick
+import ink.meodinger.lpfx.util.image.resizeByRadius
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.ICON
+import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.resource.loadAsImage
+import ink.meodinger.lpfx.util.string.omitHighText
+import ink.meodinger.lpfx.util.string.omitWideText
 
 import javafx.event.ActionEvent
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.image.ImageView
-import javafx.scene.layout.*
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import javafx.stage.Window
-import java.util.Optional
+import java.util.*
 
 
 /**
@@ -51,7 +53,7 @@ fun showDialog(graphic: Node?, title: String, header: String?, content: String, 
     dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
     dialog.dialogPane.buttonTypes.addAll(buttonTypes)
     dialog.dialogPane.setOnMouseClicked {
-        if (it.clickCount > 1) {
+        if (it.isDoubleClick) {
             val maxWidth = dialog.width / 3 * 2
             val nowText = Text(dialog.contentText).apply { wrappingWidth = maxWidth }
             val newText = Text(content).apply { wrappingWidth = maxWidth }

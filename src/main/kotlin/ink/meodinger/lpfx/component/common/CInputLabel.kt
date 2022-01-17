@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
+import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
@@ -93,7 +94,7 @@ class CInputLabel : Pane() {
 
         label.setOnMouseClicked {
             if (it.button != MouseButton.PRIMARY) return@setOnMouseClicked
-            if (it.clickCount < 2) return@setOnMouseClicked
+            if (!it.isDoubleClick) return@setOnMouseClicked
 
             fieldText = onChangeToField(this)
             isEditing = true

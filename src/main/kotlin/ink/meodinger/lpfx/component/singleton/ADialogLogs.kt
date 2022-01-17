@@ -10,6 +10,7 @@ import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showError
+import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.platform.isWin
 import ink.meodinger.lpfx.util.property.onChange
@@ -97,7 +98,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
                 selectionModel.selectionMode = SelectionMode.SINGLE
                 selectionModel.selectedItemProperty().addListener(onChange { labelSent.text = "" })
                 setRowFactory { TableRow<LogFile>().apply { setOnMouseClicked { e ->
-                    if (e.clickCount > 1) Runtime.getRuntime().exec(
+                    if (e.isDoubleClick) Runtime.getRuntime().exec(
                         if (isWin) "notepad ${item.file.absolutePath}"
                         else if (isMac) "open -t ${item.file.absolutePath}"
                         else "vi ${item.file.absolutePath}"

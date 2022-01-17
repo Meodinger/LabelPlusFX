@@ -71,7 +71,7 @@ class CGroup(
         }, selectedProperty))
         borderProperty().bind(Bindings.createObjectBinding({
             Border(BorderStroke(
-                if (isHover) color else Color.TRANSPARENT,
+                if (isHover) this.color else Color.TRANSPARENT,
                 BorderStrokeStyle.SOLID,
                 CornerRadii(CORNER_RADII),
                 BorderWidths(BORDER_WIDTH)

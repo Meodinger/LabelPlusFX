@@ -125,7 +125,7 @@ object AMenuBar : MenuBar() {
             }
             separator()
             item(I18N["m.exit"]) {
-                does { State.controller.exit() }
+                does { if (!State.controller.stay()) State.application.stop() }
             }
         }
         menu(I18N["mm.edit"]) {

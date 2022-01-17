@@ -21,6 +21,7 @@ import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.collections.ObservableList
+import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
@@ -177,13 +178,15 @@ object ATreeMenu : ContextMenu() {
             }
         }
         g_renameItem.setOnAction {
-            val groupItem = view.selectionModel.selectedItem
+            val groupName: String =
+                if (it.source is String) it.source as String
+                else view.selectionModel.selectedItem.value
 
             showInput(
                 State.stage,
                 I18N["context.rename_group.dialog.title"],
                 I18N["context.rename_group.dialog.header"],
-                groupItem.value,
+                groupName,
                 genGroupNameFormatter()
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
@@ -193,14 +196,15 @@ object ATreeMenu : ContextMenu() {
                 }
 
                 // Edit data
-                State.setTransGroupName(State.transFile.getGroupIdByName(groupItem.value), newName)
+                State.setTransGroupName(State.transFile.getGroupIdByName(groupName), newName)
                 // Mark change
                 State.isChanged = true
             }
         }
         g_deleteItem.setOnAction {
-            val groupItem = view.selectionModel.selectedItem
-            val groupName = groupItem.value
+            val groupName: String =
+                if (it.source is String) it.source as String
+                else view.selectionModel.selectedItem.value
             val groupId = State.transFile.getGroupIdByName(groupName)
 
             view.selectionModel.clearSelection()
@@ -265,6 +269,16 @@ object ATreeMenu : ContextMenu() {
             // other
             doNothing()
         }
+    }
+
+    fun toggleGroupCreate() {
+        r_addGroupItem.fire()
+    }
+    fun toggleGroupRename(groupName: String) {
+        g_renameItem.onAction.handle(ActionEvent(groupName, null))
+    }
+    fun toggleGroupDelete(groupName: String) {
+        g_deleteItem.onAction.handle(ActionEvent(groupName, null))
     }
 
 }

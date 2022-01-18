@@ -176,6 +176,11 @@ object AMenuBar : MenuBar() {
                 )
             }
         }
+        menu("Tool") {
+            item("Dict") {
+                does { AOnlineDict.show() }
+            }
+        }
         menu(I18N["mm.about"]) {
             item(I18N["m.settings"]) {
                 does { settings() }

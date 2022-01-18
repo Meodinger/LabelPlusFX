@@ -18,6 +18,9 @@ module lpfx {
     requires soundlibs.jorbis;
     requires soundlibs.tritonus.share;
 
+    // HTML Parser
+    requires ink.meodinger.htmlparser;
+
     uses javazoom.spi.vorbis.sampled.file.VorbisAudioFileReader;
     uses javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider;
 

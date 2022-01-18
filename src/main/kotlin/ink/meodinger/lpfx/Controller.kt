@@ -503,8 +503,8 @@ class Controller(private val root: View) {
         Logger.info("Added effect on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
-        cTransArea.addEventFilter(ScrollEvent.SCROLL) {
-            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventFilter
+        cTransArea.addEventHandler(ScrollEvent.SCROLL) {
+            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
 
             val newSize = (cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt()
                 .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)

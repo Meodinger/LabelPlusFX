@@ -230,6 +230,8 @@ class CLabelPane : ScrollPane() {
         root.alignment = Pos.CENTER
 
         addEventFilter(ScrollEvent.SCROLL) {
+            // Use filter to process event before actually action
+
             // Remove text when scroll event fired
             removeText()
 
@@ -245,7 +247,7 @@ class CLabelPane : ScrollPane() {
             root.scaleX = it
             root.scaleY = it
         })
-        root.addEventFilter(ScrollEvent.SCROLL) {
+        root.addEventHandler(ScrollEvent.SCROLL) {
             if (it.isAltOrMetaDown) {
                 scale += it.deltaY / (10 * SCROLL_DELTA)
                 it.consume()

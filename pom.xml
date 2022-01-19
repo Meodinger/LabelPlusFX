@@ -7,7 +7,7 @@
 
     <groupId>ink.meodinger</groupId>
     <artifactId>lpfx</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.2</version>
     <packaging>jar</packaging>
 
     <name>lpfx</name>
@@ -91,6 +91,7 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -124,7 +125,7 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.6.10</version>
                 <executions>
                     <execution>
                         <id>compile</id>

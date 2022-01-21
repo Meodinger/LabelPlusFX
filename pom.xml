@@ -86,9 +86,9 @@
             <version>1.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>ink.meodinger.plugin</groupId>
+            <groupId>ink.meodinger</groupId>
             <artifactId>htmlparser</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 
         <dependency>

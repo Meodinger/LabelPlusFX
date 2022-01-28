@@ -1154,23 +1154,19 @@ class Controller(private val root: View) {
         Logger.info("TreeView rendered", LOGSRC_CONTROLLER)
     }
 
-    fun registerGroup(transGroup: TransGroup) {
-        cTreeView.registerGroup(transGroup)
-
-        Logger.info("Registered group item @ $transGroup", LOGSRC_CONTROLLER)
-    }
-    fun unregisterGroup(groupName: String) {
-        cTreeView.unregisterGroup(groupName)
-
-        Logger.info("Unregistered group item @ $groupName", LOGSRC_CONTROLLER)
-    }
     fun createGroupTreeItem(transGroup: TransGroup) {
-        cTreeView.createGroupItem(transGroup)
+        when (State.viewMode) {
+            ViewMode.IndexMode -> cTreeView.registerGroup(transGroup)
+            ViewMode.GroupMode -> cTreeView.createGroupItem(transGroup)
+        }
 
         Logger.info("Created group item @ $transGroup", LOGSRC_CONTROLLER)
     }
     fun removeGroupTreeItem(groupName: String) {
-        cTreeView.removeGroupItem(groupName)
+        when (State.viewMode) {
+            ViewMode.IndexMode -> cTreeView.unregisterGroup(groupName)
+            ViewMode.GroupMode -> cTreeView.removeGroupItem(groupName)
+        }
 
         Logger.info("Removed group item @ $groupName", LOGSRC_CONTROLLER)
     }

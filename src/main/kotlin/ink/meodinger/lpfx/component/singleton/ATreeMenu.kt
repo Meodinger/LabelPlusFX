@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
 import ink.meodinger.lpfx.component.CTreeView
@@ -169,10 +168,7 @@ object ATreeMenu : ContextMenu() {
                 // Update view
                 State.controller.createLabelLayer()
                 State.controller.createGroupBarItem(newGroup)
-                when (State.viewMode) {
-                    ViewMode.IndexMode -> State.controller.registerGroup(newGroup)
-                    ViewMode.GroupMode -> State.controller.createGroupTreeItem(newGroup)
-                }
+                State.controller.createGroupTreeItem(newGroup)
                 // Mark change
                 State.isChanged = true
             }

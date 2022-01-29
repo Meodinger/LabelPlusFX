@@ -44,7 +44,7 @@ object UpdateChecker {
             val jsonNode = ObjectMapper().readTree(URL(API))
             if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {
-            Logger.warning("No network connection, check failed", LOGSRC_CHECKER)
+            Logger.warning("No network connection", LOGSRC_CHECKER)
         } catch (e: SocketTimeoutException) {
             Logger.warning("Connect timeout", LOGSRC_CHECKER)
         } catch (e: ConnectException) {

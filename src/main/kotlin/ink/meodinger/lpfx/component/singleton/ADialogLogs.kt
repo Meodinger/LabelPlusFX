@@ -62,8 +62,8 @@ object ADialogLogs : AbstractPropertiesDialog() {
         initOwner(State.stage)
 
         title = I18N["logs.title"]
-        dialogPane.prefWidth = DIALOG_WIDTH
-        dialogPane.prefHeight = DIALOG_HEIGHT
+        dialogPane.prefWidth = PANE_WIDTH
+        dialogPane.prefHeight = PANE_HEIGHT
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         withContent(GridPane()) {
             //    0      1           2     3

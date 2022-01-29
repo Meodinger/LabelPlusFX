@@ -78,10 +78,11 @@ object ADialogSettings : AbstractPropertiesDialog() {
         initOwner(State.stage)
 
         title = I18N["settings.title"]
-        dialogPane.prefWidth = DIALOG_WIDTH
-        dialogPane.prefHeight = DIALOG_HEIGHT
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         withContent(TabPane()) {
+            // DialogPane size depends on TabPane
+            prefWidth = PANE_WIDTH
+            prefHeight = PANE_HEIGHT
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
             add(I18N["settings.group.title"]) {

@@ -22,8 +22,8 @@ val V = Version(2, 2, 2)
  */
 const val WINDOW_WIDTH  = 900.0
 const val WINDOW_HEIGHT = 600.0
-const val DIALOG_WIDTH  = 600.0
-const val DIALOG_HEIGHT = 400.0
+const val PANE_WIDTH    = 600.0
+const val PANE_HEIGHT   = 400.0
 const val COMMON_GAP    = 16.0
 
 /**

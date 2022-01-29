@@ -1,8 +1,8 @@
 package ink.meodinger.lpfx.util.dialog
 
 import ink.meodinger.lpfx.COMMON_GAP
-import ink.meodinger.lpfx.DIALOG_HEIGHT
-import ink.meodinger.lpfx.DIALOG_WIDTH
+import ink.meodinger.lpfx.PANE_HEIGHT
+import ink.meodinger.lpfx.PANE_WIDTH
 import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
@@ -44,7 +44,7 @@ val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").r
 val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
-fun showDialog(graphic: Node?, title: String, header: String?, content: String, owner: Window?, vararg buttonTypes: ButtonType): Optional<ButtonType> {
+fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
     dialog.graphic = graphic
@@ -83,7 +83,7 @@ fun showConfirm(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? YES | NO
  */
 fun showConfirm(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(confirmImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO)
+    return showDialog(owner, confirmImageView, title, header, content, ButtonType.YES, ButtonType.NO)
 }
 
 /**
@@ -103,7 +103,7 @@ fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? YES | NO | CANCEL
  */
 fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
 }
 
 /**
@@ -123,7 +123,7 @@ fun showInfo(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showInfo(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(infoImageView, title, header, content, owner, ButtonType.OK)
+    return showDialog(owner, infoImageView, title, header, content, ButtonType.OK)
 }
 
 /**
@@ -143,7 +143,7 @@ fun showWarning(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? YES | CLOSE
  */
 fun showWarning(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.CLOSE)
+    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.CLOSE)
 }
 
 /**
@@ -163,7 +163,7 @@ fun showError(content: String, owner: Window?): Optional<ButtonType> {
  * @return ButtonType? Ok
  */
 fun showError(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(errorImageView, title, header, content, owner, ButtonType.OK)
+    return showDialog(owner, errorImageView, title, header, content, ButtonType.OK)
 }
 
 
@@ -183,8 +183,8 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
     dialog.headerText = e.javaClass.name
-    dialog.dialogPane.prefWidth = DIALOG_WIDTH
-    dialog.dialogPane.prefHeight = DIALOG_HEIGHT
+    dialog.dialogPane.prefWidth = PANE_WIDTH
+    dialog.dialogPane.prefHeight = PANE_HEIGHT
     dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
     dialog.withContent(VBox()) {
         spacing = COMMON_GAP / 2

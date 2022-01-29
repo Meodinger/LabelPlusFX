@@ -57,8 +57,8 @@ object ADialogSpecify : Dialog<List<File>>() {
         initOwner(State.stage)
 
         title = I18N["specify.title"]
-        dialogPane.prefWidth = DIALOG_WIDTH
-        dialogPane.prefHeight = DIALOG_HEIGHT
+        dialogPane.prefWidth = PANE_WIDTH
+        dialogPane.prefHeight = PANE_HEIGHT
         dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
         withContent(BorderPane()) {
             val stackPane = StackPane(contentGridPane.apply {

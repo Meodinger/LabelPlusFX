@@ -54,8 +54,8 @@ fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, co
     return dialog.showAndWait()
 }
 
-fun showInput(owner: Window?, title: String, header: String, placeholder: String?, formatter: TextFormatter<String>?): Optional<String> {
-    val dialog = TextInputDialog(placeholder)
+fun showInput(owner: Window?, title: String, header: String, defaultText: String?, formatter: TextFormatter<String>?): Optional<String> {
+    val dialog = TextInputDialog(defaultText)
     dialog.initOwner(owner)
     dialog.title = title
     dialog.headerText = header
@@ -64,17 +64,15 @@ fun showInput(owner: Window?, title: String, header: String, placeholder: String
     return dialog.showAndWait()
 }
 
-fun showInputArea(owner: Window?, title: String, placeholder: String): Optional<String> {
-    val textArea = TextArea(placeholder)
+fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<String> {
+    val textArea = TextArea(defaultText)
     val dialog = Dialog<String>()
     dialog.initOwner(owner)
     dialog.title = title
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+    dialog.setResultConverter { if (it == ButtonType.OK) textArea.text else defaultText }
     dialog withContent HBox(textArea)
 
-    dialog.resultConverter = Callback { buttonType ->
-        if (buttonType == ButtonType.OK) textArea.text else placeholder
-    }
     return dialog.showAndWait()
 }
 

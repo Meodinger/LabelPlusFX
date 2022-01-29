@@ -172,6 +172,7 @@ object AMenuBar : MenuBar() {
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.ALT_DOWN,
+                    KeyCombination.SHIFT_DOWN, // Ctrl+Alt+S is occupied by QQ Screen Record
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
                 )
             }
@@ -186,6 +187,9 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.about"]) {
                 does { about() }
+            }
+            item(I18N["m.cheat"]) {
+                does { cheatSheet() }
             }
             separator()
             item(I18N["m.crash"]) {
@@ -437,6 +441,10 @@ object AMenuBar : MenuBar() {
         ) {
             State.application.hostServices.showDocument(INFO["application.url"])
         }
+    }
+    private fun cheatSheet() {
+        ADialogCheatSheet.show()
+        ADialogCheatSheet.toFront()
     }
     private fun crash() {
         if (properties[CrashCount] == null) properties[CrashCount] = 0

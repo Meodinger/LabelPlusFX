@@ -93,7 +93,7 @@ To get a local copy up and running follow these simple steps.
 
 Label Plus FX's function design based on [LabelPlus](https://noodlefighter.com/label_plus/)
 
-_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y)_
+_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y) and [Wiki](https://github.com/Meodinger/LabelPlusFX/wiki)_
 
 
 
@@ -113,7 +113,7 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-Distributed under the GPLv3 License. See `LICENSE` for more information.
+Distributed under the AGPLv3 License. See `LICENSE` for more information.
 
 
 

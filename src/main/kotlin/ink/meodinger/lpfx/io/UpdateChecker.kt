@@ -64,7 +64,7 @@ object UpdateChecker {
         LPFXTask {
             Logger.info("Fetching latest version...", LOGSRC_CHECKER)
             val version = fetchSync()
-            if (version != Version.V0) Logger.info("Got latest version: $version", LOGSRC_CHECKER)
+            if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CHECKER)
 
             if (version > V) {
                 val time = Date().time

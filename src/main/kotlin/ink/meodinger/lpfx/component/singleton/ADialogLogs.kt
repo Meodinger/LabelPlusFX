@@ -47,7 +47,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
 
     private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     private class LogFile(val file: File) {
-        val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLong())))
+        val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLongOrNull() ?: -1)))
         val endTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
         val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)

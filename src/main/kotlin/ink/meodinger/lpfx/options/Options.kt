@@ -11,7 +11,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
-import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 import kotlin.io.path.name
@@ -35,7 +34,6 @@ object Options {
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_Logs = "logs"
     private const val Logfile_MAXCOUNT = 20
-    private const val Logfile_ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
 
     lateinit var profileDir: Path
         private set
@@ -176,12 +174,13 @@ object Options {
         val failed = ArrayList<File>()
 
         try {
+            var count = 0
             Files
                 .walk(logs, 1).filter { it.name != logs.name }
                 .map(Path::toFile).collect(Collectors.toList())
                 .apply { sortByDescending(File::lastModified) }
-                .forEachIndexed { index, file ->
-                    val del = index > Logfile_MAXCOUNT || !file.name.isMathematicalNatural() || Date().time - file.lastModified() > Logfile_ALIVE
+                .forEach { file ->
+                    val del = count++ > Logfile_MAXCOUNT || !file.name.isMathematicalNatural()
                     if (del && !file.delete()) failed.add(file)
                 }
         } catch (e : IOException) {

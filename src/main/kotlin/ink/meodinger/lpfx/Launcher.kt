@@ -22,6 +22,15 @@ import java.awt.BorderLayout
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    // Global Uncaught Exception Handler
+    Thread.setDefaultUncaughtExceptionHandler { t, e ->
+        if (!Logger.isStarted) return@setDefaultUncaughtExceptionHandler
+
+        Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
+        Logger.exception(e)
+        LogSender.send(Logger.log)
+    }
+
     // Immediately log exception and send if Logger started successfully
     // Note that we can only get exception information from log file if happened in this period
     // And if Options or Logger init failed, we can only get information from Swing window

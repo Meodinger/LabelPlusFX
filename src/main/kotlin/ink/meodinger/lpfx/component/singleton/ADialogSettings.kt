@@ -351,13 +351,13 @@ object ADialogSettings : AbstractPropertiesDialog() {
         gGridPane.add(button, 3, newRowIndex)
     }
     private fun removeGroupRow(index: Int) {
-        val toRemoveList = ArrayList<Node>()
+        val toRemoveSet = HashSet<Node>()
         for (node in gGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
-            if (row == index) toRemoveList.add(node)
+            if (row == index) toRemoveSet.add(node)
             if (row > index) GridPane.setRowIndex(node, row - 1)
         }
-        gGridPane.children.removeAll(toRemoveList)
+        gGridPane.children.removeAll(toRemoveSet)
 
         if (gGridPane.rowCount == gRowShift) {
             gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
@@ -406,16 +406,16 @@ object ADialogSettings : AbstractPropertiesDialog() {
         rGridPane.add(button, 2, newRowIndex)
     }
     private fun removeLigatureRow(index: Int) {
-        val toRemoveList = ArrayList<Node>()
+        val toRemoveSet = HashSet<Node>()
         for (node in rGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
-            if (row == index) toRemoveList.add(node)
+            if (row == index) toRemoveSet.add(node)
             if (row > index) {
                 GridPane.setRowIndex(node, row - 1)
                 node.properties[rRuleIndex] = row - 1 - rRowShift
             }
         }
-        rGridPane.children.removeAll(toRemoveList)
+        rGridPane.children.removeAll(toRemoveSet)
 
         if (rGridPane.rowCount == rRowShift) {
             rGridPane.children.removeAll(rLabelFrom, rLabelTo)

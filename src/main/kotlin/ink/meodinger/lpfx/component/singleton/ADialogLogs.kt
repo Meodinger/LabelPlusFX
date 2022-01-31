@@ -28,9 +28,9 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.io.path.name
 
 
@@ -121,7 +121,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
             }
             add(Button(I18N["logs.button.clean"]), 3, 5) {
                 does {
-                    val toRemove = ArrayList<LogFile>()
+                    val toRemove = HashSet<LogFile>()
                     for (modal in tableLog.items) {
                         if (modal.file.name == Logger.log.name) continue
                         if (!modal.file.delete()) {

@@ -707,16 +707,16 @@ class Controller(private val root: View) {
 
         val picCount = State.transFile.picCount
         val picNames = State.transFile.sortedPicNames
-        var uncomplete = false
+        var uncompleted = false
         for (i in 0 until picCount) {
             val picFile = picFiles[i]
             if (!picFile.exists()) {
-                uncomplete = true
+                uncompleted = true
                 continue
             }
             State.transFile.setFile(picNames[i], picFile)
         }
-        if (uncomplete) showInfo(I18N["specify.info.incomplete"], State.stage)
+        if (uncompleted) showInfo(I18N["specify.info.incomplete"], State.stage)
 
         // Re-render picture
         if (State.isOpened) if (State.getPicFileNow().exists()) renderLabelPane()

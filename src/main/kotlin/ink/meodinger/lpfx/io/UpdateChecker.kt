@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.io
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.LOGSRC_CHECKER
 import ink.meodinger.lpfx.State
@@ -15,6 +14,7 @@ import ink.meodinger.lpfx.util.dialog.infoImageView
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.control.*
@@ -25,6 +25,7 @@ import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.Date
+import javax.net.ssl.SSLHandshakeException
 
 
 /**
@@ -45,6 +46,8 @@ object UpdateChecker {
             if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {
             Logger.warning("No network connection", LOGSRC_CHECKER)
+        } catch (e: SSLHandshakeException) {
+            Logger.warning("SSL Handshake failed", LOGSRC_CHECKER)
         } catch (e: SocketTimeoutException) {
             Logger.warning("Connect timeout", LOGSRC_CHECKER)
         } catch (e: ConnectException) {

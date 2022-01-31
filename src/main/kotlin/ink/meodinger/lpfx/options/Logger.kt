@@ -53,7 +53,7 @@ object Logger {
 
     val log: File
     var level: LogType = LogType.DEBUG
-    val isStarted: Boolean get() = this::writer.isInitialized
+    var isStarted: Boolean = false
 
     init {
         val path = Options.logs.resolve(Date().time.toString())
@@ -62,11 +62,15 @@ object Logger {
     }
 
     fun start() {
+        if (isStarted) return
+
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
+        isStarted = true
 
         val builder = StringBuilder()
         builder.append("\n========== System Info ==========")
-        builder.append("\nOS Name: ").append(System.getProperty("os.name")).append(", ")
+        builder.append("\n")
+            .append("OS Name: ").append(System.getProperty("os.name")).append(", ")
             .append("Version: ").append(System.getProperty("os.version")).append(", ")
             .append("Arch: ").append(System.getProperty("os.arch")).append(";")
         builder.append("\nApplication Version: ").append(V).append(";")
@@ -76,9 +80,12 @@ object Logger {
         info("Logger start", LOGSRC_LOGGER)
     }
     fun stop() {
+        if (!isStarted) return
+
         info("Logger exit", LOGSRC_LOGGER)
 
         writer.close()
+        isStarted = false
     }
 
     private fun log(type: LogType, text: String, from: String) {

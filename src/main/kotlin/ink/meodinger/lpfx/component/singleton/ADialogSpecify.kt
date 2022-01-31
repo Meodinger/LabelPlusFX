@@ -100,7 +100,7 @@ object ADialogSpecify : Dialog<List<File>>() {
                             .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
-                            if (preserve && files[i] != DEFAULT_FILE) continue
+                            if (preserve && files[i] !== DEFAULT_FILE) continue
 
                             val lastIndex = newPicPaths.size - 1
                             for (j in newPicPaths.indices) {
@@ -154,7 +154,7 @@ object ADialogSpecify : Dialog<List<File>>() {
         }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
-            text = if (files[it] != DEFAULT_FILE) files[it].path else unspecified
+            text = if (files[it] !== DEFAULT_FILE) files[it].path else unspecified
             tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
                 init { bind(this@apply.textProperty()) }
                 override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }

@@ -141,6 +141,8 @@ object ATreeMenu : ContextMenu() {
 
         // Action
         r_addGroupItem.setOnAction {
+            if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(State.stage)
+
             val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
             val colorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList().ifEmpty {
                 TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST

@@ -46,8 +46,8 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
     constructor(key: String, value: List<*>) : this(key, parseList(value))
     constructor(key: String, vararg value: Any) : this(key, listOf(*value))
 
-    fun isUninitialized(): Boolean {
-        return value == UNINITIALIZED
+    fun initialized(): Boolean {
+        return value != UNINITIALIZED
     }
 
     fun asString(): String {

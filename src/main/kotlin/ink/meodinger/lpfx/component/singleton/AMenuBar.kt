@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
+import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
@@ -201,9 +202,8 @@ object AMenuBar : MenuBar() {
     fun updateRecentFiles() {
         mOpenRecent.items.clear()
 
-        for (path in RecentFiles.getAll())
-            if (File(path).exists())
-                mOpenRecent.items.add(MenuItem(path) does { openRecentTranslation(this) })
+        for (path in RecentFiles.getAll()) if (File(path).exists())
+            mOpenRecent.items.add(MenuItem(path) does { openRecentTranslation(this) })
     }
     private fun openRecentTranslation(item: MenuItem) {
         // Open recent, remove item if not exist
@@ -211,8 +211,7 @@ object AMenuBar : MenuBar() {
         if (State.controller.stay()) return
 
         val path = item.text
-        val file = File(path)
-        if (!file.exists()) {
+        val file = File(path).existsOrNull() ?: run {
             showError(String.format(I18N["error.file_not_exist.s"], path), State.stage)
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)

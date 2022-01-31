@@ -450,7 +450,7 @@ open class _if_<T>(private val condition: () -> Any?, private val ifBlock: () ->
     private var elseBlock: () -> T = DEFAULT_BLOCK
 
     infix fun _else_(elseBlock: () -> T): _if_<T> {
-        if (this.elseBlock != DEFAULT_BLOCK) throw IllegalStateException("multi else")
+        if (this.elseBlock !== DEFAULT_BLOCK) throw IllegalStateException("multi else")
         return this.apply { this.elseBlock = elseBlock }
     }
 

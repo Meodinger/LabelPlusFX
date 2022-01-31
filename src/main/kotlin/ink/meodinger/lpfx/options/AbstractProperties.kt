@@ -85,7 +85,7 @@ abstract class AbstractProperties {
         /**
          * Be careful!
          */
-        fun getProperties(properties: AbstractProperties): List<CProperty> = properties.properties
+        fun getPropertiesOf(properties: AbstractProperties): List<CProperty> = properties.properties
     }
 
     protected abstract val default: Map<String, String>

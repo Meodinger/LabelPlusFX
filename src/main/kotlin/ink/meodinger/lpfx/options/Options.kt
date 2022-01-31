@@ -62,9 +62,9 @@ object Options {
 
             Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
 
-            Logger.debug("Got RecentFiles: ${AbstractProperties.getProperties(RecentFiles)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Preference:  ${AbstractProperties.getProperties(Preference)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Settings: ${AbstractProperties.getProperties(Settings)}", LOGSRC_OPTIONS)
+            Logger.debug("Got RecentFiles: ${AbstractProperties.getPropertiesOf(RecentFiles)}", LOGSRC_OPTIONS)
+            Logger.debug("Got Preference:  ${AbstractProperties.getPropertiesOf(Preference)}", LOGSRC_OPTIONS)
+            Logger.debug("Got Settings: ${AbstractProperties.getPropertiesOf(Settings)}", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
             Logger.exception(e)

@@ -126,7 +126,7 @@ object AMenuBar : MenuBar() {
             }
             separator()
             item(I18N["m.exit"]) {
-                does { if (!State.controller.stay()) State.application.stop() }
+                does { if (!State.controller.stay()) State.application.exit() }
             }
         }
         menu(I18N["mm.edit"]) {
@@ -450,10 +450,10 @@ object AMenuBar : MenuBar() {
 
         properties[CrashCount] = (properties[CrashCount] as Int) + 1
         if (properties[CrashCount] as Int >= 5) {
-            properties[CrashCount] = 0
             val confirm = showWarning(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
+                properties[CrashCount] = 0
             } else return
         }
 

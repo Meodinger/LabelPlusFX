@@ -10,9 +10,9 @@ import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
+import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.stage.Stage
-import kotlin.system.exitProcess
 
 
 /**
@@ -65,7 +65,7 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT)
         primaryStage.setOnCloseRequest {
-            if (!controller.stay()) stop() else it.consume()
+            if (!controller.stay()) exit() else it.consume()
         }
 
         primaryStage.show()
@@ -76,13 +76,22 @@ class LabelPlusFX: HookedApplication() {
         UpdateChecker.check()
     }
 
-    override fun stop() {
+    override fun exit() {
         Logger.info("App stopping...", LOGSRC_APPLICATION)
 
         State.stage.close()
         Options.save()
 
-        Logger.info("App stopped", LOGSRC_APPLICATION)
-        runHooks { exitProcess(0) }
+        runHooks(
+            {
+                Logger.info("App stopped", LOGSRC_APPLICATION)
+                Platform.exit()
+            },
+            {
+                Logger.error("Exception occurred during hooks run", LOGSRC_APPLICATION)
+                Logger.exception(it)
+            }
+        )
     }
+
 }

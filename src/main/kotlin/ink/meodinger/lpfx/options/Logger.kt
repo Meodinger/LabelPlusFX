@@ -64,6 +64,8 @@ object Logger {
     fun start() {
         if (isStarted) return
 
+        println("<Logger>: Start")
+
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
         isStarted = true
 
@@ -81,6 +83,8 @@ object Logger {
     }
     fun stop() {
         if (!isStarted) return
+
+        println("<Logger>: Exit")
 
         info("Logger exit", LOGSRC_LOGGER)
 

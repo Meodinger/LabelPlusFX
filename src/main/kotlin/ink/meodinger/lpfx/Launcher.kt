@@ -10,6 +10,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import java.awt.BorderLayout
+import kotlin.system.exitProcess
 
 
 /**
@@ -24,6 +25,8 @@ import java.awt.BorderLayout
 fun main(vararg args: String) {
     // Global Uncaught Exception Handler
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
+        System.err.println("On thread ${t.name}: ${e.stackTraceToString()}")
+
         if (!Logger.isStarted) return@setDefaultUncaughtExceptionHandler
 
         Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
@@ -68,4 +71,6 @@ fun main(vararg args: String) {
     Logger.start()
     Application.launch(LabelPlusFX::class.java, *args)
     Logger.stop()
+
+    exitProcess(0)
 }

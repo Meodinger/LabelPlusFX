@@ -91,7 +91,7 @@ abstract class HookedApplication : Application() {
      * You MUST run this before stop or hooks will not be executed.
      * And you should actually shut the app down in the callback function.
      */
-    protected fun runHooks(callback: () -> Unit) {
+    protected fun runHooks(callback: () -> Unit = {}, onError: (Throwable) -> Unit = {}) {
         if (shuttingDown) return
 
         shuttingDown = true
@@ -102,11 +102,15 @@ abstract class HookedApplication : Application() {
             val hooks = shutdownHooks.values.toList()
             Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
-            }) finally {
+            }) catch { e: Throwable ->
+                e.also(onError)
+            } finally {
                 callback()
             }
         }
     }
+
+    abstract fun exit()
 
 }
 

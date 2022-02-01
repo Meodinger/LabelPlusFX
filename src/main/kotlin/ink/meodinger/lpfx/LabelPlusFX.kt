@@ -84,6 +84,7 @@ class LabelPlusFX: HookedApplication() {
 
         runHooks(
             {
+                Logger.info("Hooks ran", LOGSRC_APPLICATION)
                 Logger.info("App stopped", LOGSRC_APPLICATION)
                 Platform.exit()
             },

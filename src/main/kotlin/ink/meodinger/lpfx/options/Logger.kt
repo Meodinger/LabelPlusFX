@@ -84,12 +84,12 @@ object Logger {
     fun stop() {
         if (!isStarted) return
 
-        println("<Logger>: Exit")
-
         info("Logger exit", LOGSRC_LOGGER)
 
         writer.close()
         isStarted = false
+
+        println("<Logger>: Exit")
     }
 
     private fun log(type: LogType, text: String, from: String) {
@@ -106,6 +106,8 @@ object Logger {
           //.append("--".repeat(depth)).append("> ")
             .appendLine(text)
             .toString()
+
+        print("<Logger>: $logText")
 
         writer.write(logText)
         writer.flush()
@@ -129,7 +131,7 @@ object Logger {
     fun exception(e: Throwable) {
         val str = e.stackTraceToString()
 
-        System.err.print("<Logger>: ")
+        System.err.println("<Logger>: ")
         System.err.println(str)
         writer.write(str)
         writer.flush()

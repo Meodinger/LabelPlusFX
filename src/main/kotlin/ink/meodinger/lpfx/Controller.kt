@@ -1119,7 +1119,7 @@ class Controller(private val root: View) {
         }
 
         cLabelPane.moveToZero()
-        Logger.info("LabelPane rendered", LOGSRC_CONTROLLER)
+        Logger.info("LabelPane rendered pic: ${State.currentPicName}", LOGSRC_CONTROLLER)
     }
 
     fun createLabelLayer() {
@@ -1151,7 +1151,7 @@ class Controller(private val root: View) {
             transLabels = State.transFile.getTransList(State.currentPicName),
         )
 
-        Logger.info("TreeView rendered", LOGSRC_CONTROLLER)
+        Logger.info("TreeView rendered pic: ${State.currentPicName}", LOGSRC_CONTROLLER)
     }
 
     fun createGroupTreeItem(transGroup: TransGroup) {

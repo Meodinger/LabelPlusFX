@@ -1,4 +1,4 @@
-DIR=$PWD/..
+DIR=$PWD/../..
 
 rm -rf "$DIR/out/LabelPlusFX"
 

@@ -449,7 +449,7 @@ object AMenuBar : MenuBar() {
         if (properties[CrashCount] == null) properties[CrashCount] = 0
 
         properties[CrashCount] = (properties[CrashCount] as Int) + 1
-        if (properties[CrashCount] as Int >= 5) {
+        if (properties[CrashCount] as Int >= CrashTrigger) {
             val confirm = showWarning(I18N["confirm.extra"], State.stage)
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
@@ -460,5 +460,6 @@ object AMenuBar : MenuBar() {
         throw RuntimeException("Crash")
     }
     private const val CrashCount = "C_Crash_Count"
+    private const val CrashTrigger = 5
 
 }

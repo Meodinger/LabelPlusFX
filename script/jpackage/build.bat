@@ -1,6 +1,6 @@
 @echo off
 
-set DIR=%~dp0..
+set DIR=%~dp0..\..
 rd /S /Q "%DIR%\out\LabelPlusFX"
 del /F /Q "%DIR%\out\*.zip"
 

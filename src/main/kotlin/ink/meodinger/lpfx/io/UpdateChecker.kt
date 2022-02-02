@@ -20,12 +20,8 @@ import javafx.geometry.Insets
 import javafx.scene.control.*
 import javafx.scene.layout.VBox
 import java.io.IOException
-import java.net.ConnectException
-import java.net.NoRouteToHostException
-import java.net.SocketTimeoutException
-import java.net.URL
+import java.net.*
 import java.util.Date
-import javax.net.ssl.SSLHandshakeException
 
 
 /**
@@ -42,12 +38,14 @@ object UpdateChecker {
 
     fun fetchSync(): Version {
         try {
-            val jsonNode = ObjectMapper().readTree(URL(API))
+            val proxy = ProxySelector.getDefault().select(URI(API))[0].also {
+                if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOGSRC_CHECKER)
+            }
+            val connection = URL(API).openConnection(proxy).also { it.connect() }
+            val jsonNode = ObjectMapper().readTree(connection.getInputStream())
             if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {
             Logger.warning("No network connection", LOGSRC_CHECKER)
-        } catch (e: SSLHandshakeException) {
-            Logger.warning("SSL Handshake failed", LOGSRC_CHECKER)
         } catch (e: SocketTimeoutException) {
             Logger.warning("Connect timeout", LOGSRC_CHECKER)
         } catch (e: ConnectException) {

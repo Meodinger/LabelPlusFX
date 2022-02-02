@@ -23,6 +23,11 @@ import kotlin.system.exitProcess
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    // Use System Proxies
+    System.setProperty("java.net.useSystemProxies", "true")
+    // Fix shake_hands issue (Client sends v1.2 but server responses v.13)
+    System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,SSLv3")
+
     // Global Uncaught Exception Handler
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
         System.err.println("On thread ${t.name}: ${e.stackTraceToString()}")

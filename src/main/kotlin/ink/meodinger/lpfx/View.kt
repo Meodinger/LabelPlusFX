@@ -64,7 +64,7 @@ class View : BorderPane() {
                         scale = 1.0
                     }
                     add(HBox()) {
-                        hGrow = Priority.ALWAYS
+                        boxHGrow = Priority.ALWAYS
                     }
                     add(cPicBox) {
                         isWrapped = true
@@ -82,7 +82,7 @@ class View : BorderPane() {
                         add(cGroupBox)
                         add(HBox()) {
                             alignment = Pos.CENTER
-                            hGrow = Priority.ALWAYS
+                            boxHGrow = Priority.ALWAYS
                         }
                         add(bSwitchViewMode) {
                             isMnemonicParsing = false

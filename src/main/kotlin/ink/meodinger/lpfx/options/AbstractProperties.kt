@@ -21,6 +21,8 @@ import kotlin.collections.ArrayList
  */
 abstract class AbstractProperties {
 
+    class PropertiesException(message: String? = null) : RuntimeException(message)
+
     companion object {
 
         private const val KV_SPILT = "="
@@ -35,7 +37,11 @@ abstract class AbstractProperties {
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
                     val prop = line.split(KV_SPILT, limit = 2)
-                    instance[prop[0]] = prop[1]
+                    try {
+                        instance[prop[0]] = prop[1]
+                    } catch (e : PropertiesException) {
+                        continue // invalid key
+                    }
                 }
             } catch (e: IndexOutOfBoundsException) {
                 throw IOException("Load properties failed: KV format invalid").initCause(e)
@@ -109,7 +115,7 @@ abstract class AbstractProperties {
                 return property
             }
         }
-        throw RuntimeException(String.format(I18N["exception.property.property_not_found.k"], key))
+        throw PropertiesException(String.format(I18N["exception.property.property_not_found.k"], key))
     }
     operator fun set(key: String, value: String) {
         get(key).set(value)

@@ -34,6 +34,7 @@ import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.scene.Cursor
 import javafx.scene.control.*
+import javafx.scene.image.Image
 import javafx.scene.input.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -1096,17 +1097,25 @@ class Controller(private val root: View) {
     // ----- LabelPane ----- //
     fun renderLabelPane() {
         try {
-            cLabelPane.render(
-                State.getPicFileNow(),
-                State.transFile.groupCount,
-                State.transFile.getTransList(State.currentPicName)
-            )
-        } catch (e: CLabelPane.LabelPaneException) {
-            Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-            showError(String.format(I18N["error.picture_not_exists.s"], State.currentPicName), State.stage)
-            return
+            val picFile = State.getPicFileNow()
+            if (picFile.exists()) {
+                val image = Image(picFile.toURI().toURL().toString())
+                cLabelPane.render(
+                    image,
+                    State.transFile.groupCount,
+                    State.transFile.getTransList(State.currentPicName)
+                )
+            } else {
+                cLabelPane.scale = cLabelPane.initScale
+                cLabelPane.render(null, 0, emptyList())
+                cLabelPane.moveToCenter()
+
+                Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                showError(String.format(I18N["error.picture_not_exists.s"], State.currentPicName), State.stage)
+                return
+            }
         } catch (e: IOException) {
-            Logger.error("LabelPane update failed", LOGSRC_CONTROLLER)
+            Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showException(e, State.stage)
             return

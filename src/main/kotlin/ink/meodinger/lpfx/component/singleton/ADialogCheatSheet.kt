@@ -3,17 +3,23 @@ package ink.meodinger.lpfx.component.singleton
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
+import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
+import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
+import javafx.scene.control.Hyperlink
 import javafx.scene.control.Label
 import javafx.scene.control.Separator
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
@@ -40,7 +46,7 @@ object ADialogCheatSheet : Stage() {
             alignment = Pos.TOP_CENTER
 
             add(Label(I18N["cheat.accelerator"]), 0, 0, 2, 1) {
-                GridPane.setHalignment(this, HPos.CENTER)
+                gridHAlign = HPos.CENTER
                 textAlignment = TextAlignment.CENTER
             }
             add(Label("Ctrl/Meta + ↑/↓"), 0, 1)
@@ -55,7 +61,7 @@ object ADialogCheatSheet : Stage() {
             add(Separator(), 0, 5, 2, 1)
 
             add(Label(I18N["cheat.mouse"]), 0, 6, 2, 1) {
-                GridPane.setHalignment(this, HPos.CENTER)
+                gridHAlign = HPos.CENTER
                 textAlignment = TextAlignment.CENTER
             }
             add(Label(I18N["cheat.dnd.dsc"]), 0, 7)
@@ -64,7 +70,15 @@ object ADialogCheatSheet : Stage() {
             add(Label(I18N["cheat.drag_label.res"]), 1, 8)
             add(Label(I18N["cheat.double_label.dsc"]), 0, 9)
             add(Label(I18N["cheat.double_label.res"]), 1, 9)
+            add(Hyperlink(I18N["cheat.more_help"]), 0, 10, 2, 1) {
+                gridHAlign = HPos.CENTER
+                setOnAction {
+                    State.application.hostServices.showDocument(INFO["application.help"])
+                }
+            }
         })
+
+        addEventHandler(KeyEvent.KEY_PRESSED) { if (it.code == KeyCode.ESCAPE) hide() }
     }
 
 }

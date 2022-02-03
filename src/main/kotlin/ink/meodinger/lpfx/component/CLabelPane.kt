@@ -36,7 +36,6 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import java.io.File
 import java.io.IOException
 
 
@@ -66,14 +65,7 @@ class CLabelPane : ScrollPane() {
         private val TEXT_FONT = Font(MonoFont, 32.0)
     }
 
-    // ----- Exception ----- //
-    class LabelPaneException(message: String) : IOException(message) {
-        companion object {
-            fun pictureNotFound(picPath: String) = LabelPaneException("Picture $picPath not found")
-        }
-    }
-
-    // ----- event ----- //
+    // ----- Event ----- //
 
     class LabelEvent(
         eventType: EventType<LabelEvent>,
@@ -93,7 +85,7 @@ class CLabelPane : ScrollPane() {
         }
     }
 
-    // ----- layer system ----- //
+    // ----- Layer System ----- //
 
     /**
      *           |   Layout   | Width
@@ -130,13 +122,13 @@ class CLabelPane : ScrollPane() {
      */
     private val container = AnchorPane()
 
-    // ----- runtime data ----- //
+    // ----- Runtime Data ----- //
 
     private var shiftX = 0.0
     private var shiftY = 0.0
     private val labels = ArrayList<CLabel>()
 
-    // ----- properties ----- //
+    // ----- Properties ----- //
 
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(NOT_SET)
     private val minScaleProperty:  DoubleProperty = SimpleDoubleProperty(NOT_SET)
@@ -339,12 +331,13 @@ class CLabelPane : ScrollPane() {
 
     /**
      * Render CLabels
-     *
-     * @throws LabelPaneException when picture not found
+     * @param image Image to show. Set to null to show INIT_IMAGE
+     * @param layerCount How many layers to render
+     * @param transLabels TransLabels to show
      * @throws IOException when Image load failed
      */
-    @Throws(LabelPaneException::class, IOException::class)
-    fun render(picFile: File, layerCount: Int, transLabels: List<TransLabel>) {
+    @Throws(IOException::class)
+    fun render(image: Image?, layerCount: Int, transLabels: List<TransLabel>) {
         container.isDisable = true
 
         vvalue = 0.0
@@ -352,22 +345,11 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        if (picFile.exists()) {
-            setupImage(picFile)
-            setupLayers(layerCount)
-            setupLabels(transLabels)
+        setupImage(image ?: INIT_IMAGE)
+        setupLayers(layerCount)
+        setupLabels(transLabels)
 
-            container.isDisable = false
-        } else {
-            setupImage(INIT_IMAGE)
-            setupLayers(0)
-            setupLabels(emptyList())
-
-            scale = initScale
-            moveToCenter()
-
-            throw LabelPaneException.pictureNotFound(picFile.path)
-        }
+        container.isDisable = image == null
     }
 
     private fun getLabel(labelIndex: Int): CLabel {
@@ -379,10 +361,6 @@ class CLabelPane : ScrollPane() {
         throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], label.index))
     }
 
-    @Throws(IOException::class)
-    private fun setupImage(file: File) {
-        setupImage(Image(file.toURI().toURL().toString()))
-    }
     private fun setupImage(image: Image) {
         this.image = image
     }

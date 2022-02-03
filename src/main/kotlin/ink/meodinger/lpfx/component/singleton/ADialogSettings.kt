@@ -120,7 +120,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                         alignment = Pos.CENTER_RIGHT
                         padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
                         add(Label(I18N["settings.ligature.sample"]))
-                        add(HBox()) { hGrow = Priority.ALWAYS }
+                        add(HBox()) { boxHGrow = Priority.ALWAYS }
                         add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
                     }
                 }
@@ -134,27 +134,24 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     hgap = COMMON_GAP
                     alignment = Pos.TOP_CENTER
                     //   0         1
-                    // 0 WorkMode  ViewMode
-                    // 1 Input     | input | < > (ViewMode)
-                    // 2 Label     | label | < > (ViewMode)
-                    // 3
-                    // 4 Scale on new picture
-                    // 5 | selection | < >       (String)
-                    add(Label(I18N["mode.work"]), 0, 0)
-                    add(Label(I18N["mode.view"]), 1, 0)
-                    add(Label(I18N["mode.work.input"]), 0, 1)
-                    add(Label(I18N["mode.work.label"]), 0, 2)
-                    add(mComboInput, 1, 1) {
+                    // 0 Input     | input | < > (ViewMode)
+                    // 1 Label     | label | < > (ViewMode)
+                    // 2
+                    // 3 Scale on new picture
+                    // 4 | selection | < >       (String)
+                    add(Label(I18N["mode.work.input"]), 0, 0)
+                    add(mComboInput, 1, 0) {
                         items.setAll(viewModeList)
                         isWrapped = true
                     }
-                    add(mComboLabel, 1, 2) {
+                    add(Label(I18N["mode.work.label"]), 0, 1)
+                    add(mComboLabel, 1, 1) {
                         items.setAll(viewModeList)
                         isWrapped = true
                     }
-                    add(HBox(), 0, 3)
-                    add(Label(I18N["settings.mode.scale.label"]), 0, 4, 2, 1)
-                    add(mComboScale, 0, 5, 2, 1) {
+                    add(HBox(), 0, 2)
+                    add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
+                    add(mComboScale, 0, 4, 2, 1) {
                         items.setAll(listOf(
                             I18N["settings.mode.scale.100"],
                             I18N["settings.mode.scale.fit"],

@@ -702,7 +702,7 @@ class Controller(private val root: View) {
 
         // Closed or Cancelled
         if (picFiles.isEmpty()) {
-            showInfo(I18N["specify.info.cancelled"], State.stage)
+            showInfo(State.stage, I18N["specify.info.cancelled"])
             return false
         }
 
@@ -717,7 +717,7 @@ class Controller(private val root: View) {
             }
             State.transFile.setFile(picNames[i], picFile)
         }
-        if (uncompleted) showInfo(I18N["specify.info.incomplete"], State.stage)
+        if (uncompleted) showInfo(State.stage, I18N["specify.info.incomplete"])
 
         // Re-render picture
         if (State.isOpened) if (State.getPicFileNow().exists()) renderLabelPane()
@@ -734,7 +734,7 @@ class Controller(private val root: View) {
         if (!State.isChanged) return false
 
         // Opened but not saved
-        val result = showAlert(I18N["common.exit"], null, I18N["alert.not_save.content"], State.stage)
+        val result = showAlert(State.stage, null, I18N["alert.not_save.content"], I18N["common.exit"])
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
@@ -754,7 +754,7 @@ class Controller(private val root: View) {
      * @param type Which type the Translation file will be
      * @return ProjectFolder if success, null if fail
      */
-    fun new(file: File, type: FileType = FileType.getType(file)): File? {
+    fun new(file: File, type: FileType = FileType.getFileType(file)): File? {
         Logger.info("Newing $type to ${file.path}", LOGSRC_CONTROLLER)
 
         // Choose Pics
@@ -771,7 +771,7 @@ class Controller(private val root: View) {
             }
             if (potentialPics.isEmpty()) {
                 // Find nothing, this folder isn't project folder, confirm to ues another folder
-                val result = showConfirm(I18N["confirm.project_folder_invalid"], State.stage)
+                val result = showConfirm(State.stage, I18N["confirm.project_folder_invalid"])
                 if (result.isPresent && result.get() == ButtonType.YES) {
                     // Specify project folder
                     val newFolder = DirectoryChooser().also { it.initialDirectory = projectFolder }.showDialog(State.stage)
@@ -779,7 +779,7 @@ class Controller(private val root: View) {
                 } else {
                     // Do not specify, cancel
                     Logger.info("Cancel (project folder invalid)", LOGSRC_CONTROLLER)
-                    showInfo(I18N["common.cancel"], State.stage)
+                    showInfo(State.stage, I18N["common.cancel"])
                     return null
                 }
             } else {
@@ -792,13 +792,13 @@ class Controller(private val root: View) {
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Cancel (choose none)", LOGSRC_CONTROLLER)
-                showInfo(I18N["info.required_at_least_1_pic"], State.stage)
+                showInfo(State.stage, I18N["info.required_at_least_1_pic"])
                 return null
             }
             selectedPics.addAll(result.get())
         } else {
             Logger.info("Cancel (no selected)", LOGSRC_CONTROLLER)
-            showInfo(I18N["common.cancel"], State.stage)
+            showInfo(State.stage, I18N["common.cancel"])
             return null
         }
 
@@ -820,8 +820,8 @@ class Controller(private val root: View) {
         } catch (e: IOException) {
             Logger.error("New failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.new_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.new_failed"])
+            showException(State.stage, e)
             return null
         }
 
@@ -835,7 +835,7 @@ class Controller(private val root: View) {
      * @param type Which type the file is
      * @param projectFolder Which folder the pictures locate in; translation file's folder by default
      */
-    fun open(file: File, type: FileType = FileType.getType(file), projectFolder: File = file.parentFile) {
+    fun open(file: File, type: FileType = FileType.getFileType(file), projectFolder: File = file.parentFile) {
         Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
 
         // Load File
@@ -845,13 +845,13 @@ class Controller(private val root: View) {
             // We assume that all pics are in the project folder.
             // If not, TransFile.checkLost() will find them out.
             for (picName in transFile.picNames) {
-                transFile.addFile(picName, projectFolder.resolve(picName))
+                transFile.setFile(picName, projectFolder.resolve(picName))
             }
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.open_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.open_failed"])
+            showException(State.stage, e)
             return
         }
 
@@ -874,7 +874,7 @@ class Controller(private val root: View) {
             }
             if (modified) {
                 Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
-                showInfo(I18N["common.info"], I18N["m.comment.dialog.content"], comment, State.stage)
+                showInfo(State.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
             }
         }
 
@@ -891,13 +891,13 @@ class Controller(private val root: View) {
             Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)
         } else {
             Logger.warning("Auto-backup unavailable", LOGSRC_CONTROLLER)
-            showWarning(I18N["warning.auto_backup_unavailable"], State.stage)
+            showWarning(State.stage, I18N["warning.auto_backup_unavailable"])
         }
 
         // Check lost
         if (State.transFile.checkLost().isNotEmpty()) {
             // Specify now?
-            showConfirm(I18N["specify.confirm.lost_pictures"], State.stage).ifPresent {
+            showConfirm(State.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
                 if (it == ButtonType.YES) specifyPicFiles()
             }
         }
@@ -918,15 +918,15 @@ class Controller(private val root: View) {
      * @param type Which type will the translation file be
      * @param silent Whether the save procedure is done in silence or not
      */
-    fun save(file: File, type: FileType = FileType.getType(file), silent: Boolean = false) {
+    fun save(file: File, type: FileType = FileType.getFileType(file), silent: Boolean = false) {
         // Whether overwriting existing file
         val overwrite = file.exists()
 
-        Logger.info("Saving to ${file.path}, isSilent:$silent, isOverwrite:$overwrite", LOGSRC_CONTROLLER)
+        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite", LOGSRC_CONTROLLER)
 
         // Check folder
         if (!silent) if (file.parentFile != State.projectFolder) {
-            val confirm = showConfirm(I18N["confirm.save_to_another_place"], State.stage)
+            val confirm = showConfirm(State.stage, I18N["confirm.save_to_another_place"])
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
@@ -938,20 +938,20 @@ class Controller(private val root: View) {
                 Logger.info("Temp file removed", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.warning("Temp file remove failed", LOGSRC_CONTROLLER)
-                if (!silent) showWarning(String.format(I18N["warning.save_temp_remove_failed.s"], exportDest.path), State.stage)
+                if (!silent) showWarning(State.stage, String.format(I18N["warning.save_temp_remove_failed.s"], exportDest.path))
             }
         }
 
         // Export
         try {
             export(exportDest, type, State.transFile)
-            if (!silent) showInfo(I18N["info.saved_successfully"], State.stage)
+            if (!silent) showInfo(State.stage, I18N["info.saved_successfully"])
             Logger.info("Exported translation", LOGSRC_CONTROLLER)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.save_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.save_failed"])
+            showException(State.stage, e)
 
             // Delete the temp file
             if (overwrite) removeTemp()
@@ -968,8 +968,8 @@ class Controller(private val root: View) {
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
-                showError(I18N["error.save_temp_transfer_failed"], State.stage)
-                showException(e, State.stage)
+                showError(State.stage, I18N["error.save_temp_transfer_failed"])
+                showException(State.stage, e)
 
                 Logger.info("Save failed", LOGSRC_CONTROLLER)
                 return
@@ -993,7 +993,7 @@ class Controller(private val root: View) {
      * @param from The backup file
      * @param to Which file will the backup recover to
      */
-    fun recovery(from: File, to: File, type: FileType = FileType.getType(to)) {
+    fun recovery(from: File, to: File, type: FileType = FileType.getFileType(to)) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
@@ -1007,8 +1007,8 @@ class Controller(private val root: View) {
         } catch (e: Exception) {
             Logger.error("Recover failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.recovery_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.recovery_failed"])
+            showException(State.stage, e)
         }
 
         open(to, type)
@@ -1018,19 +1018,19 @@ class Controller(private val root: View) {
      * @param file Which file will the TransFile write to
      * @param type Which type will the translation file be
      */
-    fun export(file: File, type: FileType = FileType.getType(file)) {
+    fun export(file: File, type: FileType = FileType.getFileType(file)) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
             export(file, type, State.transFile)
 
             Logger.info("Exported to ${file.path}", LOGSRC_CONTROLLER)
-            showInfo(I18N["info.exported_successful"], State.stage)
+            showInfo(State.stage, I18N["info.exported_successful"])
         } catch (e: IOException) {
             Logger.error("Export failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.export_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.export_failed"])
+            showException(State.stage, e)
         }
     }
     /**
@@ -1044,12 +1044,12 @@ class Controller(private val root: View) {
             pack(file, State.transFile)
 
             Logger.info("Packed to ${file.path}", LOGSRC_CONTROLLER)
-            showInfo(I18N["info.exported_successful"], State.stage)
+            showInfo(State.stage, I18N["info.exported_successful"])
         } catch (e : IOException) {
             Logger.error("Pack failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(I18N["error.export_failed"], State.stage)
-            showException(e, State.stage)
+            showError(State.stage, I18N["error.export_failed"])
+            showException(State.stage, e)
         }
     }
 
@@ -1111,13 +1111,13 @@ class Controller(private val root: View) {
                 cLabelPane.moveToCenter()
 
                 Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-                showError(String.format(I18N["error.picture_not_exists.s"], State.currentPicName), State.stage)
+                showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
                 return
             }
         } catch (e: IOException) {
             Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showException(e, State.stage)
+            showException(State.stage, e)
             return
         }
 

@@ -56,7 +56,7 @@ class CTreeView: TreeView<String>() {
         contextMenu = ATreeMenu
 
         // Update tree menu when requested
-        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems) }
+        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems.toList()) }
 
         // ViewMode -> update
         viewModeProperty.addListener(onChange { update() })

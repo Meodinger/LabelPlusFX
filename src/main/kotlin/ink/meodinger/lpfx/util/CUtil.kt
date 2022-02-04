@@ -99,7 +99,7 @@ abstract class HookedApplication : Application() {
         if (shutdownHooks.isEmpty()) {
             callback()
         } else {
-            val hooks = shutdownHooks.values.toList()
+            val hooks = shutdownHooks.values.toList() // In case of clearHooks
             Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
             }) catch { e: Throwable ->

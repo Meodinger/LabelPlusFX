@@ -116,9 +116,10 @@ object State {
         Logger.info("Added $transGroup", LOGSRC_STATE)
     }
     fun removeTransGroup(groupName: String) {
-        val toRemove = transFile.getTransGroup(groupName)
+        val toRemoveId = transFile.getGroupIdByName(groupName)
+        val toRemove = transFile.getTransGroup(toRemoveId)
 
-        transFile.removeTransGroup(groupName)
+        transFile.removeTransGroup(toRemoveId)
 
         Logger.info("Removed $toRemove", LOGSRC_STATE)
     }
@@ -137,7 +138,7 @@ object State {
         val file = picFile ?: projectFolder.resolve(picName)
 
         transFile.addTransList(picName)
-        transFile.addFile(picName, file)
+        transFile.setFile(picName, file)
 
         Logger.info("Added picture $picName with path ${file.path}", LOGSRC_STATE)
     }
@@ -176,7 +177,7 @@ object State {
      */
     fun getPicFileNow(): File {
         if (!isOpened || currentPicName == "") return DEFAULT_FILE
-        return transFile.getFile(currentPicName)
+        return transFile.getFileOrByProject(currentPicName, projectFolder)
     }
 
     /**

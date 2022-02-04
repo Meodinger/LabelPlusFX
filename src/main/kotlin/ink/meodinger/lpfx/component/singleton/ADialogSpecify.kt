@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
+import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -87,7 +88,7 @@ object ADialogSpecify : Dialog<List<File>>() {
                         // preserve already-set path?
                         var preserve = false
                         if (show) {
-                            val confirmPre = showConfirm(I18N["specify.confirm.preserve"], thisWindow)
+                            val confirmPre = showConfirm(thisWindow, I18N["specify.confirm.preserve"])
                             preserve = confirmPre.isPresent && confirmPre.get() == ButtonType.YES
                         }
 
@@ -148,10 +149,7 @@ object ADialogSpecify : Dialog<List<File>>() {
         fileChooser.initialDirectory = projectFolder
         dirChooser.initialDirectory = projectFolder
 
-        files = MutableList(picCount) {
-            val file = workingTransFile.getFile(picNames[it])
-            if (file.exists()) file else DEFAULT_FILE
-        }
+        files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).existsOrNull() ?: DEFAULT_FILE }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
             text = if (files[it] !== DEFAULT_FILE) files[it].path else unspecified

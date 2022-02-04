@@ -36,7 +36,6 @@ fun main(vararg args: String) {
 
         Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
         Logger.exception(e)
-        LogSender.send(Logger.log)
     }
 
     // Immediately log exception and send if Logger started successfully

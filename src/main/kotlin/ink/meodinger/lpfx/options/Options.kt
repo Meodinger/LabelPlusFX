@@ -68,8 +68,8 @@ object Options {
         } catch (e: IOException) {
             Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
             Logger.exception(e)
-            showError(I18N["error.options.load_failed"], null)
-            showException(e, null)
+            showError(null, I18N["error.options.load_failed"])
+            showException(null, e)
             exitProcess(-1)
         }
     }
@@ -95,7 +95,7 @@ object Options {
             RecentFiles.load()
             if (RecentFiles.checkAndFix()) {
                 Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles), null)
+                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles))
             }
 
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
@@ -105,10 +105,10 @@ object Options {
             Logger.error("Load Recent Files failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles),
-                null
+                I18N["common.alert"]
             )
         }
     }
@@ -123,7 +123,7 @@ object Options {
             Preference.load()
             if (Preference.checkAndFix()) {
                 Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Preference), null)
+                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_Preference))
             }
 
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
@@ -133,10 +133,10 @@ object Options {
             Logger.error("Load Preference failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_Preference),
-                null
+                I18N["common.alert"]
             )
         }
     }
@@ -151,7 +151,7 @@ object Options {
             Settings.load()
             if (Settings.checkAndFix()) {
                 Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Settings), null)
+                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_Settings))
             }
 
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
@@ -161,10 +161,10 @@ object Options {
             Logger.error("Load Settings failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_Settings),
-                null
+                I18N["common.alert"]
             )
         }
     }

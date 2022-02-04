@@ -34,7 +34,7 @@ class LabelPlusFX: HookedApplication() {
         // Cannot catch Exceptions occurred when starting
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
             Logger.exception(e)
-            showException(e, State.stage)
+            showException(State.stage, e)
         }
 
         State.application = this
@@ -54,7 +54,7 @@ class LabelPlusFX: HookedApplication() {
             controller = Controller(root)
         } catch (e: Throwable) {
             Logger.exception(e)
-            showException(e, null)
+            showException(null, e)
             stop()
             return
         }

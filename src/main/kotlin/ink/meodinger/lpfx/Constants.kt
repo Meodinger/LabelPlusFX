@@ -27,6 +27,13 @@ const val PANE_HEIGHT   = 400.0
 const val COMMON_GAP    = 16.0
 
 /**
+ * Scale
+ */
+const val SCALE_MIN  = 0.1
+const val SCALE_MAX  = 4.0
+const val SCALE_INIT = 1.0
+
+/**
  * CLabel Radius Range
  */
 const val LABEL_RADIUS_MIN = 8.0
@@ -142,10 +149,7 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        fun isLPFile(file: File): Boolean = file.extension == EXTENSION_FILE_LP
-        fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_FILE_MEO
-
-        fun getType(file: File): FileType = when (file.extension) {
+        fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
             else -> throw IllegalArgumentException(

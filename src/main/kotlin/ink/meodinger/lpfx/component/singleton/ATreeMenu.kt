@@ -19,7 +19,6 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
-import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -71,10 +70,10 @@ object ATreeMenu : ContextMenu() {
     private val l_moveToItem = MenuItem(I18N["context.move_to"])
     private val l_deleteAction = { items: List<TreeItem<String>> ->
         val confirm = showConfirm(
-            I18N["context.delete_label.dialog.title"],
+            State.stage,
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
             StringBuilder().apply { for (item in items) appendLine(item.value) }.toString(),
-            State.stage
+            I18N["context.delete_label.dialog.title"]
         )
 
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {
@@ -161,7 +160,7 @@ object ATreeMenu : ContextMenu() {
             rAddGroupDialog.result = null
             rAddGroupDialog.showAndWait().ifPresent { newGroup ->
                 if (State.transFile.groupNames.contains(newGroup.name)) {
-                    showError(I18N["context.error.same_group_name"], State.stage)
+                    showError(State.stage, I18N["context.error.same_group_name"])
                     return@ifPresent
                 }
 
@@ -189,7 +188,7 @@ object ATreeMenu : ContextMenu() {
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
                 if (State.transFile.groupNames.contains(newName)) {
-                    showError(I18N["context.error.same_group_name"], State.stage)
+                    showError(State.stage, I18N["context.error.same_group_name"])
                     return@ifPresent
                 }
 
@@ -224,18 +223,16 @@ object ATreeMenu : ContextMenu() {
         this.view = view
     }
 
-    fun update(selectedItems: ObservableList<TreeItem<String>>) {
+    fun update(selectedItems: List<TreeItem<String>>) {
         items.clear()
 
         if (selectedItems.isEmpty()) return
 
-        // NOTE: toList() to make a not observable copy
-        val selected = selectedItems.toList()
         var rootCount = 0
         var groupCount = 0
         var labelCount = 0
 
-        for (item in selected) {
+        for (item in selectedItems) {
             if (item.parent == null) rootCount += 1
             else if (item is CTreeLabelItem) labelCount += 1
             else groupCount += 1
@@ -246,10 +243,10 @@ object ATreeMenu : ContextMenu() {
             items.add(r_addGroupItem)
         } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
             // group
-            val groupItem = selected[0]
+            val groupItem = selectedItems[0]
 
             (g_changeColorItem.graphic as CColorPicker).value = (groupItem.graphic as Circle).fill as Color
-            g_deleteItem.isDisable = !State.transFile.isGroupUnused(groupItem.value)
+            g_deleteItem.isDisable = !State.transFile.isGroupUnused(State.transFile.getGroupIdByName(groupItem.value))
 
             items.add(g_renameItem)
             items.add(g_changeColorItem)
@@ -257,8 +254,8 @@ object ATreeMenu : ContextMenu() {
             items.add(g_deleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)
-            l_moveToItem.setOnAction { l_moveToAction(selected) }
-            l_deleteItem.setOnAction { l_deleteAction(selected) }
+            l_moveToItem.setOnAction { l_moveToAction(selectedItems) }
+            l_deleteItem.setOnAction { l_deleteAction(selectedItems) }
 
             items.add(l_moveToItem)
             items.add(SeparatorMenuItem())

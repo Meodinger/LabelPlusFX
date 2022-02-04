@@ -212,7 +212,7 @@ object AMenuBar : MenuBar() {
 
         val path = item.text
         val file = File(path).existsOrNull() ?: run {
-            showError(String.format(I18N["error.file_not_exist.s"], path), State.stage)
+            showError(State.stage, String.format(I18N["error.file_not_exist.s"], path))
             RecentFiles.remove(path)
             mOpenRecent.items.remove(item)
             return
@@ -310,7 +310,7 @@ object AMenuBar : MenuBar() {
 
         showChoiceList(State.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
-                showInfo(I18N["info.required_at_least_1_pic"], State.stage)
+                showInfo(State.stage, I18N["info.required_at_least_1_pic"])
                 return@ifPresent
             }
 
@@ -324,7 +324,7 @@ object AMenuBar : MenuBar() {
 
             if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
             if (toRemove.size != 0) {
-                val confirm = showConfirm(I18N["confirm.removing_pic"], State.stage)
+                val confirm = showConfirm(State.stage, I18N["confirm.removing_pic"])
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
@@ -353,10 +353,10 @@ object AMenuBar : MenuBar() {
         }
         if (conflictList.isNotEmpty()) {
             showInfo(
-                I18N["common.info"],
+                State.stage,
                 I18N["m.externalPic.dialog.header"],
                 conflictList.joinToString(",\n"),
-                State.stage
+                I18N["common.info"]
             )
         }
     }
@@ -450,7 +450,7 @@ object AMenuBar : MenuBar() {
 
         properties[CrashCount] = (properties[CrashCount] as Int) + 1
         if (properties[CrashCount] as Int >= CrashTrigger) {
-            val confirm = showWarning(I18N["confirm.extra"], State.stage)
+            val confirm = showWarning(State.stage, I18N["confirm.extra"])
             if (confirm.isPresent && confirm.get() == ButtonType.YES) {
                 State.controller.justMonika()
                 properties[CrashCount] = 0

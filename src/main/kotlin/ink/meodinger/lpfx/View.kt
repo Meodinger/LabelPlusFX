@@ -51,17 +51,15 @@ class View : BorderPane() {
             add(BorderPane()) {
                 top(cGroupBar)
                 center(cLabelPane) {
-                    initScale = 1.0
-                    minScale = 0.2
-                    maxScale = 2.0
-                    scale = 1.0
+                    initScale = SCALE_INIT
+                    minScale = SCALE_MIN
+                    maxScale = SCALE_MAX
                 }
                 bottom(HBox()) {
                     add(cSlider) {
-                        initScale = 1.0
-                        minScale = 0.2
-                        maxScale = 2.0
-                        scale = 1.0
+                        initScale = SCALE_INIT
+                        minScale = SCALE_MIN
+                        maxScale = SCALE_MAX
                     }
                     add(HBox()) {
                         boxHGrow = Priority.ALWAYS

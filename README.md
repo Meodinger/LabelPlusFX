@@ -126,4 +126,4 @@ Project Link: [https://github.com/Meodinger/LabelPlusFX](https://github.com/Meod
 
 
 
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: https://s2.loli.net/2022/02/04/2H7bguJ9rcyBjUO.png

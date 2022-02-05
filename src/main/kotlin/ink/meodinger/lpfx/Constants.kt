@@ -51,11 +51,6 @@ const val FONT_SIZE_MAX = 64
 val DEFAULT_FILE = File("")
 
 /**
- * Scroll Delta Default
- */
-const val SCROLL_DELTA = 32.0
-
-/**
  * TreeItem Graphic radius
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0

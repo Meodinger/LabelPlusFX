@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.SCROLL_DELTA
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.color.toHexRGB
@@ -229,7 +228,7 @@ class CLabelPane : ScrollPane() {
 
             // Horizon scroll
             if (it.isControlDown) {
-                hvalue -= it.deltaY / (10 * SCROLL_DELTA)
+                hvalue -= it.deltaY / imageWidth
                 it.consume()
             }
         }
@@ -241,7 +240,7 @@ class CLabelPane : ScrollPane() {
         })
         root.addEventHandler(ScrollEvent.SCROLL) {
             if (it.isAltOrMetaDown) {
-                scale += it.deltaY / (10 * SCROLL_DELTA)
+                scale += if (it.deltaY > 0) 0.1 else -0.1
                 it.consume()
             }
         }
@@ -297,7 +296,7 @@ class CLabelPane : ScrollPane() {
                 if (it.y <= pickRadius || it.y + pickRadius >= imageHeight) return@addEventHandler
 
                 onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE,
-                    it, labels.size + 1,
+                    it, NOT_FOUND,
                     it.x / imageWidth, it.y / imageHeight,
                     it.x, it.y
                 ))

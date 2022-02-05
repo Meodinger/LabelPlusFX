@@ -191,7 +191,10 @@ class Controller(private val root: View) {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelPlace
             if (State.transFile.groupCount == 0) return@setOnLabelPlace
 
-            val transLabel = TransLabel(it.labelIndex, State.currentGroupId, it.labelX, it.labelY, "")
+            val newIndex =
+                if (State.currentLabelIndex != -1) State.currentLabelIndex + 1
+                else State.transFile.getTransList(State.currentPicName).size + 1
+            val transLabel = TransLabel(newIndex, State.currentGroupId, it.labelX, it.labelY, "")
 
             // Edit data
             State.addTransLabel(State.currentPicName, transLabel)
@@ -200,22 +203,21 @@ class Controller(private val root: View) {
             createLabelTreeItem(transLabel)
             // Mark change
             State.isChanged = true
+            // Select it
+            cTreeView.selectLabel(newIndex, true)
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
-            // Edit data
-            State.removeTransLabel(State.currentPicName, it.labelIndex)
-            for (label in State.transFile.getTransList(State.currentPicName)) {
-                if (label.index > it.labelIndex) {
-                    State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
-                }
-            }
             // Update view
             removeLabel(it.labelIndex)
             removeLabelTreeItem(it.labelIndex)
+            // Edit data
+            State.removeTransLabel(State.currentPicName, it.labelIndex)
             // Mark change
             State.isChanged = true
+            // Select prev
+            cTreeView.selectLabel(it.labelIndex - 1, true)
         }
         cLabelPane.setOnLabelPointed {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
@@ -507,7 +509,7 @@ class Controller(private val root: View) {
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
             if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
 
-            val newSize = (cTransArea.font.size + it.deltaY / SCROLL_DELTA).toInt()
+            val newSize = (cTransArea.font.size + 1).toInt()
                 .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
 
             cTransArea.font = Font.font(TextFont, newSize.toDouble())
@@ -695,33 +697,26 @@ class Controller(private val root: View) {
 
     /**
      * Specify pictures of current translation file
-     * @return True if submitted, false if cancelled
+     * @return true if completed; false if not; null if cancel
      */
-    fun specifyPicFiles(): Boolean {
+    fun specifyPicFiles(): Boolean? {
         val picFiles = ADialogSpecify.specify()
 
         // Closed or Cancelled
-        if (picFiles.isEmpty()) {
-            showInfo(State.stage, I18N["specify.info.cancelled"])
-            return false
-        }
+        if (picFiles.isEmpty()) return null
 
         val picCount = State.transFile.picCount
         val picNames = State.transFile.sortedPicNames
-        var uncompleted = false
+        var completed = true
         for (i in 0 until picCount) {
             val picFile = picFiles[i]
             if (!picFile.exists()) {
-                uncompleted = true
+                completed = false
                 continue
             }
             State.transFile.setFile(picNames[i], picFile)
         }
-        if (uncompleted) showInfo(State.stage, I18N["specify.info.incomplete"])
-
-        // Re-render picture
-        if (State.isOpened) if (State.getPicFileNow().exists()) renderLabelPane()
-        return true
+        return completed
     }
 
     /**
@@ -898,7 +893,11 @@ class Controller(private val root: View) {
         if (State.transFile.checkLost().isNotEmpty()) {
             // Specify now?
             showConfirm(State.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
-                if (it == ButtonType.YES) specifyPicFiles()
+                if (it == ButtonType.YES) {
+                    val completed = specifyPicFiles()
+                    if (completed == null) showInfo(State.stage, I18N["specify.info.cancelled"])
+                    else if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
+                }
             }
         }
 

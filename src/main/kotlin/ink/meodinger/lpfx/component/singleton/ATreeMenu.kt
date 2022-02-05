@@ -87,9 +87,6 @@ object ATreeMenu : ContextMenu() {
                 State.controller.removeLabel(labelIndex)
                 // Edit data
                 State.removeTransLabel(State.currentPicName, labelIndex)
-                for (label in State.transFile.getTransList(State.currentPicName))
-                    if (label.index > labelIndex)
-                        State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
             }
             // Mark change
             State.isChanged = true
@@ -124,10 +121,7 @@ object ATreeMenu : ContextMenu() {
                 val groupItem = view.selectionModel.selectedItem
 
                 // Edit data
-                State.setTransGroupColor(
-                    State.transFile.getGroupIdByName(groupItem.value),
-                    this@apply.value.toHexRGB()
-                )
+                State.setTransGroupColor(State.transFile.getGroupIdByName(groupItem.value), value.toHexRGB())
                 // Mark change
                 State.isChanged = true
             }
@@ -211,8 +205,6 @@ object ATreeMenu : ContextMenu() {
             State.controller.removeGroupBarItem(groupName)
             State.controller.removeGroupTreeItem(groupName)
             // Edit data
-            for (key in State.transFile.picNames) for (label in State.transFile.getTransList(key))
-                if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
             State.removeTransGroup(groupName)
             // Mark change
             State.isChanged = true

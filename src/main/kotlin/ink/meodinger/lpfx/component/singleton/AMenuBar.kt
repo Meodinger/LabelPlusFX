@@ -144,7 +144,7 @@ object AMenuBar : MenuBar() {
                 disableProperty().bind(!State.isOpenedProperty)
             }
             item(I18N["m.specify"]) {
-                does { State.controller.specifyPicFiles() }
+                does { specifyPictures() }
                 disableProperty().bind(!State.isOpenedProperty)
             }
         }
@@ -358,6 +358,13 @@ object AMenuBar : MenuBar() {
                 conflictList.joinToString(",\n"),
                 I18N["common.info"]
             )
+        }
+    }
+    private fun specifyPictures() {
+        val completed = State.controller.specifyPicFiles()
+        if (completed != null) {
+            if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
+            if (State.isOpened) if (State.getPicFileNow().exists()) State.controller.renderLabelPane()
         }
     }
 

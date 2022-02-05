@@ -120,6 +120,8 @@ object State {
         val toRemove = transFile.getTransGroup(toRemoveId)
 
         transFile.removeTransGroup(toRemoveId)
+        for (picName in transFile.picNames) for (label in transFile.getTransList(picName))
+            if (label.groupId >= toRemoveId) label.groupId--
 
         Logger.info("Removed $toRemove", LOGSRC_STATE)
     }
@@ -150,6 +152,9 @@ object State {
     }
 
     fun addTransLabel(picName: String, transLabel: TransLabel) {
+        val labelIndex = transLabel.index
+
+        for (label in transFile.getTransList(picName)) if (label.index >= labelIndex) label.index++
         transFile.addTransLabel(picName, transLabel)
 
         Logger.info("Added $picName @ $transLabel", LOGSRC_STATE)
@@ -158,13 +163,9 @@ object State {
         val toRemove = transFile.getTransLabel(picName, labelIndex)
 
         transFile.removeTransLabel(picName, labelIndex)
+        for (label in transFile.getTransList(picName)) if (label.index > labelIndex) label.index--
 
         Logger.info("Removed $picName @ $toRemove", LOGSRC_STATE)
-    }
-    fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
-        transFile.getTransLabel(picName, index).index = newIndex
-
-        Logger.info("Set $picName->Index=$index @index=$newIndex", LOGSRC_STATE)
     }
     fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
         transFile.getTransLabel(picName, index).groupId = groupId

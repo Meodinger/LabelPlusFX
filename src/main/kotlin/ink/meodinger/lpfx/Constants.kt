@@ -71,18 +71,13 @@ val EXTENSIONS_PIC  = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC
 val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 
 /**
- * Filenames
- */
-const val INITIAL_FILE_NAME  = "New Translation"
-const val RECOVERY_FILE_NAME = "Recovery"
-const val PACKAGE_FILE_NAME  = "Package"
-const val EXPORT_FILE_NAME   = "Export"
-
-/**
  * For label/group not found
  */
 const val NOT_FOUND = -1
 
+/**
+ * Log Source
+ */
 const val LOGSRC_APPLICATION = "Application"
 const val LOGSRC_CONTROLLER  = "Controller"
 const val LOGSRC_STATE       = "State"

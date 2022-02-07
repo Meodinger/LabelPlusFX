@@ -224,7 +224,7 @@ class CTreeView: TreeView<String>() {
         labelItems[transLabel.groupId].remove(labelItem)
         transLabels.remove(transLabel)
     }
-    fun selectLabel(labelIndex: Int, scrollTo: Boolean) {
+    fun selectLabel(labelIndex: Int, scrollTo: Boolean = true) {
         select(getLabelItem(labelIndex), scrollTo)
     }
 

@@ -9,13 +9,28 @@ package ink.meodinger.lpfx.util
 /**
  * Add at last
  */
-fun <E> MutableList<E>.addAtLast(element: E, indexFromLast: Int = 0) {
-    this.add(this.size - indexFromLast, element)
+fun <E> MutableList<E>.addLast(element: E, indexFromLast: Int = 0) {
+    add(size - indexFromLast, element)
 }
 
 /**
  * Add at first
  */
-fun <E> MutableList<E>.addAtFirst(element: E, indexFromFirst: Int = 0) {
-    this.add(indexFromFirst, element)
+fun <E> MutableList<E>.addFirst(element: E, indexFromFirst: Int = 0) {
+    add(indexFromFirst, element)
+}
+
+/**
+ * Remove all for Map
+ */
+fun <K, V> MutableMap<K, V>.removeAll(keys: Collection<K>) {
+    keys.forEach { remove(it) }
+}
+
+/**
+ * Contains If
+ */
+fun <E> Collection<E>.contains(predicate: (E) -> Boolean): Boolean {
+    for (element in this) if (predicate(element)) return true
+    return false
 }

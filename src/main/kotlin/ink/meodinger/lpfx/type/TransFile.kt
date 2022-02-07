@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.type
 
+import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import javafx.beans.property.*
 import javafx.collections.FXCollections
+import javafx.collections.MapChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
 import java.io.File
@@ -127,6 +129,11 @@ open class TransFile @JsonCreator constructor(
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
     val transMapProperty: MapProperty<String, MutableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap))
 
+    // ----- Lazy ---- //
+
+    val sortedPicNamesLazy: ReLazy<List<String>> = ReLazy { sortByDigit(transMapObservable.keys.toList()) } // copy
+    val sortedPicNames: List<String> by sortedPicNamesLazy
+
     // ----- Accessible Fields ----- //
 
     val version: IntArray by versionProperty
@@ -141,12 +148,17 @@ open class TransFile @JsonCreator constructor(
     /// NOTE: sortedPicNames is slow, find a way to make it faster (maybe use ReLazy)
     val picCount: Int get() = transMapObservable.size
     val picNames: List<String> get() = transMapObservable.keys.toList() // copy
-    val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList()) // copy
 
     // ----- JSON Getters ----- //
 
     @Suppress("unused") protected val groupList: List<TransGroup> by groupListObservable
     @Suppress("unused") protected val transMap: Map<String, List<TransLabel>> by transMapObservable
+
+    // ----- Init ----- //
+
+    init {
+        transMapObservable.addListener(MapChangeListener { sortedPicNamesLazy.refresh() })
+    }
 
     // ----- TransGroup ----- //
 

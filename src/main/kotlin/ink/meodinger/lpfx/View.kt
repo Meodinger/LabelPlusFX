@@ -47,7 +47,6 @@ class View : BorderPane() {
     init {
         top(AMenuBar)
         center(pMain) {
-            setDividerPositions(0.618)
             add(BorderPane()) {
                 top(cGroupBar)
                 center(cLabelPane) {
@@ -70,7 +69,6 @@ class View : BorderPane() {
                 }
             }
             add(pRight) {
-                setDividerPositions(0.618)
                 orientation = Orientation.VERTICAL
                 add(BorderPane()) {
                     top(HBox()) {

@@ -12,16 +12,14 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.component.*
+import ink.meodinger.lpfx.util.contains
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
-import ink.meodinger.lpfx.util.property.RuledGenericBidirectionalBinding
-import ink.meodinger.lpfx.util.property.onChange
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.once
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
@@ -204,7 +202,7 @@ class Controller(private val root: View) {
             // Mark change
             State.isChanged = true
             // Select it
-            cTreeView.selectLabel(newIndex, true)
+            cTreeView.selectLabel(newIndex)
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
@@ -217,7 +215,7 @@ class Controller(private val root: View) {
             // Mark change
             State.isChanged = true
             // Select prev
-            cTreeView.selectLabel(it.labelIndex - 1, true)
+            cTreeView.selectLabel(it.labelIndex - 1)
         }
         cLabelPane.setOnLabelPointed {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
@@ -237,7 +235,7 @@ class Controller(private val root: View) {
 
             if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 
-            cTreeView.selectLabel(it.labelIndex, true)
+            cTreeView.selectLabel(it.labelIndex)
         }
         cLabelPane.setOnLabelMove {
             State.isChanged = true
@@ -360,7 +358,7 @@ class Controller(private val root: View) {
             }
         })
         RuledGenericBidirectionalBinding.bind(
-            cGroupBox.indexProperty(), { observable, _, newValue, _ ->
+            cGroupBox.indexProperty(), a@{ observable, _, newValue, _ ->
                 val n = newValue as Int
                 val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else NOT_FOUND
 
@@ -369,11 +367,19 @@ class Controller(private val root: View) {
                 // Check opened to avoid accidentally set "Close time -1" to "Open time index"
                 if (State.isOpened && n == NOT_FOUND) Platform.runLater { observable.value = a }
 
-                a
+                return@a a
             },
             State.currentGroupIdProperty, { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
+
+        // TreeView - CurrentLabelIndex
+        cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
+            if (it != null && it is CTreeLabelItem) State.currentLabelIndex = it.index
+        })
+        State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
+            if (State.isOpened && it != NOT_FOUND) cTreeView.selectLabel(it)
+        })
 
         // TreeView
         cTreeView.picNameProperty().bind(State.currentPicNameProperty)
@@ -414,6 +420,15 @@ class Controller(private val root: View) {
             }
         }, State.workModeProperty))
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
+
+        // Workspace
+        val workspaceListener = onNew<Any, Any> {
+            if (State.isOpened) RecentFiles.setProgressOf(State.translationFile.path,
+                State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
+            )
+        }
+        State.currentPicNameProperty.addListener(workspaceListener)
+        State.currentLabelIndexProperty.addListener(workspaceListener)
     }
     /**
      * Properties' listeners (for unbindable)
@@ -434,9 +449,6 @@ class Controller(private val root: View) {
         State.currentPicNameProperty.addListener(onChange {
             // Clear selected when change pic
             State.currentLabelIndex = NOT_FOUND
-        })
-        cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
-            if (it != null && it is CTreeLabelItem) State.currentLabelIndex = it.index
         })
         Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
 
@@ -903,8 +915,11 @@ class Controller(private val root: View) {
 
         // Initialize workspace
         renderGroupBar()
-        State.currentPicName = State.transFile.sortedPicNames[0]
+        val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
         State.currentGroupId = 0
+        State.currentPicName = State.transFile.sortedPicNames[picIndex.takeIf { it in 0 until State.transFile.picCount } ?: 0]
+        State.currentLabelIndex = labelIndex.takeIf { State.transFile.getTransList(State.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
+        if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name

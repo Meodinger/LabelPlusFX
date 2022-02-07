@@ -24,7 +24,7 @@ import java.io.IOException
 fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
     if (!ori.exists()) throw IOException(String.format(I18N["exception.io.file_not_exists.s"], ori))
     if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
-    if (overwrite && dst.exists()) throw IOException(String.format(I18N["exception.io.overwrite_disable.s"], dst))
+    if (!overwrite && dst.exists()) throw IOException(String.format(I18N["exception.io.overwrite_disable.s"], dst))
 
     val input = FileInputStream(ori).channel
     val output = FileOutputStream(dst).channel

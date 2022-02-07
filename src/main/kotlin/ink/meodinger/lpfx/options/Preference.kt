@@ -20,8 +20,8 @@ object Preference : AbstractProperties() {
     const val LAST_UPDATE_NOTICE = "LastUpdateNotice"
 
     override val default = listOf(
-        CProperty(MAIN_DIVIDER, 0.63),
-        CProperty(RIGHT_DIVIDER, 0.6),
+        CProperty(MAIN_DIVIDER, 0.618),
+        CProperty(RIGHT_DIVIDER, 0.618),
         CProperty(TEXTAREA_FONT_SIZE, 12),
         CProperty(LAST_UPDATE_NOTICE, 0)
     ).toPropertiesMap()

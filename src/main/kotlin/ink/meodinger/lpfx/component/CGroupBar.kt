@@ -3,7 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.addAtLast
+import ink.meodinger.lpfx.util.addLast
 import ink.meodinger.lpfx.util.component.boxHGrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
@@ -83,8 +83,8 @@ class CGroupBar : HBox() {
     fun createGroup(transGroup: TransGroup) {
         // If first add
         if (transGroups.isEmpty()) {
-            children.addAtLast(placeHolder)
-            children.addAtLast(addItem)
+            children.addLast(placeHolder)
+            children.addLast(addItem)
         }
 
         transGroups.add(transGroup)
@@ -102,7 +102,7 @@ class CGroupBar : HBox() {
         }
 
         cGroups.add(cGroup)
-        children.addAtLast(cGroup, vShift)
+        children.addLast(cGroup, vShift)
 
         if (cGroups.size == 1) select(0)
     }

@@ -84,7 +84,6 @@ abstract class BidirectionalBinding<T>(
     }
 
 }
-
 open class TypedGenericBidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
@@ -195,7 +194,7 @@ class RuledGenericBidirectionalBinding<T> private constructor(
  * @param listener1 Lambda to change o2 when o1 change
  * @param listener2 Lambda to change o1 when o2 change
  */
-class BidirectionalBindingByListener<T>(
+class BidirectionalListener<T>(
     observable1: ObservableValue<T>,
     private val listener1: ChangeListener<T>,
     observable2: ObservableValue<T>,
@@ -203,23 +202,23 @@ class BidirectionalBindingByListener<T>(
 ) : ChangeListener<T>, WeakListener {
 
     companion object {
-        fun <T> bind(
+        fun <T> listen(
             observable1: ObservableValue<T>, lambda1: ChangeListener<T>,
             observable2: ObservableValue<T>, lambda2: ChangeListener<T>
         ) {
-            BidirectionalBindingByListener(observable1, lambda1, observable2, lambda2).also {
+            BidirectionalListener(observable1, lambda1, observable2, lambda2).also {
                 observable1.addListener(it)
                 observable2.addListener(it)
             }
         }
 
-        fun <T> unbind(observable1: ObservableValue<T>?, observable2: ObservableValue<T>?) {
+        fun <T> dismiss(observable1: ObservableValue<T>?, observable2: ObservableValue<T>?) {
             requireNotNull(observable1) { "Both properties must be specified." }
             requireNotNull(observable2) { "Both properties must be specified." }
             require(observable1 !== observable2) { "Cannot bind property to itself" }
 
             @Suppress("UNCHECKED_CAST")
-            val binding = BidirectionalBindingByListener(
+            val binding = BidirectionalListener(
                 observable1 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
                 observable2 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
             )
@@ -270,7 +269,7 @@ class BidirectionalBindingByListener<T>(
         val oA2 = observable2
         if (oA1 == null || oA2 == null) return false
 
-        if (other is BidirectionalBindingByListener<*>) {
+        if (other is BidirectionalListener<*>) {
             val oB1 = other.observable1
             val oB2 = other.observable2
             if (oB1 == null || oB2 == null) return false

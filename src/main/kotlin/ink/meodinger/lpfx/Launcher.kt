@@ -55,13 +55,12 @@ fun main(vararg args: String) {
             contentPane.add(JPanel().apply {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
                 add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
-                add(JLabel("----------------------------------------", JLabel.CENTER))
-                add(JLabel(e.javaClass.name + ": " + e.message, JLabel.CENTER))
             }, BorderLayout.CENTER)
-            setSize(300, 120)
+            setSize(320, 80)
             setLocationRelativeTo(null)
 
             defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+            isResizable = false
             isVisible = true
         }
     }

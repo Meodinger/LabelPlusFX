@@ -235,7 +235,9 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         val fileDirectory = newChooser.showDialog(State.stage) ?: return
-        val file = fileDirectory.resolve("${fileDirectory.name}.$EXTENSION_FILE_MEO")
+        val extension = if (Settings[Settings.UseMeoFileAsDefault].asBoolean()) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
+
+        val file = fileDirectory.resolve("${fileDirectory.name}.$extension")
         if (file.exists()) {
             val confirm = showConfirm(State.stage, I18N["m.new.dialog.overwrite"])
             if (confirm.isEmpty || confirm.get() == ButtonType.NO) return

@@ -521,7 +521,7 @@ class Controller(private val root: View) {
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
             if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
 
-            val newSize = (cTransArea.font.size + 1).toInt()
+            val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).toInt()
                 .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
 
             cTransArea.font = Font.font(TextFont, newSize.toDouble())

@@ -34,6 +34,7 @@ object Settings : AbstractProperties() {
     const val LabelAlpha               = "LabelAlpha"
     const val LigatureRules            = "LigatureRules"
     const val InstantTranslate         = "InstantTranslate"
+    const val UseMeoFileAsDefault      = "DefaultFileFormat"
 
     // ----- Default ----- //
 
@@ -59,6 +60,7 @@ object Settings : AbstractProperties() {
             "*"      to "\u203b",
         ),
         CProperty(InstantTranslate, false),
+        CProperty(UseMeoFileAsDefault, true),
     ).toPropertiesMap()
 
     init { useDefault() }

@@ -42,8 +42,6 @@ import javafx.scene.text.TextAlignment
  */
 object ADialogSettings : AbstractPropertiesDialog() {
 
-    private val xInstCheckBox = CheckBox(I18N["settings.general.inst_trans"])
-
     private const val gRowShift = 1
     private val gLabelHint = Label(I18N["settings.group.hint"])
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
@@ -76,6 +74,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private val lLabelRadius = CInputLabel()
     private val lLabelAlpha = CInputLabel()
 
+    private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
+    private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
+
     init {
         initOwner(State.stage)
 
@@ -87,20 +88,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
             prefHeight = PANE_HEIGHT
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
-            add(I18N["settings.general.title"]) {
-                withContent(GridPane()) {
-                    padding = Insets(COMMON_GAP)
-                    vgap = COMMON_GAP
-                    hgap = COMMON_GAP
-                    alignment = Pos.TOP_CENTER
-
-                    //   0        1
-                    // 0 InstantCheckBox and Text
-                    // 1
-
-                    add(xInstCheckBox, 0, 0, 2, 1)
-                }
-            }
             add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(gGridPane.apply {
@@ -316,6 +303,21 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     }
                 }
             }
+            add(I18N["settings.other.title"]) {
+                withContent(GridPane()) {
+                    padding = Insets(COMMON_GAP)
+                    vgap = COMMON_GAP
+                    hgap = COMMON_GAP
+                    alignment = Pos.TOP_CENTER
+
+                    //   0        1
+                    // 0 InstantCheckBox and Text
+                    // 1 UseMeoFileCheckBox and Text
+
+                    add(xInstCheckBox, 0, 0, 2, 1)
+                    add(xUseMCheckBox, 0, 1, 2, 1)
+                }
+            }
         }
 
         initProperties()
@@ -440,6 +442,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     // ----- Initialize Properties ----- //
     override fun initProperties() {
         // General
+        xUseMCheckBox.isSelected = Settings[Settings.UseMeoFileAsDefault].asBoolean()
         xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
 
         // Group
@@ -472,13 +475,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
     }
 
     // ----- Result convert ---- //
-    private fun convertGeneral(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
-        list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
-
-        return list
-    }
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
@@ -557,14 +553,22 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
         return list
     }
+    private fun convertOther(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
+        list.add(CProperty(Settings.UseMeoFileAsDefault, xUseMCheckBox.isSelected))
+
+        return list
+    }
 
     override fun convertResult(): List<CProperty> {
         return ArrayList<CProperty>().apply {
-            addAll(convertGeneral())
             addAll(convertGroup())
             addAll(convertLigatureRule())
             addAll(convertMode())
             addAll(convertLabel())
+            addAll(convertOther())
         }
     }
 

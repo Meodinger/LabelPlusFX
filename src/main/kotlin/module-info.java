@@ -7,7 +7,6 @@ module lpfx {
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
-    requires javafx.media;
     requires jakarta.mail;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;

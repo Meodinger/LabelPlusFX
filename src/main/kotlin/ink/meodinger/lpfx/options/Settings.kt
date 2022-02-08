@@ -28,8 +28,8 @@ object Settings : AbstractProperties() {
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans  = "isGroupCreateOnNew"
     const val ScaleOnNewPicture        = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
-    const val ViewModePreference       = "ViewModePreference"  // Input, Label
-    const val LogLevelPreference       = "LogLevelPreference"
+    const val ViewModes                = "ViewModes"            // Input, Label
+    const val LogLevel                 = "LogLevel"
     const val LabelRadius              = "LabelRadius"
     const val LabelAlpha               = "LabelAlpha"
     const val LigatureRules            = "LigatureRules"
@@ -42,8 +42,8 @@ object Settings : AbstractProperties() {
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ScaleOnNewPicture, NEW_PIC_SCALE_100),
-        CProperty(ViewModePreference, ViewMode.IndexMode, ViewMode.GroupMode), // Input, Label
-        CProperty(LogLevelPreference, Logger.LogType.INFO),
+        CProperty(ViewModes, ViewMode.IndexMode, ViewMode.GroupMode), // Input, Label
+        CProperty(LogLevel, Logger.LogType.INFO),
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
@@ -71,8 +71,8 @@ object Settings : AbstractProperties() {
         DefaultGroupNameList to "Below three properties should have the same length",
         LigatureRules        to "DO NOT USE `,` HERE\nMaybe cause problems",
         ScaleOnNewPicture    to "0 - 100%, 1 - Fit, 2 - Last",
-        ViewModePreference   to "Input, Label",
-        LogLevelPreference   to "DEBUG, INFO, WARNING, ERROR, FATAL",
+        ViewModes            to "Input, Label",
+        LogLevel             to "DEBUG, INFO, WARNING, ERROR, FATAL",
         LabelRadius          to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF",
         InstantTranslate     to "Translate instantly after place a label",
     ))

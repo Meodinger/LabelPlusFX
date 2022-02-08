@@ -60,7 +60,7 @@ object Options {
             loadSettings()
             cleanLogs()
 
-            Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
+            Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevel].asString())
 
             Logger.debug("Got RecentFiles: ${AbstractProperties.getPropertiesOf(RecentFiles)}", LOGSRC_OPTIONS)
             Logger.debug("Got Preference:  ${AbstractProperties.getPropertiesOf(Preference)}", LOGSRC_OPTIONS)

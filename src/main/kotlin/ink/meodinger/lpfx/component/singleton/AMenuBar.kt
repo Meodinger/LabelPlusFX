@@ -434,14 +434,10 @@ object AMenuBar : MenuBar() {
             /// Too slow, find a faster way
             if (Settings[property.key].asString() == property.value) continue
 
-            when (property.key) {
-                Settings.LogLevelPreference -> Logger.level = Logger.LogType.getType(property.value)
-            }
-
             Settings[property.key] = property
         }
 
-        Logger.level = Logger.LogType.getType(Settings[Settings.LogLevelPreference].asString())
+        Logger.level = Logger.LogType.getType(Settings[Settings.LogLevel].asString())
     }
     private fun about() {
         showLink(

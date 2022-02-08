@@ -98,7 +98,7 @@ object State {
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
-        viewMode = ViewMode.getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
+        viewMode = ViewMode.getViewMode(Settings[Settings.ViewModes].asStringList()[0])
         workMode = WorkMode.InputMode
 
         Logger.info("Reset", LOGSRC_STATE)

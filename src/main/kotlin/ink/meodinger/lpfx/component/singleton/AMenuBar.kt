@@ -463,20 +463,6 @@ object AMenuBar : MenuBar() {
         ADialogCheatSheet.toFront()
     }
     private fun crash() {
-        if (properties[CrashCount] == null) properties[CrashCount] = 0
-
-        properties[CrashCount] = (properties[CrashCount] as Int) + 1
-        if (properties[CrashCount] as Int >= CrashTrigger) {
-            val confirm = showWarning(State.stage, I18N["confirm.extra"])
-            if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-                State.controller.justMonika()
-                properties[CrashCount] = 0
-            } else return
-        }
-
         throw RuntimeException("Crash")
     }
-    private const val CrashCount = "C_Crash_Count"
-    private const val CrashTrigger = 5
-
 }

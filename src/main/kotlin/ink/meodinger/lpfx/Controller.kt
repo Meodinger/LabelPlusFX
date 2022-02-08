@@ -17,7 +17,6 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.transfer
-import ink.meodinger.lpfx.util.media.playOggList
 import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
@@ -1229,53 +1228,6 @@ class Controller(private val root: View) {
     // ----- Info ----- //
     fun labelInfo(info: String) {
         lInfo.text = info
-    }
-
-    // ----- EXTRA ----- //
-    fun justMonika() {
-        // Write "love you" to comment, once a time
-        fun loveYouForever() {
-            State.transFile.comment = "I Love You Forever  --Yours, Monika"
-            save(State.translationFile, silent = true)
-
-            val monika = Options.profileDir.resolve("monika.json").toFile()
-            save(monika, FileType.MeoFile, true)
-        }
-        if (State.isOpened) loveYouForever()
-
-        // Force all text change to "JUST MONIKA"
-        fun textReformat() {
-            val monika = "JUST MONIKA "
-            for (picName in State.transFile.picNames)
-                for (transLabel in State.transFile.getTransList(picName))
-                    transLabel.text = monika
-
-            val chars = monika.toCharArray()
-            cTransArea.textFormatter = TextFormatter<String> {
-                if (!(it.control as CLigatureArea).isBound) return@TextFormatter it
-
-                val end = cTransArea.text.length
-                val last = it.controlText.last()
-                val index = if (last == ' ') {
-                    if (it.controlText[it.controlText.length - 2] == 'A') 0 else 5
-                } else {
-                    chars.indexOf(last) + 1
-                }
-
-                it.setRange(end, end)
-                it.text = chars[(index) % chars.size].toString()
-                it.anchor = end + 1
-                it.caretPosition = end + 1
-
-                it
-            }
-        }
-        if (State.isOpened) textReformat()
-
-        // Restore default formatter if closed (State reset)
-        State.isOpenedProperty.once(onNew { if (!it) cTransArea.reset() })
-
-        State.application.addShutdownHook("JustMonika") { playOggList(MONIKA_VOICE, MONIKA_SONG, callback = it) }
     }
 
 }

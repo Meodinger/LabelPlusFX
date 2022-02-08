@@ -47,9 +47,6 @@ val SCRIPT = loadAsBytes("/file/script/Meo_PS_Script")
 val TEMPLATE_EN = loadAsBytes("/file/script/ps_script_res/en.psd")
 val TEMPLATE_ZH = loadAsBytes("/file/script/ps_script_res/zh.psd")
 
-val MONIKA_VOICE = loadAsURL("/file/audio/monika/voice.ogg")
-val MONIKA_SONG = loadAsURL("/file/audio/monika/song.ogg")
-
 val INFO = ResourceBundle.getBundle("ink.meodinger.lpfx.LabelPlusFX")!!
 val I18N = ResourceBundle.getBundle("ink.meodinger.lpfx.Lang")!!
 operator fun ResourceBundle.get(key: String): String = this.getString(key)

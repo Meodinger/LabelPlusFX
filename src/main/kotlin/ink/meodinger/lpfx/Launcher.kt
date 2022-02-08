@@ -56,7 +56,7 @@ fun main(vararg args: String) {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
                 add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
             }, BorderLayout.CENTER)
-            setSize(320, 80)
+            setSize(300, 100)
             setLocationRelativeTo(null)
 
             defaultCloseOperation = JFrame.EXIT_ON_CLOSE

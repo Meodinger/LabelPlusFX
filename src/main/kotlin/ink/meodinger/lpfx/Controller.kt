@@ -781,7 +781,7 @@ class Controller(private val root: View) {
                 val result = showConfirm(State.stage, I18N["confirm.project_folder_invalid"])
                 if (result.isPresent && result.get() == ButtonType.YES) {
                     // Specify project folder
-                    val newFolder = DirectoryChooser().also { it.initialDirectory = projectFolder }.showDialog(State.stage)
+                    val newFolder = DirectoryChooser().apply { initialDirectory = projectFolder }.showDialog(State.stage)
                     if (newFolder != null) projectFolder = newFolder
                 } else {
                     // Do not specify, cancel
@@ -1011,7 +1011,7 @@ class Controller(private val root: View) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
-            val tempFile = File.createTempFile("temp", type.name).also { it.deleteOnExit() }
+            val tempFile = File.createTempFile("temp", type.name).apply { deleteOnExit() }
             val transFile = load(from, FileType.MeoFile)
 
             export(tempFile, type, transFile)

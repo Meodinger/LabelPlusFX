@@ -41,7 +41,7 @@ object UpdateChecker {
             val proxy = ProxySelector.getDefault().select(URI(API))[0].also {
                 if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOGSRC_CHECKER)
             }
-            val connection = URL(API).openConnection(proxy).also { it.connect() }
+            val connection = URL(API).openConnection(proxy).apply { connect() }
             val jsonNode = ObjectMapper().readTree(connection.getInputStream())
             if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {

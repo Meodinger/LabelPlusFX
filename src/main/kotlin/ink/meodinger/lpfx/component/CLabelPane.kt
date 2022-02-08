@@ -384,7 +384,7 @@ class CLabelPane : ScrollPane() {
     }
 
     fun createLabelLayer() {
-        val pane = AnchorPane().also { it.isPickOnBounds = false }
+        val pane = AnchorPane().apply { isPickOnBounds = false }
         // Layout
         root.children.add(pane)
         // Add layer in list

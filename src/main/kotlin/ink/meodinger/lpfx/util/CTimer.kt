@@ -31,17 +31,22 @@ inline fun genTask(crossinline task: () -> Unit): TimerTask = object : TimerTask
  * @param task What the only TimerTask to do
  */
 class TimerTaskManager(
-    delay: Long = DEFAULT_DELAY,
-    period: Long = DEFAULT_PERIOD,
-    private val task: () -> Unit
+    delay: Long,
+    period: Long,
+    task: TimerTaskManager.() -> Unit
 ): Timer() {
 
     companion object {
-        const val DEFAULT_DELAY = 1000L
-        const val DEFAULT_PERIOD = 1000L
+        fun once(delay: Long, task: TimerTaskManager.() -> Unit) {
+            TimerTaskManager(delay, 0) {
+                task(this)
+                cancel()
+            }.schedule()
+        }
     }
 
-    private var timerTask: TimerTask = genTask(task)
+    private val _task: () -> Unit = { task(this) }
+    private var timerTask: TimerTask = genTask(_task)
 
     private val runningProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun runningProperty(): BooleanProperty = runningProperty
@@ -92,7 +97,7 @@ class TimerTaskManager(
         running = false
 
         // Re-generate the timer task for the next turn
-        timerTask = genTask(task)
+        timerTask = genTask(_task)
     }
 
 }

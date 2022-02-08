@@ -202,6 +202,8 @@ class Controller(private val root: View) {
             State.isChanged = true
             // Select it
             cTreeView.selectLabel(newIndex)
+            // If instant translate
+            if (Settings[Settings.InstantTranslate].asBoolean()) cTransArea.requestFocus()
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
@@ -213,8 +215,6 @@ class Controller(private val root: View) {
             State.removeTransLabel(State.currentPicName, it.labelIndex)
             // Mark change
             State.isChanged = true
-            // Select prev
-            cTreeView.selectLabel(it.labelIndex - 1)
         }
         cLabelPane.setOnLabelPointed {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
@@ -374,10 +374,12 @@ class Controller(private val root: View) {
 
         // TreeView - CurrentLabelIndex
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
-            if (it != null && it is CTreeLabelItem) State.currentLabelIndex = it.index
+            if (it != null && it is CTreeLabelItem && cTreeView.selectionModel.selectedItems.size == 1)
+                State.currentLabelIndex = it.index
         })
         State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
-            if (State.isOpened && it != NOT_FOUND) cTreeView.selectLabel(it)
+            if (State.isOpened && it != NOT_FOUND)
+                cTreeView.selectLabel(it, false)
         })
 
         // TreeView

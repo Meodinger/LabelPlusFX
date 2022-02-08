@@ -33,6 +33,7 @@ object Settings : AbstractProperties() {
     const val LabelRadius              = "LabelRadius"
     const val LabelAlpha               = "LabelAlpha"
     const val LigatureRules            = "LigatureRules"
+    const val InstantTranslate         = "InstantTranslate"
 
     // ----- Default ----- //
 
@@ -57,6 +58,7 @@ object Settings : AbstractProperties() {
             "cc"     to "\u25ce",
             "*"      to "\u203b",
         ),
+        CProperty(InstantTranslate, false),
     ).toPropertiesMap()
 
     init { useDefault() }
@@ -71,76 +73,8 @@ object Settings : AbstractProperties() {
         ScaleOnNewPicture    to "0 - 100%, 1 - Fit, 2 - Last",
         ViewModePreference   to "Input, Label",
         LogLevelPreference   to "DEBUG, INFO, WARNING, ERROR, FATAL",
-        LabelRadius          to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF"
+        LabelRadius          to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF",
+        InstantTranslate     to "Translate instantly after place a label",
     ))
-
-    override fun checkAndFix(): Boolean {
-        var fixed = false
-
-        var groupInvalid = false
-        run checkGroup@ {
-            val groupNameList = this[DefaultGroupNameList].asStringList()
-            val groupColorHexList = this[DefaultGroupColorHexList].asStringList()
-            val isGroupCreateList = this[IsGroupCreateOnNewTrans].asBooleanList()
-
-            if (groupNameList.size != groupColorHexList.size || groupNameList.size != isGroupCreateList.size) {
-                groupInvalid = true
-                return@checkGroup
-            }
-            for (hex in groupColorHexList) if (hex.length != 6) {
-                groupInvalid = true
-                return@checkGroup
-            }
-        }
-        if (groupInvalid) {
-            this[DefaultGroupNameList] = default[DefaultGroupNameList]!!
-            this[DefaultGroupColorHexList] = default[DefaultGroupColorHexList]!!
-            this[IsGroupCreateOnNewTrans] = default[IsGroupCreateOnNewTrans]!!
-            fixed = true
-        }
-
-        val scaleOnNewPicture = this[ScaleOnNewPicture].asInteger()
-        if (scaleOnNewPicture < 0 || scaleOnNewPicture > 2) {
-            this[ScaleOnNewPicture] = default[ScaleOnNewPicture]!!
-            fixed = true
-        }
-
-        val viewModePreferenceList = this[ViewModePreference].asStringList()
-        for (preference in viewModePreferenceList) try {
-            ViewMode.getViewMode(preference)
-        } catch (e: Exception) {
-            this[ViewModePreference] = default[ViewModePreference]!!
-            fixed = true
-            break
-        }
-
-        val logLevel = this[LogLevelPreference].asString()
-        try {
-            Logger.LogType.getType(logLevel)
-        } catch (e: Exception) {
-            this[LogLevelPreference] = default[LogLevelPreference]!!
-            fixed = true
-        }
-
-        val labelRadius = this[LabelRadius].asDouble()
-        if (labelRadius < 8 || labelRadius > 48) {
-            this[LabelRadius] = default[LabelRadius]!!
-            fixed = true
-        }
-
-        val labelAlpha = this[LabelAlpha].asInteger(16)
-        if (labelAlpha < 0 || labelAlpha > 255) {
-            this[LabelAlpha] = default[LabelAlpha]!!
-            fixed = true
-        }
-
-        val ligatureRules = this[LigatureRules].asPairList()
-        for (pair in ligatureRules) if (pair.first.contains(Regex("[|, ]"))) {
-            this[LigatureRules] = default[LigatureRules]!!
-            fixed = true
-        }
-
-        return fixed
-    }
 
 }

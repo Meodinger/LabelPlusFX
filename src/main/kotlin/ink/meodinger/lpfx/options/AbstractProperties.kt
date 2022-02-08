@@ -102,8 +102,6 @@ abstract class AbstractProperties {
     @Throws(IOException::class)
     abstract fun save()
 
-    abstract fun checkAndFix(): Boolean
-
     fun useDefault() {
         properties.clear()
         default.forEach { (k, v) -> properties.add(CProperty(k, v)) }

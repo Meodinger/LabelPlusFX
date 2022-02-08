@@ -42,6 +42,8 @@ import javafx.scene.text.TextAlignment
  */
 object ADialogSettings : AbstractPropertiesDialog() {
 
+    private val xInstCheckBox = CheckBox(I18N["settings.general.inst_trans"])
+
     private const val gRowShift = 1
     private val gLabelHint = Label(I18N["settings.group.hint"])
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
@@ -85,6 +87,20 @@ object ADialogSettings : AbstractPropertiesDialog() {
             prefHeight = PANE_HEIGHT
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
+            add(I18N["settings.general.title"]) {
+                withContent(GridPane()) {
+                    padding = Insets(COMMON_GAP)
+                    vgap = COMMON_GAP
+                    hgap = COMMON_GAP
+                    alignment = Pos.TOP_CENTER
+
+                    //   0        1
+                    // 0 InstantCheckBox and Text
+                    // 1
+
+                    add(xInstCheckBox, 0, 0, 2, 1)
+                }
+            }
             add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(gGridPane.apply {
@@ -127,18 +143,19 @@ object ADialogSettings : AbstractPropertiesDialog() {
             }
             add(I18N["settings.mode.title"]) {
                 withContent(GridPane()) {
-                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
-
                     padding = Insets(COMMON_GAP)
                     vgap = COMMON_GAP
                     hgap = COMMON_GAP
                     alignment = Pos.TOP_CENTER
+
                     //   0         1
                     // 0 Input     | input | < > (ViewMode)
                     // 1 Label     | label | < > (ViewMode)
                     // 2
                     // 3 Scale on new picture
                     // 4 | selection | < >       (String)
+
+                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
                         items.setAll(viewModeList)
@@ -422,6 +439,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     // ----- Initialize Properties ----- //
     override fun initProperties() {
+        // General
+        xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
+
         // Group
         gDefaultColorHexListLazy.refresh()
         initGroupTab()
@@ -452,6 +472,13 @@ object ADialogSettings : AbstractPropertiesDialog() {
     }
 
     // ----- Result convert ---- //
+    private fun convertGeneral(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
+
+        return list
+    }
     private fun convertGroup(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
@@ -533,6 +560,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     override fun convertResult(): List<CProperty> {
         return ArrayList<CProperty>().apply {
+            addAll(convertGeneral())
             addAll(convertGroup())
             addAll(convertLigatureRule())
             addAll(convertMode())

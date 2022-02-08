@@ -93,11 +93,6 @@ object Options {
         }
         try {
             RecentFiles.load()
-            if (RecentFiles.checkAndFix()) {
-                Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
-                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles))
-            }
-
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             RecentFiles.useDefault()
@@ -121,11 +116,6 @@ object Options {
         }
         try {
             Preference.load()
-            if (Preference.checkAndFix()) {
-                Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
-                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_Preference))
-            }
-
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Preference.useDefault()
@@ -149,11 +139,6 @@ object Options {
         }
         try {
             Settings.load()
-            if (Settings.checkAndFix()) {
-                Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
-                showWarning(null, String.format(I18N["warning.options.fixed.s"], FileName_Settings))
-            }
-
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Settings.useDefault()

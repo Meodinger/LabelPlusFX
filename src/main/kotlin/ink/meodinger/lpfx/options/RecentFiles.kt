@@ -2,11 +2,8 @@ package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.util.addFirst
-import ink.meodinger.lpfx.util.removeAll
 
 import java.io.IOException
-import java.nio.file.InvalidPathException
-import java.nio.file.Path
 
 
 /**
@@ -50,25 +47,6 @@ object RecentFiles : AbstractProperties() {
         this[PROGRESS] = recent.map { progress[it] }
 
         save(Options.recentFiles, this)
-    }
-
-    override fun checkAndFix(): Boolean {
-        val toRemove = HashSet<String>()
-        recent.forEach {
-            try {
-                Path.of(it)
-            } catch (e: InvalidPathException) {
-                toRemove.add(it)
-            }
-        }
-
-        recent.removeAll(toRemove)
-        progress.removeAll(toRemove)
-
-        this[RECENT] = recent
-        this[PROGRESS] = recent.map { progress[it] }
-
-        return toRemove.size != 0
     }
 
     fun getAll(): List<String> {

@@ -212,6 +212,7 @@ class Controller(private val root: View) {
             removeLabelTreeItem(it.labelIndex)
             // Edit data
             State.removeTransLabel(State.currentPicName, it.labelIndex)
+            if (State.currentLabelIndex == it.labelIndex) State.currentLabelIndex = NOT_FOUND
             // Mark change
             State.isChanged = true
         }
@@ -314,15 +315,15 @@ class Controller(private val root: View) {
 
         })
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), a@{ observable, _, newValue, _ ->
-                val a = newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
-
+            cPicBox.valueProperty(), rule@{ observable, _, newValue, _ ->
                 // Indicate current item was removed
                 // Use run later to avoid Issue#5 (Reason unclear).
                 // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
-                if (State.isOpened && newValue == null) Platform.runLater { observable.value = a }
+                if (State.isOpened && newValue == null) Platform.runLater {
+                    observable.value = State.transFile.sortedPicNames[0]
+                }
 
-                return@a a
+                return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
             },
             State.currentPicNameProperty, { _, _, newValue, _ -> newValue!! }
         )
@@ -356,7 +357,7 @@ class Controller(private val root: View) {
             }
         })
         RuledGenericBidirectionalBinding.bind(
-            cGroupBox.indexProperty(), a@{ observable, _, newValue, _ ->
+            cGroupBox.indexProperty(), rule@{ observable, _, newValue, _ ->
                 val n = newValue as Int
                 val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else NOT_FOUND
 
@@ -365,7 +366,7 @@ class Controller(private val root: View) {
                 // Check opened to avoid accidentally set "Close time -1" to "Open time index"
                 if (State.isOpened && n == NOT_FOUND) Platform.runLater { observable.value = a }
 
-                return@a a
+                return@rule a
             },
             State.currentGroupIdProperty, { _, _, newValue, _ -> newValue!! }
         )

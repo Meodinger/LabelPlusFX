@@ -12,7 +12,13 @@ import javafx.concurrent.Task
 /**
  * LPFX Task for long-time procedure
  */
-open class LPFXTask<T>(private val task: () -> T) : Task<T>() {
+abstract class LPFXTask<T> : Task<T>() {
+
+    companion object {
+        fun <T> createTask(task: LPFXTask<T>.() -> T): LPFXTask<T> {
+            return object : LPFXTask<T>() { override fun call(): T = task(this) }
+        }
+    }
 
     fun setOnSucceeded(callback: (T) -> Unit): LPFXTask<T> {
         super.setOnSucceeded {
@@ -33,8 +39,8 @@ open class LPFXTask<T>(private val task: () -> T) : Task<T>() {
 
     fun startInNewThread() = Thread(this).start()
 
-    override fun call(): T = task()
-
     operator fun invoke() = startInNewThread()
+
+    inline fun handleCancel(breaker: () -> Unit) { if (isCancelled) breaker() }
 
 }

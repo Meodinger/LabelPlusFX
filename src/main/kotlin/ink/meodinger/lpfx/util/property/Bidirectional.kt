@@ -143,6 +143,16 @@ open class TypedGenericBidirectionalBinding<T> protected constructor(
         }
     }
 }
+
+/**
+ * Provide a convenient way to bind two properties with processed new value
+ *
+ * Actually, this binding is to add a listener to both of the given observables.
+ * Sometimes we don't want the raw new value to be applied to the other property,
+ * that means we need to process it before pass to the other property.
+ * @param rule1 Lambda to process o2's change
+ * @param rule2 Lambda to process o2's change
+ */
 class RuledGenericBidirectionalBinding<T> private constructor(
     property1: Property<T>,
     private val rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
@@ -194,7 +204,7 @@ class RuledGenericBidirectionalBinding<T> private constructor(
  * @param listener1 Lambda to change o2 when o1 change
  * @param listener2 Lambda to change o1 when o2 change
  */
-class BidirectionalListener<T>(
+class BidirectionalListener<T> private constructor(
     observable1: ObservableValue<T>,
     private val listener1: ChangeListener<T>,
     observable2: ObservableValue<T>,

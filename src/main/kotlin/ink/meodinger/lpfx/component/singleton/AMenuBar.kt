@@ -5,13 +5,18 @@ import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
+import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.platform.isMac
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.translator.convert2Simplified
+import ink.meodinger.lpfx.util.translator.convert2Traditional
 
 import javafx.beans.binding.Bindings
 import javafx.scene.control.*
@@ -149,6 +154,15 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.specify"]) {
                 does { specifyPictures() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            separator()
+            item(I18N["m.cht2zh"]) {
+                does { cht2zh() }
+                disableProperty().bind(!State.isOpenedProperty)
+            }
+            item(I18N["m.zh2cht"]) {
+                does { cht2zh(true) }
                 disableProperty().bind(!State.isOpenedProperty)
             }
         }
@@ -328,9 +342,9 @@ object AMenuBar : MenuBar() {
             val picNames = State.transFile.picNames
 
             // Edit date
-            val toAdd = ArrayList<String>()
+            val toAdd = HashSet<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
-            val toRemove = ArrayList<String>()
+            val toRemove = HashSet<String>()
             for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
 
             if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
@@ -341,6 +355,8 @@ object AMenuBar : MenuBar() {
 
             for (picName in toAdd) State.addPicture(picName)
             for (picName in toRemove) State.removePicture(picName)
+            // Update View
+            State.currentPicName = State.transFile.sortedPicNames[0]
             // Mark change
             State.isChanged = true
         }
@@ -377,6 +393,66 @@ object AMenuBar : MenuBar() {
             if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
             if (State.isOpened) if (State.getPicFileNow().exists()) State.controller.renderLabelPane()
         }
+    }
+    private fun cht2zh(inverse: Boolean = false) {
+        val converter = if (inverse) ::convert2Traditional else ::convert2Simplified
+
+        val task = object : LPFXTask<Unit>() {
+            val DELIMITER = "#|#"
+
+            override fun call() {
+                State.isChanged = true
+
+                val picNames = State.transFile.sortedPicNames
+                var picIndex = 0.0
+                val picCount = State.transFile.picCount
+                for (picName in picNames) {
+                    handleCancel { return }
+                    val labels = State.transFile.getTransList(picName)
+                    var labelIndex = 0.0
+                    val labelCount = labels.size
+
+                    val builder = StringBuilder()
+                    for (label in labels) builder.append(label.text).append(DELIMITER)
+                    val iterator = converter(builder.deleteTail(DELIMITER).toString()).split(DELIMITER).also {
+                        if (it.size != labelCount) {
+                            updateMessage("at [$picIndex:$labelIndex] ${it.joinToString()}")
+                            cancel()
+                            return
+                        }
+                    }.iterator()
+                    for (label in labels) {
+                        labelIndex++
+                        updateProgress(((picIndex + labelIndex / labelCount) / picCount), 1.0)
+                        label.text = iterator.next().trim() // Sometimes will get whitespaces at label start
+                    }
+                    picIndex++
+                }
+            }
+        }
+
+        Dialog<Unit>().apply {
+            initOwner(State.stage)
+            dialogPane.withContent(ProgressBar()) {
+                progressProperty().bind(task.progressProperty())
+                progressProperty().addListener(onNew<Number, Double> {
+                    if (it >= 1.0) {
+                        result = Unit
+                        close()
+                    }
+                })
+            }
+
+            task.messageProperty().addListener(onNew {
+                if (it.isNotBlank()) {
+                    result = Unit
+                    close()
+                    showError(State.stage, "Error: $it")
+                }
+            })
+        }.show()
+
+        task()
     }
 
     private fun exportTransFile(type: FileType) {

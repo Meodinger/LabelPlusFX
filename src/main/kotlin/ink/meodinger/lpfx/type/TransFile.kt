@@ -11,9 +11,9 @@ import ink.meodinger.lpfx.util.property.setValue
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import javafx.beans.InvalidationListener
 import javafx.beans.property.*
 import javafx.collections.FXCollections
-import javafx.collections.MapChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
 import java.io.File
@@ -131,7 +131,7 @@ open class TransFile @JsonCreator constructor(
 
     // ----- Lazy ---- //
 
-    val sortedPicNamesLazy: ReLazy<List<String>> = ReLazy { sortByDigit(transMapObservable.keys.toList()) } // copy
+    private val sortedPicNamesLazy: ReLazy<List<String>> = ReLazy { sortByDigit(transMapObservable.keys.toList()) } // copy
     val sortedPicNames: List<String> by sortedPicNamesLazy
 
     // ----- Accessible Fields ----- //
@@ -157,7 +157,7 @@ open class TransFile @JsonCreator constructor(
     // ----- Init ----- //
 
     init {
-        transMapObservable.addListener(MapChangeListener { sortedPicNamesLazy.refresh() })
+        transMapObservable.addListener(InvalidationListener { sortedPicNamesLazy.refresh() })
     }
 
     // ----- TransGroup ----- //

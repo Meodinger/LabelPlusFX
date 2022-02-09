@@ -62,7 +62,7 @@ object UpdateChecker {
      * Should run after stage showed
      */
     fun check() {
-        LPFXTask {
+        LPFXTask.createTask<Unit> task@{
             Logger.info("Fetching latest version...", LOGSRC_CHECKER)
             val version = fetchSync()
             if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CHECKER)
@@ -72,7 +72,7 @@ object UpdateChecker {
                 val last = Preference[Preference.LAST_UPDATE_NOTICE].asLong()
                 if (last != 0L && time - last < DELAY) {
                     Logger.info("Check suppressed, last notice time is $last", LOGSRC_CHECKER)
-                    return@LPFXTask
+                    return@task
                 }
 
                 Preference[Preference.LAST_UPDATE_NOTICE] = 0

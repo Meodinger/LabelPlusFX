@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component.singleton
 
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
@@ -87,6 +88,7 @@ object ATreeMenu : ContextMenu() {
                 State.controller.removeLabel(labelIndex)
                 // Edit data
                 State.removeTransLabel(State.currentPicName, labelIndex)
+                if (State.currentLabelIndex == labelIndex) State.currentLabelIndex = NOT_FOUND
             }
             // Mark change
             State.isChanged = true

@@ -14,12 +14,14 @@ import java.io.IOException
  */
 object Preference : AbstractProperties() {
 
+    const val WINDOW_SIZE        = "WindowSize"
     const val MAIN_DIVIDER       = "MainDivider"
     const val RIGHT_DIVIDER      = "RightDivider"
     const val TEXTAREA_FONT_SIZE = "TextAreaFontSize"
     const val LAST_UPDATE_NOTICE = "LastUpdateNotice"
 
     override val default = listOf(
+        CProperty(WINDOW_SIZE, 900, 600),
         CProperty(MAIN_DIVIDER, 0.618),
         CProperty(RIGHT_DIVIDER, 0.618),
         CProperty(TEXTAREA_FONT_SIZE, 12),

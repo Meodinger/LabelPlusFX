@@ -20,8 +20,6 @@ val V = Version(2, 2, 2)
 /**
  * Size related constants
  */
-const val WINDOW_WIDTH  = 900.0
-const val WINDOW_HEIGHT = 600.0
 const val PANE_WIDTH    = 600.0
 const val PANE_HEIGHT   = 400.0
 const val COMMON_GAP    = 16.0
@@ -97,15 +95,6 @@ enum class WorkMode(val description: String) {
 
     override fun toString(): String = description
 
-    companion object {
-        fun getWorkMode(description: String): WorkMode = when (description) {
-            InputMode.description -> InputMode
-            LabelMode.description -> LabelMode
-            else -> throw IllegalArgumentException(
-                String.format(I18N["exception.work_mode.invalid_description.s"], description)
-            )
-        }
-    }
 }
 
 /**
@@ -118,15 +107,6 @@ enum class ViewMode(private val description: String) {
 
     override fun toString(): String = description
 
-    companion object {
-        fun getViewMode(description: String): ViewMode = when (description) {
-            IndexMode.description -> IndexMode
-            GroupMode.description -> GroupMode
-            else -> throw IllegalArgumentException(
-                String.format(I18N["exception.view_mode.invalid_description.s"], description)
-            )
-        }
-    }
 }
 
 /**

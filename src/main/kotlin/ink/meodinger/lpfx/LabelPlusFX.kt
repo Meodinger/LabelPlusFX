@@ -3,8 +3,10 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
+import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
@@ -61,12 +63,17 @@ class LabelPlusFX: HookedApplication() {
 
         State.controller = controller
 
+        val size = Preference[Preference.WINDOW_SIZE].asDoubleList()
+
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
-        primaryStage.scene = Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT)
+        primaryStage.scene = Scene(root, size[0], size[1])
         primaryStage.setOnCloseRequest {
             if (!controller.stay()) exit() else it.consume()
         }
+
+        primaryStage.scene.widthProperty().addListener(onNew { Preference[Preference.WINDOW_SIZE] = listOf(it, primaryStage.scene.height) })
+        primaryStage.scene.heightProperty().addListener(onNew { Preference[Preference.WINDOW_SIZE] = listOf(primaryStage.scene.width, it) })
 
         primaryStage.show()
         controller.labelInfo(I18N["common.ready"])

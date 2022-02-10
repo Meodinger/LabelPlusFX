@@ -2,8 +2,6 @@ package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
 import ink.meodinger.lpfx.V
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -32,16 +30,6 @@ object Logger {
 
         override fun toString(): String = type
 
-        companion object {
-            fun getType(type: String): LogType = when (type) {
-                DEBUG.type   -> DEBUG
-                INFO.type    -> INFO
-                WARNING.type -> WARNING
-                ERROR.type   -> ERROR
-                FATAL.type   -> FATAL
-                else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.invalid_log_type.s"], type))
-            }
-        }
     }
 
     private lateinit var writer: Writer

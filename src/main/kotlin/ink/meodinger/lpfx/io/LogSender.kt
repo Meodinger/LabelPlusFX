@@ -59,21 +59,7 @@ object LogSender {
         Transport.send(message, reportUser, reportAuth)
     }
 
-    fun send(log: File) {
-        val task = LPFXTask.createTask<Unit> { sendSync(log) }
-
-        task.setOnFailed {
-            Logger.error("Log sent failed", LOGSRC_SENDER)
-            Logger.exception(it)
-        }
-
-        task.setOnSucceeded {
-            Logger.info("Sent Log ${log.name}", LOGSRC_SENDER)
-        }
-
-        task.startInNewThread()
-    }
-    fun send(log: File, onSucceeded: () -> Unit, onFailed: (Throwable) -> Unit) {
+    fun send(log: File, onSucceeded: () -> Unit = {}, onFailed: (Throwable) -> Unit = {}) {
         val task = LPFXTask.createTask<Unit> { sendSync(log) }
 
         task.setOnFailed {

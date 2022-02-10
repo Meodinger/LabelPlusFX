@@ -178,7 +178,7 @@ class Controller(private val root: View) {
         Logger.info("Applied Preferences", LOGSRC_CONTROLLER)
 
         // Settings
-        State.viewMode = ViewMode.getViewMode(Settings[Settings.ViewModes].asStringList()[0])
+        State.viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
         updateLigatureRules()
         Logger.info("Applied Settings", LOGSRC_CONTROLLER)
 
@@ -1220,8 +1220,8 @@ class Controller(private val root: View) {
         State.workMode = mode
 
         setViewMode(when (mode) {
-            WorkMode.InputMode -> ViewMode.getViewMode(Settings[Settings.ViewModes].asStringList()[0])
-            WorkMode.LabelMode -> ViewMode.getViewMode(Settings[Settings.ViewModes].asStringList()[1])
+            WorkMode.InputMode -> ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
+            WorkMode.LabelMode -> ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[1]]
         })
 
         Logger.info("Switched work mode to $mode", LOGSRC_CONTROLLER)

@@ -27,12 +27,7 @@ fun loadAsStream(fileName: String): InputStream = LabelPlusFX::class.java.getRes
 /**
  * Load file in module as ByteArray
  */
-fun loadAsBytes(fileName: String): ByteArray {
-    val inputStream = loadAsStream(fileName)
-    val buffer = ByteArray(inputStream.available())
-    inputStream.read(buffer)
-    return buffer
-}
+fun loadAsBytes(fileName: String): ByteArray = loadAsStream(fileName).readAllBytes()
 
 /**
  * Load file in module as Image

@@ -142,7 +142,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
     }
 
     override fun initProperties() {
-        comboLevel.select(LogType.getType(Settings[Settings.LogLevel].asString()))
+        comboLevel.select(Settings[Settings.LogLevelOrdinal].asInteger())
 
         val files = Files
             .walk(Options.logs, 1).filter { it.name != Options.logs.name }
@@ -154,6 +154,6 @@ object ADialogLogs : AbstractPropertiesDialog() {
     }
 
     override fun convertResult(): List<CProperty> {
-        return listOf(CProperty(Settings.LogLevel, comboLevel.value))
+        return listOf(CProperty(Settings.LogLevelOrdinal, comboLevel.index))
     }
 }

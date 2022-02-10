@@ -24,7 +24,7 @@ object Preference : AbstractProperties() {
         CProperty(RIGHT_DIVIDER, 0.618),
         CProperty(TEXTAREA_FONT_SIZE, 12),
         CProperty(LAST_UPDATE_NOTICE, 0)
-    ).toPropertiesMap()
+    )
 
     init { useDefault() }
 

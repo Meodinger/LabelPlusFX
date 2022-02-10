@@ -515,7 +515,7 @@ object AMenuBar : MenuBar() {
             Settings[property.key] = property
         }
 
-        Logger.level = Logger.LogType.getType(Settings[Settings.LogLevel].asString())
+        Logger.level = Logger.LogType.values()[Settings[Settings.LogLevelOrdinal].asInteger()]
     }
     private fun about() {
         showLink(

@@ -453,10 +453,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
         initLigatureTab()
 
         // Mode
-        val modeStringList = Settings[Settings.ViewModes].asStringList()
-        val modeList = List(modeStringList.size) { ViewMode.getViewMode(modeStringList[it]) }
-        mComboInput.select(modeList[0])
-        mComboLabel.select(modeList[1])
+        val modeOrdinals = Settings[Settings.ViewModeOrdinals].asIntegerList()
+        mComboInput.select(ViewMode.values()[modeOrdinals[0]])
+        mComboLabel.select(ViewMode.values()[modeOrdinals[1]])
         mComboScale.select(Settings[Settings.ScaleOnNewPicture].asInteger())
 
         // Label
@@ -537,7 +536,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun convertMode(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        list.add(CProperty(Settings.ViewModes, mComboInput.value, mComboLabel.value))
+        list.add(CProperty(Settings.ViewModeOrdinals, mComboInput.index, mComboLabel.index))
         list.add(CProperty(Settings.ScaleOnNewPicture, mComboScale.index))
 
         return list

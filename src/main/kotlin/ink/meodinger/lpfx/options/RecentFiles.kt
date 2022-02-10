@@ -27,7 +27,7 @@ object RecentFiles : AbstractProperties() {
     override val default = listOf(
         CProperty(RECENT),
         CProperty(PROGRESS)
-    ).toPropertiesMap()
+    )
 
     init { useDefault() }
 

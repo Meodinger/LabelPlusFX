@@ -16,6 +16,7 @@
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.6.10" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.10" />
       <element id="library" level="project" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10" />
+      <element id="library" level="project" name="Maven: ink.meodinger:htmlparser:0.0.1" />
     </root>
   </artifact>
 </component>

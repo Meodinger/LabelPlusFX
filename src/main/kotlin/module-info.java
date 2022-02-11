@@ -12,6 +12,9 @@ module lpfx {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
 
+    // HTML Parser
+    requires ink.meodinger.htmlparser;
+
     opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports ink.meodinger.lpfx;

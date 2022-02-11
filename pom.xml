@@ -82,6 +82,12 @@
         </dependency>
 
         <dependency>
+            <groupId>ink.meodinger</groupId>
+            <artifactId>htmlparser</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>

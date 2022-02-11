@@ -72,8 +72,12 @@ class LabelPlusFX: HookedApplication() {
             if (!controller.stay()) exit() else it.consume()
         }
 
-        primaryStage.scene.widthProperty().addListener(onNew { Preference[Preference.WINDOW_SIZE] = listOf(it, primaryStage.scene.height) })
-        primaryStage.scene.heightProperty().addListener(onNew { Preference[Preference.WINDOW_SIZE] = listOf(primaryStage.scene.width, it) })
+        primaryStage.scene.widthProperty().addListener(onNew {
+            if (!primaryStage.isMaximized) Preference[Preference.WINDOW_SIZE] = listOf(it, primaryStage.scene.height)
+        })
+        primaryStage.scene.heightProperty().addListener(onNew {
+            if (!primaryStage.isMaximized) Preference[Preference.WINDOW_SIZE] = listOf(primaryStage.scene.width, it)
+        })
 
         primaryStage.show()
         controller.labelInfo(I18N["common.ready"])

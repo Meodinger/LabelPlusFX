@@ -70,7 +70,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* [Liberica JDK 16 (Full)](https://bell-sw.com/pages/downloads/?version=java-16&package=jdk-full)
+* [Liberica JDK 17 (Full)](https://bell-sw.com/pages/downloads/#/java-17-lts%20/%20current)
 
 
 ### Installation
@@ -93,7 +93,7 @@ To get a local copy up and running follow these simple steps.
 
 Label Plus FX's function design based on [LabelPlus](https://noodlefighter.com/label_plus/)
 
-_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y)_
+_For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y) and [Wiki](https://github.com/Meodinger/LabelPlusFX/wiki)_
 
 
 
@@ -113,7 +113,7 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-Distributed under the GPLv3 License. See `LICENSE` for more information.
+Distributed under the AGPLv3 License. See `LICENSE` for more information.
 
 
 
@@ -126,4 +126,4 @@ Project Link: [https://github.com/Meodinger/LabelPlusFX](https://github.com/Meod
 
 
 
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: https://s2.loli.net/2022/02/04/2H7bguJ9rcyBjUO.png

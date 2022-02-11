@@ -31,7 +31,7 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
             val folder = "$path/"
             zip.putNextEntry(ZipEntry(folder))
 
-            file.listFiles()?.forEach { f -> zip(f, folder + f) }
+            file.listFiles()?.forEach { zip(it, folder + it) }
         } else {
             zip(FileInputStream(file), path)
         }

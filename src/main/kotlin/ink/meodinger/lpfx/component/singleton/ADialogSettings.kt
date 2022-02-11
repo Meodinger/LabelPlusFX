@@ -74,14 +74,18 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private val lLabelRadius = CInputLabel()
     private val lLabelAlpha = CInputLabel()
 
+    private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
+    private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
+
     init {
         initOwner(State.stage)
 
         title = I18N["settings.title"]
-        dialogPane.prefWidth = DIALOG_WIDTH
-        dialogPane.prefHeight = DIALOG_HEIGHT
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         withContent(TabPane()) {
+            // DialogPane size depends on TabPane
+            prefWidth = PANE_WIDTH
+            prefHeight = PANE_HEIGHT
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
             add(I18N["settings.group.title"]) {
@@ -119,41 +123,39 @@ object ADialogSettings : AbstractPropertiesDialog() {
                         alignment = Pos.CENTER_RIGHT
                         padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
                         add(Label(I18N["settings.ligature.sample"]))
-                        add(HBox()) { hGrow = Priority.ALWAYS }
+                        add(HBox()) { boxHGrow = Priority.ALWAYS }
                         add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
                     }
                 }
             }
             add(I18N["settings.mode.title"]) {
                 withContent(GridPane()) {
-                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
-
                     padding = Insets(COMMON_GAP)
                     vgap = COMMON_GAP
                     hgap = COMMON_GAP
                     alignment = Pos.TOP_CENTER
+
                     //   0         1
-                    // 0 WorkMode  ViewMode
-                    // 1 Input     | input | < > (ViewMode)
-                    // 2 Label     | label | < > (ViewMode)
-                    // 3
-                    // 4 Scale on new picture
-                    // 5 | selection | < >       (String)
-                    add(Label(I18N["mode.work"]), 0, 0)
-                    add(Label(I18N["mode.view"]), 1, 0)
-                    add(Label(I18N["mode.work.input"]), 0, 1)
-                    add(Label(I18N["mode.work.label"]), 0, 2)
-                    add(mComboInput, 1, 1) {
+                    // 0 Input     | input | < > (ViewMode)
+                    // 1 Label     | label | < > (ViewMode)
+                    // 2
+                    // 3 Scale on new picture
+                    // 4 | selection | < >       (String)
+
+                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
+                    add(Label(I18N["mode.work.input"]), 0, 0)
+                    add(mComboInput, 1, 0) {
                         items.setAll(viewModeList)
                         isWrapped = true
                     }
-                    add(mComboLabel, 1, 2) {
+                    add(Label(I18N["mode.work.label"]), 0, 1)
+                    add(mComboLabel, 1, 1) {
                         items.setAll(viewModeList)
                         isWrapped = true
                     }
-                    add(HBox(), 0, 3)
-                    add(Label(I18N["settings.mode.scale.label"]), 0, 4, 2, 1)
-                    add(mComboScale, 0, 5, 2, 1) {
+                    add(HBox(), 0, 2)
+                    add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
+                    add(mComboScale, 0, 4, 2, 1) {
                         items.setAll(listOf(
                             I18N["settings.mode.scale.100"],
                             I18N["settings.mode.scale.fit"],
@@ -301,6 +303,21 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     }
                 }
             }
+            add(I18N["settings.other.title"]) {
+                withContent(GridPane()) {
+                    padding = Insets(COMMON_GAP)
+                    vgap = COMMON_GAP
+                    hgap = COMMON_GAP
+                    alignment = Pos.TOP_CENTER
+
+                    //   0        1
+                    // 0 InstantCheckBox and Text
+                    // 1 UseMeoFileCheckBox and Text
+
+                    add(xInstCheckBox, 0, 0, 2, 1)
+                    add(xUseMCheckBox, 0, 1, 2, 1)
+                }
+            }
         }
 
         initProperties()
@@ -350,13 +367,13 @@ object ADialogSettings : AbstractPropertiesDialog() {
         gGridPane.add(button, 3, newRowIndex)
     }
     private fun removeGroupRow(index: Int) {
-        val toRemoveList = ArrayList<Node>()
+        val toRemoveSet = HashSet<Node>()
         for (node in gGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
-            if (row == index) toRemoveList.add(node)
+            if (row == index) toRemoveSet.add(node)
             if (row > index) GridPane.setRowIndex(node, row - 1)
         }
-        gGridPane.children.removeAll(toRemoveList)
+        gGridPane.children.removeAll(toRemoveSet)
 
         if (gGridPane.rowCount == gRowShift) {
             gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
@@ -405,16 +422,16 @@ object ADialogSettings : AbstractPropertiesDialog() {
         rGridPane.add(button, 2, newRowIndex)
     }
     private fun removeLigatureRow(index: Int) {
-        val toRemoveList = ArrayList<Node>()
+        val toRemoveSet = HashSet<Node>()
         for (node in rGridPane.children) {
             val row = GridPane.getRowIndex(node) ?: 0
-            if (row == index) toRemoveList.add(node)
+            if (row == index) toRemoveSet.add(node)
             if (row > index) {
                 GridPane.setRowIndex(node, row - 1)
                 node.properties[rRuleIndex] = row - 1 - rRowShift
             }
         }
-        rGridPane.children.removeAll(toRemoveList)
+        rGridPane.children.removeAll(toRemoveSet)
 
         if (rGridPane.rowCount == rRowShift) {
             rGridPane.children.removeAll(rLabelFrom, rLabelTo)
@@ -424,6 +441,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     // ----- Initialize Properties ----- //
     override fun initProperties() {
+        // General
+        xUseMCheckBox.isSelected = Settings[Settings.UseMeoFileAsDefault].asBoolean()
+        xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
+
         // Group
         gDefaultColorHexListLazy.refresh()
         initGroupTab()
@@ -432,10 +453,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
         initLigatureTab()
 
         // Mode
-        val preferenceStringList = Settings[Settings.ViewModePreference].asStringList()
-        val preferenceList = List(preferenceStringList.size) { ViewMode.getViewMode(preferenceStringList[it]) }
-        mComboInput.select(preferenceList[0])
-        mComboLabel.select(preferenceList[1])
+        val modeOrdinals = Settings[Settings.ViewModeOrdinals].asIntegerList()
+        mComboInput.select(ViewMode.values()[modeOrdinals[0]])
+        mComboLabel.select(ViewMode.values()[modeOrdinals[1]])
         mComboScale.select(Settings[Settings.ScaleOnNewPicture].asInteger())
 
         // Label
@@ -516,7 +536,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun convertMode(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        list.add(CProperty(Settings.ViewModePreference, mComboInput.value, mComboLabel.value))
+        list.add(CProperty(Settings.ViewModeOrdinals, mComboInput.index, mComboLabel.index))
         list.add(CProperty(Settings.ScaleOnNewPicture, mComboScale.index))
 
         return list
@@ -532,6 +552,14 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
         return list
     }
+    private fun convertOther(): List<CProperty> {
+        val list = ArrayList<CProperty>()
+
+        list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
+        list.add(CProperty(Settings.UseMeoFileAsDefault, xUseMCheckBox.isSelected))
+
+        return list
+    }
 
     override fun convertResult(): List<CProperty> {
         return ArrayList<CProperty>().apply {
@@ -539,6 +567,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
             addAll(convertLigatureRule())
             addAll(convertMode())
             addAll(convertLabel())
+            addAll(convertOther())
         }
     }
 

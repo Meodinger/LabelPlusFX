@@ -12,7 +12,7 @@ import ink.meodinger.lpfx.util.string.deleteTail
 /**
  * A data class for property storage
  */
-class CProperty(val key: String, var value: String = UNINITIALIZED) {
+class CProperty(val key: String, var value: String = EMPTY) {
 
     // NOTE: May be deprecated in 3.x versions. May use serialize/java.util.properties instead.
 
@@ -22,7 +22,6 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
         private const val PAIR_START     = "<"
         private const val PAIR_STOP      = ">"
 
-        private const val UNINITIALIZED = "<@Uninitialized@>"
         const val EMPTY = ""
 
         private fun parseList(values: List<*>): String {
@@ -45,10 +44,6 @@ class CProperty(val key: String, var value: String = UNINITIALIZED) {
     constructor(key: String, value: Number) : this(key, value.toString())
     constructor(key: String, value: List<*>) : this(key, parseList(value))
     constructor(key: String, vararg value: Any) : this(key, listOf(*value))
-
-    fun isUninitialized(): Boolean {
-        return value == UNINITIALIZED
-    }
 
     fun asString(): String {
         return value

@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.util.component
 
 import javafx.beans.value.ObservableValue
+import javafx.geometry.HPos
+import javafx.geometry.VPos
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.*
@@ -144,6 +146,22 @@ fun <T : Node> GridPane.add(node: T, col: Int, row: Int, operation: T.() -> Unit
     return add(node, col, row, 1, 1, operation)
 }
 
+var Node.gridHGrow: Priority
+    get() = GridPane.getHgrow(this) ?: Priority.NEVER
+    set(value) { GridPane.setHgrow(this, value) }
+
+var Node.gridVGrow: Priority
+    get() = GridPane.getVgrow(this) ?: Priority.NEVER
+    set(value) { GridPane.setVgrow(this, value) }
+
+var Node.gridHAlign: HPos
+    get() = GridPane.getHalignment(this) ?: HPos.LEFT
+    set(value) { GridPane.setHalignment(this, value) }
+
+var Node.gridVAlign: VPos
+    get() = GridPane.getValignment(this) ?: VPos.BASELINE
+    set(value) { GridPane.setValignment(this, value) }
+
 ////////////////////////////////////////////////////////////
 ///// ScrollPane
 ////////////////////////////////////////////////////////////
@@ -191,11 +209,11 @@ fun VBox.addAll(vararg nodes: Node): VBox {
     return apply { children.addAll(*nodes) }
 }
 
-var Node.hGrow: Priority
+var Node.boxHGrow: Priority
     get() = HBox.getHgrow(this) ?: Priority.NEVER
     set(value) { HBox.setHgrow(this, value) }
 
-var Node.vGrow: Priority
+var Node.boxVGrow: Priority
     get() = VBox.getVgrow(this) ?: Priority.NEVER
     set(value) { VBox.setVgrow(this, value) }
 

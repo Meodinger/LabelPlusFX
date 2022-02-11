@@ -57,24 +57,24 @@ class CFileChooser {
     var selectedExtensionFilter: FileChooser.ExtensionFilter? = chooser.selectedExtensionFilter
 
     init {
-        initialDirectoryProperty.bind(lastDirectoryProperty)
+        initialDirectoryProperty.bindBidirectional(lastDirectoryProperty)
     }
 
     fun showOpenDialog(owner: Window?): File? {
-        val file = chooser.showOpenDialog(owner)
-        if (file != null) lastDirectory = file.parentFile
-        return file
+        return chooser.showOpenDialog(owner).also {
+            if (it != null) lastDirectory = it.parentFile
+        }
     }
 
     fun showSaveDialog(owner: Window?): File? {
-        val file = chooser.showSaveDialog(owner)
-        if (file != null) lastDirectory = file.parentFile
-        return file
+        return chooser.showSaveDialog(owner).also {
+            if (it != null) lastDirectory = it.parentFile
+        }
     }
 
     fun showOpenMultipleDialog(owner: Window?) : List<File>? {
-        val files = chooser.showOpenMultipleDialog(owner)
-        if (files != null) lastDirectory = files.last().parentFile
-        return files
+        return chooser.showOpenMultipleDialog(owner).also {
+            if (it != null) lastDirectory = it.last().parentFile
+        }
     }
 }

@@ -20,11 +20,16 @@ val V = Version(2, 2, 2)
 /**
  * Size related constants
  */
-const val WINDOW_WIDTH  = 900.0
-const val WINDOW_HEIGHT = 600.0
-const val DIALOG_WIDTH  = 600.0
-const val DIALOG_HEIGHT = 400.0
+const val PANE_WIDTH    = 600.0
+const val PANE_HEIGHT   = 400.0
 const val COMMON_GAP    = 16.0
+
+/**
+ * Scale
+ */
+const val SCALE_MIN  = 0.1
+const val SCALE_MAX  = 4.0
+const val SCALE_INIT = 1.0
 
 /**
  * CLabel Radius Range
@@ -42,11 +47,6 @@ const val FONT_SIZE_MAX = 64
  * Default File Object
  */
 val DEFAULT_FILE = File("")
-
-/**
- * Scroll Delta Default
- */
-const val SCROLL_DELTA = 32.0
 
 /**
  * TreeItem Graphic radius
@@ -69,18 +69,13 @@ val EXTENSIONS_PIC  = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC
 val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 
 /**
- * Filenames
- */
-const val INITIAL_FILE_NAME  = "New Translation"
-const val RECOVERY_FILE_NAME = "Recovery"
-const val PACKAGE_FILE_NAME  = "Package"
-const val EXPORT_FILE_NAME   = "Export"
-
-/**
  * For label/group not found
  */
 const val NOT_FOUND = -1
 
+/**
+ * Log Source
+ */
 const val LOGSRC_APPLICATION = "Application"
 const val LOGSRC_CONTROLLER  = "Controller"
 const val LOGSRC_STATE       = "State"
@@ -100,15 +95,6 @@ enum class WorkMode(val description: String) {
 
     override fun toString(): String = description
 
-    companion object {
-        fun getWorkMode(description: String): WorkMode = when (description) {
-            InputMode.description -> InputMode
-            LabelMode.description -> LabelMode
-            else -> throw IllegalArgumentException(
-                String.format(I18N["exception.work_mode.invalid_description.s"], description)
-            )
-        }
-    }
 }
 
 /**
@@ -121,15 +107,6 @@ enum class ViewMode(private val description: String) {
 
     override fun toString(): String = description
 
-    companion object {
-        fun getViewMode(description: String): ViewMode = when (description) {
-            IndexMode.description -> IndexMode
-            GroupMode.description -> GroupMode
-            else -> throw IllegalArgumentException(
-                String.format(I18N["exception.view_mode.invalid_description.s"], description)
-            )
-        }
-    }
 }
 
 /**
@@ -142,10 +119,7 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
-        fun isLPFile(file: File): Boolean = file.extension == EXTENSION_FILE_LP
-        fun isMeoFile(file: File): Boolean = file.extension == EXTENSION_FILE_MEO
-
-        fun getType(file: File): FileType = when (file.extension) {
+        fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
             else -> throw IllegalArgumentException(

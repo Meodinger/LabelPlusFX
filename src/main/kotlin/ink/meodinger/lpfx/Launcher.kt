@@ -10,6 +10,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import java.awt.BorderLayout
+import kotlin.system.exitProcess
 
 
 /**
@@ -22,6 +23,21 @@ import java.awt.BorderLayout
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    // Use System Proxies
+    System.setProperty("java.net.useSystemProxies", "true")
+    // Fix shake_hands issue (Client sends v1.2 but server responses v.13)
+    System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,SSLv3")
+
+    // Global Uncaught Exception Handler
+    Thread.setDefaultUncaughtExceptionHandler { t, e ->
+        System.err.println("On thread ${t.name}: ${e.stackTraceToString()}")
+
+        if (!Logger.isStarted) return@setDefaultUncaughtExceptionHandler
+
+        Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
+        Logger.exception(e)
+    }
+
     // Immediately log exception and send if Logger started successfully
     // Note that we can only get exception information from log file if happened in this period
     // And if Options or Logger init failed, we can only get information from Swing window
@@ -39,13 +55,12 @@ fun main(vararg args: String) {
             contentPane.add(JPanel().apply {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
                 add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
-                add(JLabel("----------------------------------------", JLabel.CENTER))
-                add(JLabel(e.javaClass.name + ": " + e.message, JLabel.CENTER))
             }, BorderLayout.CENTER)
-            setSize(300, 120)
+            setSize(300, 100)
             setLocationRelativeTo(null)
 
             defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+            isResizable = false
             isVisible = true
         }
     }
@@ -59,4 +74,6 @@ fun main(vararg args: String) {
     Logger.start()
     Application.launch(LabelPlusFX::class.java, *args)
     Logger.stop()
+
+    exitProcess(0)
 }

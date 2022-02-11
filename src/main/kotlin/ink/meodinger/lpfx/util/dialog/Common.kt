@@ -1,12 +1,12 @@
 package ink.meodinger.lpfx.util.dialog
 
 import ink.meodinger.lpfx.COMMON_GAP
-import ink.meodinger.lpfx.DIALOG_HEIGHT
-import ink.meodinger.lpfx.DIALOG_WIDTH
+import ink.meodinger.lpfx.PANE_HEIGHT
+import ink.meodinger.lpfx.PANE_WIDTH
 import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.vGrow
+import ink.meodinger.lpfx.util.component.boxVGrow
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.image.resizeByRadius
@@ -44,7 +44,7 @@ val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").r
 val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
 val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
-fun showDialog(graphic: Node?, title: String, header: String?, content: String, owner: Window?, vararg buttonTypes: ButtonType): Optional<ButtonType> {
+fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
     dialog.graphic = graphic
@@ -71,8 +71,8 @@ fun showDialog(graphic: Node?, title: String, header: String?, content: String, 
  * @param content Message to show
  * @return ButtonType? YES | NO
  */
-fun showConfirm(content: String, owner: Window?): Optional<ButtonType> {
-    return showConfirm(I18N["common.confirm"], null, content, owner)
+fun showConfirm(owner: Window?, content: String): Optional<ButtonType> {
+    return showConfirm(owner, null, content, I18N["common.confirm"])
 }
 /**
  * Show message for confirm
@@ -82,8 +82,8 @@ fun showConfirm(content: String, owner: Window?): Optional<ButtonType> {
  * @param owner Owner window
  * @return ButtonType? YES | NO
  */
-fun showConfirm(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(confirmImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO)
+fun showConfirm(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, confirmImageView, title, header, content, ButtonType.YES, ButtonType.NO)
 }
 
 /**
@@ -91,8 +91,8 @@ fun showConfirm(title: String, header: String?, content: String, owner: Window?)
  * @param content Alert to show
  * @return ButtonType? YES | NO | CANCEL
  */
-fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
-    return showAlert(I18N["common.alert"], null, content, owner)
+fun showAlert(owner: Window?, content: String): Optional<ButtonType> {
+    return showAlert(owner, null, content, I18N["common.alert"])
 }
 /**
  * Show alert
@@ -102,8 +102,8 @@ fun showAlert(content: String, owner: Window?): Optional<ButtonType> {
  * @param owner Owner window
  * @return ButtonType? YES | NO | CANCEL
  */
-fun showAlert(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+fun showAlert(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
 }
 
 /**
@@ -111,8 +111,8 @@ fun showAlert(title: String, header: String?, content: String, owner: Window?): 
  * @param content Info to show
  * @return ButtonType? OK
  */
-fun showInfo(content: String, owner: Window?): Optional<ButtonType> {
-    return showInfo(I18N["common.info"], null, content, owner)
+fun showInfo(owner: Window?, content: String): Optional<ButtonType> {
+    return showInfo(owner, null, content, I18N["common.info"])
 }
 /**
  * Show information
@@ -122,8 +122,8 @@ fun showInfo(content: String, owner: Window?): Optional<ButtonType> {
  * @param owner Owner window
  * @return ButtonType? OK
  */
-fun showInfo(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(infoImageView, title, header, content, owner, ButtonType.OK)
+fun showInfo(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, infoImageView, title, header, content, ButtonType.OK)
 }
 
 /**
@@ -131,8 +131,8 @@ fun showInfo(title: String, header: String?, content: String, owner: Window?): O
  * @param content Warning to show
  * @return ButtonType? YES | CLOSE
  */
-fun showWarning(content: String, owner: Window?): Optional<ButtonType> {
-    return showWarning(I18N["common.warning"], null, content, owner)
+fun showWarning(owner: Window?, content: String): Optional<ButtonType> {
+    return showWarning(owner, null, content, I18N["common.warning"])
 }
 /**
  * Show warning
@@ -142,8 +142,8 @@ fun showWarning(content: String, owner: Window?): Optional<ButtonType> {
  * @param owner Owner window
  * @return ButtonType? YES | CLOSE
  */
-fun showWarning(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(alertImageView, title, header, content, owner, ButtonType.YES, ButtonType.CLOSE)
+fun showWarning(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.CLOSE)
 }
 
 /**
@@ -151,8 +151,8 @@ fun showWarning(title: String, header: String?, content: String, owner: Window?)
  * @param content Error to show
  * @return ButtonType? OK
  */
-fun showError(content: String, owner: Window?): Optional<ButtonType> {
-    return showError(I18N["common.error"], null, content, owner)
+fun showError(owner: Window?, content: String): Optional<ButtonType> {
+    return showError(owner, null, content, I18N["common.error"])
 }
 /**
  * Show error
@@ -162,8 +162,8 @@ fun showError(content: String, owner: Window?): Optional<ButtonType> {
  * @param owner Owner window
  * @return ButtonType? Ok
  */
-fun showError(title: String, header: String?, content: String, owner: Window?): Optional<ButtonType> {
-    return showDialog(errorImageView, title, header, content, owner, ButtonType.OK)
+fun showError(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, errorImageView, title, header, content, ButtonType.OK)
 }
 
 
@@ -176,15 +176,15 @@ fun showError(title: String, header: String?, content: String, owner: Window?): 
  * @param e Exception to print
  * @return ButtonType? Cancel
  */
-fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
+fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
     val dialog = Dialog<ButtonType>().apply { initOwner(owner) }
 
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
     dialog.headerText = e.javaClass.name
-    dialog.dialogPane.prefWidth = DIALOG_WIDTH
-    dialog.dialogPane.prefHeight = DIALOG_HEIGHT
+    dialog.dialogPane.prefWidth = PANE_WIDTH
+    dialog.dialogPane.prefHeight = PANE_HEIGHT
     dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
     dialog.withContent(VBox()) {
         spacing = COMMON_GAP / 2
@@ -193,7 +193,7 @@ fun showException(e: Throwable, owner: Window?): Optional<ButtonType> {
         add(Label("The exception stacktrace is:"))
         add(TextArea(e.stackTraceToString())) {
             isEditable = false
-            vGrow = Priority.ALWAYS
+            boxVGrow = Priority.ALWAYS
         }
     }
 

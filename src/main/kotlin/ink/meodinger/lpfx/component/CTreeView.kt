@@ -56,7 +56,7 @@ class CTreeView: TreeView<String>() {
         contextMenu = ATreeMenu
 
         // Update tree menu when requested
-        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems) }
+        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems.toList()) }
 
         // ViewMode -> update
         viewModeProperty.addListener(onChange { update() })
@@ -188,24 +188,20 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty)
             textProperty().bind(transLabel.textProperty)
+            if (viewMode == ViewMode.IndexMode)
+                graphicProperty().bind(Bindings.createObjectBinding(
+                    { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(transGroups[transLabel.groupId].colorHex)) },
+                    transLabel.groupIdProperty
+                ))
         }
 
         // Add view
-        when (viewMode) {
-            ViewMode.IndexMode -> {
-                labelItem.graphicProperty().bind(Bindings.createObjectBinding(
-                    { Circle(
-                        GRAPHICS_CIRCLE_RADIUS,
-                        Color.web(transGroups[transLabel.groupId].colorHex)
-                    ) },
-                    transLabel.groupIdProperty
-                ))
-                root.children.add(labelItem)
-            }
-            ViewMode.GroupMode -> {
-                groupItems[transLabel.groupId].children.add(labelItem)
-            }
+        val node = when (viewMode) {
+            ViewMode.IndexMode -> root
+            ViewMode.GroupMode -> groupItems[transLabel.groupId]
         }
+        val index = node.children.indexOfLast { (it as CTreeLabelItem).index < transLabel.index }
+        if (index == node.children.size - 1) node.children.add(labelItem) else node.children.add(index + 1, labelItem)
         // Add data
         labelItems[transLabel.groupId].add(labelItem)
         transLabels.add(transLabel)
@@ -228,7 +224,7 @@ class CTreeView: TreeView<String>() {
         labelItems[transLabel.groupId].remove(labelItem)
         transLabels.remove(transLabel)
     }
-    fun selectLabel(labelIndex: Int, scrollTo: Boolean) {
+    fun selectLabel(labelIndex: Int, scrollTo: Boolean = true) {
         select(getLabelItem(labelIndex), scrollTo)
     }
 

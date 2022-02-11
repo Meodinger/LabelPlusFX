@@ -63,7 +63,7 @@ private fun loadLP(file: File): TransFile {
     if (bom.contentEquals(buf)) reader.read(CharArray(3), 0, 1)
 
     val lines = reader.readLines()
-    val size = lines.size
+    val lineCount = lines.size
 
     var index = 0
     var pointer = 0
@@ -74,7 +74,7 @@ private fun loadLP(file: File): TransFile {
     fun parseText(vararg marks: String): String {
         val builder = StringBuilder()
 
-        while (pointer < size) {
+        while (pointer < lineCount) {
             for (mark in marks) {
                 if (lines[pointer].startsWith(mark)) {
                     // return when read stop mark
@@ -129,7 +129,7 @@ private fun loadLP(file: File): TransFile {
     fun parsePicBody(): MutableList<TransLabel> {
         val transLabels = ArrayList<TransLabel>()
 
-        while (pointer < size && lines[pointer].startsWith(LPTransFile.LABEL_START)) {
+        while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.LABEL_START)) {
             val label = parseTranLabel()
 
             for (l in transLabels) {
@@ -141,15 +141,15 @@ private fun loadLP(file: File): TransFile {
         }
 
         // move to next pic
-        while (pointer < size && !lines[pointer].startsWith(LPTransFile.PIC_START)) pointer++
+        while (pointer < lineCount && !lines[pointer].startsWith(LPTransFile.PIC_START)) pointer++
 
         return transLabels
     }
 
     // Version
-    val v = lines[pointer].split(LPTransFile.SPLIT).also {
-        if (it.size != 2) throw IOException(String.format(I18N["exception.loader.invalid_version_head.s"], lines[pointer]))
-        it.forEach { v -> if (!v.isMathematicalNatural()) throw IOException(String.format(I18N["exception.loader.invalid_version_text.s"], v)) }
+    val v = lines[pointer].split(LPTransFile.SPLIT).apply {
+        if (size != 2) throw IOException(String.format(I18N["exception.loader.invalid_version_head.s"], lines[pointer]))
+        forEach { v -> if (!v.isMathematicalNatural()) throw IOException(String.format(I18N["exception.loader.invalid_version_text.s"], v)) }
     }
     val version = intArrayOf(v[0].trim().toInt(), v[1].trim().toInt())
     pointer++
@@ -179,7 +179,7 @@ private fun loadLP(file: File): TransFile {
 
     // Content
     val transMap = HashMap<String, MutableList<TransLabel>>()
-    while (pointer < size && lines[pointer].startsWith(LPTransFile.PIC_START)) {
+    while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.PIC_START)) {
         index = 0
 
         // Parse order：

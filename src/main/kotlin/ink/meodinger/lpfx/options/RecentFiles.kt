@@ -1,8 +1,9 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.util.addFirst
+
 import java.io.IOException
-import java.nio.file.InvalidPathException
-import java.nio.file.Path
 
 
 /**
@@ -18,10 +19,15 @@ object RecentFiles : AbstractProperties() {
 
     private const val MAX_SIZE = 10
     private const val RECENT = "recent"
+    private const val PROGRESS = "progress"
 
-    private val recent = ArrayDeque<String>()
+    private val recent = ArrayList<String>()
+    private val progress = HashMap<String, Pair<Int, Int>>()
 
-    override val default = listOf(CProperty(RECENT, CProperty.EMPTY)).toPropertiesMap()
+    override val default = listOf(
+        CProperty(RECENT),
+        CProperty(PROGRESS)
+    )
 
     init { useDefault() }
 
@@ -29,30 +35,18 @@ object RecentFiles : AbstractProperties() {
     override fun load() {
         load(Options.recentFiles, this)
 
-        recent.clear()
         recent.addAll(this[RECENT].asStringList())
+
+        val progressList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
+        progress.putAll(recent.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } })
     }
 
     @Throws(IOException::class)
     override fun save() {
         this[RECENT] = recent
+        this[PROGRESS] = recent.map { progress[it] }
 
         save(Options.recentFiles, this)
-    }
-
-    override fun checkAndFix(): Boolean {
-        val toRemove = HashSet<String>()
-        recent.forEach {
-            try {
-                Path.of(it)
-            } catch (e: InvalidPathException) {
-                toRemove.add(it)
-            }
-        }
-        recent.removeAll(toRemove)
-        this[RECENT] = recent
-
-        return toRemove.size != 0
     }
 
     fun getAll(): List<String> {
@@ -67,10 +61,22 @@ object RecentFiles : AbstractProperties() {
         recent.remove(path)
         recent.addFirst(path)
 
-        if (recent.size > MAX_SIZE) recent.removeLast()
+        progress[path] = progress[path] ?: (NOT_FOUND to NOT_FOUND)
+
+        if (recent.size > MAX_SIZE) progress.remove(recent.removeLast())
     }
 
     fun remove(path: String) {
         recent.remove(path)
+        progress.remove(path)
     }
+
+    fun getProgressOf(path: String): Pair<Int, Int> {
+        return progress[path] ?: (NOT_FOUND to NOT_FOUND)
+    }
+
+    fun setProgressOf(path: String, current: Pair<Int, Int>) {
+        progress[path] = current
+    }
+
 }

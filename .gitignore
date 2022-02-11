@@ -1,8 +1,12 @@
 /out/
 /target/
+
 /.idea/*
 !/.idea/artifacts
 !/.idea/vcs.xml
+
+/script/jlink/*
+!/script/jlink/*.bat
 
 lpfx.iml
 lpfx.ipr

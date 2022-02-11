@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.component.singleton
 
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.CTreeLabelItem
 import ink.meodinger.lpfx.component.CTreeView
@@ -20,7 +20,6 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
-import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -72,10 +71,10 @@ object ATreeMenu : ContextMenu() {
     private val l_moveToItem = MenuItem(I18N["context.move_to"])
     private val l_deleteAction = { items: List<TreeItem<String>> ->
         val confirm = showConfirm(
-            I18N["context.delete_label.dialog.title"],
+            State.stage,
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
             StringBuilder().apply { for (item in items) appendLine(item.value) }.toString(),
-            State.stage
+            I18N["context.delete_label.dialog.title"]
         )
 
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {
@@ -89,9 +88,7 @@ object ATreeMenu : ContextMenu() {
                 State.controller.removeLabel(labelIndex)
                 // Edit data
                 State.removeTransLabel(State.currentPicName, labelIndex)
-                for (label in State.transFile.getTransList(State.currentPicName))
-                    if (label.index > labelIndex)
-                        State.setTransLabelIndex(State.currentPicName, label.index, label.index - 1)
+                if (State.currentLabelIndex == labelIndex) State.currentLabelIndex = NOT_FOUND
             }
             // Mark change
             State.isChanged = true
@@ -126,10 +123,7 @@ object ATreeMenu : ContextMenu() {
                 val groupItem = view.selectionModel.selectedItem
 
                 // Edit data
-                State.setTransGroupColor(
-                    State.transFile.getGroupIdByName(groupItem.value),
-                    this@apply.value.toHexRGB()
-                )
+                State.setTransGroupColor(State.transFile.getGroupIdByName(groupItem.value), value.toHexRGB())
                 // Mark change
                 State.isChanged = true
             }
@@ -142,6 +136,8 @@ object ATreeMenu : ContextMenu() {
 
         // Action
         r_addGroupItem.setOnAction {
+            if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(State.stage)
+
             val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
             val colorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList().ifEmpty {
                 TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
@@ -160,7 +156,7 @@ object ATreeMenu : ContextMenu() {
             rAddGroupDialog.result = null
             rAddGroupDialog.showAndWait().ifPresent { newGroup ->
                 if (State.transFile.groupNames.contains(newGroup.name)) {
-                    showError(I18N["context.error.same_group_name"], State.stage)
+                    showError(State.stage, I18N["context.error.same_group_name"])
                     return@ifPresent
                 }
 
@@ -169,10 +165,7 @@ object ATreeMenu : ContextMenu() {
                 // Update view
                 State.controller.createLabelLayer()
                 State.controller.createGroupBarItem(newGroup)
-                when (State.viewMode) {
-                    ViewMode.IndexMode -> State.controller.registerGroup(newGroup)
-                    ViewMode.GroupMode -> State.controller.createGroupTreeItem(newGroup)
-                }
+                State.controller.createGroupTreeItem(newGroup)
                 // Mark change
                 State.isChanged = true
             }
@@ -191,7 +184,7 @@ object ATreeMenu : ContextMenu() {
             ).ifPresent { newName ->
                 if (newName.isBlank()) return@ifPresent
                 if (State.transFile.groupNames.contains(newName)) {
-                    showError(I18N["context.error.same_group_name"], State.stage)
+                    showError(State.stage, I18N["context.error.same_group_name"])
                     return@ifPresent
                 }
 
@@ -214,8 +207,6 @@ object ATreeMenu : ContextMenu() {
             State.controller.removeGroupBarItem(groupName)
             State.controller.removeGroupTreeItem(groupName)
             // Edit data
-            for (key in State.transFile.picNames) for (label in State.transFile.getTransList(key))
-                if (label.groupId >= groupId) State.setTransLabelGroup(key, label.index, label.groupId - 1)
             State.removeTransGroup(groupName)
             // Mark change
             State.isChanged = true
@@ -226,18 +217,16 @@ object ATreeMenu : ContextMenu() {
         this.view = view
     }
 
-    fun update(selectedItems: ObservableList<TreeItem<String>>) {
+    fun update(selectedItems: List<TreeItem<String>>) {
         items.clear()
 
         if (selectedItems.isEmpty()) return
 
-        // NOTE: toList() to make a not observable copy
-        val selected = selectedItems.toList()
         var rootCount = 0
         var groupCount = 0
         var labelCount = 0
 
-        for (item in selected) {
+        for (item in selectedItems) {
             if (item.parent == null) rootCount += 1
             else if (item is CTreeLabelItem) labelCount += 1
             else groupCount += 1
@@ -248,10 +237,10 @@ object ATreeMenu : ContextMenu() {
             items.add(r_addGroupItem)
         } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
             // group
-            val groupItem = selected[0]
+            val groupItem = selectedItems[0]
 
             (g_changeColorItem.graphic as CColorPicker).value = (groupItem.graphic as Circle).fill as Color
-            g_deleteItem.isDisable = !State.transFile.isGroupUnused(groupItem.value)
+            g_deleteItem.isDisable = !State.transFile.isGroupUnused(State.transFile.getGroupIdByName(groupItem.value))
 
             items.add(g_renameItem)
             items.add(g_changeColorItem)
@@ -259,8 +248,8 @@ object ATreeMenu : ContextMenu() {
             items.add(g_deleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)
-            l_moveToItem.setOnAction { l_moveToAction(selected) }
-            l_deleteItem.setOnAction { l_deleteAction(selected) }
+            l_moveToItem.setOnAction { l_moveToAction(selectedItems) }
+            l_deleteItem.setOnAction { l_deleteAction(selectedItems) }
 
             items.add(l_moveToItem)
             items.add(SeparatorMenuItem())

@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.type
 
+import ink.meodinger.lpfx.util.ReLazy
+import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.sortByDigit
@@ -9,6 +11,7 @@ import ink.meodinger.lpfx.util.property.setValue
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import javafx.beans.InvalidationListener
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -97,15 +100,15 @@ open class TransFile @JsonCreator constructor(
     // ----- Project Files Management ----- //
 
     private val fileMap = HashMap<String, File>()
+    fun getFileOrByProject(picName: String, projectFolder: File): File {
+        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        return fileMap[picName] ?: projectFolder.resolve(picName).existsOrNull() ?: throw TransFileException.pictureNotFound(picName)
+    }
     fun getFile(picName: String): File {
-        if (!fileMap.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
         return fileMap[picName]!!
     }
-    fun setFile(picName: String, newFile: File) {
-        if (!fileMap.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
-        fileMap[picName] = newFile
-    }
-    fun addFile(picName: String, file: File) {
+    fun setFile(picName: String, file: File) {
         if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
         fileMap[picName] = file
     }
@@ -126,6 +129,11 @@ open class TransFile @JsonCreator constructor(
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
     val transMapProperty: MapProperty<String, MutableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap))
 
+    // ----- Lazy ---- //
+
+    private val sortedPicNamesLazy: ReLazy<List<String>> = ReLazy { sortByDigit(transMapObservable.keys.toList()) } // copy
+    val sortedPicNames: List<String> by sortedPicNamesLazy
+
     // ----- Accessible Fields ----- //
 
     val version: IntArray by versionProperty
@@ -140,26 +148,26 @@ open class TransFile @JsonCreator constructor(
     /// NOTE: sortedPicNames is slow, find a way to make it faster (maybe use ReLazy)
     val picCount: Int get() = transMapObservable.size
     val picNames: List<String> get() = transMapObservable.keys.toList() // copy
-    val sortedPicNames: List<String> get() = sortByDigit(transMapObservable.keys.toList()) // copy
 
     // ----- JSON Getters ----- //
 
     @Suppress("unused") protected val groupList: List<TransGroup> by groupListObservable
     @Suppress("unused") protected val transMap: Map<String, List<TransLabel>> by transMapObservable
 
+    // ----- Init ----- //
+
+    init {
+        transMapObservable.addListener(InvalidationListener { sortedPicNamesLazy.refresh() })
+    }
+
     // ----- TransGroup ----- //
 
-    fun getTransGroup(groupName: String): TransGroup {
-        for (group in groupListObservable) if (group.name == groupName) return group
+    fun getGroupIdByName(name: String): Int {
+        groupListObservable.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
 
-        throw TransFileException.transGroupNotFound(groupName)
+        throw TransFileException.transGroupNotFound(name)
     }
-    fun getTransGroup(groupId: Int): TransGroup {
-        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        return groupListObservable[groupId]
-    }
     fun addTransGroup(transGroup: TransGroup) {
         for (group in groupListObservable)
             if (group.name == transGroup.name)
@@ -167,12 +175,11 @@ open class TransFile @JsonCreator constructor(
 
         groupListObservable.add(transGroup)
     }
-    fun removeTransGroup(groupName: String) {
-        var toRemove: TransGroup? = null
-        for (group in groupListObservable) if (group.name == groupName) toRemove = group
+    fun getTransGroup(groupId: Int): TransGroup {
+        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
+        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
 
-        if (toRemove != null) groupListObservable.remove(toRemove)
-        else throw TransFileException.transGroupNotFound(groupName)
+        return groupListObservable[groupId]
     }
     fun removeTransGroup(groupId: Int) {
         if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
@@ -181,28 +188,18 @@ open class TransFile @JsonCreator constructor(
         groupListObservable.removeAt(groupId)
     }
 
-    fun getGroupIdByName(name: String): Int {
-        groupListObservable.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
-
-        throw TransFileException.transGroupNotFound(name)
-    }
-    fun isGroupUnused(groupName: String): Boolean {
-        return isGroupUnused(getGroupIdByName(groupName))
-    }
     fun isGroupUnused(groupId: Int): Boolean {
-        for (key in transMapObservable.keys) for (label in getTransList(key)) {
-            if (label.groupId == groupId) return false
-        }
+        for (list in transMapObservable.values) for (label in list) if (label.groupId == groupId) return false
         return true
     }
 
     // ----- TransList (TransMap) ----- //
 
-    open fun getTransList(picName: String): MutableList<TransLabel> {
-        return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
-    }
     open fun addTransList(picName: String) {
         transMapObservable[picName] = ArrayList()
+    }
+    open fun getTransList(picName: String): List<TransLabel> {
+        return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
     open fun removeTransList(picName: String) {
         if (transMapObservable[picName] != null) transMapObservable.remove(picName)
@@ -211,13 +208,8 @@ open class TransFile @JsonCreator constructor(
 
     // ----- TransLabel ----- //
 
-    fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
-        for (label in getTransList(picName)) if (label.index == labelIndex) return label
-
-        throw TransFileException.transLabelNotFound(picName, labelIndex)
-    }
     fun addTransLabel(picName: String, transLabel: TransLabel) {
-        val list = getTransList(picName)
+        val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
 
         val (index, groupId) = transLabel
         if (groupId >= groupListObservable.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
@@ -225,8 +217,15 @@ open class TransFile @JsonCreator constructor(
 
         list.add(transLabel)
     }
+    fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
+        for (label in transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName))
+            if (label.index == labelIndex)
+                return label
+
+        throw TransFileException.transLabelNotFound(picName, labelIndex)
+    }
     fun removeTransLabel(picName: String, labelIndex: Int) {
-        val list = getTransList(picName)
+        val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
         var toRemove: TransLabel? = null
         for (label in list) if (label.index == labelIndex) toRemove = label
 
@@ -239,17 +238,15 @@ open class TransFile @JsonCreator constructor(
     fun clone(): TransFile {
         val version = this.version.clone()
         val comment = this.comment
-        val groupList = MutableList(this.groupListObservable.size) { this.groupListObservable[it].clone() }
-        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().also {
-            for (key in sortedPicNames)
-                it[key] = MutableList(this.transMapObservable[key]!!.size) { index ->
-                    this.transMapObservable[key]!![index].clone()
-                }
+        val groupList = MutableList(groupListObservable.size) { groupListObservable[it].clone() }
+        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().apply {
+            putAll(sortedPicNames.map {
+                it to MutableList(transMapObservable[it]!!.size) { index -> transMapObservable[it]!![index].clone() }
+            })
         }
 
         return TransFile(version, comment, groupList, transMap)
     }
-
 
     fun toJsonString(): String {
         return ObjectMapper()

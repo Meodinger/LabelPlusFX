@@ -11,7 +11,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
-import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 import kotlin.io.path.name
@@ -35,7 +34,6 @@ object Options {
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_Logs = "logs"
     private const val Logfile_MAXCOUNT = 20
-    private const val Logfile_ALIVE = 3 * 24 * 60 * 60 * 1000L // 3 Days
 
     lateinit var profileDir: Path
         private set
@@ -62,16 +60,16 @@ object Options {
             loadSettings()
             cleanLogs()
 
-            Logger.level = Logger.LogType.valueOf(Settings[Settings.LogLevelPreference].asString())
+            Logger.level = Logger.LogType.values()[Settings[Settings.LogLevelOrdinal].asInteger()]
 
-            Logger.debug("Got RecentFiles: ${AbstractProperties.getProperties(RecentFiles)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Preference:  ${AbstractProperties.getProperties(Preference)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Settings: ${AbstractProperties.getProperties(Settings)}", LOGSRC_OPTIONS)
+            Logger.debug("Got RecentFiles: ${AbstractProperties.getPropertiesOf(RecentFiles)}", LOGSRC_OPTIONS)
+            Logger.debug("Got Preference:  ${AbstractProperties.getPropertiesOf(Preference)}", LOGSRC_OPTIONS)
+            Logger.debug("Got Settings: ${AbstractProperties.getPropertiesOf(Settings)}", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
             Logger.exception(e)
-            showError(I18N["error.options.load_failed"], null)
-            showException(e, null)
+            showError(null, I18N["error.options.load_failed"])
+            showException(null, e)
             exitProcess(-1)
         }
     }
@@ -95,11 +93,6 @@ object Options {
         }
         try {
             RecentFiles.load()
-            if (RecentFiles.checkAndFix()) {
-                Logger.warning("Fixed $FileName_RecentFiles", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_RecentFiles), null)
-            }
-
             Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             RecentFiles.useDefault()
@@ -107,10 +100,10 @@ object Options {
             Logger.error("Load Recent Files failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles),
-                null
+                I18N["common.alert"]
             )
         }
     }
@@ -123,11 +116,6 @@ object Options {
         }
         try {
             Preference.load()
-            if (Preference.checkAndFix()) {
-                Logger.warning("Fixed $FileName_Preference", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Preference), null)
-            }
-
             Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Preference.useDefault()
@@ -135,10 +123,10 @@ object Options {
             Logger.error("Load Preference failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_Preference),
-                null
+                I18N["common.alert"]
             )
         }
     }
@@ -151,11 +139,6 @@ object Options {
         }
         try {
             Settings.load()
-            if (Settings.checkAndFix()) {
-                Logger.warning("Fixed $FileName_Settings", LOGSRC_OPTIONS)
-                showWarning(String.format(I18N["warning.options.fixed.s"], FileName_Settings), null)
-            }
-
             Logger.info("Loaded Settings", LOGSRC_OPTIONS)
         } catch (e: IOException) {
             Settings.useDefault()
@@ -163,10 +146,10 @@ object Options {
             Logger.error("Load Settings failed, using default", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
-                I18N["common.alert"],
+                null,
                 null,
                 String.format(I18N["error.options.load_failed.s"], FileName_Settings),
-                null
+                I18N["common.alert"]
             )
         }
     }
@@ -176,12 +159,13 @@ object Options {
         val failed = ArrayList<File>()
 
         try {
+            var count = 0
             Files
                 .walk(logs, 1).filter { it.name != logs.name }
                 .map(Path::toFile).collect(Collectors.toList())
                 .apply { sortByDescending(File::lastModified) }
-                .forEachIndexed { index, file ->
-                    val del = index > Logfile_MAXCOUNT || !file.name.isMathematicalNatural() || Date().time - file.lastModified() > Logfile_ALIVE
+                .forEach { file ->
+                    val del = count++ > Logfile_MAXCOUNT || !file.name.isMathematicalNatural()
                     if (del && !file.delete()) failed.add(file)
                 }
         } catch (e : IOException) {

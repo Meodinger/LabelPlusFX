@@ -47,24 +47,21 @@ class View : BorderPane() {
     init {
         top(AMenuBar)
         center(pMain) {
-            setDividerPositions(0.618)
             add(BorderPane()) {
                 top(cGroupBar)
                 center(cLabelPane) {
-                    initScale = 1.0
-                    minScale = 0.2
-                    maxScale = 2.0
-                    scale = 1.0
+                    initScale = SCALE_INIT
+                    minScale = SCALE_MIN
+                    maxScale = SCALE_MAX
                 }
                 bottom(HBox()) {
                     add(cSlider) {
-                        initScale = 1.0
-                        minScale = 0.2
-                        maxScale = 2.0
-                        scale = 1.0
+                        initScale = SCALE_INIT
+                        minScale = SCALE_MIN
+                        maxScale = SCALE_MAX
                     }
                     add(HBox()) {
-                        hGrow = Priority.ALWAYS
+                        boxHGrow = Priority.ALWAYS
                     }
                     add(cPicBox) {
                         isWrapped = true
@@ -72,7 +69,6 @@ class View : BorderPane() {
                 }
             }
             add(pRight) {
-                setDividerPositions(0.618)
                 orientation = Orientation.VERTICAL
                 add(BorderPane()) {
                     top(HBox()) {
@@ -82,7 +78,7 @@ class View : BorderPane() {
                         add(cGroupBox)
                         add(HBox()) {
                             alignment = Pos.CENTER
-                            hGrow = Priority.ALWAYS
+                            boxHGrow = Priority.ALWAYS
                         }
                         add(bSwitchViewMode) {
                             isMnemonicParsing = false

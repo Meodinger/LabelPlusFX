@@ -3,8 +3,8 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.addAtLast
-import ink.meodinger.lpfx.util.component.hGrow
+import ink.meodinger.lpfx.util.addLast
+import ink.meodinger.lpfx.util.component.boxHGrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.resource.I18N
@@ -46,7 +46,7 @@ class CGroupBar : HBox() {
     private val cGroups: MutableList<CGroup> = ArrayList()
 
     private val placeHolder: HBox = HBox().apply {
-        hGrow = Priority.ALWAYS
+        boxHGrow = Priority.ALWAYS
     }
     private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
         setOnMouseClicked { ATreeMenu.toggleGroupCreate() }
@@ -83,8 +83,8 @@ class CGroupBar : HBox() {
     fun createGroup(transGroup: TransGroup) {
         // If first add
         if (transGroups.isEmpty()) {
-            children.addAtLast(placeHolder)
-            children.addAtLast(addItem)
+            children.addLast(placeHolder)
+            children.addLast(addItem)
         }
 
         transGroups.add(transGroup)
@@ -102,7 +102,7 @@ class CGroupBar : HBox() {
         }
 
         cGroups.add(cGroup)
-        children.addAtLast(cGroup, vShift)
+        children.addLast(cGroup, vShift)
 
         if (cGroups.size == 1) select(0)
     }

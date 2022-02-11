@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.io
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.LOGSRC_CHECKER
 import ink.meodinger.lpfx.State
@@ -15,15 +14,13 @@ import ink.meodinger.lpfx.util.dialog.infoImageView
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.control.*
 import javafx.scene.layout.VBox
 import java.io.IOException
-import java.net.ConnectException
-import java.net.NoRouteToHostException
-import java.net.SocketTimeoutException
-import java.net.URL
+import java.net.*
 import java.util.Date
 
 
@@ -41,10 +38,14 @@ object UpdateChecker {
 
     fun fetchSync(): Version {
         try {
-            val jsonNode = ObjectMapper().readTree(URL(API))
+            val proxy = ProxySelector.getDefault().select(URI(API))[0].also {
+                if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOGSRC_CHECKER)
+            }
+            val connection = URL(API).openConnection(proxy).apply { connect() }
+            val jsonNode = ObjectMapper().readTree(connection.getInputStream())
             if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
         } catch (e: NoRouteToHostException) {
-            Logger.warning("No network connection, check failed", LOGSRC_CHECKER)
+            Logger.warning("No network connection", LOGSRC_CHECKER)
         } catch (e: SocketTimeoutException) {
             Logger.warning("Connect timeout", LOGSRC_CHECKER)
         } catch (e: ConnectException) {
@@ -61,17 +62,17 @@ object UpdateChecker {
      * Should run after stage showed
      */
     fun check() {
-        LPFXTask {
+        LPFXTask.createTask<Unit> task@{
             Logger.info("Fetching latest version...", LOGSRC_CHECKER)
             val version = fetchSync()
-            if (version != Version.V0) Logger.info("Got latest version: $version", LOGSRC_CHECKER)
+            if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CHECKER)
 
             if (version > V) {
                 val time = Date().time
                 val last = Preference[Preference.LAST_UPDATE_NOTICE].asLong()
                 if (last != 0L && time - last < DELAY) {
                     Logger.info("Check suppressed, last notice time is $last", LOGSRC_CHECKER)
-                    return@LPFXTask
+                    return@task
                 }
 
                 Preference[Preference.LAST_UPDATE_NOTICE] = 0

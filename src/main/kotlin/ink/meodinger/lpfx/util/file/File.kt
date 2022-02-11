@@ -21,8 +21,10 @@ import java.io.IOException
  * @param dst File that transfer to
  */
 @Throws(IOException::class)
-fun transfer(ori: File, dst: File) {
+fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
+    if (!ori.exists()) throw IOException(String.format(I18N["exception.io.file_not_exists.s"], ori))
     if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
+    if (!overwrite && dst.exists()) throw IOException(String.format(I18N["exception.io.overwrite_disable.s"], dst))
 
     val input = FileInputStream(ori).channel
     val output = FileOutputStream(dst).channel
@@ -37,8 +39,10 @@ fun transfer(ori: File, dst: File) {
  * Whether this file exists. If not, return null
  */
 @Throws(IOException::class)
-fun File?.existsOrNull(): File? {
-    if (this == null) return null
-    if (!this.exists()) return null
-    return this
-}
+fun File?.existsOrNull(): File? = takeIf { this != null && this.exists() }
+
+/**
+ * Whether this file exists. If not, return default
+ */
+@Throws(IOException::class)
+fun File?.existsOrElse(default: File): File = existsOrNull() ?: default

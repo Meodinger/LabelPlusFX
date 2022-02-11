@@ -3,16 +3,18 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.io.UpdateChecker
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
+import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
+import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.stage.Stage
-import kotlin.system.exitProcess
 
 
 /**
@@ -34,7 +36,7 @@ class LabelPlusFX: HookedApplication() {
         // Cannot catch Exceptions occurred when starting
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
             Logger.exception(e)
-            showException(e, State.stage)
+            showException(State.stage, e)
         }
 
         State.application = this
@@ -54,19 +56,28 @@ class LabelPlusFX: HookedApplication() {
             controller = Controller(root)
         } catch (e: Throwable) {
             Logger.exception(e)
-            showException(e, null)
+            showException(null, e)
             stop()
             return
         }
 
         State.controller = controller
 
+        val size = Preference[Preference.WINDOW_SIZE].asDoubleList()
+
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
-        primaryStage.scene = Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT)
+        primaryStage.scene = Scene(root, size[0], size[1])
         primaryStage.setOnCloseRequest {
-            if (!controller.stay()) stop() else it.consume()
+            if (!controller.stay()) exit() else it.consume()
         }
+
+        primaryStage.scene.widthProperty().addListener(onNew {
+            if (!primaryStage.isMaximized) Preference[Preference.WINDOW_SIZE] = listOf(it, primaryStage.scene.height)
+        })
+        primaryStage.scene.heightProperty().addListener(onNew {
+            if (!primaryStage.isMaximized) Preference[Preference.WINDOW_SIZE] = listOf(primaryStage.scene.width, it)
+        })
 
         primaryStage.show()
         controller.labelInfo(I18N["common.ready"])
@@ -76,13 +87,23 @@ class LabelPlusFX: HookedApplication() {
         UpdateChecker.check()
     }
 
-    override fun stop() {
+    override fun exit() {
         Logger.info("App stopping...", LOGSRC_APPLICATION)
 
         State.stage.close()
         Options.save()
 
-        Logger.info("App stopped", LOGSRC_APPLICATION)
-        runHooks { exitProcess(0) }
+        runHooks(
+            {
+                Logger.info("Hooks ran", LOGSRC_APPLICATION)
+                Logger.info("App stopped", LOGSRC_APPLICATION)
+                Platform.exit()
+            },
+            {
+                Logger.error("Exception occurred during hooks run", LOGSRC_APPLICATION)
+                Logger.exception(it)
+            }
+        )
     }
+
 }

@@ -91,7 +91,7 @@ abstract class HookedApplication : Application() {
      * You MUST run this before stop or hooks will not be executed.
      * And you should actually shut the app down in the callback function.
      */
-    protected fun runHooks(callback: () -> Unit) {
+    protected fun runHooks(callback: () -> Unit = {}, onError: (Throwable) -> Unit = {}) {
         if (shuttingDown) return
 
         shuttingDown = true
@@ -99,14 +99,18 @@ abstract class HookedApplication : Application() {
         if (shutdownHooks.isEmpty()) {
             callback()
         } else {
-            val hooks = shutdownHooks.values.toList()
+            val hooks = shutdownHooks.values.toList() // In case of clearHooks
             Promise.all(List(shutdownHooks.size) {
                 Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
-            }) finally {
+            }) catch { e: Throwable ->
+                e.also(onError)
+            } finally {
                 callback()
             }
         }
     }
+
+    abstract fun exit()
 
 }
 
@@ -425,65 +429,6 @@ class Promise<T>(private val block: (Resolve<T>, Reject<Throwable>) -> Unit) {
         }
     }
 }
-
-/**
- * Logic Boolean Value Implementations
- * Use JavaScript Standard
- */
-open class _if_<T>(private val condition: () -> Any?, private val ifBlock: () -> T) {
-
-    companion object {
-        fun Any?.logic(): Boolean {
-            return when (this) {
-                is Unit    -> false
-                is Boolean -> this
-                is Number  -> this != 0 && !this.toDouble().isNaN()
-                is String  -> this.isNotEmpty()
-                else       -> this != null
-            }
-        }
-
-        private val DEFAULT_BLOCK: () -> Nothing = { throw NotImplementedError() }
-    }
-
-    private var parent: _if_<T>? = null
-    private var elseBlock: () -> T = DEFAULT_BLOCK
-
-    infix fun _else_(elseBlock: () -> T): _if_<T> {
-        if (this.elseBlock != DEFAULT_BLOCK) throw IllegalStateException("multi else")
-        return this.apply { this.elseBlock = elseBlock }
-    }
-
-    infix fun _else_(_if_: _if_<T>): _if_<T> {
-        return _if_.also {
-            it.parent = this
-            _else_ { it.eval() }
-        }
-    }
-
-    private fun eval(): T {
-        return if (condition().logic()) ifBlock() else elseBlock()
-    }
-
-    operator fun invoke(): T {
-        var root: _if_<T> = this
-        while (root.parent != null) root = root.parent!!
-        return root.eval()
-    }
-
-}
-class _if_not_<T>(condition: () -> Any?, ifBlock: () -> T) : _if_<T>({ !condition().logic() }, ifBlock)
-class _if_null_<T>(condition: () -> Any?, ifBlock: () -> T) : _if_<T>({ condition() == null }, ifBlock)
-class _if_zero_<T>(condition: () -> Int, ifBlock: () -> T) : _if_<T>({ condition() == 0 }, ifBlock)
-class _if_neg1_<T>(condition: () -> Int, ifBlock: () -> T) : _if_<T>({ condition() == -1 }, ifBlock)
-
-// infix fun <T> _if_<T>.`else`(elseBlock: () -> T): _if_<T> = this._else_(elseBlock)
-// infix fun <T> _if_<T>.`else`(_if_: _if_<T>): _if_<T> = this._else_(_if_)
-// typealias `if`<T> = _if_<T>
-// typealias `if not`<T> = _if_not_<T>
-// typealias `if null`<T> = _if_null_<T>
-// typealias `if is 0`<T> = _if_zero_<T>
-// typealias `if is -1`<T> = _if_neg1_<T>
 
 /**
  * Refreshable Lazy

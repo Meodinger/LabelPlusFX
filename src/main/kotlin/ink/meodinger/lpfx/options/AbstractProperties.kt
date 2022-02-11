@@ -35,7 +35,9 @@ abstract class AbstractProperties {
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
                     val prop = line.split(KV_SPILT, limit = 2)
-                    instance[prop[0]] = prop[1]
+                    if (prop.size == 2) {
+                        if (instance.tryGet(prop[0]) != null) instance[prop[0]] = prop[1] else continue
+                    }
                 }
             } catch (e: IndexOutOfBoundsException) {
                 throw IOException("Load properties failed: KV format invalid").initCause(e)
@@ -47,19 +49,10 @@ abstract class AbstractProperties {
         }
 
         @Throws(IOException::class)
-        fun save(path: Path, instance: AbstractProperties, comments: Map<String, String> = emptyMap()) {
+        fun save(path: Path, instance: AbstractProperties) {
             using {
                 val writer = Files.newBufferedWriter(path).autoClose()
                 for (property in instance.properties) {
-                    if (comments[property.key] != null) {
-                        writer.write(
-                            StringBuilder()
-                                .append("\n").append(COMMENT_HEAD).append(" ")
-                                .append(comments[property.key]?.replace("\n", "\n$COMMENT_HEAD "))
-                                .append("\n")
-                                .toString()
-                        )
-                    }
                     writer.write(
                         StringBuilder()
                             .append(property.key)
@@ -76,19 +69,13 @@ abstract class AbstractProperties {
             }
         }
 
-        fun List<CProperty>.toPropertiesMap(): Map<String, String> {
-            val map = LinkedHashMap<String, String>()
-            for (property in this) map[property.key] = property.value
-            return map
-        }
-
         /**
          * Be careful!
          */
-        fun getProperties(properties: AbstractProperties): List<CProperty> = properties.properties
+        fun getPropertiesOf(properties: AbstractProperties): List<CProperty> = properties.properties
     }
 
-    protected abstract val default: Map<String, String>
+    protected abstract val default: List<CProperty>
     protected val properties = ArrayList<CProperty>()
 
     @Throws(IOException::class)
@@ -96,20 +83,22 @@ abstract class AbstractProperties {
     @Throws(IOException::class)
     abstract fun save()
 
-    abstract fun checkAndFix(): Boolean
-
     fun useDefault() {
         properties.clear()
-        default.forEach { (k, v) -> properties.add(CProperty(k, v)) }
+        properties.addAll(default)
     }
 
-    operator fun get(key: String): CProperty {
+    private fun tryGet(key: String): CProperty? {
         for (property in properties) {
             if (property.key == key) {
                 return property
             }
         }
-        throw RuntimeException(String.format(I18N["exception.property.property_not_found.k"], key))
+        return null
+    }
+
+    operator fun get(key: String): CProperty {
+        return tryGet(key) ?: throw IllegalArgumentException(String.format(I18N["exception.property.property_not_found.k"], key))
     }
     operator fun set(key: String, value: String) {
         get(key).set(value)

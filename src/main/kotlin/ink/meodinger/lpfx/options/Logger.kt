@@ -2,8 +2,6 @@ package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
 import ink.meodinger.lpfx.V
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -32,16 +30,6 @@ object Logger {
 
         override fun toString(): String = type
 
-        companion object {
-            fun getType(type: String): LogType = when (type) {
-                DEBUG.type   -> DEBUG
-                INFO.type    -> INFO
-                WARNING.type -> WARNING
-                ERROR.type   -> ERROR
-                FATAL.type   -> FATAL
-                else -> throw IllegalArgumentException(String.format(I18N["exception.log_type.invalid_log_type.s"], type))
-            }
-        }
     }
 
     private lateinit var writer: Writer
@@ -53,7 +41,7 @@ object Logger {
 
     val log: File
     var level: LogType = LogType.DEBUG
-    val isStarted: Boolean get() = this::writer.isInitialized
+    var isStarted: Boolean = false
 
     init {
         val path = Options.logs.resolve(Date().time.toString())
@@ -62,11 +50,17 @@ object Logger {
     }
 
     fun start() {
+        if (isStarted) return
+
+        println("<Logger>: Start")
+
         writer = BufferedWriter(OutputStreamWriter(FileOutputStream(log), StandardCharsets.UTF_8))
+        isStarted = true
 
         val builder = StringBuilder()
         builder.append("\n========== System Info ==========")
-        builder.append("\nOS Name: ").append(System.getProperty("os.name")).append(", ")
+        builder.append("\n")
+            .append("OS Name: ").append(System.getProperty("os.name")).append(", ")
             .append("Version: ").append(System.getProperty("os.version")).append(", ")
             .append("Arch: ").append(System.getProperty("os.arch")).append(";")
         builder.append("\nApplication Version: ").append(V).append(";")
@@ -76,9 +70,14 @@ object Logger {
         info("Logger start", LOGSRC_LOGGER)
     }
     fun stop() {
+        if (!isStarted) return
+
         info("Logger exit", LOGSRC_LOGGER)
 
         writer.close()
+        isStarted = false
+
+        println("<Logger>: Exit")
     }
 
     private fun log(type: LogType, text: String, from: String) {
@@ -95,6 +94,8 @@ object Logger {
           //.append("--".repeat(depth)).append("> ")
             .appendLine(text)
             .toString()
+
+        print("<Logger>: $logText")
 
         writer.write(logText)
         writer.flush()
@@ -118,7 +119,7 @@ object Logger {
     fun exception(e: Throwable) {
         val str = e.stackTraceToString()
 
-        System.err.print("<Logger>: ")
+        System.err.println("<Logger>: ")
         System.err.println(str)
         writer.write(str)
         writer.flush()

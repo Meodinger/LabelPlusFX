@@ -7,22 +7,13 @@ module lpfx {
     requires javafx.base;
     requires javafx.controls;
     requires javafx.graphics;
-    requires javafx.media;
     requires jakarta.mail;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
 
-    // This three modules provide ogg SPI
-    requires soundlibs.vorbisspi;
-    requires soundlibs.jorbis;
-    requires soundlibs.tritonus.share;
-
     // HTML Parser
     requires ink.meodinger.htmlparser;
-
-    uses javazoom.spi.vorbis.sampled.file.VorbisAudioFileReader;
-    uses javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider;
 
     opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 

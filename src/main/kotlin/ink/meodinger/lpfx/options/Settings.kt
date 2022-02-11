@@ -28,11 +28,13 @@ object Settings : AbstractProperties() {
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans  = "isGroupCreateOnNew"
     const val ScaleOnNewPicture        = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
-    const val ViewModePreference       = "ViewModePreference"  // Input, Label
-    const val LogLevelPreference       = "LogLevelPreference"
+    const val ViewModeOrdinals         = "ViewModeOrdinals"     // Input, Label
+    const val LogLevelOrdinal          = "LogLevelOrdinal"
     const val LabelRadius              = "LabelRadius"
     const val LabelAlpha               = "LabelAlpha"
     const val LigatureRules            = "LigatureRules"
+    const val InstantTranslate         = "InstantTranslate"
+    const val UseMeoFileAsDefault      = "DefaultFileFormat"
 
     // ----- Default ----- //
 
@@ -41,8 +43,8 @@ object Settings : AbstractProperties() {
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ScaleOnNewPicture, NEW_PIC_SCALE_100),
-        CProperty(ViewModePreference, ViewMode.IndexMode, ViewMode.GroupMode), // Input, Label
-        CProperty(LogLevelPreference, Logger.LogType.INFO),
+        CProperty(ViewModeOrdinals, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
+        CProperty(LogLevelOrdinal, Logger.LogType.INFO.ordinal),
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
@@ -57,7 +59,9 @@ object Settings : AbstractProperties() {
             "cc"     to "\u25ce",
             "*"      to "\u203b",
         ),
-    ).toPropertiesMap()
+        CProperty(InstantTranslate, false),
+        CProperty(UseMeoFileAsDefault, true),
+    )
 
     init { useDefault() }
 
@@ -65,82 +69,6 @@ object Settings : AbstractProperties() {
     override fun load() = load(Options.settings, this)
 
     @Throws(IOException::class)
-    override fun save() = save(Options.settings, this, mapOf(
-        DefaultGroupNameList to "Below three properties should have the same length",
-        LigatureRules        to "DO NOT USE `,` HERE\nMaybe cause problems",
-        ScaleOnNewPicture    to "0 - 100%, 1 - Fit, 2 - Last",
-        ViewModePreference   to "Input, Label",
-        LogLevelPreference   to "DEBUG, INFO, WARNING, ERROR, FATAL",
-        LabelRadius          to "Radius = 8.00 -> 48.00\nAlpha = 0x00 -> 0xFF"
-    ))
-
-    override fun checkAndFix(): Boolean {
-        var fixed = false
-
-        var groupInvalid = false
-        run checkGroup@ {
-            val groupNameList = this[DefaultGroupNameList].asStringList()
-            val groupColorHexList = this[DefaultGroupColorHexList].asStringList()
-            val isGroupCreateList = this[IsGroupCreateOnNewTrans].asBooleanList()
-
-            if (groupNameList.size != groupColorHexList.size || groupNameList.size != isGroupCreateList.size) {
-                groupInvalid = true
-                return@checkGroup
-            }
-            for (hex in groupColorHexList) if (hex.length != 6) {
-                groupInvalid = true
-                return@checkGroup
-            }
-        }
-        if (groupInvalid) {
-            this[DefaultGroupNameList] = default[DefaultGroupNameList]!!
-            this[DefaultGroupColorHexList] = default[DefaultGroupColorHexList]!!
-            this[IsGroupCreateOnNewTrans] = default[IsGroupCreateOnNewTrans]!!
-            fixed = true
-        }
-
-        val scaleOnNewPicture = this[ScaleOnNewPicture].asInteger()
-        if (scaleOnNewPicture < 0 || scaleOnNewPicture > 2) {
-            this[ScaleOnNewPicture] = default[ScaleOnNewPicture]!!
-            fixed = true
-        }
-
-        val viewModePreferenceList = this[ViewModePreference].asStringList()
-        for (preference in viewModePreferenceList) try {
-            ViewMode.getViewMode(preference)
-        } catch (e: Exception) {
-            this[ViewModePreference] = default[ViewModePreference]!!
-            fixed = true
-            break
-        }
-
-        val logLevel = this[LogLevelPreference].asString()
-        try {
-            Logger.LogType.getType(logLevel)
-        } catch (e: Exception) {
-            this[LogLevelPreference] = default[LogLevelPreference]!!
-            fixed = true
-        }
-
-        val labelRadius = this[LabelRadius].asDouble()
-        if (labelRadius < 8 || labelRadius > 48) {
-            this[LabelRadius] = default[LabelRadius]!!
-            fixed = true
-        }
-
-        val labelAlpha = this[LabelAlpha].asInteger(16)
-        if (labelAlpha < 0 || labelAlpha > 255) {
-            this[LabelAlpha] = default[LabelAlpha]!!
-            fixed = true
-        }
-
-        val ligatureRules = this[LigatureRules].asPairList()
-        for (pair in ligatureRules) if (pair.first.contains(Regex("[|, ]"))) {
-            this[LigatureRules] = default[LigatureRules]!!
-            fixed = true
-        }
-
-        return fixed
-    }
+    override fun save() = save(Options.settings, this)
 
 }

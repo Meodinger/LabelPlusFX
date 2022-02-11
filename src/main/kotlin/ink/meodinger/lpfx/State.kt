@@ -98,7 +98,7 @@ object State {
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
-        viewMode = ViewMode.getViewMode(Settings[Settings.ViewModePreference].asStringList()[0])
+        viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
         workMode = WorkMode.InputMode
 
         Logger.info("Reset", LOGSRC_STATE)
@@ -116,9 +116,12 @@ object State {
         Logger.info("Added $transGroup", LOGSRC_STATE)
     }
     fun removeTransGroup(groupName: String) {
-        val toRemove = transFile.getTransGroup(groupName)
+        val toRemoveId = transFile.getGroupIdByName(groupName)
+        val toRemove = transFile.getTransGroup(toRemoveId)
 
-        transFile.removeTransGroup(groupName)
+        transFile.removeTransGroup(toRemoveId)
+        for (picName in transFile.picNames) for (label in transFile.getTransList(picName))
+            if (label.groupId >= toRemoveId) label.groupId--
 
         Logger.info("Removed $toRemove", LOGSRC_STATE)
     }
@@ -137,7 +140,7 @@ object State {
         val file = picFile ?: projectFolder.resolve(picName)
 
         transFile.addTransList(picName)
-        transFile.addFile(picName, file)
+        transFile.setFile(picName, file)
 
         Logger.info("Added picture $picName with path ${file.path}", LOGSRC_STATE)
     }
@@ -149,6 +152,9 @@ object State {
     }
 
     fun addTransLabel(picName: String, transLabel: TransLabel) {
+        val labelIndex = transLabel.index
+
+        for (label in transFile.getTransList(picName)) if (label.index >= labelIndex) label.index++
         transFile.addTransLabel(picName, transLabel)
 
         Logger.info("Added $picName @ $transLabel", LOGSRC_STATE)
@@ -157,13 +163,9 @@ object State {
         val toRemove = transFile.getTransLabel(picName, labelIndex)
 
         transFile.removeTransLabel(picName, labelIndex)
+        for (label in transFile.getTransList(picName)) if (label.index > labelIndex) label.index--
 
         Logger.info("Removed $picName @ $toRemove", LOGSRC_STATE)
-    }
-    fun setTransLabelIndex(picName: String, index: Int, newIndex: Int) {
-        transFile.getTransLabel(picName, index).index = newIndex
-
-        Logger.info("Set $picName->Index=$index @index=$newIndex", LOGSRC_STATE)
     }
     fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
         transFile.getTransLabel(picName, index).groupId = groupId
@@ -176,7 +178,7 @@ object State {
      */
     fun getPicFileNow(): File {
         if (!isOpened || currentPicName == "") return DEFAULT_FILE
-        return transFile.getFile(currentPicName)
+        return transFile.getFileOrByProject(currentPicName, projectFolder)
     }
 
     /**

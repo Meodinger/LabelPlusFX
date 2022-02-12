@@ -196,11 +196,6 @@ object AMenuBar : MenuBar() {
                 )
             }
         }
-        menu("Tool") {
-            item("Dict") {
-                does { AOnlineDict.show() }
-            }
-        }
         menu(I18N["mm.about"]) {
             item(I18N["m.settings"]) {
                 does { settings() }
@@ -218,6 +213,12 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.crash"]) {
                 does { crash() }
+            }
+        }
+        menu(I18N["mm.tools"]) {
+            item(I18N["m.dict"]) {
+                does { toggleDict() }
+                accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN)
             }
         }
     }
@@ -544,4 +545,11 @@ object AMenuBar : MenuBar() {
     private fun crash() {
         throw RuntimeException("Crash")
     }
+
+    fun toggleDict() {
+        AOnlineDict.x = State.stage.x - (AOnlineDict.width + COMMON_GAP * 2) + State.stage.width
+        AOnlineDict.y = State.stage.y + (COMMON_GAP * 2)
+        AOnlineDict.show()
+    }
+
 }

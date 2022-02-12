@@ -58,13 +58,13 @@ data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
 abstract class HookedApplication : Application() {
 
     private var shuttingDown: Boolean = false
-    private val shutdownHooks = LinkedHashMap<String, (() -> Unit) -> Unit>()
+    private val shutdownHooks = LinkedHashMap<String, () -> Unit>()
 
     /**
      * Add a shutdown hook
      * Should use the resolve function as callback
      */
-    fun addShutdownHook(key: String, onShutdown: (() -> Unit) -> Unit) {
+    fun addShutdownHook(key: String, onShutdown: () -> Unit) {
         if (shuttingDown) return
         shutdownHooks[key] = onShutdown
     }
@@ -101,7 +101,7 @@ abstract class HookedApplication : Application() {
         } else {
             val hooks = shutdownHooks.values.toList() // In case of clearHooks
             Promise.all(List(shutdownHooks.size) {
-                Promise<Unit> { resolve, _ -> hooks[it] { resolve(Unit) } }
+                Promise<Unit> { resolve, _ -> resolve(hooks[it]()) }
             }) catch { e: Throwable ->
                 e.also(onError)
             } finally {

@@ -2,12 +2,14 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
-import ink.meodinger.lpfx.DIALOG_HEIGHT
-import ink.meodinger.lpfx.DIALOG_WIDTH
-import ink.meodinger.lpfx.util.Promise
+import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.ICON
+import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.IntegerProperty
@@ -34,12 +36,13 @@ import java.nio.charset.StandardCharsets
  * Have fun with my code!
  */
 
-
+/**
+ * Simple online dictionary, better than none, anyway.
+ */
 object AOnlineDict : Stage() {
 
     private const val JD_SITE: String = "https://nekodict.com"
     private const val JD_API: String = "https://nekodict.com/words?q="
-    private const val BD_API: String = ""
 
     private val stateLabel = Label()
     private val inputField = TextField()
@@ -51,8 +54,9 @@ object AOnlineDict : Stage() {
     private var state: Int by stateProperty
 
     init {
-        width = DIALOG_WIDTH
-        height = DIALOG_HEIGHT
+        icons.add(ICON)
+        width = 300.0
+        height = 200.0
         scene = Scene(BorderPane().apply {
             top(HBox()) {
                 alignment = Pos.CENTER
@@ -79,15 +83,19 @@ object AOnlineDict : Stage() {
                     }, stateProperty))
                 }
                 add(inputField) {
-                    hGrow = Priority.ALWAYS
+                    boxHGrow = Priority.ALWAYS
                     addEventHandler(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventHandler
                         state = (state + 1) % 2
                         it.consume()
                     }
                     setOnAction {
-                        outputArea.text = "Fetching..."
-                        fetchInfo(text, outputArea::setText)
+                        outputArea.text = I18N["dict.fetching"]
+                        when (state) {
+                            STATE_WORD -> fetchInfo(text, outputArea::setText)
+                            STATE_SENTENCE -> outputArea.text = translateJP(text)
+                            else -> throw IllegalStateException("State invalid")
+                        }
                     }
                 }
             }
@@ -99,39 +107,32 @@ object AOnlineDict : Stage() {
     }
 
     private fun fetchInfoSync(word: String): String {
-        val searchConnection = URL("$JD_API$word").openConnection() as HttpsURLConnection
-        searchConnection.connectTimeout = 10000
-        searchConnection.connect()
-        if (searchConnection.responseCode != 200) return "Error when search"
+        val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
+        if (searchConnection.responseCode != 200) return String.format(I18N["dict.search_error.i"], searchConnection.responseCode)
 
         val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText()
         val searchResults = parse(searchHTML).body.children[1].children[2]
         val first = searchResults.children[0]
-        if (first.attributes["id"] == "out-search") return "Not Found"
+        if (first.attributes["id"] == "out-search") return I18N["dict.not_found"]
 
         val target = JD_SITE + first.attributes["href"]
-        val contentConnection = URL(target).openConnection() as HttpsURLConnection
-        contentConnection.connectTimeout = 10000
-        contentConnection.connect()
-        if (contentConnection.responseCode != 200) return "Error when fetch"
+        val contentConnection = URL(target).openConnection().apply { connect() } as HttpsURLConnection
+        if (contentConnection.responseCode != 200) return String.format(I18N["dict.search_error.i"], contentConnection.responseCode)
 
         // ContentHTML has syntax error
         val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().replace("</body>", "</div></body>")
         val contentResults = parse(contentHTML).body.children[1].children[1].children[0]
-        val content = contentResults.children
+
+        return contentResults.children
             .filter { it.attributes.getOrDefault("class", "").startsWith("my-4 p-3") }
             .joinToString("\n\n") { (it.children[0].children[0] as HNode.HText).text }
-
-        return content
     }
+
     private fun fetchInfo(word: String, callback: (String) -> Unit) {
-        Promise<String> { re, _ ->
-            re(fetchInfoSync(word))
-        } then {
-            callback(it)
-        } catch { it: Throwable ->
-            it.also { callback(it.toString()) }
-        }
+        LPFXTask.createTask<String> { fetchInfoSync(word) }.apply {
+            setOnSucceeded(callback)
+            setOnFailed { callback(it.toString()) }
+        }()
     }
 
 }

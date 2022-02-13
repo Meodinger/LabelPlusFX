@@ -26,7 +26,7 @@ object Settings : AbstractProperties() {
 
     const val DefaultGroupNameList     = "DefaultGroupNameList"
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
-    const val IsGroupCreateOnNewTrans  = "isGroupCreateOnNew"
+    const val IsGroupCreateOnNewTrans  = "IsGroupCreateOnNew"
     const val ScaleOnNewPicture        = "ScaleOnNewPicture"    // 0 - 100%, 1 - Fit, 2 - Last
     const val ViewModeOrdinals         = "ViewModeOrdinals"     // Input, Label
     const val LogLevelOrdinal          = "LogLevelOrdinal"
@@ -34,7 +34,9 @@ object Settings : AbstractProperties() {
     const val LabelAlpha               = "LabelAlpha"
     const val LigatureRules            = "LigatureRules"
     const val InstantTranslate         = "InstantTranslate"
-    const val UseMeoFileAsDefault      = "DefaultFileFormat"
+    const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
+    // const val UseExportNameTemplate    = "UseExportNameTemplate"
+    // const val ExportNameTemplate       = "ExportNameTemplate"
 
     // ----- Default ----- //
 
@@ -61,6 +63,8 @@ object Settings : AbstractProperties() {
         ),
         CProperty(InstantTranslate, false),
         CProperty(UseMeoFileAsDefault, true),
+        // CProperty(UseExportNameTemplate, false),
+        // CProperty(ExportNameTemplate, "%FILENAME% ")
     )
 
     init { useDefault() }

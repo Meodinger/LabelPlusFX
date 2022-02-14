@@ -22,6 +22,8 @@ object Settings : AbstractProperties() {
     const val NEW_PIC_SCALE_FIT = 1
     const val NEW_PIC_SCALE_LAST = 2
 
+    const val VARIABLE_FILENAME = "%FILENAME%"
+
     // ----- Property Names ----- //
 
     const val DefaultGroupNameList     = "DefaultGroupNameList"
@@ -35,13 +37,13 @@ object Settings : AbstractProperties() {
     const val LigatureRules            = "LigatureRules"
     const val InstantTranslate         = "InstantTranslate"
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
-    // const val UseExportNameTemplate    = "UseExportNameTemplate"
-    // const val ExportNameTemplate       = "ExportNameTemplate"
+    const val UseExportNameTemplate    = "UseExportNameTemplate"
+    const val ExportNameTemplate       = "ExportNameTemplate"
 
     // ----- Default ----- //
 
     override val default = listOf(
-        CProperty(DefaultGroupNameList, "\u6846\u5185", "\u6846\u5916"),
+        CProperty(DefaultGroupNameList, "框内", "框外"),
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(ScaleOnNewPicture, NEW_PIC_SCALE_100),
@@ -50,21 +52,21 @@ object Settings : AbstractProperties() {
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
-            "("      to "\u300c",
-            ")"      to "\u300d",
-            "\uff08" to "\u300e",
-            "\uff09" to "\u300f",
-            "star"   to "\u2b50",
-            "square" to "\u2662",
-            "heart"  to "\u2661",
-            "music"  to "\u266a",
-            "cc"     to "\u25ce",
-            "*"      to "\u203b",
+            "("      to "「",
+            ")"      to "」",
+            "（"     to "『",
+            "）"     to "』",
+            "star"   to "⭐",
+            "square" to "♢",
+            "heart"  to "♡",
+            "music"  to "♪",
+            "cc"     to "◎",
+            "*"      to "※",
         ),
         CProperty(InstantTranslate, false),
         CProperty(UseMeoFileAsDefault, true),
-        // CProperty(UseExportNameTemplate, false),
-        // CProperty(ExportNameTemplate, "%FILENAME% ")
+        CProperty(UseExportNameTemplate, false),
+        CProperty(ExportNameTemplate, "%FILENAME% 翻译：XXX")
     )
 
     init { useDefault() }

@@ -76,6 +76,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
     private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
+    private val xUseTCheckBox = CheckBox(I18N["settings.other.template_enable"])
+    private val xTemplateField = TextField()
 
     init {
         initOwner(State.stage)
@@ -311,11 +313,22 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     alignment = Pos.TOP_CENTER
 
                     //   0        1
-                    // 0 InstantCheckBox and Text
-                    // 1 UseMeoFileCheckBox and Text
+                    // 0 O Instant Translate
+                    // 1 O Use Meo File As Default
+                    // 2 O Use Export Template
+                    // 3   | template text |
 
                     add(xInstCheckBox, 0, 0, 2, 1)
                     add(xUseMCheckBox, 0, 1, 2, 1)
+                    add(xUseTCheckBox, 0, 2, 2, 1)
+                    add(xTemplateField, 1, 3) {
+                        disableProperty().bind(!xUseTCheckBox.selectedProperty())
+                        textFormatter = TextFormatter<String> {
+                            it.apply {
+                                text = text.replace(Regex("[:*?<>|/\"\\\\]"), "")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -441,10 +454,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     // ----- Initialize Properties ----- //
     override fun initProperties() {
-        // General
-        xUseMCheckBox.isSelected = Settings[Settings.UseMeoFileAsDefault].asBoolean()
-        xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
-
         // Group
         gDefaultColorHexListLazy.refresh()
         initGroupTab()
@@ -471,6 +480,12 @@ object ADialogSettings : AbstractPropertiesDialog() {
         lLabelAlpha.isEditing = false
         lLabelAlpha.text = "0x$alpha"
         lSliderAlpha.value = alpha.toInt(16) / 255.0
+
+        // Other
+        xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
+        xUseMCheckBox.isSelected = Settings[Settings.UseMeoFileAsDefault].asBoolean()
+        xUseTCheckBox.isSelected = Settings[Settings.UseExportNameTemplate].asBoolean()
+        xTemplateField.text = Settings[Settings.ExportNameTemplate].asString()
     }
 
     // ----- Result convert ---- //
@@ -557,6 +572,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
         list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
         list.add(CProperty(Settings.UseMeoFileAsDefault, xUseMCheckBox.isSelected))
+        list.add(CProperty(Settings.UseExportNameTemplate, xUseTCheckBox.isSelected))
+        list.add(CProperty(Settings.ExportNameTemplate, xTemplateField.text))
 
         return list
     }

@@ -463,17 +463,22 @@ object AMenuBar : MenuBar() {
 
     private fun exportTransFile(type: FileType) {
         exportChooser.extensionFilters.clear()
+        val exportName =
+            if (Settings[Settings.UseExportNameTemplate].asBoolean())
+                Settings[Settings.ExportNameTemplate].asString().replace(Settings.VARIABLE_FILENAME, State.getFileFolder().name)
+            else State.getFileFolder().name
 
         when (type) {
             FileType.MeoFile -> {
                 exportChooser.extensionFilters.add(meoFilter)
-                exportChooser.initialFilename = "${State.getFileFolder().name}.$EXTENSION_FILE_MEO"
+                exportChooser.initialFilename = "$exportName.$EXTENSION_FILE_MEO"
             }
             FileType.LPFile -> {
                 exportChooser.extensionFilters.add(lpFilter)
-                exportChooser.initialFilename = "${State.getFileFolder().name}.$EXTENSION_FILE_LP"
+                exportChooser.initialFilename = "$exportName.$EXTENSION_FILE_LP"
             }
         }
+
         val file = exportChooser.showSaveDialog(State.stage) ?: return
         State.controller.export(file, type)
     }

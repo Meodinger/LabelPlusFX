@@ -102,6 +102,7 @@ object AOnlineDict : Stage() {
             center(outputArea) {
                 isWrapText = true
                 isEditable = false
+                font = font.s(16.0)
             }
         })
     }
@@ -119,13 +120,41 @@ object AOnlineDict : Stage() {
         val contentConnection = URL(target).openConnection().apply { connect() } as HttpsURLConnection
         if (contentConnection.responseCode != 200) return String.format(I18N["dict.search_error.i"], contentConnection.responseCode)
 
-        // ContentHTML has syntax error
+        // ContentHTML has unclosed div
         val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().replace("</body>", "</div></body>")
-        val contentResults = parse(contentHTML).body.children[1].children[1].children[0]
+        val contentResults = parse(contentHTML).body.children[1].children[1].children[0].children
 
-        return contentResults.children
-            .filter { it.attributes.getOrDefault("class", "").startsWith("my-4 p-3") }
-            .joinToString("\n\n") { (it.children[0].children[0] as HNode.HText).text }
+        // Build WordInfo
+        fun HNode.isWordExplanation() = attributes.getOrDefault("class", "").startsWith("my-4 p-3")
+        fun HNode.isWordSentence() = attributes.getOrDefault("class", "").startsWith("sentence-block")
+        fun HNode.jpText(): String {
+            val builder = StringBuilder()
+            for (node in children) {
+                if (node is HNode.HText) builder.append(node.text)
+                if (node.nodeType == "ruby") for (n in node.children) if (n is HNode.HText) builder.append(n.text)
+            }
+            return builder.toString()
+        }
+
+        var nodeIndex = -1
+        var wordIndex = 1
+        val infoBuilder = StringBuilder()
+
+        infoBuilder.append(word).append(" : ").append((contentResults[2].children[0].children[0] as HNode.HText).text).append("\n\n")
+        while (++nodeIndex < contentResults.size) {
+            val node = contentResults[nodeIndex]
+            if (!node.isWordExplanation()) continue
+
+            infoBuilder.append("<").append(wordIndex++).append("> ").appendLine((node.children[0].children[0] as HNode.HText).text)
+            while ((nodeIndex + 1) < contentResults.size && contentResults[nodeIndex + 1].isWordSentence()) {
+                val sentenceNode = contentResults[++nodeIndex].children[0].children[0]
+                infoBuilder.append(" - ").appendLine(sentenceNode.children[0].jpText().trim())
+                infoBuilder.append(" > ").appendLine((sentenceNode.children[1].children[0] as HNode.HText).text.trim())
+            }
+            infoBuilder.appendLine()
+        }
+
+        return infoBuilder.toString()
     }
 
     private fun fetchInfo(word: String, callback: (String) -> Unit) {

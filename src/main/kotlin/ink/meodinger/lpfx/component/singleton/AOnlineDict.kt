@@ -2,6 +2,8 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
+import ink.meodinger.lpfx.LOGSRC_DICTIONARY
+import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.getValue
@@ -159,8 +161,16 @@ object AOnlineDict : Stage() {
 
     private fun fetchInfo(word: String, callback: (String) -> Unit) {
         LPFXTask.createTask<String> { fetchInfoSync(word) }.apply {
-            setOnSucceeded(callback)
-            setOnFailed { callback(it.toString()) }
+            setOnSucceeded {
+                Logger.info("Fetched word info: $word", LOGSRC_DICTIONARY)
+                callback(it)
+            }
+            setOnFailed {
+                // TODO: The custom JRE doesn't support TLS_EC cipher suites, but the neko-dict only supports TLS_EC
+                Logger.error("Fetch word info failed", LOGSRC_DICTIONARY)
+                Logger.exception(it)
+                callback(it.toString())
+            }
         }()
     }
 

@@ -84,6 +84,7 @@ const val LOGSRC_DIALOGS     = "Dialog"
 const val LOGSRC_LOGGER      = "Logger"
 const val LOGSRC_SENDER      = "Sender"
 const val LOGSRC_CHECKER     = "UpdateCheck"
+const val LOGSRC_DICTIONARY  = "Dictionary"
 
 /**
  * Work Mode

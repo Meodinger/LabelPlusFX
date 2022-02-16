@@ -25,8 +25,6 @@ import kotlin.system.exitProcess
 fun main(vararg args: String) {
     // Use System Proxies
     System.setProperty("java.net.useSystemProxies", "true")
-    // Fix GitHub api Handshake issue (Client sends v1.2 but server responses v1.3)
-    System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,SSLv3")
 
     // Global Uncaught Exception Handler
     Thread.setDefaultUncaughtExceptionHandler { t, e ->

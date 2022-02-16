@@ -27,9 +27,12 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
+import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.net.ssl.HttpsURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import kotlin.jvm.Throws
 
 
 /**
@@ -109,6 +112,7 @@ object AOnlineDict : Stage() {
         })
     }
 
+    @Throws(IOException::class, SocketTimeoutException::class)
     private fun fetchInfoSync(word: String): String {
         val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
         if (searchConnection.responseCode != 200) return String.format(I18N["dict.search_error.i"], searchConnection.responseCode)
@@ -166,7 +170,6 @@ object AOnlineDict : Stage() {
                 callback(it)
             }
             setOnFailed {
-                // TODO: The custom JRE doesn't support TLS_EC cipher suites, but the neko-dict only supports TLS_EC
                 Logger.error("Fetch word info failed", LOGSRC_DICTIONARY)
                 Logger.exception(it)
                 callback(it.toString())

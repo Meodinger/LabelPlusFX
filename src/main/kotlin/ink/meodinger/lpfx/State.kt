@@ -9,10 +9,7 @@ import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.stage.Stage
 import java.io.File
 
@@ -28,23 +25,31 @@ import java.io.File
  */
 object State {
 
-    val DEFAULT_WORK_MODE = WorkMode.InputMode
-    val DEFAULT_VIEW_MODE = ViewMode.IndexMode
-
     lateinit var application: HookedApplication
     lateinit var controller: Controller
     lateinit var stage: Stage
 
-    val isOpenedProperty = SimpleBooleanProperty(false)
-    val isChangedProperty = SimpleBooleanProperty(false)
-    val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
-    val translationFileProperty = SimpleObjectProperty(DEFAULT_FILE)
-    val projectFolderProperty = SimpleObjectProperty(DEFAULT_FILE)
-    val currentPicNameProperty = SimpleStringProperty("")
-    val currentGroupIdProperty = SimpleIntegerProperty(0)
-    val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    val viewModeProperty = SimpleObjectProperty(DEFAULT_VIEW_MODE)
-    val workModeProperty = SimpleObjectProperty(DEFAULT_WORK_MODE)
+    private val isOpenedProperty          = SimpleBooleanProperty(false)
+    private val isChangedProperty         = SimpleBooleanProperty(false)
+    private val transFileProperty         = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
+    private val translationFileProperty   = SimpleObjectProperty(DEFAULT_FILE)
+    private val projectFolderProperty     = SimpleObjectProperty(DEFAULT_FILE)
+    private val currentPicNameProperty    = SimpleStringProperty("")
+    private val currentGroupIdProperty    = SimpleIntegerProperty(0)
+    private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
+    private val viewModeProperty          = SimpleObjectProperty(ViewMode.IndexMode)
+    private val workModeProperty          = SimpleObjectProperty(WorkMode.InputMode)
+
+    fun isOpenedProperty():          BooleanProperty           = isOpenedProperty
+    fun isChangedProperty():         BooleanProperty           = isChangedProperty
+    fun transFileProperty():         ObjectProperty<TransFile> = transFileProperty
+    fun translationFileProperty():   ObjectProperty<File>      = translationFileProperty
+    fun projectFolderProperty():     ObjectProperty<File>      = projectFolderProperty
+    fun currentPicNameProperty():    StringProperty            = currentPicNameProperty
+    fun currentGroupIdProperty():    IntegerProperty           = currentGroupIdProperty
+    fun currentLabelIndexProperty(): IntegerProperty           = currentLabelIndexProperty
+    fun viewModeProperty():          ObjectProperty<ViewMode>  = viewModeProperty
+    fun workModeProperty():          ObjectProperty<WorkMode>  = workModeProperty
 
     /**
      * Whether opened a TransFile or not
@@ -98,7 +103,7 @@ object State {
         currentPicName = ""
         currentGroupId = 0
         currentLabelIndex = NOT_FOUND
-        viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
+        viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[WorkMode.InputMode.ordinal]]
         workMode = WorkMode.InputMode
 
         Logger.info("Reset", LOGSRC_STATE)

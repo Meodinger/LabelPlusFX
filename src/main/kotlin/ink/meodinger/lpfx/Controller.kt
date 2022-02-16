@@ -257,14 +257,14 @@ class Controller(private val root: View) {
         Logger.info("Binding properties...", LOGSRC_CONTROLLER)
 
         // Set components disabled
-        bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty)
-        bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty)
-        cTransArea.disableProperty().bind(!State.isOpenedProperty)
-        cTreeView.disableProperty().bind(!State.isOpenedProperty)
-        cPicBox.disableProperty().bind(!State.isOpenedProperty)
-        cGroupBox.disableProperty().bind(!State.isOpenedProperty)
-        cSlider.disableProperty().bind(!State.isOpenedProperty)
-        cLabelPane.disableProperty().bind(!State.isOpenedProperty)
+        bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty())
+        bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty())
+        cTransArea.disableProperty().bind(!State.isOpenedProperty())
+        cTreeView.disableProperty().bind(!State.isOpenedProperty())
+        cPicBox.disableProperty().bind(!State.isOpenedProperty())
+        cGroupBox.disableProperty().bind(!State.isOpenedProperty())
+        cSlider.disableProperty().bind(!State.isOpenedProperty())
+        cLabelPane.disableProperty().bind(!State.isOpenedProperty())
         Logger.info("Bound disabled", LOGSRC_CONTROLLER)
 
         // CSlider - CLabelPane#scale
@@ -281,14 +281,14 @@ class Controller(private val root: View) {
                 WorkMode.InputMode -> I18N["mode.work.input"]
                 WorkMode.LabelMode -> I18N["mode.work.label"]
             }
-        }, State.workModeProperty))
+        }, State.workModeProperty()))
         bSwitchViewMode.textProperty().bind(Bindings.createStringBinding(binding@{
             labelInfo("Switched view mode to ${State.viewMode}")
             return@binding when (State.viewMode) {
                 ViewMode.IndexMode -> I18N["mode.view.index"]
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
-        }, State.viewModeProperty))
+        }, State.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         // PictureBox - CurrentPicName
@@ -297,7 +297,7 @@ class Controller(private val root: View) {
 
             init {
                 // When switch to new TransFile, update
-                bind(State.transFileProperty)
+                bind(State.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<String> {
@@ -325,7 +325,7 @@ class Controller(private val root: View) {
 
                 return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
             },
-            State.currentPicNameProperty, { _, _, newValue, _ -> newValue!! }
+            State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
@@ -336,7 +336,7 @@ class Controller(private val root: View) {
 
             init {
                 // When switch to new TransFile, update
-                bind(State.transFileProperty)
+                bind(State.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<String> {
@@ -368,7 +368,7 @@ class Controller(private val root: View) {
 
                 return@rule a
             },
-            State.currentGroupIdProperty, { _, _, newValue, _ -> newValue!! }
+            State.currentGroupIdProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
@@ -377,14 +377,14 @@ class Controller(private val root: View) {
             if (it != null && it is CTreeLabelItem && cTreeView.selectionModel.selectedItems.size == 1)
                 State.currentLabelIndex = it.index
         })
-        State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
+        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (State.isOpened && it != NOT_FOUND)
                 cTreeView.selectLabel(it, false)
         })
 
         // TreeView
-        cTreeView.picNameProperty().bind(State.currentPicNameProperty)
-        cTreeView.viewModeProperty().bind(State.viewModeProperty)
+        cTreeView.picNameProperty().bind(State.currentPicNameProperty())
+        cTreeView.viewModeProperty().bind(State.viewModeProperty())
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
@@ -394,7 +394,7 @@ class Controller(private val root: View) {
 
             init {
                 // When switch to new TransFile, update
-                bind(State.transFileProperty)
+                bind(State.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<String> {
@@ -419,7 +419,7 @@ class Controller(private val root: View) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
-        }, State.workModeProperty))
+        }, State.workModeProperty()))
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
 
         // Workspace
@@ -428,8 +428,8 @@ class Controller(private val root: View) {
                 State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
             )
         }
-        State.currentPicNameProperty.addListener(workspaceListener)
-        State.currentLabelIndexProperty.addListener(workspaceListener)
+        State.currentPicNameProperty().addListener(workspaceListener)
+        State.currentLabelIndexProperty().addListener(workspaceListener)
     }
     /**
      * Properties' listeners (for unbindable)
@@ -447,7 +447,7 @@ class Controller(private val root: View) {
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
         // currentLabelIndex
-        State.currentPicNameProperty.addListener(onChange {
+        State.currentPicNameProperty().addListener(onChange {
             // Clear selected when change pic
             State.currentLabelIndex = NOT_FOUND
         })
@@ -472,7 +472,7 @@ class Controller(private val root: View) {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
 
         // Update cTreeView & cLabelPane when pic change
-        State.currentPicNameProperty.addListener(onNew {
+        State.currentPicNameProperty().addListener(onNew {
             if (!State.isOpened || it.isEmpty()) return@onNew
 
             renderTreeView()
@@ -483,7 +483,7 @@ class Controller(private val root: View) {
         Logger.info("Added effect on CurrentPicName change", LOGSRC_CONTROLLER)
 
         // Clear text layer & re-select CGroup when group change
-        State.currentGroupIdProperty.addListener(onNew<Number, Int> {
+        State.currentGroupIdProperty().addListener(onNew<Number, Int> {
             if (!State.isOpened) return@onNew
 
             // Remove text
@@ -501,7 +501,7 @@ class Controller(private val root: View) {
         Logger.info("Added effect on CurrentGroupId change", LOGSRC_CONTROLLER)
 
         // Update text area when label change
-        State.currentLabelIndexProperty.addListener(onNew<Number, Int> {
+        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (!State.isOpened) return@onNew
 
             // unbind TextArea

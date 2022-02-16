@@ -109,12 +109,12 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             separator()
             item(I18N["m.save"]) {
                 does { saveTranslation() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -122,7 +122,7 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.save_as"]) {
                 does { saveAsTranslation() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.SHIFT_DOWN,
@@ -141,35 +141,35 @@ object AMenuBar : MenuBar() {
         menu(I18N["mm.edit"]) {
             item(I18N["m.comment"]) {
                 does { editComment() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             separator()
             item(I18N["m.projectPics"]) {
                 does { editProjectPictures() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             item(I18N["m.externalPic"]) {
                 does { addExternalPicture() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             item(I18N["m.specify"]) {
                 does { specifyPictures() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             separator()
             item(I18N["m.cht2zh"]) {
                 does { cht2zh() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
             item(I18N["m.zh2cht"]) {
                 does { cht2zh(true) }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
             }
         }
         menu(I18N["mm.export"]) {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -177,7 +177,7 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.meo"]) {
                 does { exportTransFile(FileType.MeoFile) }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     KeyCombination.SHIFT_DOWN,
@@ -187,7 +187,7 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.pack"]) {
                 does { exportTransPack() }
-                disableProperty().bind(!State.isOpenedProperty)
+                disableProperty().bind(!State.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.ALT_DOWN,

@@ -145,7 +145,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     // 3 Scale on new picture
                     // 4 | selection | < >       (String)
 
-                    val viewModeList = listOf(ViewMode.IndexMode, ViewMode.GroupMode)
+                    val viewModeList = listOf(*ViewMode.values())
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
                         items.setAll(viewModeList)

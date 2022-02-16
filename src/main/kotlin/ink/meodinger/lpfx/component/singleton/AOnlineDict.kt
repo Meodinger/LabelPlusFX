@@ -125,8 +125,8 @@ object AOnlineDict : Stage() {
         val contentResults = parse(contentHTML).body.children[1].children[1].children[0].children
 
         // Build WordInfo
-        fun HNode.isWordExplanation() = attributes.getOrDefault("class", "").startsWith("my-4 p-3")
-        fun HNode.isWordSentence() = attributes.getOrDefault("class", "").startsWith("sentence-block")
+        fun HNode.isWordExplanation() = attributes["class"]?.startsWith("my-4 p-3") ?: false
+        fun HNode.isWordSentence() = attributes["class"]?.startsWith("sentence-block") ?: false
         fun HNode.jpText(): String {
             val builder = StringBuilder()
             for (node in children) {

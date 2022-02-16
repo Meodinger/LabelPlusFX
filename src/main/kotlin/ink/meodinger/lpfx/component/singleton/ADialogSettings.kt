@@ -29,6 +29,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
+import javafx.util.Duration
 
 
 /**
@@ -93,10 +94,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
             add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(gGridPane.apply {
+                        alignment = Pos.TOP_CENTER
                         padding = Insets(COMMON_GAP)
                         vgap = COMMON_GAP
                         hgap = COMMON_GAP
-                        alignment = Pos.TOP_CENTER
                     })
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
@@ -112,10 +113,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
             add(I18N["settings.ligature.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(rGridPane.apply {
+                        alignment = Pos.TOP_CENTER
                         padding = Insets(COMMON_GAP)
                         vgap = COMMON_GAP
                         hgap = COMMON_GAP
-                        alignment = Pos.TOP_CENTER
                     })
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
@@ -132,10 +133,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
             }
             add(I18N["settings.mode.title"]) {
                 withContent(GridPane()) {
+                    alignment = Pos.TOP_CENTER
                     padding = Insets(COMMON_GAP)
                     vgap = COMMON_GAP
                     hgap = COMMON_GAP
-                    alignment = Pos.TOP_CENTER
 
                     //   0         1
                     // 0 Input     | input | < > (ViewMode)
@@ -169,10 +170,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
             }
             add(I18N["settings.label.title"]) {
                 withContent(GridPane()) {
+                    alignment = Pos.CENTER
                     padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
                     vgap = COMMON_GAP
                     hgap = COMMON_GAP
-                    alignment = Pos.CENTER
 
                     // lGridPane.isGridLinesVisible = true
                     //   0         1           2
@@ -307,16 +308,16 @@ object ADialogSettings : AbstractPropertiesDialog() {
             }
             add(I18N["settings.other.title"]) {
                 withContent(GridPane()) {
+                    alignment = Pos.TOP_CENTER
                     padding = Insets(COMMON_GAP)
                     vgap = COMMON_GAP
                     hgap = COMMON_GAP
-                    alignment = Pos.TOP_CENTER
 
                     //   0        1
-                    // 0 O Instant Translate
-                    // 1 O Use Meo File As Default
-                    // 2 O Use Export Template
-                    // 3   | template text |
+                    // 0 O InstantTranslate
+                    // 1 O UseMeoFileAsDefault
+                    // 2 O UseExportTemplate
+                    // 3   |  template text  |
 
                     add(xInstCheckBox, 0, 0, 2, 1)
                     add(xUseMCheckBox, 0, 1, 2, 1)
@@ -324,10 +325,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(xTemplateField, 1, 3) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
                         textFormatter = TextFormatter<String> {
-                            it.apply {
-                                text = text.replace(Regex("[:*?<>|/\"\\\\]"), "")
-                            }
+                            it.apply { text = text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
                         }
+                        tooltip = Tooltip(I18N["settings.other.template_hint"]).apply { showDelay = Duration(500.0) }
                     }
                 }
             }

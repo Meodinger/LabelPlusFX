@@ -22,7 +22,9 @@ object Settings : AbstractProperties() {
     const val NEW_PIC_SCALE_FIT = 1
     const val NEW_PIC_SCALE_LAST = 2
 
-    const val VARIABLE_FILENAME = "%FILENAME%"
+    const val VARIABLE_FILENAME = "%FILE%"
+    const val VARIABLE_DIRNAME  = "%DIR%"
+    const val VARIABLE_PROJECT  = "%PROJECT%"
 
     // ----- Property Names ----- //
 
@@ -66,7 +68,7 @@ object Settings : AbstractProperties() {
         CProperty(InstantTranslate, false),
         CProperty(UseMeoFileAsDefault, true),
         CProperty(UseExportNameTemplate, false),
-        CProperty(ExportNameTemplate, "%FILENAME% 翻译：XXX")
+        CProperty(ExportNameTemplate, "%FILE% 翻译：XXX")
     )
 
     init { useDefault() }

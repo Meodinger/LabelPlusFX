@@ -465,7 +465,10 @@ object AMenuBar : MenuBar() {
         exportChooser.extensionFilters.clear()
         val exportName =
             if (Settings[Settings.UseExportNameTemplate].asBoolean())
-                Settings[Settings.ExportNameTemplate].asString().replace(Settings.VARIABLE_FILENAME, State.getFileFolder().name)
+                Settings[Settings.ExportNameTemplate].asString()
+                    .replace(Settings.VARIABLE_FILENAME, State.translationFile.nameWithoutExtension)
+                    .replace(Settings.VARIABLE_DIRNAME, State.getFileFolder().name)
+                    .replace(Settings.VARIABLE_PROJECT, State.projectFolder.name)
             else State.getFileFolder().name
 
         when (type) {

@@ -68,7 +68,7 @@ object Settings : AbstractProperties() {
         CProperty(InstantTranslate, false),
         CProperty(UseMeoFileAsDefault, true),
         CProperty(UseExportNameTemplate, false),
-        CProperty(ExportNameTemplate, "%FILE% 翻译：XXX")
+        CProperty(ExportNameTemplate, "%FILE% 翻译：XXX"),
     )
 
     init { useDefault() }

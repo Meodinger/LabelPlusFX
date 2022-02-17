@@ -120,6 +120,9 @@ enum class FileType(private val description: String) {
     override fun toString(): String = description
 
     companion object {
+        /**
+         * NOTE: It's not safe to determine a file's type by its extension
+         */
         fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile

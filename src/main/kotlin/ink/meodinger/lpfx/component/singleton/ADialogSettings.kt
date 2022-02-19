@@ -265,10 +265,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             return@TextFormatter change
                         }
                         setOnChangeToLabel {
-                            val radius = fieldText.toDouble()
-                            lSliderRadius.value = radius
+                            lSliderRadius.value = fieldText.padStart(5, '0').toDouble()
 
-                            String.format("%05.2f", radius)
+                            String.format("%05.2f", lSliderRadius.value)
                         }
                     }
                     add(Label(I18N["settings.label.alpha"]), 1, 2)
@@ -276,8 +275,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                         min = 0.0
                         max = 1.0
                         valueProperty().addListener(onNew<Number, Double> {
-                            val alphaStr = (it * 255.0).toInt().toString(16)
-                            val alphaPart = if (alphaStr.length == 1) "0$alphaStr" else alphaStr
+                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0')
 
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
                             lCLabel.color = Color.web("FF0000$alphaPart")
@@ -298,10 +296,10 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             labelText.substring(2)
                         }
                         setOnChangeToLabel {
-                            val alphaStr = fieldText
+                            val alphaStr = fieldText.padStart(2, '0').uppercase()
                             lSliderAlpha.value = alphaStr.toInt(16) / 255.0
 
-                            "0x" + if (alphaStr.isEmpty()) "00" else if (alphaStr.length == 1) "0$alphaStr" else alphaStr
+                            "0x$alphaStr"
                         }
                     }
                 }
@@ -560,10 +558,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
-
-        var str = (lSliderAlpha.value * 255.0).toInt().toString(16)
-        if (str.length == 1) str = "0$str"
-        list.add(CProperty(Settings.LabelAlpha, str))
+        list.add(CProperty(Settings.LabelAlpha, (lSliderAlpha.value * 255.0).toInt().toString(16).padStart(2, '0')))
 
         return list
     }

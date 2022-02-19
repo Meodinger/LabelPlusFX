@@ -90,7 +90,7 @@ const val LOGSRC_DICTIONARY  = "Dictionary"
  * Work Mode
  * @param description Display name for WorkMode
  */
-enum class WorkMode(val description: String) {
+enum class WorkMode(private val description: String) {
     InputMode(I18N["mode.work.input"]),
     LabelMode(I18N["mode.work.label"]);
 
@@ -113,9 +113,9 @@ enum class ViewMode(private val description: String) {
 /**
  * Translation File Type
  */
-enum class FileType(private val description: String) {
-    LPFile(I18N["filetype.translation_lp"]),
-    MeoFile(I18N["filetype.translation_meo"]);
+enum class FileType(private val description: String, val extension: String) {
+    LPFile(I18N["filetype.translation_lp"], EXTENSION_FILE_LP),
+    MeoFile(I18N["filetype.translation_meo"], EXTENSION_FILE_MEO);
 
     override fun toString(): String = description
 
@@ -126,9 +126,7 @@ enum class FileType(private val description: String) {
         fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
-            else -> throw IllegalArgumentException(
-                String.format(I18N["exception.file_type.invalid_file_extension.s"], file.extension)
-            )
+            else -> throw IllegalArgumentException(String.format(I18N["exception.file_type.invalid_file_extension.s"], file.extension))
         }
     }
 }

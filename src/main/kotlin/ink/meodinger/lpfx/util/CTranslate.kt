@@ -24,10 +24,8 @@ private val utf8Charset = Charset.forName("UTF-8")
 private val md5Instance = MessageDigest.getInstance("MD5")
 private fun md5(text: String): String {
     return StringBuilder().apply {
-        for (byte in md5Instance.digest(text.toByteArray(utf8Charset))) {
-            val hex = (byte.toInt() and 0xFF).toString(16)
-            append(if (hex.length == 1) "0$hex" else hex)
-        }
+        for (byte in md5Instance.digest(text.toByteArray(utf8Charset)))
+            append((byte.toInt() and 0xFF).toString(16).padStart(2, '0'))
     }.toString()
 }
 private fun query(q: String, from: String, to: String): String {

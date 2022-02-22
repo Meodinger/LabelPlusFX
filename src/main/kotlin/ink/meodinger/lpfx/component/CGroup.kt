@@ -11,6 +11,7 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -27,8 +28,8 @@ import javafx.scene.text.TextAlignment
  * A Region that displays a TransGroup
  */
 class CGroup(
-    name:  String = DEFAULT_NAME,
-    color: Color  = Color.web(DEFAULT_COLOR_HEX)
+    groupName:  String = DEFAULT_NAME,
+    groupColor: Color  = Color.web(DEFAULT_COLOR_HEX)
 ) : Region() {
 
     companion object {
@@ -40,17 +41,17 @@ class CGroup(
         private const val PADDING = 4.0
     }
 
-    private val text: Text = Text(name).apply {
-        fill = color
+    private val text: Text = Text(groupName).apply {
+        fill = groupColor
         textAlignment = TextAlignment.CENTER
         textOrigin = VPos.CENTER
     }
 
-    private val nameProperty: StringProperty = SimpleStringProperty(name)
+    private val nameProperty: StringProperty = SimpleStringProperty(groupName)
     fun nameProperty(): StringProperty = nameProperty
     var name: String by nameProperty
 
-    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(color)
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(groupColor)
     fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
@@ -68,6 +69,9 @@ class CGroup(
 
         nameProperty.addListener(onNew { update(name = it) })
         colorProperty.addListener(onNew { update(color = it) })
+        selectedProperty.addListener(onNew { if (it) onSelect.handle(ActionEvent(name, this)) })
+
+        addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
 
         backgroundProperty().bind(Bindings.createObjectBinding({
             if (selected) Background(BackgroundFill(
@@ -113,7 +117,6 @@ class CGroup(
 
     fun select() {
         selected = true
-        onSelect.handle(ActionEvent(name, this))
     }
 
     fun unselect() {

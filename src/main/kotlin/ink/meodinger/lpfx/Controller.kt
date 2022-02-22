@@ -25,6 +25,7 @@ import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.ListProperty
 import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -323,6 +324,7 @@ class Controller(private val root: View) {
                     observable.value = State.transFile.sortedPicNames[0]
                 }
 
+                // Directly bind bi-directionally will cause NPE
                 return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
             },
             State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
@@ -356,24 +358,11 @@ class Controller(private val root: View) {
                 return FXCollections.observableArrayList(State.transFile.groupNames)
             }
         })
-        RuledGenericBidirectionalBinding.bind(
-            cGroupBox.indexProperty(), rule@{ observable, _, newValue, _ ->
-                val n = newValue as Int
-                val a = if (n != NOT_FOUND) n else if (State.isOpened) 0 else NOT_FOUND
-
-                // Indicate current item was removed
-                // Use run later to avoid Issue#5 (Reason unclear).
-                // Check opened to avoid accidentally set "Close time -1" to "Open time index"
-                if (State.isOpened && n == NOT_FOUND) Platform.runLater { observable.value = a }
-
-                return@rule a
-            },
-            State.currentGroupIdProperty(), { _, _, newValue, _ -> newValue!! }
-        )
+        cGroupBox.indexProperty().bindBidirectional(State.currentGroupIdProperty())
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // GroupBar
-        cGroupBar.groupListProperty().bind(object : ObjectBinding<ObservableList<TransGroup>>() {
+        cGroupBar.groupsProperty().bind(object : ObjectBinding<ListProperty<TransGroup>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
 
             init {
@@ -381,7 +370,7 @@ class Controller(private val root: View) {
                 bind(State.transFileProperty())
             }
 
-            override fun computeValue(): ObservableList<TransGroup> {
+            override fun computeValue(): ListProperty<TransGroup> {
                 // Abandon the ObservableValue of last TransFile
                 unbind(lastGroupListObservable)
                 // Get new ObservableValue
@@ -389,11 +378,12 @@ class Controller(private val root: View) {
                 // Bind to it
                 bind(lastGroupListObservable)
 
-                return FXCollections.observableList(lastGroupListObservable.toList())
+                return State.transFile.groupListProperty
             }
 
         })
         cGroupBar.selectedGroupIndexProperty().bindBidirectional(State.currentGroupIdProperty())
+        Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // TreeView
         cTreeView.picNameProperty().bind(State.currentPicNameProperty())
@@ -612,10 +602,6 @@ class Controller(private val root: View) {
             cGroupBox.select(index)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
-
-        // Transform CGroup select to CGroupBox select
-        cGroupBar.setOnGroupSelect { cGroupBox.select(it.source as String) }
-        Logger.info("Transformed CGroupBar selected", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {

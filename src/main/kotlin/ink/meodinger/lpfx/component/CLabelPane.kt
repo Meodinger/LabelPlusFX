@@ -74,11 +74,11 @@ class CLabelPane : ScrollPane() {
         val displayX: Double, val displayY: Double,
     ) : Event(eventType) {
         companion object {
-            val LABEL_ANY = EventType<LabelEvent>(EventType.ROOT)
-            val LABEL_MOVE = EventType(LABEL_ANY, "LABEL_MOVE")
-            val LABEL_OTHER = EventType(LABEL_ANY, "LABEL_OTHER")
-            val LABEL_PLACE = EventType(LABEL_ANY, "LABEL_PLACE")
-            val LABEL_REMOVE = EventType(LABEL_ANY, "LABEL_REMOVE")
+            val LABEL_ANY     = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
+            val LABEL_MOVE    = EventType(LABEL_ANY, "LABEL_MOVE")
+            val LABEL_OTHER   = EventType(LABEL_ANY, "LABEL_OTHER")
+            val LABEL_PLACE   = EventType(LABEL_ANY, "LABEL_PLACE")
+            val LABEL_REMOVE  = EventType(LABEL_ANY, "LABEL_REMOVE")
             val LABEL_POINTED = EventType(LABEL_ANY, "LABEL_POINTED")
             val LABEL_CLICKED = EventType(LABEL_ANY, "LABEL_CLICKED")
         }
@@ -458,6 +458,13 @@ class CLabelPane : ScrollPane() {
             label.cursor = defaultCursor
             removeText()
         }
+
+
+        /*
+         * TODO: Add Event Handle to CLabel
+         *     LabelEvent.Pointed,
+         *     LabelEvent.Clicked,
+         */
 
         // Event handle
         label.setOnMouseMoved {

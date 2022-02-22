@@ -291,7 +291,7 @@ class Controller(private val root: View) {
         }, State.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
-        // PictureBox - CurrentPicName
+        // PictureBox
         cPicBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastMapObservable = State.transFile.transMapObservable
 
@@ -329,7 +329,7 @@ class Controller(private val root: View) {
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
-        // GroupBox - CurrentGroupId
+        // GroupBox
         cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<StringProperty>()
@@ -372,7 +372,32 @@ class Controller(private val root: View) {
         )
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
-        // TreeView - CurrentLabelIndex
+        // GroupBar
+        cGroupBar.groupListProperty().bind(object : ObjectBinding<ObservableList<TransGroup>>() {
+            private var lastGroupListObservable = State.transFile.groupListObservable
+
+            init {
+                // When switch to new TransFile, update
+                bind(State.transFileProperty())
+            }
+
+            override fun computeValue(): ObservableList<TransGroup> {
+                // Abandon the ObservableValue of last TransFile
+                unbind(lastGroupListObservable)
+                // Get new ObservableValue
+                lastGroupListObservable = State.transFile.groupListObservable
+                // Bind to it
+                bind(lastGroupListObservable)
+
+                return FXCollections.observableList(lastGroupListObservable.toList())
+            }
+
+        })
+        cGroupBar.selectedGroupIndexProperty().bindBidirectional(State.currentGroupIdProperty())
+
+        // TreeView
+        cTreeView.picNameProperty().bind(State.currentPicNameProperty())
+        cTreeView.viewModeProperty().bind(State.viewModeProperty())
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
             if (it != null && it is CTreeLabelItem && cTreeView.selectionModel.selectedItems.size == 1)
                 State.currentLabelIndex = it.index
@@ -381,10 +406,6 @@ class Controller(private val root: View) {
             if (State.isOpened && it != NOT_FOUND)
                 cTreeView.selectLabel(it, false)
         })
-
-        // TreeView
-        cTreeView.picNameProperty().bind(State.currentPicNameProperty())
-        cTreeView.viewModeProperty().bind(State.viewModeProperty())
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
@@ -492,11 +513,10 @@ class Controller(private val root: View) {
             if (it == NOT_FOUND) return@onNew
 
             // Select GroupBar, CTreeView
-            val name = State.transFile.getTransGroup(it).name
-            if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(name, false)
-            cGroupBar.select(name)
+            if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(State.transFile.getTransGroup(it).name, false)
+            cGroupBar.select(it)
 
-            labelInfo("Selected group to $name")
+            labelInfo("Selected group $it")
         })
         Logger.info("Added effect on CurrentGroupId change", LOGSRC_CONTROLLER)
 
@@ -595,7 +615,7 @@ class Controller(private val root: View) {
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
         // Transform CGroup select to CGroupBox select
-        cGroupBar.setOnGroupSelect { cGroupBox.select(it) }
+        cGroupBar.setOnGroupSelect { cGroupBox.select(it.groupName) }
         Logger.info("Transformed CGroupBar selected", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
@@ -915,12 +935,12 @@ class Controller(private val root: View) {
         }
 
         // Initialize workspace
-        renderGroupBar()
         val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
         State.currentGroupId = 0
         State.currentPicName = State.transFile.sortedPicNames[picIndex.takeIf { it in 0 until State.transFile.picCount } ?: 0]
         State.currentLabelIndex = labelIndex.takeIf { State.transFile.getTransList(State.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
+        cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
@@ -1074,7 +1094,6 @@ class Controller(private val root: View) {
         // cSlider
         // cPicBox
         // cGroupBox
-        cGroupBar.reset()
         cLabelPane.reset()
         cTreeView.reset()
         cTransArea.reset()
@@ -1087,26 +1106,6 @@ class Controller(private val root: View) {
     // ----- Update component properties ----- //
     fun updateLigatureRules() {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
-    }
-
-    // ----- GroupBar ----- //
-    fun renderGroupBar() {
-        cGroupBar.reset()
-        cGroupBar.render(State.transFile.groupListObservable)
-        cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
-
-        Logger.info("Group bar rendered", LOGSRC_CONTROLLER)
-    }
-
-    fun createGroupBarItem(transGroup: TransGroup) {
-        cGroupBar.createGroup(transGroup)
-
-        Logger.info("Created CGroup @ $transGroup", LOGSRC_CONTROLLER)
-    }
-    fun removeGroupBarItem(groupName: String) {
-        cGroupBar.removeGroup(groupName)
-
-        Logger.info("Removed CGroup @ $groupName", LOGSRC_CONTROLLER)
     }
 
     // ----- LabelPane ----- //

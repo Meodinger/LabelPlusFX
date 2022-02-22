@@ -19,10 +19,8 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.event.Event
+import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.event.EventType
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
@@ -39,41 +37,14 @@ import javafx.scene.paint.Color
  */
 class CGroupBar : HBox() {
 
-    companion object {
-        private const val C_GROUP_ID = "C_GROUP_ID"
-    }
-
-    class GroupEvent(
-        eventType: EventType<GroupEvent>,
-        val source: MouseEvent,
-        val groupName: String, val groupColor: Color,
-        val labelX: Double, val labelY: Double,
-        val displayX: Double, val displayY: Double,
-    ) : Event(eventType) {
-        companion object {
-            val GROUP_ANY     = EventType<GroupEvent>(EventType.ROOT, "GROUP_ANY")
-            val GROUP_POINTED = EventType(GROUP_ANY, "GROUP_POINTED")
-            val GROUP_CLICKED = EventType(GROUP_ANY, "GROUP_CLICKED")
-            val GROUP_SELECT  = EventType(GROUP_ANY, "GROUP_SELECT")
-        }
-    }
-
-    private val onGroupPointedProperty: ObjectProperty<EventHandler<GroupEvent>> = SimpleObjectProperty(EventHandler {})
-    private val onGroupClickedProperty: ObjectProperty<EventHandler<GroupEvent>> = SimpleObjectProperty(EventHandler {})
-    private val onGroupSelectProperty:  ObjectProperty<EventHandler<GroupEvent>> = SimpleObjectProperty(EventHandler {})
-    fun onGroupPointedProperty():       ObjectProperty<EventHandler<GroupEvent>> = onGroupPointedProperty
-    fun onGroupClickedProperty():       ObjectProperty<EventHandler<GroupEvent>> = onGroupClickedProperty
-    fun onGroupSelectProperty():        ObjectProperty<EventHandler<GroupEvent>> = onGroupSelectProperty
-    val onGroupPointed:                                EventHandler<GroupEvent> by onGroupPointedProperty
-    val onGroupClicked:                                EventHandler<GroupEvent> by onGroupClickedProperty
-    val onGroupSelect:                                 EventHandler<GroupEvent> by onGroupSelectProperty
-    fun setOnGroupPointed(handler: EventHandler<GroupEvent>)                     = onGroupPointedProperty.set(handler)
-    fun setOnGroupClicked(handler: EventHandler<GroupEvent>)                     = onGroupClickedProperty.set(handler)
-    fun setOnGroupSelect(handler: EventHandler<GroupEvent>)                      = onGroupSelectProperty.set(handler)
-
     private val groupListProperty: ObjectProperty<ObservableList<TransGroup>> = SimpleObjectProperty(FXCollections.observableArrayList())
     fun groupListProperty(): ObjectProperty<ObservableList<TransGroup>> = groupListProperty
     val groupList: ObservableList<TransGroup> by groupListProperty
+
+    private val onGroupSelectProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
+    fun onGroupSelectProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupSelectProperty
+    val onGroupSelect: EventHandler<ActionEvent> by onGroupSelectProperty
+    fun setOnGroupSelect(handler: EventHandler<ActionEvent>) = onGroupSelectProperty.set(handler)
 
     private val selectedGroupIndexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun selectedGroupIndexProperty(): IntegerProperty = selectedGroupIndexProperty
@@ -104,52 +75,10 @@ class CGroupBar : HBox() {
             children.addLast(placeHolder)
             children.addLast(addItem)
         }
+
         for (transGroup in transGroups) {
             children.addLast(CGroup().apply {
-                tagCGroupId(this, cGroups.size)
-
-                /*
-                 * TODO: Add event handle to CGroup
-                 *     GroupEvent.Select,
-                 *     GroupEvent.Pointed,
-                 *     GroupEvent.Clicked,
-                 */
-
-                addEventHandler(MouseEvent.MOUSE_MOVED) {
-                    onGroupPointed.handle(GroupEvent(
-                        GroupEvent.GROUP_POINTED, it,
-                        name, color,
-                        it.x / width, it.y / height, it.x, it.y,
-                    ))
-                }
-                addEventHandler(MouseEvent.MOUSE_CLICKED) {
-                    onGroupClicked.handle(GroupEvent(
-                        GroupEvent.GROUP_CLICKED, it,
-                        name, color,
-                        it.x / width, it.y / height, it.x, it.y,
-                    ))
-                }
-                addEventHandler(MouseEvent.MOUSE_CLICKED) {
-                    onGroupSelect.handle(GroupEvent(
-                        GroupEvent.GROUP_SELECT, it,
-                        name, color,
-                        it.x / width, it.y / height, it.x, it.y,
-                    ))
-                    selectedGroupIndex = useCGroupId(this)
-                }
-                /*
-                selectedProperty().addListener(onNew {
-                    if (it) {
-                        onGroupSelect.handle(GroupEvent(
-                            GroupEvent.GROUP_SELECT, it,
-                            name, color,
-                            it.x / width, it.y / height, it.x, it.y,
-                        ))
-                        selectedGroupIndex = useCGroupId(this)
-                    }
-                })
-                 */
-
+                onSelectProperty().bind(onGroupSelectProperty)
                 nameProperty().bind(transGroup.nameProperty)
                 colorProperty().bind(Bindings.createObjectBinding(
                     { Color.web(transGroup.colorHex) },
@@ -158,14 +87,8 @@ class CGroupBar : HBox() {
             }.also { cGroups.add(it) }, vShift)
         }
 
+        if (transGroups.isEmpty()) selectedGroupIndex = NOT_FOUND
         if (selectedGroupIndex != NOT_FOUND && selectedGroupIndex < cGroups.size) select(selectedGroupIndex)
-    }
-
-    private fun tagCGroupId(cGroup: CGroup, groupId: Int) {
-        cGroup.properties[C_GROUP_ID] = groupId
-    }
-    private fun useCGroupId(cGroup: CGroup): Int {
-        return cGroup.properties[C_GROUP_ID] as Int
     }
 
     fun select(groupId: Int) {

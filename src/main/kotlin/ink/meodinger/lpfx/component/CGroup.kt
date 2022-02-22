@@ -7,6 +7,8 @@ import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.VPos
 import javafx.scene.layout.*
@@ -55,6 +57,11 @@ class CGroup(
     private val selectedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun selectedProperty(): BooleanProperty = selectedProperty
     var selected: Boolean by selectedProperty
+
+    private val onSelectProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
+    fun onSelectProperty(): ObjectProperty<EventHandler<ActionEvent>> = onSelectProperty
+    val onSelect: EventHandler<ActionEvent> by onSelectProperty
+    fun setOnSelect(handler: EventHandler<ActionEvent>) = onSelectProperty.set(handler)
 
     init {
         padding = Insets(PADDING)
@@ -106,6 +113,7 @@ class CGroup(
 
     fun select() {
         selected = true
+        onSelect.handle(ActionEvent(name, this))
     }
 
     fun unselect() {

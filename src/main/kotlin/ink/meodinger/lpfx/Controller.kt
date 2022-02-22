@@ -514,7 +514,6 @@ class Controller(private val root: View) {
 
             // Select GroupBar, CTreeView
             if (State.viewMode != ViewMode.IndexMode) cTreeView.selectGroup(State.transFile.getTransGroup(it).name, false)
-            cGroupBar.select(it)
 
             labelInfo("Selected group $it")
         })
@@ -615,7 +614,7 @@ class Controller(private val root: View) {
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
         // Transform CGroup select to CGroupBox select
-        cGroupBar.setOnGroupSelect { cGroupBox.select(it.groupName) }
+        cGroupBar.setOnGroupSelect { cGroupBox.select(it.source as String) }
         Logger.info("Transformed CGroupBar selected", LOGSRC_CONTROLLER)
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
@@ -940,7 +939,6 @@ class Controller(private val root: View) {
         State.currentPicName = State.transFile.sortedPicNames[picIndex.takeIf { it in 0 until State.transFile.picCount } ?: 0]
         State.currentLabelIndex = labelIndex.takeIf { State.transFile.getTransList(State.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
-        cGroupBar.select(if (State.currentGroupId == NOT_FOUND) 0 else State.currentGroupId)
 
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name

@@ -101,7 +101,7 @@ object State {
         translationFile = DEFAULT_FILE
         projectFolder = DEFAULT_FILE
         currentPicName = ""
-        currentGroupId = 0
+        currentGroupId = NOT_FOUND
         currentLabelIndex = NOT_FOUND
         viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[WorkMode.InputMode.ordinal]]
         workMode = WorkMode.InputMode

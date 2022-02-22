@@ -124,32 +124,6 @@ class Controller(private val root: View) {
     private fun init() {
         Logger.info("Initializing components...", LOGSRC_CONTROLLER)
 
-        // Drag and Drop
-        root.setOnDragOver {
-            if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
-            it.consume() // Consume used event
-        }
-        root.setOnDragDropped {
-            if (stay()) return@setOnDragDropped
-
-            State.reset()
-
-            val board = it.dragboard
-            if (board.hasFiles()) {
-                val file = board.files.firstOrNull { f -> EXTENSIONS_FILE.contains(f.extension) } ?: return@setOnDragDropped
-
-                // To avoid exception cannot be caught
-                Platform.runLater { open(file) }
-                it.isDropCompleted = true
-            }
-            it.consume() // Consume used event
-        }
-        Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
-
-        // Global event catch, prevent mnemonic parsing and the beep
-        root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
-        Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
-
         // MenuBar
         root.top = AMenuBar
         Logger.info("Added MenuBar", LOGSRC_CONTROLLER)
@@ -182,6 +156,32 @@ class Controller(private val root: View) {
         State.viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
         updateLigatureRules()
         Logger.info("Applied Settings", LOGSRC_CONTROLLER)
+
+        // Drag and Drop
+        root.setOnDragOver {
+            if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
+            it.consume() // Consume used event
+        }
+        root.setOnDragDropped {
+            if (stay()) return@setOnDragDropped
+
+            State.reset()
+
+            val board = it.dragboard
+            if (board.hasFiles()) {
+                val file = board.files.firstOrNull { f -> EXTENSIONS_FILE.contains(f.extension) } ?: return@setOnDragDropped
+
+                // To avoid exception cannot be caught
+                Platform.runLater { open(file) }
+                it.isDropCompleted = true
+            }
+            it.consume() // Consume used event
+        }
+        Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
+
+        // Global event catch, prevent mnemonic parsing and the beep
+        root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
+        Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
         // Register handler
         cLabelPane.setOnLabelPlace {
@@ -432,21 +432,18 @@ class Controller(private val root: View) {
             }
         }, State.workModeProperty()))
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
-
-        // Workspace
-        val workspaceListener = onNew<Any, Any> {
-            if (State.isOpened) RecentFiles.setProgressOf(State.translationFile.path,
-                State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
-            )
-        }
-        State.currentPicNameProperty().addListener(workspaceListener)
-        State.currentLabelIndexProperty().addListener(workspaceListener)
     }
     /**
      * Properties' listeners (for unbindable)
      */
     private fun listen() {
         Logger.info("Attaching Listeners...", LOGSRC_CONTROLLER)
+
+        // Preferences
+        cTransArea.fontProperty().addListener(onNew { Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt() })
+        pMain.dividers[0].positionProperty().addListener(onNew(Preference[Preference.MAIN_DIVIDER]::set))
+        pRight.dividers[0].positionProperty().addListener(onNew(Preference[Preference.RIGHT_DIVIDER]::set))
+        Logger.info("Listened for Preferences", LOGSRC_CONTROLLER)
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
@@ -457,6 +454,12 @@ class Controller(private val root: View) {
         })
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
+        // isChanged
+        cTransArea.textProperty().addListener(onChange {
+            if (cTransArea.isBound) State.isChanged = true
+        })
+        Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
+
         // currentLabelIndex
         State.currentPicNameProperty().addListener(onChange {
             // Clear selected when change pic
@@ -464,17 +467,15 @@ class Controller(private val root: View) {
         })
         Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
 
-        // isChanged
-        cTransArea.textProperty().addListener(onChange {
-            if (cTransArea.isBound) State.isChanged = true
-        })
-        Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
-
-        // Preferences
-        cTransArea.fontProperty().addListener(onNew { Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt() })
-        pMain.dividers[0].positionProperty().addListener(onNew(Preference[Preference.MAIN_DIVIDER]::set))
-        pRight.dividers[0].positionProperty().addListener(onNew(Preference[Preference.RIGHT_DIVIDER]::set))
-        Logger.info("Listened for Preferences", LOGSRC_CONTROLLER)
+        // Work Progress
+        val workspaceListener = onNew<Any, Any> {
+            if (State.isOpened) RecentFiles.setProgressOf(State.translationFile.path,
+                State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
+            )
+        }
+        State.currentPicNameProperty().addListener(workspaceListener)
+        State.currentLabelIndexProperty().addListener(workspaceListener)
+        Logger.info("Listened for Current Work Progress", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' effect on view

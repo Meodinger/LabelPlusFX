@@ -35,7 +35,9 @@ import javafx.scene.paint.Color
  */
 class CGroupBar : HBox() {
 
-    private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList())
+    // ----- Properties ----- //
+
+    private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
     val groups: ObservableList<TransGroup> by groupsProperty
 
@@ -43,23 +45,26 @@ class CGroupBar : HBox() {
     fun selectedGroupIndexProperty(): IntegerProperty = selectedGroupIndexProperty
     var selectedGroupIndex: Int by selectedGroupIndexProperty
 
+    // ----- Common Components ----- //
+
     private val cGroups: MutableList<CGroup> = ArrayList()
     private val placeHolder: HBox = HBox().apply {
         boxHGrow = Priority.ALWAYS
     }
     private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
-        setOnMouseClicked { ATreeMenu.toggleGroupCreate() }
+        setOnSelect { ATreeMenu.toggleGroupCreate() }
     }
     private val vShift = 2
 
     init {
+        // TODO: Use ChangeListener and ListProperties
         groupsProperty.addListener(onNew { transGroups ->
             cGroups.clear()
             children.clear()
 
             if (transGroups.isNotEmpty()) {
-                children.addLast(placeHolder)
-                children.addLast(addItem)
+                children.add(placeHolder)
+                children.add(addItem)
             }
 
             for (transGroup in transGroups) {

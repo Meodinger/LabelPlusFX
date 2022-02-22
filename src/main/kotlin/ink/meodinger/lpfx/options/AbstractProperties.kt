@@ -21,6 +21,8 @@ import kotlin.collections.ArrayList
  */
 abstract class AbstractProperties {
 
+    // TODO : Use java properties
+
     companion object {
 
         private const val KV_SPILT = "="

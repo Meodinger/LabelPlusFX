@@ -397,8 +397,7 @@ object AMenuBar : MenuBar() {
         val completed = State.controller.specifyPicFiles()
         if (completed != null) {
             if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
-            // todo: Render
-            // if (State.isOpened) if (State.getPicFileNow().exists()) State.controller.renderLabelPane()
+            if (State.isOpened) if (State.getPicFileNow().exists()) State.controller.renderLabelPane()
         }
     }
     private fun cht2zh(inverse: Boolean = false) {

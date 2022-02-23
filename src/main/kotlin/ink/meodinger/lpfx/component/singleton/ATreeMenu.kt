@@ -85,6 +85,7 @@ object ATreeMenu : ContextMenu() {
 
                 // Update view
                 State.controller.removeLabelTreeItem(labelIndex)
+                State.controller.removeLabel(labelIndex)
                 // Edit data
                 State.removeTransLabel(State.currentPicName, labelIndex)
                 if (State.currentLabelIndex == labelIndex) State.currentLabelIndex = NOT_FOUND
@@ -162,6 +163,7 @@ object ATreeMenu : ContextMenu() {
                 // Edit data
                 State.addTransGroup(newGroup)
                 // Update view
+                State.controller.createLabelLayer()
                 State.controller.createGroupTreeItem(newGroup)
                 // Mark change
                 State.isChanged = true
@@ -195,10 +197,12 @@ object ATreeMenu : ContextMenu() {
             val groupName: String =
                 if (it.source is String) it.source as String
                 else view.selectionModel.selectedItem.value
+            val groupId = State.transFile.getGroupIdByName(groupName)
 
             view.selectionModel.clearSelection()
 
             // Update view
+            State.controller.removeLabelLayer(groupId)
             State.controller.removeGroupTreeItem(groupName)
             // Edit data
             State.removeTransGroup(groupName)

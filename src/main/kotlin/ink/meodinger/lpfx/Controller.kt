@@ -20,17 +20,16 @@ import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
+import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
-import javafx.beans.binding.IntegerBinding
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ListProperty
 import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.collections.ObservableMap
 import javafx.event.EventHandler
 import javafx.scene.Cursor
 import javafx.scene.control.*
@@ -199,6 +198,7 @@ class Controller(private val root: View) {
             // Edit data
             State.addTransLabel(State.currentPicName, transLabel)
             // Update view
+            createLabel(transLabel)
             createLabelTreeItem(transLabel)
             // Mark change
             State.isChanged = true
@@ -211,6 +211,7 @@ class Controller(private val root: View) {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
             // Update view
+            removeLabel(it.labelIndex)
             removeLabelTreeItem(it.labelIndex)
             // Edit data
             State.removeTransLabel(State.currentPicName, it.labelIndex)
@@ -295,29 +296,46 @@ class Controller(private val root: View) {
 
         // PictureBox
         cPicBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
-            private var lastMapObservable: ObservableMap<String, ObservableList<TransLabel>> = FXCollections.emptyObservableMap()
+            private var lastMapObservable = State.transFile.transMapObservable
 
             init {
+                // When switch to new TransFile, update
                 bind(State.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<String> {
-                if (lastMapObservable !== State.transFile.transMapObservable) {
-                    unbind(lastMapObservable)
-                    lastMapObservable = State.transFile.transMapObservable
-                    bind(State.transFile.transMapObservable)
-                }
+                // Abandon the ObservableValue of last TransFile
+                unbind(lastMapObservable)
+
+                // Get new ObservableValue
+                lastMapObservable = State.transFile.transMapObservable
+
+                // Bind to it
+                bind(State.transFile.transMapObservable)
 
                 return FXCollections.observableList(State.transFile.sortedPicNames)
             }
 
         })
-        cPicBox.valueProperty().bindBidirectional(State.currentPicNameProperty())
+        RuledGenericBidirectionalBinding.bind(
+            cPicBox.valueProperty(), rule@{ observable, _, newValue, _ ->
+                // Indicate current item was removed
+                // Use run later to avoid Issue#5 (Reason unclear).
+                // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
+                if (State.isOpened && newValue == null) Platform.runLater {
+                    observable.value = State.transFile.sortedPicNames[0]
+                }
+
+                // Directly bind bi-directionally will cause NPE
+                return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else emptyString()
+            },
+            State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
+        )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // GroupBox
         cGroupBox.itemsProperty().bind(object : ObjectBinding<ObservableList<String>>() {
-            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
+            private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<StringProperty>()
 
             init {
@@ -326,16 +344,18 @@ class Controller(private val root: View) {
             }
 
             override fun computeValue(): ObservableList<String> {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
-                    bind(State.transFile.groupListObservable)
+                // Abandon the ObservableValue of last TransFile
+                unbind(lastGroupListObservable)
+                for (property in boundGroupNameProperties) unbind(property)
+                boundGroupNameProperties.clear()
 
-                    for (property in boundGroupNameProperties) unbind(property)
-                    boundGroupNameProperties.clear()
-                    for (group in lastGroupListObservable) boundGroupNameProperties.add(group.nameProperty)
-                    for (property in boundGroupNameProperties) bind(property)
-                }
+                // Get new ObservableValue
+                lastGroupListObservable = State.transFile.groupListObservable
+                for (group in State.transFile.groupListObservable) boundGroupNameProperties.add(group.nameProperty)
+
+                // Bind to it
+                bind(State.transFile.groupListObservable)
+                for (property in boundGroupNameProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupNames)
             }
@@ -345,18 +365,20 @@ class Controller(private val root: View) {
 
         // GroupBar
         cGroupBar.groupsProperty().bind(object : ObjectBinding<ListProperty<TransGroup>>() {
-            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
+            private var lastGroupListObservable = State.transFile.groupListObservable
 
             init {
+                // When switch to new TransFile, update
                 bind(State.transFileProperty())
             }
 
             override fun computeValue(): ListProperty<TransGroup> {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
-                    bind(State.transFile.transMapObservable)
-                }
+                // Abandon the ObservableValue of last TransFile
+                unbind(lastGroupListObservable)
+                // Get new ObservableValue
+                lastGroupListObservable = State.transFile.groupListObservable
+                // Bind to it
+                bind(lastGroupListObservable)
 
                 return State.transFile.groupListProperty
             }
@@ -379,47 +401,33 @@ class Controller(private val root: View) {
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
-        cLabelPane.imageProperty().bind(Bindings.createObjectBinding(binding@{
-            if (!State.isOpened) return@binding INIT_IMAGE
-
-            var image: Image? = null
-            try {
-                val picFile = State.getPicFileNow()
-                if (picFile.exists()) {
-                    image = Image(picFile.toURI().toURL().toString())
-                } else {
-                    Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-                    showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
-                }
-            } catch (e: IOException) {
-                Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
-                Logger.exception(e)
-                showException(State.stage, e)
-            }
-            return@binding image ?: INIT_IMAGE
-        }, State.currentPicNameProperty()))
-        cLabelPane.layerCountProperty().bind(object : IntegerBinding() {
-            private var lastGroupListObservable = State.transFile.groupListObservable
+        cLabelPane.imageProperty().bind(object : ObjectBinding<Image>() {
 
             init {
-               bind(State.transFileProperty())
+                bind(State.currentPicNameProperty())
             }
 
-            override fun computeValue(): Int {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
-                    bind(lastGroupListObservable)
-                }
+            override fun computeValue(): Image {
+                if (!State.isOpened) return INIT_IMAGE
 
-                return State.transFile.groupCount
+                var image: Image? = null
+                try {
+                    val picFile = State.getPicFileNow()
+                    if (picFile.exists()) {
+                        image = Image(picFile.toURI().toURL().toString())
+                    } else {
+                        Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                        showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
+                    }
+                } catch (e: IOException) {
+                    Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
+                    Logger.exception(e)
+                    showException(State.stage, e)
+                }
+                return image ?: INIT_IMAGE
             }
 
         })
-        cLabelPane.labelsProperty().bind(Bindings.createObjectBinding(binding@{
-            return@binding if (!State.isOpened || State.currentPicName.isEmpty()) FXCollections.emptyObservableList()
-            else State.transFile.transMapObservable[State.currentPicName]!!
-        }, State.currentPicNameProperty()))
         cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupHexProperties = ArrayList<StringProperty>()
@@ -430,16 +438,18 @@ class Controller(private val root: View) {
             }
 
             override fun computeValue(): ObservableList<String> {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
-                    bind(State.transFile.groupListObservable)
+                // Abandon the ObservableValue of last TransFile
+                unbind(lastGroupListObservable)
+                for (property in boundGroupHexProperties) unbind(property)
+                boundGroupHexProperties.clear()
 
-                    for (property in boundGroupHexProperties) unbind(property)
-                    boundGroupHexProperties.clear()
-                    for (group in lastGroupListObservable) boundGroupHexProperties.add(group.colorHexProperty)
-                    for (property in boundGroupHexProperties) bind(property)
-                }
+                // Get new ObservableValue
+                lastGroupListObservable = State.transFile.groupListObservable
+                for (group in State.transFile.groupListObservable) boundGroupHexProperties.add(group.colorHexProperty)
+
+                // Bind to it
+                bind(State.transFile.groupListObservable)
+                for (property in boundGroupHexProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
@@ -507,6 +517,7 @@ class Controller(private val root: View) {
             if (!State.isOpened || it.isEmpty()) return@onNew
 
             renderTreeView()
+            renderLabelPane()
 
             labelInfo("Changed picture to $it")
         })
@@ -1094,6 +1105,7 @@ class Controller(private val root: View) {
     fun reset() {
         backupManager.clear()
 
+        cLabelPane.reset()
         cTreeView.reset()
         cTransArea.reset()
 
@@ -1110,6 +1122,37 @@ class Controller(private val root: View) {
     }
     fun updateLigatureRules() {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
+    }
+
+    // ----- LabelPane ----- //
+    fun renderLabelPane() {
+        cLabelPane.render(
+            State.transFile.groupCount,
+            State.transFile.getTransList(State.currentPicName)
+        )
+
+        Logger.info("LabelPane rendered pic: ${State.currentPicName}", LOGSRC_CONTROLLER)
+    }
+
+    fun createLabelLayer() {
+        cLabelPane.createLabelLayer()
+
+        Logger.info("Created label layer @ ${State.transFile.groupCount - 1}", LOGSRC_CONTROLLER)
+    }
+    fun removeLabelLayer(groupId: Int) {
+        cLabelPane.removeLabelLayer(groupId)
+
+        Logger.info("Removed label layer @ $groupId", LOGSRC_CONTROLLER)
+    }
+    fun createLabel(transLabel: TransLabel) {
+        cLabelPane.createLabel(transLabel)
+
+        Logger.info("Created label @ $transLabel", LOGSRC_CONTROLLER)
+    }
+    fun removeLabel(labelIndex: Int) {
+        cLabelPane.removeLabel(labelIndex)
+
+        Logger.info("Removed label @ $labelIndex", LOGSRC_CONTROLLER)
     }
 
     // ----- TreeView ----- //

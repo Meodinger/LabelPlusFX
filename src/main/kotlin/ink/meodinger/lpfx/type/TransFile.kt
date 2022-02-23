@@ -127,7 +127,7 @@ open class TransFile @JsonCreator constructor(
     val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
     val commentProperty: StringProperty = SimpleStringProperty(comment)
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
-    val transMapProperty: MapProperty<String, MutableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap))
+    val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
 
     // ----- Lazy ---- //
 
@@ -139,7 +139,7 @@ open class TransFile @JsonCreator constructor(
     val version: IntArray by versionProperty
     var comment: String by commentProperty
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
-    val transMapObservable: ObservableMap<String, MutableList<TransLabel>> by transMapProperty
+    val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
 
     val groupCount: Int get() = groupListObservable.size
     val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
@@ -196,7 +196,7 @@ open class TransFile @JsonCreator constructor(
     // ----- TransList (TransMap) ----- //
 
     open fun addTransList(picName: String) {
-        transMapObservable[picName] = ArrayList()
+        transMapObservable[picName] = FXCollections.observableArrayList()
     }
     open fun getTransList(picName: String): List<TransLabel> {
         return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)

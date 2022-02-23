@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.property.*
 import javafx.stage.Stage
@@ -34,7 +35,7 @@ object State {
     private val transFileProperty         = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
     private val translationFileProperty   = SimpleObjectProperty(DEFAULT_FILE)
     private val projectFolderProperty     = SimpleObjectProperty(DEFAULT_FILE)
-    private val currentPicNameProperty    = SimpleStringProperty("")
+    private val currentPicNameProperty    = SimpleStringProperty(emptyString())
     private val currentGroupIdProperty    = SimpleIntegerProperty(0)
     private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     private val viewModeProperty          = SimpleObjectProperty(ViewMode.IndexMode)
@@ -100,7 +101,7 @@ object State {
         transFile = TransFile.DEFAULT_TRANSFILE
         translationFile = DEFAULT_FILE
         projectFolder = DEFAULT_FILE
-        currentPicName = ""
+        currentPicName = emptyString()
         currentGroupId = NOT_FOUND
         currentLabelIndex = NOT_FOUND
         viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[WorkMode.InputMode.ordinal]]
@@ -181,10 +182,7 @@ object State {
     /**
      * Get current picture's FileSystem file
      */
-    fun getPicFileNow(): File {
-        if (!isOpened || currentPicName == "") return DEFAULT_FILE
-        return transFile.getFileOrByProject(currentPicName, projectFolder)
-    }
+    fun getPicFileNow(): File = if (isOpened && currentPicName.isNotEmpty()) transFile.getFileOrByProject(currentPicName, projectFolder) else DEFAULT_FILE
 
     /**
      * Get current TransFile's FileSystem file's directory

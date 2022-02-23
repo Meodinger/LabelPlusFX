@@ -3,6 +3,7 @@ package ink.meodinger.lpfx
 import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.scene.control.TextFormatter
 import java.io.File
@@ -46,7 +47,7 @@ const val FONT_SIZE_MAX = 64
 /**
  * Default File Object
  */
-val DEFAULT_FILE = File("")
+val DEFAULT_FILE = File(emptyString())
 
 /**
  * TreeItem Graphic radius

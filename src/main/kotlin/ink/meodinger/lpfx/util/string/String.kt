@@ -9,7 +9,12 @@ package ink.meodinger.lpfx.util.string
 
 /**
  * Repeat char
- *
  * @param n times to repeat
  */
 fun Char.repeat(n: Int): String = toString().repeat(n)
+
+/**
+ * Return an empty String
+ * @return String("")
+ */
+fun emptyString(): String = ""

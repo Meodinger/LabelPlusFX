@@ -20,6 +20,7 @@ import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
+import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import javafx.application.Platform
@@ -325,7 +326,7 @@ class Controller(private val root: View) {
                 }
 
                 // Directly bind bi-directionally will cause NPE
-                return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else ""
+                return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else emptyString()
             },
             State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
@@ -399,6 +400,33 @@ class Controller(private val root: View) {
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
+        cLabelPane.imageProperty().bind(object : ObjectBinding<Image>() {
+
+            init {
+                bind(State.currentPicNameProperty())
+            }
+
+            override fun computeValue(): Image {
+                if (!State.isOpened) return INIT_IMAGE
+
+                var image: Image? = null
+                try {
+                    val picFile = State.getPicFileNow()
+                    if (picFile.exists()) {
+                        image = Image(picFile.toURI().toURL().toString())
+                    } else {
+                        Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                        showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
+                    }
+                } catch (e: IOException) {
+                    Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
+                    Logger.exception(e)
+                    showException(State.stage, e)
+                }
+                return image ?: INIT_IMAGE
+            }
+
+        })
         cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
             private val boundGroupHexProperties = ArrayList<StringProperty>()
@@ -1076,9 +1104,6 @@ class Controller(private val root: View) {
     fun reset() {
         backupManager.clear()
 
-        // cSlider
-        // cPicBox
-        // cGroupBox
         cLabelPane.reset()
         cTreeView.reset()
         cTransArea.reset()
@@ -1095,38 +1120,11 @@ class Controller(private val root: View) {
 
     // ----- LabelPane ----- //
     fun renderLabelPane() {
-        try {
-            val picFile = State.getPicFileNow()
-            if (picFile.exists()) {
-                val image = Image(picFile.toURI().toURL().toString())
-                cLabelPane.render(
-                    image,
-                    State.transFile.groupCount,
-                    State.transFile.getTransList(State.currentPicName)
-                )
-            } else {
-                cLabelPane.scale = cLabelPane.initScale
-                cLabelPane.render(null, 0, emptyList())
-                cLabelPane.moveToCenter()
+        cLabelPane.render(
+            State.transFile.groupCount,
+            State.transFile.getTransList(State.currentPicName)
+        )
 
-                Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-                showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
-                return
-            }
-        } catch (e: IOException) {
-            Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
-            Logger.exception(e)
-            showException(State.stage, e)
-            return
-        }
-
-        when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
-            Settings.NEW_PIC_SCALE_100  -> cLabelPane.scale = 1.0 // 100%
-            Settings.NEW_PIC_SCALE_FIT  -> cLabelPane.fitToPane() // Fit
-            Settings.NEW_PIC_SCALE_LAST -> doNothing() // Last
-        }
-
-        cLabelPane.moveToZero()
         Logger.info("LabelPane rendered pic: ${State.currentPicName}", LOGSRC_CONTROLLER)
     }
 

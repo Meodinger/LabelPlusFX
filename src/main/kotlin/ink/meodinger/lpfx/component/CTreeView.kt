@@ -11,6 +11,7 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.isNotBound
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ObjectProperty
@@ -34,7 +35,7 @@ import javafx.scene.shape.Circle
  */
 class CTreeView: TreeView<String>() {
 
-    private val picNameProperty: StringProperty = SimpleStringProperty("")
+    private val picNameProperty: StringProperty = SimpleStringProperty(emptyString())
     fun picNameProperty(): StringProperty = picNameProperty
     var picName: String by picNameProperty
 

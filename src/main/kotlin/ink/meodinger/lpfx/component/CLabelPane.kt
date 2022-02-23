@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.isAltOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.*
@@ -86,7 +87,7 @@ class CLabelPane : ScrollPane() {
 
     // ----- Layer System ----- //
 
-    /**
+    /*
      *           |   Layout   | Width
      * -----------------------------
      * pane      | -          | actual width
@@ -200,6 +201,10 @@ class CLabelPane : ScrollPane() {
     fun setOnLabelMove(handler: EventHandler<LabelEvent>)                        = onLabelMoveProperty.set(handler)
     fun setOnLabelOther(handler: EventHandler<LabelEvent>)                       = onLabelOtherProperty.set(handler)
 
+    private val imageProperty: ObjectProperty<Image> = view.imageProperty()
+    fun imageProperty(): ObjectProperty<Image> = imageProperty
+    var image: Image by imageProperty
+
     private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
     fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
     var colorHexList: ObservableList<String> by colorHexListProperty
@@ -208,42 +213,38 @@ class CLabelPane : ScrollPane() {
     fun defaultCursorProperty(): ObjectProperty<Cursor> = defaultCursorProperty
     var defaultCursor: Cursor by defaultCursorProperty
 
-    private var image: Image by view.imageProperty()
-    private val imageWidth: Double get() = image.width
-    private val imageHeight: Double get() = image.height
-
     init {
         textLayer.isMouseTransparent = true
         textLayer.graphicsContext2D.font = TEXT_FONT
         textLayer.graphicsContext2D.textBaseline = VPos.TOP
+        textLayer.widthProperty().bind(Bindings.createDoubleBinding({ image.width }, imageProperty))
+        textLayer.heightProperty().bind(Bindings.createDoubleBinding({ image.height }, imageProperty))
         view.isPreserveRatio = true
         view.isPickOnBounds = true
         root.alignment = Pos.CENTER
 
         addEventFilter(ScrollEvent.SCROLL) {
-            // Use filter to process event before actually action
-
             // Remove text when scroll event fired
             removeText()
 
             // Horizon scroll
             if (it.isControlDown) {
-                hvalue -= it.deltaY / imageWidth
+                hvalue -= it.deltaY / image.height
                 it.consume()
             }
         }
 
         // Scale
-        scaleProperty.addListener(onNew<Number, Double> {
-            root.scaleX = it
-            root.scaleY = it
-        })
-        root.addEventHandler(ScrollEvent.SCROLL) {
+        addEventFilter(ScrollEvent.SCROLL) {
             if (it.isAltOrMetaDown) {
                 scale += if (it.deltaY > 0) 0.1 else -0.1
                 it.consume()
             }
         }
+        scaleProperty.addListener(onNew<Number, Double> {
+            root.scaleX = it
+            root.scaleY = it
+        })
 
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
@@ -282,7 +283,7 @@ class CLabelPane : ScrollPane() {
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
             onLabelOther.handle(LabelEvent(LabelEvent.LABEL_OTHER,
                 it, NOT_FOUND,
-                it.x / imageWidth, it.y / imageHeight,
+                it.x / image.width, it.y / image.height,
                 it.x, it.y
             ))
         }
@@ -292,12 +293,12 @@ class CLabelPane : ScrollPane() {
 
                 // Make sure all labels will not be placed partial outside
                 val pickRadius = Settings[Settings.LabelRadius].asDouble().coerceAtLeast(CLabel.MIN_PICK_RADIUS)
-                if (it.x <= pickRadius || it.x + pickRadius >= imageWidth) return@addEventHandler
-                if (it.y <= pickRadius || it.y + pickRadius >= imageHeight) return@addEventHandler
+                if (it.x <= pickRadius || it.x + pickRadius >= image.width) return@addEventHandler
+                if (it.y <= pickRadius || it.y + pickRadius >= image.height) return@addEventHandler
 
                 onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE,
                     it, NOT_FOUND,
-                    it.x / imageWidth, it.y / imageHeight,
+                    it.x / image.width, it.y / image.height,
                     it.x, it.y
                 ))
             }
@@ -319,7 +320,6 @@ class CLabelPane : ScrollPane() {
 
         scale = initScale
 
-        setupImage(INIT_IMAGE)
         setupLayers(0)
         setupLabels(emptyList())
 
@@ -336,7 +336,7 @@ class CLabelPane : ScrollPane() {
      * @throws IOException when Image load failed
      */
     @Throws(IOException::class)
-    fun render(image: Image?, layerCount: Int, transLabels: List<TransLabel>) {
+    fun render(layerCount: Int, transLabels: List<TransLabel>) {
         container.isDisable = true
 
         vvalue = 0.0
@@ -344,11 +344,23 @@ class CLabelPane : ScrollPane() {
         root.layoutX = 0.0
         root.layoutY = 0.0
 
-        setupImage(image ?: INIT_IMAGE)
         setupLayers(layerCount)
         setupLabels(transLabels)
 
-        container.isDisable = image == null
+        container.isDisable = (image == INIT_IMAGE).also {
+            if (it) {
+                scale = initScale
+                moveToCenter()
+            } else {
+                when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
+                    Settings.NEW_PIC_SCALE_100  -> scale = 1.0 // 100%
+                    Settings.NEW_PIC_SCALE_FIT  -> fitToPane() // Fit
+                    Settings.NEW_PIC_SCALE_LAST -> doNothing() // Last
+                }
+                moveToZero()
+            }
+        }
+
     }
 
     private fun getLabel(labelIndex: Int): CLabel {
@@ -360,16 +372,11 @@ class CLabelPane : ScrollPane() {
         throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], label.index))
     }
 
-    private fun setupImage(image: Image) {
-        this.image = image
-    }
     private fun setupLayers(count: Int) {
         labelLayers.forEach { root.children.remove(it) }
         labelLayers.clear()
 
         removeText()
-        textLayer.width = imageWidth
-        textLayer.height = imageHeight
 
         for (i in 0 until count) createLabelLayer()
     }
@@ -431,8 +438,8 @@ class CLabelPane : ScrollPane() {
             //  |  R         LR      |
             //  |LR|-----    LR      |
             //  |  |         --------|
-            if (newLayoutX < 0 || newLayoutX > imageWidth - 2 * radius) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > imageHeight - 2 * radius) return@addEventHandler
+            if (newLayoutX < 0 || newLayoutX > image.width - 2 * radius) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > image.height - 2 * radius) return@addEventHandler
 
             label.layoutX = newLayoutX
             label.layoutY = newLayoutY
@@ -458,13 +465,6 @@ class CLabelPane : ScrollPane() {
             label.cursor = defaultCursor
             removeText()
         }
-
-
-        /*
-         * TODO: Add Event Handle to CLabel
-         *     LabelEvent.Pointed,
-         *     LabelEvent.Clicked,
-         */
 
         // Event handle
         label.setOnMouseMoved {
@@ -498,8 +498,8 @@ class CLabelPane : ScrollPane() {
         //  |    |
 
         // Layout
-        label.layoutX = -radius + transLabel.x * imageWidth
-        label.layoutY = -radius + transLabel.y * imageHeight
+        label.layoutX = -radius + transLabel.x * image.width
+        label.layoutY = -radius + transLabel.y * image.height
         labelLayers[transLabel.groupId].children.add(label)
 
         // Bind
@@ -511,7 +511,7 @@ class CLabelPane : ScrollPane() {
     }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
-        val s = omitWideText(omitHighText(text), (imageWidth - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
+        val s = omitWideText(omitHighText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
         val t = Text(s).apply { font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width
@@ -527,11 +527,11 @@ class CLabelPane : ScrollPane() {
         var shapeX = x + SHIFT_X
         var shapeY = y
 
-        if (shapeX + shapeW > imageWidth) {
+        if (shapeX + shapeW > image.width) {
             textX = x - textW - SHIFT_X - TEXT_INSET
             shapeX = x - shapeW - SHIFT_X
         }
-        if (shapeY + shapeH > imageHeight) {
+        if (shapeY + shapeH > image.height) {
             textY = y - textH - TEXT_INSET
             shapeY = y - shapeH
         }
@@ -582,8 +582,8 @@ class CLabelPane : ScrollPane() {
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
-        val fakeX = imageWidth / 2 * (1 - scale) + label.layoutX * scale
-        val fakeY = imageHeight / 2 * (1 - scale) + label.layoutY * scale
+        val fakeX = image.width / 2 * (1 - scale) + label.layoutX * scale
+        val fakeY = image.height / 2 * (1 - scale) + label.layoutY * scale
 
         // To center
         // -> Scroll / 2 = Layout + Fake
@@ -595,18 +595,18 @@ class CLabelPane : ScrollPane() {
         vvalue = 0.0
         hvalue = 0.0
 
-        root.layoutX = - (1 - scale) * imageWidth / 2
-        root.layoutY = - (1 - scale) * imageHeight / 2
+        root.layoutX = - (1 - scale) * image.width / 2
+        root.layoutY = - (1 - scale) * image.height / 2
     }
     fun moveToCenter() {
         vvalue = 0.0
         hvalue = 0.0
 
-        root.layoutX = (width - imageWidth) / 2
-        root.layoutY = (height - imageHeight) / 2
+        root.layoutX = (width - image.width) / 2
+        root.layoutY = (height - image.height) / 2
     }
 
     fun fitToPane() {
-        scale = width / imageWidth
+        scale = width / image.width
     }
 }

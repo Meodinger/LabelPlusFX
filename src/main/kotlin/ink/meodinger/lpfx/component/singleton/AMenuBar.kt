@@ -501,14 +501,16 @@ object AMenuBar : MenuBar() {
             if (Settings[property.key].asString() == property.value) continue
 
             when (property.key) {
-                Settings.LabelAlpha, Settings.LabelRadius -> updatePane = true
+                Settings.LabelAlpha, Settings.LabelRadius -> updatePane = true // todo
                 Settings.LigatureRules -> updateRules = true
+                // todo: add new pic scale
+                // todo: use property in properties
             }
 
             Settings[property.key] = property
         }
 
-        if (updatePane && State.isOpened) State.controller.renderLabelPane()
+        if (updatePane && State.isOpened) State.controller.updateLabelPane()
         if (updateRules) State.controller.updateLigatureRules()
     }
     private fun logs() {

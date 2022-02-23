@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
@@ -84,6 +83,10 @@ class CLabelPane : ScrollPane() {
             val LABEL_CLICKED = EventType(LABEL_ANY, "LABEL_CLICKED")
         }
     }
+
+    // ----- Enum ----- //
+
+    enum class NewPictureScale { DEFAULT, FULL, FIT, PREVIOUS }
 
     // ----- Layer System ----- //
 
@@ -205,13 +208,25 @@ class CLabelPane : ScrollPane() {
     fun imageProperty(): ObjectProperty<Image> = imageProperty
     var image: Image by imageProperty
 
+    private val labelRadiusProperty: DoubleProperty = SimpleDoubleProperty(24.0)
+    fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
+    var labelRadius: Double by labelRadiusProperty
+
+    private val labelAlphaProperty: StringProperty = SimpleStringProperty("A0")
+    fun labelAlphaProperty(): StringProperty = labelAlphaProperty
+    var labelAlpha: String by labelAlphaProperty
+
     private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
     fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
     var colorHexList: ObservableList<String> by colorHexListProperty
 
-    private val defaultCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
-    fun defaultCursorProperty(): ObjectProperty<Cursor> = defaultCursorProperty
-    var defaultCursor: Cursor by defaultCursorProperty
+    private val commonCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
+    fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
+    var commonCursor: Cursor by commonCursorProperty
+
+    private val newPictureScaleProperty: ObjectProperty<NewPictureScale> = SimpleObjectProperty(NewPictureScale.DEFAULT)
+    fun newPictureScaleProperty(): ObjectProperty<NewPictureScale> = newPictureScaleProperty
+    var newPictureScale: NewPictureScale by newPictureScaleProperty
 
     init {
         textLayer.isMouseTransparent = true
@@ -264,18 +279,18 @@ class CLabelPane : ScrollPane() {
             }
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
-            root.cursor = defaultCursor
+            root.cursor = commonCursor
         }
 
         // Cursor
         root.addEventHandler(MouseEvent.MOUSE_ENTERED) {
-            root.cursor = defaultCursor
+            root.cursor = commonCursor
         }
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            root.cursor = defaultCursor
+            root.cursor = commonCursor
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
-            root.cursor = defaultCursor
+            root.cursor = commonCursor
             removeText()
         }
 
@@ -292,7 +307,7 @@ class CLabelPane : ScrollPane() {
                 if (!it.isStillSincePress) return@addEventHandler
 
                 // Make sure all labels will not be placed partial outside
-                val pickRadius = Settings[Settings.LabelRadius].asDouble().coerceAtLeast(CLabel.MIN_PICK_RADIUS)
+                val pickRadius = labelRadius.coerceAtLeast(CLabel.MIN_PICK_RADIUS)
                 if (it.x <= pickRadius || it.x + pickRadius >= image.width) return@addEventHandler
                 if (it.y <= pickRadius || it.y + pickRadius >= image.height) return@addEventHandler
 
@@ -352,10 +367,11 @@ class CLabelPane : ScrollPane() {
                 scale = initScale
                 moveToCenter()
             } else {
-                when (Settings[Settings.ScaleOnNewPicture].asInteger()) {
-                    Settings.NEW_PIC_SCALE_100  -> scale = 1.0 // 100%
-                    Settings.NEW_PIC_SCALE_FIT  -> fitToPane() // Fit
-                    Settings.NEW_PIC_SCALE_LAST -> doNothing() // Last
+                when (newPictureScale) {
+                    NewPictureScale.DEFAULT  -> scale = initScale
+                    NewPictureScale.FULL     -> scale = 1.0 // 100%
+                    NewPictureScale.FIT      -> fitToPane() // Fit
+                    NewPictureScale.PREVIOUS -> doNothing() // Last
                 }
                 moveToZero()
             }
@@ -405,14 +421,12 @@ class CLabelPane : ScrollPane() {
      * Properties (groupId, index) of created CLabel will bind to TransLabel
      */
     fun createLabel(transLabel: TransLabel) {
-        val radius = Settings[Settings.LabelRadius].asDouble()
-        val alpha = Settings[Settings.LabelAlpha].asString()
-
-        val label = CLabel(radius = radius).apply {
+        val label = CLabel().apply {
+            radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
             colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(colorHexList[transLabel.groupId] + alpha) },
-                colorHexListProperty, transLabel.groupIdProperty
+                { Color.web(colorHexList[transLabel.groupId] + labelAlpha) },
+                labelAlphaProperty, colorHexListProperty, transLabel.groupIdProperty
             ))
         }
 
@@ -438,8 +452,8 @@ class CLabelPane : ScrollPane() {
             //  |  R         LR      |
             //  |LR|-----    LR      |
             //  |  |         --------|
-            if (newLayoutX < 0 || newLayoutX > image.width - 2 * radius) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > image.height - 2 * radius) return@addEventHandler
+            if (newLayoutX < 0 || newLayoutX > image.width - 2 * label.radius) return@addEventHandler
+            if (newLayoutY < 0 || newLayoutY > image.height - 2 * label.radius) return@addEventHandler
 
             label.layoutX = newLayoutX
             label.layoutY = newLayoutY
@@ -462,7 +476,7 @@ class CLabelPane : ScrollPane() {
             label.cursor = Cursor.HAND
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
-            label.cursor = defaultCursor
+            label.cursor = commonCursor
             removeText()
         }
 
@@ -498,13 +512,13 @@ class CLabelPane : ScrollPane() {
         //  |    |
 
         // Layout
-        label.layoutX = -radius + transLabel.x * image.width
-        label.layoutY = -radius + transLabel.y * image.height
+        label.layoutX = -label.radius + transLabel.x * image.width
+        label.layoutY = -label.radius + transLabel.y * image.height
         labelLayers[transLabel.groupId].children.add(label)
 
         // Bind
-        transLabel.xProperty.bind((label.layoutXProperty() + radius) / view.image.widthProperty())
-        transLabel.yProperty.bind((label.layoutYProperty() + radius) / view.image.heightProperty())
+        transLabel.xProperty.bind((label.layoutXProperty() + label.radius) / view.image.widthProperty())
+        transLabel.yProperty.bind((label.layoutYProperty() + label.radius) / view.image.heightProperty())
 
         // Add label in list
         labels.add(label)
@@ -561,6 +575,7 @@ class CLabelPane : ScrollPane() {
         val groupId = getLabelGroup(label)
 
         // Unbind
+        label.radiusProperty().unbind()
         label.indexProperty().unbind()
         label.colorProperty().unbind()
 

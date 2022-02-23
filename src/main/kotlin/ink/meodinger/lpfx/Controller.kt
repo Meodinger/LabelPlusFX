@@ -154,8 +154,9 @@ class Controller(private val root: View) {
         Logger.info("Applied Preferences", LOGSRC_CONTROLLER)
 
         // Settings
-        State.viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
+        updateLabelPane()
         updateLigatureRules()
+        State.viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
         Logger.info("Applied Settings", LOGSRC_CONTROLLER)
 
         // Drag and Drop
@@ -453,7 +454,7 @@ class Controller(private val root: View) {
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
         })
-        cLabelPane.defaultCursorProperty().bind(Bindings.createObjectBinding(binding@{
+        cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding(binding@{
             return@binding when (State.workMode) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
@@ -1114,6 +1115,11 @@ class Controller(private val root: View) {
     }
 
     // ----- Update component properties ----- //
+    fun updateLabelPane() {
+        cLabelPane.newPictureScale = CLabelPane.NewPictureScale.values()[Settings[Settings.ScaleOnNewPicture].asInteger()]
+        cLabelPane.labelRadius = Settings[Settings.LabelRadius].asDouble()
+        cLabelPane.labelAlpha = Settings[Settings.LabelAlpha].asString()
+    }
     fun updateLigatureRules() {
         cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
     }

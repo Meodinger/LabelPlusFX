@@ -86,7 +86,14 @@ class CLabelPane : ScrollPane() {
 
     // ----- Enum ----- //
 
-    enum class NewPictureScale { DEFAULT, FULL, FIT, PREVIOUS }
+    enum class NewPictureScale(private val description: String) {
+        DEFAULT(I18N["label_pane.nps.default"]),
+        FULL(I18N["label_pane.nps.full"]),
+        FIT(I18N["label_pane.nps.fit"]),
+        PREVIOUS(I18N["label_pane.nps.previous"]);
+
+        override fun toString(): String = description
+    }
 
     // ----- Layer System ----- //
 

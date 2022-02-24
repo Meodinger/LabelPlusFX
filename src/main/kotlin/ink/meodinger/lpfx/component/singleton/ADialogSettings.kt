@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.CLabel
+import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CInputLabel
@@ -159,11 +160,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(HBox(), 0, 2)
                     add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
                     add(mComboScale, 0, 4, 2, 1) {
-                        items.setAll(listOf(
-                            I18N["settings.mode.scale.100"],
-                            I18N["settings.mode.scale.fit"],
-                            I18N["settings.mode.scale.last"]
-                        ))
+                        items.setAll(CLabelPane.NewPictureScale.values().map { it.toString() })
                         isWrapped = true
                     }
                 }

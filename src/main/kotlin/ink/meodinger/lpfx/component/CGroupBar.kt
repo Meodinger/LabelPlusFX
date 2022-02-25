@@ -67,7 +67,7 @@ class CGroupBar : HBox() {
                     throw IllegalStateException("Updated: $it")
                 } else {
                     if (it.wasAdded()) for (transGroup in it.addedSubList) createGroup(transGroup)
-                    if (it.wasRemoved()) for (groupId in it.from .. it.to) removeGroup(groupId)
+                    if (it.wasRemoved()) for (transGroup in it.removed) removeGroup(transGroup)
                 }
             }
 
@@ -98,7 +98,8 @@ class CGroupBar : HBox() {
             setOnSelect { select(groupId) }
         }.also { cGroups.add(it) }, vShift)
     }
-    private fun removeGroup(groupId: Int) {
+    private fun removeGroup(transGroup: TransGroup) {
+        val groupId = cGroups.indexOfFirst { it.name == transGroup.name }
         children.remove(cGroups.removeAt(groupId))
 
         if (cGroups.isEmpty()) {

@@ -17,6 +17,7 @@ import ink.meodinger.lpfx.util.string.omitWideText
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.Event
 import javafx.event.EventHandler
@@ -35,7 +36,6 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import java.io.IOException
 
 
 /**
@@ -50,11 +50,10 @@ import java.io.IOException
 class CLabelPane : ScrollPane() {
 
     companion object {
-
-        // scale
+        // Scale
         private const val NOT_SET = -1.0
 
-        // text display
+        // Text Display
         /**
          * Rect based shift
          */
@@ -100,27 +99,28 @@ class CLabelPane : ScrollPane() {
     /*
      *           |   Layout   | Width
      * -----------------------------
-     * pane      | -          | actual width
-     * container | 0 - Fixed  | ?
+     * text      | with image | image width
+     * label     | with image | image width
      * image     | left-top   | image width
      * root      | with image | image width
-     * layer     | with image | image width
+     * container | 0 - Fixed  | ?
+     * pane      | -          | actual width
      */
 
     /**
-     * For all text display
+     * For text display
      */
     private val textLayer = Canvas()
 
     /**
-     * For group-based label display
+     * For labels display
      */
-    private val labelLayers = ArrayList<AnchorPane>()
+    private val labelLayer = AnchorPane().apply { isPickOnBounds = false }
 
     /**
      * For image display
      */
-    private val view = ImageView(INIT_IMAGE)
+    private val imageView = ImageView(INIT_IMAGE)
 
     /**
      * For display, scale, drag, label, event handle
@@ -136,7 +136,7 @@ class CLabelPane : ScrollPane() {
 
     private var shiftX = 0.0
     private var shiftY = 0.0
-    private val labels = ArrayList<CLabel>()
+    private val cLabels = ArrayList<CLabel>()
 
     // ----- Properties ----- //
 
@@ -185,7 +185,6 @@ class CLabelPane : ScrollPane() {
             }
         }
 
-
     private val onLabelPlaceProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
     private val onLabelRemoveProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
     private val onLabelPointedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -211,9 +210,17 @@ class CLabelPane : ScrollPane() {
     fun setOnLabelMove(handler: EventHandler<LabelEvent>)                        = onLabelMoveProperty.set(handler)
     fun setOnLabelOther(handler: EventHandler<LabelEvent>)                       = onLabelOtherProperty.set(handler)
 
-    private val imageProperty: ObjectProperty<Image> = view.imageProperty()
+    private val imageProperty: ObjectProperty<Image> = imageView.imageProperty()
     fun imageProperty(): ObjectProperty<Image> = imageProperty
     var image: Image by imageProperty
+
+    private val labelsProperty: ListProperty<TransLabel> = SimpleListProperty(FXCollections.emptyObservableList())
+    fun labelsProperty(): ListProperty<TransLabel> = labelsProperty
+    var labels: ObservableList<TransLabel> by labelsProperty
+
+    private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
+    fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
+    var colorHexList: ObservableList<String> by colorHexListProperty
 
     private val labelRadiusProperty: DoubleProperty = SimpleDoubleProperty(24.0)
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
@@ -222,10 +229,6 @@ class CLabelPane : ScrollPane() {
     private val labelAlphaProperty: StringProperty = SimpleStringProperty("A0")
     fun labelAlphaProperty(): StringProperty = labelAlphaProperty
     var labelAlpha: String by labelAlphaProperty
-
-    private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
-    fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
-    var colorHexList: ObservableList<String> by colorHexListProperty
 
     private val commonCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
     fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
@@ -241,8 +244,10 @@ class CLabelPane : ScrollPane() {
         textLayer.graphicsContext2D.textBaseline = VPos.TOP
         textLayer.widthProperty().bind(Bindings.createDoubleBinding({ image.width }, imageProperty))
         textLayer.heightProperty().bind(Bindings.createDoubleBinding({ image.height }, imageProperty))
-        view.isPreserveRatio = true
-        view.isPickOnBounds = true
+        labelLayer.prefWidthProperty().bind(Bindings.createDoubleBinding({ image.width }, imageProperty))
+        labelLayer.prefHeightProperty().bind(Bindings.createDoubleBinding({ image.height }, imageProperty))
+        imageView.isPreserveRatio = true
+        imageView.isPickOnBounds = true
         root.alignment = Pos.CENTER
 
         addEventFilter(ScrollEvent.SCROLL) {
@@ -257,7 +262,7 @@ class CLabelPane : ScrollPane() {
         }
 
         // Scale
-        addEventFilter(ScrollEvent.SCROLL) {
+        root.addEventFilter(ScrollEvent.SCROLL) {
             if (it.isAltOrMetaDown) {
                 scale += if (it.deltaY > 0) 0.1 else -0.1
                 it.consume()
@@ -326,54 +331,20 @@ class CLabelPane : ScrollPane() {
             }
         }
 
-        root.children.add(view)
+        // Init layer system
+        root.children.add(imageView)
+        root.children.add(labelLayer)
         root.children.add(textLayer)
 
         content = container withContent root
-    }
 
-    fun reset() {
-        container.isDisable = true
-
-        vvalue = 0.0
-        hvalue = 0.0
-        root.layoutX = 0.0
-        root.layoutY = 0.0
-
-        scale = initScale
-
-        setupLayers(0)
-        setupLabels(emptyList())
-
-        moveToCenter()
-
-        container.isDisable = false
-    }
-
-    /**
-     * Render CLabels
-     * @param image Image to show. Set to null to show INIT_IMAGE
-     * @param layerCount How many layers to render
-     * @param transLabels TransLabels to show
-     * @throws IOException when Image load failed
-     */
-    @Throws(IOException::class)
-    fun render(layerCount: Int, transLabels: List<TransLabel>) {
-        container.isDisable = true
-
-        vvalue = 0.0
-        hvalue = 0.0
-        root.layoutX = 0.0
-        root.layoutY = 0.0
-
-        setupLayers(layerCount)
-        setupLabels(transLabels)
-
-        container.isDisable = (image == INIT_IMAGE).also {
-            if (it) {
+        imageProperty.addListener(onNew {
+            if (it === INIT_IMAGE) {
+                container.isDisable = true
                 scale = initScale
                 moveToCenter()
             } else {
+                container.isDisable = false
                 when (newPictureScale) {
                     NewPictureScale.DEFAULT  -> scale = initScale
                     NewPictureScale.FULL     -> scale = 1.0 // 100%
@@ -382,52 +353,29 @@ class CLabelPane : ScrollPane() {
                 }
                 moveToZero()
             }
-        }
-
+        })
+        labelsProperty.addListener(ListChangeListener {
+            while (it.next()) {
+                if (it.wasPermutated()) {
+                    // will not happen
+                    throw IllegalStateException("Permuted: $it")
+                } else if (it.wasUpdated()) {
+                    // will not happen
+                    throw IllegalStateException("Updated: $it")
+                } else {
+                    if (it.wasAdded()) for (transLabel in it.addedSubList) createLabel(transLabel)
+                    if (it.wasRemoved()) for (transLabel in it.removed) removeLabel(transLabel)
+                }
+            }
+        })
     }
 
     private fun getLabel(labelIndex: Int): CLabel {
-        for (label in labels) if (label.index == labelIndex) return label
+        for (label in cLabels) if (label.index == labelIndex) return label
         throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
     }
-    private fun getLabelGroup(label: CLabel): Int {
-        for (i in labelLayers.indices) if (labelLayers[i].children.contains(label)) return i
-        throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], label.index))
-    }
 
-    private fun setupLayers(count: Int) {
-        labelLayers.forEach { root.children.remove(it) }
-        labelLayers.clear()
-
-        removeText()
-
-        for (i in 0 until count) createLabelLayer()
-    }
-    private fun setupLabels(transLabels: List<TransLabel>) {
-        for (label in labels) {
-            label.indexProperty().unbind()
-            label.colorProperty().unbind()
-        }
-        labels.clear()
-
-        for (transLabel in transLabels) createLabel(transLabel)
-    }
-
-    fun createLabelLayer() {
-        val pane = AnchorPane().apply { isPickOnBounds = false }
-        // Layout
-        root.children.add(pane)
-        // Add layer in list
-        labelLayers.add(pane)
-        // Move text layer to front
-        textLayer.toFront()
-    }
-    /**
-     * Properties (x, y) of argument TransLabel will bind to created CLabel;
-     *
-     * Properties (groupId, index) of created CLabel will bind to TransLabel
-     */
-    fun createLabel(transLabel: TransLabel) {
+    private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
             radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
@@ -521,15 +469,30 @@ class CLabelPane : ScrollPane() {
         // Layout
         label.layoutX = -label.radius + transLabel.x * image.width
         label.layoutY = -label.radius + transLabel.y * image.height
-        labelLayers[transLabel.groupId].children.add(label)
 
         // Bind
-        transLabel.xProperty.bind((label.layoutXProperty() + label.radius) / view.image.widthProperty())
-        transLabel.yProperty.bind((label.layoutYProperty() + label.radius) / view.image.heightProperty())
+        transLabel.xProperty.bind((label.layoutXProperty() + label.radius) / imageView.image.widthProperty())
+        transLabel.yProperty.bind((label.layoutYProperty() + label.radius) / imageView.image.heightProperty())
 
-        // Add label in list
-        labels.add(label)
+        // Layout
+        labelLayer.children.add(label)
+        // Add cLabel to list
+        cLabels.add(label)
     }
+    private fun removeLabel(transLabel: TransLabel) {
+        val label = getLabel(transLabel.index)
+
+        // Unbind
+        label.radiusProperty().unbind()
+        label.indexProperty().unbind()
+        label.colorProperty().unbind()
+
+        // Remove view
+        labelLayer.children.remove(label)
+        // Remove data
+        cLabels.remove(label)
+    }
+
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val s = omitWideText(omitHighText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
@@ -563,33 +526,6 @@ class CLabelPane : ScrollPane() {
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)
         gc.fill = color
         gc.fillText(t.text, textX, textY)
-    }
-
-    fun removeLabelLayer(groupId: Int) {
-        // When this method called, means there
-        // are no labels in this group. So no
-        // need to edit labels
-
-        val layer = labelLayers[groupId]
-
-        // Remove layer in list
-        labelLayers.remove(layer)
-        // Remove layer comp
-        root.children.remove(layer)
-    }
-    fun removeLabel(labelIndex: Int) {
-        val label = getLabel(labelIndex)
-        val groupId = getLabelGroup(label)
-
-        // Unbind
-        label.radiusProperty().unbind()
-        label.indexProperty().unbind()
-        label.colorProperty().unbind()
-
-        // Remove view
-        labelLayers[groupId].children.remove(label)
-        // Remove data
-        labels.remove(label)
     }
     fun removeText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)

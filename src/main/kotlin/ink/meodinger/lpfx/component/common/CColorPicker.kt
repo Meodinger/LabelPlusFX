@@ -13,7 +13,6 @@ import javafx.scene.control.skin.ColorPickerSkin
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import java.util.stream.Collectors
 
 
 /**

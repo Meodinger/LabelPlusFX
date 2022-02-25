@@ -30,7 +30,7 @@ const val COMMON_GAP    = 16.0
  */
 const val SCALE_MIN  = 0.1
 const val SCALE_MAX  = 4.0
-const val SCALE_INIT = 1.0
+const val SCALE_INIT = 0.8
 
 /**
  * CLabel Radius Range

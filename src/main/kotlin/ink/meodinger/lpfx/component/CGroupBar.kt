@@ -8,7 +8,6 @@ import ink.meodinger.lpfx.util.component.boxHGrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
@@ -18,6 +17,7 @@ import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -57,35 +57,53 @@ class CGroupBar : HBox() {
     private val vShift = 2
 
     init {
-        // TODO: Use ChangeListener and ListProperties
-        groupsProperty.addListener(onNew { transGroups ->
-            cGroups.clear()
-            children.clear()
-
-            if (transGroups.isNotEmpty()) {
-                children.add(placeHolder)
-                children.add(addItem)
+        groupsProperty.addListener(ListChangeListener {
+            while (it.next()) {
+                if (it.wasPermutated()) {
+                    // will not happen
+                    throw IllegalStateException("Permuted: $it")
+                } else if (it.wasUpdated()) {
+                    // will not happen
+                    throw IllegalStateException("Updated: $it")
+                } else {
+                    if (it.wasAdded()) for (transGroup in it.addedSubList) createGroup(transGroup)
+                    if (it.wasRemoved()) for (groupId in it.from .. it.to) removeGroup(groupId)
+                }
             }
 
-            for (transGroup in transGroups) {
-                children.addLast(CGroup().apply {
-                    val groupId = cGroups.size // Don't put this into lambda
-
-                    nameProperty().bind(transGroup.nameProperty)
-                    colorProperty().bind(Bindings.createObjectBinding(
-                        { Color.web(transGroup.colorHex) },
-                        transGroup.colorHexProperty
-                    ))
-                    setOnSelect { select(groupId) }
-                }.also { cGroups.add(it) }, vShift)
-            }
-
-            if (transGroups.isEmpty()) selectedGroupIndex = NOT_FOUND
+            if (cGroups.isEmpty()) selectedGroupIndex = NOT_FOUND
             if (selectedGroupIndex != NOT_FOUND && selectedGroupIndex < cGroups.size) cGroups[selectedGroupIndex].select()
         })
+
         selectedGroupIndexProperty.addListener { _, o, n ->
             if ((o as Int) != NOT_FOUND && o < cGroups.size) cGroups[o].unselect()
             if ((n as Int) != NOT_FOUND && n < cGroups.size) cGroups[n].select()
+        }
+    }
+
+    private fun createGroup(transGroup: TransGroup) {
+        if (cGroups.isEmpty()) {
+            children.add(placeHolder)
+            children.add(addItem)
+        }
+
+        children.addLast(CGroup().apply {
+            val groupId = cGroups.size // Don't put this into lambda
+
+            nameProperty().bind(transGroup.nameProperty)
+            colorProperty().bind(Bindings.createObjectBinding(
+                { Color.web(transGroup.colorHex) },
+                transGroup.colorHexProperty
+            ))
+            setOnSelect { select(groupId) }
+        }.also { cGroups.add(it) }, vShift)
+    }
+    private fun removeGroup(groupId: Int) {
+        children.remove(cGroups.removeAt(groupId))
+
+        if (cGroups.isEmpty()) {
+            children.remove(placeHolder)
+            children.remove(addItem)
         }
     }
 

@@ -56,27 +56,27 @@ class CInputLabel : Pane() {
             if (isEditing) fieldText = value else labelText = value
         }
 
-    private val onChangeToFieldProperty: ObjectProperty<CInputLabel.() -> String> = SimpleObjectProperty { labelText }
-    fun onChangeToFieldProperty(): ObjectProperty<CInputLabel.() -> String> = onChangeToFieldProperty
-    val onChangeToField: CInputLabel.() -> String by onChangeToFieldProperty
+    private val onChangeToFieldProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty { fieldText = labelText }
+    fun onChangeToFieldProperty(): ObjectProperty<CInputLabel.() -> Unit> = onChangeToFieldProperty
+    val onChangeToField: CInputLabel.() -> Unit by onChangeToFieldProperty
 
     /**
      * This function will be called when Label is double-clicked.
      * FieldText will be set to the return value of this function.
      * Then Label will hide and TextField will show.
      */
-    fun setOnChangeToField(callback: CInputLabel.() -> String) = onChangeToFieldProperty.set(callback)
+    fun setOnChangeToField(callback: CInputLabel.() -> Unit) = onChangeToFieldProperty.set(callback)
 
-    private val onChangeToLabelProperty: ObjectProperty<CInputLabel.() -> String> = SimpleObjectProperty { fieldText }
-    fun onChangeToLabelProperty(): ObjectProperty<CInputLabel.() -> String> = onChangeToLabelProperty
-    val onChangeToLabel: CInputLabel.() -> String by onChangeToLabelProperty
+    private val onChangeToLabelProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty { labelText = fieldText }
+    fun onChangeToLabelProperty(): ObjectProperty<CInputLabel.() -> Unit> = onChangeToLabelProperty
+    val onChangeToLabel: CInputLabel.() -> Unit by onChangeToLabelProperty
 
     /**
      * This function will be called when enter-key fired on TextField.
      * LabelText will be set to the return value of this function.
      * Then TextField will hide and Label will show.
      */
-    fun setOnChangeToLabel(callback: CInputLabel.() -> String) = onChangeToLabelProperty.set(callback)
+    fun setOnChangeToLabel(callback: CInputLabel.() -> Unit) = onChangeToLabelProperty.set(callback)
 
     init {
         setPrefSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
@@ -96,11 +96,11 @@ class CInputLabel : Pane() {
             if (it.button != MouseButton.PRIMARY) return@setOnMouseClicked
             if (!it.isDoubleClick) return@setOnMouseClicked
 
-            fieldText = onChangeToField(this)
+            onChangeToField(this)
             isEditing = true
         }
         field.setOnAction {
-            labelText = onChangeToLabel(this)
+            onChangeToLabel(this)
             isEditing = false
         }
 

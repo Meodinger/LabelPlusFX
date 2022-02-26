@@ -374,7 +374,6 @@ class CLabelPane : ScrollPane() {
         for (label in cLabels) if (label.index == labelIndex) return label
         throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
     }
-
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
             radiusProperty().bind(labelRadiusProperty)

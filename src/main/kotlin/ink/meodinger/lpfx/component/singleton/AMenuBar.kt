@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.property.onNew
@@ -19,6 +20,7 @@ import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
 import javafx.beans.binding.Bindings
+import javafx.collections.FXCollections
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
@@ -255,7 +257,7 @@ object AMenuBar : MenuBar() {
         State.reset()
 
         val fileDirectory = newChooser.showDialog(State.stage) ?: return
-        val extension = if (Settings[Settings.UseMeoFileAsDefault].asBoolean()) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
+        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
 
         val file = fileDirectory.resolve("${fileDirectory.name}.$extension")
         if (file.exists()) {
@@ -470,8 +472,8 @@ object AMenuBar : MenuBar() {
         })
 
         val exportName =
-            if (Settings[Settings.UseExportNameTemplate].asBoolean())
-                Settings[Settings.ExportNameTemplate].asString()
+            if (Settings.useExportNameTemplate)
+                Settings.exportNameTemplate
                     .replace(Settings.VARIABLE_FILENAME, State.translationFile.nameWithoutExtension)
                     .replace(Settings.VARIABLE_DIRNAME, State.getFileFolder().name)
                     .replace(Settings.VARIABLE_PROJECT, State.projectFolder.name)
@@ -494,25 +496,17 @@ object AMenuBar : MenuBar() {
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
         Logger.debug("got $list", LOGSRC_DIALOGS)
 
-        var updatePane = false
-        var updateRules = false
-
         for (property in list) {
             /// Too slow, find a faster way
-            if (Settings[property.key].asString() == property.value) continue
-
             when (property.key) {
-                Settings.LabelAlpha, Settings.LabelRadius -> updatePane = true // todo
-                Settings.LigatureRules -> updateRules = true
-                // todo: add new pic scale
-                // todo: use property in properties
+                Settings.DefaultGroupNameList -> Settings.defaultGroupNameList = FXCollections.observableList(property.asStringList())
+                Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList = FXCollections.observableList(property.asStringList())
+                Settings.IsGroupCreateOnNewTrans -> Settings.isGroupCreateOnNewTransList = FXCollections.observableList(property.asBooleanList())
+                Settings.ViewModeOrdinals -> Settings.viewModes = FXCollections.observableList(property.asIntegerList().map { ViewMode.values()[it] })
+                Settings.LigatureRules -> Settings.ligatureRules = FXCollections.observableList(property.asPairList())
+                else -> doNothing()
             }
-
-            Settings[property.key] = property
         }
-
-        if (updatePane && State.isOpened) State.controller.updateLabelPane()
-        if (updateRules) State.controller.updateLigatureRules()
     }
     private fun logs() {
         val list = ADialogLogs.generateProperties()
@@ -520,14 +514,7 @@ object AMenuBar : MenuBar() {
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)
         Logger.debug("got $list", LOGSRC_DIALOGS)
 
-        for (property in list) {
-            /// Too slow, find a faster way
-            if (Settings[property.key].asString() == property.value) continue
-
-            Settings[property.key] = property
-        }
-
-        Logger.level = Logger.LogType.values()[Settings[Settings.LogLevelOrdinal].asInteger()]
+        Logger.level = Settings.logLevel
     }
     private fun about() {
         showLink(

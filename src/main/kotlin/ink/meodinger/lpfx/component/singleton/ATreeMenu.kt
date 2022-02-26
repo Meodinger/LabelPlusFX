@@ -137,10 +137,8 @@ object ATreeMenu : ContextMenu() {
         r_addGroupItem.setOnAction {
             if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(State.stage)
 
-            val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
-            val colorHexList = Settings[Settings.DefaultGroupColorHexList].asStringList().ifEmpty {
-                TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
-            }
+            val nameList = Settings.defaultGroupNameList
+            val colorHexList = Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
 
             val newGroupId = State.transFile.groupCount
             var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)

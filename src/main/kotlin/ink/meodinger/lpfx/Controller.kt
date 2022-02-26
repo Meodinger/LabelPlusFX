@@ -147,17 +147,9 @@ class Controller(private val root: View) {
         AMenuBar.updateRecentFiles()
         Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
 
-        // Preferences
-        cTransArea.font = Font.font(TextFont, Preference[Preference.TEXTAREA_FONT_SIZE].asDouble())
-        pMain.setDividerPositions(Preference[Preference.MAIN_DIVIDER].asDouble())
-        pRight.setDividerPositions(Preference[Preference.RIGHT_DIVIDER].asDouble())
-        Logger.info("Applied Preferences", LOGSRC_CONTROLLER)
-
         // Settings
-        updateLabelPane()
-        updateLigatureRules()
-        State.viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
-        Logger.info("Applied Settings", LOGSRC_CONTROLLER)
+        State.viewMode = Settings.viewModes[State.workMode.ordinal]
+        Logger.info("Applied Settings @ ViewMode", LOGSRC_CONTROLLER)
 
         // Drag and Drop
         root.setOnDragOver {
@@ -204,7 +196,7 @@ class Controller(private val root: View) {
             // Select it
             cTreeView.selectLabel(newIndex)
             // If instant translate
-            if (Settings[Settings.InstantTranslate].asBoolean()) cTransArea.requestFocus()
+            if (Settings.instantTranslate) cTransArea.requestFocus()
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
@@ -257,6 +249,12 @@ class Controller(private val root: View) {
     private fun bind() {
         Logger.info("Binding properties...", LOGSRC_CONTROLLER)
 
+        // Preferences
+        cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
+        pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
+        pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
+        Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
+
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty())
         bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty())
@@ -267,6 +265,10 @@ class Controller(private val root: View) {
         cSlider.disableProperty().bind(!State.isOpenedProperty())
         cLabelPane.disableProperty().bind(!State.isOpenedProperty())
         Logger.info("Bound disabled", LOGSRC_CONTROLLER)
+
+        // CLigatureTextArea - rules
+        cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
+        Logger.info("Bound ligature rules", LOGSRC_CONTROLLER)
 
         // CSlider - CLabelPane#scale
         cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
@@ -439,12 +441,15 @@ class Controller(private val root: View) {
                 return FXCollections.observableArrayList(State.transFile.groupColors)
             }
         })
+        cLabelPane.labelRadiusProperty().bind(Settings.labelRadiusProperty())
+        cLabelPane.labelAlphaProperty().bind(Settings.labelAlphaProperty())
         cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding(binding@{
             return@binding when (State.workMode) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
         }, State.workModeProperty()))
+        cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
     }
     /**
@@ -452,12 +457,6 @@ class Controller(private val root: View) {
      */
     private fun listen() {
         Logger.info("Attaching Listeners...", LOGSRC_CONTROLLER)
-
-        // Preferences
-        cTransArea.fontProperty().addListener(onNew { Preference[Preference.TEXTAREA_FONT_SIZE] = it.size.toInt() })
-        pMain.dividers[0].positionProperty().addListener(onNew(Preference[Preference.MAIN_DIVIDER]::set))
-        pRight.dividers[0].positionProperty().addListener(onNew(Preference[Preference.RIGHT_DIVIDER]::set))
-        Logger.info("Listened for Preferences", LOGSRC_CONTROLLER)
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
@@ -831,9 +830,9 @@ class Controller(private val root: View) {
 
         // Prepare new TransFile
         val groupList = ArrayList<TransGroup>()
-        val groupNameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        val groupColorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
-        val groupCreateList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
+        val groupNameList = Settings.defaultGroupNameList
+        val groupColorList = Settings.defaultGroupColorHexList
+        val groupCreateList = Settings.isGroupCreateOnNewTransList
         for (i in groupNameList.indices) if (groupCreateList[i])
             groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
         val transMap = HashMap<String, MutableList<TransLabel>>()
@@ -1097,16 +1096,6 @@ class Controller(private val root: View) {
         labelInfo(I18N["common.ready"])
     }
 
-    // ----- Update component properties ----- //
-    fun updateLabelPane() {
-        cLabelPane.newPictureScale = CLabelPane.NewPictureScale.values()[Settings[Settings.ScaleOnNewPicture].asInteger()]
-        cLabelPane.labelRadius = Settings[Settings.LabelRadius].asDouble()
-        cLabelPane.labelAlpha = Settings[Settings.LabelAlpha].asString()
-    }
-    fun updateLigatureRules() {
-        cTransArea.ligatureRules = FXCollections.observableList(Settings[Settings.LigatureRules].asPairList())
-    }
-
     // ----- TreeView ----- //
     fun renderTreeView() {
         // PicName and ViewMode were bound
@@ -1159,10 +1148,7 @@ class Controller(private val root: View) {
     fun setWorkMode(mode: WorkMode) {
         State.workMode = mode
 
-        setViewMode(when (mode) {
-            WorkMode.InputMode -> ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[0]]
-            WorkMode.LabelMode -> ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[1]]
-        })
+        setViewMode(Settings.viewModes[mode.ordinal])
 
         Logger.info("Switched work mode to $mode", LOGSRC_CONTROLLER)
     }

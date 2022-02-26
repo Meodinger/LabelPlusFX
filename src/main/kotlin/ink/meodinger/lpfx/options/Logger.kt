@@ -21,7 +21,7 @@ import java.util.*
  */
 object Logger {
 
-    enum class LogType(val type: String) {
+    enum class LogLevel(val type: String) {
         DEBUG("DEBUG"),
         INFO("INFO"),
         WARNING("WARNING"),
@@ -40,7 +40,7 @@ object Logger {
     // private var mark = depth
 
     val log: File
-    var level: LogType = LogType.DEBUG
+    var level: LogLevel = LogLevel.DEBUG
     var isStarted: Boolean = false
 
     init {
@@ -80,7 +80,7 @@ object Logger {
         println("<Logger>: Exit")
     }
 
-    private fun log(type: LogType, text: String, from: String) {
+    private fun log(type: LogLevel, text: String, from: String) {
         if (!isStarted || type < level) return
 
         val logHead = StringBuilder()
@@ -101,19 +101,19 @@ object Logger {
         writer.flush()
     }
     fun debug(message: String, from: String) {
-        log(LogType.DEBUG, message, from)
+        log(LogLevel.DEBUG, message, from)
     }
     fun info(message: String, from: String) {
-        log(LogType.INFO, message, from)
+        log(LogLevel.INFO, message, from)
     }
     fun warning(message: String, from: String) {
-        log(LogType.WARNING, message, from)
+        log(LogLevel.WARNING, message, from)
     }
     fun error(message: String, from: String) {
-        log(LogType.ERROR, message, from)
+        log(LogLevel.ERROR, message, from)
     }
     fun fatal(message: String, from: String) {
-        log(LogType.FATAL, message, from)
+        log(LogLevel.FATAL, message, from)
     }
 
     fun exception(e: Throwable) {

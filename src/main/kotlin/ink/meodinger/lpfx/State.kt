@@ -104,7 +104,7 @@ object State {
         currentPicName = emptyString()
         currentGroupId = NOT_FOUND
         currentLabelIndex = NOT_FOUND
-        viewMode = ViewMode.values()[Settings[Settings.ViewModeOrdinals].asIntegerList()[WorkMode.InputMode.ordinal]]
+        viewMode = Settings.viewModes[WorkMode.InputMode.ordinal]
         workMode = WorkMode.InputMode
 
         Logger.info("Reset", LOGSRC_STATE)

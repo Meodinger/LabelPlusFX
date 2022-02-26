@@ -51,9 +51,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
     private val gDefaultColorHexListLazy = ReLazy {
-        Settings[Settings.DefaultGroupColorHexList].asStringList().ifEmpty {
-            TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
-        }
+        Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
     }
     private val gDefaultColorHexList by gDefaultColorHexListLazy
 
@@ -67,7 +65,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
 
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
-    private val mComboScale = CComboBox<String>()
+    private val mComboScale = CComboBox<CLabelPane.NewPictureScale>()
 
     private val lCLabel = CLabel(index = 8)
     private val lLabelPane = AnchorPane()
@@ -160,8 +158,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(HBox(), 0, 2)
                     add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
                     add(mComboScale, 0, 4, 2, 1) {
-                        items.setAll(CLabelPane.NewPictureScale.values().map { it.toString() })
+                        items.setAll(CLabelPane.NewPictureScale.values().toList())
                         isWrapped = true
+                        valueProperty().bindBidirectional(Settings.newPictureScaleProperty())
                     }
                 }
             }
@@ -245,6 +244,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(lSliderRadius, 1, 1) {
                         min = LABEL_RADIUS_MIN
                         max = LABEL_RADIUS_MAX
+                        valueProperty().bindBidirectional(Settings.labelRadiusProperty())
                         valueProperty().addListener(onNew<Number, Double> {
                             lLabelRadius.text = String.format("%05.2f", it)
                             lCLabel.radius = it
@@ -264,19 +264,21 @@ object ADialogSettings : AbstractPropertiesDialog() {
                         setOnChangeToLabel {
                             lSliderRadius.value = fieldText.padStart(5, '0').toDouble()
 
-                            String.format("%05.2f", lSliderRadius.value)
+                            labelText = String.format("%05.2f", lSliderRadius.value)
                         }
                     }
                     add(Label(I18N["settings.label.alpha"]), 1, 2)
                     add(lSliderAlpha, 1, 3) {
                         min = 0.0
                         max = 1.0
+                        Settings.labelAlphaProperty().addListener(onNew { value = it.toInt(16) / 255.0 })
                         valueProperty().addListener(onNew<Number, Double> {
-                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0')
+                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0').also { Settings.labelAlpha = it }
 
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
                             lCLabel.color = Color.web("FF0000$alphaPart")
                         })
+                        value = Settings.labelAlpha.toInt(16) / 255.0
                     }
                     add(lLabelAlpha, 2, 3) {
                         textFormatter = TextFormatter { change ->
@@ -290,13 +292,13 @@ object ADialogSettings : AbstractPropertiesDialog() {
                             return@TextFormatter change
                         }
                         setOnChangeToField {
-                            labelText.substring(2)
+                            fieldText = labelText.substring(2)
                         }
                         setOnChangeToLabel {
                             val alphaStr = fieldText.padStart(2, '0').uppercase()
                             lSliderAlpha.value = alphaStr.toInt(16) / 255.0
 
-                            "0x$alphaStr"
+                            labelText = "0x$alphaStr"
                         }
                     }
                 }
@@ -314,11 +316,18 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     // 2 O UseExportTemplate
                     // 3   |  template text  |
 
-                    add(xInstCheckBox, 0, 0, 2, 1)
-                    add(xUseMCheckBox, 0, 1, 2, 1)
-                    add(xUseTCheckBox, 0, 2, 2, 1)
+                    add(xInstCheckBox, 0, 0, 2, 1) {
+                        selectedProperty().bindBidirectional(Settings.instantTranslateProperty())
+                    }
+                    add(xUseMCheckBox, 0, 1, 2, 1) {
+                        selectedProperty().bindBidirectional(Settings.useMeoFileAsDefaultProperty())
+                    }
+                    add(xUseTCheckBox, 0, 2, 2, 1) {
+                        selectedProperty().bindBidirectional(Settings.useExportNameTemplateProperty())
+                    }
                     add(xTemplateField, 1, 3) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
+                        textProperty().bindBidirectional(Settings.exportNameTemplateProperty())
                         textFormatter = TextFormatter<String> {
                             it.apply { text = text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
                         }
@@ -335,9 +344,9 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun initGroupTab() {
         gGridPane.children.clear()
 
-        val nameList = Settings[Settings.DefaultGroupNameList].asStringList()
-        val colorList = Settings[Settings.DefaultGroupColorHexList].asStringList()
-        val createList = Settings[Settings.IsGroupCreateOnNewTrans].asBooleanList()
+        val nameList = Settings.defaultGroupNameList
+        val colorList = Settings.defaultGroupColorHexList
+        val createList = Settings.isGroupCreateOnNewTransList
 
         if (nameList.isEmpty()) {
             gGridPane.add(gLabelHint, 0, 0)
@@ -393,7 +402,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun initLigatureTab() {
         rGridPane.children.clear()
 
-        val ruleList = Settings[Settings.LigatureRules].asPairList()
+        val ruleList = Settings.ligatureRules
 
         if (ruleList.isEmpty()) {
             rGridPane.add(rLabelHint, 0, 0)
@@ -457,30 +466,18 @@ object ADialogSettings : AbstractPropertiesDialog() {
         initLigatureTab()
 
         // Mode
-        val modeOrdinals = Settings[Settings.ViewModeOrdinals].asIntegerList()
-        mComboInput.select(ViewMode.values()[modeOrdinals[0]])
-        mComboLabel.select(ViewMode.values()[modeOrdinals[1]])
-        mComboScale.select(Settings[Settings.ScaleOnNewPicture].asInteger())
+        mComboInput.select(Settings.viewModes[0])
+        mComboLabel.select(Settings.viewModes[1])
 
         // Label
         lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
         lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
 
-        val radius = Settings[Settings.LabelRadius].asDouble()
         lLabelRadius.isEditing = false
-        lLabelRadius.text = String.format("%05.2f", radius)
-        lSliderRadius.value = radius
+        lLabelRadius.text = String.format("%05.2f", lSliderRadius.value)
 
-        val alpha = Settings[Settings.LabelAlpha].asString()
         lLabelAlpha.isEditing = false
-        lLabelAlpha.text = "0x$alpha"
-        lSliderAlpha.value = alpha.toInt(16) / 255.0
-
-        // Other
-        xInstCheckBox.isSelected = Settings[Settings.InstantTranslate].asBoolean()
-        xUseMCheckBox.isSelected = Settings[Settings.UseMeoFileAsDefault].asBoolean()
-        xUseTCheckBox.isSelected = Settings[Settings.UseExportNameTemplate].asBoolean()
-        xTemplateField.text = Settings[Settings.ExportNameTemplate].asString()
+        lLabelAlpha.text = "0x${(lSliderAlpha.value * 255.0).toInt().toString(16).padStart(2, '0')}"
     }
 
     // ----- Result convert ---- //
@@ -546,8 +543,8 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private fun convertMode(): List<CProperty> {
         val list = ArrayList<CProperty>()
 
-        list.add(CProperty(Settings.ViewModeOrdinals, mComboInput.index, mComboLabel.index))
-        list.add(CProperty(Settings.ScaleOnNewPicture, mComboScale.index))
+        list.add(CProperty(Settings.ViewModeOrdinals, mComboInput.value.ordinal, mComboLabel.value.ordinal))
+        list.add(CProperty(Settings.ScaleOnNewPictureOrdinal, mComboScale.value.ordinal))
 
         return list
     }

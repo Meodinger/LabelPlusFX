@@ -35,16 +35,16 @@ object RecentFiles : AbstractProperties() {
     override fun load() {
         load(Options.recentFiles, this)
 
-        recent.addAll(this[RECENT].asStringList())
+        recent.addAll(this[RECENT]!!.asStringList())
 
-        val progressList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
+        val progressList = this[PROGRESS]!!.asPairList().map { it.first.toInt() to it.second.toInt() }
         progress.putAll(recent.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } })
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[RECENT] = recent
-        this[PROGRESS] = recent.map { progress[it] }
+        this[RECENT]!!.set(recent)
+        this[PROGRESS]!!.set(recent.map(progress::get))
 
         save(Options.recentFiles, this)
     }

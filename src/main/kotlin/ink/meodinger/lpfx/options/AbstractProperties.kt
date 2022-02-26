@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -21,8 +19,6 @@ import kotlin.collections.ArrayList
  */
 abstract class AbstractProperties {
 
-    // TODO : Use java properties
-
     companion object {
 
         private const val KV_SPILT = "="
@@ -38,7 +34,7 @@ abstract class AbstractProperties {
 
                     val prop = line.split(KV_SPILT, limit = 2)
                     if (prop.size == 2) {
-                        if (instance.tryGet(prop[0]) != null) instance[prop[0]] = prop[1] else continue
+                        if (instance[prop[0]] != null) instance[prop[0]]!!.value = prop[1] else continue
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -90,31 +86,9 @@ abstract class AbstractProperties {
         properties.addAll(default)
     }
 
-    private fun tryGet(key: String): CProperty? {
-        for (property in properties) {
-            if (property.key == key) {
-                return property
-            }
-        }
+    operator fun get(key: String): CProperty? {
+        for (property in properties) if (property.key == key) return property
         return null
     }
 
-    operator fun get(key: String): CProperty {
-        return tryGet(key) ?: throw IllegalArgumentException(String.format(I18N["exception.property.property_not_found.k"], key))
-    }
-    operator fun set(key: String, value: String) {
-        get(key).set(value)
-    }
-    operator fun set(key: String, value: Boolean) {
-        get(key).set(value)
-    }
-    operator fun set(key: String, value: Number) {
-        get(key).set(value)
-    }
-    operator fun set(key: String, value: List<*>) {
-        get(key).set(value)
-    }
-    operator fun set(key: String, another: CProperty) {
-        get(key).set(another)
-    }
 }

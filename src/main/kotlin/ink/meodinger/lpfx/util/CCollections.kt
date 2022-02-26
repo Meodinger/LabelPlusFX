@@ -24,7 +24,7 @@ fun <E> MutableList<E>.addFirst(element: E, indexFromFirst: Int = 0) {
  * Remove all for Map
  */
 fun <K, V> MutableMap<K, V>.removeAll(keys: Collection<K>) {
-    keys.forEach { remove(it) }
+    keys.forEach(::remove)
 }
 
 /**

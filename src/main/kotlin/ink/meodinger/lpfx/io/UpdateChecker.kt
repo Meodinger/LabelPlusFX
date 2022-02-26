@@ -69,13 +69,13 @@ object UpdateChecker {
 
             if (version > V) {
                 val time = Date().time
-                val last = Preference[Preference.LAST_UPDATE_NOTICE].asLong()
+                val last = Preference.lastUpdateNotice
                 if (last != 0L && time - last < DELAY) {
                     Logger.info("Check suppressed, last notice time is $last", LOGSRC_CHECKER)
                     return@task
                 }
 
-                Preference[Preference.LAST_UPDATE_NOTICE] = 0
+                Preference.lastUpdateNotice = 0
                 Platform.runLater {
                     val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
 
@@ -100,7 +100,7 @@ object UpdateChecker {
 
                     dialog.showAndWait().ifPresent {
                         if (it == suppressNoticeButtonType) {
-                            Preference[Preference.LAST_UPDATE_NOTICE] = time
+                            Preference.lastUpdateNotice = time
                             Logger.info("Check suppressed, next notice time is ${time + DELAY}", LOGSRC_CHECKER)
                         }
                     }

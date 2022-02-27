@@ -5,8 +5,6 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import javafx.scene.text.Font
 import java.io.IOException
 
@@ -36,9 +34,13 @@ object Preference : AbstractProperties() {
         CProperty(LAST_UPDATE_NOTICE, 0)
     )
 
-    private val windowSizeProperty: ListProperty<Double> = SimpleListProperty()
-    fun windowSizeProperty(): ListProperty<Double> = windowSizeProperty
-    var windowSize: ObservableList<Double> by windowSizeProperty
+    private val windowWidthProperty: DoubleProperty = SimpleDoubleProperty()
+    fun windowWidthProperty(): DoubleProperty = windowWidthProperty
+    val windowWidth: Double by windowWidthProperty
+
+    private val windowHeightProperty: DoubleProperty = SimpleDoubleProperty()
+    fun windowHeightProperty(): DoubleProperty = windowHeightProperty
+    val windowHeight: Double by windowHeightProperty
 
     private val mainDividerPositionProperty: DoubleProperty = SimpleDoubleProperty()
     fun mainDividerPositionProperty(): DoubleProperty = mainDividerPositionProperty
@@ -62,20 +64,22 @@ object Preference : AbstractProperties() {
     override fun load() {
         load(Options.preference, this)
 
-        windowSize = FXCollections.observableList(this[WINDOW_SIZE]!!.asDoubleList())
-        mainDividerPosition = this[MAIN_DIVIDER]!!.asDouble()
-        rightDividerPosition = this[RIGHT_DIVIDER]!!.asDouble()
-        textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE]!!.asDouble())
-        lastUpdateNotice = this[LAST_UPDATE_NOTICE]!!.asLong()
+        val windowSizes = this[WINDOW_SIZE].asDoubleList()
+        windowWidthProperty.set(windowSizes[0])
+        windowHeightProperty.set(windowSizes[1])
+        mainDividerPosition = this[MAIN_DIVIDER].asDouble()
+        rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
+        textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
+        lastUpdateNotice = this[LAST_UPDATE_NOTICE].asLong()
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[WINDOW_SIZE]!!.set(windowSize)
-        this[MAIN_DIVIDER]!!.set(mainDividerPosition)
-        this[RIGHT_DIVIDER]!!.set(rightDividerPosition)
-        this[TEXTAREA_FONT_SIZE]!!.set(textAreaFont.size)
-        this[LAST_UPDATE_NOTICE]!!.set(lastUpdateNotice)
+        this[WINDOW_SIZE].set(windowWidth, windowHeight)
+        this[MAIN_DIVIDER].set(mainDividerPosition)
+        this[RIGHT_DIVIDER].set(rightDividerPosition)
+        this[TEXTAREA_FONT_SIZE].set(textAreaFont.size)
+        this[LAST_UPDATE_NOTICE].set(lastUpdateNotice)
 
         save(Options.preference, this)
     }

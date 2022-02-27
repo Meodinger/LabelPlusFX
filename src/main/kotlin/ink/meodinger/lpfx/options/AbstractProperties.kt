@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -34,7 +36,7 @@ abstract class AbstractProperties {
 
                     val prop = line.split(KV_SPILT, limit = 2)
                     if (prop.size == 2) {
-                        if (instance[prop[0]] != null) instance[prop[0]]!!.value = prop[1] else continue
+                        if (instance.tryGet(prop[0]) != null) instance[prop[0]].set(prop[1]) else continue
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -86,9 +88,11 @@ abstract class AbstractProperties {
         properties.addAll(default)
     }
 
-    operator fun get(key: String): CProperty? {
+    private fun tryGet(key: String): CProperty? {
         for (property in properties) if (property.key == key) return property
         return null
     }
+
+    operator fun get(key: String): CProperty = tryGet(key) ?: throw IllegalArgumentException(I18N["exception.property.property_not_found.k"])
 
 }

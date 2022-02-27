@@ -131,36 +131,36 @@ object Settings : AbstractProperties() {
     override fun load() {
         load(Options.settings, this)
 
-        defaultGroupNameList = FXCollections.observableList(this[DefaultGroupNameList]!!.asStringList())
-        defaultGroupColorHexList = FXCollections.observableList(this[DefaultGroupColorHexList]!!.asStringList())
-        isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans]!!.asBooleanList())
-        newPictureScalePicture = CLabelPane.NewPictureScale.values()[this[ScaleOnNewPictureOrdinal]!!.asInteger()]
-        viewModes = FXCollections.observableList(this[ViewModeOrdinals]!!.asIntegerList().map { ViewMode.values()[it] })
-        logLevel = Logger.LogLevel.values()[this[LogLevelOrdinal]!!.asInteger()]
-        labelRadius = this[LabelRadius]!!.asDouble()
-        labelAlpha = this[LabelAlpha]!!.asString()
-        ligatureRules = FXCollections.observableList(this[LigatureRules]!!.asPairList())
-        instantTranslate = this[InstantTranslate]!!.asBoolean()
-        useMeoFileAsDefault = this[UseMeoFileAsDefault]!!.asBoolean()
-        useExportNameTemplate = this[UseExportNameTemplate]!!.asBoolean()
-        exportNameTemplate = this[ExportNameTemplate]!!.asString()
+        defaultGroupNameList = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
+        defaultGroupColorHexList = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
+        isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans].asBooleanList())
+        newPictureScalePicture = CLabelPane.NewPictureScale.values()[this[ScaleOnNewPictureOrdinal].asInteger()]
+        viewModes = FXCollections.observableList(this[ViewModeOrdinals].asIntegerList().map { ViewMode.values()[it] })
+        logLevel = Logger.LogLevel.values()[this[LogLevelOrdinal].asInteger()]
+        labelRadius = this[LabelRadius].asDouble()
+        labelAlpha = this[LabelAlpha].asString()
+        ligatureRules = FXCollections.observableList(this[LigatureRules].asPairList())
+        instantTranslate = this[InstantTranslate].asBoolean()
+        useMeoFileAsDefault = this[UseMeoFileAsDefault].asBoolean()
+        useExportNameTemplate = this[UseExportNameTemplate].asBoolean()
+        exportNameTemplate = this[ExportNameTemplate].asString()
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[DefaultGroupNameList]!!.set(defaultGroupNameList)
-        this[DefaultGroupColorHexList]!!.set(defaultGroupColorHexList)
-        this[IsGroupCreateOnNewTrans]!!.set(isGroupCreateOnNewTransList)
-        this[ScaleOnNewPictureOrdinal]!!.set(newPictureScalePicture.ordinal)
-        this[ViewModeOrdinals]!!.set(viewModes.map(Enum<*>::ordinal))
-        this[LogLevelOrdinal]!!.set(logLevel.ordinal)
-        this[LabelRadius]!!.set(labelRadius)
-        this[LabelAlpha]!!.set(labelAlpha)
-        this[LigatureRules]!!.set(ligatureRules)
-        this[InstantTranslate]!!.set(instantTranslate)
-        this[UseMeoFileAsDefault]!!.set(useMeoFileAsDefault)
-        this[UseExportNameTemplate]!!.set(useExportNameTemplate)
-        this[ExportNameTemplate]!!.set(exportNameTemplate)
+        this[DefaultGroupNameList].set(defaultGroupNameList)
+        this[DefaultGroupColorHexList].set(defaultGroupColorHexList)
+        this[IsGroupCreateOnNewTrans].set(isGroupCreateOnNewTransList)
+        this[ScaleOnNewPictureOrdinal].set(newPictureScalePicture.ordinal)
+        this[ViewModeOrdinals].set(viewModes.map(Enum<*>::ordinal))
+        this[LogLevelOrdinal].set(logLevel.ordinal)
+        this[LabelRadius].set(labelRadius)
+        this[LabelAlpha].set(labelAlpha)
+        this[LigatureRules].set(ligatureRules)
+        this[InstantTranslate].set(instantTranslate)
+        this[UseMeoFileAsDefault].set(useMeoFileAsDefault)
+        this[UseExportNameTemplate].set(useExportNameTemplate)
+        this[ExportNameTemplate].set(exportNameTemplate)
 
         save(Options.settings, this)
     }

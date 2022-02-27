@@ -65,17 +65,11 @@ class LabelPlusFX: HookedApplication() {
 
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
-        primaryStage.scene = Scene(root, Preference.windowSize[0], Preference.windowSize[1])
-        primaryStage.setOnCloseRequest {
-            if (!controller.stay()) exit() else it.consume()
-        }
+        primaryStage.scene = Scene(root, Preference.windowWidth, Preference.windowHeight)
+        primaryStage.setOnCloseRequest { if (!controller.stay()) exit() else it.consume() }
 
-        primaryStage.scene.widthProperty().addListener(onNew<Number, Double> {
-            if (!primaryStage.isMaximized) Preference.windowSize[0] = it
-        })
-        primaryStage.scene.heightProperty().addListener(onNew<Number, Double> {
-            if (!primaryStage.isMaximized) Preference.windowSize[1] = it
-        })
+        Preference.windowWidthProperty().bind(primaryStage.scene.widthProperty())
+        Preference.windowHeightProperty().bind(primaryStage.scene.heightProperty())
 
         primaryStage.show()
         controller.labelInfo(I18N["common.ready"])

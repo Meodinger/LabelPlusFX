@@ -470,8 +470,8 @@ class CLabelPane : ScrollPane() {
         label.layoutY = -label.radius + transLabel.y * image.height
 
         // Bind
-        transLabel.xProperty.bind((label.layoutXProperty() + label.radius) / imageView.image.widthProperty())
-        transLabel.yProperty.bind((label.layoutYProperty() + label.radius) / imageView.image.heightProperty())
+        transLabel.xProperty.bind((label.layoutXProperty() + label.radius) / image.widthProperty())
+        transLabel.yProperty.bind((label.layoutYProperty() + label.radius) / image.heightProperty())
 
         // Layout
         labelLayer.children.add(label)

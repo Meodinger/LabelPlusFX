@@ -211,7 +211,7 @@ open class TransFile @JsonCreator constructor(
     fun addTransLabel(picName: String, transLabel: TransLabel) {
         val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
 
-        val (index, groupId) = transLabel
+        val (index, groupId, _, _, _) = transLabel
         if (groupId >= groupListObservable.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
         for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
 
@@ -252,7 +252,7 @@ open class TransFile @JsonCreator constructor(
         return ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .writeValueAsString(this.clone())
+            .writeValueAsString(this)
     }
 
     override fun toString(): String = ObjectMapper().writeValueAsString(this)

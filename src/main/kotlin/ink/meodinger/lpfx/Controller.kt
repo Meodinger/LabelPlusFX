@@ -17,7 +17,6 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.transfer
-import ink.meodinger.lpfx.util.platform.TextFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.string.emptyString
@@ -36,7 +35,6 @@ import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.input.*
 import javafx.scene.paint.Color
-import javafx.scene.text.Font
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
@@ -344,8 +342,9 @@ class Controller(private val root: View) {
                     lastGroupListObservable = State.transFile.groupListObservable
                     bind(State.transFile.groupListObservable)
                 }
+
                 for (property in boundGroupNameProperties) unbind(property)
-                State.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply { clear() }) { it.nameProperty }
+                State.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(ArrayList<*>::clear)) { it.nameProperty }
                 for (property in boundGroupNameProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupNames)
@@ -434,8 +433,9 @@ class Controller(private val root: View) {
                     lastGroupListObservable = State.transFile.groupListObservable
                     bind(State.transFile.groupListObservable)
                 }
+
                 for (property in boundGroupHexProperties) unbind(property)
-                State.transFile.groupListObservable.mapTo(boundGroupHexProperties.apply { clear() }) { it.nameProperty }
+                State.transFile.groupListObservable.mapTo(boundGroupHexProperties.apply(MutableList<*>::clear)) { it.nameProperty }
                 for (property in boundGroupHexProperties) bind(property)
 
                 return FXCollections.observableArrayList(State.transFile.groupColors)
@@ -481,13 +481,13 @@ class Controller(private val root: View) {
         Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
 
         // Work Progress
-        val workspaceListener = onNew<Any, Any> {
+        val workProgressListener = onNew<Any, Any> {
             if (State.isOpened) RecentFiles.setProgressOf(State.translationFile.path,
                 State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
             )
         }
-        State.currentPicNameProperty().addListener(workspaceListener)
-        State.currentLabelIndexProperty().addListener(workspaceListener)
+        State.currentPicNameProperty().addListener(workProgressListener)
+        State.currentLabelIndexProperty().addListener(workProgressListener)
         Logger.info("Listened for Current Work Progress", LOGSRC_CONTROLLER)
     }
     /**
@@ -532,8 +532,7 @@ class Controller(private val root: View) {
             if (it == NOT_FOUND) return@onNew
 
             // bind new text property
-            val transLabels = State.transFile.getTransList(State.currentPicName)
-            val newLabel = transLabels.find { label -> label.index == it }
+            val newLabel = State.transFile.getTransList(State.currentPicName).find { label -> label.index == it }
             if (newLabel != null) cTransArea.bindBidirectional(newLabel.textProperty)
 
             labelInfo("Selected label $it")
@@ -547,7 +546,7 @@ class Controller(private val root: View) {
             val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).toInt()
                 .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
 
-            cTransArea.font = Font.font(TextFont, newSize.toDouble())
+            cTransArea.font = cTransArea.font.s(newSize.toDouble())
             cTransArea.positionCaret(0)
 
             labelInfo("Set text font size to $newSize")
@@ -588,8 +587,8 @@ class Controller(private val root: View) {
         Logger.info("Transformed CTreeGroupItem selected", LOGSRC_CONTROLLER)
 
         // Transform tab press in CTreeView to ViewModeBtn click
-        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code != KeyCode.TAB) return@addEventHandler
+        cTreeView.addEventFilter(KeyEvent.KEY_PRESSED) {
+            if (it.code != KeyCode.TAB) return@addEventFilter
 
             switchViewMode()
             it.consume() // Disable tab shift
@@ -597,8 +596,8 @@ class Controller(private val root: View) {
         Logger.info("Transformed Tab on CTreeView", LOGSRC_CONTROLLER)
 
         // Transform tab press in CLabelPane to WorkModeBtn click
-        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code != KeyCode.TAB) return@addEventHandler
+        cLabelPane.addEventFilter(KeyEvent.KEY_PRESSED) {
+            if (it.code != KeyCode.TAB) return@addEventFilter
 
             cLabelPane.removeText()
             switchWorkMode()
@@ -611,7 +610,7 @@ class Controller(private val root: View) {
             if (!it.code.isDigitKey) return@addEventHandler
 
             val index = it.text.toInt() - 1
-            if (index < 0 || index >= cGroupBox.items.size) return@addEventHandler
+            if (index !in 0..cGroupBox.items.size) return@addEventHandler
             cGroupBox.select(index)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)

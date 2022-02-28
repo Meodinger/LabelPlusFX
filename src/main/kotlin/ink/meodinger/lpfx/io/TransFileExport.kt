@@ -96,7 +96,7 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
 
     return when(targetType) {
         FileType.LPFile  -> buildLPFile(transFile)
-        FileType.MeoFile -> transFile.toJsonString()
+        FileType.MeoFile -> transFile.clone().toJsonString()
     }
 }
 

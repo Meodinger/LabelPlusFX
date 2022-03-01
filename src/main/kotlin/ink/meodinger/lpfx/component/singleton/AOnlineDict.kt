@@ -89,8 +89,8 @@ object AOnlineDict : Stage() {
                 }
                 add(inputField) {
                     boxHGrow = Priority.ALWAYS
-                    addEventHandler(KeyEvent.KEY_PRESSED) {
-                        if (it.code != KeyCode.TAB) return@addEventHandler
+                    addEventFilter(KeyEvent.KEY_PRESSED) {
+                        if (it.code != KeyCode.TAB) return@addEventFilter
                         state = (state + 1) % 2
                         it.consume()
                     }

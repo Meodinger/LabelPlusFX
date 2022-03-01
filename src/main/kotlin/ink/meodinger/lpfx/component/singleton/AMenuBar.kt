@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.*
+import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.RecentFiles
@@ -470,11 +471,10 @@ object AMenuBar : MenuBar() {
         })
 
         val exportName =
-            if (Settings.useExportNameTemplate)
-                Settings.exportNameTemplate
-                    .replace(Settings.VARIABLE_FILENAME, State.translationFile.nameWithoutExtension)
-                    .replace(Settings.VARIABLE_DIRNAME, State.getFileFolder().name)
-                    .replace(Settings.VARIABLE_PROJECT, State.projectFolder.name)
+            if (Settings.useExportNameTemplate) Settings.exportNameTemplate
+                .replace(Settings.VARIABLE_FILENAME, State.translationFile.nameWithoutExtension)
+                .replace(Settings.VARIABLE_DIRNAME, State.getFileFolder().name)
+                .replace(Settings.VARIABLE_PROJECT, State.projectFolder.name)
             else State.getFileFolder().name
         exportChooser.initialFilename = "$exportName.${type.extension}"
 
@@ -497,11 +497,18 @@ object AMenuBar : MenuBar() {
         for (property in list) {
             /// Too slow, find a faster way
             when (property.key) {
-                Settings.DefaultGroupNameList -> Settings.defaultGroupNameList = FXCollections.observableList(property.asStringList())
+                Settings.DefaultGroupNameList     -> Settings.defaultGroupNameList = FXCollections.observableList(property.asStringList())
                 Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList = FXCollections.observableList(property.asStringList())
-                Settings.IsGroupCreateOnNewTrans -> Settings.isGroupCreateOnNewTransList = FXCollections.observableList(property.asBooleanList())
-                Settings.ViewModeOrdinals -> Settings.viewModes = FXCollections.observableList(property.asIntegerList().map { ViewMode.values()[it] })
-                Settings.LigatureRules -> Settings.ligatureRules = FXCollections.observableList(property.asPairList())
+                Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList = FXCollections.observableList(property.asBooleanList())
+                Settings.ScaleOnNewPictureOrdinal -> Settings.newPictureScalePicture = CLabelPane.NewPictureScale.values()[property.asInteger()]
+                Settings.ViewModeOrdinals         -> Settings.viewModes = FXCollections.observableList(property.asIntegerList().map { ViewMode.values()[it] })
+                Settings.LabelRadius              -> Settings.labelRadius = property.asDouble()
+                Settings.LabelAlpha               -> Settings.labelAlpha = property.asString()
+                Settings.LigatureRules            -> Settings.ligatureRules = FXCollections.observableList(property.asPairList())
+                Settings.InstantTranslate         -> Settings.instantTranslate = property.asBoolean()
+                Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault = property.asBoolean()
+                Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate = property.asBoolean()
+                Settings.ExportNameTemplate       -> Settings.exportNameTemplate = property.asString()
                 else -> doNothing()
             }
         }

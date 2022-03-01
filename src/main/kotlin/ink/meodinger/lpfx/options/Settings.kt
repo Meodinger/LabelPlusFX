@@ -68,7 +68,7 @@ object Settings : AbstractProperties() {
             "*"      to "※",
         ),
         CProperty(InstantTranslate, false),
-        CProperty(UseMeoFileAsDefault, true),
+        CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, "%FILE% 翻译：XXX"),
     )
@@ -85,9 +85,9 @@ object Settings : AbstractProperties() {
     fun isGroupCreateOnNewTransListProperty(): ListProperty<Boolean> = isGroupCreateOnNewTransListProperty
     var isGroupCreateOnNewTransList: ObservableList<Boolean> by isGroupCreateOnNewTransListProperty
 
-    private val scaleOnNewPictureProperty: ObjectProperty<CLabelPane.NewPictureScale> = SimpleObjectProperty()
-    fun newPictureScaleProperty(): ObjectProperty<CLabelPane.NewPictureScale> = scaleOnNewPictureProperty
-    var newPictureScalePicture: CLabelPane.NewPictureScale by scaleOnNewPictureProperty
+    private val newPictureScaleProperty: ObjectProperty<CLabelPane.NewPictureScale> = SimpleObjectProperty()
+    fun newPictureScaleProperty(): ObjectProperty<CLabelPane.NewPictureScale> = newPictureScaleProperty
+    var newPictureScalePicture: CLabelPane.NewPictureScale by newPictureScaleProperty
 
     private val viewModesProperty: ListProperty<ViewMode> = SimpleListProperty()
     fun viewModesProperty(): ListProperty<ViewMode> = viewModesProperty

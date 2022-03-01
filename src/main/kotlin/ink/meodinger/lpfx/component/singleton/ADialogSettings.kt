@@ -160,7 +160,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(mComboScale, 0, 4, 2, 1) {
                         items.setAll(CLabelPane.NewPictureScale.values().toList())
                         isWrapped = true
-                        valueProperty().bindBidirectional(Settings.newPictureScaleProperty())
                     }
                 }
             }
@@ -244,7 +243,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(lSliderRadius, 1, 1) {
                         min = LABEL_RADIUS_MIN
                         max = LABEL_RADIUS_MAX
-                        valueProperty().bindBidirectional(Settings.labelRadiusProperty())
                         valueProperty().addListener(onNew<Number, Double> {
                             lLabelRadius.text = String.format("%05.2f", it)
                             lCLabel.radius = it
@@ -271,14 +269,12 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     add(lSliderAlpha, 1, 3) {
                         min = 0.0
                         max = 1.0
-                        Settings.labelAlphaProperty().addListener(onNew { value = it.toInt(16) / 255.0 })
                         valueProperty().addListener(onNew<Number, Double> {
-                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0').also { Settings.labelAlpha = it }
+                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0')
 
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
                             lCLabel.color = Color.web("FF0000$alphaPart")
                         })
-                        value = Settings.labelAlpha.toInt(16) / 255.0
                     }
                     add(lLabelAlpha, 2, 3) {
                         textFormatter = TextFormatter { change ->
@@ -316,18 +312,11 @@ object ADialogSettings : AbstractPropertiesDialog() {
                     // 2 O UseExportTemplate
                     // 3   |  template text  |
 
-                    add(xInstCheckBox, 0, 0, 2, 1) {
-                        selectedProperty().bindBidirectional(Settings.instantTranslateProperty())
-                    }
-                    add(xUseMCheckBox, 0, 1, 2, 1) {
-                        selectedProperty().bindBidirectional(Settings.useMeoFileAsDefaultProperty())
-                    }
-                    add(xUseTCheckBox, 0, 2, 2, 1) {
-                        selectedProperty().bindBidirectional(Settings.useExportNameTemplateProperty())
-                    }
+                    add(xInstCheckBox, 0, 0, 2, 1)
+                    add(xUseMCheckBox, 0, 1, 2, 1)
+                    add(xUseTCheckBox, 0, 2, 2, 1)
                     add(xTemplateField, 1, 3) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
-                        textProperty().bindBidirectional(Settings.exportNameTemplateProperty())
                         textFormatter = TextFormatter<String> {
                             it.apply { text = text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
                         }
@@ -468,16 +457,25 @@ object ADialogSettings : AbstractPropertiesDialog() {
         // Mode
         mComboInput.select(Settings.viewModes[0])
         mComboLabel.select(Settings.viewModes[1])
+        mComboScale.select(Settings.newPictureScalePicture)
 
         // Label
         lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
         lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
 
         lLabelRadius.isEditing = false
-        lLabelRadius.text = String.format("%05.2f", lSliderRadius.value)
+        lLabelRadius.text = String.format("%05.2f", Settings.labelRadius)
+        lSliderRadius.value = Settings.labelRadius
 
         lLabelAlpha.isEditing = false
-        lLabelAlpha.text = "0x${(lSliderAlpha.value * 255.0).toInt().toString(16).padStart(2, '0')}"
+        lLabelAlpha.text = "0x${Settings.labelAlpha}"
+        lSliderAlpha.value =  Settings.labelAlpha.toInt(16) / 255.0
+
+        // Other
+        xInstCheckBox.isSelected = Settings.instantTranslate
+        xUseMCheckBox.isSelected = Settings.useMeoFileAsDefault
+        xUseTCheckBox.isSelected = Settings.useExportNameTemplate
+        xTemplateField.text = Settings.exportNameTemplate
     }
 
     // ----- Result convert ---- //

@@ -21,9 +21,9 @@ val V = Version(2, 2, 2)
 /**
  * Size related constants
  */
-const val PANE_WIDTH    = 600.0
-const val PANE_HEIGHT   = 400.0
-const val COMMON_GAP    = 16.0
+const val PANE_WIDTH  = 600.0
+const val PANE_HEIGHT = 400.0
+const val COMMON_GAP  = 16.0
 
 /**
  * Scale

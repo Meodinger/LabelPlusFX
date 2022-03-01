@@ -80,7 +80,7 @@ class Controller(private val root: View) {
             val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
             try {
                 export(bak, FileType.MeoFile, State.transFile)
-                labelInfo("Backuped")
+                labelInfo("Backed")
             } catch (e: IOException) {
                 Logger.error("Auto-backup failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)

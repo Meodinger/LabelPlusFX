@@ -26,6 +26,7 @@ import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.ListProperty
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -269,26 +270,26 @@ class Controller(private val root: View) {
 
             override fun computeValue(): ObservableList<TransLabel> {
                 return if (State.currentPicName.isNotEmpty())
-                    FXCollections.observableList(State.transFile.transMapObservable[State.currentPicName]!!)
+                    State.transFile.transMapObservable[State.currentPicName]!!
                 else
                     FXCollections.emptyObservableList()
             }
         }
-        fun genGroupsBinding() = object : ObjectBinding<ObservableList<TransGroup>>() {
+        fun genGroupsBinding() = object : ObjectBinding<ListProperty<TransGroup>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
 
             init {
                 bind(State.transFileProperty())
             }
 
-            override fun computeValue(): ObservableList<TransGroup> {
+            override fun computeValue(): ListProperty<TransGroup> {
                 if (lastGroupListObservable !== State.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
                     lastGroupListObservable = State.transFile.groupListObservable
                     bind(lastGroupListObservable)
                 }
 
-                return FXCollections.observableList(State.transFile.groupListObservable)
+                return State.transFile.groupListProperty
             }
         }
         fun <T> genGroupPropertyBinding(

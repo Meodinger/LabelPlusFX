@@ -56,11 +56,9 @@ class CTreeView: TreeView<String>() {
 
     init {
         // Init
-        ATreeMenu.initView(this)
-
-        selectionModel.selectionMode = SelectionMode.MULTIPLE
-        contextMenu = ATreeMenu
         root = TreeItem()
+        contextMenu = ATreeMenu.apply { update(emptyList()) }
+        selectionModel.selectionMode = SelectionMode.MULTIPLE
 
         // Update tree menu when requested
         addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems.toList()) }
@@ -99,7 +97,7 @@ class CTreeView: TreeView<String>() {
         })
     }
 
-    private fun update(fromMode: ViewMode = this.viewMode, toMode: ViewMode = this.viewMode) {
+    private fun update(fromMode: ViewMode, toMode: ViewMode) {
         for (transLabel in labels) removeLabelItem(transLabel, fromMode)
         for (transGroup in groups) removeGroupItem(transGroup, fromMode)
         for (transGroup in groups) createGroupItem(transGroup, toMode)

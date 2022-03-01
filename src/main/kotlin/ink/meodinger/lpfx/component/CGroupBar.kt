@@ -33,6 +33,10 @@ import javafx.scene.paint.Color
  */
 class CGroupBar : HBox() {
 
+    companion object {
+        private const val TAG_GROUP_ID = "TAG_GROUP_ID"
+    }
+
     // ----- Properties ----- //
 
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
@@ -84,6 +88,13 @@ class CGroupBar : HBox() {
         }
     }
 
+    private fun tagGroupId(cGroup: CGroup, groupId: Int) {
+        cGroup.properties[TAG_GROUP_ID] = groupId
+    }
+    private fun useGroupId(cGroup: CGroup): Int {
+        return cGroup.properties[TAG_GROUP_ID] as Int
+    }
+
     private fun createGroup(transGroup: TransGroup) {
         if (cGroups.isEmpty()) {
             children.add(placeHolder)
@@ -98,12 +109,19 @@ class CGroupBar : HBox() {
                 { Color.web(transGroup.colorHex) },
                 transGroup.colorHexProperty
             ))
-            setOnSelect { select(groupId) }
+
+            tagGroupId(this, groupId)
+            setOnSelect { select(useGroupId(this)) }
         }.also { cGroups.add(it) }, vShift)
     }
     private fun removeGroup(transGroup: TransGroup) {
         val groupId = cGroups.indexOfFirst { it.name == transGroup.name }
+
         children.remove(cGroups.removeAt(groupId))
+        cGroups.forEach {
+            val oldGroupId = useGroupId(it)
+            if (oldGroupId > groupId) tagGroupId(it, oldGroupId - 1)
+        }
 
         if (cGroups.isEmpty()) {
             children.remove(placeHolder)

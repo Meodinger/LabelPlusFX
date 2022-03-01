@@ -2,9 +2,9 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.component.common.CColorPicker
+import ink.meodinger.lpfx.component.CTreeGroupItem
 import ink.meodinger.lpfx.component.CTreeLabelItem
-import ink.meodinger.lpfx.component.CTreeView
+import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
@@ -21,11 +21,11 @@ import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
-import javafx.scene.shape.Circle
 
 
 /**
@@ -39,14 +39,115 @@ import javafx.scene.shape.Circle
  */
 object ATreeMenu : ContextMenu() {
 
-    private lateinit var view: CTreeView
+    private val r_addGroupField      = TextField().apply {
+        textFormatter = genGroupNameFormatter()
+    }
+    private val r_addGroupPicker     = CColorPicker().apply {
+        hide()
+    }
+    private val r_addGroupDialog     = Dialog<TransGroup>().apply {
+        title = I18N["context.add_group.dialog.title"]
+        headerText = I18N["context.add_group.dialog.header"]
+        dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
+        withContent(HBox(r_addGroupField, r_addGroupPicker)) { alignment = Pos.CENTER }
 
-    private val r_addGroupItem    = MenuItem(I18N["context.add_group"])
-    private val g_renameItem      = MenuItem(I18N["context.rename_group"])
-    private val g_changeColorItem = MenuItem()
-    private val g_deleteItem      = MenuItem(I18N["context.delete_group"])
+        setResultConverter converter@{
+            return@converter when (it) {
+                ButtonType.FINISH -> TransGroup(r_addGroupField.text, r_addGroupPicker.value.toHexRGB())
+                else -> null
+            }
+        }
+    }
+    private val r_addGroupHandler    = EventHandler<ActionEvent> {
+        if (r_addGroupDialog.owner == null) r_addGroupDialog.initOwner(State.stage)
 
-    private val l_moveToAction = { items: List<TreeItem<String>> ->
+        val nameList = Settings.defaultGroupNameList
+        val colorHexList = Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
+
+        val newGroupId = State.transFile.groupCount
+        var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
+        if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
+            if (!State.transFile.groupNames.contains(nameList[newGroupId])) {
+                newName = nameList[newGroupId]
+            }
+        }
+
+        r_addGroupField.text = newName
+        r_addGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
+        r_addGroupDialog.result = null
+        r_addGroupDialog.showAndWait().ifPresent { newGroup ->
+            if (State.transFile.groupNames.contains(newGroup.name)) {
+                showError(State.stage, I18N["context.error.same_group_name"])
+                return@ifPresent
+            }
+
+            // Edit data
+            State.addTransGroup(newGroup)
+            // Mark change
+            State.isChanged = true
+        }
+    }
+    private val r_addGroupItem       = MenuItem(I18N["context.add_group"]).apply {
+        onAction = r_addGroupHandler
+    }
+
+    private val g_renameHandler      = EventHandler<ActionEvent> {
+        val groupName: String = it.source as String
+
+        showInput(
+            State.stage,
+            I18N["context.rename_group.dialog.title"],
+            I18N["context.rename_group.dialog.header"],
+            groupName,
+            genGroupNameFormatter()
+        ).ifPresent { newName ->
+            if (newName.isBlank()) return@ifPresent
+            if (State.transFile.groupNames.contains(newName)) {
+                showError(State.stage, I18N["context.error.same_group_name"])
+                return@ifPresent
+            }
+
+            // Edit data
+            State.setTransGroupName(State.transFile.getGroupIdByName(groupName), newName)
+            // Mark change
+            State.isChanged = true
+        }
+    }
+    private val g_renameItem         = MenuItem(I18N["context.rename_group"])
+
+    private val g_changeColorPicker  = CColorPicker().apply {
+        setPrefSize(40.0, 20.0)
+    }
+    private val g_changeColorHandler = EventHandler<ActionEvent> {
+        val groupName = it.source as String
+        val newColor = (it.target as ColorPicker).value
+
+        // Edit data
+        State.setTransGroupColor(State.transFile.getGroupIdByName(groupName), newColor.toHexRGB())
+        // Mark change
+        State.isChanged = true
+    }
+    private val g_changeColorItem    = MenuItem().apply {
+        graphic = g_changeColorPicker
+        textProperty().bind(Bindings.createStringBinding(
+            { g_changeColorPicker.value.toHexRGB() },
+            g_changeColorPicker.valueProperty()
+        ))
+    }
+
+    private val g_deleteHandler      = EventHandler<ActionEvent> {
+        val groupName = it.source as String
+
+        // Edit data
+        State.removeTransGroup(groupName)
+        // Mark change
+        State.isChanged = true
+    }
+    private val g_deleteItem         = MenuItem(I18N["context.delete_group"])
+
+    private val l_moveToHandler      = EventHandler<ActionEvent> {
+        val items = it.source as List<*>
+
         showChoice(
             State.stage,
             I18N["context.move_to.dialog.title"],
@@ -68,18 +169,19 @@ object ATreeMenu : ContextMenu() {
             State.isChanged = true
         }
     }
-    private val l_moveToItem = MenuItem(I18N["context.move_to"])
-    private val l_deleteAction = { items: List<TreeItem<String>> ->
+    private val l_moveToItem         = MenuItem(I18N["context.move_to"])
+
+    private val l_deleteHandler      = EventHandler<ActionEvent> {
+        val items = it.source as List<*>
+
         val confirm = showConfirm(
             State.stage,
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
-            StringBuilder().apply { for (item in items) appendLine(item.value) }.toString(),
+            StringBuilder().apply { for (item in items) appendLine((item as CTreeLabelItem).text) }.toString(),
             I18N["context.delete_label.dialog.title"]
         )
 
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-            view.selectionModel.clearSelection()
-
             for (item in items) {
                 val labelIndex = (item as CTreeLabelItem).index
 
@@ -91,117 +193,7 @@ object ATreeMenu : ContextMenu() {
             State.isChanged = true
         }
     }
-    private val l_deleteItem = MenuItem(I18N["context.delete_label"])
-
-    init {
-        val rAddGroupField = TextField().apply {
-            textFormatter = genGroupNameFormatter()
-        }
-        val rAddGroupPicker = CColorPicker().apply {
-            hide()
-        }
-        val rAddGroupDialog = Dialog<TransGroup>().apply {
-            title = I18N["context.add_group.dialog.title"]
-            headerText = I18N["context.add_group.dialog.header"]
-            dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
-            withContent(HBox(rAddGroupField, rAddGroupPicker)) { alignment = Pos.CENTER }
-
-            setResultConverter converter@{
-                return@converter when (it) {
-                    ButtonType.FINISH -> TransGroup(rAddGroupField.text, rAddGroupPicker.value.toHexRGB())
-                    else -> null
-                }
-            }
-        }
-
-        val gChangeColorPicker = CColorPicker().apply {
-            setPrefSize(40.0, 20.0)
-            setOnAction {
-                val groupItem = view.selectionModel.selectedItem
-
-                // Edit data
-                State.setTransGroupColor(State.transFile.getGroupIdByName(groupItem.value), value.toHexRGB())
-                // Mark change
-                State.isChanged = true
-            }
-        }
-        g_changeColorItem.graphic = gChangeColorPicker
-        g_changeColorItem.textProperty().bind(Bindings.createStringBinding(
-            { gChangeColorPicker.value.toHexRGB() },
-            gChangeColorPicker.valueProperty()
-        ))
-
-        // Action
-        r_addGroupItem.setOnAction {
-            if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(State.stage)
-
-            val nameList = Settings.defaultGroupNameList
-            val colorHexList = Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
-
-            val newGroupId = State.transFile.groupCount
-            var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
-            if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
-                if (!State.transFile.groupNames.contains(nameList[newGroupId])) {
-                    newName = nameList[newGroupId]
-                }
-            }
-
-            rAddGroupField.text = newName
-            rAddGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
-            rAddGroupDialog.result = null
-            rAddGroupDialog.showAndWait().ifPresent { newGroup ->
-                if (State.transFile.groupNames.contains(newGroup.name)) {
-                    showError(State.stage, I18N["context.error.same_group_name"])
-                    return@ifPresent
-                }
-
-                // Edit data
-                State.addTransGroup(newGroup)
-                // Mark change
-                State.isChanged = true
-            }
-        }
-        g_renameItem.setOnAction {
-            val groupName: String =
-                if (it.source is String) it.source as String
-                else view.selectionModel.selectedItem.value
-
-            showInput(
-                State.stage,
-                I18N["context.rename_group.dialog.title"],
-                I18N["context.rename_group.dialog.header"],
-                groupName,
-                genGroupNameFormatter()
-            ).ifPresent { newName ->
-                if (newName.isBlank()) return@ifPresent
-                if (State.transFile.groupNames.contains(newName)) {
-                    showError(State.stage, I18N["context.error.same_group_name"])
-                    return@ifPresent
-                }
-
-                // Edit data
-                State.setTransGroupName(State.transFile.getGroupIdByName(groupName), newName)
-                // Mark change
-                State.isChanged = true
-            }
-        }
-        g_deleteItem.setOnAction {
-            val groupName: String =
-                if (it.source is String) it.source as String
-                else view.selectionModel.selectedItem.value
-
-            view.selectionModel.clearSelection()
-
-            // Edit data
-            State.removeTransGroup(groupName)
-            // Mark change
-            State.isChanged = true
-        }
-    }
-
-    fun initView(view: CTreeView) {
-        this.view = view
-    }
+    private val l_deleteItem         = MenuItem(I18N["context.delete_label"])
 
     fun update(selectedItems: List<TreeItem<String>>) {
         items.clear()
@@ -215,7 +207,8 @@ object ATreeMenu : ContextMenu() {
         for (item in selectedItems) {
             if (item.parent == null) rootCount += 1
             else if (item is CTreeLabelItem) labelCount += 1
-            else groupCount += 1
+            else if (item is CTreeGroupItem) groupCount += 1
+            else doNothing()
         }
 
         if (rootCount == 1 && groupCount == 0 && labelCount == 0) {
@@ -223,10 +216,15 @@ object ATreeMenu : ContextMenu() {
             items.add(r_addGroupItem)
         } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
             // group
-            val groupItem = selectedItems[0]
+            val groupItem = selectedItems[0] as CTreeGroupItem
+            val groupName = groupItem.name
 
-            (g_changeColorItem.graphic as CColorPicker).value = (groupItem.graphic as Circle).fill as Color
+            g_changeColorPicker.value = groupItem.color
             g_deleteItem.isDisable = !State.transFile.isGroupUnused(State.transFile.getGroupIdByName(groupItem.value))
+
+            g_renameItem.setOnAction { g_renameHandler.handle(ActionEvent(groupName, g_renameItem)) }
+            g_changeColorPicker.setOnAction { g_changeColorHandler.handle(ActionEvent(groupName, g_changeColorPicker)) }
+            g_deleteItem.setOnAction { g_deleteHandler.handle(ActionEvent(groupName, g_deleteItem)) }
 
             items.add(g_renameItem)
             items.add(g_changeColorItem)
@@ -234,8 +232,8 @@ object ATreeMenu : ContextMenu() {
             items.add(g_deleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)
-            l_moveToItem.setOnAction { l_moveToAction(selectedItems) }
-            l_deleteItem.setOnAction { l_deleteAction(selectedItems) }
+            l_moveToItem.setOnAction { l_moveToHandler.handle(ActionEvent(selectedItems, l_moveToItem)) }
+            l_deleteItem.setOnAction { l_deleteHandler.handle(ActionEvent(selectedItems, l_deleteItem)) }
 
             items.add(l_moveToItem)
             items.add(SeparatorMenuItem())

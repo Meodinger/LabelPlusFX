@@ -32,7 +32,8 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
-import javafx.scene.layout.*
+import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
@@ -230,13 +231,13 @@ class CLabelPane : ScrollPane() {
     fun labelAlphaProperty(): StringProperty = labelAlphaProperty
     var labelAlpha: String by labelAlphaProperty
 
-    private val commonCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
-    fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
-    var commonCursor: Cursor by commonCursorProperty
-
     private val newPictureScaleProperty: ObjectProperty<NewPictureScale> = SimpleObjectProperty(NewPictureScale.DEFAULT)
     fun newPictureScaleProperty(): ObjectProperty<NewPictureScale> = newPictureScaleProperty
     var newPictureScale: NewPictureScale by newPictureScaleProperty
+
+    private val commonCursorProperty: ObjectProperty<Cursor> = SimpleObjectProperty(Cursor.DEFAULT)
+    fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
+    var commonCursor: Cursor by commonCursorProperty
 
     init {
         textLayer.isMouseTransparent = true

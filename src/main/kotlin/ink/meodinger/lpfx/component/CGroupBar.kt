@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.addLast
 import ink.meodinger.lpfx.util.component.boxHGrow
@@ -12,13 +11,12 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.ListProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
@@ -45,6 +43,11 @@ class CGroupBar : HBox() {
     fun selectedGroupIndexProperty(): IntegerProperty = selectedGroupIndexProperty
     var selectedGroupIndex: Int by selectedGroupIndexProperty
 
+    private val onGroupCreateProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
+    fun onGroupCreateProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupCreateProperty
+    val onGroupCreate: EventHandler<ActionEvent> by onGroupCreateProperty
+    fun setOnGroupCreate(handler: EventHandler<ActionEvent>) = onGroupCreateProperty.set(handler)
+
     // ----- Common Components ----- //
 
     private val cGroups: MutableList<CGroup> = ArrayList()
@@ -52,7 +55,7 @@ class CGroupBar : HBox() {
         boxHGrow = Priority.ALWAYS
     }
     private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
-        setOnSelect { ATreeMenu.toggleGroupCreate() }
+        onSelectProperty().bind(onGroupCreateProperty)
     }
     private val vShift = 2
 

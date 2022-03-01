@@ -5,12 +5,8 @@ import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties
-import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
+import com.fasterxml.jackson.annotation.*
+import javafx.beans.property.*
 
 
 /**
@@ -48,11 +44,11 @@ class TransLabel @JsonCreator constructor(
 
     // ----- Properties ----- //
 
-    val indexProperty = SimpleIntegerProperty()
-    val groupIdProperty = SimpleIntegerProperty()
-    val xProperty = SimpleDoubleProperty()
-    val yProperty = SimpleDoubleProperty()
-    val textProperty = SimpleStringProperty(text)
+    val indexProperty:   IntegerProperty = SimpleIntegerProperty()
+    val groupIdProperty: IntegerProperty = SimpleIntegerProperty()
+    val xProperty:       DoubleProperty  = SimpleDoubleProperty()
+    val yProperty:       DoubleProperty  = SimpleDoubleProperty()
+    val textProperty:    StringProperty  = SimpleStringProperty(text)
 
     var index: Int
         get() = indexProperty.get()
@@ -94,6 +90,7 @@ class TransLabel @JsonCreator constructor(
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (other !is TransLabel) return false
+        if (other.hashCode() != hashCode()) return false
         if (index != other.index) return false
         if (groupId != other.groupId) return false
         if (x != other.x) return false

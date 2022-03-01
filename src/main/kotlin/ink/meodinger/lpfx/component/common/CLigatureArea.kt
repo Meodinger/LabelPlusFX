@@ -103,11 +103,6 @@ class CLigatureArea: TextArea() {
         textFormatter = defaultTextFormatter
     }
 
-    fun reset() {
-        unbindBidirectional()
-        textFormatter = defaultTextFormatter
-    }
-
     /**
      * Bind the StringProperty of this TextArea to another StringProperty bidirectionally.
      */

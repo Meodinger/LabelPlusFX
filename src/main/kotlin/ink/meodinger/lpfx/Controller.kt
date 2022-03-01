@@ -25,7 +25,6 @@ import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.ListProperty
 import javafx.beans.property.StringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -187,8 +186,6 @@ class Controller(private val root: View) {
 
             // Edit data
             State.addTransLabel(State.currentPicName, transLabel)
-            // Update view
-            createLabelTreeItem(transLabel)
             // Mark change
             State.isChanged = true
             // Select it
@@ -199,8 +196,6 @@ class Controller(private val root: View) {
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
-            // Update view
-            removeLabelTreeItem(it.labelIndex)
             // Edit data
             State.removeTransLabel(State.currentPicName, it.labelIndex)
             if (State.currentLabelIndex == it.labelIndex) State.currentLabelIndex = NOT_FOUND
@@ -354,21 +349,21 @@ class Controller(private val root: View) {
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // GroupBar
-        cGroupBar.groupsProperty().bind(object : ObjectBinding<ListProperty<TransGroup>>() {
+        cGroupBar.groupsProperty().bind(object : ObjectBinding<ObservableList<TransGroup>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
 
             init {
                 bind(State.transFileProperty())
             }
 
-            override fun computeValue(): ListProperty<TransGroup> {
+            override fun computeValue(): ObservableList<TransGroup> {
                 if (lastGroupListObservable !== State.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
                     lastGroupListObservable = State.transFile.groupListObservable
                     bind(lastGroupListObservable)
                 }
 
-                return State.transFile.groupListProperty
+                return FXCollections.observableList(State.transFile.groupListObservable)
             }
 
         })
@@ -376,8 +371,29 @@ class Controller(private val root: View) {
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // TreeView
-        cTreeView.picNameProperty().bind(State.currentPicNameProperty())
+        cTreeView.rootNameProperty().bind(State.currentPicNameProperty())
         cTreeView.viewModeProperty().bind(State.viewModeProperty())
+        cTreeView.groupsProperty().bind(object : ObjectBinding<ObservableList<TransGroup>>() {
+            private var lastGroupListObservable = State.transFile.groupListObservable
+
+            init {
+                bind(State.transFileProperty())
+            }
+
+            override fun computeValue(): ObservableList<TransGroup> {
+                if (lastGroupListObservable !== State.transFile.groupListObservable) {
+                    unbind(lastGroupListObservable)
+                    lastGroupListObservable = State.transFile.groupListObservable
+                    bind(lastGroupListObservable)
+                }
+
+                return FXCollections.observableList(State.transFile.groupListObservable)
+            }
+
+        })
+        cTreeView.labelsProperty().bind(Bindings.createObjectBinding(binding@{
+            return@binding if (State.currentPicName != "") FXCollections.observableList(State.transFile.transMapObservable[State.currentPicName]!!) else FXCollections.emptyObservableList()
+        }, State.currentPicNameProperty()))
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
             if (it != null && it is CTreeLabelItem && cTreeView.selectionModel.selectedItems.size == 1)
                 State.currentLabelIndex = it.index
@@ -417,7 +433,7 @@ class Controller(private val root: View) {
 
         })
         cLabelPane.labelsProperty().bind(Bindings.createObjectBinding(binding@{
-            return@binding if (State.currentPicName != "") State.transFile.transMapObservable[State.currentPicName]!! else FXCollections.emptyObservableList()
+            return@binding if (State.currentPicName != "") FXCollections.observableList(State.transFile.transMapObservable[State.currentPicName]!!) else FXCollections.emptyObservableList()
         }, State.currentPicNameProperty()))
         cLabelPane.colorHexListProperty().bind(object : ObjectBinding<ObservableList<String>>() {
             private var lastGroupListObservable = State.transFile.groupListObservable
@@ -499,8 +515,6 @@ class Controller(private val root: View) {
         // Update cTreeView & cLabelPane when pic change
         State.currentPicNameProperty().addListener(onNew {
             if (!State.isOpened || it.isEmpty()) return@onNew
-
-            renderTreeView()
 
             labelInfo("Changed picture to $it")
         })
@@ -1087,8 +1101,7 @@ class Controller(private val root: View) {
     fun reset() {
         backupManager.clear()
 
-        cTreeView.reset()
-        cTransArea.reset()
+        cTransArea.unbindBidirectional()
 
         State.stage.title = INFO["application.name"]
 
@@ -1096,42 +1109,7 @@ class Controller(private val root: View) {
     }
 
     // ----- TreeView ----- //
-    fun renderTreeView() {
-        // PicName and ViewMode were bound
-        cTreeView.render(
-            transGroups = State.transFile.groupListObservable,
-            transLabels = State.transFile.getTransList(State.currentPicName),
-        )
 
-        Logger.info("TreeView rendered pic: ${State.currentPicName}", LOGSRC_CONTROLLER)
-    }
-
-    fun createGroupTreeItem(transGroup: TransGroup) {
-        when (State.viewMode) {
-            ViewMode.IndexMode -> cTreeView.registerGroup(transGroup)
-            ViewMode.GroupMode -> cTreeView.createGroupItem(transGroup)
-        }
-
-        Logger.info("Created group item @ $transGroup", LOGSRC_CONTROLLER)
-    }
-    fun removeGroupTreeItem(groupName: String) {
-        when (State.viewMode) {
-            ViewMode.IndexMode -> cTreeView.unregisterGroup(groupName)
-            ViewMode.GroupMode -> cTreeView.removeGroupItem(groupName)
-        }
-
-        Logger.info("Removed group item @ $groupName", LOGSRC_CONTROLLER)
-    }
-    fun createLabelTreeItem(transLabel: TransLabel) {
-        cTreeView.createLabelItem(transLabel)
-
-        Logger.info("Created label item @ $transLabel", LOGSRC_CONTROLLER)
-    }
-    fun removeLabelTreeItem(labelIndex: Int) {
-        cTreeView.removeLabelItem(labelIndex)
-
-        Logger.info("Removed label item @ $labelIndex", LOGSRC_CONTROLLER)
-    }
     fun moveLabelTreeItem(labelIndex: Int, from: Int, to: Int) {
         cTreeView.moveLabelItem(labelIndex, from, to)
 

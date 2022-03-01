@@ -159,15 +159,6 @@ object AMenuBar : MenuBar() {
                 does { specifyPictures() }
                 disableProperty().bind(!State.isOpenedProperty())
             }
-            separator()
-            item(I18N["m.cht2zh"]) {
-                does { cht2zh() }
-                disableProperty().bind(!State.isOpenedProperty())
-            }
-            item(I18N["m.zh2cht"]) {
-                does { cht2zh(true) }
-                disableProperty().bind(!State.isOpenedProperty())
-            }
         }
         menu(I18N["mm.export"]) {
             item(I18N["m.lp"]) {
@@ -222,6 +213,15 @@ object AMenuBar : MenuBar() {
             item(I18N["m.dict"]) {
                 does { toggleDict() }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN)
+            }
+            separator()
+            item(I18N["m.cht2zh"]) {
+                does { cht2zh() }
+                disableProperty().bind(!State.isOpenedProperty())
+            }
+            item(I18N["m.zh2cht"]) {
+                does { cht2zh(true) }
+                disableProperty().bind(!State.isOpenedProperty())
             }
         }
     }
@@ -398,69 +398,8 @@ object AMenuBar : MenuBar() {
         val completed = State.controller.specifyPicFiles()
         if (completed != null) {
             if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
-            // TODO: re-render
-            // if (State.isOpened) if (State.getPicFileNow().exists()) State.controller.renderLabelPane()
+            State.currentPicName = State.transFile.sortedPicNames[0]
         }
-    }
-    private fun cht2zh(inverse: Boolean = false) {
-        val converter = if (inverse) ::convert2Traditional else ::convert2Simplified
-
-        val task = object : LPFXTask<Unit>() {
-            val DELIMITER = "#|#"
-
-            override fun call() {
-                State.isChanged = true
-
-                val picNames = State.transFile.sortedPicNames
-                var picIndex = 0.0
-                val picCount = State.transFile.picCount
-                for (picName in picNames) {
-                    handleCancel { return }
-                    val labels = State.transFile.getTransList(picName)
-                    var labelIndex = 0.0
-                    val labelCount = labels.size
-
-                    val builder = StringBuilder()
-                    for (label in labels) builder.append(label.text).append(DELIMITER)
-                    val iterator = converter(builder.deleteTail(DELIMITER).toString()).split(DELIMITER).also {
-                        if (it.size != labelCount) {
-                            updateMessage("at [$picIndex:$labelIndex] ${it.joinToString()}")
-                            cancel()
-                            return
-                        }
-                    }.iterator()
-                    for (label in labels) {
-                        labelIndex++
-                        updateProgress(((picIndex + labelIndex / labelCount) / picCount), 1.0)
-                        label.text = iterator.next().trim() // Sometimes will get whitespaces at label start
-                    }
-                    picIndex++
-                }
-            }
-        }
-
-        Dialog<Unit>().apply {
-            initOwner(State.stage)
-            dialogPane.withContent(ProgressBar()) {
-                progressProperty().bind(task.progressProperty())
-                progressProperty().addListener(onNew<Number, Double> {
-                    if (it >= 1.0) {
-                        result = Unit
-                        close()
-                    }
-                })
-            }
-
-            task.messageProperty().addListener(onNew {
-                if (it.isNotBlank()) {
-                    result = Unit
-                    close()
-                    showError(State.stage, "Error: $it")
-                }
-            })
-        }.show()
-
-        task()
     }
 
     private fun exportTransFile(type: FileType) {
@@ -544,6 +483,66 @@ object AMenuBar : MenuBar() {
         throw RuntimeException("Crash")
     }
 
+    private fun cht2zh(inverse: Boolean = false) {
+        val converter = if (inverse) ::convert2Traditional else ::convert2Simplified
+
+        val task = object : LPFXTask<Unit>() {
+            val DELIMITER = "#|#"
+
+            override fun call() {
+                State.isChanged = true
+
+                val picNames = State.transFile.sortedPicNames
+                val picCount = State.transFile.picCount
+                for ((picIndex, picName) in picNames.withIndex()) {
+                    handleCancel { return }
+                    val labels = State.transFile.getTransList(picName)
+                    var labelIndex = 0
+                    val labelCount = labels.size
+
+                    if (labelCount == 0) continue
+
+                    val builder = StringBuilder()
+                    for (label in labels) builder.append(label.text).append(DELIMITER)
+                    val iterator = converter(builder.deleteTail(DELIMITER).toString()).split(DELIMITER).also {
+                        if (it.size != labelCount) {
+                            updateMessage("at [$picName] ${it.joinToString()}")
+                            cancel()
+                            return
+                        }
+                    }.iterator()
+                    for (label in labels) {
+                        labelIndex++
+                        updateProgress((1.0 * (picIndex + labelIndex / labelCount) / picCount), 1.0)
+                        label.text = iterator.next().trim() // Sometimes will get whitespaces at label start
+                    }
+                }
+            }
+        }
+
+        Dialog<Unit>().apply {
+            initOwner(State.stage)
+            dialogPane.withContent(ProgressBar()) {
+                progressProperty().bind(task.progressProperty())
+                progressProperty().addListener(onNew<Number, Double> {
+                    if (it >= 1.0) {
+                        result = Unit
+                        close()
+                    }
+                })
+            }
+
+            task.messageProperty().addListener(onNew {
+                if (it.isNotBlank()) {
+                    result = Unit
+                    close()
+                    showError(State.stage, "Error: $it")
+                }
+            })
+        }.show()
+
+        task()
+    }
     fun toggleDict() {
         AOnlineDict.x = State.stage.x - (AOnlineDict.width + COMMON_GAP * 2) + State.stage.width
         AOnlineDict.y = State.stage.y + (COMMON_GAP * 2)

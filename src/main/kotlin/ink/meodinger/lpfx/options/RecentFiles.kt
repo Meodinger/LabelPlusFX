@@ -15,11 +15,11 @@ import java.io.IOException
 object RecentFiles : AbstractProperties() {
 
     private const val MAX_SIZE = 10
-    private const val RECENT   = "recent"
-    private const val PROGRESS = "progress"
+    private const val RECENT   = "RecentFiles"
+    private const val PROGRESS = "ProgressMap"
 
-    private val recent = ArrayDeque<String>()
-    private val progress = HashMap<String, Pair<Int, Int>>()
+    private val recentFiles = ArrayDeque<String>()
+    private val progressMap = HashMap<String, Pair<Int, Int>>()
 
     override val default = listOf(
         CProperty(RECENT),
@@ -32,48 +32,48 @@ object RecentFiles : AbstractProperties() {
     override fun load() {
         load(Options.recentFiles, this)
 
-        recent.addAll(this[RECENT].asStringList())
+        recentFiles.addAll(this[RECENT].asStringList())
 
         val progressList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
-        progress.putAll(recent.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } })
+        progressMap.putAll(recentFiles.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } })
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[RECENT].set(recent)
-        this[PROGRESS].set(recent.map(progress::get))
+        this[RECENT].set(recentFiles)
+        this[PROGRESS].set(recentFiles.map(progressMap::get))
 
         save(Options.recentFiles, this)
     }
 
     fun getAll(): List<String> {
-        return recent
+        return recentFiles
     }
 
     fun getLastOpenFile(): String? {
-        return recent.firstOrNull()
+        return recentFiles.firstOrNull()
     }
 
     fun add(path: String) {
-        recent.remove(path)
-        recent.addFirst(path)
+        recentFiles.remove(path)
+        recentFiles.addFirst(path)
 
-        progress[path] = progress[path] ?: (-1 to -1)
+        progressMap[path] = progressMap[path] ?: (-1 to -1)
 
-        if (recent.size > MAX_SIZE) progress.remove(recent.removeLast())
+        if (recentFiles.size > MAX_SIZE) progressMap.remove(recentFiles.removeLast())
     }
 
     fun remove(path: String) {
-        recent.remove(path)
-        progress.remove(path)
+        recentFiles.remove(path)
+        progressMap.remove(path)
     }
 
     fun getProgressOf(path: String): Pair<Int, Int> {
-        return progress[path] ?: (-1 to -1)
+        return progressMap[path] ?: (-1 to -1)
     }
 
     fun setProgressOf(path: String, current: Pair<Int, Int>) {
-        progress[path] = current
+        progressMap[path] = current
     }
 
 }

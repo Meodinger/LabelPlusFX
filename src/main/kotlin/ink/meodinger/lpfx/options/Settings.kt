@@ -79,7 +79,7 @@ object Settings : AbstractProperties() {
 
     private val defaultGroupColorHexListProperty: ListProperty<String> = SimpleListProperty()
     fun defaultGroupColorHexListProperty(): ListProperty<String> = defaultGroupColorHexListProperty
-    var defaultGroupColorHexList: ObservableList<String> by defaultGroupNameListProperty
+    var defaultGroupColorHexList: ObservableList<String> by defaultGroupColorHexListProperty
 
     private val isGroupCreateOnNewTransListProperty: ListProperty<Boolean> = SimpleListProperty()
     fun isGroupCreateOnNewTransListProperty(): ListProperty<Boolean> = isGroupCreateOnNewTransListProperty

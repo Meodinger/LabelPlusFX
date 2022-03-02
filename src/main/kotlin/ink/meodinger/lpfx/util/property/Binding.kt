@@ -2,10 +2,9 @@
 
 package ink.meodinger.lpfx.util.property
 
+import javafx.beans.*
 import javafx.beans.binding.*
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.value.ObservableBooleanValue
-import javafx.beans.value.ObservableNumberValue
+import javafx.beans.value.*
 
 
 /**
@@ -14,82 +13,120 @@ import javafx.beans.value.ObservableNumberValue
  * Have fun with my code!
  */
 
-// Kotlin will translate `!` to `.not()`. So this operator function is unnecessary
-// operator fun BooleanProperty.not(): BooleanBinding = not()
-
 operator fun IntegerExpression.unaryMinus(): IntegerBinding = negate()
-operator fun IntegerExpression.plus(other: ObservableNumberValue): NumberBinding = add(other)
+operator fun IntegerExpression.plus(other: ObservableIntegerValue): IntegerBinding = add(other) as IntegerBinding
+operator fun IntegerExpression.plus(other: ObservableLongValue): LongBinding = add(other) as LongBinding
+operator fun IntegerExpression.plus(other: ObservableFloatValue): FloatBinding = add(other) as FloatBinding
+operator fun IntegerExpression.plus(other: ObservableDoubleValue): DoubleBinding = add(other) as DoubleBinding
 operator fun IntegerExpression.plus(other: Int): IntegerBinding = add(other)
 operator fun IntegerExpression.plus(other: Long): LongBinding = add(other)
 operator fun IntegerExpression.plus(other: Float): FloatBinding = add(other)
 operator fun IntegerExpression.plus(other: Double): DoubleBinding = add(other)
-operator fun IntegerExpression.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
+operator fun IntegerExpression.minus(other: ObservableIntegerValue): IntegerBinding = subtract(other) as IntegerBinding
+operator fun IntegerExpression.minus(other: ObservableLongValue): LongBinding = subtract(other) as LongBinding
+operator fun IntegerExpression.minus(other: ObservableFloatValue): FloatBinding = subtract(other) as FloatBinding
+operator fun IntegerExpression.minus(other: ObservableDoubleValue): DoubleBinding = subtract(other) as DoubleBinding
 operator fun IntegerExpression.minus(other: Int): IntegerBinding = subtract(other)
 operator fun IntegerExpression.minus(other: Long): LongBinding = subtract(other)
 operator fun IntegerExpression.minus(other: Float): FloatBinding = subtract(other)
 operator fun IntegerExpression.minus(other: Double): DoubleBinding = subtract(other)
-operator fun IntegerExpression.times(other: ObservableNumberValue): NumberBinding = multiply(other)
+operator fun IntegerExpression.times(other: ObservableIntegerValue): IntegerBinding = multiply(other) as IntegerBinding
+operator fun IntegerExpression.times(other: ObservableLongValue): LongBinding = multiply(other) as LongBinding
+operator fun IntegerExpression.times(other: ObservableFloatValue): FloatBinding = multiply(other) as FloatBinding
+operator fun IntegerExpression.times(other: ObservableDoubleValue): DoubleBinding = multiply(other) as DoubleBinding
 operator fun IntegerExpression.times(other: Int): IntegerBinding = multiply(other)
 operator fun IntegerExpression.times(other: Long): LongBinding = multiply(other)
 operator fun IntegerExpression.times(other: Float): FloatBinding = multiply(other)
 operator fun IntegerExpression.times(other: Double): DoubleBinding = multiply(other)
-operator fun IntegerExpression.div(other: ObservableNumberValue): NumberBinding = divide(other)
+operator fun IntegerExpression.div(other: ObservableIntegerValue): IntegerBinding = divide(other) as IntegerBinding
+operator fun IntegerExpression.div(other: ObservableLongValue): LongBinding = divide(other) as LongBinding
+operator fun IntegerExpression.div(other: ObservableFloatValue): FloatBinding = divide(other) as FloatBinding
+operator fun IntegerExpression.div(other: ObservableDoubleValue): DoubleBinding = divide(other) as DoubleBinding
 operator fun IntegerExpression.div(other: Int): IntegerBinding = divide(other)
 operator fun IntegerExpression.div(other: Long): LongBinding = divide(other)
 operator fun IntegerExpression.div(other: Float): FloatBinding = divide(other)
 operator fun IntegerExpression.div(other: Double): DoubleBinding = divide(other)
 
 operator fun LongExpression.unaryMinus(): LongBinding = negate()
-operator fun LongExpression.plus(other: ObservableNumberValue): NumberBinding = add(other)
+operator fun LongExpression.plus(other: ObservableNumberValue): LongBinding = add(other) as LongBinding
+operator fun LongExpression.plus(other: ObservableFloatValue): FloatBinding = add(other) as FloatBinding
+operator fun LongExpression.plus(other: ObservableDoubleValue): DoubleBinding = add(other) as DoubleBinding
 operator fun LongExpression.plus(other: Number): LongBinding = add(other.toLong())
 operator fun LongExpression.plus(other: Float): FloatBinding = add(other)
 operator fun LongExpression.plus(other: Double): DoubleBinding = add(other)
-operator fun LongExpression.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
+operator fun LongExpression.minus(other: ObservableNumberValue): LongBinding = subtract(other) as LongBinding
+operator fun LongExpression.minus(other: ObservableFloatValue): FloatBinding = subtract(other) as FloatBinding
+operator fun LongExpression.minus(other: ObservableDoubleValue): DoubleBinding = subtract(other) as DoubleBinding
 operator fun LongExpression.minus(other: Number): LongBinding = subtract(other.toLong())
 operator fun LongExpression.minus(other: Float): FloatBinding = subtract(other)
 operator fun LongExpression.minus(other: Double): DoubleBinding = subtract(other)
-operator fun LongExpression.times(other: ObservableNumberValue): NumberBinding = multiply(other)
+operator fun LongExpression.times(other: ObservableNumberValue): LongBinding = multiply(other) as LongBinding
+operator fun LongExpression.times(other: ObservableFloatValue): FloatBinding = multiply(other) as FloatBinding
+operator fun LongExpression.times(other: ObservableDoubleValue): DoubleBinding = multiply(other) as DoubleBinding
 operator fun LongExpression.times(other: Number): LongBinding = multiply(other.toLong())
 operator fun LongExpression.times(other: Float): FloatBinding = multiply(other)
 operator fun LongExpression.times(other: Double): DoubleBinding = multiply(other)
-operator fun LongExpression.div(other: ObservableNumberValue): NumberBinding = divide(other)
+operator fun LongExpression.div(other: ObservableNumberValue): LongBinding = divide(other) as LongBinding
+operator fun LongExpression.div(other: ObservableFloatValue): FloatBinding = divide(other) as FloatBinding
+operator fun LongExpression.div(other: ObservableDoubleValue): DoubleBinding = divide(other) as DoubleBinding
 operator fun LongExpression.div(other: Number): LongBinding = divide(other.toLong())
 operator fun LongExpression.div(other: Float): FloatBinding = divide(other)
 operator fun LongExpression.div(other: Double): DoubleBinding = divide(other)
 
 operator fun FloatExpression.unaryMinus(): FloatBinding = negate()
-operator fun FloatExpression.plus(other: ObservableNumberValue): NumberBinding = add(other)
+operator fun FloatExpression.plus(other: ObservableNumberValue): FloatBinding = add(other) as FloatBinding
+operator fun FloatExpression.plus(other: ObservableDoubleValue): DoubleBinding = add(other) as DoubleBinding
 operator fun FloatExpression.plus(other: Number): FloatBinding = add(other.toFloat())
 operator fun FloatExpression.plus(other: Double): DoubleBinding = add(other)
-operator fun FloatExpression.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
+operator fun FloatExpression.minus(other: ObservableNumberValue): FloatBinding = subtract(other) as FloatBinding
+operator fun FloatExpression.minus(other: ObservableDoubleValue): DoubleBinding = subtract(other) as DoubleBinding
 operator fun FloatExpression.minus(other: Number): FloatBinding = subtract(other.toFloat())
 operator fun FloatExpression.minus(other: Double): DoubleBinding = subtract(other)
-operator fun FloatExpression.times(other: ObservableNumberValue): NumberBinding = multiply(other)
+operator fun FloatExpression.times(other: ObservableNumberValue): FloatBinding = multiply(other) as FloatBinding
+operator fun FloatExpression.times(other: ObservableDoubleValue): DoubleBinding = multiply(other) as DoubleBinding
 operator fun FloatExpression.times(other: Number): FloatBinding = multiply(other.toFloat())
 operator fun FloatExpression.times(other: Double): DoubleBinding = multiply(other)
-operator fun FloatExpression.div(other: ObservableNumberValue): NumberBinding = divide(other)
+operator fun FloatExpression.div(other: ObservableNumberValue): FloatBinding = divide(other) as FloatBinding
+operator fun FloatExpression.div(other: ObservableDoubleValue): DoubleBinding = divide(other) as DoubleBinding
 operator fun FloatExpression.div(other: Number): FloatBinding = divide(other.toFloat())
 operator fun FloatExpression.div(other: Double): DoubleBinding = divide(other)
 
 operator fun DoubleExpression.unaryMinus(): DoubleBinding = negate()
-operator fun DoubleExpression.plus(other: ObservableNumberValue): NumberBinding = add(other)
+operator fun DoubleExpression.plus(other: ObservableNumberValue): DoubleBinding = add(other) as DoubleBinding
 operator fun DoubleExpression.plus(other: Number): DoubleBinding = add(other.toDouble())
-operator fun DoubleExpression.minus(other: ObservableNumberValue): NumberBinding = subtract(other)
+operator fun DoubleExpression.minus(other: ObservableNumberValue): DoubleBinding = subtract(other) as DoubleBinding
 operator fun DoubleExpression.minus(other: Number): DoubleBinding = subtract(other.toDouble())
-operator fun DoubleExpression.times(other: ObservableNumberValue): NumberBinding = multiply(other)
+operator fun DoubleExpression.times(other: ObservableNumberValue): DoubleBinding = multiply(other) as DoubleBinding
 operator fun DoubleExpression.times(other: Number): DoubleBinding = multiply(other.toDouble())
-operator fun DoubleExpression.div(other: ObservableNumberValue): NumberBinding = divide(other)
+operator fun DoubleExpression.div(other: ObservableNumberValue): DoubleBinding = divide(other) as DoubleBinding
 operator fun DoubleExpression.div(other: Number): DoubleBinding = divide(other.toDouble())
 
 // Boolean bindings
+// Kotlin will translate `!` to `.not()`. So this operator function is unnecessary
+// operator fun BooleanExpression.not(): BooleanBinding = not()
 
-infix fun BooleanExpression.and(other: Boolean): BooleanBinding = and(SimpleBooleanProperty(other))
+class BooleanConstant private constructor(private val constantValue: Boolean) : ObservableBooleanValue {
+
+    companion object {
+        fun of(value: Boolean) = BooleanConstant(value)
+    }
+
+    override fun addListener(listener: ChangeListener<in Boolean>?) { /* no-op */ }
+    override fun addListener(listener: InvalidationListener?) { /* no-op */ }
+    override fun removeListener(listener: InvalidationListener?) { /* no-op */ }
+    override fun removeListener(listener: ChangeListener<in Boolean>?) { /* no-op */ }
+    override fun getValue(): Boolean = constantValue
+    override fun get(): Boolean = constantValue
+
+}
+
+infix fun BooleanExpression.and(other: Boolean): BooleanBinding = and(BooleanConstant.of(other))
 infix fun BooleanExpression.and(other: ObservableBooleanValue): BooleanBinding = and(other)
-infix fun BooleanExpression.or(other: Boolean): BooleanBinding = or(SimpleBooleanProperty(other))
+infix fun BooleanExpression.or(other: Boolean): BooleanBinding = or(BooleanConstant.of(other))
 infix fun BooleanExpression.or(other: ObservableBooleanValue): BooleanBinding = or(other)
 infix fun BooleanExpression.xor(other: Boolean): BooleanBinding = Bindings.createBooleanBinding( { get() xor other }, this )
 infix fun BooleanExpression.xor(other: ObservableBooleanValue): BooleanBinding = Bindings.createBooleanBinding( { get() xor other.get() }, this )
-infix fun BooleanExpression.eq(other: Boolean): BooleanBinding = isEqualTo(SimpleBooleanProperty(other))
+infix fun BooleanExpression.eq(other: Boolean): BooleanBinding = isEqualTo(BooleanConstant.of(other))
 infix fun BooleanExpression.eq(other: ObservableBooleanValue): BooleanBinding = isEqualTo(other)
 
 infix fun NumberExpression.gt(other: Int): BooleanBinding = greaterThan(other)

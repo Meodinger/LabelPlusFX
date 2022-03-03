@@ -239,6 +239,8 @@ class CLabelPane : ScrollPane() {
     fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
     var commonCursor: Cursor by commonCursorProperty
 
+    private val shouldCreate: Boolean get() = image !== INIT_IMAGE
+
     init {
         textLayer.isMouseTransparent = true
         textLayer.graphicsContext2D.font = TEXT_FONT
@@ -364,17 +366,13 @@ class CLabelPane : ScrollPane() {
                     // will not happen
                     throw IllegalStateException("Updated: $it")
                 } else {
-                    if (it.wasAdded()) for (transLabel in it.addedSubList) createLabel(transLabel)
-                    if (it.wasRemoved()) for (transLabel in it.removed) removeLabel(transLabel)
+                    if (it.wasRemoved()) it.removed.forEach(this::removeLabel)
+                    if (it.wasAdded() && shouldCreate) it.addedSubList.forEach(this::createLabel)
                 }
             }
         })
     }
 
-    private fun getLabel(labelIndex: Int): CLabel {
-        for (label in cLabels) if (label.index == labelIndex) return label
-        throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
-    }
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
             radiusProperty().bind(labelRadiusProperty)
@@ -480,7 +478,7 @@ class CLabelPane : ScrollPane() {
         cLabels.add(label)
     }
     private fun removeLabel(transLabel: TransLabel) {
-        val label = getLabel(transLabel.index)
+        val label = cLabels.firstOrNull { it.index == transLabel.index } ?: return
 
         // Unbind
         label.radiusProperty().unbind()
@@ -532,10 +530,13 @@ class CLabelPane : ScrollPane() {
     }
 
     fun moveToLabel(labelIndex: Int) {
+        if (!shouldCreate) return
+
+        val label = cLabels.firstOrNull { it.index == labelIndex }
+            ?: throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
+
         vvalue = 0.0
         hvalue = 0.0
-
-        val label = getLabel(labelIndex)
 
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
@@ -567,4 +568,21 @@ class CLabelPane : ScrollPane() {
     fun fitToPane() {
         scale = width / image.width
     }
+
+
+    /**
+     * This function will let imageProperty re-get its value.
+     * It's useful when the binding was manually invalidated.
+     */
+    fun requestShowImage() = imageProperty.get()
+    /**
+     * WARNING: this function will force LabelPane to create labels regardless of
+     *          whether the label actually should and could be layout.
+     */
+    fun requestCreateLabel() = labels.forEach(this::createLabel)
+    /**
+     * WARNING: this function will force LabelPane to remove labels regardless of
+     *          whether the label actually was layout or should be removed.
+     */
+    fun requestRemoveLabel() = labels.forEach(this::removeLabel)
 }

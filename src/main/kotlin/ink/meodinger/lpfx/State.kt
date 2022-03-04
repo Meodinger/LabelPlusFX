@@ -30,64 +30,71 @@ object State {
     lateinit var controller: Controller
     lateinit var stage: Stage
 
-    private val isOpenedProperty          = SimpleBooleanProperty(false)
-    private val isChangedProperty         = SimpleBooleanProperty(false)
-    private val transFileProperty         = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
-    private val translationFileProperty   = SimpleObjectProperty(DEFAULT_FILE)
-    private val projectFolderProperty     = SimpleObjectProperty(DEFAULT_FILE)
-    private val currentPicNameProperty    = SimpleStringProperty(emptyString())
-    private val currentGroupIdProperty    = SimpleIntegerProperty(0)
-    private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
-    private val viewModeProperty          = SimpleObjectProperty(ViewMode.IndexMode)
-    private val workModeProperty          = SimpleObjectProperty(WorkMode.InputMode)
-
-    fun isOpenedProperty():          BooleanProperty           = isOpenedProperty
-    fun isChangedProperty():         BooleanProperty           = isChangedProperty
-    fun transFileProperty():         ObjectProperty<TransFile> = transFileProperty
-    fun translationFileProperty():   ObjectProperty<File>      = translationFileProperty
-    fun projectFolderProperty():     ObjectProperty<File>      = projectFolderProperty
-    fun currentPicNameProperty():    StringProperty            = currentPicNameProperty
-    fun currentGroupIdProperty():    IntegerProperty           = currentGroupIdProperty
-    fun currentLabelIndexProperty(): IntegerProperty           = currentLabelIndexProperty
-    fun viewModeProperty():          ObjectProperty<ViewMode>  = viewModeProperty
-    fun workModeProperty():          ObjectProperty<WorkMode>  = workModeProperty
-
+    private val isOpenedProperty = SimpleBooleanProperty(false)
+    fun isOpenedProperty(): BooleanProperty = isOpenedProperty
     /**
      * Whether opened a TransFile or not
      */
     var isOpened: Boolean by isOpenedProperty
+
+    private val isChangedProperty = SimpleBooleanProperty(false)
+    fun isChangedProperty(): BooleanProperty = isChangedProperty
     /**
      * Whether changed a TransFile or not
      */
     var isChanged: Boolean by isChangedProperty
+
+    private val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
+    fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
     /**
-     * TransFile opened
+     * The opened TransFile
      */
     var transFile: TransFile by transFileProperty
+
+    private val translationFileProperty = SimpleObjectProperty(DEFAULT_FILE)
+    fun translationFileProperty(): ObjectProperty<File> = translationFileProperty
     /**
-     * TransFile's FileSystem file
+     * The FileSystem file of the opened TransFile
      */
     var translationFile: File by translationFileProperty
+
+    private val projectFolderProperty = SimpleObjectProperty(DEFAULT_FILE)
+    fun projectFolderProperty(): ObjectProperty<File> = projectFolderProperty
     /**
-     * Folder of all project pictures (no external pictures)
+     * The folder of all project pictures (no external pictures)
      */
     var projectFolder: File by projectFolderProperty
+
+    private val currentPicNameProperty = SimpleStringProperty(emptyString())
+    fun currentPicNameProperty(): StringProperty = currentPicNameProperty
     /**
      * Name of current selected picture (usually also picture's FileSystem file's name)
      */
     var currentPicName: String by currentPicNameProperty
+
+    private val currentGroupIdProperty = SimpleIntegerProperty(0)
+    fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
     /**
      * Index of current selected TransGroup
      */
     var currentGroupId: Int by currentGroupIdProperty
+
+    private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
+    fun currentLabelIndexProperty(): IntegerProperty = currentLabelIndexProperty
     /**
      * Index of current selected TransLabel
      */
     var currentLabelIndex: Int by currentLabelIndexProperty
+
+    private val viewModeProperty = SimpleObjectProperty(ViewMode.IndexMode)
+    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
     /**
      * Current view mode
      */
     var viewMode: ViewMode by viewModeProperty
+
+    private val workModeProperty = SimpleObjectProperty(WorkMode.InputMode)
+    fun workModeProperty(): ObjectProperty<WorkMode> = workModeProperty
     /**
      * Current work mode
      */
@@ -176,13 +183,16 @@ object State {
     fun setTransLabelGroup(picName: String, index: Int, groupId: Int) {
         transFile.getTransLabel(picName, index).groupId = groupId
 
-        Logger.info("Set $picName->Index=$index @groupId=$groupId", LOGSRC_STATE)
+        Logger.info("Set $picName @ Index=$index @groupId=$groupId", LOGSRC_STATE)
     }
 
     /**
      * Get current picture's FileSystem file
      */
-    fun getPicFileNow(): File = if (isOpened && currentPicName.isNotEmpty()) transFile.getFileOrByProject(currentPicName, projectFolder) else DEFAULT_FILE
+    fun getPicFileNow(): File = if (isOpened && currentPicName.isNotEmpty()) transFile.getFileOrByProject(
+        currentPicName,
+        projectFolder
+    ) else DEFAULT_FILE
 
     /**
      * Get current TransFile's FileSystem file's directory

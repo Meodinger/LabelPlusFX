@@ -211,7 +211,7 @@ open class TransFile @JsonCreator constructor(
     fun addTransLabel(picName: String, transLabel: TransLabel) {
         val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
 
-        val (index, groupId, _, _, _) = transLabel
+        val (index, groupId) = transLabel
         if (groupId >= groupListObservable.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
         for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
 

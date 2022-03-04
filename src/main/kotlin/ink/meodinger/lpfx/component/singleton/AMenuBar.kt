@@ -398,7 +398,6 @@ object AMenuBar : MenuBar() {
         val completed = State.controller.specifyPicFiles()
         if (completed != null) {
             if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
-            //State.currentPicName = State.transFile.sortedPicNames[0]
             State.controller.requestRepaint()
         }
     }

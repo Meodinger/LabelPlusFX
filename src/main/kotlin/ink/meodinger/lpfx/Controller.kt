@@ -1109,18 +1109,21 @@ class Controller(private val root: View) {
 
     // ----- Component Methods ----- //
 
-    fun moveLabelTreeItem(labelIndex: Int, from: Int, to: Int) {
-        cTreeView.moveLabelItem(labelIndex, from, to)
+    fun moveLabelTreeItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
+        cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)
 
-        Logger.info("Moved label item @ $labelIndex @ from=$from, to=$to", LOGSRC_CONTROLLER)
+        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId", LOGSRC_CONTROLLER)
     }
     fun labelInfo(info: String) {
         lInfo.text = info
     }
+
+    // ----- Global Methods ----- //
+
     fun requestRepaint() {
         cLabelPaneImageBinding.invalidate()
         cLabelPane.requestShowImage()
-        cLabelPane.requestCreateLabel()
+        cLabelPane.requestCreateLabels()
     }
 
 }

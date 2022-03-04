@@ -573,16 +573,18 @@ class CLabelPane : ScrollPane() {
     /**
      * This function will let imageProperty re-get its value.
      * It's useful when the binding was manually invalidated.
+     * @return current image
      */
-    fun requestShowImage() = imageProperty.get()
+    fun requestShowImage(): Image = imageProperty.get()
     /**
      * WARNING: this function will force LabelPane to create labels regardless of
      *          whether the label actually should and could be layout.
      */
-    fun requestCreateLabel() = labels.forEach(this::createLabel)
+    fun requestCreateLabels() = labels.forEach(this::createLabel)
     /**
      * WARNING: this function will force LabelPane to remove labels regardless of
      *          whether the label actually was layout or should be removed.
      */
-    fun requestRemoveLabel() = labels.forEach(this::removeLabel)
+    fun requestRemoveLabels() = labels.forEach(this::removeLabel)
+
 }

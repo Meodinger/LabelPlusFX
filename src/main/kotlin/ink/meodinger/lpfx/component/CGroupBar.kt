@@ -73,8 +73,8 @@ class CGroupBar : HBox() {
                     // will not happen
                     throw IllegalStateException("Updated: $it")
                 } else {
-                    if (it.wasAdded()) for (transGroup in it.addedSubList) createGroup(transGroup)
-                    if (it.wasRemoved()) for (transGroup in it.removed) removeGroup(transGroup)
+                    if (it.wasRemoved()) it.removed.forEach(this::removeGroup)
+                    if (it.wasAdded()) it.addedSubList.forEach(this::createGroup)
                 }
             }
 

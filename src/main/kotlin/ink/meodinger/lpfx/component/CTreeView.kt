@@ -76,8 +76,8 @@ class CTreeView: TreeView<String>() {
                     // will not happen
                     throw IllegalStateException("Updated: $it")
                 } else {
-                    if (it.wasAdded()) for (transGroup in it.addedSubList) createGroupItem(transGroup)
-                    if (it.wasRemoved()) for (transGroup in it.removed) removeGroupItem(transGroup)
+                    if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
+                    if (it.wasAdded()) it.addedSubList.forEach(this::createGroupItem)
                 }
             }
         })
@@ -90,8 +90,8 @@ class CTreeView: TreeView<String>() {
                     // will not happen
                     throw IllegalStateException("Updated: $it")
                 } else {
-                    if (it.wasAdded()) for (transLabel in it.addedSubList) createLabelItem(transLabel)
-                    if (it.wasRemoved()) for (transLabel in it.removed) removeLabelItem(transLabel)
+                    if (it.wasRemoved()) it.removed.forEach(this::removeLabelItem)
+                    if (it.wasAdded()) it.addedSubList.forEach(this::createLabelItem)
                 }
             }
         })

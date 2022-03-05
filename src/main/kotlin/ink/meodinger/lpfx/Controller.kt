@@ -291,9 +291,9 @@ class Controller(private val root: View) {
         Logger.info("Registered CGroupBar Handler", LOGSRC_CONTROLLER)
 
         // Register CLabelPane handler
-        cLabelPane.setOnLabelPlace {
-            if (State.workMode != WorkMode.LabelMode) return@setOnLabelPlace
-            if (State.transFile.groupCount == 0) return@setOnLabelPlace
+        cLabelPane.setOnLabelCreate {
+            if (State.workMode != WorkMode.LabelMode) return@setOnLabelCreate
+            if (State.transFile.groupCount == 0) return@setOnLabelCreate
 
             val newIndex =
                 if (State.currentLabelIndex != -1) State.currentLabelIndex + 1
@@ -319,7 +319,7 @@ class Controller(private val root: View) {
             // Mark change
             State.isChanged = true
         }
-        cLabelPane.setOnLabelPointed {
+        cLabelPane.setOnLabelHover {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
 
             // Text display
@@ -332,8 +332,8 @@ class Controller(private val root: View) {
                 }
             }
         }
-        cLabelPane.setOnLabelClicked {
-            if (State.workMode != WorkMode.InputMode) return@setOnLabelClicked
+        cLabelPane.setOnLabelClick {
+            if (State.workMode != WorkMode.InputMode) return@setOnLabelClick
 
             if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 

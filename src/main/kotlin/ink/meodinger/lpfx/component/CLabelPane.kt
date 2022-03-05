@@ -74,13 +74,13 @@ class CLabelPane : ScrollPane() {
         val displayX: Double, val displayY: Double,
     ) : Event(eventType) {
         companion object {
-            val LABEL_ANY     = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
-            val LABEL_MOVE    = EventType(LABEL_ANY, "LABEL_MOVE")
-            val LABEL_OTHER   = EventType(LABEL_ANY, "LABEL_OTHER")
-            val LABEL_PLACE   = EventType(LABEL_ANY, "LABEL_PLACE")
-            val LABEL_REMOVE  = EventType(LABEL_ANY, "LABEL_REMOVE")
-            val LABEL_POINTED = EventType(LABEL_ANY, "LABEL_POINTED")
-            val LABEL_CLICKED = EventType(LABEL_ANY, "LABEL_CLICKED")
+            val LABEL_ANY    = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
+            val LABEL_CREATE = EventType(LABEL_ANY, "LABEL_CREATE")
+            val LABEL_REMOVE = EventType(LABEL_ANY, "LABEL_REMOVE")
+            val LABEL_HOVER  = EventType(LABEL_ANY, "LABEL_HOVER")
+            val LABEL_CLICK  = EventType(LABEL_ANY, "LABEL_CLICK")
+            val LABEL_MOVE   = EventType(LABEL_ANY, "LABEL_MOVE")
+            val LABEL_OTHER  = EventType(LABEL_ANY, "LABEL_OTHER")
         }
     }
 
@@ -186,30 +186,54 @@ class CLabelPane : ScrollPane() {
             }
         }
 
-    private val onLabelPlaceProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    private val onLabelRemoveProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    private val onLabelPointedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    private val onLabelClickedProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    private val onLabelMoveProperty:    ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    private val onLabelOtherProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
-    fun onLabelPlaceProperty():         ObjectProperty<EventHandler<LabelEvent>> = onLabelPlaceProperty
-    fun onLabelRemoveProperty():        ObjectProperty<EventHandler<LabelEvent>> = onLabelRemoveProperty
-    fun onLabelPointedProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelPointedProperty
-    fun onLabelClickedProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelClickedProperty
-    fun onLabelMoveProperty():          ObjectProperty<EventHandler<LabelEvent>> = onLabelMoveProperty
-    fun onLabelOtherProperty():         ObjectProperty<EventHandler<LabelEvent>> = onLabelOtherProperty
-    val onLabelPlace:                                  EventHandler<LabelEvent> by onLabelPlaceProperty
-    val onLabelRemove:                                 EventHandler<LabelEvent> by onLabelRemoveProperty
-    val onLabelPointed:                                EventHandler<LabelEvent> by onLabelPointedProperty
-    val onLabelClicked:                                EventHandler<LabelEvent> by onLabelClickedProperty
-    val onLabelMove:                                   EventHandler<LabelEvent> by onLabelMoveProperty
-    val onLabelOther:                                  EventHandler<LabelEvent> by onLabelOtherProperty
-    fun setOnLabelPlace(handler: EventHandler<LabelEvent>)                       = onLabelPlaceProperty.set(handler)
-    fun setOnLabelRemove(handler: EventHandler<LabelEvent>)                      = onLabelRemoveProperty.set(handler)
-    fun setOnLabelPointed(handler: EventHandler<LabelEvent>)                     = onLabelPointedProperty.set(handler)
-    fun setOnLabelClicked(handler: EventHandler<LabelEvent>)                     = onLabelClickedProperty.set(handler)
-    fun setOnLabelMove(handler: EventHandler<LabelEvent>)                        = onLabelMoveProperty.set(handler)
-    fun setOnLabelOther(handler: EventHandler<LabelEvent>)                       = onLabelOtherProperty.set(handler)
+    private val onLabelCreateProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelRemoveProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelHoverProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelClickProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelMoveProperty:   ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    private val onLabelOtherProperty:  ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
+    fun onLabelCreateProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelCreateProperty
+    fun onLabelRemoveProperty():       ObjectProperty<EventHandler<LabelEvent>> = onLabelRemoveProperty
+    fun onLabelHoverProperty():        ObjectProperty<EventHandler<LabelEvent>> = onLabelHoverProperty
+    fun onLabelClickProperty():        ObjectProperty<EventHandler<LabelEvent>> = onLabelClickProperty
+    fun onLabelMoveProperty():         ObjectProperty<EventHandler<LabelEvent>> = onLabelMoveProperty
+    fun onLabelOtherProperty():        ObjectProperty<EventHandler<LabelEvent>> = onLabelOtherProperty
+    val onLabelCreate:                                EventHandler<LabelEvent> by onLabelCreateProperty
+    val onLabelRemove:                                EventHandler<LabelEvent> by onLabelRemoveProperty
+    val onLabelHover:                                 EventHandler<LabelEvent> by onLabelHoverProperty
+    val onLabelClick:                                 EventHandler<LabelEvent> by onLabelClickProperty
+    val onLabelMove:                                  EventHandler<LabelEvent> by onLabelMoveProperty
+    val onLabelOther:                                 EventHandler<LabelEvent> by onLabelOtherProperty
+    fun setOnLabelCreate(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_CREATE, onLabelCreate)
+        onLabelCreateProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_CREATE, onLabelCreate)
+    }
+    fun setOnLabelRemove(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_REMOVE, onLabelRemove)
+        onLabelRemoveProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_REMOVE, onLabelRemove)
+    }
+    fun setOnLabelHover(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_HOVER, onLabelHover)
+        onLabelHoverProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_HOVER, onLabelHover)
+    }
+    fun setOnLabelClick(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_CLICK, onLabelClick)
+        onLabelClickProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_CLICK, onLabelClick)
+    }
+    fun setOnLabelMove(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_MOVE, onLabelMove)
+        onLabelMoveProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_MOVE, onLabelMove)
+    }
+    fun setOnLabelOther(handler: EventHandler<LabelEvent>) {
+        removeEventHandler(LabelEvent.LABEL_OTHER, onLabelOther)
+        onLabelOtherProperty.set(handler)
+        addEventHandler(LabelEvent.LABEL_OTHER, onLabelOther)
+    }
 
     private val imageProperty: ObjectProperty<Image> = imageView.imageProperty()
     fun imageProperty(): ObjectProperty<Image> = imageProperty
@@ -311,7 +335,7 @@ class CLabelPane : ScrollPane() {
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            onLabelOther.handle(LabelEvent(LabelEvent.LABEL_OTHER,
+            fireEvent(LabelEvent(LabelEvent.LABEL_OTHER,
                 it, NOT_FOUND,
                 it.x / image.width, it.y / image.height,
                 it.x, it.y
@@ -326,7 +350,7 @@ class CLabelPane : ScrollPane() {
                 if (it.x <= pickRadius || it.x + pickRadius >= image.width) return@addEventHandler
                 if (it.y <= pickRadius || it.y + pickRadius >= image.height) return@addEventHandler
 
-                onLabelPlace.handle(LabelEvent(LabelEvent.LABEL_PLACE,
+                fireEvent(LabelEvent(LabelEvent.LABEL_CREATE,
                     it, NOT_FOUND,
                     it.x / image.width, it.y / image.height,
                     it.x, it.y
@@ -411,7 +435,7 @@ class CLabelPane : ScrollPane() {
             label.layoutX = newLayoutX
             label.layoutY = newLayoutY
 
-            onLabelMove.handle(LabelEvent(LabelEvent.LABEL_MOVE,
+            fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
                 it, transLabel.index,
                 transLabel.x, transLabel.y,
                 label.layoutX + it.x, label.layoutY + it.y
@@ -435,7 +459,7 @@ class CLabelPane : ScrollPane() {
 
         // Event handle
         label.setOnMouseMoved {
-            onLabelPointed.handle(LabelEvent(LabelEvent.LABEL_POINTED,
+            fireEvent(LabelEvent(LabelEvent.LABEL_HOVER,
                 it, transLabel.index,
                 transLabel.x, transLabel.y,
                 label.layoutX + it.x, label.layoutY + it.y
@@ -445,13 +469,14 @@ class CLabelPane : ScrollPane() {
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
             if (it.button == MouseButton.PRIMARY) {
-                onLabelClicked.handle(LabelEvent(LabelEvent.LABEL_CLICKED,
+                fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
                     it, transLabel.index,
                     transLabel.x, transLabel.y,
                     label.layoutX + it.x, label.layoutY + it.y
                 ))
             } else if (it.button == MouseButton.SECONDARY) {
-                onLabelRemove.handle(LabelEvent(LabelEvent.LABEL_REMOVE,
+
+                fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
                     it, transLabel.index,
                     transLabel.x, transLabel.y,
                     label.layoutX + it.x, label.layoutY + it.y
@@ -569,6 +594,7 @@ class CLabelPane : ScrollPane() {
         scale = width / image.width
     }
 
+    // ----- Dangerous Zone ----- //
 
     /**
      * This function will let imageProperty re-get its value.

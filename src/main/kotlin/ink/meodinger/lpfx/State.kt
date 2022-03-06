@@ -44,7 +44,7 @@ object State {
      */
     var isChanged: Boolean by isChangedProperty
 
-    private val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANSFILE)
+    private val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANS_FILE)
     fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
     /**
      * The opened TransFile
@@ -105,7 +105,7 @@ object State {
 
         isOpened = false
         isChanged = false
-        transFile = TransFile.DEFAULT_TRANSFILE
+        transFile = TransFile.DEFAULT_TRANS_FILE
         translationFile = DEFAULT_FILE
         projectFolder = DEFAULT_FILE
         currentPicName = emptyString()

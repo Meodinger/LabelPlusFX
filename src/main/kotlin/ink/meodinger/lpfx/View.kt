@@ -86,15 +86,13 @@ class View : BorderPane() {
                     }
                     center(cTreeView)
                 }
-                add(BorderPane()) {
-                    center(cTransArea) {
-                        isWrapText = true
-                    }
-                    bottom(lInfo) {
-                        padding = Insets(4.0, 8.0, 4.0, 8.0)
-                    }
+                add(cTransArea) {
+                    isWrapText = true
                 }
             }
+        }
+        bottom(lInfo) {
+            padding = Insets(4.0, 8.0, 4.0, 8.0)
         }
     }
 

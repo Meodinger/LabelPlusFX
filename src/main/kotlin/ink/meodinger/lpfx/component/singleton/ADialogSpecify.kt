@@ -45,7 +45,7 @@ object ADialogSpecify : Dialog<List<File>>() {
     }
     private val dirChooser = DirectoryChooser()
 
-    private var workingTransFile: TransFile = TransFile.DEFAULT_TRANSFILE
+    private var workingTransFile: TransFile = TransFile.DEFAULT_TRANS_FILE
     private var projectFolder: File = DEFAULT_FILE
     private var picCount: Int = 0
     private var picNames: List<String> = ArrayList()

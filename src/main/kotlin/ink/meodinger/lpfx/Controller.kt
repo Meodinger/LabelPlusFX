@@ -39,8 +39,8 @@ import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 
 /**
@@ -62,14 +62,8 @@ class Controller(private val root: View) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
     }
 
-    private val bSwitchViewMode: Button      = root.bSwitchViewMode does {
-        switchViewMode()
-        labelInfo("Switched work mode to ${State.viewMode}")
-    }
-    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode does {
-        switchWorkMode()
-        labelInfo("Switched work mode to ${State.workMode}")
-    }
+    private val bSwitchViewMode: Button      = root.bSwitchViewMode does { switchViewMode() }
+    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode does { switchWorkMode() }
     private val lInfo: Label                 = root.lInfo
     private val pMain: SplitPane             = root.pMain
     private val pRight: SplitPane            = root.pRight
@@ -204,9 +198,11 @@ class Controller(private val root: View) {
 
     private fun switchViewMode() {
         State.viewMode = ViewMode.values()[(State.viewMode.ordinal + 1) % ViewMode.values().size]
+        labelInfo("Switched work mode to ${State.viewMode}")
     }
     private fun switchWorkMode() {
         State.workMode = WorkMode.values()[(State.workMode.ordinal + 1) % WorkMode.values().size]
+        labelInfo("Switched work mode to ${State.workMode}")
     }
 
     init {
@@ -308,6 +304,8 @@ class Controller(private val root: View) {
             cTreeView.selectLabel(newIndex)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
+
+            labelInfo("Created label $newIndex at ${String.format("%.4f", it.labelX)}, ${String.format("%.4f", it.labelY)}")
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
@@ -318,6 +316,8 @@ class Controller(private val root: View) {
             if (State.currentLabelIndex == it.labelIndex) State.currentLabelIndex = NOT_FOUND
             // Mark change
             State.isChanged = true
+
+            labelInfo("Removed label ${it.labelIndex}")
         }
         cLabelPane.setOnLabelHover {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
@@ -511,9 +511,7 @@ class Controller(private val root: View) {
         Logger.info("Added effect: show info on InfoLabel", LOGSRC_CONTROLLER)
 
         // Clear text when some state change
-        val clearTextListener = onChange<Any> {
-            cLabelPane.removeText()
-        }
+        val clearTextListener = onChange<Any> { cLabelPane.removeText() }
         State.currentGroupIdProperty().addListener(clearTextListener)
         State.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)
@@ -799,7 +797,7 @@ class Controller(private val root: View) {
         // Choose Pics
         var projectFolder = file.parentFile
         val potentialPics = ArrayList<String>()
-        val selectedPics = ArrayList<String>()
+        val selectedPics  = ArrayList<String>()
         while (potentialPics.isEmpty()) {
             // Find pictures
             val files = projectFolder.listFiles()
@@ -809,7 +807,7 @@ class Controller(private val root: View) {
                 }
             }
             if (potentialPics.isEmpty()) {
-                // Find nothing, this folder isn't project folder, confirm to ues another folder
+                // Find nothing, this folder isn't project folder, confirm to use another folder
                 val result = showConfirm(State.stage, I18N["confirm.project_folder_invalid"])
                 if (result.isPresent && result.get() == ButtonType.YES) {
                     // Specify project folder
@@ -817,7 +815,7 @@ class Controller(private val root: View) {
                     if (newFolder != null) projectFolder = newFolder
                 } else {
                     // Do not specify, cancel
-                    Logger.info("Cancel (project folder invalid)", LOGSRC_CONTROLLER)
+                    Logger.info("Cancel (project folder has no pictures)", LOGSRC_CONTROLLER)
                     showInfo(State.stage, I18N["common.cancel"])
                     return null
                 }
@@ -830,28 +828,32 @@ class Controller(private val root: View) {
         val result = showChoiceList(State.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
-                Logger.info("Cancel (choose none)", LOGSRC_CONTROLLER)
+                Logger.info("Cancel (selected none)", LOGSRC_CONTROLLER)
                 showInfo(State.stage, I18N["info.required_at_least_1_pic"])
                 return null
             }
             selectedPics.addAll(result.get())
         } else {
-            Logger.info("Cancel (no selected)", LOGSRC_CONTROLLER)
+            Logger.info("Cancel (didn't do the selection)", LOGSRC_CONTROLLER)
             showInfo(State.stage, I18N["common.cancel"])
             return null
         }
+        Logger.info("Chose pictures", LOGSRC_CONTROLLER)
 
         // Prepare new TransFile
-        val groupList = ArrayList<TransGroup>()
         val groupNameList = Settings.defaultGroupNameList
         val groupColorList = Settings.defaultGroupColorHexList
         val groupCreateList = Settings.isGroupCreateOnNewTransList
-        for (i in groupNameList.indices) if (groupCreateList[i])
-            groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
-        val transMap = HashMap<String, MutableList<TransLabel>>()
-        for (pic in selectedPics) transMap[pic] = ArrayList()
+
+        val groupList = ArrayList<TransGroup>()
+        for (i in groupNameList.indices)
+            if (groupCreateList[i]) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
+        val transMap = LinkedHashMap<String, MutableList<TransLabel>>()
+        for (pic in selectedPics)
+            transMap[pic] = ArrayList()
 
         val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
+        Logger.info("Built TransFile", LOGSRC_CONTROLLER)
 
         // Export to file
         try {
@@ -863,7 +865,6 @@ class Controller(private val root: View) {
             showException(State.stage, e)
             return null
         }
-
         Logger.info("Newed TransFile", LOGSRC_CONTROLLER)
 
         return projectFolder
@@ -875,7 +876,7 @@ class Controller(private val root: View) {
      * @param projectFolder Which folder the pictures locate in; translation file's folder by default
      */
     fun open(file: File, type: FileType = FileType.getFileType(file), projectFolder: File = file.parentFile) {
-        Logger.info("Opening ${file.path}", LOGSRC_CONTROLLER)
+        Logger.info("Opening TransFile: ${file.path}", LOGSRC_CONTROLLER)
 
         // Load File
         val transFile: TransFile
@@ -883,9 +884,7 @@ class Controller(private val root: View) {
             transFile = load(file, type)
             // We assume that all pics are in the project folder.
             // If not, TransFile.checkLost() will find them out.
-            for (picName in transFile.picNames) {
-                transFile.setFile(picName, projectFolder.resolve(picName))
-            }
+            for (picName in transFile.picNames) transFile.setFile(picName, projectFolder.resolve(picName))
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -893,6 +892,7 @@ class Controller(private val root: View) {
             showException(State.stage, e)
             return
         }
+        Logger.info("Loaded TransFile", LOGSRC_CONTROLLER)
 
         // Opened, update State
         State.transFile = transFile
@@ -903,22 +903,15 @@ class Controller(private val root: View) {
         // Show info if comment not in default list
         // Should do this before update RecentFiles
         if (!RecentFiles.getAll().contains(file.path)) {
-            var modified = true
             val comment = transFile.comment.trim()
-            for (defaultComment in TransFile.DEFAULT_COMMENT_LIST) {
-                if (comment == defaultComment) {
-                    modified = false
-                    break
-                }
-            }
-            if (modified) {
+            if (TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
                 Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
                 showInfo(State.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
             }
         }
 
         // Update recent files
-        CFileChooser.lastDirectory = file.parentFile
+        CFileChooser.lastDirectory = file.parentFile  //todo: use binding
         RecentFiles.add(file.path)
         AMenuBar.updateRecentFiles()
 
@@ -955,8 +948,7 @@ class Controller(private val root: View) {
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
-        labelInfo("Opened TransFile")
+        labelInfo("Opened TransFile: ${file.path}")
     }
     /**
      * Save a TransFile
@@ -977,40 +969,26 @@ class Controller(private val root: View) {
         }
 
         // Use temp if overwrite
-        val exportDest = if (overwrite) File("${file.path}.temp") else file
-        fun removeTemp() {
-            try {
-                Files.delete(exportDest.toPath())
-                Logger.info("Temp file removed", LOGSRC_CONTROLLER)
-            } catch (e: Exception) {
-                Logger.warning("Temp file remove failed", LOGSRC_CONTROLLER)
-                if (!silent) showWarning(State.stage, String.format(I18N["warning.save_temp_remove_failed.s"], exportDest.path))
-            }
-        }
+        val exportDest = if (overwrite) File.createTempFile(file.path, "temp").apply(File::deleteOnExit) else file
 
         // Export
         try {
             export(exportDest, type, State.transFile)
-            if (!silent) showInfo(State.stage, I18N["info.saved_successfully"])
-            Logger.info("Exported translation", LOGSRC_CONTROLLER)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(State.stage, I18N["error.save_failed"])
             showException(State.stage, e)
 
-            // Delete the temp file
-            if (overwrite) removeTemp()
-
             Logger.info("Save failed", LOGSRC_CONTROLLER)
             return
         }
+        Logger.info("Exported translation", LOGSRC_CONTROLLER)
 
+        // Transfer to origin file if overwrite
         if (overwrite) {
-            // Transfer to origin file if export success
             try {
                 transfer(exportDest, file)
-                Logger.info("Transferred temp file", LOGSRC_CONTROLLER)
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
@@ -1020,9 +998,7 @@ class Controller(private val root: View) {
                 Logger.info("Save failed", LOGSRC_CONTROLLER)
                 return
             }
-
-            // Delete the temp file
-            removeTemp()
+            Logger.info("Transferred temp file", LOGSRC_CONTROLLER)
         }
 
         // Update state
@@ -1032,8 +1008,8 @@ class Controller(private val root: View) {
         // Change title
         State.stage.title = INFO["application.name"] + " - " + file.name
 
-        Logger.info("Saved to ${file.path}", LOGSRC_CONTROLLER)
-        labelInfo(I18N["info.saved_successfully"])
+        labelInfo("Saved TransFile to ${file.path}")
+        if (!silent) showInfo(State.stage, I18N["info.saved_successfully"])
     }
     /**
      * Recover from backup file
@@ -1049,14 +1025,13 @@ class Controller(private val root: View) {
 
             export(tempFile, type, transFile)
             transfer(tempFile, to)
-
-            Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
         } catch (e: Exception) {
             Logger.error("Recover failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(State.stage, I18N["error.recovery_failed"])
             showException(State.stage, e)
         }
+        Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
 
         open(to, type)
     }
@@ -1070,15 +1045,15 @@ class Controller(private val root: View) {
 
         try {
             export(file, type, State.transFile)
-
-            Logger.info("Exported to ${file.path}", LOGSRC_CONTROLLER)
-            showInfo(State.stage, I18N["info.exported_successful"])
         } catch (e: IOException) {
             Logger.error("Export failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(State.stage, I18N["error.export_failed"])
             showException(State.stage, e)
         }
+
+        labelInfo("Exported to ${file.path}")
+        showInfo(State.stage, I18N["info.exported_successful"])
     }
     /**
      * Generate a zip file with translation file and picture files
@@ -1089,15 +1064,15 @@ class Controller(private val root: View) {
 
         try {
             pack(file, State.transFile)
-
-            Logger.info("Packed to ${file.path}", LOGSRC_CONTROLLER)
-            showInfo(State.stage, I18N["info.exported_successful"])
         } catch (e : IOException) {
             Logger.error("Pack failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
             showError(State.stage, I18N["error.export_failed"])
             showException(State.stage, e)
         }
+
+        labelInfo("Packed to ${file.path}")
+        showInfo(State.stage, I18N["info.exported_successful"])
     }
 
     fun reset() {
@@ -1117,8 +1092,9 @@ class Controller(private val root: View) {
 
         Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId", LOGSRC_CONTROLLER)
     }
-    fun labelInfo(info: String) {
+    fun labelInfo(info: String, source: String = LOGSRC_CONTROLLER) {
         lInfo.text = info
+        Logger.info(info, source)
     }
 
     // ----- Global Methods ----- //

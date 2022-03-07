@@ -4,9 +4,7 @@ import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
 import javafx.collections.ObservableList
 import javafx.stage.FileChooser
 import javafx.stage.Window
@@ -28,7 +26,7 @@ class CFileChooser {
 
     companion object {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
-        fun lastDirectoryProperty(): ObjectProperty<File> = lastDirectoryProperty
+        fun lastDirectoryProperty(): ReadOnlyObjectProperty<File> = lastDirectoryProperty
         var lastDirectory : File?
             get() = lastDirectoryProperty.get().existsOrNull()
             set(value) {
@@ -62,19 +60,19 @@ class CFileChooser {
 
     fun showOpenDialog(owner: Window?): File? {
         return chooser.showOpenDialog(owner).also {
-            if (it != null) lastDirectory = it.parentFile
+            lastDirectory = it?.parentFile
         }
     }
 
     fun showSaveDialog(owner: Window?): File? {
         return chooser.showSaveDialog(owner).also {
-            if (it != null) lastDirectory = it.parentFile
+            lastDirectory = it?.parentFile
         }
     }
 
     fun showOpenMultipleDialog(owner: Window?) : List<File>? {
         return chooser.showOpenMultipleDialog(owner).also {
-            if (it != null) lastDirectory = it.last().parentFile
+            lastDirectory = it?.last()?.parentFile
         }
     }
 }

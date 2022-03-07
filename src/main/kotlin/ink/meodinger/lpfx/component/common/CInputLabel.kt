@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.isNotBound
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -56,7 +57,9 @@ class CInputLabel : Pane() {
             if (isEditing) fieldText = value else labelText = value
         }
 
-    private val onChangeToFieldProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty { fieldText = labelText }
+    private val onChangeToFieldProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty {
+        if (fieldTextProperty.isNotBound) fieldText = labelText
+    }
     fun onChangeToFieldProperty(): ObjectProperty<CInputLabel.() -> Unit> = onChangeToFieldProperty
     val onChangeToField: CInputLabel.() -> Unit by onChangeToFieldProperty
 
@@ -67,7 +70,9 @@ class CInputLabel : Pane() {
      */
     fun setOnChangeToField(callback: CInputLabel.() -> Unit) = onChangeToFieldProperty.set(callback)
 
-    private val onChangeToLabelProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty { labelText = fieldText }
+    private val onChangeToLabelProperty: ObjectProperty<CInputLabel.() -> Unit> = SimpleObjectProperty {
+        if (labelTextProperty.isNotBound) labelText = fieldText
+    }
     fun onChangeToLabelProperty(): ObjectProperty<CInputLabel.() -> Unit> = onChangeToLabelProperty
     val onChangeToLabel: CInputLabel.() -> Unit by onChangeToLabelProperty
 

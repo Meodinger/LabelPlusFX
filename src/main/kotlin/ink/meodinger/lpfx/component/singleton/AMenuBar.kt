@@ -10,8 +10,8 @@ import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.platform.isMac
+import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
@@ -21,7 +21,11 @@ import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ListProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
@@ -51,6 +55,29 @@ object AMenuBar : MenuBar() {
 
     private val mOpenRecent = Menu(I18N["m.recent"])
 
+    private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
+    fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
+    val recentFiles: ObservableList<File> by recentFilesProperty
+
+    private fun openRecentTranslation(item: MenuItem) {
+        // Open recent, remove item if not exist
+
+        if (State.controller.stay()) return
+
+        val path = item.text
+        val file = File(path)
+        if (!file.exists()) {
+            showError(State.stage, String.format(I18N["error.file_not_exist.s"], path))
+            RecentFiles.remove(file)
+            mOpenRecent.items.remove(item)
+            return
+        }
+
+        State.reset()
+
+        State.controller.open(file)
+    }
+
     // ----- Choosers ----- //
 
     private val picChooser        = CFileChooser()
@@ -66,7 +93,7 @@ object AMenuBar : MenuBar() {
     private val lpFilter          = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_FILE_LP}")
     private val meoFilter         = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_FILE_MEO}")
 
-    private val backupChooser     = CFileChooser()
+    private val backupChooser     = FileChooser()
     private val bakFilter         = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
 
     private val exportPackChooser = CFileChooser()
@@ -224,35 +251,32 @@ object AMenuBar : MenuBar() {
                 disableProperty().bind(!State.isOpenedProperty())
             }
         }
-    }
 
-    fun updateRecentFiles() {
-        mOpenRecent.items.clear()
-
-        for (path in RecentFiles.getAll()) if (File(path).exists())
-            mOpenRecent.items.add(MenuItem(path) does { openRecentTranslation(this) })
-    }
-    private fun openRecentTranslation(item: MenuItem) {
-        // Open recent, remove item if not exist
-
-        if (State.controller.stay()) return
-
-        val path = item.text
-        val file = File(path).existsOrNull() ?: run {
-            showError(State.stage, String.format(I18N["error.file_not_exist.s"], path))
-            RecentFiles.remove(path)
-            mOpenRecent.items.remove(item)
-            return
-        }
-
-        State.reset()
-
-        State.controller.open(file)
+        recentFilesProperty.addListener(ListChangeListener {
+            while (it.next()) {
+                if (it.wasPermutated()) {
+                    // will not happen
+                    throw IllegalStateException("Permuted: $it")
+                } else if (it.wasUpdated()) {
+                    // will not happen
+                    throw IllegalStateException("Updated: $it")
+                } else {
+                    if (it.wasRemoved()) {
+                        it.removed.forEach { file ->
+                            mOpenRecent.items.removeIf { item -> item.text == file.path }
+                        }
+                    }
+                    if (it.wasAdded()) {
+                        it.addedSubList.forEach { file ->
+                            mOpenRecent.items.add(MenuItem(file.path) does { openRecentTranslation(this) })
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun newTranslation() {
-        // new & open
-
         if (State.controller.stay()) return
 
         State.reset()
@@ -270,27 +294,21 @@ object AMenuBar : MenuBar() {
         if (projectFolder != null) State.controller.open(file, projectFolder = projectFolder)
     }
     private fun openTranslation() {
-        // open
-
         if (State.controller.stay()) return
-
-        State.reset()
 
         fileChooser.title = I18N["chooser.open"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = ""
         val file = fileChooser.showOpenDialog(State.stage) ?: return
 
+        State.reset()
+
         State.controller.open(file)
     }
     private fun saveTranslation() {
-        // save
-
         State.controller.save(State.translationFile, silent = true)
     }
     private fun saveAsTranslation() {
-        // save
-
         fileChooser.title = I18N["chooser.save"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = State.translationFile.name
@@ -304,22 +322,17 @@ object AMenuBar : MenuBar() {
         State.reset()
     }
     private fun bakRecovery() {
-        // transfer & open
-
         if (State.controller.stay()) return
 
-        State.reset()
-
+        backupChooser.initialDirectory = if (State.isOpened) State.getBakFolder() else CFileChooser.lastDirectory
         val bak = backupChooser.showOpenDialog(State.stage) ?: return
-        val translationFolder = bak.parentFile.parentFile
-
-        // Not update
-        CFileChooser.lastDirectory = translationFolder
 
         fileChooser.title = I18N["chooser.rec"]
         fileChooser.selectedExtensionFilter = fileFilter
-        fileChooser.initialFilename = "Re.${translationFolder.name}.$EXTENSION_FILE_MEO"
+        fileChooser.initialFilename = "Re.${bak.parentFile.parentFile.name}.$EXTENSION_FILE_MEO"
         val rec = fileChooser.showSaveDialog(State.stage) ?: return
+
+        State.reset()
 
         State.controller.recovery(bak, rec)
     }

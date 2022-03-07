@@ -65,19 +65,19 @@ object State {
      */
     var projectFolder: File by projectFolderProperty
 
+    private val currentGroupIdProperty = SimpleIntegerProperty(NOT_FOUND)
+    fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
+    /**
+     * Index of current selected TransGroup
+     */
+    var currentGroupId: Int by currentGroupIdProperty
+
     private val currentPicNameProperty = SimpleStringProperty(emptyString())
     fun currentPicNameProperty(): StringProperty = currentPicNameProperty
     /**
      * Name of current selected picture (usually also picture's FileSystem file's name)
      */
     var currentPicName: String by currentPicNameProperty
-
-    private val currentGroupIdProperty = SimpleIntegerProperty(0)
-    fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
-    /**
-     * Index of current selected TransGroup
-     */
-    var currentGroupId: Int by currentGroupIdProperty
 
     private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
     fun currentLabelIndexProperty(): IntegerProperty = currentLabelIndexProperty
@@ -101,6 +101,8 @@ object State {
     var workMode: WorkMode by workModeProperty
 
     fun reset() {
+        if (!isOpened) return
+
         controller.reset()
 
         isOpened = false
@@ -108,8 +110,8 @@ object State {
         transFile = TransFile.DEFAULT_TRANS_FILE
         translationFile = DEFAULT_FILE
         projectFolder = DEFAULT_FILE
-        currentPicName = emptyString()
         currentGroupId = NOT_FOUND
+        currentPicName = emptyString()
         currentLabelIndex = NOT_FOUND
         viewMode = Settings.viewModes[WorkMode.InputMode.ordinal]
         workMode = WorkMode.InputMode
@@ -189,19 +191,24 @@ object State {
     /**
      * Get current picture's FileSystem file
      */
-    fun getPicFileNow(): File = if (isOpened && currentPicName.isNotEmpty()) transFile.getFileOrByProject(
-        currentPicName,
-        projectFolder
-    ) else DEFAULT_FILE
+    fun getPicFileNow(): File {
+        return if (isOpened && currentPicName.isNotEmpty())
+            transFile.getFileOrByProject(currentPicName, projectFolder)
+        else DEFAULT_FILE
+    }
 
     /**
      * Get current TransFile's FileSystem file's directory
      */
-    fun getFileFolder(): File = translationFile.parentFile
+    fun getFileFolder(): File {
+        return if (isOpened) translationFile.parentFile else DEFAULT_FILE
+    }
 
     /**
      * Get current TransFile's FileSystem file's backup directory
      */
-    fun getBakFolder(): File = translationFile.parentFile.resolve(FOLDER_NAME_BAK)
+    fun getBakFolder(): File {
+        return if (isOpened) translationFile.parentFile.resolve(FOLDER_NAME_BAK) else DEFAULT_FILE
+    }
 
 }

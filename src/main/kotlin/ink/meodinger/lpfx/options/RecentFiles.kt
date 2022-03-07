@@ -1,5 +1,11 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.util.addFirst
+import ink.meodinger.lpfx.util.property.getValue
+
+import javafx.beans.property.*
+import javafx.collections.*
+import java.io.File
 import java.io.IOException
 
 
@@ -18,8 +24,17 @@ object RecentFiles : AbstractProperties() {
     private const val RECENT   = "RecentFiles"
     private const val PROGRESS = "ProgressMap"
 
-    private val recentFiles = ArrayDeque<String>()
-    private val progressMap = HashMap<String, Pair<Int, Int>>()
+    private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
+    fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
+    val recentFiles: ObservableList<File> by recentFilesProperty
+
+    private val progressMapProperty: MapProperty<String, Pair<Int, Int>> = SimpleMapProperty()
+    fun progressMapProperty(): MapProperty<String, Pair<Int, Int>> = progressMapProperty
+    val progressMap: ObservableMap<String, Pair<Int, Int>> by progressMapProperty
+
+    private val lastFileProperty: ObjectProperty<File?> = SimpleObjectProperty()
+    fun lastFileProperty(): ObjectProperty<File?> = lastFileProperty
+    val lastFile: File? by lastFileProperty
 
     override val default = listOf(
         CProperty(RECENT),
@@ -32,40 +47,36 @@ object RecentFiles : AbstractProperties() {
     override fun load() {
         load(Options.recentFiles, this)
 
-        recentFiles.addAll(this[RECENT].asStringList())
+        val recentPaths = this[RECENT].asStringList()
+        recentFilesProperty.set(FXCollections.observableArrayList(recentPaths.map(::File)))
 
         val progressList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
-        progressMap.putAll(recentFiles.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } })
+        val progressMap = recentPaths.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } }
+        progressMapProperty.set(FXCollections.observableHashMap<String, Pair<Int, Int>>().apply { putAll(progressMap) })
+
+        lastFileProperty.set(recentFiles.firstOrNull())
     }
 
     @Throws(IOException::class)
     override fun save() {
         this[RECENT].set(recentFiles)
-        this[PROGRESS].set(recentFiles.map(progressMap::get))
+        this[PROGRESS].set(recentFiles.map { progressMap[it.path] })
 
         save(Options.recentFiles, this)
     }
 
-    fun getAll(): List<String> {
-        return recentFiles
+    fun add(file: File) {
+        recentFiles.remove(file)
+        recentFiles.addFirst(file)
+
+        progressMap[file.path] = progressMap[file.path] ?: (-1 to -1)
+
+        if (recentFiles.size > MAX_SIZE) progressMap.remove(recentFiles.removeLast().path)
     }
 
-    fun getLastOpenFile(): String? {
-        return recentFiles.firstOrNull()
-    }
-
-    fun add(path: String) {
-        recentFiles.remove(path)
-        recentFiles.addFirst(path)
-
-        progressMap[path] = progressMap[path] ?: (-1 to -1)
-
-        if (recentFiles.size > MAX_SIZE) progressMap.remove(recentFiles.removeLast())
-    }
-
-    fun remove(path: String) {
-        recentFiles.remove(path)
-        progressMap.remove(path)
+    fun remove(file: File) {
+        recentFiles.remove(file)
+        progressMap.remove(file.path)
     }
 
     fun getProgressOf(path: String): Pair<Int, Int> {

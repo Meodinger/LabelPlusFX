@@ -71,9 +71,9 @@ class LabelPlusFX: HookedApplication() {
         Preference.windowHeightProperty().bind(primaryStage.scene.heightProperty())
 
         primaryStage.show()
-        controller.labelInfo(I18N["common.ready"])
 
         Logger.info("App started", LOGSRC_APPLICATION)
+        controller.labelInfo(I18N["common.ready"], LOGSRC_APPLICATION)
 
         UpdateChecker.check()
     }
@@ -86,7 +86,6 @@ class LabelPlusFX: HookedApplication() {
 
         runHooks(
             {
-                Logger.info("Hooks ran", LOGSRC_APPLICATION)
                 Logger.info("App stopped", LOGSRC_APPLICATION)
                 Platform.exit()
             },

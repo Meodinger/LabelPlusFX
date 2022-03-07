@@ -80,7 +80,7 @@ class Controller(private val root: View) {
             val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
             try {
                 export(bak, FileType.MeoFile, State.transFile)
-                labelInfo("Backed")
+                Logger.info("Backed TransFile", LOGSRC_CONTROLLER)
             } catch (e: IOException) {
                 Logger.error("Auto-backup failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
@@ -235,22 +235,17 @@ class Controller(private val root: View) {
         Logger.info("Added MenuBar", LOGSRC_CONTROLLER)
 
         // Last directory
-        var lastFilePath = RecentFiles.getLastOpenFile()
-        while (lastFilePath != null) {
-            val file = File(lastFilePath)
-            if (file.exists() && file.parentFile.exists()) {
-                CFileChooser.lastDirectory = file.parentFile
+        var lastFile = RecentFiles.lastFile
+        while (lastFile != null) {
+            if (lastFile.exists() && lastFile.parentFile.exists()) {
+                CFileChooser.lastDirectory = lastFile.parentFile
                 break
             } else {
-                RecentFiles.remove(lastFilePath)
-                lastFilePath = RecentFiles.getLastOpenFile()
+                RecentFiles.remove(lastFile)
+                lastFile = RecentFiles.lastFile
             }
         }
         Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOGSRC_CONTROLLER)
-
-        // RecentFiles
-        AMenuBar.updateRecentFiles()
-        Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
 
         // Settings
         State.viewMode = Settings.viewModes[State.workMode.ordinal]
@@ -304,8 +299,6 @@ class Controller(private val root: View) {
             cTreeView.selectLabel(newIndex)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
-
-            labelInfo("Created label $newIndex at ${String.format("%.4f", it.labelX)}, ${String.format("%.4f", it.labelY)}")
         }
         cLabelPane.setOnLabelRemove {
             if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
@@ -316,8 +309,6 @@ class Controller(private val root: View) {
             if (State.currentLabelIndex == it.labelIndex) State.currentLabelIndex = NOT_FOUND
             // Mark change
             State.isChanged = true
-
-            labelInfo("Removed label ${it.labelIndex}")
         }
         cLabelPane.setOnLabelHover {
             val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
@@ -365,6 +356,10 @@ class Controller(private val root: View) {
         pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
 
+        // RecentFiles
+        AMenuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
+        Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
+
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty())
         bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty())
@@ -402,6 +397,20 @@ class Controller(private val root: View) {
         }, State.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
+        // GroupBox
+        cGroupBox.itemsProperty().bind(genGroupPropertyBinding({
+            FXCollections.observableList(State.transFile.groupNames)
+        }, {
+            it.nameProperty
+        }))
+        cGroupBox.indexProperty().bindBidirectional(State.currentGroupIdProperty())
+        Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
+
+        // GroupBar
+        cGroupBar.groupsProperty().bind(genGroupsBinding())
+        cGroupBar.selectedGroupIndexProperty().bindBidirectional(State.currentGroupIdProperty())
+        Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
+
         // PictureBox
         cPicBox.itemsProperty().bind(genPicNamesBinding())
         RuledGenericBidirectionalBinding.bind(
@@ -419,20 +428,6 @@ class Controller(private val root: View) {
             State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
-
-        // GroupBox
-        cGroupBox.itemsProperty().bind(genGroupPropertyBinding({
-            FXCollections.observableList(State.transFile.groupNames)
-        }, {
-            it.nameProperty
-        }))
-        cGroupBox.indexProperty().bindBidirectional(State.currentGroupIdProperty())
-        Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
-
-        // GroupBar
-        cGroupBar.groupsProperty().bind(genGroupsBinding())
-        cGroupBar.selectedGroupIndexProperty().bindBidirectional(State.currentGroupIdProperty())
-        Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // TreeView
         cTreeView.rootNameProperty().bind(State.currentPicNameProperty())
@@ -499,14 +494,17 @@ class Controller(private val root: View) {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
 
         // Update LabelInfo
+        State.currentGroupIdProperty().addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND) labelInfo("Cleared group selection")
+            else labelInfo("Selected group $it, ${State.transFile.getTransGroup(it).name}")
+        })
         State.currentPicNameProperty().addListener(onNew {
-            labelInfo("Changed picture to $it")
+            if (it.isEmpty()) labelInfo("Cleared picture selection")
+            else labelInfo("Changed picture to $it")
         })
-        State.currentGroupIdProperty().addListener(onNew {
-            labelInfo("Selected group $it")
-        })
-        State.currentLabelIndexProperty().addListener(onNew {
-            labelInfo("Selected label $it")
+        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND) labelInfo("Cleared label selection")
+            else labelInfo("Selected label $it")
         })
         Logger.info("Added effect: show info on InfoLabel", LOGSRC_CONTROLLER)
 
@@ -844,14 +842,12 @@ class Controller(private val root: View) {
         val groupNameList = Settings.defaultGroupNameList
         val groupColorList = Settings.defaultGroupColorHexList
         val groupCreateList = Settings.isGroupCreateOnNewTransList
-
         val groupList = ArrayList<TransGroup>()
         for (i in groupNameList.indices)
             if (groupCreateList[i]) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
         val transMap = LinkedHashMap<String, MutableList<TransLabel>>()
         for (pic in selectedPics)
             transMap[pic] = ArrayList()
-
         val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
         Logger.info("Built TransFile", LOGSRC_CONTROLLER)
 
@@ -902,18 +898,16 @@ class Controller(private val root: View) {
 
         // Show info if comment not in default list
         // Should do this before update RecentFiles
-        if (!RecentFiles.getAll().contains(file.path)) {
+        if (!RecentFiles.recentFiles.contains(file)) {
             val comment = transFile.comment.trim()
-            if (TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
+            if (!TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
                 Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
                 showInfo(State.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
             }
         }
 
         // Update recent files
-        CFileChooser.lastDirectory = file.parentFile  //todo: use binding
-        RecentFiles.add(file.path)
-        AMenuBar.updateRecentFiles()
+        RecentFiles.add(file)
 
         // Auto backup
         backupManager.clear()
@@ -1020,7 +1014,7 @@ class Controller(private val root: View) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
-            val tempFile = File.createTempFile("temp", type.name).apply { deleteOnExit() }
+            val tempFile = File.createTempFile("temp", type.name).apply(File::deleteOnExit)
             val transFile = load(from, FileType.MeoFile)
 
             export(tempFile, type, transFile)
@@ -1081,8 +1075,6 @@ class Controller(private val root: View) {
         cTransArea.unbindBidirectional()
 
         State.stage.title = INFO["application.name"]
-
-        labelInfo(I18N["common.ready"])
     }
 
     // ----- Component Methods ----- //

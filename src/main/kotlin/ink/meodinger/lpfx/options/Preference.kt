@@ -18,7 +18,7 @@ import java.io.IOException
 /**
  * The preferences that user set while using
  */
-object Preference : AbstractProperties() {
+object Preference : AbstractProperties("Preference") {
 
     const val WINDOW_SIZE        = "WindowSize"
     const val MAIN_DIVIDER       = "MainDivider"
@@ -60,7 +60,7 @@ object Preference : AbstractProperties() {
 
     init { useDefault() }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
         load(Options.preference, this)
 

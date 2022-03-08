@@ -20,7 +20,7 @@ import java.io.IOException
 /**
  * The settings that user set through CSettingsDialog
  */
-object Settings : AbstractProperties() {
+object Settings : AbstractProperties("Settings") {
 
     // ----- Constants ----- //
 
@@ -54,7 +54,7 @@ object Settings : AbstractProperties() {
         CProperty(ViewModeOrdinals, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
         CProperty(LogLevelOrdinal, Logger.LogLevel.INFO.ordinal),
         CProperty(LabelRadius, 24.0),
-        CProperty(LabelAlpha, "80"),
+        CProperty(LabelAlpha, "A0"),
         CProperty(LigatureRules,
             "("      to "「",
             ")"      to "」",
@@ -127,7 +127,7 @@ object Settings : AbstractProperties() {
 
     init { useDefault() }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
         load(Options.settings, this)
 

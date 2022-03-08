@@ -55,9 +55,9 @@ object Options {
 
     fun load() {
         try {
-            loadRecentFiles()
-            loadPreference()
-            loadSettings()
+            loadProperties(RecentFiles, recentFiles)
+            loadProperties(Preference, preference)
+            loadProperties(Settings, settings)
             cleanLogs()
 
             Logger.level = Settings.logLevel
@@ -75,83 +75,37 @@ object Options {
     }
 
     fun save() {
-        RecentFiles.save()
-        Logger.info("Saved RecentFiles", LOGSRC_OPTIONS)
-
-        Preference.save()
-        Logger.info("Saved Preference", LOGSRC_OPTIONS)
-
-        Settings.save()
-        Logger.info("Saved Settings", LOGSRC_OPTIONS)
+        saveProperties(RecentFiles)
+        saveProperties(Preference)
+        saveProperties(Settings)
     }
 
     @Throws(IOException::class)
-    private fun loadRecentFiles() {
-        if (Files.notExists(recentFiles)) {
-            Files.createFile(recentFiles)
-            RecentFiles.save()
-        }
+    private fun loadProperties(instance: AbstractProperties, path: Path) {
+        if (Files.notExists(path)) Files.createFile(path)
+
         try {
-            RecentFiles.load()
-            Logger.info("Loaded RecentFile", LOGSRC_OPTIONS)
-        } catch (e: IOException) {
-            RecentFiles.useDefault()
-            RecentFiles.save()
-            Logger.error("Load Recent Files failed", LOGSRC_OPTIONS)
+            instance.load()
+            Logger.info("Loaded ${instance.name}", LOGSRC_OPTIONS)
+        } catch (e: NumberFormatException) {
+            instance.useDefault()
+            AbstractProperties.save(path, instance)
+            instance.load()
+
+            Logger.error("Load ${instance.name} properties failed", LOGSRC_OPTIONS)
             Logger.exception(e)
             showError(
                 null,
                 null,
-                String.format(I18N["error.options.load_failed.s"], FileName_RecentFiles),
+                String.format(I18N["error.options.load_failed.s"], instance.name),
                 I18N["common.alert"]
             )
         }
     }
 
-    @Throws(IOException::class)
-    private fun loadPreference() {
-        if (Files.notExists(preference)) {
-            Files.createFile(preference)
-            Preference.save()
-        }
-        try {
-            Preference.load()
-            Logger.info("Loaded Preferences", LOGSRC_OPTIONS)
-        } catch (e: IOException) {
-            Preference.useDefault()
-            Preference.save()
-            Logger.error("Load Preference failed, using default", LOGSRC_OPTIONS)
-            Logger.exception(e)
-            showError(
-                null,
-                null,
-                String.format(I18N["error.options.load_failed.s"], FileName_Preference),
-                I18N["common.alert"]
-            )
-        }
-    }
-
-    @Throws(IOException::class)
-    private fun loadSettings() {
-        if (Files.notExists(settings)) {
-            Files.createFile(settings)
-            Settings.save()
-        }
-        try {
-            Settings.load()
-            Logger.info("Loaded Settings", LOGSRC_OPTIONS)
-        } catch (e: IOException) {
-            Settings.useDefault()
-            Settings.save()
-            Logger.error("Load Settings failed, using default", LOGSRC_OPTIONS)
-            Logger.exception(e)
-            showError(
-                null,
-                null,
-                String.format(I18N["error.options.load_failed.s"], FileName_Settings),
-                I18N["common.alert"]
-            )
-        }
+    private fun saveProperties(instance: AbstractProperties) {
+        instance.save()
+        Logger.info("Saved ${instance.name}", LOGSRC_OPTIONS)
     }
 
     @Throws(IOException::class)

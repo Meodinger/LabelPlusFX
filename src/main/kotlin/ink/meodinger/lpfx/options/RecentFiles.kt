@@ -18,7 +18,7 @@ import java.io.IOException
 /**
  * The recent files that user opens while using
  */
-object RecentFiles : AbstractProperties() {
+object RecentFiles : AbstractProperties("Recent Files") {
 
     private const val MAX_SIZE = 10
     private const val RECENT   = "RecentFiles"
@@ -33,7 +33,7 @@ object RecentFiles : AbstractProperties() {
     val progressMap: ObservableMap<String, Pair<Int, Int>> by progressMapProperty
 
     private val lastFileProperty: ObjectProperty<File?> = SimpleObjectProperty()
-    fun lastFileProperty(): ObjectProperty<File?> = lastFileProperty
+    fun lastFileProperty(): ReadOnlyObjectProperty<File?> = lastFileProperty
     val lastFile: File? by lastFileProperty
 
     override val default = listOf(
@@ -43,18 +43,18 @@ object RecentFiles : AbstractProperties() {
 
     init { useDefault() }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
         load(Options.recentFiles, this)
 
         val recentPaths = this[RECENT].asStringList()
         recentFilesProperty.set(FXCollections.observableArrayList(recentPaths.map(::File)))
 
-        val progressList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
-        val progressMap = recentPaths.mapIndexed { index, path -> path to progressList.getOrElse(index) { -1 to -1 } }
-        progressMapProperty.set(FXCollections.observableHashMap<String, Pair<Int, Int>>().apply { putAll(progressMap) })
+        val progressPairList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
+        val progressList = recentPaths.mapIndexed { index, path -> path to progressPairList.getOrElse(index) { -1 to -1 } }
+        progressMapProperty.set(FXCollections.observableHashMap<String, Pair<Int, Int>>().apply { putAll(progressList) })
 
-        lastFileProperty.set(recentFiles.firstOrNull())
+        lastFileProperty.bind(recentFilesProperty.valueAt(0))
     }
 
     @Throws(IOException::class)

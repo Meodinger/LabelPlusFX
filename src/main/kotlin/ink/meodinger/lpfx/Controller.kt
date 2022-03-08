@@ -265,7 +265,7 @@ class Controller(private val root: View) {
             if (board.hasFiles()) {
                 val file = board.files.firstOrNull { f -> EXTENSIONS_FILE.contains(f.extension) } ?: return@setOnDragDropped
 
-                // To avoid exception cannot be caught
+                // To make sure exception can be caught
                 Platform.runLater { open(file) }
                 it.isDropCompleted = true
             }
@@ -316,7 +316,9 @@ class Controller(private val root: View) {
             // Text display
             cLabelPane.removeText()
             when (State.workMode) {
-                WorkMode.InputMode -> cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+                WorkMode.InputMode -> {
+                    cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+                }
                 WorkMode.LabelMode -> {
                     val transGroup = State.transFile.getTransGroup(transLabel.groupId)
                     cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
@@ -358,7 +360,7 @@ class Controller(private val root: View) {
 
         // RecentFiles
         AMenuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
-        Logger.info("Updated RecentFiles Menu", LOGSRC_CONTROLLER)
+        Logger.info("Bound recent files menu", LOGSRC_CONTROLLER)
 
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty())
@@ -408,7 +410,7 @@ class Controller(private val root: View) {
 
         // GroupBar
         cGroupBar.groupsProperty().bind(genGroupsBinding())
-        cGroupBar.selectedGroupIndexProperty().bindBidirectional(State.currentGroupIdProperty())
+        cGroupBar.indexProperty().bindBidirectional(State.currentGroupIdProperty())
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
@@ -618,8 +620,7 @@ class Controller(private val root: View) {
             if (!it.code.isDigitKey) return@addEventHandler
 
             val index = it.text.toInt() - 1
-            if (index !in 0..cGroupBox.items.size) return@addEventHandler
-            cGroupBox.select(index)
+            if (index in 0..cGroupBox.items.size) cGroupBox.select(index)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
@@ -646,14 +647,14 @@ class Controller(private val root: View) {
          */
         fun getNextLabelItemIndex(from: Int, direction: Int): Int {
             // Make sure we have items to select
-            cTreeView.getTreeItem(from).apply { this?.expandAll() }
+            cTreeView.getTreeItem(from).apply { this?.expand() }
 
             var index = from
             var item: TreeItem<String>?
             do {
                 index += direction
                 item = cTreeView.getTreeItem(index)
-                item?.expandAll()
+                item?.expand()
 
                 if (item == null) return NOT_FOUND
             } while (item !is CTreeLabelItem)
@@ -662,37 +663,29 @@ class Controller(private val root: View) {
         }
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
             if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
-
-            // Make sure we'll not get into endless LabelItem find loop
-            if (State.transFile.getTransList(State.currentPicName).isEmpty()) return@EventHandler
-
-            val shift = when (it.code) {
+            // Direction
+            val labelItemShift: Int = when (it.code) {
                 KeyCode.UP -> -1
                 KeyCode.DOWN -> 1
                 else -> return@EventHandler
             }
+            // Make sure we'll not get into endless LabelItem find loop
+            if (State.transFile.getTransList(State.currentPicName).isEmpty()) return@EventHandler
 
-            val selectedIndex = cTreeView.selectionModel.selectedIndex
-            var labelItemIndex = when (it.code) {
-                // if not selected, return first or last;
-                KeyCode.UP   -> shift + if (selectedIndex != NOT_FOUND) selectedIndex else cTreeView.expandedItemCount
-                KeyCode.DOWN -> shift + if (selectedIndex != NOT_FOUND) selectedIndex else 0
-                else -> throw IllegalStateException("Should not be here")
-            }
+            var labelItemIndex: Int = cTreeView.selectionModel.selectedIndex + labelItemShift
 
             var item: TreeItem<String>? = cTreeView.getTreeItem(labelItemIndex)
             while (item !is CTreeLabelItem) {
                 // if selected first and try getting previous, return last;
                 // if selected last and try getting next, return first;
-                labelItemIndex = getNextLabelItemIndex(when (it.code) {
-                    KeyCode.UP   -> if (labelItemIndex != NOT_FOUND) labelItemIndex else cTreeView.expandedItemCount
-                    KeyCode.DOWN -> if (labelItemIndex != NOT_FOUND) labelItemIndex else 0
-                    else -> throw IllegalStateException("Should not be here")
-                }, shift)
+                labelItemIndex = getNextLabelItemIndex(
+                    if (labelItemShift == -1)
+                        if (labelItemIndex != NOT_FOUND) labelItemIndex else cTreeView.expandedItemCount
+                    else
+                        if (labelItemIndex != NOT_FOUND) labelItemIndex else 0
+                , labelItemShift)
                 item = cTreeView.getTreeItem(labelItemIndex)
             }
-
-            if (labelItemIndex == NOT_FOUND) return@EventHandler
 
             cTreeView.selectionModel.clearSelection()
             cTreeView.selectionModel.select(labelItemIndex)
@@ -709,14 +702,16 @@ class Controller(private val root: View) {
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
             if (!(it.isControlOrMetaDown && it.code == KeyCode.ENTER)) return@EventHandler
 
-            val isShiftDown = it.isShiftDown
+            val backward = it.isShiftDown
             val selectedItemIndex = cTreeView.selectionModel.selectedIndex
-            val nextLabelItemIndex = getNextLabelItemIndex(selectedItemIndex, if (isShiftDown) -1 else 1)
+            val nextLabelItemIndex = getNextLabelItemIndex(selectedItemIndex, if (backward) -1 else 1)
 
             val code = if (nextLabelItemIndex == NOT_FOUND) {
-                if (isShiftDown) KeyCode.LEFT else KeyCode.RIGHT
+                // Met the bounds, consider change picture
+                if (backward) KeyCode.LEFT else KeyCode.RIGHT
             } else {
-                if (isShiftDown) KeyCode.UP else KeyCode.DOWN
+                // Got next label, still in this picture
+                if (backward) KeyCode.UP else KeyCode.DOWN
             }
 
             cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = code))
@@ -798,12 +793,12 @@ class Controller(private val root: View) {
         val selectedPics  = ArrayList<String>()
         while (potentialPics.isEmpty()) {
             // Find pictures
-            val files = projectFolder.listFiles()
-            if (files != null) for (f in files) if (f.isFile) {
-                for (extension in EXTENSIONS_PIC) if (f.extension == extension) {
-                    potentialPics.add(f.name)
+            projectFolder.listFiles()?.forEach {
+                if (it.isFile && EXTENSIONS_PIC.contains(it.extension)) {
+                    potentialPics.add(it.name)
                 }
             }
+
             if (potentialPics.isEmpty()) {
                 // Find nothing, this folder isn't project folder, confirm to use another folder
                 val result = showConfirm(State.stage, I18N["confirm.project_folder_invalid"])

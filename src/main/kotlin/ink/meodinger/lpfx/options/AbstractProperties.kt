@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
 /**
  * Abstract properties structure for save/load/check
  */
-abstract class AbstractProperties {
+abstract class AbstractProperties(val name: String) {
 
     companion object {
 
@@ -41,10 +41,8 @@ abstract class AbstractProperties {
                 }
             } catch (e: IndexOutOfBoundsException) {
                 throw IOException("Load properties failed: KV format invalid").initCause(e)
-            } catch (e: SecurityException) {
-                throw IOException("Load properties failed: Security manager installed, check first").initCause(e)
             } catch (e: IOException) {
-                throw IOException("Save properties failed").initCause(e)
+                throw IOException("Save properties I/O failed").initCause(e)
             }
         }
 
@@ -62,10 +60,8 @@ abstract class AbstractProperties {
                             .toString()
                     )
                 }
-            } catch { e: SecurityException ->
-                throw IOException("Save properties failed: Security manager installed, check first").initCause(e)
             } catch { e: Exception ->
-                throw IOException("Save properties failed").initCause(e)
+                throw IOException("Save properties I/O failed").initCause(e)
             }
         }
 
@@ -78,14 +74,14 @@ abstract class AbstractProperties {
     protected abstract val default: List<CProperty>
     protected val properties = ArrayList<CProperty>()
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, NumberFormatException::class)
     abstract fun load()
     @Throws(IOException::class)
     abstract fun save()
 
     fun useDefault() {
         properties.clear()
-        properties.addAll(default)
+        properties.addAll(default.map(CProperty::copy))
     }
 
     private fun tryGet(key: String): CProperty? {

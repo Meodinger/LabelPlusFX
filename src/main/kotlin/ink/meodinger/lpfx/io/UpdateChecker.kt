@@ -62,20 +62,19 @@ object UpdateChecker {
      * Should run after stage showed
      */
     fun check() {
+        val time = Date().time
+        val last = Preference.lastUpdateNotice
+        if (time - last < DELAY) {
+            Logger.info("Check suppressed, last notice time is $last", LOGSRC_CHECKER)
+            return
+        }
+
         LPFXTask.createTask<Unit> task@{
             Logger.info("Fetching latest version...", LOGSRC_CHECKER)
             val version = fetchSync()
             if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CHECKER)
 
             if (version > V) {
-                val time = Date().time
-                val last = Preference.lastUpdateNotice
-                if (last != 0L && time - last < DELAY) {
-                    Logger.info("Check suppressed, last notice time is $last", LOGSRC_CHECKER)
-                    return@task
-                }
-
-                Preference.lastUpdateNotice = 0
                 Platform.runLater {
                     val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
 

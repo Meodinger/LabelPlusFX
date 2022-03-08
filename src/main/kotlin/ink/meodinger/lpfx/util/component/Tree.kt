@@ -19,10 +19,17 @@ val <T> TreeItem<T>.root: TreeItem<T> get() {
 }
 
 /**
+ * Alias for isExpanded
+ */
+fun TreeItem<*>.expand() {
+    isExpanded = true
+}
+
+/**
  * Expand all items under it
  */
 fun TreeItem<*>.expandAll() {
-    isExpanded = true
+    expand()
 
     for (i in children) i.expandAll()
 }

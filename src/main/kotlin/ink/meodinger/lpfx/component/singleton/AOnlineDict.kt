@@ -2,7 +2,9 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
+import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.LOGSRC_DICTIONARY
+import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
@@ -175,6 +177,12 @@ object AOnlineDict : Stage() {
                 callback(it.toString())
             }
         }()
+    }
+
+    fun showDict() {
+        x = State.stage.x - (width + COMMON_GAP * 2) + State.stage.width
+        y = State.stage.y + (COMMON_GAP * 2)
+        show()
     }
 
 }

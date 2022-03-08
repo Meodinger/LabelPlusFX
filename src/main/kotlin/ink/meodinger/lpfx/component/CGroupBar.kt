@@ -43,9 +43,9 @@ class CGroupBar : HBox() {
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
     val groups: ObservableList<TransGroup> by groupsProperty
 
-    private val selectedGroupIndexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    fun selectedGroupIndexProperty(): IntegerProperty = selectedGroupIndexProperty
-    var selectedGroupIndex: Int by selectedGroupIndexProperty
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    fun indexProperty(): IntegerProperty = indexProperty
+    var index: Int by indexProperty
 
     private val onGroupCreateProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
     fun onGroupCreateProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupCreateProperty
@@ -78,11 +78,11 @@ class CGroupBar : HBox() {
                 }
             }
 
-            if (cGroups.isEmpty()) selectedGroupIndex = NOT_FOUND
-            if (selectedGroupIndex != NOT_FOUND && selectedGroupIndex < cGroups.size) cGroups[selectedGroupIndex].select()
+            if (cGroups.isEmpty()) index = NOT_FOUND
+            if (index != NOT_FOUND && index < cGroups.size) cGroups[index].select()
         })
 
-        selectedGroupIndexProperty.addListener { _, o, n ->
+        indexProperty.addListener { _, o, n ->
             if ((o as Int) != NOT_FOUND && o < cGroups.size) cGroups[o].unselect()
             if ((n as Int) != NOT_FOUND && n < cGroups.size) cGroups[n].select()
         }
@@ -130,7 +130,7 @@ class CGroupBar : HBox() {
     }
 
     fun select(groupId: Int) {
-        if (groupId in 0 until cGroups.size) selectedGroupIndex = groupId
+        if (groupId in 0 until cGroups.size) index = groupId
         else if (cGroups.size == 0 && groupId == 0) doNothing()
         else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
     }

@@ -30,7 +30,6 @@ import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
-import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import java.io.File
 import java.nio.file.Files
@@ -80,13 +79,15 @@ object AMenuBar : MenuBar() {
 
     // ----- Choosers ----- //
 
+    private val anyFilter         = FileChooser.ExtensionFilter(I18N["filetype.any"], "*.*")
+
     private val picChooser        = CFileChooser()
     private val picFilter         = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
     private val pngFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSION_PIC_PNG}")
     private val jpgFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
     private val jpegFilter        = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
 
-    private val newChooser        = DirectoryChooser()
+    private val newChooser        = CFileChooser()
     private val fileChooser       = CFileChooser()
     private val exportChooser     = CFileChooser()
     private val fileFilter        = FileChooser.ExtensionFilter(I18N["filetype.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
@@ -104,7 +105,7 @@ object AMenuBar : MenuBar() {
         picChooser.extensionFilters.addAll(picFilter, pngFilter, jpgFilter, jpegFilter)
 
         newChooser.title = I18N["chooser.new"]
-        newChooser.initialDirectoryProperty().bind(CFileChooser.lastDirectoryProperty())
+        newChooser.extensionFilters.addAll(anyFilter, fileFilter, lpFilter, meoFilter)
 
         // fileChooser's tile will change
         fileChooser.extensionFilters.addAll(fileFilter, meoFilter, lpFilter)
@@ -238,7 +239,7 @@ object AMenuBar : MenuBar() {
         }
         menu(I18N["mm.tools"]) {
             item(I18N["m.dict"]) {
-                does { toggleDict() }
+                does { showDict() }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN)
             }
             separator()
@@ -281,10 +282,17 @@ object AMenuBar : MenuBar() {
 
         State.reset()
 
-        val fileDirectory = newChooser.showDialog(State.stage) ?: return
         val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
+        val filename = "Nova traduko" // It's Esperanto!
+        newChooser.initialFilename = "$filename.$extension"
 
-        val file = fileDirectory.resolve("${fileDirectory.name}.$extension")
+        val file = newChooser.showSaveDialog(State.stage)?.let {
+            if (EXTENSIONS_FILE.contains(it.extension)) {
+                if (filename == it.nameWithoutExtension) {
+                    it.parentFile.let { f -> f.resolve("${f.name}.${it.extension}") }
+                } else it
+            } else File("${it.nameWithoutExtension}.$extension")
+        } ?: return
         if (file.exists()) {
             val confirm = showConfirm(State.stage, I18N["m.new.dialog.overwrite"])
             if (confirm.isEmpty || confirm.get() == ButtonType.NO) return
@@ -408,11 +416,9 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun specifyPictures() {
-        val completed = State.controller.specifyPicFiles()
-        if (completed != null) {
-            if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
-            State.controller.requestRepaint()
-        }
+        val completed = State.controller.specifyPicFiles() ?: return
+        if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
+        State.controller.requestRepaint()
     }
 
     private fun exportTransFile(type: FileType) {
@@ -556,10 +562,8 @@ object AMenuBar : MenuBar() {
 
         task()
     }
-    fun toggleDict() {
-        AOnlineDict.x = State.stage.x - (AOnlineDict.width + COMMON_GAP * 2) + State.stage.width
-        AOnlineDict.y = State.stage.y + (COMMON_GAP * 2)
-        AOnlineDict.show()
+    private fun showDict() {
+        AOnlineDict.showDict()
     }
 
 }

@@ -22,6 +22,7 @@ import javafx.scene.layout.VBox
 import java.io.IOException
 import java.net.*
 import java.util.Date
+import javax.net.ssl.HttpsURLConnection
 
 
 /**
@@ -41,15 +42,19 @@ object UpdateChecker {
             val proxy = ProxySelector.getDefault().select(URI(API))[0].also {
                 if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOGSRC_CHECKER)
             }
-            val connection = URL(API).openConnection(proxy).apply { connect() }
-            val jsonNode = ObjectMapper().readTree(connection.getInputStream())
-            if (jsonNode.isArray) return Version.of(jsonNode[0]["name"].asText())
+            val connection = URL(API).openConnection(proxy).apply { connect() } as HttpsURLConnection
+            if (connection.responseCode != 200) throw ConnectException("Response code ${connection.responseCode}")
+
+            return ObjectMapper().readTree(connection.inputStream).let {
+                if (it.isArray) Version.of(it[0]["name"].asText())
+                else throw IOException("Should get an array, but not")
+            }
         } catch (e: NoRouteToHostException) {
             Logger.warning("No network connection", LOGSRC_CHECKER)
         } catch (e: SocketTimeoutException) {
             Logger.warning("Connect timeout", LOGSRC_CHECKER)
         } catch (e: ConnectException) {
-            Logger.warning("Connect failed", LOGSRC_CHECKER)
+            Logger.warning("Connect failed: ${e.message}", LOGSRC_CHECKER)
         } catch (e: IOException) {
             Logger.warning("Fetch I/O failed", LOGSRC_CHECKER)
             Logger.exception(e)

@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.component.common.CLigatureArea
 import ink.meodinger.lpfx.component.common.CTextSlider
 import ink.meodinger.lpfx.component.singleton.AMenuBar
 import ink.meodinger.lpfx.util.component.*
+import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
@@ -31,9 +32,10 @@ import javafx.scene.layout.Priority
  */
 class View : BorderPane() {
 
-    val bSwitchViewMode = Button(State.viewMode.toString())
-    val bSwitchWorkMode = Button(State.workMode.toString())
+    val bSwitchViewMode = Button()
+    val bSwitchWorkMode = Button()
     val lInfo           = Label()
+    val statsBar        = HBox()
     val pMain           = SplitPane()
     val pRight          = SplitPane()
     val cGroupBar       = CGroupBar()
@@ -91,8 +93,14 @@ class View : BorderPane() {
                 }
             }
         }
-        bottom(lInfo) {
-            padding = Insets(4.0, 8.0, 4.0, 8.0)
+        bottom(statsBar) {
+            add(lInfo) {
+                padding = Insets(4.0, 8.0, 4.0, 8.0)
+            }
+
+            visibleProperty().addListener(onNew {
+                if (it) this@View.bottom(statsBar) else this@View.children.remove(statsBar)
+            })
         }
     }
 

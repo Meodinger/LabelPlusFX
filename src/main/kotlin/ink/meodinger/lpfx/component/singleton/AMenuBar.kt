@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
@@ -53,11 +54,6 @@ object AMenuBar : MenuBar() {
     // ----- Recent ----- //
 
     private val mOpenRecent = Menu(I18N["m.recent"])
-
-    private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
-    fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
-    val recentFiles: ObservableList<File> by recentFilesProperty
-
     private fun openRecentTranslation(item: MenuItem) {
         // Open recent, remove item if not exist
 
@@ -76,6 +72,10 @@ object AMenuBar : MenuBar() {
 
         State.controller.open(file)
     }
+
+    private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
+    fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
+    val recentFiles: ObservableList<File> by recentFilesProperty
 
     // ----- Choosers ----- //
 
@@ -235,6 +235,10 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.crash"]) {
                 does { crash() }
+            }
+            separator()
+            checkItem(I18N["m.stats_bar"]) {
+                selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
             }
         }
         menu(I18N["mm.tools"]) {

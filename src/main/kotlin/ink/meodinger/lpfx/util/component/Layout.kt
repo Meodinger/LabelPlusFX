@@ -245,6 +245,12 @@ fun Menu.item(item: MenuItem, operation: MenuItem.() -> Unit = {}): Menu {
 fun Menu.item(text: String, operation: MenuItem.() -> Unit = {}): Menu {
     return apply { item(MenuItem(text), operation) }
 }
+fun Menu.checkItem(text: String, selected: Boolean, operation: CheckMenuItem.() -> Unit = {}): Menu {
+    return apply { add(CheckMenuItem(text)) { isSelected = selected; operation(this) } }
+}
+fun Menu.checkItem(text: String, operation: CheckMenuItem.() -> Unit = {}): Menu {
+    return apply { checkItem(text, false, operation) }
+}
 fun Menu.menu(menu: Menu, operation: Menu.() -> Unit = {}): Menu {
     return apply { add(menu, operation) }
 }

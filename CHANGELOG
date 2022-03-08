@@ -32,6 +32,7 @@ Remove:
 TODO:
  - 增加全文搜索替换功能
  - 彩色Dict（多色彩TextArea）
+ - 撤回栈
 
 # 2.2.2
 

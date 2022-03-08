@@ -24,6 +24,7 @@ object Preference : AbstractProperties("Preference") {
     const val MAIN_DIVIDER       = "MainDivider"
     const val RIGHT_DIVIDER      = "RightDivider"
     const val TEXTAREA_FONT_SIZE = "TextAreaFontSize"
+    const val SHOW_STATS_BAR     = "ShowStatsBar"
     const val LAST_UPDATE_NOTICE = "LastUpdateNotice"
 
     override val default = listOf(
@@ -31,6 +32,7 @@ object Preference : AbstractProperties("Preference") {
         CProperty(MAIN_DIVIDER, 0.618),
         CProperty(RIGHT_DIVIDER, 0.618),
         CProperty(TEXTAREA_FONT_SIZE, 12),
+        CProperty(SHOW_STATS_BAR, false),
         CProperty(LAST_UPDATE_NOTICE, 0)
     )
 
@@ -54,6 +56,10 @@ object Preference : AbstractProperties("Preference") {
     fun textAreaFontProperty(): ObjectProperty<Font> = textAreaFontProperty
     var textAreaFont: Font by textAreaFontProperty
 
+    private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty()
+    fun showStatsBarProperty(): BooleanProperty = showStatsBarProperty
+    var showStatsBar: Boolean by showStatsBarProperty
+
     private val lastUpdateNoticeProperty: LongProperty = SimpleLongProperty()
     fun lastUpdateNoticeProperty(): LongProperty = lastUpdateNoticeProperty
     var lastUpdateNotice: Long by lastUpdateNoticeProperty
@@ -70,6 +76,7 @@ object Preference : AbstractProperties("Preference") {
         mainDividerPosition = this[MAIN_DIVIDER].asDouble()
         rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
         textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
+        showStatsBar = this[SHOW_STATS_BAR].asBoolean()
         lastUpdateNotice = this[LAST_UPDATE_NOTICE].asLong()
     }
 
@@ -79,6 +86,7 @@ object Preference : AbstractProperties("Preference") {
         this[MAIN_DIVIDER].set(mainDividerPosition)
         this[RIGHT_DIVIDER].set(rightDividerPosition)
         this[TEXTAREA_FONT_SIZE].set(textAreaFont.size)
+        this[SHOW_STATS_BAR].set(showStatsBar)
         this[LAST_UPDATE_NOTICE].set(lastUpdateNotice)
 
         save(Options.preference, this)

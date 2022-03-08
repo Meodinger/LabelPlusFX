@@ -356,6 +356,7 @@ class Controller(private val root: View) {
         cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
         pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
+        root.statsBar.visibleProperty().bind(Preference.showStatsBarProperty())
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
 
         // RecentFiles

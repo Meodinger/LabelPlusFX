@@ -4,7 +4,7 @@ Change
 Add
 Remove
 
-# 2.2.3
+# 2.3.0
 
 Fix:
  - 修正了某些情况下Label位置会变成(NaN, NaN)的问题；

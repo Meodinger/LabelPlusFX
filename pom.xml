@@ -7,7 +7,7 @@
 
     <groupId>ink.meodinger</groupId>
     <artifactId>lpfx</artifactId>
-    <version>2.2.3</version>
+    <version>2.3.0</version>
     <packaging>jar</packaging>
 
     <name>lpfx</name>
@@ -57,7 +57,7 @@
             <version>1.6.10</version>
         </dependency>
 
-        <!-- jackson 2.13.0 has problem with kotlin (multi-release KT-48027) -->
+        <!-- kotlin has problem with jackson 2.13.0 (multi-release KT-48027, fixed in 1.6.20-RC) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>

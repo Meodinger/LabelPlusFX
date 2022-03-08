@@ -16,7 +16,7 @@ import java.io.File
  */
 
 // Current Version
-val V = Version(2, 2, 2)
+val V = Version(2, 3, 0)
 
 /**
  * Size related constants

@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component.properties
 
 import ink.meodinger.lpfx.options.CProperty
 

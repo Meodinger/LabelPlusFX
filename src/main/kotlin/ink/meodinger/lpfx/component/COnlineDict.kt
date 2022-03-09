@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
@@ -46,7 +46,7 @@ import kotlin.jvm.Throws
 /**
  * Simple online dictionary, better than none, anyway.
  */
-class ADialogDict : Stage() {
+class COnlineDict : Stage() {
 
     companion object {
         private const val JD_SITE        = "https://nekodict.com"

@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CRollerLabel
@@ -31,7 +31,7 @@ import kotlin.io.path.*
  * Have fun with my code!
  */
 
-class ADialogSpecify(private val state: State) : Dialog<List<File>>() {
+class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
 
     companion object {
         private const val rowShift = 1

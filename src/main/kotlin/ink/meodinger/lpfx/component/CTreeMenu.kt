@@ -1,9 +1,7 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.component.CTreeGroupItem
-import ink.meodinger.lpfx.component.CTreeLabelItem
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
@@ -37,7 +35,7 @@ import javafx.scene.paint.Color
 /**
  * A ContextMenu Singleton for CTreeView
  */
-class ATreeMenu(private val state: State) : ContextMenu() {
+class CTreeMenu(private val state: State) : ContextMenu() {
 
     private val rAddGroupField      = TextField().apply {
         textFormatter = genGroupNameFormatter()

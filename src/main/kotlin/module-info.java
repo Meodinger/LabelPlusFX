@@ -24,5 +24,5 @@ module lpfx {
     exports ink.meodinger.lpfx.options;
     exports ink.meodinger.lpfx.component;
     exports ink.meodinger.lpfx.component.common;
-    exports ink.meodinger.lpfx.component.singleton;
+    exports ink.meodinger.lpfx.component.properties;
 }

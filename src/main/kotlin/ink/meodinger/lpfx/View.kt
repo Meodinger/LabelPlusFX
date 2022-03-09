@@ -1,13 +1,9 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.component.CGroupBar
-import ink.meodinger.lpfx.component.CLabelPane
-import ink.meodinger.lpfx.component.CTreeView
+import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CLigatureArea
 import ink.meodinger.lpfx.component.common.CTextSlider
-import ink.meodinger.lpfx.component.singleton.AMenuBar
-import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
@@ -21,6 +17,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SplitPane
+import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -37,7 +34,7 @@ import javafx.scene.layout.Priority
  */
 class View(private val state: State) : BorderPane() {
 
-    val menuBar         = AMenuBar(state)
+    val menuBar         = CMenuBar(state)
     val bSwitchViewMode = Button()
     val bSwitchWorkMode = Button()
     val lInfo           = Label()
@@ -50,6 +47,7 @@ class View(private val state: State) : BorderPane() {
     val cPicBox         = CComboBox<String>()
     val cGroupBox       = CComboBox<String>()
     val cTreeView       = CTreeView()
+    val cTreeViewMenu   = CTreeMenu(state)
     val cTransArea      = CLigatureArea()
 
     private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty(false)
@@ -96,14 +94,20 @@ class View(private val state: State) : BorderPane() {
                             isMnemonicParsing = false
                         }
                     }
-                    center(cTreeView)
+                    center(cTreeView) {
+                        contextMenu = cTreeViewMenu.apply { update(emptyList()) }
+                        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
+                            cTreeViewMenu.update(selectionModel.selectedItems.toList())
+                        }
+                    }
                 }
                 add(cTransArea) {
                     isWrapText = true
                 }
             }
         }
-        bottom(statsBar) {
+
+        with(statsBar) {
             add(lInfo) {
                 padding = Insets(4.0, 8.0, 4.0, 8.0)
             }

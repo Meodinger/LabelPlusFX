@@ -32,3 +32,5 @@ fun String?.isColorHex(): Boolean {
 
     return true
 }
+
+fun Color.opacity(opacity: Double): Color = Color(red, green, blue, opacity)

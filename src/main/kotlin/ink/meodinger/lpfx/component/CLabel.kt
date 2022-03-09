@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.util.color.opacity
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -7,9 +8,11 @@ import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
 import javafx.geometry.VPos
+import javafx.scene.effect.BlendMode
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
+import javafx.scene.shape.Shape
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
@@ -32,6 +35,8 @@ class CLabel(
 ) : Region() {
 
     /// TODO: Custom Text Color
+    /// TODO: Add alpha property
+    /// TODO: Use Shape.subtract
 
     companion object {
         private const val DEFAULT_INDEX = -1
@@ -57,20 +62,21 @@ class CLabel(
     var color: Color by colorProperty
 
     init {
-        text.fill = Color.WHITE
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to get rid of editing layoutY
+        text.blendMode = BlendMode.OVERLAY
 
         indexProperty.addListener(onNew<Number, Int> { update(index = it) })
         radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })
         colorProperty.addListener(onNew { update(color = it) })
 
-        children.setAll(circle, text)
+        children.addAll(circle, text)
         update()
     }
 
     private fun update(index: Int = this.index, radius: Double = this.radius, color: Color = this.color) {
         text.text = index.toString()
+        text.fill = Color.WHITE.opacity(color.opacity)
         circle.radius = radius
         circle.fill = color
 

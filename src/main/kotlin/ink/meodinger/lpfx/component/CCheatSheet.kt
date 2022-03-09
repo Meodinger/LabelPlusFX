@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
@@ -29,7 +29,7 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-class ADialogCheatSheet(services: HostServices) : Stage() {
+class CCheatSheet(services: HostServices) : Stage() {
 
     init {
         title = I18N["m.cheat"]

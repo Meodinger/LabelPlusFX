@@ -1,8 +1,9 @@
-package ink.meodinger.lpfx.component.singleton
+package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
-import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.component.common.CFileChooser
+import ink.meodinger.lpfx.component.properties.ADialogLogs
+import ink.meodinger.lpfx.component.properties.ADialogSettings
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
@@ -12,6 +13,7 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.platform.isMac
+import ink.meodinger.lpfx.util.property.BidirectionalListener
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
@@ -49,7 +51,7 @@ import kotlin.io.path.name
 /**
  * A MenuBar for main scene, did not make it singleton for fxml loader
  */
-class AMenuBar(private val state: State) : MenuBar() {
+class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Recent ----- //
 
@@ -79,10 +81,10 @@ class AMenuBar(private val state: State) : MenuBar() {
 
     // ----- Dialogs ----- //
 
-    private val dialogCheatSheet = ADialogCheatSheet(state.application.hostServices)
-    private val dialogOnlineDict = ADialogDict()
-    private val dialogLogs       = ADialogLogs()
-    private val dialogSettings   = ADialogSettings()
+    private val cheatSheet     = CCheatSheet(state.application.hostServices)
+    private val onlineDict     = COnlineDict()
+    private val dialogLogs     = ADialogLogs()
+    private val dialogSettings = ADialogSettings()
 
     // ----- Choosers ----- //
 
@@ -236,6 +238,9 @@ class AMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.about"]) {
                 does { about() }
             }
+            item(I18N["m.update"]) {
+                does { checkUpdate() }
+            }
             item(I18N["m.cheat"]) {
                 does { cheatSheet() }
             }
@@ -243,15 +248,15 @@ class AMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.crash"]) {
                 does { crash() }
             }
-            separator()
-            checkItem(I18N["m.stats_bar"]) {
-                selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
-            }
         }
         menu(I18N["mm.tools"]) {
-            item(I18N["m.dict"]) {
+            checkItem(I18N["m.dict"]) {
                 does { showDict() }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN)
+                BidirectionalListener.listen(
+                    selectedProperty(), { _, _, _ -> isSelected = onlineDict.isShowing },
+                    onlineDict.showingProperty(), { _, _, new  -> isSelected = new }
+                )
             }
             separator()
             item(I18N["m.cht2zh"]) {
@@ -261,6 +266,10 @@ class AMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.zh2cht"]) {
                 does { cht2zh(true) }
                 disableProperty().bind(!state.isOpenedProperty())
+            }
+            separator()
+            checkItem(I18N["m.stats_bar"]) {
+                selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
             }
         }
 
@@ -509,9 +518,12 @@ class AMenuBar(private val state: State) : MenuBar() {
             state.application.hostServices.showDocument(INFO["application.url"])
         }
     }
+    private fun checkUpdate() {
+        state.controller.checkUpdate(true)
+    }
     private fun cheatSheet() {
-        dialogCheatSheet.show()
-        dialogCheatSheet.toFront()
+        cheatSheet.show()
+        cheatSheet.toFront()
     }
     private fun crash() {
         throw RuntimeException("Crash")
@@ -522,15 +534,16 @@ class AMenuBar(private val state: State) : MenuBar() {
 
         val task = object : LPFXTask<Unit>() {
             val DELIMITER = "#|#"
+            val state = this@CMenuBar.state
 
             override fun call() {
-                this@AMenuBar.state.isChanged = true
+               state.isChanged = true
 
-                val picNames = this@AMenuBar.state.transFile.sortedPicNames
-                val picCount = this@AMenuBar.state.transFile.picCount
+                val picNames = state.transFile.sortedPicNames
+                val picCount = state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
                     handleCancel { return }
-                    val labels = this@AMenuBar.state.transFile.getTransList(picName)
+                    val labels = state.transFile.getTransList(picName)
                     var labelIndex = 0
                     val labelCount = labels.size
 
@@ -578,7 +591,8 @@ class AMenuBar(private val state: State) : MenuBar() {
         task()
     }
     private fun showDict() {
-        dialogOnlineDict.showDict(state.stage)
+        onlineDict.showDict(state.stage)
+        onlineDict.toFront()
     }
 
 }

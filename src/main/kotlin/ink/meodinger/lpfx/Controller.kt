@@ -1,10 +1,9 @@
 package ink.meodinger.lpfx
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
-import ink.meodinger.lpfx.component.singleton.ADialogSpecify
-import ink.meodinger.lpfx.component.singleton.ATreeMenu
+import ink.meodinger.lpfx.component.CSpecifyDialog
+import ink.meodinger.lpfx.component.CTreeMenu
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -25,6 +24,7 @@ import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -68,6 +68,8 @@ class Controller(private val view: View, private val state: State) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
     }
 
+    private val dialogSpecify: CSpecifyDialog = CSpecifyDialog(state)
+
     private val bSwitchViewMode: Button      = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button      = view.bSwitchWorkMode does { switchWorkMode() }
     private val lInfo: Label                 = view.lInfo
@@ -80,9 +82,6 @@ class Controller(private val view: View, private val state: State) {
     private val cGroupBox: CComboBox<String> = view.cGroupBox
     private val cTreeView: CTreeView         = view.cTreeView
     private val cTransArea: CLigatureArea    = view.cTransArea
-
-    private val dialogSpecify: ADialogSpecify = ADialogSpecify(state)
-    private val cTreeViewMenu: ATreeMenu = ATreeMenu(state).apply { update(emptyList()) }
 
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (state.isChanged) {
@@ -151,7 +150,8 @@ class Controller(private val view: View, private val state: State) {
             }
         }
     }
-    private fun <T> genGroupPropertyBinding(getter: () -> ObservableList<T>,
+    private fun <T> genGroupPropertyBinding(
+        getter: () -> ObservableList<T>,
         propertyGetter: (TransGroup) -> Property<T>
     ): ObjectBinding<ObservableList<T>> {
         return object : ObjectBinding<ObservableList<T>>() {
@@ -252,9 +252,7 @@ class Controller(private val view: View, private val state: State) {
                 lastFile = RecentFiles.lastFile
             }
         }
-        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}",
-            LOGSRC_CONTROLLER
-        )
+        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOGSRC_CONTROLLER)
 
         // Settings
         state.viewMode = Settings.viewModes[state.workMode.ordinal]
@@ -287,7 +285,7 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
-        cGroupBar.setOnGroupCreate { cTreeViewMenu.toggleGroupCreate() }
+        cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
         Logger.info("Registered CGroupBar Handler", LOGSRC_CONTROLLER)
 
         // Register CLabelPane handler
@@ -354,13 +352,6 @@ class Controller(private val view: View, private val state: State) {
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         Logger.info("Registered CLabelPane Handler", LOGSRC_CONTROLLER)
-
-        // Register CTreeView ContextMenu
-        cTreeView.contextMenu = cTreeViewMenu
-        cTreeView.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-            cTreeViewMenu.update(cTreeView.selectionModel.selectedItems.toList())
-        }
-        Logger.info("Registered CTreeView context menu", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' bindings
@@ -1113,6 +1104,9 @@ class Controller(private val view: View, private val state: State) {
 
     // ----- Global Methods ----- //
 
+    /**
+     * Request repaint the view, usually the CLabelPane
+     */
     fun requestRepaint() {
         cLabelPaneImageBinding.invalidate()
         cLabelPane.requestShowImage()
@@ -1169,8 +1163,9 @@ class Controller(private val view: View, private val state: State) {
                         )
                     }
                 }
+            } else if (showWhenUpdated) Platform.runLater {
+                showInfo(this@Controller.state.stage, I18N["update.info.updated"])
             }
-            else if (showWhenUpdated) showInfo(this@Controller.state.stage, "Already updated")
         }()
     }
     private fun fetchUpdateSync(): Version {

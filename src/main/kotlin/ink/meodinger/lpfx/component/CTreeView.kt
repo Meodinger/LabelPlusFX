@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
-import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.component.expandAll
@@ -19,7 +18,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.control.*
-import javafx.scene.input.ContextMenuEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 

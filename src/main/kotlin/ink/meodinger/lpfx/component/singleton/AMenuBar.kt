@@ -49,7 +49,7 @@ import kotlin.io.path.name
 /**
  * A MenuBar for main scene, did not make it singleton for fxml loader
  */
-object AMenuBar : MenuBar() {
+class AMenuBar(private val state: State) : MenuBar() {
 
     // ----- Recent ----- //
 
@@ -57,25 +57,32 @@ object AMenuBar : MenuBar() {
     private fun openRecentTranslation(item: MenuItem) {
         // Open recent, remove item if not exist
 
-        if (State.controller.stay()) return
+        if (state.controller.stay()) return
 
         val path = item.text
         val file = File(path)
         if (!file.exists()) {
-            showError(State.stage, String.format(I18N["error.file_not_exist.s"], path))
+            showError(state.stage, String.format(I18N["error.file_not_exist.s"], path))
             RecentFiles.remove(file)
             mOpenRecent.items.remove(item)
             return
         }
 
-        State.reset()
+        state.reset()
 
-        State.controller.open(file)
+        state.controller.open(file)
     }
 
     private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
     val recentFiles: ObservableList<File> by recentFilesProperty
+
+    // ----- Dialogs ----- //
+
+    private val dialogCheatSheet = ADialogCheatSheet(state.application.hostServices)
+    private val dialogOnlineDict = ADialogDict()
+    private val dialogLogs       = ADialogLogs()
+    private val dialogSettings   = ADialogSettings()
 
     // ----- Choosers ----- //
 
@@ -140,12 +147,12 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
             separator()
             item(I18N["m.save"]) {
                 does { saveTranslation() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -153,7 +160,7 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.save_as"]) {
                 does { saveAsTranslation() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.SHIFT_DOWN,
@@ -166,32 +173,32 @@ object AMenuBar : MenuBar() {
             }
             separator()
             item(I18N["m.exit"]) {
-                does { if (!State.controller.stay()) State.application.exit() }
+                does { if (!state.controller.stay()) state.application.exit() }
             }
         }
         menu(I18N["mm.edit"]) {
             item(I18N["m.comment"]) {
                 does { editComment() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
             separator()
             item(I18N["m.projectPics"]) {
                 does { editProjectPictures() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
             item(I18N["m.externalPic"]) {
                 does { addExternalPicture() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
             item(I18N["m.specify"]) {
                 does { specifyPictures() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
         }
         menu(I18N["mm.export"]) {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -199,7 +206,7 @@ object AMenuBar : MenuBar() {
             }
             item(I18N["m.meo"]) {
                 does { exportTransFile(FileType.MeoFile) }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     KeyCombination.SHIFT_DOWN,
@@ -209,7 +216,7 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.pack"]) {
                 does { exportTransPack() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.ALT_DOWN,
@@ -249,11 +256,11 @@ object AMenuBar : MenuBar() {
             separator()
             item(I18N["m.cht2zh"]) {
                 does { cht2zh() }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
             item(I18N["m.zh2cht"]) {
                 does { cht2zh(true) }
-                disableProperty().bind(!State.isOpenedProperty())
+                disableProperty().bind(!state.isOpenedProperty())
             }
         }
 
@@ -282,15 +289,15 @@ object AMenuBar : MenuBar() {
     }
 
     private fun newTranslation() {
-        if (State.controller.stay()) return
+        if (state.controller.stay()) return
 
-        State.reset()
+        state.reset()
 
         val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
         val filename = "Nova traduko" // It's Esperanto!
         newChooser.initialFilename = "$filename.$extension"
 
-        val file = newChooser.showSaveDialog(State.stage)?.let {
+        val file = newChooser.showSaveDialog(state.stage)?.let {
             if (EXTENSIONS_FILE.contains(it.extension)) {
                 if (filename == it.nameWithoutExtension) {
                     it.parentFile.let { f -> f.resolve("${f.name}.${it.extension}") }
@@ -298,80 +305,80 @@ object AMenuBar : MenuBar() {
             } else File("${it.nameWithoutExtension}.$extension")
         } ?: return
         if (file.exists()) {
-            val confirm = showConfirm(State.stage, I18N["m.new.dialog.overwrite"])
+            val confirm = showConfirm(state.stage, I18N["m.new.dialog.overwrite"])
             if (confirm.isEmpty || confirm.get() == ButtonType.NO) return
         }
 
-        val projectFolder = State.controller.new(file)
-        if (projectFolder != null) State.controller.open(file, projectFolder = projectFolder)
+        val projectFolder = state.controller.new(file)
+        if (projectFolder != null) state.controller.open(file, projectFolder = projectFolder)
     }
     private fun openTranslation() {
-        if (State.controller.stay()) return
+        if (state.controller.stay()) return
 
         fileChooser.title = I18N["chooser.open"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = ""
-        val file = fileChooser.showOpenDialog(State.stage) ?: return
+        val file = fileChooser.showOpenDialog(state.stage) ?: return
 
-        State.reset()
+        state.reset()
 
-        State.controller.open(file)
+        state.controller.open(file)
     }
     private fun saveTranslation() {
-        State.controller.save(State.translationFile, silent = true)
+        state.controller.save(state.translationFile, silent = true)
     }
     private fun saveAsTranslation() {
         fileChooser.title = I18N["chooser.save"]
         fileChooser.selectedExtensionFilter = fileFilter
-        fileChooser.initialFilename = State.translationFile.name
-        val file = fileChooser.showSaveDialog(State.stage) ?: return
+        fileChooser.initialFilename = state.translationFile.name
+        val file = fileChooser.showSaveDialog(state.stage) ?: return
 
-        State.controller.save(file)
+        state.controller.save(file)
     }
     private fun closeTranslation() {
-        if (State.controller.stay()) return
+        if (state.controller.stay()) return
 
-        State.reset()
+        state.reset()
     }
     private fun bakRecovery() {
-        if (State.controller.stay()) return
+        if (state.controller.stay()) return
 
-        backupChooser.initialDirectory = if (State.isOpened) State.getBakFolder() else CFileChooser.lastDirectory
-        val bak = backupChooser.showOpenDialog(State.stage) ?: return
+        backupChooser.initialDirectory = if (state.isOpened) state.getBakFolder() else CFileChooser.lastDirectory
+        val bak = backupChooser.showOpenDialog(state.stage) ?: return
 
         fileChooser.title = I18N["chooser.rec"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = "Re.${bak.parentFile.parentFile.name}.$EXTENSION_FILE_MEO"
-        val rec = fileChooser.showSaveDialog(State.stage) ?: return
+        val rec = fileChooser.showSaveDialog(state.stage) ?: return
 
-        State.reset()
+        state.reset()
 
-        State.controller.recovery(bak, rec)
+        state.controller.recovery(bak, rec)
     }
 
     private fun editComment() {
-        showInputArea(State.stage, I18N["m.comment.dialog.title"], State.transFile.comment).ifPresent {
-            State.setComment(it)
-            State.isChanged = true
+        showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
+            state.setComment(it)
+            state.isChanged = true
         }
     }
     private fun editProjectPictures() {
         // Choose Pics
-        val selected = State.transFile.sortedPicNames
-        val unselected = Files.walk(State.projectFolder.toPath(), 1)
+        val selected = state.transFile.sortedPicNames
+        val unselected = Files.walk(state.projectFolder.toPath(), 1)
             .filter {
                 if (selected.contains(it.name)) return@filter false
                 for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
                 false
             }.map(Path::name).collect(Collectors.toList())
 
-        showChoiceList(State.stage, unselected, selected).ifPresent {
+        showChoiceList(state.stage, unselected, selected).ifPresent {
             if (it.isEmpty()) {
-                showInfo(State.stage, I18N["info.required_at_least_1_pic"])
+                showInfo(state.stage, I18N["info.required_at_least_1_pic"])
                 return@ifPresent
             }
 
-            val picNames = State.transFile.picNames
+            val picNames = state.transFile.picNames
 
             // Edit date
             val toAdd = HashSet<String>()
@@ -381,21 +388,21 @@ object AMenuBar : MenuBar() {
 
             if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
             if (toRemove.size != 0) {
-                val confirm = showConfirm(State.stage, I18N["confirm.removing_pic"])
+                val confirm = showConfirm(state.stage, I18N["confirm.removing_pic"])
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
-            for (picName in toAdd) State.addPicture(picName)
-            for (picName in toRemove) State.removePicture(picName)
+            for (picName in toAdd) state.addPicture(picName)
+            for (picName in toRemove) state.removePicture(picName)
             // Update View
-            State.currentPicName = State.transFile.sortedPicNames[0]
+            state.currentPicName = state.transFile.sortedPicNames[0]
             // Mark change
-            State.isChanged = true
+            state.isChanged = true
         }
     }
     private fun addExternalPicture() {
-        val files = picChooser.showOpenMultipleDialog(State.stage) ?: return
-        val picNames = State.transFile.sortedPicNames
+        val files = picChooser.showOpenMultipleDialog(state.stage) ?: return
+        val picNames = state.transFile.sortedPicNames
 
         val conflictList = ArrayList<String>()
         for (file in files) {
@@ -406,13 +413,13 @@ object AMenuBar : MenuBar() {
             }
 
             // Edit data
-            State.addPicture(picName, file)
+            state.addPicture(picName, file)
             // Mark Change
-            State.isChanged = true
+            state.isChanged = true
         }
         if (conflictList.isNotEmpty()) {
             showInfo(
-                State.stage,
+                state.stage,
                 I18N["m.externalPic.dialog.header"],
                 conflictList.joinToString(",\n"),
                 I18N["common.info"]
@@ -420,9 +427,9 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun specifyPictures() {
-        val completed = State.controller.specifyPicFiles() ?: return
-        if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
-        State.controller.requestRepaint()
+        val completed = state.controller.specifyPicFiles() ?: return
+        if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
+        state.controller.requestRepaint()
     }
 
     private fun exportTransFile(type: FileType) {
@@ -434,24 +441,26 @@ object AMenuBar : MenuBar() {
 
         val exportName =
             if (Settings.useExportNameTemplate) Settings.exportNameTemplate
-                .replace(Settings.VARIABLE_FILENAME, State.translationFile.nameWithoutExtension)
-                .replace(Settings.VARIABLE_DIRNAME, State.getFileFolder().name)
-                .replace(Settings.VARIABLE_PROJECT, State.projectFolder.name)
-            else State.getFileFolder().name
+                .replace(Settings.VARIABLE_FILENAME, state.translationFile.nameWithoutExtension)
+                .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder().name)
+                .replace(Settings.VARIABLE_PROJECT, state.projectFolder.name)
+            else state.getFileFolder().name
         exportChooser.initialFilename = "$exportName.${type.extension}"
 
-        val file = exportChooser.showSaveDialog(State.stage) ?: return
-        State.controller.export(file, type)
+        val file = exportChooser.showSaveDialog(state.stage) ?: return
+        state.controller.export(file, type)
     }
     private fun exportTransPack() {
-        exportPackChooser.initialFilename = "${State.getFileFolder().name}.$EXTENSION_PACK"
-        val file = exportPackChooser.showSaveDialog(State.stage) ?: return
+        exportPackChooser.initialFilename = "${state.getFileFolder().name}.$EXTENSION_PACK"
+        val file = exportPackChooser.showSaveDialog(state.stage) ?: return
 
-        State.controller.pack(file)
+        state.controller.pack(file)
     }
 
     private fun settings() {
-        val list = ADialogSettings.generateProperties()
+        dialogSettings.owner ?: dialogSettings.initOwner(state.stage)
+
+        val list = dialogSettings.generateProperties()
 
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
         Logger.debug("got $list", LOGSRC_DIALOGS)
@@ -476,7 +485,9 @@ object AMenuBar : MenuBar() {
         }
     }
     private fun logs() {
-        val list = ADialogLogs.generateProperties()
+        dialogLogs.owner ?: dialogLogs.initOwner(state.stage)
+
+        val list = dialogLogs.generateProperties()
 
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)
         Logger.debug("got $list", LOGSRC_DIALOGS)
@@ -485,7 +496,7 @@ object AMenuBar : MenuBar() {
     }
     private fun about() {
         showLink(
-            State.stage,
+            state.stage,
             iconImageView,
             I18N["m.about.dialog.title"],
             null,
@@ -495,12 +506,12 @@ object AMenuBar : MenuBar() {
                 .toString(),
             INFO["application.link"]
         ) {
-            State.application.hostServices.showDocument(INFO["application.url"])
+            state.application.hostServices.showDocument(INFO["application.url"])
         }
     }
     private fun cheatSheet() {
-        ADialogCheatSheet.show()
-        ADialogCheatSheet.toFront()
+        dialogCheatSheet.show()
+        dialogCheatSheet.toFront()
     }
     private fun crash() {
         throw RuntimeException("Crash")
@@ -513,13 +524,13 @@ object AMenuBar : MenuBar() {
             val DELIMITER = "#|#"
 
             override fun call() {
-                State.isChanged = true
+                this@AMenuBar.state.isChanged = true
 
-                val picNames = State.transFile.sortedPicNames
-                val picCount = State.transFile.picCount
+                val picNames = this@AMenuBar.state.transFile.sortedPicNames
+                val picCount = this@AMenuBar.state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
                     handleCancel { return }
-                    val labels = State.transFile.getTransList(picName)
+                    val labels = this@AMenuBar.state.transFile.getTransList(picName)
                     var labelIndex = 0
                     val labelCount = labels.size
 
@@ -544,7 +555,7 @@ object AMenuBar : MenuBar() {
         }
 
         Dialog<Unit>().apply {
-            initOwner(State.stage)
+            initOwner(state.stage)
             dialogPane.withContent(ProgressBar()) {
                 progressProperty().bind(task.progressProperty())
                 progressProperty().addListener(onNew<Number, Double> {
@@ -559,7 +570,7 @@ object AMenuBar : MenuBar() {
                 if (it.isNotBlank()) {
                     result = Unit
                     close()
-                    showError(State.stage, "Error: $it")
+                    showError(state.stage, "Error: $it")
                 }
             })
         }.show()
@@ -567,7 +578,7 @@ object AMenuBar : MenuBar() {
         task()
     }
     private fun showDict() {
-        AOnlineDict.showDict()
+        dialogOnlineDict.showDict(state.stage)
     }
 
 }

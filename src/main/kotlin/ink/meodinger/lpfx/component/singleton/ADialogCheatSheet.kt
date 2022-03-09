@@ -3,7 +3,6 @@ package ink.meodinger.lpfx.component.singleton
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
-import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.resource.I18N
@@ -11,6 +10,7 @@ import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
+import javafx.application.HostServices
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -29,7 +29,7 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-object ADialogCheatSheet : Stage() {
+class ADialogCheatSheet(services: HostServices) : Stage() {
 
     init {
         title = I18N["m.cheat"]
@@ -72,9 +72,7 @@ object ADialogCheatSheet : Stage() {
             add(Label(I18N["cheat.double_label.res"]), 1, 9)
             add(Hyperlink(I18N["cheat.more_help"]), 0, 10, 2, 1) {
                 gridHAlign = HPos.CENTER
-                setOnAction {
-                    State.application.hostServices.showDocument(INFO["application.help"])
-                }
+                setOnAction { services.showDocument(INFO["application.help"]) }
             }
         })
 

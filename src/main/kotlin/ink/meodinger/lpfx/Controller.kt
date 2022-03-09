@@ -1,17 +1,19 @@
 package ink.meodinger.lpfx
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.component.singleton.ADialogSpecify
-import ink.meodinger.lpfx.component.singleton.AMenuBar
 import ink.meodinger.lpfx.component.singleton.ATreeMenu
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
 import ink.meodinger.lpfx.options.*
+import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.contains
 import ink.meodinger.lpfx.util.dialog.*
@@ -31,15 +33,19 @@ import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.input.*
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
+import java.net.*
 import java.util.*
+import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.LinkedHashMap
 
 
@@ -52,7 +58,7 @@ import kotlin.collections.LinkedHashMap
 /**
  * Main controller
  */
-class Controller(private val view: View) {
+class Controller(private val view: View, private val state: State) {
 
     companion object {
         /**
@@ -75,11 +81,14 @@ class Controller(private val view: View) {
     private val cTreeView: CTreeView         = view.cTreeView
     private val cTransArea: CLigatureArea    = view.cTransArea
 
+    private val dialogSpecify: ADialogSpecify = ADialogSpecify(state)
+    private val cTreeViewMenu: ATreeMenu = ATreeMenu(state).apply { update(emptyList()) }
+
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
-        if (State.isChanged) {
-            val bak = State.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
+        if (state.isChanged) {
+            val bak = state.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
             try {
-                export(bak, FileType.MeoFile, State.transFile)
+                export(bak, FileType.MeoFile, state.transFile)
                 Logger.info("Backed TransFile", LOGSRC_CONTROLLER)
             } catch (e: IOException) {
                 Logger.error("Auto-backup failed", LOGSRC_CONTROLLER)
@@ -90,20 +99,20 @@ class Controller(private val view: View) {
 
     private fun genPicNamesBinding(): ObjectBinding<ObservableList<String>> {
         return object : ObjectBinding<ObservableList<String>>() {
-            private var lastMapObservable = State.transFile.transMapObservable
+            private var lastMapObservable = state.transFile.transMapObservable
 
             init {
-                bind(State.transFileProperty())
+                bind(state.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<String> {
-                if (lastMapObservable !== State.transFile.transMapObservable) {
+                if (lastMapObservable !== state.transFile.transMapObservable) {
                     unbind(lastMapObservable)
-                    lastMapObservable = State.transFile.transMapObservable
+                    lastMapObservable = state.transFile.transMapObservable
                     bind(lastMapObservable)
                 }
 
-                return FXCollections.observableList(State.transFile.sortedPicNames)
+                return FXCollections.observableList(state.transFile.sortedPicNames)
             }
 
         }
@@ -112,12 +121,12 @@ class Controller(private val view: View) {
         return object : ObjectBinding<ObservableList<TransLabel>>() {
 
             init {
-                bind(State.currentPicNameProperty())
+                bind(state.currentPicNameProperty())
             }
 
             override fun computeValue(): ObservableList<TransLabel> {
-                return if (State.currentPicName.isNotEmpty())
-                    State.transFile.transMapObservable[State.currentPicName]!!
+                return if (state.currentPicName.isNotEmpty())
+                    state.transFile.transMapObservable[state.currentPicName]!!
                 else
                     FXCollections.emptyObservableList()
             }
@@ -125,20 +134,20 @@ class Controller(private val view: View) {
     }
     private fun genGroupsBinding(): ObjectBinding<ListProperty<TransGroup>> {
         return object : ObjectBinding<ListProperty<TransGroup>>() {
-            private var lastGroupListObservable = State.transFile.groupListObservable
+            private var lastGroupListObservable = state.transFile.groupListObservable
 
             init {
-                bind(State.transFileProperty())
+                bind(state.transFileProperty())
             }
 
             override fun computeValue(): ListProperty<TransGroup> {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
+                if (lastGroupListObservable !== state.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
+                    lastGroupListObservable = state.transFile.groupListObservable
                     bind(lastGroupListObservable)
                 }
 
-                return State.transFile.groupListProperty
+                return state.transFile.groupListProperty
             }
         }
     }
@@ -146,22 +155,22 @@ class Controller(private val view: View) {
         propertyGetter: (TransGroup) -> Property<T>
     ): ObjectBinding<ObservableList<T>> {
         return object : ObjectBinding<ObservableList<T>>() {
-            private var lastGroupListObservable = State.transFile.groupListObservable
+            private var lastGroupListObservable = state.transFile.groupListObservable
             private val boundGroupNameProperties = ArrayList<Property<T>>()
 
             init {
-                bind(State.transFileProperty())
+                bind(state.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<T> {
-                if (lastGroupListObservable !== State.transFile.groupListObservable) {
+                if (lastGroupListObservable !== state.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
-                    lastGroupListObservable = State.transFile.groupListObservable
-                    bind(State.transFile.groupListObservable)
+                    lastGroupListObservable = state.transFile.groupListObservable
+                    bind(state.transFile.groupListObservable)
                 }
 
                 for (property in boundGroupNameProperties) unbind(property)
-                State.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(ArrayList<*>::clear), propertyGetter)
+                state.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(ArrayList<*>::clear), propertyGetter)
                 for (property in boundGroupNameProperties) bind(property)
 
                 return getter()
@@ -171,25 +180,25 @@ class Controller(private val view: View) {
     private val cLabelPaneImageBinding: ObjectBinding<Image> = object : ObjectBinding<Image>() {
 
         init {
-            bind(State.currentPicNameProperty())
+            bind(state.currentPicNameProperty())
         }
 
         override fun computeValue(): Image {
-            if (!State.isOpened) return INIT_IMAGE
+            if (!state.isOpened) return INIT_IMAGE
 
             var image: Image? = null
             try {
-                val picFile = State.getPicFileNow()
+                val picFile = state.getPicFileNow()
                 if (picFile.exists()) {
                     image = Image(picFile.toURI().toURL().toString())
                 } else {
-                    Logger.error("Picture `${State.currentPicName}` not exists", LOGSRC_CONTROLLER)
-                    showError(State.stage, String.format(I18N["error.picture_not_exists.s"], State.currentPicName))
+                    Logger.error("Picture `${state.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                    showError(state.stage, String.format(I18N["error.picture_not_exists.s"], state.currentPicName))
                 }
             } catch (e: IOException) {
                 Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
-                showException(State.stage, e)
+                showException(state.stage, e)
             }
             return image ?: INIT_IMAGE
         }
@@ -197,15 +206,17 @@ class Controller(private val view: View) {
     }
 
     private fun switchViewMode() {
-        State.viewMode = ViewMode.values()[(State.viewMode.ordinal + 1) % ViewMode.values().size]
-        labelInfo("Switched work mode to ${State.viewMode}")
+        state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
+        labelInfo("Switched work mode to ${state.viewMode}")
     }
     private fun switchWorkMode() {
-        State.workMode = WorkMode.values()[(State.workMode.ordinal + 1) % WorkMode.values().size]
-        labelInfo("Switched work mode to ${State.workMode}")
+        state.workMode = WorkMode.values()[(state.workMode.ordinal + 1) % WorkMode.values().size]
+        labelInfo("Switched work mode to ${state.workMode}")
     }
 
     init {
+        state.controller = this
+
         Logger.info("Controller initializing...", LOGSRC_CONTROLLER)
 
         init()
@@ -230,10 +241,6 @@ class Controller(private val view: View) {
     private fun init() {
         Logger.info("Initializing components...", LOGSRC_CONTROLLER)
 
-        // MenuBar
-        view.top = AMenuBar
-        Logger.info("Added MenuBar", LOGSRC_CONTROLLER)
-
         // Last directory
         var lastFile = RecentFiles.lastFile
         while (lastFile != null) {
@@ -245,10 +252,12 @@ class Controller(private val view: View) {
                 lastFile = RecentFiles.lastFile
             }
         }
-        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOGSRC_CONTROLLER)
+        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}",
+            LOGSRC_CONTROLLER
+        )
 
         // Settings
-        State.viewMode = Settings.viewModes[State.workMode.ordinal]
+        state.viewMode = Settings.viewModes[state.workMode.ordinal]
         Logger.info("Applied Settings @ ViewMode", LOGSRC_CONTROLLER)
 
         // Drag and Drop
@@ -259,7 +268,7 @@ class Controller(private val view: View) {
         view.setOnDragDropped {
             if (stay()) return@setOnDragDropped
 
-            State.reset()
+            state.reset()
 
             val board = it.dragboard
             if (board.hasFiles()) {
@@ -278,73 +287,80 @@ class Controller(private val view: View) {
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
-        cGroupBar.setOnGroupCreate { ATreeMenu.toggleGroupCreate() }
+        cGroupBar.setOnGroupCreate { cTreeViewMenu.toggleGroupCreate() }
         Logger.info("Registered CGroupBar Handler", LOGSRC_CONTROLLER)
 
         // Register CLabelPane handler
         cLabelPane.setOnLabelCreate {
-            if (State.workMode != WorkMode.LabelMode) return@setOnLabelCreate
-            if (State.transFile.groupCount == 0) return@setOnLabelCreate
+            if (state.workMode != WorkMode.LabelMode) return@setOnLabelCreate
+            if (state.transFile.groupCount == 0) return@setOnLabelCreate
 
             val newIndex =
-                if (State.currentLabelIndex != -1) State.currentLabelIndex + 1
-                else State.transFile.getTransList(State.currentPicName).size + 1
-            val transLabel = TransLabel(newIndex, State.currentGroupId, it.labelX, it.labelY, "")
+                if (state.currentLabelIndex != -1) state.currentLabelIndex + 1
+                else state.transFile.getTransList(state.currentPicName).size + 1
+            val transLabel = TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
 
             // Edit data
-            State.addTransLabel(State.currentPicName, transLabel)
+            state.addTransLabel(state.currentPicName, transLabel)
             // Mark change
-            State.isChanged = true
+            state.isChanged = true
             // Select it
             cTreeView.selectLabel(newIndex)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
         }
         cLabelPane.setOnLabelRemove {
-            if (State.workMode != WorkMode.LabelMode) return@setOnLabelRemove
+            if (state.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
             // Edit data
-            State.removeTransLabel(State.currentPicName, it.labelIndex)
+            state.removeTransLabel(state.currentPicName, it.labelIndex)
             // Change state
-            if (State.currentLabelIndex == it.labelIndex) State.currentLabelIndex = NOT_FOUND
+            if (state.currentLabelIndex == it.labelIndex) state.currentLabelIndex = NOT_FOUND
             // Mark change
-            State.isChanged = true
+            state.isChanged = true
         }
         cLabelPane.setOnLabelHover {
-            val transLabel = State.transFile.getTransLabel(State.currentPicName, it.labelIndex)
+            val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
 
             // Text display
             cLabelPane.removeText()
-            when (State.workMode) {
+            when (state.workMode) {
                 WorkMode.InputMode -> {
                     cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
                 }
                 WorkMode.LabelMode -> {
-                    val transGroup = State.transFile.getTransGroup(transLabel.groupId)
+                    val transGroup = state.transFile.getTransGroup(transLabel.groupId)
                     cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
                 }
             }
         }
         cLabelPane.setOnLabelClick {
-            if (State.workMode != WorkMode.InputMode) return@setOnLabelClick
+            if (state.workMode != WorkMode.InputMode) return@setOnLabelClick
 
             if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 
             cTreeView.selectLabel(it.labelIndex)
         }
         cLabelPane.setOnLabelMove {
-            State.isChanged = true
+            state.isChanged = true
         }
         cLabelPane.setOnLabelOther {
-            if (State.workMode != WorkMode.LabelMode) return@setOnLabelOther
-            if (State.transFile.groupCount == 0) return@setOnLabelOther
+            if (state.workMode != WorkMode.LabelMode) return@setOnLabelOther
+            if (state.transFile.groupCount == 0) return@setOnLabelOther
 
-            val transGroup = State.transFile.getTransGroup(State.currentGroupId)
+            val transGroup = state.transFile.getTransGroup(state.currentGroupId)
 
             cLabelPane.removeText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         Logger.info("Registered CLabelPane Handler", LOGSRC_CONTROLLER)
+
+        // Register CTreeView ContextMenu
+        cTreeView.contextMenu = cTreeViewMenu
+        cTreeView.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
+            cTreeViewMenu.update(cTreeView.selectionModel.selectedItems.toList())
+        }
+        Logger.info("Registered CTreeView context menu", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' bindings
@@ -360,18 +376,18 @@ class Controller(private val view: View) {
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
 
         // RecentFiles
-        AMenuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
+        view.menuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
         Logger.info("Bound recent files menu", LOGSRC_CONTROLLER)
 
         // Set components disabled
-        bSwitchViewMode.disableProperty().bind(!State.isOpenedProperty())
-        bSwitchWorkMode.disableProperty().bind(!State.isOpenedProperty())
-        cTransArea.disableProperty().bind(!State.isOpenedProperty())
-        cTreeView.disableProperty().bind(!State.isOpenedProperty())
-        cPicBox.disableProperty().bind(!State.isOpenedProperty())
-        cGroupBox.disableProperty().bind(!State.isOpenedProperty())
-        cSlider.disableProperty().bind(!State.isOpenedProperty())
-        cLabelPane.disableProperty().bind(!State.isOpenedProperty())
+        bSwitchViewMode.disableProperty().bind(!state.isOpenedProperty())
+        bSwitchWorkMode.disableProperty().bind(!state.isOpenedProperty())
+        cTransArea.disableProperty().bind(!state.isOpenedProperty())
+        cTreeView.disableProperty().bind(!state.isOpenedProperty())
+        cPicBox.disableProperty().bind(!state.isOpenedProperty())
+        cGroupBox.disableProperty().bind(!state.isOpenedProperty())
+        cSlider.disableProperty().bind(!state.isOpenedProperty())
+        cLabelPane.disableProperty().bind(!state.isOpenedProperty())
         Logger.info("Bound disabled", LOGSRC_CONTROLLER)
 
         // CLigatureTextArea - rules
@@ -387,31 +403,31 @@ class Controller(private val view: View) {
 
         // Switch Button text
         bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
-            when (State.workMode) {
+            when (state.workMode) {
                 WorkMode.InputMode -> I18N["mode.work.input"]
                 WorkMode.LabelMode -> I18N["mode.work.label"]
             }
-        }, State.workModeProperty()))
+        }, state.workModeProperty()))
         bSwitchViewMode.textProperty().bind(Bindings.createStringBinding({
-            when (State.viewMode) {
+            when (state.viewMode) {
                 ViewMode.IndexMode -> I18N["mode.view.index"]
                 ViewMode.GroupMode -> I18N["mode.view.group"]
             }
-        }, State.viewModeProperty()))
+        }, state.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         // GroupBox
         cGroupBox.itemsProperty().bind(genGroupPropertyBinding({
-            FXCollections.observableList(State.transFile.groupNames)
+            FXCollections.observableList(state.transFile.groupNames)
         }, {
             it.nameProperty
         }))
-        cGroupBox.indexProperty().bindBidirectional(State.currentGroupIdProperty())
+        cGroupBox.indexProperty().bindBidirectional(state.currentGroupIdProperty())
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // GroupBar
         cGroupBar.groupsProperty().bind(genGroupsBinding())
-        cGroupBar.indexProperty().bindBidirectional(State.currentGroupIdProperty())
+        cGroupBar.indexProperty().bindBidirectional(state.currentGroupIdProperty())
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
@@ -421,20 +437,20 @@ class Controller(private val view: View) {
                 // Indicate current item was removed
                 // Use run later to avoid Issue#5 (Reason unclear).
                 // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
-                if (State.isOpened && newValue == null) Platform.runLater {
-                    observable.value = State.transFile.sortedPicNames[0]
+                if (state.isOpened && newValue == null) Platform.runLater {
+                    observable.value = state.transFile.sortedPicNames[0]
                 }
 
                 // Directly bind bi-directionally will cause NPE
-                return@rule newValue ?: if (State.isOpened) State.transFile.sortedPicNames[0] else emptyString()
+                return@rule newValue ?: if (state.isOpened) state.transFile.sortedPicNames[0] else emptyString()
             },
-            State.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
+            state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // TreeView
-        cTreeView.rootNameProperty().bind(State.currentPicNameProperty())
-        cTreeView.viewModeProperty().bind(State.viewModeProperty())
+        cTreeView.rootNameProperty().bind(state.currentPicNameProperty())
+        cTreeView.viewModeProperty().bind(state.viewModeProperty())
         cTreeView.groupsProperty().bind(genGroupsBinding())
         cTreeView.labelsProperty().bind(genLabelsBinding())
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
@@ -443,7 +459,7 @@ class Controller(private val view: View) {
         cLabelPane.imageProperty().bind(cLabelPaneImageBinding)
         cLabelPane.labelsProperty().bind(genLabelsBinding())
         cLabelPane.colorHexListProperty().bind(genGroupPropertyBinding({
-            FXCollections.observableList(State.transFile.groupColors)
+            FXCollections.observableList(state.transFile.groupColors)
         }, {
             it.colorHexProperty
         }))
@@ -451,11 +467,11 @@ class Controller(private val view: View) {
         cLabelPane.labelAlphaProperty().bind(Settings.labelAlphaProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding({
-            when (State.workMode) {
+            when (state.workMode) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
-        }, State.workModeProperty()))
+        }, state.workModeProperty()))
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
     }
     /**
@@ -466,27 +482,27 @@ class Controller(private val view: View) {
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         cLabelPane.heightProperty().addListener(onChange {
-            if (!State.isOpened || !State.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
         // isChanged
         cTransArea.textProperty().addListener(onChange {
-            if (cTransArea.isBound) State.isChanged = true
+            if (cTransArea.isBound) state.isChanged = true
         })
         Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
 
         // currentLabelIndex
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
             if (it != null && it is CTreeLabelItem && cTreeView.selectionModel.selectedItems.size == 1)
-                State.currentLabelIndex = it.index
+                state.currentLabelIndex = it.index
         })
-        State.currentPicNameProperty().addListener(onChange {
+        state.currentPicNameProperty().addListener(onChange {
             // Clear selected when change pic
-            State.currentLabelIndex = NOT_FOUND
+            state.currentLabelIndex = NOT_FOUND
         })
         Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
     }
@@ -497,15 +513,15 @@ class Controller(private val view: View) {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
 
         // Update LabelInfo
-        State.currentGroupIdProperty().addListener(onNew<Number, Int> {
+        state.currentGroupIdProperty().addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) labelInfo("Cleared group selection")
-            else labelInfo("Selected group $it, ${State.transFile.getTransGroup(it).name}")
+            else labelInfo("Selected group $it, ${state.transFile.getTransGroup(it).name}")
         })
-        State.currentPicNameProperty().addListener(onNew {
+        state.currentPicNameProperty().addListener(onNew {
             if (it.isEmpty()) labelInfo("Cleared picture selection")
             else labelInfo("Changed picture to $it")
         })
-        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) labelInfo("Cleared label selection")
             else labelInfo("Selected label $it")
         })
@@ -513,24 +529,24 @@ class Controller(private val view: View) {
 
         // Clear text when some state change
         val clearTextListener = onChange<Any> { cLabelPane.removeText() }
-        State.currentGroupIdProperty().addListener(clearTextListener)
-        State.workModeProperty().addListener(clearTextListener)
+        state.currentGroupIdProperty().addListener(clearTextListener)
+        state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)
 
         // Select TreeItem when state change
-        State.currentGroupIdProperty().addListener(onNew<Number, Int> {
-            if (!State.isOpened || it == NOT_FOUND || State.viewMode != ViewMode.GroupMode) return@onNew
-            cTreeView.selectGroup(State.transFile.getTransGroup(it).name, false)
+        state.currentGroupIdProperty().addListener(onNew<Number, Int> {
+            if (!state.isOpened || it == NOT_FOUND || state.viewMode != ViewMode.GroupMode) return@onNew
+            cTreeView.selectGroup(state.transFile.getTransGroup(it).name, false)
         })
-        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
-            if (!State.isOpened || it == NOT_FOUND) return@onNew
+        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+            if (!state.isOpened || it == NOT_FOUND) return@onNew
             cTreeView.selectLabel(it, false)
         })
         Logger.info("Added effect: select TreeItem on CurrentXXIndex change", LOGSRC_CONTROLLER)
 
         // Update text area when label change
-        State.currentLabelIndexProperty().addListener(onNew<Number, Int> {
-            if (!State.isOpened) return@onNew
+        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+            if (!state.isOpened) return@onNew
 
             // unbind TextArea
             cTransArea.unbindBidirectional()
@@ -538,9 +554,11 @@ class Controller(private val view: View) {
             if (it == NOT_FOUND) return@onNew
 
             // bind new text property
-            cTransArea.bindBidirectional(State.transFile.getTransLabel(State.currentPicName, it).textProperty)
+            cTransArea.bindBidirectional(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
         })
-        Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOGSRC_CONTROLLER)
+        Logger.info("Added effect: bind text property on CurrentLabelIndex change",
+            LOGSRC_CONTROLLER
+        )
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
@@ -577,13 +595,15 @@ class Controller(private val view: View) {
 
         // Work Progress
         val workProgressListener = onChange<Any> {
-            if (State.isOpened) RecentFiles.setProgressOf(State.translationFile.path,
-                State.transFile.sortedPicNames.indexOf(State.currentPicName) to State.currentLabelIndex
+            if (state.isOpened) RecentFiles.setProgressOf(state.translationFile.path,
+                state.transFile.sortedPicNames.indexOf(state.currentPicName) to state.currentLabelIndex
             )
         }
-        State.currentPicNameProperty().addListener(workProgressListener)
-        State.currentLabelIndexProperty().addListener(workProgressListener)
-        Logger.info("Added effect: update work progress on PicName/LabelIndex change", LOGSRC_CONTROLLER)
+        state.currentPicNameProperty().addListener(workProgressListener)
+        state.currentLabelIndexProperty().addListener(workProgressListener)
+        Logger.info("Added effect: update work progress on PicName/LabelIndex change",
+            LOGSRC_CONTROLLER
+        )
     }
     /**
      * Transformations
@@ -594,7 +614,7 @@ class Controller(private val view: View) {
         // Transform CTreeView group selection to CGroupBox select
         cTreeView.selectionModel.selectedItemProperty().addListener(onNew {
             if (it != null && it is CTreeGroupItem)
-                cGroupBox.select(State.transFile.getGroupIdByName(it.name))
+                cGroupBox.select(state.transFile.getGroupIdByName(it.name))
         })
         Logger.info("Transformed CTreeGroupItem selected", LOGSRC_CONTROLLER)
 
@@ -671,7 +691,7 @@ class Controller(private val view: View) {
                 else -> return@EventHandler
             }
             // Make sure we'll not get into endless LabelItem find loop
-            if (State.transFile.getTransList(State.currentPicName).isEmpty()) return@EventHandler
+            if (state.transFile.getTransList(state.currentPicName).isEmpty()) return@EventHandler
 
             var labelItemIndex: Int = cTreeView.selectionModel.selectedIndex + labelItemShift
 
@@ -691,7 +711,7 @@ class Controller(private val view: View) {
             cTreeView.selectionModel.clearSelection()
             cTreeView.selectionModel.select(labelItemIndex)
             cTreeView.scrollTo(labelItemIndex)
-            cLabelPane.moveToLabel(State.currentLabelIndex)
+            cLabelPane.moveToLabel(state.currentLabelIndex)
 
             it.consume() // Consume used event
         }
@@ -736,13 +756,15 @@ class Controller(private val view: View) {
      * @return true if completed; false if not; null if cancel
      */
     fun specifyPicFiles(): Boolean? {
-        val picFiles = ADialogSpecify.specify()
+        dialogSpecify.owner ?: dialogSpecify.initOwner(state.stage)
+
+        val picFiles = dialogSpecify.specify()
 
         // Closed or Cancelled
         if (picFiles.isEmpty()) return null
 
-        val picCount = State.transFile.picCount
-        val picNames = State.transFile.sortedPicNames
+        val picCount = state.transFile.picCount
+        val picNames = state.transFile.sortedPicNames
         var completed = true
         for (i in 0 until picCount) {
             val picFile = picFiles[i]
@@ -750,7 +772,7 @@ class Controller(private val view: View) {
                 completed = false
                 continue
             }
-            State.transFile.setFile(picNames[i], picFile)
+            state.transFile.setFile(picNames[i], picFile)
         }
         return completed
     }
@@ -760,16 +782,16 @@ class Controller(private val view: View) {
      */
     fun stay(): Boolean {
         // Not open
-        if (!State.isOpened) return false
+        if (!state.isOpened) return false
         // Opened but saved
-        if (!State.isChanged) return false
+        if (!state.isChanged) return false
 
         // Opened but not saved
-        val result = showAlert(State.stage, null, I18N["alert.not_save.content"], I18N["common.exit"])
+        val result = showAlert(state.stage, null, I18N["alert.not_save.content"], I18N["common.exit"])
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
-                save(State.translationFile, silent = true)
+                save(state.translationFile, silent = true)
                 return false
             }
             ButtonType.NO -> return false
@@ -802,34 +824,34 @@ class Controller(private val view: View) {
 
             if (potentialPics.isEmpty()) {
                 // Find nothing, this folder isn't project folder, confirm to use another folder
-                val result = showConfirm(State.stage, I18N["confirm.project_folder_invalid"])
+                val result = showConfirm(state.stage, I18N["confirm.project_folder_invalid"])
                 if (result.isPresent && result.get() == ButtonType.YES) {
                     // Specify project folder
-                    val newFolder = DirectoryChooser().apply { initialDirectory = projectFolder }.showDialog(State.stage)
+                    val newFolder = DirectoryChooser().apply { initialDirectory = projectFolder }.showDialog(state.stage)
                     if (newFolder != null) projectFolder = newFolder
                 } else {
                     // Do not specify, cancel
                     Logger.info("Cancel (project folder has no pictures)", LOGSRC_CONTROLLER)
-                    showInfo(State.stage, I18N["common.cancel"])
+                    showInfo(state.stage, I18N["common.cancel"])
                     return null
                 }
             } else {
                 // Find some pics, continue procedure
-                State.projectFolder = projectFolder
+                state.projectFolder = projectFolder
                 Logger.info("Project folder set to ${projectFolder.path}", LOGSRC_CONTROLLER)
             }
         }
-        val result = showChoiceList(State.stage, potentialPics)
+        val result = showChoiceList(state.stage, potentialPics)
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Cancel (selected none)", LOGSRC_CONTROLLER)
-                showInfo(State.stage, I18N["info.required_at_least_1_pic"])
+                showInfo(state.stage, I18N["info.required_at_least_1_pic"])
                 return null
             }
             selectedPics.addAll(result.get())
         } else {
             Logger.info("Cancel (didn't do the selection)", LOGSRC_CONTROLLER)
-            showInfo(State.stage, I18N["common.cancel"])
+            showInfo(state.stage, I18N["common.cancel"])
             return null
         }
         Logger.info("Chose pictures", LOGSRC_CONTROLLER)
@@ -853,8 +875,8 @@ class Controller(private val view: View) {
         } catch (e: IOException) {
             Logger.error("New failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.new_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.new_failed"])
+            showException(state.stage, e)
             return null
         }
         Logger.info("Newed TransFile", LOGSRC_CONTROLLER)
@@ -880,17 +902,17 @@ class Controller(private val view: View) {
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.open_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.open_failed"])
+            showException(state.stage, e)
             return
         }
         Logger.info("Loaded TransFile", LOGSRC_CONTROLLER)
 
-        // Opened, update State
-        State.transFile = transFile
-        State.translationFile = file
-        State.projectFolder = projectFolder
-        State.isOpened = true
+        // Opened, update state
+        state.transFile = transFile
+        state.translationFile = file
+        state.projectFolder = projectFolder
+        state.isOpened = true
 
         // Show info if comment not in default list
         // Should do this before update RecentFiles
@@ -898,7 +920,7 @@ class Controller(private val view: View) {
             val comment = transFile.comment.trim()
             if (!TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
                 Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
-                showInfo(State.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
+                showInfo(state.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
             }
         }
 
@@ -907,36 +929,36 @@ class Controller(private val view: View) {
 
         // Auto backup
         backupManager.clear()
-        val bakDir = State.getBakFolder()
+        val bakDir = state.getBakFolder()
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             backupManager.schedule()
             Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)
         } else {
             Logger.warning("Auto-backup unavailable", LOGSRC_CONTROLLER)
-            showWarning(State.stage, I18N["warning.auto_backup_unavailable"])
+            showWarning(state.stage, I18N["warning.auto_backup_unavailable"])
         }
 
         // Check lost
-        if (State.transFile.checkLost().isNotEmpty()) {
+        if (state.transFile.checkLost().isNotEmpty()) {
             // Specify now?
-            showConfirm(State.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
+            showConfirm(state.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
                 if (it == ButtonType.YES) {
                     val completed = specifyPicFiles()
-                    if (completed == null) showInfo(State.stage, I18N["specify.info.cancelled"])
-                    else if (!completed) showInfo(State.stage, I18N["specify.info.incomplete"])
+                    if (completed == null) showInfo(state.stage, I18N["specify.info.cancelled"])
+                    else if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
                 }
             }
         }
 
         // Initialize workspace
         val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
-        State.currentGroupId = 0
-        State.currentPicName = State.transFile.sortedPicNames[picIndex.takeIf { it in 0 until State.transFile.picCount } ?: 0]
-        State.currentLabelIndex = labelIndex.takeIf { State.transFile.getTransList(State.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
+        state.currentGroupId = 0
+        state.currentPicName = state.transFile.sortedPicNames[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
+        state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 
         // Change title
-        State.stage.title = INFO["application.name"] + " - " + file.name
+        state.stage.title = INFO["application.name"] + " - " + file.name
 
         labelInfo("Opened TransFile: ${file.path}")
     }
@@ -950,11 +972,13 @@ class Controller(private val view: View) {
         // Whether overwriting existing file
         val overwrite = file.exists()
 
-        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite", LOGSRC_CONTROLLER)
+        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite",
+            LOGSRC_CONTROLLER
+        )
 
         // Check folder
-        if (!silent) if (file.parentFile != State.projectFolder) {
-            val confirm = showConfirm(State.stage, I18N["confirm.save_to_another_place"])
+        if (!silent) if (file.parentFile != state.projectFolder) {
+            val confirm = showConfirm(state.stage, I18N["confirm.save_to_another_place"])
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
@@ -963,12 +987,12 @@ class Controller(private val view: View) {
 
         // Export
         try {
-            export(exportDest, type, State.transFile)
+            export(exportDest, type, state.transFile)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.save_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.save_failed"])
+            showException(state.stage, e)
 
             Logger.info("Save failed", LOGSRC_CONTROLLER)
             return
@@ -982,8 +1006,8 @@ class Controller(private val view: View) {
             } catch (e: Exception) {
                 Logger.error("Transfer temp file failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
-                showError(State.stage, I18N["error.save_temp_transfer_failed"])
-                showException(State.stage, e)
+                showError(state.stage, I18N["error.save_temp_transfer_failed"])
+                showException(state.stage, e)
 
                 Logger.info("Save failed", LOGSRC_CONTROLLER)
                 return
@@ -992,14 +1016,14 @@ class Controller(private val view: View) {
         }
 
         // Update state
-        State.translationFile = file
-        State.isChanged = false
+        state.translationFile = file
+        state.isChanged = false
 
         // Change title
-        State.stage.title = INFO["application.name"] + " - " + file.name
+        state.stage.title = INFO["application.name"] + " - " + file.name
 
         labelInfo("Saved TransFile to ${file.path}")
-        if (!silent) showInfo(State.stage, I18N["info.saved_successfully"])
+        if (!silent) showInfo(state.stage, I18N["info.saved_successfully"])
     }
     /**
      * Recover from backup file
@@ -1018,8 +1042,8 @@ class Controller(private val view: View) {
         } catch (e: Exception) {
             Logger.error("Recover failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.recovery_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.recovery_failed"])
+            showException(state.stage, e)
         }
         Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
 
@@ -1034,16 +1058,16 @@ class Controller(private val view: View) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
-            export(file, type, State.transFile)
+            export(file, type, state.transFile)
         } catch (e: IOException) {
             Logger.error("Export failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.export_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.export_failed"])
+            showException(state.stage, e)
         }
 
         labelInfo("Exported to ${file.path}")
-        showInfo(State.stage, I18N["info.exported_successful"])
+        showInfo(state.stage, I18N["info.exported_successful"])
     }
     /**
      * Generate a zip file with translation file and picture files
@@ -1053,16 +1077,16 @@ class Controller(private val view: View) {
         Logger.info("Packing to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
-            pack(file, State.transFile)
+            pack(file, state.transFile)
         } catch (e : IOException) {
             Logger.error("Pack failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
-            showError(State.stage, I18N["error.export_failed"])
-            showException(State.stage, e)
+            showError(state.stage, I18N["error.export_failed"])
+            showException(state.stage, e)
         }
 
         labelInfo("Packed to ${file.path}")
-        showInfo(State.stage, I18N["info.exported_successful"])
+        showInfo(state.stage, I18N["info.exported_successful"])
     }
 
     fun reset() {
@@ -1070,7 +1094,7 @@ class Controller(private val view: View) {
 
         cTransArea.unbindBidirectional()
 
-        State.stage.title = INFO["application.name"]
+        state.stage.title = INFO["application.name"]
     }
 
     // ----- Component Methods ----- //
@@ -1078,7 +1102,9 @@ class Controller(private val view: View) {
     fun moveLabelTreeItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
         cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)
 
-        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId", LOGSRC_CONTROLLER)
+        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId",
+            LOGSRC_CONTROLLER
+        )
     }
     fun labelInfo(info: String, source: String = LOGSRC_CONTROLLER) {
         lInfo.text = info
@@ -1092,5 +1118,88 @@ class Controller(private val view: View) {
         cLabelPane.requestShowImage()
         cLabelPane.requestCreateLabels()
     }
+
+    /**
+     * Start a new LPFX task to check and show update info
+     * @param
+     */
+    fun checkUpdate(showWhenUpdated: Boolean = false) {
+        val release = "https://github.com/Meodinger/LabelPlusFX/releases"
+        val delay = 604800L
+
+        val time = Date().time
+        val last = Preference.lastUpdateNotice
+        if (time - last < delay) {
+            Logger.info("Check suppressed, last notice time is $last", LOGSRC_CONTROLLER)
+            return
+        }
+
+        LPFXTask.createTask<Unit> {
+            Logger.info("Fetching latest version...", LOGSRC_CONTROLLER)
+            val version = fetchUpdateSync()
+            if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CONTROLLER)
+
+            if (version > V) Platform.runLater {
+                val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
+
+                val dialog = Dialog<ButtonType>()
+                dialog.initOwner(this@Controller.state.stage)
+                dialog.title = I18N["update.dialog.title"]
+                dialog.graphic = infoImageView
+                dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
+                dialog.withContent(VBox()) {
+                    add(Label(String.format(I18N["update.dialog.content.s"], version)))
+                    add(Separator()) {
+                        padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0)
+                    }
+                    add(Hyperlink(I18N["update.dialog.link"])) {
+                        padding = Insets(0.0)
+                        setOnAction { this@Controller.state.application.hostServices.showDocument(release) }
+                    }
+                }
+
+                val suppressButton = dialog.dialogPane.lookupButton(suppressNoticeButtonType)
+                ButtonBar.setButtonUniformSize(suppressButton, false)
+
+                dialog.showAndWait().ifPresent { type ->
+                    if (type == suppressNoticeButtonType) {
+                        Preference.lastUpdateNotice = time
+                        Logger.info("Check suppressed, next notice time is ${time + delay}",
+                            LOGSRC_CONTROLLER
+                        )
+                    }
+                }
+            }
+            else if (showWhenUpdated) showInfo(this@Controller.state.stage, "Already updated")
+        }()
+    }
+    private fun fetchUpdateSync(): Version {
+        val api = "https://api.github.com/repos/Meodinger/LabelPlusFX/releases"
+        try {
+            val proxy = ProxySelector.getDefault().select(URI(api))[0].also {
+                if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOGSRC_CONTROLLER)
+            }
+            val connection = URL(api).openConnection(proxy).apply { connect() } as HttpsURLConnection
+            if (connection.responseCode != 200) throw ConnectException("Response code ${connection.responseCode}")
+
+            return ObjectMapper().readTree(connection.inputStream).let {
+                if (it.isArray) Version.of(it[0]["name"].asText())
+                else throw IOException("Should get an array, but not")
+            }
+        } catch (e: NoRouteToHostException) {
+            Logger.warning("No network connection", LOGSRC_CONTROLLER)
+        } catch (e: SocketException) {
+            Logger.warning("Socket failed: ${e.message}", LOGSRC_CONTROLLER)
+        } catch (e: SocketTimeoutException) {
+            Logger.warning("Connect timeout", LOGSRC_CONTROLLER)
+        } catch (e: ConnectException) {
+            Logger.warning("Connect failed: ${e.message}", LOGSRC_CONTROLLER)
+        } catch (e: IOException) {
+            Logger.warning("Fetch I/O failed", LOGSRC_CONTROLLER)
+            Logger.exception(e)
+        }
+        return Version.V0
+    }
+
 
 }

@@ -1,7 +1,16 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.LOGSRC_LOGGER
+import ink.meodinger.lpfx.LOGSRC_SENDER
 import ink.meodinger.lpfx.V
+import ink.meodinger.lpfx.type.LPFXTask
+import jakarta.mail.Message
+import jakarta.mail.Session
+import jakarta.mail.Transport
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeBodyPart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -124,4 +133,58 @@ object Logger {
         writer.write(str)
         writer.flush()
     }
+
+    fun sendLogSync(logFile: File = log) {
+        // Account owned by Meodinger Wang
+        // DO NOT USE FOR PRIVATE, I trust you.
+        val reportUser = "labelplusfx_report@163.com"
+        val reportAuth = "SUWAYUTJSKWQNDOF"
+        val targetUser = "meodinger@qq.com"
+
+        // properties
+        val props = Properties()
+        props.setProperty("mail.transport.protocol", "smtp")
+        props.setProperty("mail.smtp.auth", "true")
+        props.setProperty("mail.smtp.host", "smtp.163.com")
+
+        // text part
+        val textPart = MimeBodyPart()
+        textPart.setText("Got a problem! (or not)\nFrom LPFX $V")
+
+        // file part
+        val filePart = MimeBodyPart()
+        filePart.attachFile(logFile)
+        filePart.fileName = "${logFile.name}.txt"
+
+        // content
+        val content = MimeMultipart()
+        content.addBodyPart(textPart)
+        content.addBodyPart(filePart)
+
+        // message
+        val message = MimeMessage(Session.getInstance(props))
+        message.subject = "LPFX log report - ${System.getProperty("user.name")}"
+        message.setFrom(reportUser)
+        message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(targetUser))
+        message.setContent(content)
+
+        Transport.send(message, reportUser, reportAuth)
+    }
+    fun sendLog(logFile: File = log, onSucceeded: () -> Unit = {}, onFailed: (Throwable) -> Unit = {}) {
+        val task = LPFXTask.createTask<Unit> { sendLogSync(logFile) }
+
+        task.setOnFailed {
+            error("Log sent failed", LOGSRC_SENDER)
+            exception(it)
+            onFailed(it)
+        }
+
+        task.setOnSucceeded {
+            info("Sent Log ${logFile.name}", LOGSRC_SENDER)
+            onSucceeded()
+        }
+
+        task.startInNewThread()
+    }
+
 }

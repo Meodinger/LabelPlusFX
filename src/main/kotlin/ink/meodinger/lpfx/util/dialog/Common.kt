@@ -3,11 +3,11 @@ package ink.meodinger.lpfx.util.dialog
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
-import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.boxVGrow
 import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.resource.I18N
@@ -178,7 +178,7 @@ fun showError(owner: Window?, header: String?, content: String, title: String): 
  */
 fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
-    val dialog = Dialog<ButtonType>().apply { initOwner(owner) }
+    val dialog = Dialog<ButtonType>() withOwner owner
 
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
@@ -206,7 +206,7 @@ fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     applyBtn.addEventFilter(ActionEvent.ACTION) { event ->
         val button = event.source as Button
         button.text = I18N["common.sending"]
-        LogSender.send(Logger.log,
+        Logger.sendLog(Logger.log,
             { button.text = I18N["common.sent"] },
             { button.text = I18N["common.failed"] }
         )

@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.component.singleton
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CComboBox
-import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Logger.LogLevel
@@ -43,10 +42,14 @@ import kotlin.io.path.name
 /**
  * A Dialog Singleton for logs set/clean/send
  */
-object ADialogLogs : AbstractPropertiesDialog() {
+class ADialogLogs : AbstractPropertiesDialog() {
 
-    private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     private class LogFile(val file: File) {
+
+        companion object {
+            private val formatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        }
+
         val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLongOrNull() ?: -1)))
         val endTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
@@ -59,8 +62,6 @@ object ADialogLogs : AbstractPropertiesDialog() {
     private val tableLog = TableView<LogFile>()
 
     init {
-        initOwner(State.stage)
-
         title = I18N["logs.title"]
         dialogPane.prefWidth = PANE_WIDTH
         dialogPane.prefHeight = PANE_HEIGHT
@@ -114,7 +115,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
                     val log = tableLog.selectionModel.selectedItem?.file ?: return@does
 
                     labelSent.text = I18N["common.sending"]
-                    LogSender.send(log,
+                    Logger.sendLog(log,
                         { labelSent.text = I18N["common.sent"] + " " + log.name },
                         { labelSent.text = "${I18N["common.failed"]} - ${(it.cause ?: it)::class.simpleName}" }
                     )
@@ -127,7 +128,7 @@ object ADialogLogs : AbstractPropertiesDialog() {
                         if (modal.file.name == Logger.log.name) continue
                         if (!modal.file.delete()) {
                             Logger.error("Delete ${modal.file.path} failed", LOGSRC_DIALOGS)
-                            showError(State.stage, String.format(I18N["logs.error.delete_failed.s"], modal.file.name))
+                            showError(owner, String.format(I18N["logs.error.delete_failed.s"], modal.file.name))
                             continue
                         }
                         toRemove.add(modal)

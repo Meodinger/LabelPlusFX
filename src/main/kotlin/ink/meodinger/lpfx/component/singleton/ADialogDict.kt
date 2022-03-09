@@ -4,7 +4,6 @@ import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.LOGSRC_DICTIONARY
-import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
@@ -29,6 +28,7 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
+import javafx.stage.Window
 import java.io.IOException
 import java.net.SocketTimeoutException
 import javax.net.ssl.HttpsURLConnection
@@ -46,19 +46,22 @@ import kotlin.jvm.Throws
 /**
  * Simple online dictionary, better than none, anyway.
  */
-object AOnlineDict : Stage() {
+class ADialogDict : Stage() {
 
-    private const val JD_SITE: String = "https://nekodict.com"
-    private const val JD_API: String = "https://nekodict.com/words?q="
+    companion object {
+        private const val JD_SITE        = "https://nekodict.com"
+        private const val JD_API         = "https://nekodict.com/words?q="
+
+        private const val STATE_WORD     = 0
+        private const val STATE_SENTENCE = 1
+    }
 
     private val stateLabel = Label()
     private val inputField = TextField()
     private val outputArea = TextArea()
 
-    private const val STATE_WORD     = 0
-    private const val STATE_SENTENCE = 1
-    private val stateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
-    private var state: Int by stateProperty
+    private val transStateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
+    private var transState: Int by transStateProperty
 
     init {
         icons.add(ICON)
@@ -69,7 +72,7 @@ object AOnlineDict : Stage() {
                 alignment = Pos.CENTER
                 backgroundProperty().bind(Bindings.createObjectBinding({
                     Background(BackgroundFill(
-                        when (state) {
+                        when (transState) {
                             STATE_WORD -> Color.LIGHTGREEN
                             STATE_SENTENCE -> Color.LIGHTBLUE
                             else -> throw IllegalStateException("State invalid")
@@ -77,28 +80,28 @@ object AOnlineDict : Stage() {
                         CornerRadii(0.0),
                         Insets(0.0)
                     ))
-                }, stateProperty))
+                }, transStateProperty))
                 add(stateLabel) {
                     minWidth = 75.0
                     alignment = Pos.CENTER
                     textProperty().bind(Bindings.createStringBinding({
-                        when (state) {
+                        when (transState) {
                             STATE_WORD -> "Word: "
                             STATE_SENTENCE -> "Sentence: "
                             else -> throw IllegalStateException("State invalid")
                         }
-                    }, stateProperty))
+                    }, transStateProperty))
                 }
                 add(inputField) {
                     boxHGrow = Priority.ALWAYS
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter
-                        state = (state + 1) % 2
+                        transState = (transState + 1) % 2
                         it.consume()
                     }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
-                        when (state) {
+                        when (transState) {
                             STATE_WORD -> fetchInfo(text, outputArea::setText)
                             STATE_SENTENCE -> outputArea.text = translateJP(text)
                             else -> throw IllegalStateException("State invalid")
@@ -179,9 +182,13 @@ object AOnlineDict : Stage() {
         }()
     }
 
-    fun showDict() {
-        x = State.stage.x - (width + COMMON_GAP * 2) + State.stage.width
-        y = State.stage.y + (COMMON_GAP * 2)
+    fun showDict(relativeTo: Window?) {
+        if (relativeTo != null) {
+            x = relativeTo.x - (width + COMMON_GAP * 2) + relativeTo.width
+            y = relativeTo.y + (COMMON_GAP * 2)
+        } else {
+            centerOnScreen()
+        }
         show()
     }
 

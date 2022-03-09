@@ -8,6 +8,7 @@ import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
+import javafx.stage.Window
 
 
 /**
@@ -39,6 +40,10 @@ fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}
 }
 infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
     return apply { dialogPane.withContent(content) }
+}
+
+infix fun <T : Dialog<*>> T.withOwner(owner: Window?): T {
+    return apply { initOwner(owner) }
 }
 
 ////////////////////////////////////////////////////////////

@@ -31,10 +31,13 @@ import kotlin.io.path.*
  * Have fun with my code!
  */
 
-object ADialogSpecify : Dialog<List<File>>() {
+class ADialogSpecify(private val state: State) : Dialog<List<File>>() {
+
+    companion object {
+        private const val rowShift = 1
+    }
 
     private val contentGridPane = GridPane()
-    private const val rowShift = 1
 
     private val thisWindow = dialogPane.scene.window
     private val fileChooser = FileChooser().apply {
@@ -55,8 +58,6 @@ object ADialogSpecify : Dialog<List<File>>() {
     private val unspecified = I18N["specify.unspecified"]
 
     init {
-        initOwner(State.stage)
-
         title = I18N["specify.title"]
         dialogPane.prefWidth = PANE_WIDTH
         dialogPane.prefHeight = PANE_HEIGHT
@@ -94,7 +95,7 @@ object ADialogSpecify : Dialog<List<File>>() {
 
                         // get project folder
                         val directory = dirChooser.showDialog(thisWindow) ?: return@does
-                        if (!preserve) State.projectFolder = directory
+                        if (!preserve) state.projectFolder = directory
 
                         // auto-fill
                         val newPicPaths = Files.walk(directory.toPath(), 1)
@@ -140,10 +141,10 @@ object ADialogSpecify : Dialog<List<File>>() {
         contentGridPane.add(Label(I18N["specify.dialog.pic_path"]), 1, 0)
 
         // update variables
-        workingTransFile = State.transFile
-        projectFolder = State.projectFolder
-        picCount = State.transFile.picCount
-        picNames = State.transFile.sortedPicNames
+        workingTransFile = state.transFile
+        projectFolder = state.projectFolder
+        picCount = state.transFile.picCount
+        picNames = state.transFile.sortedPicNames
 
         // prepare
         fileChooser.initialDirectory = projectFolder

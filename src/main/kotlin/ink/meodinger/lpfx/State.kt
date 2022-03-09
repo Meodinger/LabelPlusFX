@@ -24,7 +24,11 @@ import java.io.File
 /**
  * Modal & Manager for LPFX
  */
-object State {
+class State private constructor() {
+
+    companion object {
+        fun getInstance(): State = State()
+    }
 
     lateinit var application: HookedApplication
     lateinit var controller: Controller

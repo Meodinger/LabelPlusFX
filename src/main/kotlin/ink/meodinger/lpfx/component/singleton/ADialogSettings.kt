@@ -41,18 +41,21 @@ import javafx.util.Duration
 /**
  * A Dialog Singleton for settings
  */
-object ADialogSettings : AbstractPropertiesDialog() {
+class ADialogSettings : AbstractPropertiesDialog() {
 
-    private const val gRowShift = 1
+    companion object {
+        private const val gRowShift = 1
+        private const val rRowShift = 1
+        private const val rIsFrom = "C_Is_From"
+        private const val rRuleIndex = "C_Rule_Index"
+    }
+
     private val gLabelHint = Label(I18N["settings.group.hint"])
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
     private val gLabelName = Label(I18N["settings.group.name"])
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
 
-    private const val rRowShift = 1
-    private const val rIsFrom = "C_Is_From"
-    private const val rRuleIndex = "C_Rule_Index"
     private val rLabelHint = Label(I18N["settings.ligature.hint"])
     private val rLabelFrom = Label(I18N["settings.ligature.from"])
     private val rLabelTo = Label(I18N["settings.ligature.to"])
@@ -75,8 +78,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private val xTemplateField = TextField()
 
     init {
-        initOwner(State.stage)
-
         title = I18N["settings.title"]
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         withContent(TabPane()) {

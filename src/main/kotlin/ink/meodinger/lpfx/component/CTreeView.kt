@@ -57,11 +57,7 @@ class CTreeView: TreeView<String>() {
     init {
         // Init
         root = TreeItem()
-        contextMenu = ATreeMenu.apply { update(emptyList()) }
         selectionModel.selectionMode = SelectionMode.MULTIPLE
-
-        // Update tree menu when requested
-        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) { ATreeMenu.update(selectionModel.selectedItems.toList()) }
 
         // Listen & bind
         root.valueProperty().bind(rootNameProperty())

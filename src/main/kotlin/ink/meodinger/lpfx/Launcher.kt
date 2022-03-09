@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.io.LogSender
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 
@@ -43,7 +42,7 @@ fun main(vararg args: String) {
         if (Logger.isStarted) {
             Logger.fatal("Launch failed", "Main")
             Logger.exception(e)
-            LogSender.sendSync(Logger.log)
+            Logger.sendLogSync()
         }
 
         // FX Thread not started, cannot use dialog or other FX things

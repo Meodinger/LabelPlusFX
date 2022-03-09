@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CLigatureArea
 import ink.meodinger.lpfx.component.common.CTextSlider
 import ink.meodinger.lpfx.component.singleton.AMenuBar
+import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
@@ -34,8 +35,9 @@ import javafx.scene.layout.Priority
 /**
  * Main View
  */
-class View : BorderPane() {
+class View(private val state: State) : BorderPane() {
 
+    val menuBar         = AMenuBar(state)
     val bSwitchViewMode = Button()
     val bSwitchWorkMode = Button()
     val lInfo           = Label()
@@ -55,7 +57,7 @@ class View : BorderPane() {
     var showStatsBar: Boolean by showStatsBarProperty
 
     init {
-        top(AMenuBar)
+        top(menuBar)
         center(pMain) {
             add(BorderPane()) {
                 top(cGroupBar)

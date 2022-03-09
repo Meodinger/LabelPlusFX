@@ -52,7 +52,7 @@ import kotlin.collections.LinkedHashMap
 /**
  * Main controller
  */
-class Controller(private val root: View) {
+class Controller(private val view: View) {
 
     companion object {
         /**
@@ -62,18 +62,18 @@ class Controller(private val root: View) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
     }
 
-    private val bSwitchViewMode: Button      = root.bSwitchViewMode does { switchViewMode() }
-    private val bSwitchWorkMode: Button      = root.bSwitchWorkMode does { switchWorkMode() }
-    private val lInfo: Label                 = root.lInfo
-    private val pMain: SplitPane             = root.pMain
-    private val pRight: SplitPane            = root.pRight
-    private val cGroupBar: CGroupBar         = root.cGroupBar
-    private val cLabelPane: CLabelPane       = root.cLabelPane
-    private val cSlider: CTextSlider         = root.cSlider
-    private val cPicBox: CComboBox<String>   = root.cPicBox
-    private val cGroupBox: CComboBox<String> = root.cGroupBox
-    private val cTreeView: CTreeView         = root.cTreeView
-    private val cTransArea: CLigatureArea    = root.cTransArea
+    private val bSwitchViewMode: Button      = view.bSwitchViewMode does { switchViewMode() }
+    private val bSwitchWorkMode: Button      = view.bSwitchWorkMode does { switchWorkMode() }
+    private val lInfo: Label                 = view.lInfo
+    private val pMain: SplitPane             = view.pMain
+    private val pRight: SplitPane            = view.pRight
+    private val cGroupBar: CGroupBar         = view.cGroupBar
+    private val cLabelPane: CLabelPane       = view.cLabelPane
+    private val cSlider: CTextSlider         = view.cSlider
+    private val cPicBox: CComboBox<String>   = view.cPicBox
+    private val cGroupBox: CComboBox<String> = view.cGroupBox
+    private val cTreeView: CTreeView         = view.cTreeView
+    private val cTransArea: CLigatureArea    = view.cTransArea
 
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (State.isChanged) {
@@ -231,7 +231,7 @@ class Controller(private val root: View) {
         Logger.info("Initializing components...", LOGSRC_CONTROLLER)
 
         // MenuBar
-        root.top = AMenuBar
+        view.top = AMenuBar
         Logger.info("Added MenuBar", LOGSRC_CONTROLLER)
 
         // Last directory
@@ -252,11 +252,11 @@ class Controller(private val root: View) {
         Logger.info("Applied Settings @ ViewMode", LOGSRC_CONTROLLER)
 
         // Drag and Drop
-        root.setOnDragOver {
+        view.setOnDragOver {
             if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
             it.consume() // Consume used event
         }
-        root.setOnDragDropped {
+        view.setOnDragDropped {
             if (stay()) return@setOnDragDropped
 
             State.reset()
@@ -274,7 +274,7 @@ class Controller(private val root: View) {
         Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
 
         // Global event catch, prevent mnemonic parsing and the beep
-        root.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
+        view.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
@@ -356,7 +356,7 @@ class Controller(private val root: View) {
         cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
         pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
-        root.statsBar.visibleProperty().bind(Preference.showStatsBarProperty())
+        view.showStatsBarProperty().bind(Preference.showStatsBarProperty())
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
 
         // RecentFiles
@@ -617,7 +617,7 @@ class Controller(private val root: View) {
         Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
         // Transform number key press to CGroupBox select
-        root.addEventHandler(KeyEvent.KEY_PRESSED) {
+        view.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (!it.code.isDigitKey) return@addEventHandler
 
             val index = it.text.toInt() - 1
@@ -637,7 +637,7 @@ class Controller(private val root: View) {
 
             it.consume() // Consume used event
         }
-        root.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        view.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         Logger.info("Transformed Ctrl + Left/Right", LOGSRC_CONTROLLER)
 

@@ -9,7 +9,11 @@ import ink.meodinger.lpfx.component.common.CTextSlider
 import ink.meodinger.lpfx.component.singleton.AMenuBar
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.setValue
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
@@ -45,6 +49,10 @@ class View : BorderPane() {
     val cGroupBox       = CComboBox<String>()
     val cTreeView       = CTreeView()
     val cTransArea      = CLigatureArea()
+
+    private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun showStatsBarProperty(): BooleanProperty = showStatsBarProperty
+    var showStatsBar: Boolean by showStatsBarProperty
 
     init {
         top(AMenuBar)
@@ -97,11 +105,11 @@ class View : BorderPane() {
             add(lInfo) {
                 padding = Insets(4.0, 8.0, 4.0, 8.0)
             }
-
-            visibleProperty().addListener(onNew {
-                if (it) this@View.bottom(statsBar) else this@View.children.remove(statsBar)
-            })
         }
+
+        showStatsBarProperty().addListener(onNew {
+            if (it) this@View.bottom(statsBar) else this@View.children.remove(statsBar)
+        })
     }
 
 }

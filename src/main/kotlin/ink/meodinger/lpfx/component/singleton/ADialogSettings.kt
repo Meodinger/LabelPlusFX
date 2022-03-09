@@ -9,7 +9,6 @@ import ink.meodinger.lpfx.component.common.CInputLabel
 import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.color.isColorHex
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.*
@@ -50,10 +49,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
     private val gLabelName = Label(I18N["settings.group.name"])
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane()
-    private val gDefaultColorHexListLazy = ReLazy {
-        Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
-    }
-    private val gDefaultColorHexList by gDefaultColorHexListLazy
 
     private const val rRowShift = 1
     private const val rIsFrom = "C_Is_From"
@@ -354,7 +349,7 @@ object ADialogSettings : AbstractPropertiesDialog() {
         }
 
         val groupId = newRowIndex - gRowShift
-        val colorHex = if (color.isColorHex()) color else gDefaultColorHexList[groupId % gDefaultColorHexList.size]
+        val colorHex = if (color.isColorHex()) color else TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId % 9]
 
         val checkBox = CheckBox().apply { isSelected = createOnNew }
         val textField = TextField(name).apply { textFormatter = genGroupNameFormatter() }
@@ -448,7 +443,6 @@ object ADialogSettings : AbstractPropertiesDialog() {
     // ----- Initialize Properties ----- //
     override fun initProperties() {
         // Group
-        gDefaultColorHexListLazy.refresh()
         initGroupTab()
 
         // Ligature Rule

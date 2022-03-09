@@ -158,17 +158,17 @@ private fun loadLP(file: File): TransFile {
     pointer++
 
     // Group Info and Separator
-    var groupCount = 1
+    var groupId = 0
     val groupList = ArrayList<TransGroup>()
-    while (lines[pointer] != LPTransFile.SEPARATOR && groupCount < 10) {
+    while (lines[pointer] != LPTransFile.SEPARATOR && groupId < 9) {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.loader.empty_group_name"])
 
-        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupCount - 1])
+        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId])
 
         groupList.forEach { if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], group.name)) }
         groupList.add(group)
 
-        groupCount++
+        groupId++
         pointer++
     }
     if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.exporter.too_many_groups"])

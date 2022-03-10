@@ -8,7 +8,6 @@ import ink.meodinger.lpfx.util.property.setValue
 
 import javafx.beans.property.*
 import javafx.geometry.VPos
-import javafx.scene.effect.BlendMode
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -36,7 +35,6 @@ class CLabel(
 
     /// TODO: Custom Text Color
     /// TODO: Add alpha property
-    /// TODO: Use Shape.subtract
 
     companion object {
         private const val DEFAULT_INDEX = -1
@@ -64,17 +62,17 @@ class CLabel(
     init {
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to get rid of editing layoutY
-        text.blendMode = BlendMode.OVERLAY
 
         indexProperty.addListener(onNew<Number, Int> { update(index = it) })
         radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })
         colorProperty.addListener(onNew { update(color = it) })
 
-        children.addAll(circle, text)
         update()
     }
 
     private fun update(index: Int = this.index, radius: Double = this.radius, color: Color = this.color) {
+        children.clear()
+
         text.text = index.toString()
         text.fill = Color.WHITE.opacity(color.opacity)
         circle.radius = radius
@@ -87,17 +85,20 @@ class CLabel(
         text.font = Font.font(MonoFont, FontWeight.BOLD, r)
 
         val pickerRadius = radius.coerceAtLeast(MIN_PICK_RADIUS)
-        // Layout 0,0 is the center of the circle, the left-top of the rect
-        // Text display based on left-down corner
-        // Axis is 0 →
-        //         ↓
+        // Circle display based on center
+        // Text display based on left-center
+        // 0 →
+        // ↓
         // Move to Region Center
-        text.layoutX = pickerRadius -text.boundsInLocal.width / 2
+
+        text.layoutX = pickerRadius - text.boundsInLocal.width / 2
         text.layoutY = pickerRadius
 
-        circle.layoutX = pickerRadius
-        circle.layoutY = pickerRadius
+        circle.centerX = pickerRadius
+        circle.centerY = pickerRadius
 
         setPrefSize(pickerRadius * 2, pickerRadius * 2)
+
+        children.addAll(Shape.subtract(circle, text).apply { fill = color }, text)
     }
 }

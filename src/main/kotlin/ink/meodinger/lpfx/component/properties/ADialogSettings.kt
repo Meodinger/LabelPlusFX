@@ -30,6 +30,8 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
 import javafx.util.Duration
+import javafx.util.StringConverter
+import kotlin.math.roundToInt
 
 
 /**
@@ -237,8 +239,16 @@ class ADialogSettings : AbstractPropertiesDialog() {
                     }
                     add(Label(I18N["settings.label.radius"]), 1, 0)
                     add(lSliderRadius, 1, 1) {
+                        prefWidth = 160.0
+
                         min = LABEL_RADIUS_MIN
                         max = LABEL_RADIUS_MAX
+                        majorTickUnit = 8.0
+                        minorTickCount = 3
+                        blockIncrement = 2.0
+                        isSnapToTicks = true
+                        isShowTickMarks = true
+                        isShowTickLabels = true
                         valueProperty().addListener(onNew<Number, Double> {
                             lLabelRadius.text = String.format("%05.2f", it)
                             lCLabel.radius = it
@@ -263,10 +273,21 @@ class ADialogSettings : AbstractPropertiesDialog() {
                     }
                     add(Label(I18N["settings.label.alpha"]), 1, 2)
                     add(lSliderAlpha, 1, 3) {
+                        prefWidth = 160.0
+
                         min = 0.0
-                        max = 1.0
+                        max = 255.0
+                        majorTickUnit = 64.0
+                        minorTickCount = 3
+                        blockIncrement = 16.0
+                        isShowTickMarks = true
+                        isShowTickLabels = true
+                        labelFormatter = object : StringConverter<Double>() {
+                            override fun toString(double: Double): String = double.roundToInt().toString(16)
+                            override fun fromString(string: String): Double = string.toInt(16).toDouble()
+                        }
                         valueProperty().addListener(onNew<Number, Double> {
-                            val alphaPart = (it * 255.0).toInt().toString(16).padStart(2, '0')
+                            val alphaPart = it.roundToInt().toString(16).padStart(2, '0')
 
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
                             lCLabel.color = Color.web("FF0000$alphaPart")
@@ -288,7 +309,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         }
                         setOnChangeToLabel {
                             val alphaStr = fieldText.padStart(2, '0').uppercase()
-                            lSliderAlpha.value = alphaStr.toInt(16) / 255.0
+                            lSliderAlpha.value = alphaStr.toInt(16).toDouble()
 
                             labelText = "0x$alphaStr"
                         }
@@ -464,7 +485,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
 
         lLabelAlpha.isEditing = false
         lLabelAlpha.text = "0x${Settings.labelAlpha}"
-        lSliderAlpha.value =  Settings.labelAlpha.toInt(16) / 255.0
+        lSliderAlpha.value = Settings.labelAlpha.toInt(16).toDouble()
 
         // Other
         xInstCheckBox.isSelected = Settings.instantTranslate
@@ -545,7 +566,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
         val list = ArrayList<CProperty>()
 
         list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
-        list.add(CProperty(Settings.LabelAlpha, (lSliderAlpha.value * 255.0).toInt().toString(16).padStart(2, '0')))
+        list.add(CProperty(Settings.LabelAlpha, lSliderAlpha.value.roundToInt().toString(16).padStart(2, '0')))
 
         return list
     }

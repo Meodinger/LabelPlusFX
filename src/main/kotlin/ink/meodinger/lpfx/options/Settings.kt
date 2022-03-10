@@ -54,7 +54,7 @@ object Settings : AbstractProperties("Settings") {
         CProperty(ViewModeOrdinals, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
         CProperty(LogLevelOrdinal, Logger.LogLevel.INFO.ordinal),
         CProperty(LabelRadius, 24.0),
-        CProperty(LabelAlpha, "A0"),
+        CProperty(LabelAlpha, "80"),
         CProperty(LigatureRules,
             "("      to "「",
             ")"      to "」",

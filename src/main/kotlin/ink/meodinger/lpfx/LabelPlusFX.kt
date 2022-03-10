@@ -4,9 +4,6 @@ import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.util.HookedApplication
-import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.dialog.infoImageView
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
@@ -14,12 +11,8 @@ import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.application.Platform
-import javafx.geometry.Insets
 import javafx.scene.Scene
-import javafx.scene.control.*
-import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import java.util.Date
 
 
 /**
@@ -33,6 +26,10 @@ import java.util.Date
  */
 class LabelPlusFX: HookedApplication() {
 
+    companion object {
+        const val PARAM_UNNAMED_NO_CHECK_UPDATE = "--no-check-update"
+    }
+
     private val state: State = State.getInstance()
 
     init {
@@ -43,7 +40,7 @@ class LabelPlusFX: HookedApplication() {
         // Cannot catch Exceptions occurred when starting
         Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
             Logger.exception(e)
-            showException(state.stage, e)
+            showException(null, e)
         }
 
         state.application = this
@@ -81,7 +78,7 @@ class LabelPlusFX: HookedApplication() {
         Logger.info("App started", LOGSRC_APPLICATION)
         controller.labelInfo(I18N["common.ready"], LOGSRC_APPLICATION)
 
-        controller.checkUpdate()
+        if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE)) controller.checkUpdate()
     }
 
     override fun exit() {

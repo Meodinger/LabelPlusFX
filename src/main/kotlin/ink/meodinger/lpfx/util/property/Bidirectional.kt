@@ -155,15 +155,15 @@ open class TypedGenericBidirectionalBinding<T> protected constructor(
  */
 class RuledGenericBidirectionalBinding<T> private constructor(
     property1: Property<T>,
-    private val rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
+    private val rule1: (observable: Property<T>, oldV: T?, newV: T?, another: Property<T>) -> T,
     property2: Property<T>,
-    private val rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
+    private val rule2: (observable: Property<T>, oldV: T?, newV: T?, another: Property<T>) -> T
 ) : TypedGenericBidirectionalBinding<T>(property1, property2) {
 
     companion object {
         fun <T> bind(
-            property1: Property<T>, rule1: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T,
-            property2: Property<T>, rule2: (observable: Property<T>, oldV: T?, newV: T?, Property<T>) -> T
+            property1: Property<T>, rule1: (observable: Property<T>, oldV: T?, newV: T?, another: Property<T>) -> T,
+            property2: Property<T>, rule2: (observable: Property<T>, oldV: T?, newV: T?, another: Property<T>) -> T
         ) {
             RuledGenericBidirectionalBinding(property1, rule1, property2, rule2).also {
                 property1.addListener(it)

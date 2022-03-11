@@ -51,10 +51,6 @@ import javafx.scene.text.Text
 class CLabelPane : ScrollPane() {
 
     companion object {
-        // Scale
-        private const val NOT_SET = -1.0
-
-        // Text Display
         /**
          * Rect based shift
          */
@@ -70,8 +66,12 @@ class CLabelPane : ScrollPane() {
         eventType: EventType<LabelEvent>,
         val source: MouseEvent,
         val labelIndex: Int,
-        val labelX: Double, val labelY: Double,
-        val displayX: Double, val displayY: Double,
+        val displayX: Double,
+        val displayY: Double,
+        val oldLabelX: Double = Double.NaN,
+        val oldLabelY: Double = Double.NaN,
+        val newLabelX: Double = Double.NaN,
+        val newLabelY: Double = Double.NaN,
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY    = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
@@ -137,13 +137,16 @@ class CLabelPane : ScrollPane() {
 
     private var shiftX = 0.0
     private var shiftY = 0.0
+    private var originLabelX = 0.0
+    private var originLabelY = 0.0
+    private var labelDragged = false
     private val cLabels = ArrayList<CLabel>()
 
     // ----- Properties ----- //
 
-    private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(NOT_SET)
-    private val minScaleProperty:  DoubleProperty = SimpleDoubleProperty(NOT_SET)
-    private val maxScaleProperty:  DoubleProperty = SimpleDoubleProperty(NOT_SET)
+    private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(Double.NaN)
+    private val minScaleProperty:  DoubleProperty = SimpleDoubleProperty(Double.NaN)
+    private val maxScaleProperty:  DoubleProperty = SimpleDoubleProperty(Double.NaN)
     private val scaleProperty:     DoubleProperty = SimpleDoubleProperty(1.0)
     fun initScaleProperty():       DoubleProperty = initScaleProperty
     fun minScaleProperty():        DoubleProperty = minScaleProperty
@@ -154,8 +157,8 @@ class CLabelPane : ScrollPane() {
         set(value) {
             if (value >= 0) {
                 var temp = value
-                if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
-                if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
+                if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
+                if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
                 initScaleProperty.set(temp)
             } else {
                 throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
@@ -165,14 +168,14 @@ class CLabelPane : ScrollPane() {
         get() = minScaleProperty.get()
         set(value) {
             if (value < 0) return
-            if (maxScale != NOT_SET && value > maxScale) return
+            if (!maxScale.isNaN() && value > maxScale) return
             minScaleProperty.set(value)
         }
     var maxScale: Double
         get() = maxScaleProperty.get()
         set(value) {
             if (value < 0) return
-            if (minScale != NOT_SET && value < minScale) return
+            if (!minScale.isNaN() && value < minScale) return
             maxScaleProperty.set(value)
         }
     var scale: Double
@@ -180,8 +183,8 @@ class CLabelPane : ScrollPane() {
         set(value) {
             if (value >= 0) {
                 var temp = value
-                if (minScale != NOT_SET) temp = temp.coerceAtLeast(minScale)
-                if (maxScale != NOT_SET) temp = temp.coerceAtMost(maxScale)
+                if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
+                if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
                 scaleProperty.set(temp)
             }
         }
@@ -335,11 +338,7 @@ class CLabelPane : ScrollPane() {
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            fireEvent(LabelEvent(LabelEvent.LABEL_OTHER,
-                it, NOT_FOUND,
-                it.x / image.width, it.y / image.height,
-                it.x, it.y
-            ))
+            fireEvent(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x, it.y))
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
@@ -351,9 +350,9 @@ class CLabelPane : ScrollPane() {
                 if (it.y <= pickRadius || it.y + pickRadius >= image.height) return@addEventHandler
 
                 fireEvent(LabelEvent(LabelEvent.LABEL_CREATE,
-                    it, NOT_FOUND,
-                    it.x / image.width, it.y / image.height,
-                    it.x, it.y
+                    it, NOT_FOUND, it.x, it.y,
+                    newLabelX = it.x / image.width,
+                    newLabelY = it.y / image.height,
                 ))
             }
         }
@@ -413,37 +412,48 @@ class CLabelPane : ScrollPane() {
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         label.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            it.consume()
-
             shiftX = label.layoutX - it.sceneX / scale
             shiftY = label.layoutY - it.sceneY / scale
+
+            originLabelX = transLabel.x
+            originLabelY = transLabel.y
+
             label.cursor = Cursor.MOVE
+
+            it.consume() // make sure root will not move together
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            it.consume()
+            labelDragged = true
+
             removeText()
 
             val newLayoutX = shiftX + it.sceneX / scale
             val newLayoutY = shiftY + it.sceneY / scale
 
-            //  0--L-----    0 LR LR |
-            //  |  R         LR      |
-            //  |LR|-----    LR      |
-            //  |  |         --------|
+            //  0-----LR----    0 LR LR |
+            //  |     LR        LR      |
+            //  |LR LR|-----    LR      |
+            //  |     |         --------|
             if (newLayoutX < 0 || newLayoutX > image.width - 2 * label.radius) return@addEventHandler
             if (newLayoutY < 0 || newLayoutY > image.height - 2 * label.radius) return@addEventHandler
 
             label.layoutX = newLayoutX
             label.layoutY = newLayoutY
 
-            fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
-                it, transLabel.index,
-                transLabel.x, transLabel.y,
-                label.layoutX + it.x, label.layoutY + it.y
-            ))
+            it.consume() // make sure root will not move together
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             label.cursor = Cursor.HAND
+
+            if (labelDragged) fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
+                it, transLabel.index,
+                label.layoutX + it.x,
+                label.layoutY + it.y,
+                originLabelX, originLabelY,
+                transLabel.x, transLabel.y,
+            ))
+
+            labelDragged = false
         }
 
         // Cursor
@@ -462,25 +472,24 @@ class CLabelPane : ScrollPane() {
         label.setOnMouseMoved {
             fireEvent(LabelEvent(LabelEvent.LABEL_HOVER,
                 it, transLabel.index,
-                transLabel.x, transLabel.y,
-                label.layoutX + it.x, label.layoutY + it.y
+                label.layoutX + it.x,
+                label.layoutY + it.y,
             ))
-            it.consume()
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
             if (it.button == MouseButton.PRIMARY) {
                 fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
                     it, transLabel.index,
-                    transLabel.x, transLabel.y,
-                    label.layoutX + it.x, label.layoutY + it.y
+                    label.layoutX + it.x,
+                    label.layoutY + it.y,
                 ))
             } else if (it.button == MouseButton.SECONDARY) {
 
                 fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
                     it, transLabel.index,
-                    transLabel.x, transLabel.y,
-                    label.layoutX + it.x, label.layoutY + it.y
+                    label.layoutX + it.x,
+                    label.layoutY + it.y,
                 ))
             }
         }
@@ -495,8 +504,14 @@ class CLabelPane : ScrollPane() {
         label.layoutY = -label.radius + transLabel.y * image.height
 
         // Bind
-        transLabel.xProperty.bind((label.layoutXProperty() + label.radiusProperty()) / image.width)
-        transLabel.yProperty.bind((label.layoutYProperty() + label.radiusProperty()) / image.height)
+        RuledGenericBidirectionalBinding.bind(
+            transLabel.xProperty, { _, _, new, _ -> (new as Double) * image.width - label.radius },
+            label.layoutXProperty(), { _, _, new, _ -> ((new as Double) + label.radius) / image.width }
+        )
+        RuledGenericBidirectionalBinding.bind(
+            transLabel.yProperty, { _, _, new, _ -> (new as Double) * image.height - label.radius },
+            label.layoutYProperty(), { _, _, new, _ -> ((new as Double) + label.radius) / image.height }
+        )
 
         // Layout
         labelLayer.children.add(label)

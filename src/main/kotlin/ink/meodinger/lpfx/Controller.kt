@@ -296,7 +296,7 @@ class Controller(private val view: View, private val state: State) {
             val newIndex =
                 if (state.currentLabelIndex != -1) state.currentLabelIndex + 1
                 else state.transFile.getTransList(state.currentPicName).size + 1
-            val transLabel = TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
+            val transLabel = TransLabel(newIndex, state.currentGroupId, it.newLabelX, it.newLabelY, "")
 
             // Edit data
             state.addTransLabel(state.currentPicName, transLabel)

@@ -251,9 +251,9 @@ class CLabelPane : ScrollPane() {
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
     var labelRadius: Double by labelRadiusProperty
 
-    private val labelAlphaProperty: StringProperty = SimpleStringProperty("A0")
-    fun labelAlphaProperty(): StringProperty = labelAlphaProperty
-    var labelAlpha: String by labelAlphaProperty
+    private val labelOpacityProperty: DoubleProperty = SimpleDoubleProperty(0.5)
+    fun labelOpacityProperty(): DoubleProperty = labelOpacityProperty
+    var labelOpacity: Double by labelOpacityProperty
 
     private val newPictureScaleProperty: ObjectProperty<NewPictureScale> = SimpleObjectProperty(NewPictureScale.DEFAULT)
     fun newPictureScaleProperty(): ObjectProperty<NewPictureScale> = newPictureScaleProperty
@@ -402,9 +402,10 @@ class CLabelPane : ScrollPane() {
             radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
             colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(colorHexList[transLabel.groupId] + labelAlpha) },
-                labelAlphaProperty, colorHexListProperty, transLabel.groupIdProperty
+                { Color.web(colorHexList[transLabel.groupId]) },
+                colorHexListProperty, transLabel.groupIdProperty
             ))
+            opacityProperty().bind(labelOpacityProperty)
         }
 
         // Draggable

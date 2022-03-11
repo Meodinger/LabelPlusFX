@@ -9,6 +9,7 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import java.io.IOException
+import kotlin.math.roundToInt
 
 
 /**
@@ -101,9 +102,9 @@ object Settings : AbstractProperties("Settings") {
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
     var labelRadius: Double by labelRadiusProperty
 
-    private val labelAlphaProperty: StringProperty = SimpleStringProperty()
-    fun labelAlphaProperty(): StringProperty = labelAlphaProperty
-    var labelAlpha: String by labelAlphaProperty
+    private val labelOpacityProperty: DoubleProperty = SimpleDoubleProperty()
+    fun labelOpacityProperty(): DoubleProperty = labelOpacityProperty
+    var labelOpacity: Double by labelOpacityProperty
 
     private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty()
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
@@ -138,7 +139,7 @@ object Settings : AbstractProperties("Settings") {
         viewModes = FXCollections.observableList(this[ViewModeOrdinals].asIntegerList().map { ViewMode.values()[it] })
         logLevel = Logger.LogLevel.values()[this[LogLevelOrdinal].asInteger()]
         labelRadius = this[LabelRadius].asDouble()
-        labelAlpha = this[LabelAlpha].asString()
+        labelOpacity = this[LabelAlpha].asInteger(16) / 255.0
         ligatureRules = FXCollections.observableList(this[LigatureRules].asPairList())
         instantTranslate = this[InstantTranslate].asBoolean()
         useMeoFileAsDefault = this[UseMeoFileAsDefault].asBoolean()
@@ -155,7 +156,7 @@ object Settings : AbstractProperties("Settings") {
         this[ViewModeOrdinals].set(viewModes.map(Enum<*>::ordinal))
         this[LogLevelOrdinal].set(logLevel.ordinal)
         this[LabelRadius].set(labelRadius)
-        this[LabelAlpha].set(labelAlpha)
+        this[LabelAlpha].set((labelOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LigatureRules].set(ligatureRules)
         this[InstantTranslate].set(instantTranslate)
         this[UseMeoFileAsDefault].set(useMeoFileAsDefault)

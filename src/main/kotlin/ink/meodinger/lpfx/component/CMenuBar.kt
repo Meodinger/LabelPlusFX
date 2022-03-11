@@ -483,7 +483,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 Settings.ScaleOnNewPictureOrdinal -> Settings.newPictureScalePicture = CLabelPane.NewPictureScale.values()[property.asInteger()]
                 Settings.ViewModeOrdinals         -> Settings.viewModes = FXCollections.observableList(property.asIntegerList().map { ViewMode.values()[it] })
                 Settings.LabelRadius              -> Settings.labelRadius = property.asDouble()
-                Settings.LabelAlpha               -> Settings.labelAlpha = property.asString()
+                Settings.LabelAlpha               -> Settings.labelOpacity = property.asInteger(16) / 255.0
                 Settings.LigatureRules            -> Settings.ligatureRules = FXCollections.observableList(property.asPairList())
                 Settings.InstantTranslate         -> Settings.instantTranslate = property.asBoolean()
                 Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault = property.asBoolean()

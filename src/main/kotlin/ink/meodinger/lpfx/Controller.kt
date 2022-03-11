@@ -455,7 +455,7 @@ class Controller(private val view: View, private val state: State) {
             it.colorHexProperty
         }))
         cLabelPane.labelRadiusProperty().bind(Settings.labelRadiusProperty())
-        cLabelPane.labelAlphaProperty().bind(Settings.labelAlphaProperty())
+        cLabelPane.labelOpacityProperty().bind(Settings.labelOpacityProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding({
             when (state.workMode) {

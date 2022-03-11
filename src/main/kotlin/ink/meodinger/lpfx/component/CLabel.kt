@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.util.color.opacity
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -30,11 +29,10 @@ import javafx.scene.text.TextAlignment
 class CLabel(
     index:  Int    = DEFAULT_INDEX,
     radius: Double = DEFAULT_RADIUS,
-    color:  Color  = Color.web(DEFAULT_COLOR)
+    color:  Color  = Color.web(DEFAULT_COLOR),
 ) : Region() {
 
     /// TODO: Custom Text Color
-    /// TODO: Add alpha property
 
     companion object {
         private const val DEFAULT_INDEX = -1
@@ -59,9 +57,12 @@ class CLabel(
     fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
+    /// Using Node#OpacityProperty for opacity
+
     init {
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to get rid of editing layoutY
+        text.fill = Color.WHITE
 
         indexProperty.addListener(onNew<Number, Int> { update(index = it) })
         radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })
@@ -74,9 +75,7 @@ class CLabel(
         children.clear()
 
         text.text = index.toString()
-        text.fill = Color.WHITE.opacity(color.opacity)
         circle.radius = radius
-        circle.fill = color
 
         // Font size vary from 1.7R to 1.3R
         // 0..9 -> 1.7R

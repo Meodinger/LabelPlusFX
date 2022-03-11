@@ -17,6 +17,8 @@ import javafx.scene.control.Dialog
  */
 abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
 
+    /// TODO: Use value, not CProperty
+
     init {
         setResultConverter {
             when (it) {
@@ -33,7 +35,6 @@ abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
     fun generateProperties(): List<CProperty> {
         initProperties()
 
-        val result = showAndWait()
-        return if (result.isPresent) result.get() else emptyList()
+        return showAndWait().let { if (it.isPresent) it.get() else emptyList() }
     }
 }

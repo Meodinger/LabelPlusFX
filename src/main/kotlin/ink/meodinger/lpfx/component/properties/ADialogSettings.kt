@@ -19,6 +19,7 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.isMathematicalDecimal
+import javafx.beans.binding.Bindings
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -67,7 +68,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
     private val mComboLabel = CComboBox<ViewMode>()
     private val mComboScale = CComboBox<CLabelPane.NewPictureScale>()
 
-    private val lCLabel = CLabel(index = 8)
+    private val lCLabel = CLabel(index = 8, color = Color.RED)
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
     private val lSliderAlpha = Slider()
@@ -193,6 +194,11 @@ class ADialogSettings : AbstractPropertiesDialog() {
 
                         setPrefSize(320.0, 320.0)
                         add(lCLabel) {
+                            radiusProperty().bind(lSliderRadius.valueProperty())
+                            opacityProperty().bind(Bindings.createDoubleBinding(
+                                { lSliderAlpha.value / 255 },
+                                lSliderAlpha.valueProperty()
+                            ))
                             // Draggable & drag-limitation
                             var shiftX = 0.0
                             var shiftY = 0.0
@@ -251,7 +257,6 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         isShowTickLabels = true
                         valueProperty().addListener(onNew<Number, Double> {
                             lLabelRadius.text = String.format("%05.2f", it)
-                            lCLabel.radius = it
                         })
                     }
                     add(lLabelRadius, 2, 1) {
@@ -276,21 +281,19 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         prefWidth = 160.0
 
                         min = 0.0
-                        max = 255.0
+                        max = 255.0  // Use 255 to have more precise values
                         majorTickUnit = 64.0
                         minorTickCount = 3
                         blockIncrement = 16.0
                         isShowTickMarks = true
                         isShowTickLabels = true
                         labelFormatter = object : StringConverter<Double>() {
-                            override fun toString(double: Double): String = double.roundToInt().toString(16)
+                            override fun toString(double: Double): String = double.roundToInt().toString(16).padStart(2, '0')
                             override fun fromString(string: String): Double = string.toInt(16).toDouble()
                         }
                         valueProperty().addListener(onNew<Number, Double> {
                             val alphaPart = it.roundToInt().toString(16).padStart(2, '0')
-
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
-                            lCLabel.color = Color.web("FF0000$alphaPart")
                         })
                     }
                     add(lLabelAlpha, 2, 3) {
@@ -484,8 +487,8 @@ class ADialogSettings : AbstractPropertiesDialog() {
         lSliderRadius.value = Settings.labelRadius
 
         lLabelAlpha.isEditing = false
-        lLabelAlpha.text = "0x${Settings.labelAlpha}"
-        lSliderAlpha.value = Settings.labelAlpha.toInt(16).toDouble()
+        lLabelAlpha.text = "0x${(Settings.labelOpacity * 255).roundToInt().toString(16).padStart(2, '0')}"
+        lSliderAlpha.value = Settings.labelOpacity * 255
 
         // Other
         xInstCheckBox.isSelected = Settings.instantTranslate

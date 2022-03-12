@@ -5,12 +5,14 @@ import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
 import javafx.application.Platform
+import javafx.beans.value.ChangeListener
 import javafx.scene.Scene
 import javafx.stage.Stage
 
@@ -70,8 +72,13 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.scene = Scene(root, Preference.windowWidth, Preference.windowHeight)
         primaryStage.setOnCloseRequest { if (!controller.stay()) exit() else it.consume() }
 
-        Preference.windowWidthProperty().bind(primaryStage.scene.widthProperty())
-        Preference.windowHeightProperty().bind(primaryStage.scene.heightProperty())
+        val windowSizeListener: ChangeListener<Number> = onChange {
+            if (primaryStage.isMaximized) return@onChange
+            Preference.windowWidth = primaryStage.scene.width
+            Preference.windowHeight = primaryStage.scene.height
+        }
+        primaryStage.scene.widthProperty().addListener(windowSizeListener)
+        primaryStage.scene.heightProperty().addListener(windowSizeListener)
 
         primaryStage.show()
 

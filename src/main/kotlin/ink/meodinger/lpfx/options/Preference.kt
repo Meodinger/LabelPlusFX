@@ -38,11 +38,11 @@ object Preference : AbstractProperties("Preference") {
 
     private val windowWidthProperty: DoubleProperty = SimpleDoubleProperty()
     fun windowWidthProperty(): DoubleProperty = windowWidthProperty
-    val windowWidth: Double by windowWidthProperty
+    var windowWidth: Double by windowWidthProperty
 
     private val windowHeightProperty: DoubleProperty = SimpleDoubleProperty()
     fun windowHeightProperty(): DoubleProperty = windowHeightProperty
-    val windowHeight: Double by windowHeightProperty
+    var windowHeight: Double by windowHeightProperty
 
     private val mainDividerPositionProperty: DoubleProperty = SimpleDoubleProperty()
     fun mainDividerPositionProperty(): DoubleProperty = mainDividerPositionProperty
@@ -71,8 +71,8 @@ object Preference : AbstractProperties("Preference") {
         load(Options.preference, this)
 
         val windowSizes = this[WINDOW_SIZE].asDoubleList()
-        windowWidthProperty.set(windowSizes[0])
-        windowHeightProperty.set(windowSizes[1])
+        windowWidth = windowSizes[0]
+        windowHeight = windowSizes[1]
         mainDividerPosition = this[MAIN_DIVIDER].asDouble()
         rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
         textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())

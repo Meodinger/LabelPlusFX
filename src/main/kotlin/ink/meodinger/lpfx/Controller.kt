@@ -14,7 +14,7 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.contains
+import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*

@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.addFirst
+import ink.meodinger.lpfx.util.collection.addFirst
 import ink.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.property.*

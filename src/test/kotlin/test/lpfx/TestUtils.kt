@@ -1,6 +1,7 @@
 package test.lpfx
 
 import org.junit.Assert
+import java.util.Date
 
 /**
  * Author: Meodinger
@@ -29,4 +30,13 @@ fun assertNotThrow(callable: () -> Unit) {
     } catch (e: Throwable) {
         Assert.assertTrue(e.message, false)
     }
+}
+
+
+private var time: Long = 0
+fun tic() {
+    time = Date().time
+}
+fun toc() {
+    println("Used ${Date().time - time}ms")
 }

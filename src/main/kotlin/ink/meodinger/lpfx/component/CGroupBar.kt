@@ -2,7 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.addLast
+import ink.meodinger.lpfx.util.collection.addLast
 import ink.meodinger.lpfx.util.component.boxHGrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue

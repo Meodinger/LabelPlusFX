@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.util
 
 import ink.meodinger.lpfx.util.collection.ArrayStack
+import ink.meodinger.lpfx.util.collection.addLast
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -45,6 +46,32 @@ class ArrayStackTest {
         assertEquals(false, stack.isEmpty())
         stack.pop()
         assertEquals(true, stack.isEmpty())
+    }
+
+    @Test
+    fun benchmark() {
+        val stack = ArrayStack<Int>()
+        tic()
+        for (i in 0..1_000_000) stack.push(i)
+        toc()
+        tic()
+        for (i in 0..1_000_000) stack.pop()
+        toc()
+
+        val deque = ArrayDeque<Int>()
+        tic()
+        for (i in 0..1_000_000) deque.addFirst(i)
+        toc()
+        tic()
+        for (i in 0..1_000_000) deque.removeFirst()
+        toc()
+
+        tic()
+        for (i in 0..1_000_000) deque.addLast(i)
+        toc()
+        tic()
+        for (i in 0..1_000_000) deque.removeLast()
+        toc()
     }
 
 }

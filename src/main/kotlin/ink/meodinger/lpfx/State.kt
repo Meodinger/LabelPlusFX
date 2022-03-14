@@ -69,13 +69,6 @@ class State private constructor() {
      */
     var translationFile: File by translationFileProperty
 
-    private val projectFolderProperty = SimpleObjectProperty(DEFAULT_FILE)
-    fun projectFolderProperty(): ObjectProperty<File> = projectFolderProperty
-    /**
-     * The folder of all project pictures (no external pictures)
-     */
-    var projectFolder: File by projectFolderProperty
-
     private val currentGroupIdProperty = SimpleIntegerProperty(NOT_FOUND)
     fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
     /**
@@ -120,7 +113,6 @@ class State private constructor() {
         isChanged = false
         transFile = TransFile.DEFAULT_TRANS_FILE
         translationFile = DEFAULT_FILE
-        projectFolder = DEFAULT_FILE
         currentGroupId = NOT_FOUND
         currentPicName = emptyString()
         currentLabelIndex = NOT_FOUND
@@ -163,7 +155,7 @@ class State private constructor() {
     }
 
     fun addPicture(picName: String, picFile: File? = null) {
-        val file = picFile ?: projectFolder.resolve(picName)
+        val file = picFile ?: transFile.projectFolder.resolve(picName)
 
         transFile.addTransList(picName)
         transFile.setFile(picName, file)
@@ -194,9 +186,7 @@ class State private constructor() {
      * Get current picture's FileSystem file
      */
     fun getPicFileNow(): File {
-        return if (isOpened && currentPicName.isNotEmpty())
-            transFile.getFileOrByProject(currentPicName, projectFolder)
-        else DEFAULT_FILE
+        return if (isOpened && currentPicName.isNotEmpty()) transFile.getFile(currentPicName) else DEFAULT_FILE
     }
 
     /**

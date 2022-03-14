@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.type
 
 import ink.meodinger.lpfx.util.ReLazy
-import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.sortByDigit
@@ -99,14 +98,12 @@ open class TransFile @JsonCreator constructor(
 
     // ----- Project Files Management ----- //
 
+    lateinit var projectFolder: File
+
     private val fileMap = HashMap<String, File>()
-    fun getFileOrByProject(picName: String, projectFolder: File): File {
-        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
-        return fileMap[picName] ?: projectFolder.resolve(picName).existsOrNull() ?: throw TransFileException.pictureNotFound(picName)
-    }
     fun getFile(picName: String): File {
         if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
-        return fileMap[picName]!!
+        return fileMap[picName] ?: projectFolder.resolve(picName).also { setFile(picName, it) }
     }
     fun setFile(picName: String, file: File) {
         if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
@@ -118,7 +115,7 @@ open class TransFile @JsonCreator constructor(
     }
     fun checkLost(): List<String> {
         val lost = ArrayList<String>()
-        fileMap.forEach { (name, file) -> if (!file.exists()) lost.add(name) }
+        picNames.forEach { picture -> if (!getFile(picture).exists()) lost.add(picture) }
         return lost
     }
 

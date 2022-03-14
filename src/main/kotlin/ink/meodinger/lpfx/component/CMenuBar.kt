@@ -374,7 +374,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun editProjectPictures() {
         // Choose Pics
         val selected = state.transFile.sortedPicNames
-        val unselected = Files.walk(state.projectFolder.toPath(), 1)
+        val unselected = Files.walk(state.transFile.projectFolder.toPath(), 1)
             .filter {
                 if (selected.contains(it.name)) return@filter false
                 for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
@@ -387,7 +387,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 return@ifPresent
             }
 
-            val picNames = state.transFile.picNames
+            val picNames = state.transFile.sortedPicNames
 
             // Edit date
             val toAdd = HashSet<String>()
@@ -403,7 +403,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
             for (picName in toAdd) state.addPicture(picName)
             for (picName in toRemove) state.removePicture(picName)
-            // Update View
+
             state.currentPicName = state.transFile.sortedPicNames[0]
             // Mark change
             state.isChanged = true
@@ -452,7 +452,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             if (Settings.useExportNameTemplate) Settings.exportNameTemplate
                 .replace(Settings.VARIABLE_FILENAME, state.translationFile.nameWithoutExtension)
                 .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder().name)
-                .replace(Settings.VARIABLE_PROJECT, state.projectFolder.name)
+                .replace(Settings.VARIABLE_PROJECT, state.transFile.projectFolder.name)
             else state.getFileFolder().name
         exportChooser.initialFilename = "$exportName.${type.extension}"
 

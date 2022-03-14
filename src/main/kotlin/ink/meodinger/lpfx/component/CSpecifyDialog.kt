@@ -95,7 +95,7 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
 
                         // get project folder
                         val directory = dirChooser.showDialog(thisWindow) ?: return@does
-                        if (!preserve) state.projectFolder = directory
+                        if (!preserve) state.transFile.projectFolder = directory
 
                         // auto-fill
                         val newPicPaths = Files.walk(directory.toPath(), 1)
@@ -142,7 +142,7 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
 
         // update variables
         workingTransFile = state.transFile
-        projectFolder = state.projectFolder
+        projectFolder = state.transFile.projectFolder
         picCount = state.transFile.picCount
         picNames = state.transFile.sortedPicNames
 

@@ -36,8 +36,7 @@ enum class ActionType { ADD, REMOVE, CHANGE }
  *
  * @see Action
  */
-abstract class LPFXAction(actionType: ActionType, protected val state: State) : Action {
-
-    override val type: ActionType = actionType
-
-}
+abstract class AbstractAction(
+    override val type: ActionType,
+    protected val state: State
+) : Action

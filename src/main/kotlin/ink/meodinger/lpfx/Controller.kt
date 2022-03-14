@@ -194,13 +194,17 @@ class Controller(private val view: View, private val state: State) {
                 if (picFile.exists()) {
                     image = Image(picFile.toURI().toURL().toString())
                 } else {
-                    Logger.error("Picture `${state.currentPicName}` not exists", LOGSRC_CONTROLLER)
-                    showError(state.stage, String.format(I18N["error.picture_not_exists.s"], state.currentPicName))
+                    val currentPicName = state.currentPicName
+                    Logger.error("Picture `$currentPicName` not exists", LOGSRC_CONTROLLER)
+                    // It's not safe to invoke showAndWait() when the binding is computing requested by layout
+                    Platform.runLater {
+                        showError(state.stage, String.format(I18N["error.picture_not_exists.s"], currentPicName))
+                    }
                 }
             } catch (e: IOException) {
                 Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
-                showException(state.stage, e)
+                Platform.runLater { showException(state.stage, e) }
             }
             return image ?: INIT_IMAGE
         }
@@ -836,7 +840,6 @@ class Controller(private val view: View, private val state: State) {
                 }
             } else {
                 // Find some pics, continue procedure
-                state.projectFolder = projectFolder
                 Logger.info("Project folder set to ${projectFolder.path}", LOGSRC_CONTROLLER)
             }
         }
@@ -895,9 +898,7 @@ class Controller(private val view: View, private val state: State) {
         val transFile: TransFile
         try {
             transFile = load(file, type)
-            // We assume that all pics are in the project folder.
-            // If not, TransFile.checkLost() will find them out.
-            for (picName in transFile.picNames) transFile.setFile(picName, projectFolder.resolve(picName))
+            transFile.projectFolder = projectFolder
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -910,7 +911,6 @@ class Controller(private val view: View, private val state: State) {
         // Opened, update state
         state.transFile = transFile
         state.translationFile = file
-        state.projectFolder = projectFolder
         state.isOpened = true
 
         // Show info if comment not in default list
@@ -976,7 +976,7 @@ class Controller(private val view: View, private val state: State) {
         )
 
         // Check folder
-        if (!silent) if (file.parentFile != state.projectFolder) {
+        if (!silent) if (file.parentFile != state.transFile.projectFolder) {
             val confirm = showConfirm(state.stage, I18N["confirm.save_to_another_place"])
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }

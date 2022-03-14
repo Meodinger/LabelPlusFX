@@ -33,6 +33,7 @@ class CLabel(
 ) : Region() {
 
     /// TODO: Custom Text Color
+    /// TODO: Optional Text Opacity
 
     companion object {
         private const val DEFAULT_INDEX = -1

@@ -122,37 +122,7 @@ class State private constructor() {
         Logger.info("Reset", LOGSRC_STATE)
     }
 
-    fun setComment(comment: String) {
-        transFile.comment = comment
-
-        Logger.info("Set comment @ ${comment.replaceLineFeed()}", LOGSRC_STATE)
-    }
-
-    fun addTransGroup(transGroup: TransGroup) {
-        transFile.addTransGroup(transGroup)
-
-        Logger.info("Added $transGroup", LOGSRC_STATE)
-    }
-    fun removeTransGroup(groupName: String) {
-        val toRemoveId = transFile.getGroupIdByName(groupName)
-        val toRemove = transFile.getTransGroup(toRemoveId)
-
-        transFile.removeTransGroup(toRemoveId)
-        for (picName in transFile.picNames) for (label in transFile.getTransList(picName))
-            if (label.groupId >= toRemoveId) label.groupId--
-
-        Logger.info("Removed $toRemove", LOGSRC_STATE)
-    }
-    fun setTransGroupName(groupId: Int, name: String) {
-        transFile.getTransGroup(groupId).name = name
-
-        Logger.info("Set GroupID=$groupId @name=$name", LOGSRC_STATE)
-    }
-    fun setTransGroupColor(groupId: Int, color: String) {
-        transFile.getTransGroup(groupId).colorHex = color
-
-        Logger.info("Set GroupID=$groupId @color=$color", LOGSRC_STATE)
-    }
+    // ----- File related ----- //
 
     /**
      * Get current picture's FileSystem file

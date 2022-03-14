@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.action.ActionType
 import ink.meodinger.lpfx.action.ComplexAction
+import ink.meodinger.lpfx.action.GroupAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGroupNameFormatter
@@ -83,7 +84,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             }
 
             // Edit data
-            state.addTransGroup(newGroup)
+            state.doAction(GroupAction(ActionType.ADD, state, newGroup))
             // Mark change
             state.isChanged = true
         }
@@ -109,7 +110,11 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             }
 
             // Edit data
-            state.setTransGroupName(state.transFile.getGroupIdByName(groupName), newName)
+            state.doAction(GroupAction(
+                ActionType.CHANGE, state,
+                state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName)),
+                newName = newName
+            ))
             // Mark change
             state.isChanged = true
         }
@@ -124,7 +129,11 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val newColor = (it.target as ColorPicker).value
 
         // Edit data
-        state.setTransGroupColor(state.transFile.getGroupIdByName(groupName), newColor.toHexRGB())
+        state.doAction(GroupAction(
+            ActionType.CHANGE, state,
+            state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName)),
+            newColorHex = newColor.toHexRGB()
+        ))
         // Mark change
         state.isChanged = true
     }
@@ -140,7 +149,10 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val groupName = it.source as String
 
         // Edit data
-        state.removeTransGroup(groupName)
+        state.doAction(GroupAction(
+            ActionType.REMOVE, state,
+            state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName))
+        ))
         // Mark change
         state.isChanged = true
     }

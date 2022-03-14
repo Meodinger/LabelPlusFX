@@ -24,9 +24,9 @@ import ink.meodinger.lpfx.util.string.replaceLineFeed
  * If action type is `ADD` or `REMOVE`, all parameters starts with
  * "new" could leave as default, they will not be used in the procedure.
  *
- * If action type is `CHANGE`, all parameters starts with "new" and
- * is passed non-default value will be used to update the target
- * TransLabel's properties.
+ * If action type is `CHANGE`, all explicitly passed parameters
+ * starts with "new" and is non-default value will be used to update
+ * the target TransLabel's properties.
  *
  * @see Action
  */

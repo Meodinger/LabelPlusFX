@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
+import ink.meodinger.lpfx.action.Action
 import ink.meodinger.lpfx.action.ActionType
 import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.PictureAction
@@ -26,6 +27,7 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.string.replaceLineFeed
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
@@ -373,7 +375,21 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     private fun editComment() {
         showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
-            state.setComment(it)
+            state.doAction(object : Action {
+
+                private val oriComment = state.transFile.comment
+
+                override val type: ActionType = ActionType.CHANGE
+
+                override fun commit() {
+                    state.transFile.comment = it
+                }
+
+                override fun revert() {
+                    state.transFile.comment = oriComment
+                }
+
+            })
             state.isChanged = true
         }
     }

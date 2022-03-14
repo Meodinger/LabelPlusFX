@@ -5,7 +5,7 @@ import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.event.isAltOrMetaDown
+import ink.meodinger.lpfx.util.event.isControlOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
@@ -68,10 +68,8 @@ class CLabelPane : ScrollPane() {
         val labelIndex: Int,
         val displayX: Double,
         val displayY: Double,
-        val oldLabelX: Double = Double.NaN,
-        val oldLabelY: Double = Double.NaN,
-        val newLabelX: Double = Double.NaN,
-        val newLabelY: Double = Double.NaN,
+        val labelX: Double = Double.NaN,
+        val labelY: Double = Double.NaN,
     ) : Event(eventType) {
         companion object {
             val LABEL_ANY    = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
@@ -137,8 +135,6 @@ class CLabelPane : ScrollPane() {
 
     private var shiftX = 0.0
     private var shiftY = 0.0
-    private var originLabelX = 0.0
-    private var originLabelY = 0.0
     private var labelDragged = false
     private val cLabels = ArrayList<CLabel>()
 
@@ -284,16 +280,12 @@ class CLabelPane : ScrollPane() {
             // Remove text when scroll event fired
             removeText()
 
-            // Horizon scroll
-            if (it.isControlDown) {
-                hvalue -= it.deltaY / image.height
-                it.consume()
-            }
+            // NOTE: Horizon scroll use default impl: Shift+Scroll
         }
 
         // Scale
         root.addEventFilter(ScrollEvent.SCROLL) {
-            if (it.isAltOrMetaDown) {
+            if (it.isControlOrMetaDown || it.isAltDown) {
                 scale += if (it.deltaY > 0) 0.1 else -0.1
                 it.consume()
             }
@@ -351,8 +343,8 @@ class CLabelPane : ScrollPane() {
 
                 fireEvent(LabelEvent(LabelEvent.LABEL_CREATE,
                     it, NOT_FOUND, it.x, it.y,
-                    newLabelX = it.x / image.width,
-                    newLabelY = it.y / image.height,
+                    it.x / image.width,
+                    it.y / image.height,
                 ))
             }
         }
@@ -415,9 +407,6 @@ class CLabelPane : ScrollPane() {
             shiftX = label.layoutX - it.sceneX / scale
             shiftY = label.layoutY - it.sceneY / scale
 
-            originLabelX = transLabel.x
-            originLabelY = transLabel.y
-
             label.cursor = Cursor.MOVE
 
             it.consume() // make sure root will not move together
@@ -449,8 +438,8 @@ class CLabelPane : ScrollPane() {
                 it, transLabel.index,
                 label.layoutX + it.x,
                 label.layoutY + it.y,
-                originLabelX, originLabelY,
-                transLabel.x, transLabel.y,
+                label.layoutX / image.width,
+                label.layoutY / image.height,
             ))
 
             labelDragged = false

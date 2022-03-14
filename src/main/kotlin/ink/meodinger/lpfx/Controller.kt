@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.action.ActionType
+import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.component.CSpecifyDialog
@@ -340,6 +342,12 @@ class Controller(private val view: View, private val state: State) {
             cTreeView.selectLabel(it.labelIndex)
         }
         cLabelPane.setOnLabelMove {
+            state.doAction(LabelAction(
+                ActionType.CHANGE, state,
+                state.currentPicName, state.transFile.getTransLabel(state.currentPicName, it.labelIndex),
+                newX = it.labelX,
+                newY = it.labelY
+            ))
             state.isChanged = true
         }
         cLabelPane.setOnLabelOther {

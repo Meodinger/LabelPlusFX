@@ -152,4 +152,12 @@ class CStringKtTest {
         assertEquals("1", StringBuilder("123").deleteTail("23").toString())
         assertEquals("", StringBuilder("123").deleteTail("123").toString())
     }
+
+    @Test
+    fun fixedTest() {
+        assertEquals("4.1234", 4.12344.fixed(4))
+        assertEquals("0.1234", 0.12344.fixed(4))
+        assertEquals("1.0000", 1.fixed(4))
+    }
+
 }

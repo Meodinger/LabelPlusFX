@@ -80,6 +80,7 @@ const val NOT_FOUND = -1
 const val LOGSRC_APPLICATION = "Application"
 const val LOGSRC_CONTROLLER  = "Controller"
 const val LOGSRC_STATE       = "State"
+const val LOGSRC_ACTION      = "Action"
 const val LOGSRC_OPTIONS     = "Options"
 const val LOGSRC_DIALOGS     = "Dialog"
 const val LOGSRC_LOGGER      = "Logger"

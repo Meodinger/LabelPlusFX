@@ -492,16 +492,6 @@ class CLabelPane : ScrollPane() {
         label.layoutX = -label.radius + transLabel.x * image.width
         label.layoutY = -label.radius + transLabel.y * image.height
 
-        // Bind
-        RuledGenericBidirectionalBinding.bind(
-            transLabel.xProperty, { _, _, new, _ -> (new as Double) * image.width - label.radius },
-            label.layoutXProperty(), { _, _, new, _ -> ((new as Double) + label.radius) / image.width }
-        )
-        RuledGenericBidirectionalBinding.bind(
-            transLabel.yProperty, { _, _, new, _ -> (new as Double) * image.height - label.radius },
-            label.layoutYProperty(), { _, _, new, _ -> ((new as Double) + label.radius) / image.height }
-        )
-
         // Layout
         labelLayer.children.add(label)
         // Add cLabel to list

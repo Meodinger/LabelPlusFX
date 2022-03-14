@@ -2,6 +2,8 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.action.ActionType
+import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
@@ -159,7 +161,11 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                 val groupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
 
                 // Edit data
-                state.setTransLabelGroup(state.currentPicName, labelIndex, newGroupId)
+                state.doAction(LabelAction(
+                    ActionType.CHANGE, state,
+                    state.currentPicName, state.transFile.getTransLabel(state.currentPicName, labelIndex),
+                    newGroupId = newGroupId
+                ))
                 // Update view
                 state.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId)
             }

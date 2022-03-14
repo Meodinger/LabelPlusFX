@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.fixed
 import ink.meodinger.lpfx.util.using
 
 import java.io.*
@@ -38,8 +39,8 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
             return StringBuilder()
                 .append(LPTransFile.LABEL_START).append(transLabel.index).append(LPTransFile.LABEL_END)
                 .append(LPTransFile.PROP_START)
-                .append(String.format("%.4f", transLabel.x)).append(LPTransFile.SPLIT)
-                .append(String.format("%.4f", transLabel.y)).append(LPTransFile.SPLIT)
+                .append(transLabel.x.fixed(4)).append(LPTransFile.SPLIT)
+                .append(transLabel.y.fixed(4)).append(LPTransFile.SPLIT)
                 .append(transLabel.groupId + 1)
                 .append(LPTransFile.PROP_END).append("\n")
                 .append(transLabel.text).append("\n")

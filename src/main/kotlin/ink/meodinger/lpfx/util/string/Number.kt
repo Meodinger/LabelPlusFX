@@ -59,3 +59,8 @@ fun String.isMathematicalDecimal(): Boolean {
 
     return true
 }
+
+/**
+ * Return a String that is the number in fixed style
+ */
+fun Number.fixed(count: Int): String = String.format("%.${count}f", toDouble())

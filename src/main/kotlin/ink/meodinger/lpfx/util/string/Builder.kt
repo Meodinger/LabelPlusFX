@@ -9,7 +9,6 @@ package ink.meodinger.lpfx.util.string
 
 /**
  * Delete tail string
- *
  * @param tail Tail to delete
  */
 fun StringBuilder.deleteTail(tail: String): StringBuilder {
@@ -19,6 +18,12 @@ fun StringBuilder.deleteTail(tail: String): StringBuilder {
 
     return this.deleteRange(length - tail.length, length)
 }
+
+/**
+ * Delete tail line feed
+ * @param lf line feed tail
+ */
+fun StringBuilder.deleteTailLF(lf: String = "\n"): StringBuilder = deleteTail(lf)
 
 /**
  * CharArray to StringBuilder

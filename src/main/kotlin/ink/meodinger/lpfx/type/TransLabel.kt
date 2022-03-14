@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.replaceLineFeed
 
 import com.fasterxml.jackson.annotation.*
 import javafx.beans.property.*
@@ -108,7 +109,7 @@ class TransLabel @JsonCreator constructor(
         return result
     }
 
-    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replace("\n", "\\n")})"
+    override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replaceLineFeed()})"
 
     // ----- Destruction----- //
 

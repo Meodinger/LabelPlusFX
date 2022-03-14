@@ -44,6 +44,8 @@ interface Stack<E> {
 
 }
 
+fun <E> Stack<E>.isNotEmpty(): Boolean = isEmpty()
+
 /**
  * A Stack implemented with an array as internal storage.
  * Its read method `pop()` and `peek()` is faster than

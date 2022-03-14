@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.file.existsOrNull
+import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -31,7 +32,7 @@ class CFileChooser {
             get() = lastDirectoryProperty.get().existsOrNull()
             set(value) {
                 if (value == null) return
-                if (!value.exists()) return
+                if (value.notExists()) return
                 if (value.isDirectory) lastDirectoryProperty.set(value)
                 else lastDirectoryProperty.set(value.parentFile)
             }

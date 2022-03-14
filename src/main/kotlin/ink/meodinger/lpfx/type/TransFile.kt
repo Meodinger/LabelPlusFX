@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.type
 
+import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -115,7 +116,7 @@ open class TransFile @JsonCreator constructor(
     }
     fun checkLost(): List<String> {
         val lost = ArrayList<String>()
-        picNames.forEach { picture -> if (!getFile(picture).exists()) lost.add(picture) }
+        picNames.forEach { picture -> if (getFile(picture).notExists()) lost.add(picture) }
         return lost
     }
 

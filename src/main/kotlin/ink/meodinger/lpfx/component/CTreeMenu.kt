@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.action.ActionType
+import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGroupNameFormatter
@@ -145,38 +146,35 @@ class CTreeMenu(private val state: State) : ContextMenu() {
     }
     private val gDeleteItem         = MenuItem(I18N["context.delete_group"])
 
-    private val lMoveToHandler      = EventHandler<ActionEvent> {
-        val items = it.source as List<*>
+    private val lMoveToHandler      = EventHandler<ActionEvent> { event ->
+        @Suppress("UNCHECKED_CAST") val items = event.source as List<CTreeLabelItem>
 
-        showChoice(
+        val choice = showChoice(
             state.stage,
             I18N["context.move_to.dialog.title"],
             if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
             state.transFile.groupNames
-        ).ifPresent { newGroupName ->
-            val newGroupId = state.transFile.getGroupIdByName(newGroupName)
+        )
+        if (choice.isPresent) {
+            val newGroupId = state.transFile.getGroupIdByName(choice.get())
 
-            for (item in items) {
-                val labelIndex = (item as CTreeLabelItem).index
-                val groupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
-
-                // Edit data
-                state.doAction(LabelAction(
+            state.doAction(ComplexAction.of(items.map {
+                LabelAction(
                     ActionType.CHANGE, state,
-                    state.currentPicName, state.transFile.getTransLabel(state.currentPicName, labelIndex),
+                    state.currentPicName,
+                    state.transFile.getTransLabel(state.currentPicName, it.index),
                     newGroupId = newGroupId
-                ))
-                // Update view
-                state.controller.moveLabelTreeItem(labelIndex, groupId, newGroupId)
-            }
+                )
+            }))
+            for (item in items) state.controller.moveLabelTreeItem(item.index, newGroupId)
             // Mark change
             state.isChanged = true
         }
     }
     private val lMoveToItem         = MenuItem(I18N["context.move_to"])
 
-    private val lDeleteHandler      = EventHandler<ActionEvent> {
-        val items = it.source as List<*>
+    private val lDeleteHandler      = EventHandler<ActionEvent> { event ->
+        @Suppress("UNCHECKED_CAST") val items = event.source as List<CTreeLabelItem>
 
         val confirm = showConfirm(
             state.stage,
@@ -184,15 +182,15 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             StringBuilder().apply { for (item in items) appendLine((item as CTreeLabelItem).text) }.toString(),
             I18N["context.delete_label.dialog.title"]
         )
-
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-            for (item in items) {
-                val labelIndex = (item as CTreeLabelItem).index
-
-                // Edit data
-                state.removeTransLabel(state.currentPicName, labelIndex)
-                if (state.currentLabelIndex == labelIndex) state.currentLabelIndex = NOT_FOUND
-            }
+            state.doAction(ComplexAction.of(items.map {
+                LabelAction(
+                    ActionType.REMOVE, state,
+                    state.currentPicName,
+                    state.transFile.getTransLabel(state.currentPicName, it.index),
+                )
+            }))
+            state.currentLabelIndex = NOT_FOUND
             // Mark change
             state.isChanged = true
         }

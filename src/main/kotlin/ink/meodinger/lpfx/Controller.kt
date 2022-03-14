@@ -21,6 +21,7 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.transfer
+import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.string.emptyString
@@ -191,19 +192,11 @@ class Controller(private val view: View, private val state: State) {
             var image: Image? = null
             try {
                 val picFile = state.getPicFileNow()
-                if (picFile.exists()) {
-                    image = Image(picFile.toURI().toURL().toString())
-                } else {
-                    val currentPicName = state.currentPicName
-                    Logger.error("Picture `$currentPicName` not exists", LOGSRC_CONTROLLER)
-                    // It's not safe to invoke showAndWait() when the binding is computing requested by layout
-                    Platform.runLater {
-                        showError(state.stage, String.format(I18N["error.picture_not_exists.s"], currentPicName))
-                    }
-                }
+                if (picFile.exists()) image = Image(picFile.toURI().toURL().toString())
             } catch (e: IOException) {
                 Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
                 Logger.exception(e)
+                // It's not safe to invoke showAndWait() when the binding is computing requested by layout
                 Platform.runLater { showException(state.stage, e) }
             }
             return image ?: INIT_IMAGE
@@ -302,10 +295,13 @@ class Controller(private val view: View, private val state: State) {
             val newIndex =
                 if (state.currentLabelIndex != -1) state.currentLabelIndex + 1
                 else state.transFile.getTransList(state.currentPicName).size + 1
-            val transLabel = TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
 
             // Edit data
-            state.addTransLabel(state.currentPicName, transLabel)
+            state.doAction(LabelAction(
+                ActionType.ADD, state,
+                state.currentPicName,
+                TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
+            ))
             // Mark change
             state.isChanged = true
             // Select it
@@ -317,7 +313,11 @@ class Controller(private val view: View, private val state: State) {
             if (state.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
             // Edit data
-            state.removeTransLabel(state.currentPicName, it.labelIndex)
+            state.doAction(LabelAction(
+                ActionType.REMOVE, state,
+                state.currentPicName,
+                state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
+            ))
             // Change state
             if (state.currentLabelIndex == it.labelIndex) state.currentLabelIndex = NOT_FOUND
             // Mark change
@@ -485,10 +485,10 @@ class Controller(private val view: View, private val state: State) {
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
-            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || state.getPicFileNow().notExists()) cLabelPane.moveToCenter()
         })
         cLabelPane.heightProperty().addListener(onChange {
-            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || state.getPicFileNow().notExists()) cLabelPane.moveToCenter()
         })
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
@@ -523,6 +523,14 @@ class Controller(private val view: View, private val state: State) {
         state.currentPicNameProperty().addListener(onNew {
             if (it.isEmpty()) labelInfo("Cleared picture selection")
             else labelInfo("Changed picture to $it")
+
+            if (state.isOpened) {
+                val file = state.transFile.getFile(it)
+                if (file.notExists()) {
+                    Logger.error("Picture `${state.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                    showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
+                }
+            }
         })
         state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) labelInfo("Cleared label selection")
@@ -559,9 +567,7 @@ class Controller(private val view: View, private val state: State) {
             // bind new text property
             cTransArea.bindBidirectional(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
         })
-        Logger.info("Added effect: bind text property on CurrentLabelIndex change",
-            LOGSRC_CONTROLLER
-        )
+        Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
         // Bind Ctrl/Alt/Meta + Scroll with font size change
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
@@ -604,9 +610,7 @@ class Controller(private val view: View, private val state: State) {
         }
         state.currentPicNameProperty().addListener(workProgressListener)
         state.currentLabelIndexProperty().addListener(workProgressListener)
-        Logger.info("Added effect: update work progress on PicName/LabelIndex change",
-            LOGSRC_CONTROLLER
-        )
+        Logger.info("Added effect: update work progress on PicName/LabelIndex change", LOGSRC_CONTROLLER)
     }
     /**
      * Transformations
@@ -771,7 +775,7 @@ class Controller(private val view: View, private val state: State) {
         var completed = true
         for (i in 0 until picCount) {
             val picFile = picFiles[i]
-            if (!picFile.exists()) {
+            if (picFile.notExists()) {
                 completed = false
                 continue
             }
@@ -1098,12 +1102,11 @@ class Controller(private val view: View, private val state: State) {
 
     // ----- Component Methods ----- //
 
-    fun moveLabelTreeItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
+    fun moveLabelTreeItem(labelIndex: Int, dstGroupId: Int) {
+        val oriGroupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
         cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)
 
-        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId",
-            LOGSRC_CONTROLLER
-        )
+        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId", LOGSRC_CONTROLLER)
     }
     fun labelInfo(info: String, source: String = LOGSRC_CONTROLLER) {
         lInfo.text = info

@@ -154,34 +154,6 @@ class State private constructor() {
         Logger.info("Set GroupID=$groupId @color=$color", LOGSRC_STATE)
     }
 
-    fun addPicture(picName: String, picFile: File? = null) {
-        val file = picFile ?: transFile.projectFolder.resolve(picName)
-
-        transFile.addTransList(picName)
-        transFile.setFile(picName, file)
-
-        Logger.info("Added picture $picName with path ${file.path}", LOGSRC_STATE)
-    }
-    fun removePicture(picName: String) {
-        transFile.removeTransList(picName)
-        transFile.removeFile(picName)
-
-        Logger.info("Removed picture $picName", LOGSRC_STATE)
-    }
-
-    fun addTransLabel(picName: String, transLabel: TransLabel) {
-        doAction(LabelAction(
-            ActionType.ADD, this,
-            picName, transLabel
-        ))
-    }
-    fun removeTransLabel(picName: String, labelIndex: Int) {
-        doAction(LabelAction(
-            ActionType.REMOVE, this,
-            picName, transFile.getTransLabel(picName, labelIndex)
-        ))
-    }
-
     /**
      * Get current picture's FileSystem file
      */

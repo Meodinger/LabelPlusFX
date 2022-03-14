@@ -12,3 +12,11 @@ package ink.meodinger.lpfx.util.collection
 fun <K, V> MutableMap<K, V>.removeAll(keys: Collection<K>) {
     keys.forEach(::remove)
 }
+
+fun <K ,V, R> Map<K, V>.map(transformer: (K, V) -> R): List<R> {
+    return map { entry -> transformer(entry.key, entry.value) }
+}
+
+fun <K, V, R, C : MutableList<R>> Map<K, V>.mapTo(destination: C, transformer: (K, V) -> R): C {
+    return mapTo(destination) { entry -> transformer(entry.key, entry.value) }
+}

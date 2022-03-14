@@ -1,6 +1,9 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
+import ink.meodinger.lpfx.action.ActionType
+import ink.meodinger.lpfx.action.ComplexAction
+import ink.meodinger.lpfx.action.PictureAction
 import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.component.properties.ADialogLogs
 import ink.meodinger.lpfx.component.properties.ADialogSettings
@@ -9,9 +12,12 @@ import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
+import ink.meodinger.lpfx.util.collection.addFirst
+import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
+import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.property.BidirectionalListener
 import ink.meodinger.lpfx.util.property.getValue
@@ -63,7 +69,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         val path = item.text
         val file = File(path)
-        if (!file.exists()) {
+        if (file.notExists()) {
             showError(state.stage, String.format(I18N["error.file_not_exist.s"], path))
             RecentFiles.remove(file)
             mOpenRecent.items.remove(item)
@@ -289,7 +295,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                     }
                     if (it.wasAdded()) {
                         it.addedSubList.forEach { file ->
-                            mOpenRecent.items.add(MenuItem(file.path) does { openRecentTranslation(this) })
+                            mOpenRecent.items.addFirst(MenuItem(file.path) does { openRecentTranslation(this) })
                         }
                     }
                 }
@@ -390,9 +396,9 @@ class CMenuBar(private val state: State) : MenuBar() {
             val picNames = state.transFile.sortedPicNames
 
             // Edit date
-            val toAdd = HashSet<String>()
+            val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
-            val toRemove = HashSet<String>()
+            val toRemove = ArrayList<String>()
             for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
 
             if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
@@ -401,9 +407,10 @@ class CMenuBar(private val state: State) : MenuBar() {
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
-            for (picName in toAdd) state.addPicture(picName)
-            for (picName in toRemove) state.removePicture(picName)
-
+            state.doAction(ComplexAction.of(
+                toAdd.map { picName -> PictureAction(ActionType.ADD, state, picName) },
+                toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
+            ))
             state.currentPicName = state.transFile.sortedPicNames[0]
             // Mark change
             state.isChanged = true
@@ -422,7 +429,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
 
             // Edit data
-            state.addPicture(picName, file)
+            state.doAction(PictureAction(ActionType.ADD, state, picName, file))
             // Mark Change
             state.isChanged = true
         }

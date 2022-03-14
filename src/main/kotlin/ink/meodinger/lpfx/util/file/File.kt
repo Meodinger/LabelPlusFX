@@ -22,7 +22,7 @@ import java.io.IOException
  */
 @Throws(IOException::class)
 fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
-    if (!ori.exists()) throw IOException(String.format(I18N["exception.io.file_not_exists.s"], ori))
+    if (ori.notExists()) throw IOException(String.format(I18N["exception.io.file_not_exists.s"], ori))
     if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["exception.io.cannot_transfer_directory"])
     if (!overwrite && dst.exists()) throw IOException(String.format(I18N["exception.io.overwrite_disable.s"], dst))
 
@@ -46,3 +46,9 @@ fun File?.existsOrNull(): File? = takeIf { this != null && this.exists() }
  */
 @Throws(IOException::class)
 fun File?.existsOrElse(default: File): File = existsOrNull() ?: default
+
+/**
+ * Alias for !exists()
+ */
+@Throws(SecurityException::class)
+fun File.notExists(): Boolean = !exists()

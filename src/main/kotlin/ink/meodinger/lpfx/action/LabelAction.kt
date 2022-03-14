@@ -28,11 +28,11 @@ import ink.meodinger.lpfx.util.string.replaceLineFeed
  * is passed non-default value will be used to update the target
  * TransLabel's properties.
  *
- * @see AbstractAction
+ * @see Action
  */
 class LabelAction(
-    actionType: ActionType,
-    state: State,
+    override val type: ActionType,
+    private val state: State,
     private val targetPicName: String,
     private val targetTransLabel: TransLabel,
     private val newLabelIndex: Int = NOT_FOUND,
@@ -40,7 +40,7 @@ class LabelAction(
     private val newX: Double = Double.NaN,
     private val newY: Double = Double.NaN,
     private val newText: String = emptyString()
-) : AbstractAction(actionType, state) {
+) : Action {
 
     private val oriLabelIndex: Int = targetTransLabel.index
     private val oriGroupId: Int = targetTransLabel.groupId

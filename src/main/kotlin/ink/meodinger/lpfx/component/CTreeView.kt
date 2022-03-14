@@ -197,16 +197,16 @@ class CTreeView: TreeView<String>() {
         select(getLabelItem(labelIndex), scrollTo)
     }
 
-    fun moveLabelItem(labelIndex: Int, from: Int, to: Int) {
+    fun moveLabelItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
         when (viewMode) {
             ViewMode.IndexMode -> return
             ViewMode.GroupMode -> {
                 val labelItem = getLabelItem(labelIndex)
 
-                groupItems[from].children.remove(labelItem)
-                labelItems[from].remove(labelItem)
-                groupItems[to].children.add(labelItem)
-                labelItems[to].add(labelItem)
+                groupItems[oriGroupId].children.remove(labelItem)
+                labelItems[oriGroupId].remove(labelItem)
+                groupItems[dstGroupId].children.add(labelItem)
+                labelItems[dstGroupId].add(labelItem)
             }
         }
     }

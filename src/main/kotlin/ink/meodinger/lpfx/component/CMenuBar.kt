@@ -87,10 +87,10 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Dialogs ----- //
 
-    private val cheatSheet     = CCheatSheet(state.application.hostServices)
-    private val onlineDict     = COnlineDict()
-    private val dialogLogs     = ADialogLogs()
-    private val dialogSettings = ADialogSettings()
+    private val cheatSheet     by lazy { CCheatSheet(state.application.hostServices) }
+    private val onlineDict     by lazy { COnlineDict() }
+    private val dialogLogs     by lazy { ADialogLogs() }
+    private val dialogSettings by lazy { ADialogSettings() }
 
     // ----- Choosers ----- //
 
@@ -155,12 +155,12 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             separator()
             item(I18N["m.save"]) {
                 does { saveTranslation() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -168,7 +168,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
             item(I18N["m.save_as"]) {
                 does { saveAsTranslation() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.SHIFT_DOWN,
@@ -205,26 +205,26 @@ class CMenuBar(private val state: State) : MenuBar() {
             separator()
             item(I18N["m.comment"]) {
                 does { editComment() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             separator()
             item(I18N["m.projectPics"]) {
                 does { editProjectPictures() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             item(I18N["m.externalPic"]) {
                 does { addExternalPicture() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             item(I18N["m.specify"]) {
                 does { specifyPictures() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
         }
         menu(I18N["mm.export"]) {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
@@ -232,7 +232,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
             item(I18N["m.meo"]) {
                 does { exportTransFile(FileType.MeoFile) }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.E,
                     KeyCombination.SHIFT_DOWN,
@@ -242,7 +242,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             separator()
             item(I18N["m.pack"]) {
                 does { exportTransPack() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(
                     KeyCode.S,
                     KeyCombination.ALT_DOWN,
@@ -285,11 +285,11 @@ class CMenuBar(private val state: State) : MenuBar() {
             separator()
             item(I18N["m.cht2zh"]) {
                 does { cht2zh() }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             item(I18N["m.zh2cht"]) {
                 does { cht2zh(true) }
-                disableProperty().bind(!state.isOpenedProperty())
+                disableProperty().bind(!state.openedProperty())
             }
             separator()
             checkItem(I18N["m.stats_bar"]) {

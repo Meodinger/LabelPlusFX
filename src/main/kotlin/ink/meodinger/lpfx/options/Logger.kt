@@ -44,7 +44,7 @@ object Logger {
     private lateinit var writer: Writer
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
-    // Maybe use for
+    // Maybe
     // private var depth = 0
     // private var mark = depth
 
@@ -87,6 +87,14 @@ object Logger {
         isStarted = false
 
         println("<Logger>: Exit")
+    }
+
+    private var time: Long = 0
+    fun tic() {
+        time = Date().time
+    }
+    fun toc() {
+        info("Used ${Date().time - time}ms", LOGSRC_LOGGER)
     }
 
     private fun log(type: LogLevel, text: String, from: String) {

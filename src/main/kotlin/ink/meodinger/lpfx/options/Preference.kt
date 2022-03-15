@@ -58,7 +58,7 @@ object Preference : AbstractProperties("Preference") {
 
     private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty()
     fun showStatsBarProperty(): BooleanProperty = showStatsBarProperty
-    var showStatsBar: Boolean by showStatsBarProperty
+    var isShowStatsBar: Boolean by showStatsBarProperty
 
     private val lastUpdateNoticeProperty: LongProperty = SimpleLongProperty()
     fun lastUpdateNoticeProperty(): LongProperty = lastUpdateNoticeProperty
@@ -76,7 +76,7 @@ object Preference : AbstractProperties("Preference") {
         mainDividerPosition = this[MAIN_DIVIDER].asDouble()
         rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
         textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
-        showStatsBar = this[SHOW_STATS_BAR].asBoolean()
+        isShowStatsBar = this[SHOW_STATS_BAR].asBoolean()
         lastUpdateNotice = this[LAST_UPDATE_NOTICE].asLong()
     }
 
@@ -86,7 +86,7 @@ object Preference : AbstractProperties("Preference") {
         this[MAIN_DIVIDER].set(mainDividerPosition)
         this[RIGHT_DIVIDER].set(rightDividerPosition)
         this[TEXTAREA_FONT_SIZE].set(textAreaFont.size)
-        this[SHOW_STATS_BAR].set(showStatsBar)
+        this[SHOW_STATS_BAR].set(isShowStatsBar)
         this[LAST_UPDATE_NOTICE].set(lastUpdateNotice)
 
         save(Options.preference, this)

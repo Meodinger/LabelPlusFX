@@ -57,7 +57,7 @@ class TimerTaskManager(
      * This boolean will be true if the task is scheduled and running,
      * and will be false when the task is not scheduled or cancelled.
      */
-    var running: Boolean by runningProperty
+    var isRunning: Boolean by runningProperty
         private set
 
     private val delayProperty: LongProperty = SimpleLongProperty(delay)
@@ -65,7 +65,7 @@ class TimerTaskManager(
     var delay: Long
         get() = delayProperty.get()
         set(value) {
-            if (running) throw IllegalStateException("You cannot change the delay when task is running")
+            if (isRunning) throw IllegalStateException("You cannot change the delay when task is running")
             if (value < 0) throw IllegalArgumentException("Delay must not be negative")
             delayProperty.set(value)
         }
@@ -75,26 +75,26 @@ class TimerTaskManager(
     var period: Long
         get() = periodProperty.get()
         set(value) {
-            if (running) throw IllegalStateException("You cannot change the period when task is running")
+            if (isRunning) throw IllegalStateException("You cannot change the period when task is running")
             if (value < 0) throw IllegalArgumentException("Period must not be negative")
             periodProperty.set(value)
         }
 
     fun schedule() {
         // if (running) throw IllegalStateException("Task already scheduled")
-        if (running) return
+        if (isRunning) return
 
         schedule(timerTask, delay, period)
-        running = true
+        isRunning = true
     }
 
     fun clear() {
         // if (!running) throw IllegalStateException("Task not running")
-        if (!running) return
+        if (!isRunning) return
 
         timerTask.cancel()
         purge()
-        running = false
+        isRunning = false
 
         // Re-generate the timer task for the next turn
         timerTask = genTask(_task)

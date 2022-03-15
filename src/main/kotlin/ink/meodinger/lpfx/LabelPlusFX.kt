@@ -35,6 +35,8 @@ class LabelPlusFX: HookedApplication() {
     private val state: State = State.getInstance()
 
     init {
+        Logger.tic()
+
         Logger.info("App initializing...", LOGSRC_APPLICATION)
 
         Options.load()
@@ -86,6 +88,8 @@ class LabelPlusFX: HookedApplication() {
         controller.labelInfo(I18N["common.ready"], LOGSRC_APPLICATION)
 
         if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE)) controller.checkUpdate()
+
+        Logger.toc()
     }
 
     override fun exit() {

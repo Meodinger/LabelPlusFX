@@ -36,63 +36,63 @@ class State private constructor() {
     lateinit var controller: Controller
     lateinit var stage: Stage
 
-    private val isOpenedProperty = SimpleBooleanProperty(false)
-    fun isOpenedProperty(): BooleanProperty = isOpenedProperty
+    private val openedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun openedProperty(): BooleanProperty = openedProperty
     /**
      * Whether opened a TransFile or not
      */
-    var isOpened: Boolean by isOpenedProperty
+    var isOpened: Boolean by openedProperty
 
-    private val isChangedProperty = SimpleBooleanProperty(false)
-    fun isChangedProperty(): BooleanProperty = isChangedProperty
+    private val changedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun changedProperty(): BooleanProperty = changedProperty
     /**
      * Whether changed a TransFile or not
      */
-    var isChanged: Boolean by isChangedProperty
+    var isChanged: Boolean by changedProperty
 
-    private val transFileProperty = SimpleObjectProperty(TransFile.DEFAULT_TRANS_FILE)
+    private val transFileProperty: ObjectProperty<TransFile> = SimpleObjectProperty(TransFile.DEFAULT_TRANS_FILE)
     fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
     /**
      * The opened TransFile
      */
     var transFile: TransFile by transFileProperty
 
-    private val translationFileProperty = SimpleObjectProperty(DEFAULT_FILE)
+    private val translationFileProperty: ObjectProperty<File> = SimpleObjectProperty(DEFAULT_FILE)
     fun translationFileProperty(): ObjectProperty<File> = translationFileProperty
     /**
      * The FileSystem file of the opened TransFile
      */
     var translationFile: File by translationFileProperty
 
-    private val currentGroupIdProperty = SimpleIntegerProperty(NOT_FOUND)
+    private val currentGroupIdProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
     /**
      * Index of current selected TransGroup
      */
     var currentGroupId: Int by currentGroupIdProperty
 
-    private val currentPicNameProperty = SimpleStringProperty(emptyString())
+    private val currentPicNameProperty: StringProperty = SimpleStringProperty(emptyString())
     fun currentPicNameProperty(): StringProperty = currentPicNameProperty
     /**
      * Name of current selected picture (usually also picture's FileSystem file's name)
      */
     var currentPicName: String by currentPicNameProperty
 
-    private val currentLabelIndexProperty = SimpleIntegerProperty(NOT_FOUND)
+    private val currentLabelIndexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun currentLabelIndexProperty(): IntegerProperty = currentLabelIndexProperty
     /**
      * Index of current selected TransLabel
      */
     var currentLabelIndex: Int by currentLabelIndexProperty
 
-    private val viewModeProperty = SimpleObjectProperty(ViewMode.IndexMode)
+    private val viewModeProperty: ObjectProperty<ViewMode> = SimpleObjectProperty(ViewMode.IndexMode)
     fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
     /**
      * Current view mode
      */
     var viewMode: ViewMode by viewModeProperty
 
-    private val workModeProperty = SimpleObjectProperty(WorkMode.InputMode)
+    private val workModeProperty: ObjectProperty<WorkMode> = SimpleObjectProperty(WorkMode.InputMode)
     fun workModeProperty(): ObjectProperty<WorkMode> = workModeProperty
     /**
      * Current work mode

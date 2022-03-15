@@ -5,9 +5,7 @@ import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CLigatureArea
 import ink.meodinger.lpfx.component.common.CTextSlider
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.*
 
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -16,6 +14,7 @@ import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.control.Separator
 import javafx.scene.control.SplitPane
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
@@ -32,13 +31,15 @@ import javafx.scene.layout.Priority
 /**
  * Main View
  */
-class View(private val state: State) : BorderPane() {
+class View(state: State) : BorderPane() {
 
     val menuBar         = CMenuBar(state)
     val bSwitchViewMode = Button()
     val bSwitchWorkMode = Button()
-    val lInfo           = Label()
     val statsBar        = HBox()
+    val lInfo           = Label()
+    val lBackup         = Label()
+    val lAccEditTime    = Label()
     val pMain           = SplitPane()
     val pRight          = SplitPane()
     val cGroupBar       = CGroupBar()
@@ -107,9 +108,25 @@ class View(private val state: State) : BorderPane() {
             }
         }
 
-        with(statsBar) {
+        statsBar.apply {
+            val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
             add(lInfo) {
-                padding = Insets(4.0, 8.0, 4.0, 8.0)
+                padding = generalPadding
+                prefWidthProperty().bind(statsBar.widthProperty() * 0.60)
+            }
+            add(Separator()) {
+                orientation = Orientation.VERTICAL
+            }
+            add(lBackup) {
+                padding = generalPadding
+                prefWidthProperty().bind(statsBar.widthProperty() * 0.20)
+            }
+            add(Separator()) {
+                orientation = Orientation.VERTICAL
+            }
+            add(lAccEditTime) {
+                padding = generalPadding
+                prefWidthProperty().bind(statsBar.widthProperty() * 0.20)
             }
         }
 

@@ -57,7 +57,7 @@ class CGroup(
 
     private val selectedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun selectedProperty(): BooleanProperty = selectedProperty
-    var selected: Boolean by selectedProperty
+    var isSelected: Boolean by selectedProperty
 
     private val onSelectProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
     fun onSelectProperty(): ObjectProperty<EventHandler<ActionEvent>> = onSelectProperty
@@ -74,7 +74,7 @@ class CGroup(
         addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
 
         backgroundProperty().bind(Bindings.createObjectBinding({
-            if (selected) Background(BackgroundFill(
+            if (isSelected) Background(BackgroundFill(
                 Color.LIGHTGRAY,
                 CornerRadii(CORNER_RADII),
                 Insets(0.0)
@@ -116,10 +116,10 @@ class CGroup(
     }
 
     fun select() {
-        selected = true
+        isSelected = true
     }
 
     fun unselect() {
-        selected = false
+        isSelected = false
     }
 }

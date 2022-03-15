@@ -47,6 +47,8 @@ import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.IOException
 import java.net.*
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.LinkedHashMap
@@ -64,6 +66,8 @@ import kotlin.collections.LinkedHashMap
 class Controller(private val view: View, private val state: State) {
 
     companion object {
+        private const val ONE_SCEND = 1000L
+
         /**
          * Auto-save
          */
@@ -76,6 +80,8 @@ class Controller(private val view: View, private val state: State) {
     private val bSwitchViewMode: Button      = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button      = view.bSwitchWorkMode does { switchWorkMode() }
     private val lInfo: Label                 = view.lInfo
+    private val lBackup: Label               = view.lBackup.apply { text = I18N["stats.not_backed"] }
+    private val lAccEditTime: Label          = view.lAccEditTime
     private val pMain: SplitPane             = view.pMain
     private val pRight: SplitPane            = view.pRight
     private val cGroupBar: CGroupBar         = view.cGroupBar
@@ -86,11 +92,15 @@ class Controller(private val view: View, private val state: State) {
     private val cTreeView: CTreeView         = view.cTreeView
     private val cTransArea: CLigatureArea    = view.cTransArea
 
+    private val backupFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (state.isChanged) {
             val bak = state.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
             try {
                 export(bak, FileType.MeoFile, state.transFile)
+                Platform.runLater {
+                    lBackup.text = String.format(I18N["stats.last_backup.s"], backupFormatter.format(Date()))
+                }
                 Logger.info("Backed TransFile", LOGSRC_CONTROLLER)
             } catch (e: IOException) {
                 Logger.error("Auto-backup failed", LOGSRC_CONTROLLER)
@@ -98,6 +108,17 @@ class Controller(private val view: View, private val state: State) {
             }
         }
     }
+
+    private var accumulator: Long = 16 * 60 * 60 * ONE_SCEND
+    private val accumulatorFormatter = SimpleDateFormat("HH:mm:ss")
+    private val accumulatorManager = TimerTaskManager(0, ONE_SCEND) {
+        if (state.isOpened) {
+            accumulator += ONE_SCEND
+            Platform.runLater {
+                lAccEditTime.text = String.format(I18N["stats.accumulator.s"], accumulatorFormatter.format(accumulator))
+            }
+        }
+    }.schedule()
 
     private fun genPicNamesBinding(): ObjectBinding<ObservableList<String>> {
         return object : ObjectBinding<ObservableList<String>>() {
@@ -393,14 +414,14 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Bound recent files menu", LOGSRC_CONTROLLER)
 
         // Set components disabled
-        bSwitchViewMode.disableProperty().bind(!state.isOpenedProperty())
-        bSwitchWorkMode.disableProperty().bind(!state.isOpenedProperty())
-        cTransArea.disableProperty().bind(!state.isOpenedProperty())
-        cTreeView.disableProperty().bind(!state.isOpenedProperty())
-        cPicBox.disableProperty().bind(!state.isOpenedProperty())
-        cGroupBox.disableProperty().bind(!state.isOpenedProperty())
-        cSlider.disableProperty().bind(!state.isOpenedProperty())
-        cLabelPane.disableProperty().bind(!state.isOpenedProperty())
+        bSwitchViewMode.disableProperty().bind(!state.openedProperty())
+        bSwitchWorkMode.disableProperty().bind(!state.openedProperty())
+        cTransArea.disableProperty().bind(!state.openedProperty())
+        cTreeView.disableProperty().bind(!state.openedProperty())
+        cPicBox.disableProperty().bind(!state.openedProperty())
+        cGroupBox.disableProperty().bind(!state.openedProperty())
+        cSlider.disableProperty().bind(!state.openedProperty())
+        cLabelPane.disableProperty().bind(!state.openedProperty())
         Logger.info("Bound disabled", LOGSRC_CONTROLLER)
 
         // CLigatureTextArea - rules
@@ -1105,6 +1126,7 @@ class Controller(private val view: View, private val state: State) {
     fun reset() {
         backupManager.clear()
 
+        lBackup.text = I18N["stats.not_backed"]
         cTransArea.unbindBidirectional()
 
         state.stage.title = INFO["application.name"]

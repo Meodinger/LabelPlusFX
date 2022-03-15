@@ -37,9 +37,9 @@ class CInputLabel : Pane() {
     fun textFormatterProperty(): ObjectProperty<TextFormatter<String>> = textFormatterProperty
     var textFormatter: TextFormatter<String> by textFormatterProperty
 
-    private val isEditingProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun editingProperty(): BooleanProperty = isEditingProperty
-    var isEditing: Boolean by isEditingProperty
+    private val editingProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun editingProperty(): BooleanProperty = editingProperty
+    var isEditing: Boolean by editingProperty
 
     private val labelTextProperty: StringProperty = label.textProperty()
     fun labelTextProperty(): StringProperty = labelTextProperty
@@ -92,7 +92,7 @@ class CInputLabel : Pane() {
         field.prefHeightProperty().bind(prefHeightProperty())
         field.textFormatterProperty().bind(textFormatterProperty)
 
-        isEditingProperty.addListener(onNew {
+        editingProperty.addListener(onNew {
             children.clear()
             children.add(if (it) field else label)
         })

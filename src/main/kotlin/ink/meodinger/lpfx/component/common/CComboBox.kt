@@ -43,9 +43,9 @@ class CComboBox<T> : HBox() {
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
-    private val isWrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun wrappedProperty(): BooleanProperty = isWrappedProperty
-    var isWrapped: Boolean by isWrappedProperty
+    private val wrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun wrappedProperty(): BooleanProperty = wrappedProperty
+    var isWrapped: Boolean by wrappedProperty
 
     init {
         BidirectionalListener.listen(

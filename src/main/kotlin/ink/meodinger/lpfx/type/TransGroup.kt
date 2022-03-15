@@ -20,11 +20,11 @@ import javafx.beans.property.StringProperty
  */
 @JsonIncludeProperties("name", "color")
 class TransGroup @JsonCreator constructor(
-    @JsonProperty("name")  name:     String = "NewGroup@${index++}",
+    @JsonProperty("name")  name:     String = "NewGroup@${ACC++}",
     @JsonProperty("color") colorHex: String = "66CCFF"
 ) {
     companion object {
-        private var index = 0
+        private var ACC = 0
     }
 
     // ----- Exception ----- //

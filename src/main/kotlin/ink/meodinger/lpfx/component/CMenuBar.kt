@@ -14,7 +14,6 @@ import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.collection.addFirst
-import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
@@ -27,7 +26,6 @@ import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
-import ink.meodinger.lpfx.util.string.replaceLineFeed
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
@@ -187,6 +185,24 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
         }
         menu(I18N["mm.edit"]) {
+            item(I18N["m.undo"]) {
+                does { state.undo() }
+                disableProperty().bind(!state.canUndoProperty())
+                accelerator = KeyCodeCombination(
+                    KeyCode.Z,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
+            }
+            item(I18N["m.redo"]) {
+                does { state.redo() }
+                disableProperty().bind(!state.canRedoProperty())
+                accelerator = KeyCodeCombination(
+                    KeyCode.Z,
+                    KeyCombination.SHIFT_DOWN,
+                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                )
+            }
+            separator()
             item(I18N["m.comment"]) {
                 does { editComment() }
                 disableProperty().bind(!state.isOpenedProperty())

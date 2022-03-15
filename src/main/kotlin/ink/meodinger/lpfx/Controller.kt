@@ -283,6 +283,16 @@ class Controller(private val view: View, private val state: State) {
         view.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
+        // Undo/Redo
+        view.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (!it.isConsumed) if (it.isControlOrMetaDown && it.code == KeyCode.Z) {
+                if (it.isShiftDown) state.redo() else state.undo()
+            }
+        }
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.isControlOrMetaDown && it.code == KeyCode.Z) it.consume()
+        }
+
         // Register CGroupBar handler
         cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
         Logger.info("Registered CGroupBar Handler", LOGSRC_CONTROLLER)

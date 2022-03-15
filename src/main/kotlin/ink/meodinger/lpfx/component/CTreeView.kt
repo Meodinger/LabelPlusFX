@@ -71,7 +71,9 @@ class CTreeView: TreeView<String>() {
                     throw IllegalStateException("Updated: $it")
                 } else {
                     if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
-                    if (it.wasAdded()) it.addedSubList.forEach(this::createGroupItem)
+                    if (it.wasAdded()) it.addedSubList.forEach { group ->
+                        createGroupItem(group, index = it.list.indexOf(group))
+                    }
                 }
             }
         })
@@ -97,7 +99,7 @@ class CTreeView: TreeView<String>() {
         for (transGroup in groups) createGroupItem(transGroup, toMode)
         for (transLabel in labels) createLabelItem(transLabel, toMode)
     }
-    private fun createGroupItem(transGroup: TransGroup, viewMode: ViewMode = this.viewMode) {
+    private fun createGroupItem(transGroup: TransGroup, viewMode: ViewMode = this.viewMode, index: Int = groupItems.size) {
         labelItems.add(ArrayList())
 
         val groupItem = CTreeGroupItem().apply {
@@ -109,13 +111,13 @@ class CTreeView: TreeView<String>() {
         }
 
         // Add data
-        groupItems.add(groupItem)
+        groupItems.add(index, groupItem)
 
         // In IndexMode registration is enough
         if (viewMode == ViewMode.IndexMode) return
 
         // Add view
-        root.children.add(groupItem)
+        root.children.add(index, groupItem)
     }
     private fun removeGroupItem(transGroup: TransGroup, viewMode: ViewMode = this.viewMode) {
         val groupId = groupItems.indexOfFirst { it.name == transGroup.name }

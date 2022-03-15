@@ -64,7 +64,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(state.stage)
 
         val nameList = Settings.defaultGroupNameList
-        val colorHexList = Settings.defaultGroupColorHexList.ifEmpty { TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST }
+        val colorHexList = TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST
 
         val newGroupId = state.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)

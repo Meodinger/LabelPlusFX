@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.action
 
 import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.LOGSRC_STATE
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransGroup
@@ -35,6 +36,8 @@ class GroupAction(
     private val newColorHex: String = emptyString(),
 ) : Action {
 
+    private val oriId: Int =
+        if (type == ActionType.REMOVE) state.transFile.getGroupIdByName(targetTransGroup.name) else NOT_FOUND
     private val oriName: String = targetTransGroup.name
     private val oriColorHex: String = targetTransGroup.colorHex
 
@@ -50,8 +53,11 @@ class GroupAction(
 
         Logger.info(builder.deleteTailLF().toString(), LOGSRC_ACTION)
     }
-    private fun addTransGroup(transGroup: TransGroup) {
-        state.transFile.addTransGroup(transGroup)
+    private fun addTransGroup(transGroup: TransGroup, groupId: Int = NOT_FOUND) {
+        if (groupId != NOT_FOUND)
+            state.transFile.groupListObservable.add(groupId, transGroup)
+        else
+            state.transFile.addTransGroup(transGroup)
 
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
@@ -76,7 +82,7 @@ class GroupAction(
     override fun revert() {
         when (type) {
             ActionType.ADD    -> removeTransGroup(targetTransGroup)
-            ActionType.REMOVE -> addTransGroup(targetTransGroup)
+            ActionType.REMOVE -> addTransGroup(targetTransGroup, oriId)
             ActionType.CHANGE -> applyGroupProps(oriName, oriColorHex)
         }
     }

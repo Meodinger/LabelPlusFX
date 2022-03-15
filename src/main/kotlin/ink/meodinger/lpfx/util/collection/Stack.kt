@@ -44,7 +44,10 @@ interface Stack<E> {
 
 }
 
-fun <E> Stack<E>.isNotEmpty(): Boolean = isEmpty()
+/**
+ * Alias fot !isEmpty()
+ */
+fun <E> Stack<E>.isNotEmpty(): Boolean = !isEmpty()
 
 /**
  * A Stack implemented with an array as internal storage.

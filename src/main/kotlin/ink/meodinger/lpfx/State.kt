@@ -1,13 +1,9 @@
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.action.Action
-import ink.meodinger.lpfx.action.ActionType
-import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.collection.ArrayStack
 import ink.meodinger.lpfx.util.collection.Stack
@@ -15,7 +11,6 @@ import ink.meodinger.lpfx.util.collection.isNotEmpty
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString
-import ink.meodinger.lpfx.util.string.replaceLineFeed
 
 import javafx.beans.property.*
 import javafx.stage.Stage
@@ -150,17 +145,34 @@ class State private constructor() {
     private val undoStack: Stack<Action> = ArrayStack()
     private val redoStack: Stack<Action> = ArrayStack()
 
+    private val canUndoProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun canUndoProperty(): ReadOnlyBooleanProperty = canUndoProperty
+    val canUndo: Boolean by canUndoProperty
+
+    private val canRedoProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun canRedoProperty(): ReadOnlyBooleanProperty = canRedoProperty
+    val canRedo: Boolean by canRedoProperty
+
     fun doAction(action: Action) {
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
+
+        canUndoProperty.set(true)
+        canRedoProperty.set(false)
     }
 
     fun undo() {
         if (undoStack.isNotEmpty()) redoStack.push(undoStack.pop().apply(Action::revert))
+
+        canUndoProperty.set(undoStack.isNotEmpty())
+        canRedoProperty.set(true)
     }
 
     fun redo() {
         if (redoStack.isNotEmpty()) undoStack.push(redoStack.pop().apply(Action::commit))
+
+        canUndoProperty.set(true)
+        canRedoProperty.set(redoStack.isNotEmpty())
     }
 
 }

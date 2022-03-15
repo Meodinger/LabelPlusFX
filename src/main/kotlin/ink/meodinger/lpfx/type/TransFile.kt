@@ -140,8 +140,8 @@ open class TransFile @JsonCreator constructor(
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
 
     val groupCount: Int get() = groupListObservable.size
-    val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
-    val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
+    val groupNames: List<String> get() = List(groupListObservable.size) { getTransGroup(it).name }
+    val groupColors: List<String> get() = List(groupListObservable.size) { getTransGroup(it).colorHex }
 
     /// NOTE: sortedPicNames is slow, find a way to make it faster (maybe use ReLazy)
     val picCount: Int get() = transMapObservable.size
@@ -233,7 +233,7 @@ open class TransFile @JsonCreator constructor(
 
     // ----- Other ----- //
 
-    fun clone(): TransFile {
+    fun sorted(): TransFile {
         val version = this.version.clone()
         val comment = this.comment
         val groupList = MutableList(groupListObservable.size) { groupListObservable[it].clone() }

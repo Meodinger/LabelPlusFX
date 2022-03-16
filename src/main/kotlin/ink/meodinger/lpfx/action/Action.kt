@@ -46,11 +46,11 @@ class ComplexAction(private val actions: List<Action>) : Action {
     override val type: ActionType get() = throw UnsupportedOperationException("ActionType is not fit to ComplexAction")
 
     override fun commit() {
-        for (i in actions.indices) actions[i].commit()
+        actions.forEach(Action::commit)
     }
 
     override fun revert() {
-        for (i in actions.indices.reversed()) actions[i].revert()
+        actions.reversed().forEach(Action::revert)
     }
 
 }

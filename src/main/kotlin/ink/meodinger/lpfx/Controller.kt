@@ -231,6 +231,7 @@ class Controller(private val view: View, private val state: State) {
     }
     private fun switchWorkMode() {
         state.workMode = WorkMode.values()[(state.workMode.ordinal + 1) % WorkMode.values().size]
+        state.viewMode = Settings.viewModes[state.workMode.ordinal]
         labelInfo("Switched work mode to ${state.workMode}")
     }
 
@@ -498,7 +499,8 @@ class Controller(private val view: View, private val state: State) {
             it.colorHexProperty
         }))
         cLabelPane.labelRadiusProperty().bind(Settings.labelRadiusProperty())
-        cLabelPane.labelOpacityProperty().bind(Settings.labelOpacityProperty())
+        cLabelPane.labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
+        cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding({
             when (state.workMode) {

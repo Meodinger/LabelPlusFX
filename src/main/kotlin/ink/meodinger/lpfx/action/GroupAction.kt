@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.LOGSRC_STATE
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.string.deleteTailLF
 import ink.meodinger.lpfx.util.string.emptyString
@@ -53,18 +54,22 @@ class GroupAction(
 
         Logger.info(builder.deleteTailLF().toString(), LOGSRC_ACTION)
     }
-    private fun addTransGroup(transGroup: TransGroup, groupId: Int = NOT_FOUND) {
-        if (groupId != NOT_FOUND)
-            state.transFile.groupListObservable.add(groupId, transGroup)
-        else
-            state.transFile.addTransGroup(transGroup)
+    private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
+        for (group in state.transFile.groupListObservable)
+            if (group.name == transGroup.name)
+                throw TransFile.TransFileException.transGroupNameRepeated(transGroup.name)
+
+        state.transFile.groupListObservable.add(groupId, transGroup)
+
+        // We don't need to restore labels' groupId changes because
+        // only when no labels using this group can it be removed.
 
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
     private fun removeTransGroup(transGroup: TransGroup) {
         val toRemoveId = state.transFile.getGroupIdByName(transGroup.name)
 
-        state.transFile.removeTransGroup(toRemoveId)
+        state.transFile.groupListObservable.removeAt(toRemoveId)
         for (picName in state.transFile.picNames) for (label in state.transFile.getTransList(picName))
             if (label.groupId >= toRemoveId) label.groupId--
 
@@ -73,7 +78,7 @@ class GroupAction(
 
     override fun commit() {
         when (type) {
-            ActionType.ADD    -> addTransGroup(targetTransGroup)
+            ActionType.ADD    -> addTransGroup(targetTransGroup, state.transFile.groupCount)
             ActionType.REMOVE -> removeTransGroup(targetTransGroup)
             ActionType.CHANGE -> applyGroupProps(newName, newColorHex)
         }

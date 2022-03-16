@@ -68,12 +68,13 @@ class ADialogSettings : AbstractPropertiesDialog() {
     private val mComboLabel = CComboBox<ViewMode>()
     private val mComboScale = CComboBox<CLabelPane.NewPictureScale>()
 
-    private val lCLabel = CLabel(index = 8, color = Color.RED)
+    private val lCLabel = CLabel(labelIndex = 8, labelColor = Color.RED)
     private val lLabelPane = AnchorPane()
     private val lSliderRadius = Slider()
     private val lSliderAlpha = Slider()
     private val lLabelRadius = CInputLabel()
     private val lLabelAlpha = CInputLabel()
+    private val lTextOpaqueCheckBox = CheckBox(I18N["settings.label.text_opaque"])
 
     private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
     private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
@@ -170,13 +171,14 @@ class ADialogSettings : AbstractPropertiesDialog() {
                     hgap = COMMON_GAP
 
                     // lGridPane.isGridLinesVisible = true
-                    //   0         1           2
-                    // 0 --------  Radius
-                    // 1 |      |  ----O------ 24.0
-                    // 2 |      |  Alpha
-                    // 3 |      |  ------O---- 0x80
-                    // 4 --------  *TEXT*
-                    add(lLabelPane, 0, 0, 1, 5) {
+                    //   0           1           2
+                    // 0 ----------  Radius
+                    // 1 |        |  ----O------ 24.0
+                    // 2 |        |  Alpha
+                    // 3 |        |  ------O---- 0x80
+                    // 4 |        |  O TextOpaque
+                    // 5 ----------    *HTLP TEXT*
+                    add(lLabelPane, 0, 0, 1, 6) {
                         val lLabelPaneBorderWidth = 2.0
 
                         border = Border(BorderStroke(
@@ -195,10 +197,11 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         setPrefSize(320.0, 320.0)
                         add(lCLabel) {
                             radiusProperty().bind(lSliderRadius.valueProperty())
-                            opacityProperty().bind(Bindings.createDoubleBinding(
+                            colorOpacityProperty().bind(Bindings.createDoubleBinding(
                                 { lSliderAlpha.value / 255 },
                                 lSliderAlpha.valueProperty()
                             ))
+                            textOpaqueProperty().bind(lTextOpaqueCheckBox.selectedProperty())
                             // Draggable & drag-limitation
                             var shiftX = 0.0
                             var shiftY = 0.0
@@ -238,10 +241,6 @@ class ADialogSettings : AbstractPropertiesDialog() {
                                 if (anchorPaneTop > limitY) anchorPaneTop = limitY
                             })
                         }
-                    }
-                    add(Label(I18N["settings.label.helpText"]), 1, 4, 2, 1) {
-                        isWrapText = true
-                        textAlignment = TextAlignment.CENTER
                     }
                     add(Label(I18N["settings.label.radius"]), 1, 0)
                     add(lSliderRadius, 1, 1) {
@@ -316,6 +315,11 @@ class ADialogSettings : AbstractPropertiesDialog() {
 
                             labelText = "0x$alphaStr"
                         }
+                    }
+                    add(lTextOpaqueCheckBox, 1, 4, 2, 1)
+                    add(Label(I18N["settings.label.helpText"]), 1, 5, 2, 1) {
+                        isWrapText = true
+                        textAlignment = TextAlignment.CENTER
                     }
                 }
             }
@@ -487,8 +491,10 @@ class ADialogSettings : AbstractPropertiesDialog() {
         lSliderRadius.value = Settings.labelRadius
 
         lLabelAlpha.isEditing = false
-        lLabelAlpha.text = "0x${(Settings.labelOpacity * 255).roundToInt().toString(16).padStart(2, '0')}"
-        lSliderAlpha.value = Settings.labelOpacity * 255
+        lLabelAlpha.text = "0x${(Settings.labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0')}"
+        lSliderAlpha.value = Settings.labelColorOpacity * 255
+
+        lTextOpaqueCheckBox.isSelected = Settings.labelTextOpaque
 
         // Other
         xInstCheckBox.isSelected = Settings.instantTranslate
@@ -570,6 +576,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
 
         list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
         list.add(CProperty(Settings.LabelAlpha, lSliderAlpha.value.roundToInt().toString(16).padStart(2, '0')))
+        list.add(CProperty(Settings.LabelTextOpaque, lTextOpaqueCheckBox.isSelected))
 
         return list
     }

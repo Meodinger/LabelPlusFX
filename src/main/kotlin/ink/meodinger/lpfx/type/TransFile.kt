@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.type
 
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.ReLazy
 import ink.meodinger.lpfx.util.resource.I18N
@@ -74,26 +75,15 @@ open class TransFile @JsonCreator constructor(
 
     class TransFileException(message: String) : RuntimeException(message) {
         companion object {
-            fun pictureNotFound(picName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.picture_not_found.s"], picName))
-            fun pictureStillInUse(picName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.picture_in_use.s"], picName))
-
-            fun transGroupNameRepeated(groupName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.s"], groupName))
-            fun transGroupIdNegative(groupId: Int) =
-                TransFileException(String.format(I18N["exception.trans_file.group_id_negative.i"], groupId))
-            fun transGroupIdOutOfBounds(groupId: Int) =
-                TransFileException(String.format(I18N["exception.trans_file.group_id_out_of_bounds.i"], groupId))
             fun transGroupNotFound(groupName: String) =
                 TransFileException(String.format(I18N["exception.trans_file.group_not_found.s"], groupName))
+            fun transGroupNameRepeated(groupName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.s"], groupName))
 
-            fun transLabelIndexRepeated(picName: String, index: Int) =
-                TransFileException(String.format(I18N["exception.trans_file.label_index_repeated.is"], index, picName))
-            fun transLabelGroupIdOutOfBounds(groupId: Int) =
-                TransFileException(String.format(I18N["exception.trans_file.label_groupId_out_of_bounds.i"], groupId))
-            fun transLabelNotFound(picName: String, index: Int) =
-                TransFileException(String.format(I18N["exception.trans_file.label_not_found.is"], index, picName))
+            fun pictureNotFound(picName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.picture_not_found.s"], picName))
+            fun pictureNameRepeated(picName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.picture_name_repeated.s"], picName))
         }
     }
 
@@ -110,14 +100,8 @@ open class TransFile @JsonCreator constructor(
         if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
         fileMap[picName] = file
     }
-    fun removeFile(picName: String) {
-        if (transMapObservable.keys.contains(picName)) throw TransFileException.pictureStillInUse(picName)
-        fileMap.remove(picName)
-    }
     fun checkLost(): List<String> {
-        val lost = ArrayList<String>()
-        picNames.forEach { picture -> if (getFile(picture).notExists()) lost.add(picture) }
-        return lost
+        return picNames.filter { getFile(it).notExists() }
     }
 
     // ----- Properties ----- //
@@ -143,7 +127,6 @@ open class TransFile @JsonCreator constructor(
     val groupNames: List<String> get() = List(groupListObservable.size) { getTransGroup(it).name }
     val groupColors: List<String> get() = List(groupListObservable.size) { getTransGroup(it).colorHex }
 
-    /// NOTE: sortedPicNames is slow, find a way to make it faster (maybe use ReLazy)
     val picCount: Int get() = transMapObservable.size
     val picNames: List<String> get() = transMapObservable.keys.toList() // copy
 
@@ -161,74 +144,25 @@ open class TransFile @JsonCreator constructor(
     // ----- TransGroup ----- //
 
     fun getGroupIdByName(name: String): Int {
-        groupListObservable.forEachIndexed { index, transGroup -> if (transGroup.name == name) return index }
-
-        throw TransFileException.transGroupNotFound(name)
+        val index = groupListObservable.indexOfFirst { it.name == name }
+        if (index == NOT_FOUND) throw TransFileException.transGroupNotFound(name)
+        return index
     }
-
-    fun addTransGroup(transGroup: TransGroup) {
-        for (group in groupListObservable)
-            if (group.name == transGroup.name)
-                throw TransFileException.transGroupNameRepeated(transGroup.name)
-
-        groupListObservable.add(transGroup)
-    }
-    fun getTransGroup(groupId: Int): TransGroup {
-        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
-
-        return groupListObservable[groupId]
-    }
-    fun removeTransGroup(groupId: Int) {
-        if (groupId < 0) throw TransFileException.transGroupIdNegative(groupId)
-        if (groupId >= groupListObservable.size) throw TransFileException.transGroupIdOutOfBounds(groupId)
-
-        groupListObservable.removeAt(groupId)
-    }
-
     fun isGroupUnused(groupId: Int): Boolean {
         for (list in transMapObservable.values) for (label in list) if (label.groupId == groupId) return false
         return true
     }
 
-    // ----- TransList (TransMap) ----- //
+    // ----- DATA ----- //
 
-    open fun addTransList(picName: String) {
-        transMapObservable[picName] = FXCollections.observableArrayList()
+    fun getTransGroup(groupId: Int): TransGroup {
+        return groupListObservable[groupId]
     }
     open fun getTransList(picName: String): List<TransLabel> {
         return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
-    open fun removeTransList(picName: String) {
-        if (transMapObservable[picName] != null) transMapObservable.remove(picName)
-        else throw TransFileException.pictureNotFound(picName)
-    }
-
-    // ----- TransLabel ----- //
-
-    fun addTransLabel(picName: String, transLabel: TransLabel) {
-        val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
-
-        val (index, groupId) = transLabel
-        if (groupId >= groupListObservable.size) throw TransFileException.transLabelGroupIdOutOfBounds(groupId)
-        for (label in list) if (label.index == index) throw TransFileException.transLabelIndexRepeated(picName, index)
-
-        list.add(transLabel)
-    }
     fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
-        for (label in transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName))
-            if (label.index == labelIndex)
-                return label
-
-        throw TransFileException.transLabelNotFound(picName, labelIndex)
-    }
-    fun removeTransLabel(picName: String, labelIndex: Int) {
-        val list = transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
-        var toRemove: TransLabel? = null
-        for (label in list) if (label.index == labelIndex) toRemove = label
-
-        if (toRemove != null) list.remove(toRemove)
-        else throw TransFileException.transLabelNotFound(picName, labelIndex)
+        return getTransList(picName).first { it.index == labelIndex }
     }
 
     // ----- Other ----- //

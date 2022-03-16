@@ -4,6 +4,8 @@ import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.type.TransFile
+import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.string.deleteTailLF
 import ink.meodinger.lpfx.util.string.emptyString
@@ -70,18 +72,25 @@ class LabelAction(
         Logger.info(builder.deleteTailLF().toString(), LOGSRC_ACTION)
     }
     private fun addTransLabel(picName: String, transLabel: TransLabel) {
+        if (transLabel.groupId >= state.transFile.groupCount)
+            throw TransLabel.TransLabelException.groupIdInvalid(transLabel.groupId)
+
+        val list = state.transFile.transMapObservable[picName]
+            ?: throw TransFile.TransFileException.pictureNotFound(picName)
         val labelIndex = transLabel.index
 
-        for (label in state.transFile.getTransList(picName)) if (label.index >= labelIndex) label.index++
-        state.transFile.addTransLabel(picName, transLabel)
+        for (label in list) if (label.index >= labelIndex) label.index++
+        list.add(transLabel)
 
         Logger.info("Added $picName @ $transLabel", LOGSRC_ACTION)
     }
     private fun removeTransLabel(picName: String, transLabel: TransLabel) {
+        val list = state.transFile.transMapObservable[picName]
+            ?: throw TransFile.TransFileException.pictureNotFound(picName)
         val labelIndex = transLabel.index
 
-        state.transFile.removeTransLabel(picName, labelIndex)
-        for (label in state.transFile.getTransList(picName)) if (label.index > labelIndex) label.index--
+        list.remove(list.first { it.index == labelIndex })
+        for (label in list) if (label.index > labelIndex) label.index--
 
         Logger.info("Removed $picName @ $transLabel", LOGSRC_ACTION)
     }

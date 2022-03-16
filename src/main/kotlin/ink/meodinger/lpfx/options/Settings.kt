@@ -39,6 +39,7 @@ object Settings : AbstractProperties("Settings") {
     const val LogLevelOrdinal          = "LogLevelOrdinal"
     const val LabelRadius              = "LabelRadius"
     const val LabelAlpha               = "LabelAlpha"
+    const val LabelTextOpaque          = "LabelTextOpaque"
     const val LigatureRules            = "LigatureRules"
     const val InstantTranslate         = "InstantTranslate"
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
@@ -56,6 +57,7 @@ object Settings : AbstractProperties("Settings") {
         CProperty(LogLevelOrdinal, Logger.LogLevel.INFO.ordinal),
         CProperty(LabelRadius, 24.0),
         CProperty(LabelAlpha, "80"),
+        CProperty(LabelTextOpaque, false),
         CProperty(LigatureRules,
             "("      to "「",
             ")"      to "」",
@@ -102,9 +104,13 @@ object Settings : AbstractProperties("Settings") {
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
     var labelRadius: Double by labelRadiusProperty
 
-    private val labelOpacityProperty: DoubleProperty = SimpleDoubleProperty()
-    fun labelOpacityProperty(): DoubleProperty = labelOpacityProperty
-    var labelOpacity: Double by labelOpacityProperty
+    private val labelColorOpacityProperty: DoubleProperty = SimpleDoubleProperty()
+    fun labelColorOpacityProperty(): DoubleProperty = labelColorOpacityProperty
+    var labelColorOpacity: Double by labelColorOpacityProperty
+
+    private val labelTextOpaqueProperty: BooleanProperty = SimpleBooleanProperty()
+    fun labelTextOpaqueProperty(): BooleanProperty = labelTextOpaqueProperty
+    var labelTextOpaque: Boolean by labelTextOpaqueProperty
 
     private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty()
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
@@ -139,7 +145,8 @@ object Settings : AbstractProperties("Settings") {
         viewModes = FXCollections.observableList(this[ViewModeOrdinals].asIntegerList().map { ViewMode.values()[it] })
         logLevel = Logger.LogLevel.values()[this[LogLevelOrdinal].asInteger()]
         labelRadius = this[LabelRadius].asDouble()
-        labelOpacity = this[LabelAlpha].asInteger(16) / 255.0
+        labelColorOpacity = this[LabelAlpha].asInteger(16) / 255.0
+        labelTextOpaque = this[LabelTextOpaque].asBoolean()
         ligatureRules = FXCollections.observableList(this[LigatureRules].asPairList())
         instantTranslate = this[InstantTranslate].asBoolean()
         useMeoFileAsDefault = this[UseMeoFileAsDefault].asBoolean()
@@ -156,7 +163,8 @@ object Settings : AbstractProperties("Settings") {
         this[ViewModeOrdinals].set(viewModes.map(Enum<*>::ordinal))
         this[LogLevelOrdinal].set(logLevel.ordinal)
         this[LabelRadius].set(labelRadius)
-        this[LabelAlpha].set((labelOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
+        this[LabelAlpha].set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
+        this[LabelTextOpaque].set(labelTextOpaque)
         this[LigatureRules].set(ligatureRules)
         this[InstantTranslate].set(instantTranslate)
         this[UseMeoFileAsDefault].set(useMeoFileAsDefault)

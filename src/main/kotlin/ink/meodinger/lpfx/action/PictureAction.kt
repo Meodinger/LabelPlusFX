@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.DEFAULT_FILE
 import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransLabel
 
 import javafx.collections.FXCollections
@@ -46,12 +47,19 @@ class PictureAction(
         Logger.info("Change file of picture <$targetPicFile>: ${oriPicFile.path} -> ${picFile.path}", LOGSRC_ACTION)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File) {
-        state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
+        if (state.transFile.transMapObservable.contains(picName))
+            throw TransFile.TransFileException.pictureNameRepeated(picName)
+        else
+            state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
+
         if (picFile.exists()) state.transFile.setFile(picName, picFile)
+
         Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName).path}", LOGSRC_ACTION)
     }
     private fun removePicture(picName: String) {
         state.transFile.transMapObservable.remove(picName)
+            ?: throw TransFile.TransFileException.pictureNotFound(picName)
+
         Logger.info("Removed picture <$picName>: ${oriPicFile.path}", LOGSRC_ACTION)
     }
 

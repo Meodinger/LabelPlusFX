@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
@@ -41,8 +42,9 @@ fun load(file: File, type: FileType): TransFile {
                 FileType.MeoFile -> loadLP(file)
             }
         } catch (_: Throwable) {
-            // Load as another file type failed, but we don't care about actually what problem occurred.
-            // Throw the original exception just like we never tried.
+            // Load as another file type failed, but we don't care
+            // actually what problem occurred. Throw the original
+            // exception just like we never tried.
             throw e
         }
     }
@@ -53,19 +55,19 @@ fun load(file: File, type: FileType): TransFile {
  */
 @Throws(IOException::class)
 private fun loadLP(file: File): TransFile {
-    val reader = BufferedReader(InputStreamReader(FileInputStream(file), StandardCharsets.UTF_8))
+    val stream = FileInputStream(file).apply { mark(3) }
+    val reader = BufferedReader(InputStreamReader(stream, StandardCharsets.UTF_8))
 
     // Remove BOM (EF BB BF)
     val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
     val buf = ByteArray(3)
-    val len = FileInputStream(file).read(buf, 0, 3)
+    val len = stream.read(buf, 0, 3)
     if (len != 3) throw IOException(I18N["exception.loader.unexpected_eof"])
-    if (bom.contentEquals(buf)) reader.read(CharArray(3), 0, 1)
+    if (!bom.contentEquals(buf)) stream.reset()
 
     val lines = reader.readLines()
     val lineCount = lines.size
 
-    var index = 0
     var pointer = 0
 
     /**
@@ -92,17 +94,11 @@ private fun loadLP(file: File): TransFile {
     /**
      * Parse from current line, leave pointer on next pic/label
      */
-    fun parseTranLabel(): TransLabel {
+    fun parseTranLabel(index: Int): TransLabel {
         val s = lines[pointer].split(LPTransFile.LABEL_END)
         val props = s[1].replace(LPTransFile.PROP_START, "").replace(LPTransFile.PROP_END, "").split(LPTransFile.SPLIT)
 
-        /*
-           Re-arrange label index when loading, ignore file data
-           Line  68: index define
-           Line 114: index inc
-           Line 183: index reset
-         */
-
+        // Re-arrange label index when loading, ignore file data
         // val index = s[0].replace(LPTransFile.LABEL_START, "").trim().toInt()
         val x = props[0].trim().toDouble()
         val y = props[1].trim().toDouble()
@@ -111,7 +107,7 @@ private fun loadLP(file: File): TransFile {
         // if (index < 0) throw IOException(String.format(I18N["exception.loader.invalid_index.format.i"], index))
 
         pointer++
-        return TransLabel(++index, groupId, x, y, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
+        return TransLabel(index, groupId, x, y, parseText(LPTransFile.PIC_START, LPTransFile.LABEL_START))
     }
 
     /**
@@ -127,10 +123,11 @@ private fun loadLP(file: File): TransFile {
      * Parse from current line, leave pointer on next pic
      */
     fun parsePicBody(): MutableList<TransLabel> {
+        var index = 0
         val transLabels = ArrayList<TransLabel>()
 
         while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.LABEL_START)) {
-            val label = parseTranLabel()
+            val label = parseTranLabel(index++)
 
             for (l in transLabels) {
                 if (l.index == label.index) {
@@ -163,10 +160,12 @@ private fun loadLP(file: File): TransFile {
     while (lines[pointer] != LPTransFile.SEPARATOR && groupId < 9) {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.loader.empty_group_name"])
 
-        val group = TransGroup(lines[pointer], LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId])
+        val groupName = lines[pointer]
+        val groupColor = LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId]
 
-        groupList.forEach { if (it.name == group.name) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], group.name)) }
-        groupList.add(group)
+        if (groupList.contains { it.name == groupName }) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], groupName))
+
+        groupList.add(TransGroup(groupName, groupColor))
 
         groupId++
         pointer++
@@ -180,15 +179,13 @@ private fun loadLP(file: File): TransFile {
     // Content
     val transMap = HashMap<String, MutableList<TransLabel>>()
     while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.PIC_START)) {
-        index = 0
+        val picName = parsePicHead()
+        val labels = parsePicBody()
 
+        // DO NOT USE `transMap[parsePicHead()] = parsePicBody()`
         // Parse order：
         //  - Kotlin     -> head body
         //  - JavaScript -> body head
-        // transMap[parsePicHead()] = parsePicBody()
-
-        val picName = parsePicHead()
-        val labels = parsePicBody()
 
         transMap[picName] = labels
     }

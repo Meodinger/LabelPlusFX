@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.util.color.opacity
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -27,13 +28,12 @@ import javafx.scene.text.TextAlignment
  * A Label component for LabelPane
  */
 class CLabel(
-    index:  Int    = DEFAULT_INDEX,
-    radius: Double = DEFAULT_RADIUS,
-    color:  Color  = Color.web(DEFAULT_COLOR),
+    labelIndex:  Int    = DEFAULT_INDEX,
+    labelRadius: Double = DEFAULT_RADIUS,
+    labelColor:  Color  = Color.web(DEFAULT_COLOR),
 ) : Region() {
 
     /// TODO: Custom Text Color
-    /// TODO: Optional Text Opacity
 
     companion object {
         private const val DEFAULT_INDEX = -1
@@ -43,36 +43,58 @@ class CLabel(
         const val MIN_PICK_RADIUS = 16.0
     }
 
-    private val circle = Circle()
     private val text = Text()
+    private val circle = Circle()
+    private var contour: Shape = circle
 
-    private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
-    private val radiusProperty: DoubleProperty = SimpleDoubleProperty(radius)
+    private val radiusProperty: DoubleProperty = SimpleDoubleProperty(labelRadius)
     fun radiusProperty(): DoubleProperty = radiusProperty
     var radius: Double by radiusProperty
 
-    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(color)
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(labelColor)
     fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
-    /// Using Node#OpacityProperty for opacity
+    private val colorOpacityProperty: DoubleProperty = SimpleDoubleProperty(1.0)
+    fun colorOpacityProperty(): DoubleProperty = colorOpacityProperty
+    var colorOpacity: Double by colorOpacityProperty
+
+    private val textOpaqueProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun textOpaqueProperty(): BooleanProperty = textOpaqueProperty
+    var isTextOpaque: Boolean by textOpaqueProperty
 
     init {
         text.textAlignment = TextAlignment.CENTER
         text.textOrigin = VPos.CENTER // to get rid of editing layoutY
-        text.fill = Color.WHITE
 
-        indexProperty.addListener(onNew<Number, Int> { update(index = it) })
-        radiusProperty.addListener(onNew<Number, Double> { update(radius = it) })
-        colorProperty.addListener(onNew { update(color = it) })
+        indexProperty.addListener(onNew<Number, Int> { updateShape(index = it) })
+        radiusProperty.addListener(onNew<Number, Double> { updateShape(radius = it) })
+        colorProperty.addListener(onNew { updateColor(color = it) })
+        colorOpacityProperty.addListener(onNew<Number, Double> { updateColor(colorOpacity = it) })
+        textOpaqueProperty.addListener(onNew { updateColor(isTextOpaque = it) })
 
         update()
     }
 
-    private fun update(index: Int = this.index, radius: Double = this.radius, color: Color = this.color) {
+    private fun update(
+        index: Int = this.index,
+        radius: Double = this.radius,
+        color: Color = this.color,
+        colorOpacity: Double = this.colorOpacity,
+        isTextOpaque: Boolean = this.isTextOpaque
+    ) {
+        updateShape(index, radius)
+        updateColor(color, colorOpacity, isTextOpaque)
+    }
+
+    private fun updateShape(
+        index: Int = this.index,
+        radius: Double = this.radius
+    ) {
         children.clear()
 
         text.text = index.toString()
@@ -99,6 +121,19 @@ class CLabel(
 
         setPrefSize(pickerRadius * 2, pickerRadius * 2)
 
-        children.addAll(Shape.subtract(circle, text).apply { fill = color }, text)
+        val shape = Shape.subtract(circle, text).apply {
+            fill = contour.fill
+        }.also { contour = it }
+
+        children.addAll(shape, text)
+    }
+
+    private fun updateColor(
+        color: Color = this.color,
+        colorOpacity: Double = this.colorOpacity,
+        isTextOpaque: Boolean = this.isTextOpaque
+    ) {
+        text.fill = if (isTextOpaque) Color.WHITE else Color.WHITE.opacity(colorOpacity)
+        contour.fill = color.opacity(colorOpacity)
     }
 }

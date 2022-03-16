@@ -37,8 +37,7 @@ class GroupAction(
     private val newColorHex: String = emptyString(),
 ) : Action {
 
-    private val oriId: Int =
-        if (type == ActionType.REMOVE) state.transFile.getGroupIdByName(targetTransGroup.name) else NOT_FOUND
+    private val oriId: Int = state.transFile.groupListObservable.indexOfFirst { it.name == targetTransGroup.name }
     private val oriName: String = targetTransGroup.name
     private val oriColorHex: String = targetTransGroup.colorHex
 
@@ -67,10 +66,10 @@ class GroupAction(
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
     private fun removeTransGroup(transGroup: TransGroup) {
-        val toRemoveId = state.transFile.getGroupIdByName(transGroup.name)
+        val toRemoveId = state.transFile.groupListObservable.indexOfFirst { it.name == transGroup.name }
 
         state.transFile.groupListObservable.removeAt(toRemoveId)
-        for (picName in state.transFile.picNames) for (label in state.transFile.getTransList(picName))
+        for (picName in state.transFile.picNames) for (label in state.transFile.transMapObservable[picName]!!)
             if (label.groupId >= toRemoveId) label.groupId--
 
         Logger.info("Removed TransGroup: $transGroup", LOGSRC_STATE)

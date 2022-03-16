@@ -36,7 +36,7 @@ open class TransFile @JsonCreator constructor(
     @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT,
     @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
     @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
-) {
+)  {
 
     companion object {
 
@@ -92,8 +92,8 @@ open class TransFile @JsonCreator constructor(
     lateinit var projectFolder: File
 
     private val fileMap = HashMap<String, File>()
-    fun getFile(picName: String): File {
-        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+    fun getFile(picName: String): File? {
+        if (!transMapObservable.keys.contains(picName)) return null
         return fileMap[picName] ?: projectFolder.resolve(picName).also { setFile(picName, it) }
     }
     fun setFile(picName: String, file: File) {
@@ -124,8 +124,8 @@ open class TransFile @JsonCreator constructor(
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
 
     val groupCount: Int get() = groupListObservable.size
-    val groupNames: List<String> get() = List(groupListObservable.size) { getTransGroup(it).name }
-    val groupColors: List<String> get() = List(groupListObservable.size) { getTransGroup(it).colorHex }
+    val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
+    val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
 
     val picCount: Int get() = transMapObservable.size
     val picNames: List<String> get() = transMapObservable.keys.toList() // copy

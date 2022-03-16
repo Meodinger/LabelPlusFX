@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
+import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.resource.I18N
@@ -31,7 +32,7 @@ import kotlin.io.path.*
  * Have fun with my code!
  */
 
-class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
+class CSpecifyDialog(private val state: State) : Dialog<List<File?>>() {
 
     companion object {
         private const val rowShift = 1
@@ -48,11 +49,11 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
     }
     private val dirChooser = DirectoryChooser()
 
-    private var workingTransFile: TransFile = TransFile.DEFAULT_TRANS_FILE
-    private var projectFolder: File = DEFAULT_FILE
+    private lateinit var workingTransFile: TransFile
+    private lateinit var projectFolder: File
     private var picCount: Int = 0
     private var picNames: List<String> = ArrayList()
-    private var files: MutableList<File> = ArrayList()
+    private var files: MutableList<File?> = ArrayList()
     private var labels: MutableList<CRollerLabel> = ArrayList()
 
     private val unspecified = I18N["specify.unspecified"]
@@ -102,11 +103,11 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
                             .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
-                            if (preserve && files[i] !== DEFAULT_FILE) continue
+                            if (preserve && files[i].exists()) continue
 
                             val lastIndex = newPicPaths.size - 1
                             for (j in newPicPaths.indices) {
-                                val oldPicFile = workingTransFile.getFile(picNames[i])
+                                val oldPicFile = workingTransFile.getFile(picNames[i])!!
                                 // check full filename & simple filename
                                 val fit =
                                     newPicPaths[j].name == oldPicFile.name || newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
@@ -134,7 +135,7 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
         }
     }
 
-    fun specify(): List<File> {
+    fun specify(): List<File?> {
         // clear & re-init
         contentGridPane.children.clear()
         contentGridPane.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
@@ -150,10 +151,10 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File>>() {
         fileChooser.initialDirectory = projectFolder
         dirChooser.initialDirectory = projectFolder
 
-        files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).existsOrNull() ?: DEFAULT_FILE }
+        files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).existsOrNull() }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
-            text = if (files[it] !== DEFAULT_FILE) files[it].path else unspecified
+            text = if (files[it].exists()) files[it]!!.path else unspecified
             tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
                 init { bind(this@apply.textProperty()) }
                 override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }

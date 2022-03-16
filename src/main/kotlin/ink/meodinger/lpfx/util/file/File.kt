@@ -36,19 +36,25 @@ fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
 }
 
 /**
- * Whether this file exists. If not, return null
+ * Whether this file exists. `null` is treat as not exist.
  */
-@Throws(IOException::class)
-fun File?.existsOrNull(): File? = takeIf { this != null && this.exists() }
+@Throws(SecurityException::class)
+fun File?.exists(): Boolean = this != null && exists()
 
 /**
- * Whether this file exists. If not, return default
+ * Whether this file not null and exists. If not, return null
  */
-@Throws(IOException::class)
+@Throws(SecurityException::class)
+fun File?.existsOrNull(): File? = takeIf(File?::exists)
+
+/**
+ * Whether this file not null and exists. If not, return default
+ */
+@Throws(SecurityException::class)
 fun File?.existsOrElse(default: File): File = existsOrNull() ?: default
 
 /**
- * Alias for !exists()
+ * Alias for !File?.exists()
  */
 @Throws(SecurityException::class)
-fun File.notExists(): Boolean = !exists()
+fun File?.notExists(): Boolean = !exists()

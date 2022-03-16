@@ -57,7 +57,7 @@ class State private constructor() {
      */
     var transFile: TransFile by transFileProperty
 
-    private val translationFileProperty: ObjectProperty<File> = SimpleObjectProperty(DEFAULT_FILE)
+    private val translationFileProperty: ObjectProperty<File> = SimpleObjectProperty(null)
     fun translationFileProperty(): ObjectProperty<File> = translationFileProperty
     /**
      * The FileSystem file of the opened TransFile
@@ -85,13 +85,6 @@ class State private constructor() {
      */
     var currentLabelIndex: Int by currentLabelIndexProperty
 
-    private val viewModeProperty: ObjectProperty<ViewMode> = SimpleObjectProperty(ViewMode.IndexMode)
-    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
-    /**
-     * Current view mode
-     */
-    var viewMode: ViewMode by viewModeProperty
-
     private val workModeProperty: ObjectProperty<WorkMode> = SimpleObjectProperty(WorkMode.InputMode)
     fun workModeProperty(): ObjectProperty<WorkMode> = workModeProperty
     /**
@@ -99,20 +92,30 @@ class State private constructor() {
      */
     var workMode: WorkMode by workModeProperty
 
+    private val viewModeProperty: ObjectProperty<ViewMode> = SimpleObjectProperty(ViewMode.IndexMode)
+    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
+    /**
+     * Current view mode
+     */
+    var viewMode: ViewMode by viewModeProperty
+
     fun reset() {
         if (!isOpened) return
 
         controller.reset()
 
-        isOpened = false
-        isChanged = false
-        transFile = TransFile.DEFAULT_TRANS_FILE
-        translationFile = DEFAULT_FILE
-        currentGroupId = NOT_FOUND
-        currentPicName = emptyString()
-        currentLabelIndex = NOT_FOUND
-        viewMode = Settings.viewModes[WorkMode.InputMode.ordinal]
-        workMode = WorkMode.InputMode
+        undoStack.empty()
+        redoStack.empty()
+
+        openedProperty.set(false)
+        changedProperty.set(false)
+        transFileProperty.set(TransFile.DEFAULT_TRANS_FILE)
+        translationFileProperty.set(null)
+        currentGroupIdProperty.set(NOT_FOUND)
+        currentPicNameProperty.set(emptyString())
+        currentLabelIndexProperty.set(NOT_FOUND)
+        workModeProperty.set(WorkMode.InputMode)
+        viewModeProperty.set(Settings.viewModes[workMode.ordinal])
 
         Logger.info("Reset", LOGSRC_STATE)
     }
@@ -122,22 +125,22 @@ class State private constructor() {
     /**
      * Get current picture's FileSystem file
      */
-    fun getPicFileNow(): File {
-        return if (isOpened && currentPicName.isNotEmpty()) transFile.getFile(currentPicName) else DEFAULT_FILE
+    fun getPicFileNow(): File? {
+        return if (isOpened && currentPicName.isNotEmpty()) transFile.getFile(currentPicName) else null
     }
 
     /**
      * Get current TransFile's FileSystem file's directory
      */
-    fun getFileFolder(): File {
-        return if (isOpened) translationFile.parentFile else DEFAULT_FILE
+    fun getFileFolder(): File? {
+        return if (isOpened) translationFile.parentFile else null
     }
 
     /**
      * Get current TransFile's FileSystem file's backup directory
      */
-    fun getBakFolder(): File {
-        return if (isOpened) translationFile.parentFile.resolve(FOLDER_NAME_BAK) else DEFAULT_FILE
+    fun getBakFolder(): File? {
+        return if (isOpened) translationFile.parentFile.resolve(FOLDER_NAME_BAK) else null
     }
 
     // ----- UNDO/REDO STACK ----- //

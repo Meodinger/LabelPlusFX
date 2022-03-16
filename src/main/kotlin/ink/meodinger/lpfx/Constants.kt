@@ -45,11 +45,6 @@ const val FONT_SIZE_MIN = 12
 const val FONT_SIZE_MAX = 64
 
 /**
- * Default File Object
- */
-val DEFAULT_FILE = File(emptyString())
-
-/**
  * TreeItem Graphic radius
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0

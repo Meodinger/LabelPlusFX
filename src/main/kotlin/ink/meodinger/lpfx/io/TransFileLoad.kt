@@ -127,7 +127,7 @@ private fun loadLP(file: File): TransFile {
         val transLabels = ArrayList<TransLabel>()
 
         while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.LABEL_START)) {
-            val label = parseTranLabel(index++)
+            val label = parseTranLabel(++index)
 
             for (l in transLabels) {
                 if (l.index == label.index) {

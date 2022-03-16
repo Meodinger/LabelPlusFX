@@ -67,10 +67,9 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         if (state.controller.stay()) return
 
-        val path = item.text
-        val file = File(path)
+        val file = File(item.text)
         if (file.notExists()) {
-            showError(state.stage, String.format(I18N["error.file_not_exist.s"], path))
+            showError(state.stage, String.format(I18N["error.file_not_exist.s"], file.path))
             RecentFiles.remove(file)
             mOpenRecent.items.remove(item)
             return
@@ -376,7 +375,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun bakRecovery() {
         if (state.controller.stay()) return
 
-        backupChooser.initialDirectory = if (state.isOpened) state.getBakFolder() else CFileChooser.lastDirectory
+        backupChooser.initialDirectory = state.getBakFolder() ?: CFileChooser.lastDirectory
         val bak = backupChooser.showOpenDialog(state.stage) ?: return
 
         fileChooser.title = I18N["chooser.rec"]
@@ -490,16 +489,16 @@ class CMenuBar(private val state: State) : MenuBar() {
         val exportName =
             if (Settings.useExportNameTemplate) Settings.exportNameTemplate
                 .replace(Settings.VARIABLE_FILENAME, state.translationFile.nameWithoutExtension)
-                .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder().name)
+                .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder()!!.name)
                 .replace(Settings.VARIABLE_PROJECT, state.transFile.projectFolder.name)
-            else state.getFileFolder().name
+            else state.getFileFolder()!!.name
         exportChooser.initialFilename = "$exportName.${type.extension}"
 
         val file = exportChooser.showSaveDialog(state.stage) ?: return
         state.controller.export(file, type)
     }
     private fun exportTransPack() {
-        exportPackChooser.initialFilename = "${state.getFileFolder().name}.$EXTENSION_PACK"
+        exportPackChooser.initialFilename = "${state.getFileFolder()!!.name}.$EXTENSION_PACK"
         val file = exportPackChooser.showSaveDialog(state.stage) ?: return
 
         state.controller.pack(file)

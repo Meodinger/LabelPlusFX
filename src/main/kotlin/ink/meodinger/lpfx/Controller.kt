@@ -34,6 +34,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.collections.ObservableMap
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
@@ -94,7 +95,7 @@ class Controller(private val view: View, private val state: State) {
     private val backupFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (state.isChanged) {
-            val bak = state.getBakFolder().resolve("${Date().time}.${EXTENSION_BAK}")
+            val bak = state.getBakFolder()!!.resolve("${Date().time}.${EXTENSION_BAK}")
             try {
                 export(bak, FileType.MeoFile, state.transFile)
                 Platform.runLater {
@@ -121,7 +122,7 @@ class Controller(private val view: View, private val state: State) {
 
     private fun genPicNamesBinding(): ObjectBinding<ObservableList<String>> {
         return object : ObjectBinding<ObservableList<String>>() {
-            private var lastMapObservable = state.transFile.transMapObservable
+            private var lastMapObservable: ObservableMap<String, ObservableList<TransLabel>> = FXCollections.emptyObservableMap()
 
             init {
                 bind(state.transFileProperty())
@@ -156,13 +157,15 @@ class Controller(private val view: View, private val state: State) {
     }
     private fun genGroupsBinding(): ObjectBinding<ObservableList<TransGroup>> {
         return object : ObjectBinding<ObservableList<TransGroup>>() {
-            private var lastGroupListObservable = state.transFile.groupListObservable
+            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
 
             init {
                 bind(state.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<TransGroup> {
+                if (!state.isOpened) return FXCollections.emptyObservableList()
+
                 if (lastGroupListObservable !== state.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
                     lastGroupListObservable = state.transFile.groupListObservable
@@ -178,14 +181,16 @@ class Controller(private val view: View, private val state: State) {
         propertyGetter: (TransGroup) -> Property<T>
     ): ObjectBinding<ObservableList<T>> {
         return object : ObjectBinding<ObservableList<T>>() {
-            private var lastGroupListObservable = state.transFile.groupListObservable
-            private val boundGroupNameProperties = ArrayList<Property<T>>()
+            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
+            private val boundGroupNameProperties: MutableList<Property<T>> = ArrayList()
 
             init {
                 bind(state.transFileProperty())
             }
 
             override fun computeValue(): ObservableList<T> {
+                if (!state.isOpened) return FXCollections.emptyObservableList()
+
                 if (lastGroupListObservable !== state.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
                     lastGroupListObservable = state.transFile.groupListObservable
@@ -193,7 +198,7 @@ class Controller(private val view: View, private val state: State) {
                 }
 
                 for (property in boundGroupNameProperties) unbind(property)
-                state.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(ArrayList<*>::clear), propertyGetter)
+                state.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(MutableList<*>::clear), propertyGetter)
                 for (property in boundGroupNameProperties) bind(property)
 
                 return getter()
@@ -207,11 +212,9 @@ class Controller(private val view: View, private val state: State) {
         }
 
         override fun computeValue(): Image {
-            if (!state.isOpened) return INIT_IMAGE
-
             var image: Image? = null
             try {
-                val picFile = state.getPicFileNow()
+                val picFile = state.getPicFileNow() ?: return INIT_IMAGE
                 if (picFile.exists()) image = Image(picFile.toURI().toURL().toString())
             } catch (e: IOException) {
                 Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
@@ -464,17 +467,7 @@ class Controller(private val view: View, private val state: State) {
         // PictureBox
         cPicBox.itemsProperty().bind(genPicNamesBinding())
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), rule@{ observable, _, newValue, _ ->
-                // Indicate current item was removed
-                // Use run later to avoid Issue#5 (Reason unclear).
-                // Check opened to avoid accidentally set "Close time empty str" to "Open time pic"
-                if (state.isOpened && newValue == null) Platform.runLater {
-                    observable.value = state.transFile.sortedPicNames[0]
-                }
-
-                // Directly bind bi-directionally will cause NPE
-                return@rule newValue ?: if (state.isOpened) state.transFile.sortedPicNames[0] else emptyString()
-            },
+            cPicBox.valueProperty(), rule@{ _, _, newValue, _ -> newValue ?: emptyString() },
             state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
@@ -554,11 +547,9 @@ class Controller(private val view: View, private val state: State) {
             else labelInfo("Changed picture to $it")
 
             if (state.isOpened) {
-                val file = state.transFile.getFile(it)
-                if (file.notExists()) {
-                    Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
-                    showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
-                }
+                val file = state.transFile.getFile(it).takeIf(File?::notExists) ?: return@onNew
+                Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
+                showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
             }
         })
         state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
@@ -808,7 +799,7 @@ class Controller(private val view: View, private val state: State) {
                 completed = false
                 continue
             }
-            state.transFile.setFile(picNames[i], picFile)
+            state.transFile.setFile(picNames[i], picFile!!)
         }
         return completed
     }
@@ -942,9 +933,9 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Loaded TransFile", LOGSRC_CONTROLLER)
 
         // Opened, update state
+        state.isOpened = true
         state.transFile = transFile
         state.translationFile = file
-        state.isOpened = true
 
         // Show info if comment not in default list
         // Should do this before update RecentFiles
@@ -961,7 +952,7 @@ class Controller(private val view: View, private val state: State) {
 
         // Auto backup
         backupManager.clear()
-        val bakDir = state.getBakFolder()
+        val bakDir = state.getBakFolder()!!
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             backupManager.schedule()
             Logger.info("Scheduled auto-backup", LOGSRC_CONTROLLER)

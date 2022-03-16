@@ -304,17 +304,13 @@ class CLabelPane : ScrollPane() {
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            if (!it.isConsumed) {
-                shiftX = root.layoutX - it.sceneX
-                shiftY = root.layoutY - it.sceneY
-                root.cursor = Cursor.MOVE
-            }
+            shiftX = root.layoutX - it.sceneX
+            shiftY = root.layoutY - it.sceneY
+            root.cursor = Cursor.MOVE
         }
         root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            if (!it.isConsumed) {
-                root.layoutX = shiftX + it.sceneX
-                root.layoutY = shiftY + it.sceneY
-            }
+            root.layoutX = shiftX + it.sceneX
+            root.layoutY = shiftY + it.sceneY
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = commonCursor

@@ -6,7 +6,6 @@ import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CInputLabel
-import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.color.isColorHex
@@ -206,16 +205,14 @@ class ADialogSettings : AbstractPropertiesDialog() {
                             var shiftX = 0.0
                             var shiftY = 0.0
                             addEventHandler(MouseEvent.MOUSE_PRESSED) {
-                                it.consume()
-
                                 cursor = Cursor.MOVE
 
                                 shiftX = anchorPaneLeft - it.sceneX
                                 shiftY = anchorPaneTop - it.sceneY
+
+                                it.consume()
                             }
                             addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-                                it.consume()
-
                                 val newLayoutX = shiftX + it.sceneX
                                 val newLayoutY = shiftY + it.sceneY
 
@@ -230,6 +227,8 @@ class ADialogSettings : AbstractPropertiesDialog() {
 
                                 anchorPaneLeft = newLayoutX
                                 anchorPaneTop = newLayoutY
+
+                                it.consume()
                             }
                             addEventHandler(MouseEvent.MOUSE_RELEASED) {
                                 cursor = Cursor.HAND
@@ -504,17 +503,11 @@ class ADialogSettings : AbstractPropertiesDialog() {
     }
 
     // ----- Result convert ---- //
-    private fun convertGroup(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
+    private fun convertGroup(): Map<String, Any> {
         val size = gGridPane.rowCount - gRowShift
-        if (size < 0) {
-            list.add(CProperty(Settings.DefaultGroupNameList, CProperty.EMPTY))
-            list.add(CProperty(Settings.DefaultGroupColorHexList, CProperty.EMPTY))
-            list.add(CProperty(Settings.IsGroupCreateOnNewTrans, CProperty.EMPTY))
+        if (size < 0) return emptyMap()
 
-            return list
-        }
+        val map = HashMap<String, Any>()
 
         val nameList = MutableList(size) { "" }
         val colorList = MutableList(size) { "" }
@@ -529,21 +522,17 @@ class ADialogSettings : AbstractPropertiesDialog() {
             }
         }
 
-        list.add(CProperty(Settings.DefaultGroupNameList, nameList))
-        list.add(CProperty(Settings.DefaultGroupColorHexList, colorList))
-        list.add(CProperty(Settings.IsGroupCreateOnNewTrans, isCreateList))
+        map[Settings.DefaultGroupNameList] = nameList
+        map[Settings.DefaultGroupColorHexList] = colorList
+        map[Settings.IsGroupCreateOnNewTrans] = isCreateList
 
-        return list
+        return map
     }
-    private fun convertLigatureRule(): List<CProperty> {
-        val list = ArrayList<CProperty>()
-
+    private fun convertLigatureRule(): Map<String, Any> {
         val size = rGridPane.rowCount - rRowShift
-        if (size < 0) {
-            list.add(CProperty(Settings.LigatureRules, CProperty.EMPTY))
+        if (size < 0) return emptyMap()
 
-            return list
-        }
+        val map = HashMap<String, List<Pair<String, String>>>()
 
         val fromList = MutableList(size) { "" }
         val toList = MutableList(size) { "" }
@@ -556,48 +545,48 @@ class ADialogSettings : AbstractPropertiesDialog() {
                 else toList[ruleIndex] = node.text
             }
         }
-        // Abandon repeated rule-from
+        // Abandon repeated rule-from by toMap
         val rules = List(size) { fromList[it] to toList[it] }.toMap().toList()
 
-        list.add(CProperty(Settings.LigatureRules, rules))
+        map[Settings.LigatureRules] = rules
 
-        return list
+        return map
     }
-    private fun convertMode(): List<CProperty> {
-        val list = ArrayList<CProperty>()
+    private fun convertMode(): Map<String, Any> {
+        val map = HashMap<String, Any>()
 
-        list.add(CProperty(Settings.ViewModeOrdinals, mComboInput.value.ordinal, mComboLabel.value.ordinal))
-        list.add(CProperty(Settings.ScaleOnNewPictureOrdinal, mComboScale.value.ordinal))
+        map[Settings.ViewModes] = listOf(mComboInput.value, mComboLabel.value)
+        map[Settings.NewPictureScale] = mComboScale.value
 
-        return list
+        return map
     }
-    private fun convertLabel(): List<CProperty> {
-        val list = ArrayList<CProperty>()
+    private fun convertLabel(): Map<String, Any> {
+        val map = HashMap<String, Any>()
 
-        list.add(CProperty(Settings.LabelRadius, lSliderRadius.value))
-        list.add(CProperty(Settings.LabelAlpha, lSliderAlpha.value.roundToInt().toString(16).padStart(2, '0')))
-        list.add(CProperty(Settings.LabelTextOpaque, lTextOpaqueCheckBox.isSelected))
+        map[Settings.LabelRadius] = lSliderRadius.value
+        map[Settings.LabelColorOpacity] = lSliderAlpha.value / 255
+        map[Settings.LabelTextOpaque] = lTextOpaqueCheckBox.isSelected
 
-        return list
+        return map
     }
-    private fun convertOther(): List<CProperty> {
-        val list = ArrayList<CProperty>()
+    private fun convertOther(): Map<String, Any> {
+        val map = HashMap<String, Any>()
 
-        list.add(CProperty(Settings.InstantTranslate, xInstCheckBox.isSelected))
-        list.add(CProperty(Settings.UseMeoFileAsDefault, xUseMCheckBox.isSelected))
-        list.add(CProperty(Settings.UseExportNameTemplate, xUseTCheckBox.isSelected))
-        list.add(CProperty(Settings.ExportNameTemplate, xTemplateField.text))
+        map[Settings.InstantTranslate] = xInstCheckBox.isSelected
+        map[Settings.UseMeoFileAsDefault] = xUseMCheckBox.isSelected
+        map[Settings.UseExportNameTemplate] = xUseTCheckBox.isSelected
+        map[Settings.ExportNameTemplate] = xTemplateField.text
 
-        return list
+        return map
     }
 
-    override fun convertResult(): List<CProperty> {
-        return ArrayList<CProperty>().apply {
-            addAll(convertGroup())
-            addAll(convertLigatureRule())
-            addAll(convertMode())
-            addAll(convertLabel())
-            addAll(convertOther())
+    override fun convertResult(): Map<String, Any> {
+        return HashMap<String, Any>().apply {
+            putAll(convertGroup())
+            putAll(convertLigatureRule())
+            putAll(convertMode())
+            putAll(convertLabel())
+            putAll(convertOther())
         }
     }
 

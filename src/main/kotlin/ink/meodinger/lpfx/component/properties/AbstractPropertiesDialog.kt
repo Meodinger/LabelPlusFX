@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.component.properties
 
-import ink.meodinger.lpfx.options.CProperty
-
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Dialog
 
@@ -15,7 +13,7 @@ import javafx.scene.control.Dialog
 /**
  * A Dialog for properties change
  */
-abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
+abstract class AbstractPropertiesDialog : Dialog<Map<String, Any>>() {
 
     /// TODO: Use value, not CProperty
 
@@ -23,18 +21,18 @@ abstract class AbstractPropertiesDialog : Dialog<List<CProperty>>() {
         setResultConverter {
             when (it) {
                 ButtonType.OK -> convertResult()
-                else -> emptyList()
+                else -> emptyMap()
             }
         }
     }
 
     protected abstract fun initProperties()
 
-    protected abstract fun convertResult(): List<CProperty>
+    protected abstract fun convertResult(): Map<String, Any>
 
-    fun generateProperties(): List<CProperty> {
+    fun generateProperties(): Map<String, Any> {
         initProperties()
 
-        return showAndWait().let { if (it.isPresent) it.get() else emptyList() }
+        return showAndWait().let { if (it.isPresent) it.get() else emptyMap() }
     }
 }

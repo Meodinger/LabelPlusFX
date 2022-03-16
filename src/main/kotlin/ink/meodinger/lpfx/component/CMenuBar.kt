@@ -22,6 +22,7 @@ import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.property.BidirectionalListener
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.divAssign
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
@@ -32,7 +33,6 @@ import ink.meodinger.lpfx.util.translator.convert2Traditional
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
-import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.control.*
@@ -508,38 +508,42 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun settings() {
         dialogSettings.owner ?: dialogSettings.initOwner(state.stage)
 
-        val list = dialogSettings.generateProperties()
+        val map = dialogSettings.generateProperties()
 
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
-        Logger.debug("got $list", LOGSRC_DIALOGS)
+        Logger.debug("got $map", LOGSRC_DIALOGS)
 
-        for (property in list) {
-            /// Too slow, find a faster way
-            when (property.key) {
-                Settings.DefaultGroupNameList     -> Settings.defaultGroupNameList = FXCollections.observableList(property.asStringList())
-                Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList = FXCollections.observableList(property.asStringList())
-                Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList = FXCollections.observableList(property.asBooleanList())
-                Settings.ScaleOnNewPictureOrdinal -> Settings.newPictureScalePicture = CLabelPane.NewPictureScale.values()[property.asInteger()]
-                Settings.ViewModeOrdinals         -> Settings.viewModes = FXCollections.observableList(property.asIntegerList().map { ViewMode.values()[it] })
-                Settings.LabelRadius              -> Settings.labelRadius = property.asDouble()
-                Settings.LabelAlpha               -> Settings.labelColorOpacity = property.asInteger(16) / 255.0
-                Settings.LabelTextOpaque          -> Settings.labelTextOpaque = property.asBoolean()
-                Settings.LigatureRules            -> Settings.ligatureRules = FXCollections.observableList(property.asPairList())
-                Settings.InstantTranslate         -> Settings.instantTranslate = property.asBoolean()
-                Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault = property.asBoolean()
-                Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate = property.asBoolean()
-                Settings.ExportNameTemplate       -> Settings.exportNameTemplate = property.asString()
-                else -> doNothing()
-            }
+        @Suppress("UNCHECKED_CAST")
+        for ((key, value) in map) when (key) {
+            Settings.DefaultGroupNameList     -> Settings.defaultGroupNameList        /= value as List<String>
+            Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList    /= value as List<String>
+            Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList /= value as List<Boolean>
+            Settings.NewPictureScale          -> Settings.newPictureScalePicture       = value as CLabelPane.NewPictureScale
+            Settings.ViewModes                -> Settings.viewModes                   /= value as List<ViewMode>
+            Settings.LabelRadius              -> Settings.labelRadius                  = value as Double
+            Settings.LabelColorOpacity        -> Settings.labelColorOpacity            = value as Double
+            Settings.LabelTextOpaque          -> Settings.labelTextOpaque              = value as Boolean
+            Settings.LigatureRules            -> Settings.ligatureRules               /= value as List<Pair<String, String>>
+            Settings.InstantTranslate         -> Settings.instantTranslate             = value as Boolean
+            Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault          = value as Boolean
+            Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate        = value as Boolean
+            Settings.ExportNameTemplate       -> Settings.exportNameTemplate           = value as String
+            else -> doNothing()
         }
     }
     private fun logs() {
         dialogLogs.owner ?: dialogLogs.initOwner(state.stage)
 
-        val list = dialogLogs.generateProperties()
+        val map = dialogLogs.generateProperties()
 
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)
-        Logger.debug("got $list", LOGSRC_DIALOGS)
+        Logger.debug("got $map", LOGSRC_DIALOGS)
+
+        @Suppress("UNCHECKED_CAST")
+        for ((key, value) in map) when (key) {
+            Settings.LogLevel -> Settings.logLevel = Logger.LogLevel.values()[value as Int]
+            else -> doNothing()
+        }
 
         Logger.level = Settings.logLevel
     }

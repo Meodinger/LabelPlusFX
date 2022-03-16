@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.component.properties
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CComboBox
-import ink.meodinger.lpfx.options.CProperty
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Logger.LogLevel
 import ink.meodinger.lpfx.options.Options
@@ -85,7 +84,6 @@ class ADialogLogs : AbstractPropertiesDialog() {
             add(Label(I18N["logs.label.level"]), 0, 0)
             add(comboLevel, 1, 0) {
                 items.setAll(LogLevel.values().toList())
-                valueProperty().bindBidirectional(Settings.logLevelProperty())
             }
 
             val labelSent = Label()
@@ -144,6 +142,8 @@ class ADialogLogs : AbstractPropertiesDialog() {
     }
 
     override fun initProperties() {
+        comboLevel.value = Settings.logLevel
+
         val files = Files
             .walk(Options.logs, 1).filter { it.name != Options.logs.name }
             .map(Path::toFile).collect(Collectors.toList())
@@ -153,7 +153,9 @@ class ADialogLogs : AbstractPropertiesDialog() {
         tableLog.items.addAll(MutableList(files.size) { LogFile(files[it]) })
     }
 
-    override fun convertResult(): List<CProperty> {
-        return listOf(CProperty(Settings.LogLevelOrdinal, comboLevel.index))
+    override fun convertResult(): Map<String, Any> {
+        return mapOf(
+            Settings.LogLevel to comboLevel.index,
+        )
     }
 }

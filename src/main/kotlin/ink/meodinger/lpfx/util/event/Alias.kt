@@ -16,47 +16,27 @@ import javafx.scene.input.MouseEvent
 
 /**
  * For multi-platform use
+ * Some macOS users will use Command (Control) as their Shortcut key.
  */
-val GestureEvent.isControlOrMetaDown: Boolean get() {
-    if (isControlDown) return true
-    if (isMac && isMetaDown) return true
+val GestureEvent.isControlOrMetaDown: Boolean get() = (isControlDown || isMac && isMetaDown)
 
-    return false
-}
+/**
+ * For multi-platform use
+ * Some macOS users will use Command (Control) as their Shortcut key.
+ */
+val KeyEvent.isControlOrMetaDown: Boolean get() = (isControlDown || isMac && isMetaDown)
 
 /**
  * For multi-platform use
  */
-val KeyEvent.isControlOrMetaDown: Boolean get() {
-    if (isControlDown) return true
-    if (isMac && isMetaDown) return true
-
-    return false
-}
+val GestureEvent.isAltOrMetaDown: Boolean get() = (isAltDown || isMac && isMetaDown)
 
 /**
  * For multi-platform use
  */
-val GestureEvent.isAltOrMetaDown: Boolean get() {
-    if (isAltDown) return true
-    if (isMac && isMetaDown) return true
-
-    return false
-}
-
-/**
- * For multi-platform use
- */
-val KeyEvent.isAltOrMetaDown: Boolean get() {
-    if (isAltDown) return true
-    if (isMac && isMetaDown) return true
-
-    return false
-}
+val KeyEvent.isAltOrMetaDown: Boolean get() = (isAltDown || isMac && isMetaDown)
 
 /**
  * If click count equals 2
  */
-val MouseEvent.isDoubleClick: Boolean get() {
-    return clickCount == 2
-}
+val MouseEvent.isDoubleClick: Boolean get() = clickCount == 2

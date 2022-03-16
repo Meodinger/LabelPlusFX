@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.ListProperty
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -155,22 +154,22 @@ class Controller(private val view: View, private val state: State) {
             }
         }
     }
-    private fun genGroupsBinding(): ObjectBinding<ListProperty<TransGroup>> {
-        return object : ObjectBinding<ListProperty<TransGroup>>() {
+    private fun genGroupsBinding(): ObjectBinding<ObservableList<TransGroup>> {
+        return object : ObjectBinding<ObservableList<TransGroup>>() {
             private var lastGroupListObservable = state.transFile.groupListObservable
 
             init {
                 bind(state.transFileProperty())
             }
 
-            override fun computeValue(): ListProperty<TransGroup> {
+            override fun computeValue(): ObservableList<TransGroup> {
                 if (lastGroupListObservable !== state.transFile.groupListObservable) {
                     unbind(lastGroupListObservable)
                     lastGroupListObservable = state.transFile.groupListObservable
                     bind(lastGroupListObservable)
                 }
 
-                return state.transFile.groupListProperty
+                return state.transFile.groupListObservable
             }
         }
     }
@@ -305,15 +304,12 @@ class Controller(private val view: View, private val state: State) {
         view.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
         Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
 
-        // Undo/Redo
-        view.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (!it.isConsumed) if (it.isControlOrMetaDown && it.code == KeyCode.Z) {
-                if (it.isShiftDown) state.redo() else state.undo()
-            }
-        }
+        // Alias redo in TransArea
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.isControlOrMetaDown && it.code == KeyCode.Z) it.consume()
+            if (!it.isShiftDown || !it.isControlOrMetaDown || it.code != KeyCode.Z) return@addEventHandler
+            cTransArea.fireEvent(keyEvent(it, isShiftDown = false, code = KeyCode.Y))
         }
+        Logger.info("Aliased redo in TransArea", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
         cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
@@ -560,7 +556,7 @@ class Controller(private val view: View, private val state: State) {
             if (state.isOpened) {
                 val file = state.transFile.getFile(it)
                 if (file.notExists()) {
-                    Logger.error("Picture `${state.currentPicName}` not exists", LOGSRC_CONTROLLER)
+                    Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
                     showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
                 }
             }

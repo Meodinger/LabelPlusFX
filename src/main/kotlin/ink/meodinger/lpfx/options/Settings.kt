@@ -34,11 +34,11 @@ object Settings : AbstractProperties("Settings") {
     const val DefaultGroupNameList     = "DefaultGroupNameList"
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans  = "IsGroupCreateOnNew"
-    const val ScaleOnNewPictureOrdinal = "ScaleOnNewPictureOrdinal" // 0 - default, 1 - 100%, 2 - Fit, 3 - Last
-    const val ViewModeOrdinals         = "ViewModeOrdinals"         // Input, Label
-    const val LogLevelOrdinal          = "LogLevelOrdinal"
+    const val NewPictureScale          = "ScaleOnNewPicture"
+    const val ViewModes                = "ViewMode"
+    const val LogLevel                 = "LogLevel"
     const val LabelRadius              = "LabelRadius"
-    const val LabelAlpha               = "LabelAlpha"
+    const val LabelColorOpacity        = "LabelColorOpacity"
     const val LabelTextOpaque          = "LabelTextOpaque"
     const val LigatureRules            = "LigatureRules"
     const val InstantTranslate         = "InstantTranslate"
@@ -52,11 +52,11 @@ object Settings : AbstractProperties("Settings") {
         CProperty(DefaultGroupNameList, "框内", "框外"),
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
-        CProperty(ScaleOnNewPictureOrdinal, CLabelPane.NewPictureScale.DEFAULT.ordinal),
-        CProperty(ViewModeOrdinals, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
-        CProperty(LogLevelOrdinal, Logger.LogLevel.INFO.ordinal),
+        CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
+        CProperty(ViewModes, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
+        CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
         CProperty(LabelRadius, 24.0),
-        CProperty(LabelAlpha, "80"),
+        CProperty(LabelColorOpacity, "80"),
         CProperty(LabelTextOpaque, false),
         CProperty(LigatureRules,
             "("      to "「",
@@ -141,11 +141,11 @@ object Settings : AbstractProperties("Settings") {
         defaultGroupNameList = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
         defaultGroupColorHexList = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
         isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans].asBooleanList())
-        newPictureScalePicture = CLabelPane.NewPictureScale.values()[this[ScaleOnNewPictureOrdinal].asInteger()]
-        viewModes = FXCollections.observableList(this[ViewModeOrdinals].asIntegerList().map { ViewMode.values()[it] })
-        logLevel = Logger.LogLevel.values()[this[LogLevelOrdinal].asInteger()]
+        newPictureScalePicture = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
+        viewModes = FXCollections.observableList(this[ViewModes].asIntegerList().map { ViewMode.values()[it] })
+        logLevel = Logger.LogLevel.values()[this[LogLevel].asInteger()]
         labelRadius = this[LabelRadius].asDouble()
-        labelColorOpacity = this[LabelAlpha].asInteger(16) / 255.0
+        labelColorOpacity = this[LabelColorOpacity].asInteger(16) / 255.0
         labelTextOpaque = this[LabelTextOpaque].asBoolean()
         ligatureRules = FXCollections.observableList(this[LigatureRules].asPairList())
         instantTranslate = this[InstantTranslate].asBoolean()
@@ -159,11 +159,11 @@ object Settings : AbstractProperties("Settings") {
         this[DefaultGroupNameList].set(defaultGroupNameList)
         this[DefaultGroupColorHexList].set(defaultGroupColorHexList)
         this[IsGroupCreateOnNewTrans].set(isGroupCreateOnNewTransList)
-        this[ScaleOnNewPictureOrdinal].set(newPictureScalePicture.ordinal)
-        this[ViewModeOrdinals].set(viewModes.map(Enum<*>::ordinal))
-        this[LogLevelOrdinal].set(logLevel.ordinal)
+        this[NewPictureScale].set(newPictureScalePicture.ordinal)
+        this[ViewModes].set(viewModes.map(Enum<*>::ordinal))
+        this[LogLevel].set(logLevel.ordinal)
         this[LabelRadius].set(labelRadius)
-        this[LabelAlpha].set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
+        this[LabelColorOpacity].set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LabelTextOpaque].set(labelTextOpaque)
         this[LigatureRules].set(ligatureRules)
         this[InstantTranslate].set(instantTranslate)

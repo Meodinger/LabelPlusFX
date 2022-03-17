@@ -191,7 +191,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val confirm = showConfirm(
             state.stage,
             if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
-            StringBuilder().apply { for (item in items) appendLine((item as CTreeLabelItem).text) }.toString(),
+            StringBuilder().apply { for (item in items) appendLine(item.text) }.toString(),
             I18N["context.delete_label.dialog.title"]
         )
         if (confirm.isPresent && confirm.get() == ButtonType.YES) {

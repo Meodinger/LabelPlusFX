@@ -129,6 +129,11 @@ class Controller(private val view: View, private val state: State) {
             }
 
             override fun computeValue(): ObservableList<String> {
+                // state.transFileProperty().get()
+                // FIXME: Binding doesn't compute without the above line
+
+                if (!state.isOpened) return FXCollections.emptyObservableList()
+
                 if (lastMapObservable !== state.transFile.transMapObservable) {
                     unbind(lastMapObservable)
                     lastMapObservable = state.transFile.transMapObservable

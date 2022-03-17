@@ -50,7 +50,7 @@ class State private constructor() {
      */
     var isChanged: Boolean by changedProperty
 
-    private val transFileProperty: ObjectProperty<TransFile> = SimpleObjectProperty(TransFile.DEFAULT_TRANS_FILE)
+    private val transFileProperty: ObjectProperty<TransFile> = SimpleObjectProperty(null)
     fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
     /**
      * The opened TransFile
@@ -109,13 +109,13 @@ class State private constructor() {
 
         openedProperty.set(false)
         changedProperty.set(false)
-        transFileProperty.set(TransFile.DEFAULT_TRANS_FILE)
-        translationFileProperty.set(null)
+        workModeProperty.set(WorkMode.InputMode)
+        viewModeProperty.set(Settings.viewModes[workMode.ordinal])
         currentGroupIdProperty.set(NOT_FOUND)
         currentPicNameProperty.set(emptyString())
         currentLabelIndexProperty.set(NOT_FOUND)
-        workModeProperty.set(WorkMode.InputMode)
-        viewModeProperty.set(Settings.viewModes[workMode.ordinal])
+        transFileProperty.set(null)
+        translationFileProperty.set(null)
 
         Logger.info("Reset", LOGSRC_STATE)
     }

@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.io
 import ink.meodinger.lpfx.FileType
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
+import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.resource.I18N
@@ -70,7 +71,7 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
 
         fun exportGroup(): String {
             val gBuilder = StringBuilder()
-            for (name in transFile.groupNames) gBuilder.append(name).append("\n")
+            for (name in transFile.groupList.map(TransGroup::name)) gBuilder.append(name).append("\n")
             return gBuilder.deleteCharAt(gBuilder.length - 1).toString()
         }
 

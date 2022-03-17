@@ -50,8 +50,8 @@ fun trimSame(strings: List<String>): List<String> {
 /**
  * Sort a list of string by their long value
  */
-fun sortByDigit(strings: List<String>): List<String> {
-    val trimmed = trimSame(strings)
+fun sortByDigit(strings: Collection<String>): List<String> {
+    val trimmed = trimSame(if (strings is List) strings else strings.toList())
 
     if (trimmed.size > 2) {
         var canCastToIntList = true

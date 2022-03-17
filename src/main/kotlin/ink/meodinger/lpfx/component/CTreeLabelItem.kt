@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.string.replaceLineFeed
+import ink.meodinger.lpfx.util.string.replaceEOL
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -53,7 +53,7 @@ class CTreeLabelItem(
     }
 
     private fun update(index: Int = this.index, text: String = this.text) {
-        value = "${String.format("%02d", index)}: ${text.replaceLineFeed(" ")}"
+        value = "${String.format("%02d", index)}: ${text.replaceEOL(" ")}"
     }
 
 }

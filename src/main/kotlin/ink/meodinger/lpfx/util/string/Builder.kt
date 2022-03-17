@@ -21,9 +21,9 @@ fun StringBuilder.deleteTail(tail: String): StringBuilder {
 
 /**
  * Delete tail line feed
- * @param lf line feed tail
+ * @param eol line feed tail
  */
-fun StringBuilder.deleteTailLF(lf: String = "\n"): StringBuilder = deleteTail(lf)
+fun StringBuilder.deleteTailEOL(eol: String = "\n"): StringBuilder = deleteTail(eol)
 
 /**
  * CharArray to StringBuilder

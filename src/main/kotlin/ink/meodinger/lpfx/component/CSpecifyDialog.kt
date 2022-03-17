@@ -135,6 +135,12 @@ class CSpecifyDialog(private val state: State) : Dialog<List<File?>>() {
         }
     }
 
+    /**
+     * Specify current TransFile's Picture Files.
+     * Returned list has the same order as TransFile.sortedPicNames.
+     * @return EmptyList if Closed or Cancelled; List of specific
+     *         files (not-null) or null (didn't specify for Picture)
+     */
     fun specify(): List<File?> {
         // clear & re-init
         contentGridPane.children.clear()

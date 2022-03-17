@@ -53,7 +53,7 @@ fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String
             builder.appendLine(line)
         }
     }
-    if (builder.isNotEmpty()) builder.deleteTailLF()
+    if (builder.isNotEmpty()) builder.deleteTailEOL()
 
     return builder.toString()
 }

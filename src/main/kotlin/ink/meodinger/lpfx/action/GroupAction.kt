@@ -2,12 +2,11 @@ package ink.meodinger.lpfx.action
 
 import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.LOGSRC_STATE
-import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.string.deleteTailLF
+import ink.meodinger.lpfx.util.string.deleteTailEOL
 import ink.meodinger.lpfx.util.string.emptyString
 
 /**
@@ -44,14 +43,16 @@ class GroupAction(
     private fun applyGroupProps(name: String, colorHex: String) {
         val builder = StringBuilder().apply { appendLine("Applied new props to group $oriName") }
 
-        if (newName.isNotEmpty()) targetTransGroup.name = name.also {
-            builder.appendLine("name: $oriName -> $it")
+        if (newName.isNotEmpty()) {
+            builder.appendLine("name: ${targetTransGroup.name} -> $name")
+            targetTransGroup.name = name
         }
-        if (newColorHex.isNotEmpty()) targetTransGroup.colorHex = colorHex.also {
-            builder.appendLine("colorHex: $oriColorHex -> $it")
+        if (newColorHex.isNotEmpty()) {
+            builder.appendLine("colorHex: ${targetTransGroup.colorHex} -> $colorHex")
+            targetTransGroup.colorHex = colorHex
         }
 
-        Logger.info(builder.deleteTailLF().toString(), LOGSRC_ACTION)
+        Logger.info(builder.deleteTailEOL().toString(), LOGSRC_ACTION)
     }
     private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
         for (group in state.transFile.groupListObservable)
@@ -69,7 +70,7 @@ class GroupAction(
         val toRemoveId = state.transFile.groupListObservable.indexOfFirst { it.name == transGroup.name }
 
         state.transFile.groupListObservable.removeAt(toRemoveId)
-        for (picName in state.transFile.picNames) for (label in state.transFile.transMapObservable[picName]!!)
+        for (labels in state.transFile.transMapObservable.values) for (label in labels)
             if (label.groupId >= toRemoveId) label.groupId--
 
         Logger.info("Removed TransGroup: $transGroup", LOGSRC_STATE)

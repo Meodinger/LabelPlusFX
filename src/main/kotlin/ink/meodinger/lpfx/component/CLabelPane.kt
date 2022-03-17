@@ -396,7 +396,8 @@ class CLabelPane : ScrollPane() {
             colorProperty().bind(Bindings.createObjectBinding(
                 { Color.web(groups[transLabel.groupId].colorHex) },
                 // GroupsProperty will change when group's color change
-                transLabel.groupIdProperty, groupsProperty,
+                groupsProperty, transLabel.groupIdProperty,
+                // TODO: https://stackoverflow.com/questions/71513087/javafx-valueat-binding-only-compute-once
             ))
             colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)

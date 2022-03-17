@@ -11,6 +11,7 @@ import ink.meodinger.lpfx.genGroupNameFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
+import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.showChoice
@@ -69,7 +70,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val newGroupId = state.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
         if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
-            if (!state.transFile.groupNames.contains(nameList[newGroupId])) {
+            if (!state.transFile.groupList.contains { g -> g.name == nameList[newGroupId] }) {
                 newName = nameList[newGroupId]
             }
         }
@@ -78,7 +79,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         rAddGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
         rAddGroupDialog.result = null
         rAddGroupDialog.showAndWait().ifPresent { newGroup ->
-            if (state.transFile.groupNames.contains(newGroup.name)) {
+            if (state.transFile.groupList.contains { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }
@@ -104,7 +105,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             genGroupNameFormatter()
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
-            if (state.transFile.groupNames.contains(newName)) {
+            if (state.transFile.groupList.contains { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }
@@ -165,7 +166,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             state.stage,
             I18N["context.move_to.dialog.title"],
             if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
-            state.transFile.groupNames
+            state.transFile.groupList.map(TransGroup::name)
         )
         if (choice.isPresent) {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())

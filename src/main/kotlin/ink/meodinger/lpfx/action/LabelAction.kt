@@ -5,12 +5,11 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.string.deleteTailLF
+import ink.meodinger.lpfx.util.string.deleteTailEOL
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.fixed
-import ink.meodinger.lpfx.util.string.replaceLineFeed
+import ink.meodinger.lpfx.util.string.replaceEOL
 
 /**
  * Author: Meodinger
@@ -53,23 +52,28 @@ class LabelAction(
     private fun applyLabelProps(index: Int, groupId: Int, x: Double, y: Double, text: String) {
         val builder = StringBuilder().apply { appendLine("Applied new props to $targetPicName:$oriLabelIndex") }
 
-        if (newLabelIndex != NOT_FOUND) targetTransLabel.index = index.also {
-            builder.appendLine("index: $oriLabelIndex -> $index")
+        if (newLabelIndex != NOT_FOUND) {
+            builder.appendLine("index: ${targetTransLabel.index} -> $index")
+            targetTransLabel.index = index
         }
-        if (newGroupId != NOT_FOUND) targetTransLabel.groupId = groupId.also {
-            builder.appendLine("groupId: $oriGroupId -> $groupId")
+        if (newGroupId != NOT_FOUND) {
+            builder.appendLine("groupId: ${targetTransLabel.groupId} -> $groupId")
+            targetTransLabel.groupId = groupId
         }
-        if (!newX.isNaN()) targetTransLabel.x = x.also {
-            builder.appendLine("x: ${oriX.fixed(4)} -> ${x.fixed(4)}")
+        if (!newX.isNaN()) {
+            builder.appendLine("x: ${targetTransLabel.x.fixed(4)} -> ${x.fixed(4)}")
+            targetTransLabel.x = x
         }
-        if (!newY.isNaN()) targetTransLabel.y = y.also {
-            builder.appendLine("y: ${oriY.fixed(4)} -> ${y.fixed(4)}")
+        if (!newY.isNaN()) {
+            builder.appendLine("y: ${targetTransLabel.y.fixed(4)} -> ${y.fixed(4)}")
+            targetTransLabel.y = y
         }
-        if (newText.isNotEmpty()) targetTransLabel.text = text.also {
-            builder.appendLine("text: ${text.replaceLineFeed()}")
+        if (newText.isNotEmpty()) {
+            builder.appendLine("text: ${text.replaceEOL()}")
+            targetTransLabel.text = text
         }
 
-        Logger.info(builder.deleteTailLF().toString(), LOGSRC_ACTION)
+        Logger.info(builder.deleteTailEOL().toString(), LOGSRC_ACTION)
     }
     private fun addTransLabel(picName: String, transLabel: TransLabel) {
         if (transLabel.groupId >= state.transFile.groupCount)

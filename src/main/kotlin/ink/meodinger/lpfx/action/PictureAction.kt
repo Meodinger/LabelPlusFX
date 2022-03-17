@@ -43,8 +43,9 @@ class PictureAction(
     private val oriPicFile: File? = state.transFile.getFile(targetPicName)
 
     private fun applyPicFile(picFile: File) {
+        val curFile = state.transFile.getFile(targetPicName)!!
+        Logger.info("Change file of picture <$targetPicFile>: ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
         state.transFile.setFile(targetPicName, picFile)
-        Logger.info("Change file of picture <$targetPicFile>: ${oriPicFile!!.path} -> ${picFile.path}", LOGSRC_ACTION)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
         if (state.transFile.transMapObservable.contains(picName))

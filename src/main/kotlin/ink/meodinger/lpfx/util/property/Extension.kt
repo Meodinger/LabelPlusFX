@@ -1,7 +1,8 @@
 package ink.meodinger.lpfx.util.property
 
-import javafx.beans.property.Property
-import javafx.collections.ObservableList
+import javafx.beans.property.*
+import javafx.collections.*
+
 
 /**
  * Author: Meodinger
@@ -18,6 +19,38 @@ inline val <T> Property<T>.isNotBound: Boolean get() = !isBound
  * Alias for setAll
  * @see ObservableList.setAll
  */
-operator fun <E> ObservableList<E>.divAssign(value: List<E>) {
-    setAll(value)
+operator fun <E> ObservableList<E>.divAssign(value: List<E>) { setAll(value) }
+
+fun <E> ObservableSet<E>.sorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
+    val list = FXCollections.observableArrayList(sorter(this))
+
+    addListener(SetChangeListener { list.setAll(sorter(it.set)) })
+
+    return list
+}
+fun <E> ObservableList<E>.sorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
+    val list = FXCollections.observableArrayList(sorter(this))
+
+    addListener(ListChangeListener { list.setAll(sorter(it.list)) })
+
+    return list
+}
+
+fun <E> ObservableMap<E, *>.observableKeys(): ObservableSet<E> {
+    val set = FXCollections.observableSet(HashSet(keys))
+
+    addListener(MapChangeListener {
+        if (it.wasAdded() != it.wasRemoved()) {
+            if (it.wasRemoved()) {
+                set.remove(it.key)
+            } else {
+                set.add(it.key)
+            }
+        }
+    })
+
+    return FXCollections.unmodifiableObservableSet(set)
+}
+fun <E> MapProperty<E, *>.keysProperty(): ReadOnlySetProperty<E> {
+    return ReadOnlySetWrapper<E>(observableKeys()).readOnlyProperty
 }

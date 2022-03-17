@@ -67,7 +67,7 @@ class CTreeView: TreeView<String>() {
                     // will not happen
                     throw IllegalStateException("Permuted: $it")
                 } else if (it.wasUpdated()) {
-                    // Ignore, TransGroup's Property changed,
+                    // Ignore, TransGroup's Property changed
                 } else {
                     if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
                     if (it.wasAdded()) it.addedSubList.forEach { group ->
@@ -144,7 +144,8 @@ class CTreeView: TreeView<String>() {
                 graphicProperty().bind(Bindings.createObjectBinding(
                     { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(groups[transLabel.groupId].colorHex)) },
                     // GroupsProperty will change when group's color change
-                    transLabel.groupIdProperty, groupsProperty
+                    groupsProperty, transLabel.groupIdProperty,
+                    // TODO: https://stackoverflow.com/questions/71513087/javafx-valueat-binding-only-compute-once
                 ))
         }
 

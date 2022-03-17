@@ -41,6 +41,4 @@ abstract class LPFXTask<T> : Task<T>() {
 
     operator fun invoke() = startInNewThread()
 
-    inline fun handleCancel(breaker: () -> Unit) { if (isCancelled) breaker() }
-
 }

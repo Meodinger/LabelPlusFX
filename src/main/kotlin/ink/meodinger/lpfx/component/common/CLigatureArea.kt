@@ -34,7 +34,7 @@ class CLigatureArea: TextArea() {
     fun ligatureMaxLengthProperty(): IntegerProperty = ligatureMaxLengthProperty
     var ligatureMaxLength: Int by ligatureMaxLengthProperty
 
-    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.observableArrayList())
+    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.emptyObservableList())
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 

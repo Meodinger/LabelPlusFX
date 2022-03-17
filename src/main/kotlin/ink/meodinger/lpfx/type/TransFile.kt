@@ -2,17 +2,17 @@ package ink.meodinger.lpfx.type
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.util.file.notExists
-import ink.meodinger.lpfx.util.ReLazy
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.keysProperty
+import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.sorted
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.sortByDigit
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
 
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import javafx.beans.InvalidationListener
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -99,45 +99,35 @@ open class TransFile @JsonCreator constructor(
         fileMap[picName] = file
     }
     fun checkLost(): List<String> {
-        return picNames.filter { getFile(it).notExists() }
+        return transMapObservable.keys.filter { getFile(it).notExists() }
     }
 
     // ----- Properties ----- //
+    // Properties can only be used for bindings' values;
 
     val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
     val commentProperty: StringProperty = SimpleStringProperty(comment)
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
     val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
 
-    // ----- Lazy ---- //
-
-    private val sortedPicNamesLazy: ReLazy<List<String>> = ReLazy { sortByDigit(transMapObservable.keys.toList()) } // copy
-    val sortedPicNames: List<String> by sortedPicNamesLazy
+    val picNamesProperty: ReadOnlySetProperty<String> = transMapProperty.keysProperty()
+    val sortedPicNamesObservable: ObservableList<String> = picNamesProperty.sorted(::sortByDigit)
 
     // ----- Accessible Fields ----- //
+    // Observables can be used for bindings' dependencies and data edit;
+    // Raw values can be used as simple data, they are all immutable except comment;
 
-    val version: IntArray by versionProperty
-    var comment: String by commentProperty
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
 
+    val version: IntArray by versionProperty
+    var comment: String by commentProperty
+    val groupList: List<TransGroup> by groupListObservable
+    val transMap: Map<String, List<TransLabel>> by transMapObservable
+    val sortedPicNames: List<String> by sortedPicNamesObservable
+
     val groupCount: Int get() = groupListObservable.size
-    val groupNames: List<String> get() = List(groupListObservable.size) { groupListObservable[it].name }
-    val groupColors: List<String> get() = List(groupListObservable.size) { groupListObservable[it].colorHex }
-
     val picCount: Int get() = transMapObservable.size
-    val picNames: List<String> get() = transMapObservable.keys.toList() // copy
-
-    // ----- JSON Getters ----- //
-
-    @Suppress("unused") protected val groupList: List<TransGroup> by groupListObservable
-    @Suppress("unused") protected val transMap: Map<String, List<TransLabel>> by transMapObservable
-
-    // ----- Init ----- //
-
-    init {
-        transMapObservable.addListener(InvalidationListener { sortedPicNamesLazy.refresh() })
-    }
 
     // ----- TransGroup ----- //
 
@@ -170,7 +160,7 @@ open class TransFile @JsonCreator constructor(
         val comment = this.comment
         val groupList = MutableList(groupListObservable.size) { groupListObservable[it].clone() }
         val transMap = LinkedHashMap<String, MutableList<TransLabel>>().apply {
-            putAll(sortedPicNames.map { it to transMapObservable[it]!!.sorted { l1, l2 -> l1.index - l2.index } })
+            putAll(sortedPicNamesObservable.map { it to transMapObservable[it]!!.sorted { l1, l2 -> l1.index - l2.index } })
         }
 
         return TransFile(version, comment, groupList, transMap)

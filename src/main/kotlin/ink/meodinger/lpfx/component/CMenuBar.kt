@@ -35,6 +35,7 @@ import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.event.ActionEvent
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
@@ -465,11 +466,11 @@ class CMenuBar(private val state: State) : MenuBar() {
             state.isChanged = true
         }
         if (conflictList.isNotEmpty()) {
-            showInfo(
+            showWarning(
                 state.stage,
                 I18N["m.externalPic.dialog.header"],
                 conflictList.joinToString(",\n"),
-                I18N["common.info"]
+                I18N["common.warning"]
             )
         }
     }
@@ -575,6 +576,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun cht2zh(inverse: Boolean = false) {
         val converter = if (inverse) ::convert2Traditional else ::convert2Simplified
 
+        // TODO: Use Action
         val task = object : LPFXTask<Unit>() {
             val DELIMITER = "#|#"
             val state = this@CMenuBar.state
@@ -585,9 +587,10 @@ class CMenuBar(private val state: State) : MenuBar() {
                 val picNames = state.transFile.sortedPicNames
                 val picCount = state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
-                    handleCancel { return }
+                    if (isCancelled) return
+                    updateProgress(1.0 * (picIndex + 1) / picCount, 1.0)
+
                     val labels = state.transFile.getTransList(picName)
-                    var labelIndex = 0
                     val labelCount = labels.size
 
                     if (labelCount == 0) continue
@@ -597,37 +600,31 @@ class CMenuBar(private val state: State) : MenuBar() {
                     val iterator = converter(builder.deleteTail(DELIMITER).toString()).split(DELIMITER).also {
                         if (it.size != labelCount) {
                             updateMessage("at [$picName] ${it.joinToString()}")
-                            cancel()
                             return
                         }
                     }.iterator()
-                    for (label in labels) {
-                        labelIndex++
-                        updateProgress((1.0 * (picIndex + labelIndex / labelCount) / picCount), 1.0)
-                        label.text = iterator.next().trim() // Sometimes will get whitespaces at label start
-                    }
+                    // Sometimes will get whitespaces at label start
+                    for (label in labels) label.text = iterator.next().trim()
                 }
             }
         }
 
-        Dialog<Unit>().apply {
+        Dialog<ButtonType>().apply {
             initOwner(state.stage)
+            dialogPane.buttonTypes.add(ButtonType.CANCEL)
+
+            val button = dialogPane.lookupButton(ButtonType.CANCEL)
+            fun cancel() = button.fireEvent(ActionEvent())
+
             dialogPane.withContent(ProgressBar()) {
                 progressProperty().bind(task.progressProperty())
-                progressProperty().addListener(onNew<Number, Double> {
-                    if (it >= 1.0) {
-                        result = Unit
-                        close()
-                    }
-                })
+                progressProperty().addListener(onNew<Number, Double> { if (it >= 1.0) cancel() })
             }
 
+            resultProperty().addListener(onNew { task.cancel() })
             task.messageProperty().addListener(onNew {
-                if (it.isNotBlank()) {
-                    result = Unit
-                    close()
-                    showError(state.stage, "Error: $it")
-                }
+                cancel()
+                showError(state.stage, "Error: $it")
             })
         }.show()
 

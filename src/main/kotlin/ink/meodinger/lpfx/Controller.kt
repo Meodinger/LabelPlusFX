@@ -20,6 +20,7 @@ import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
+import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.*
@@ -28,7 +29,6 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import ink.meodinger.lpfx.util.file.existsOrNull
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -128,6 +128,12 @@ class Controller(private val view: View, private val state: State) {
                 ?: FXCollections.emptyObservableList()
         }, state.transFileProperty()
     )
+    private val picNamesBinding: ObjectBinding<ObservableList<String>> = Bindings.createObjectBinding(
+        {
+            state.transFileProperty().get()?.sortedPicNamesObservable
+                ?: FXCollections.emptyObservableList()
+        }, state.transFileProperty()
+    )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
             state.getPicFileNow().existsOrNull()?.let { Image(FileInputStream(it)) }
@@ -136,7 +142,7 @@ class Controller(private val view: View, private val state: State) {
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
         {
-            state.currentPicName.takeIf(String::isNotEmpty)?.let { state.transFile.transMapObservable[it]!! }
+            state.currentPicName.takeIf(String::isNotEmpty)?.let { state.transFile.transMapProperty[it]!! }
                 ?: FXCollections.emptyObservableList()
         }, state.currentPicNameProperty()
     )
@@ -207,7 +213,7 @@ class Controller(private val view: View, private val state: State) {
 
             val board = it.dragboard
             if (board.hasFiles()) {
-                val file = board.files.firstOrNull { f -> EXTENSIONS_FILE.contains(f.extension) } ?: return@setOnDragDropped
+                val file = board.files.first()
 
                 // To make sure exception can be caught
                 Platform.runLater { open(file) }
@@ -383,16 +389,7 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
-        cPicBox.itemsProperty().bind(Bindings.createObjectBinding(
-            {
-                if (!state.isOpened)
-                    FXCollections.emptyObservableList()
-                else
-                    FXCollections.observableList(state.transFile.sortedPicNames) {
-                        arrayOf(state.transFile.transMapObservable)
-                    }
-            }, state.transFileProperty()
-        ))
+        cPicBox.itemsProperty().bind(picNamesBinding)
         RuledGenericBidirectionalBinding.bind(
             cPicBox.valueProperty(), rule@{ _, _, newValue, _ -> newValue ?: emptyString() },
             state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
@@ -925,9 +922,7 @@ class Controller(private val view: View, private val state: State) {
         // Whether overwriting existing file
         val overwrite = file.exists()
 
-        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite",
-            LOGSRC_CONTROLLER
-        )
+        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite", LOGSRC_CONTROLLER)
 
         // Check folder
         if (!silent) if (file.parentFile != state.transFile.projectFolder) {

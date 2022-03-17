@@ -69,7 +69,7 @@ object RecentFiles : AbstractProperties("Recent Files") {
         recentFiles.remove(file)
         recentFiles.addFirst(file)
 
-        progressMap[file.path] = progressMap[file.path] ?: (-1 to -1)
+        if (progressMap[file.path] == null) progressMap[file.path] = (-1 to -1)
 
         if (recentFiles.size > MAX_SIZE) progressMap.remove(recentFiles.removeLast().path)
     }

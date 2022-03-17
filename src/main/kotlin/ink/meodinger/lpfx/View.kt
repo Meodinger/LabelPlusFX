@@ -4,8 +4,10 @@ import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CLigatureArea
 import ink.meodinger.lpfx.component.common.CTextSlider
+import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.*
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -20,6 +22,7 @@ import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.util.StringConverter
 
 
 /**
@@ -46,7 +49,7 @@ class View(state: State) : BorderPane() {
     val cLabelPane      = CLabelPane()
     val cSlider         = CTextSlider()
     val cPicBox         = CComboBox<String>()
-    val cGroupBox       = CComboBox<String>()
+    val cGroupBox       = CComboBox<TransGroup>()
     val cTreeView       = CTreeView()
     val cTreeViewMenu   = CTreeMenu(state)
     val cTransArea      = CLigatureArea()
@@ -86,7 +89,12 @@ class View(state: State) : BorderPane() {
                         add(bSwitchWorkMode) {
                             isMnemonicParsing = false
                         }
-                        add(cGroupBox)
+                        add(cGroupBox) {
+                            innerBox.converter = object : StringConverter<TransGroup>() {
+                                override fun toString(group: TransGroup?): String = group?.name ?: emptyString()
+                                override fun fromString(string: String?): TransGroup? = cGroupBox.items.firstOrNull { it.name == string }
+                            }
+                        }
                         add(HBox()) {
                             alignment = Pos.CENTER
                             boxHGrow = Priority.ALWAYS

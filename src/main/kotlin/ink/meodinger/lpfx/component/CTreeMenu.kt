@@ -170,6 +170,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         if (choice.isPresent) {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())
 
+            for (item in items) state.controller.moveLabelTreeItem(item.index, newGroupId)
             state.doAction(ComplexAction.of(items.map {
                 LabelAction(
                     ActionType.CHANGE, state,
@@ -178,7 +179,6 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                     newGroupId = newGroupId
                 )
             }))
-            for (item in items) state.controller.moveLabelTreeItem(item.index, newGroupId)
             // Mark change
             state.isChanged = true
         }

@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
@@ -234,6 +235,10 @@ class CLabelPane : ScrollPane() {
         addEventHandler(LabelEvent.LABEL_OTHER, onLabelOther)
     }
 
+    private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList())
+    fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
+    var groups: ObservableList<TransGroup> by groupsProperty
+
     private val imageProperty: ObjectProperty<Image> = imageView.imageProperty()
     fun imageProperty(): ObjectProperty<Image> = imageProperty
     var image: Image by imageProperty
@@ -241,10 +246,6 @@ class CLabelPane : ScrollPane() {
     private val labelsProperty: ListProperty<TransLabel> = SimpleListProperty(FXCollections.emptyObservableList())
     fun labelsProperty(): ListProperty<TransLabel> = labelsProperty
     var labels: ObservableList<TransLabel> by labelsProperty
-
-    private val colorHexListProperty: ListProperty<String> = SimpleListProperty(FXCollections.observableArrayList())
-    fun colorHexListProperty(): ListProperty<String> = colorHexListProperty
-    var colorHexList: ObservableList<String> by colorHexListProperty
 
     private val labelRadiusProperty: DoubleProperty = SimpleDoubleProperty(24.0)
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
@@ -393,8 +394,9 @@ class CLabelPane : ScrollPane() {
             radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
             colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(colorHexList[transLabel.groupId]) },
-                colorHexListProperty, transLabel.groupIdProperty
+                { Color.web(groups[transLabel.groupId].colorHex) },
+                // GroupsProperty will change when group's color change
+                transLabel.groupIdProperty, groupsProperty,
             ))
             colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)

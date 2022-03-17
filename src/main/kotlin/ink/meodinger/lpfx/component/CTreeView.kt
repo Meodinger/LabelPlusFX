@@ -67,8 +67,7 @@ class CTreeView: TreeView<String>() {
                     // will not happen
                     throw IllegalStateException("Permuted: $it")
                 } else if (it.wasUpdated()) {
-                    // will not happen
-                    throw IllegalStateException("Updated: $it")
+                    // Ignore, TransGroup's Property changed,
                 } else {
                     if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
                     if (it.wasAdded()) it.addedSubList.forEach { group ->
@@ -144,7 +143,8 @@ class CTreeView: TreeView<String>() {
             if (viewMode == ViewMode.IndexMode)
                 graphicProperty().bind(Bindings.createObjectBinding(
                     { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(groups[transLabel.groupId].colorHex)) },
-                    transLabel.groupIdProperty
+                    // GroupsProperty will change when group's color change
+                    transLabel.groupIdProperty, groupsProperty
                 ))
         }
 
@@ -200,16 +200,14 @@ class CTreeView: TreeView<String>() {
     }
 
     fun moveLabelItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
-        when (viewMode) {
-            ViewMode.IndexMode -> return
-            ViewMode.GroupMode -> {
-                val labelItem = getLabelItem(labelIndex)
+        val labelItem = getLabelItem(labelIndex)
 
-                groupItems[oriGroupId].children.remove(labelItem)
-                labelItems[oriGroupId].remove(labelItem)
-                groupItems[dstGroupId].children.add(labelItem)
-                labelItems[dstGroupId].add(labelItem)
-            }
+        labelItems[oriGroupId].remove(labelItem)
+        labelItems[dstGroupId].add(labelItem)
+
+        if (viewMode == ViewMode.GroupMode) {
+            groupItems[oriGroupId].children.remove(labelItem)
+            groupItems[dstGroupId].children.add(labelItem)
         }
     }
 

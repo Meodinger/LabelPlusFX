@@ -28,13 +28,12 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.util.file.existsOrNull
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.collections.ObservableMap
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
@@ -45,6 +44,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.net.*
 import java.text.DateFormat
@@ -66,31 +66,31 @@ import kotlin.collections.LinkedHashMap
 class Controller(private val view: View, private val state: State) {
 
     companion object {
-        private const val ONE_SCEND = 1000L
+        private const val ONE_SECOND = 1000L
 
         /**
          * Auto-save
          */
-        private const val AUTO_SAVE_DELAY = 5 * 60 * 1000L
-        private const val AUTO_SAVE_PERIOD = 3 * 60 * 1000L
+        private const val AUTO_SAVE_DELAY = 5 * 60 * ONE_SECOND
+        private const val AUTO_SAVE_PERIOD = 3 * 60 * ONE_SECOND
     }
 
     private val dialogSpecify: CSpecifyDialog = CSpecifyDialog(state)
 
-    private val bSwitchViewMode: Button      = view.bSwitchViewMode does { switchViewMode() }
-    private val bSwitchWorkMode: Button      = view.bSwitchWorkMode does { switchWorkMode() }
-    private val lInfo: Label                 = view.lInfo
-    private val lBackup: Label               = view.lBackup.apply { text = I18N["stats.not_backed"] }
-    private val lAccEditTime: Label          = view.lAccEditTime
-    private val pMain: SplitPane             = view.pMain
-    private val pRight: SplitPane            = view.pRight
-    private val cGroupBar: CGroupBar         = view.cGroupBar
-    private val cLabelPane: CLabelPane       = view.cLabelPane
-    private val cSlider: CTextSlider         = view.cSlider
-    private val cPicBox: CComboBox<String>   = view.cPicBox
-    private val cGroupBox: CComboBox<String> = view.cGroupBox
-    private val cTreeView: CTreeView         = view.cTreeView
-    private val cTransArea: CLigatureArea    = view.cTransArea
+    private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
+    private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
+    private val lInfo: Label                     = view.lInfo
+    private val lBackup: Label                   = view.lBackup.apply { text = I18N["stats.not_backed"] }
+    private val lAccEditTime: Label              = view.lAccEditTime
+    private val pMain: SplitPane                 = view.pMain
+    private val pRight: SplitPane                = view.pRight
+    private val cGroupBar: CGroupBar             = view.cGroupBar
+    private val cLabelPane: CLabelPane           = view.cLabelPane
+    private val cSlider: CTextSlider             = view.cSlider
+    private val cPicBox: CComboBox<String>       = view.cPicBox
+    private val cGroupBox: CComboBox<TransGroup> = view.cGroupBox
+    private val cTreeView: CTreeView             = view.cTreeView
+    private val cTransArea: CLigatureArea        = view.cTransArea
 
     private val backupFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
@@ -109,128 +109,37 @@ class Controller(private val view: View, private val state: State) {
         }
     }
 
-    private var accumulator: Long = 16 * 60 * 60 * ONE_SCEND
+    private var accumulator: Long = 16 * 60 * 60 * ONE_SECOND
     private val accumulatorFormatter = SimpleDateFormat("HH:mm:ss")
-    private val accumulatorManager = TimerTaskManager(0, ONE_SCEND) {
+    private val accumulatorManager = TimerTaskManager(0, ONE_SECOND) {
         if (state.isOpened) {
-            accumulator += ONE_SCEND
+            accumulator += ONE_SECOND
             Platform.runLater {
                 lAccEditTime.text = String.format(I18N["stats.accumulator.s"], accumulatorFormatter.format(accumulator))
             }
         }
     }.schedule()
 
-    private fun genPicNamesBinding(): ObjectBinding<ObservableList<String>> {
-        return object : ObjectBinding<ObservableList<String>>() {
-            private var lastMapObservable: ObservableMap<String, ObservableList<TransLabel>> = FXCollections.emptyObservableMap()
-
-            init {
-                bind(state.transFileProperty())
-            }
-
-            override fun computeValue(): ObservableList<String> {
-                // state.transFileProperty().get()
-                // FIXME: Binding doesn't compute without the above line
-
-                if (!state.isOpened) return FXCollections.emptyObservableList()
-
-                if (lastMapObservable !== state.transFile.transMapObservable) {
-                    unbind(lastMapObservable)
-                    lastMapObservable = state.transFile.transMapObservable
-                    bind(lastMapObservable)
-                }
-
-                return FXCollections.observableList(state.transFile.sortedPicNames)
-            }
-
-        }
-    }
-    private fun genLabelsBinding(): ObjectBinding<ObservableList<TransLabel>> {
-        return object : ObjectBinding<ObservableList<TransLabel>>() {
-
-            init {
-                bind(state.currentPicNameProperty())
-            }
-
-            override fun computeValue(): ObservableList<TransLabel> {
-                return if (state.currentPicName.isNotEmpty())
-                    state.transFile.transMapObservable[state.currentPicName]!!
-                else
-                    FXCollections.emptyObservableList()
-            }
-        }
-    }
-    private fun genGroupsBinding(): ObjectBinding<ObservableList<TransGroup>> {
-        return object : ObjectBinding<ObservableList<TransGroup>>() {
-            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
-
-            init {
-                bind(state.transFileProperty())
-            }
-
-            override fun computeValue(): ObservableList<TransGroup> {
-                if (!state.isOpened) return FXCollections.emptyObservableList()
-
-                if (lastGroupListObservable !== state.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = state.transFile.groupListObservable
-                    bind(lastGroupListObservable)
-                }
-
-                return state.transFile.groupListObservable
-            }
-        }
-    }
-    private fun <T> genGroupPropertyBinding(
-        getter: () -> ObservableList<T>,
-        propertyGetter: (TransGroup) -> Property<T>
-    ): ObjectBinding<ObservableList<T>> {
-        return object : ObjectBinding<ObservableList<T>>() {
-            private var lastGroupListObservable: ObservableList<TransGroup> = FXCollections.emptyObservableList()
-            private val boundGroupNameProperties: MutableList<Property<T>> = ArrayList()
-
-            init {
-                bind(state.transFileProperty())
-            }
-
-            override fun computeValue(): ObservableList<T> {
-                if (!state.isOpened) return FXCollections.emptyObservableList()
-
-                if (lastGroupListObservable !== state.transFile.groupListObservable) {
-                    unbind(lastGroupListObservable)
-                    lastGroupListObservable = state.transFile.groupListObservable
-                    bind(state.transFile.groupListObservable)
-                }
-
-                for (property in boundGroupNameProperties) unbind(property)
-                state.transFile.groupListObservable.mapTo(boundGroupNameProperties.apply(MutableList<*>::clear), propertyGetter)
-                for (property in boundGroupNameProperties) bind(property)
-
-                return getter()
-            }
-        }
-    }
-    private val cLabelPaneImageBinding: ObjectBinding<Image> = object : ObjectBinding<Image>() {
-
-        init {
-            bind(state.currentPicNameProperty())
-        }
-
-        override fun computeValue(): Image {
-            var image: Image? = null
-            try {
-                val picFile = state.getPicFileNow() ?: return INIT_IMAGE
-                if (picFile.exists()) image = Image(picFile.toURI().toURL().toString())
-            } catch (e: IOException) {
-                Logger.error("LabelPane render failed", LOGSRC_CONTROLLER)
-                Logger.exception(e)
-                // It's not safe to invoke showAndWait() when the binding is computing requested by layout
-                Platform.runLater { showException(state.stage, e) }
-            }
-            return image ?: INIT_IMAGE
-        }
-
-    }
+    // Following Bindings should create in order to avoid unexpected Exceptions
+    private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
+        {
+            // Must invoke get() to let the code run correctly, check State::isOpened is not enough
+            state.transFileProperty().get()?.groupListProperty
+                ?: FXCollections.emptyObservableList()
+        }, state.transFileProperty()
+    )
+    private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
+        {
+            state.getPicFileNow().existsOrNull()?.let { Image(FileInputStream(it)) }
+                ?: INIT_IMAGE
+        }, state.currentPicNameProperty()
+    )
+    private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
+        {
+            state.currentPicName.takeIf(String::isNotEmpty)?.let { state.transFile.transMapObservable[it]!! }
+                ?: FXCollections.emptyObservableList()
+        }, state.currentPicNameProperty()
+    )
 
     private fun switchViewMode() {
         state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
@@ -456,21 +365,34 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         // GroupBox
-        cGroupBox.itemsProperty().bind(genGroupPropertyBinding({
-            FXCollections.observableList(state.transFile.groupNames)
-        }, {
-            it.nameProperty
-        }))
+        cGroupBox.itemsProperty().bind(Bindings.createObjectBinding(
+            {
+                if (!state.isOpened)
+                    FXCollections.emptyObservableList()
+                else
+                    FXCollections.observableList(state.transFile.groupListProperty) { arrayOf(it.nameProperty) }
+
+            }, state.transFileProperty()
+        ))
         cGroupBox.indexProperty().bindBidirectional(state.currentGroupIdProperty())
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // GroupBar
-        cGroupBar.groupsProperty().bind(genGroupsBinding())
+        cGroupBar.groupsProperty().bind(groupsBinding)
         cGroupBar.indexProperty().bindBidirectional(state.currentGroupIdProperty())
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
-        cPicBox.itemsProperty().bind(genPicNamesBinding())
+        cPicBox.itemsProperty().bind(Bindings.createObjectBinding(
+            {
+                if (!state.isOpened)
+                    FXCollections.emptyObservableList()
+                else
+                    FXCollections.observableList(state.transFile.sortedPicNames) {
+                        arrayOf(state.transFile.transMapObservable)
+                    }
+            }, state.transFileProperty()
+        ))
         RuledGenericBidirectionalBinding.bind(
             cPicBox.valueProperty(), rule@{ _, _, newValue, _ -> newValue ?: emptyString() },
             state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
@@ -478,20 +400,23 @@ class Controller(private val view: View, private val state: State) {
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // TreeView
+        cTreeView.groupsProperty().bind(groupsBinding)
+        cTreeView.labelsProperty().bind(labelsBinding)
         cTreeView.rootNameProperty().bind(state.currentPicNameProperty())
         cTreeView.viewModeProperty().bind(state.viewModeProperty())
-        cTreeView.groupsProperty().bind(genGroupsBinding())
-        cTreeView.labelsProperty().bind(genLabelsBinding())
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
-        cLabelPane.imageProperty().bind(cLabelPaneImageBinding)
-        cLabelPane.labelsProperty().bind(genLabelsBinding())
-        cLabelPane.colorHexListProperty().bind(genGroupPropertyBinding({
-            FXCollections.observableList(state.transFile.groupColors)
-        }, {
-            it.colorHexProperty
-        }))
+        cLabelPane.groupsProperty().bind(Bindings.createObjectBinding(
+            {
+                if (!state.isOpened)
+                    FXCollections.emptyObservableList()
+                else
+                    FXCollections.observableList(state.transFile.groupListProperty) { arrayOf(it.colorHexProperty) }
+            }, state.transFileProperty()
+        ))
+        cLabelPane.imageProperty().bind(imageBinding)
+        cLabelPane.labelsProperty().bind(labelsBinding)
         cLabelPane.labelRadiusProperty().bind(Settings.labelRadiusProperty())
         cLabelPane.labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
         cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
@@ -1128,6 +1053,9 @@ class Controller(private val view: View, private val state: State) {
 
     // ----- Component Methods ----- //
 
+    /**
+     * May deprecate in some time
+     */
     fun moveLabelTreeItem(labelIndex: Int, dstGroupId: Int) {
         val oriGroupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
         cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)
@@ -1145,7 +1073,7 @@ class Controller(private val view: View, private val state: State) {
      * Request repaint the view, usually the CLabelPane
      */
     fun requestRepaint() {
-        cLabelPaneImageBinding.invalidate()
+        imageBinding.invalidate()
         cLabelPane.requestShowImage()
         cLabelPane.requestCreateLabels()
     }

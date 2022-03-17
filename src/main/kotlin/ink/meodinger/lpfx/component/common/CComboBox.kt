@@ -11,6 +11,7 @@ import javafx.scene.control.ComboBox
 import javafx.scene.control.SelectionModel
 import javafx.scene.layout.HBox
 import javafx.scene.text.TextAlignment
+import javafx.util.StringConverter
 
 
 /**
@@ -28,11 +29,11 @@ class CComboBox<T> : HBox() {
     private val back = Button("<")
     private val next = Button(">")
 
-    val selectionModel: SelectionModel<T> get() = comboBox.selectionModel
+    val innerBox: ComboBox<T> get() = comboBox
     val size: Int get() = comboBox.items.size
 
-    private val itemsProperty: ObjectProperty<ObservableList<T>> = comboBox.itemsProperty()
-    fun itemsProperty(): ObjectProperty<ObservableList<T>> = itemsProperty
+    private val itemsProperty: ListProperty<T> = SimpleListProperty(comboBox.items)
+    fun itemsProperty(): ListProperty<T> = itemsProperty
     var items: ObservableList<T> by itemsProperty
 
     private val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
@@ -48,6 +49,7 @@ class CComboBox<T> : HBox() {
     var isWrapped: Boolean by wrappedProperty
 
     init {
+        comboBox.itemsProperty().bind(itemsProperty)
         BidirectionalListener.listen(
             indexProperty, onNew<Number, Int> { comboBox.selectionModel.select(it) },
             comboBox.selectionModel.selectedIndexProperty(), onNew<Number, Int> { indexProperty.set(it) }

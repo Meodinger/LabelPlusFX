@@ -64,8 +64,7 @@ class CGroupBar : HBox() {
                     // will not happen
                     throw IllegalStateException("Permuted: $it")
                 } else if (it.wasUpdated()) {
-                    // will not happen
-                    throw IllegalStateException("Updated: $it")
+                    // Ignore, TransGroup's Property changed,
                 } else {
                     if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
                     if (it.wasAdded()) it.addedSubList.forEach { group ->

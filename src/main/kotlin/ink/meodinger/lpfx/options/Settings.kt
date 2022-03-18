@@ -45,6 +45,7 @@ object Settings : AbstractProperties("Settings") {
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
     const val UseExportNameTemplate    = "UseExportNameTemplate"
     const val ExportNameTemplate       = "ExportNameTemplate"
+    const val AutoCheckUpdate          = "AutoCheckUpdate"
 
     // ----- Default ----- //
 
@@ -74,6 +75,7 @@ object Settings : AbstractProperties("Settings") {
         CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, "%FILE% 翻译：XXX"),
+        CProperty(AutoCheckUpdate, true)
     )
 
     private val defaultGroupNameListProperty: ListProperty<String> = SimpleListProperty()
@@ -132,6 +134,10 @@ object Settings : AbstractProperties("Settings") {
     fun exportNameTemplateProperty(): StringProperty = exportNameTemplateProperty
     var exportNameTemplate: String by exportNameTemplateProperty
 
+    private val autoCheckUpdateProperty: BooleanProperty = SimpleBooleanProperty()
+    fun autoCheckUpdateProperty(): BooleanProperty = autoCheckUpdateProperty
+    var autoCheckUpdate: Boolean by autoCheckUpdateProperty
+
     init { useDefault() }
 
     @Throws(IOException::class, NumberFormatException::class)
@@ -152,6 +158,7 @@ object Settings : AbstractProperties("Settings") {
         useMeoFileAsDefault = this[UseMeoFileAsDefault].asBoolean()
         useExportNameTemplate = this[UseExportNameTemplate].asBoolean()
         exportNameTemplate = this[ExportNameTemplate].asString()
+        autoCheckUpdate = this[AutoCheckUpdate].asBoolean()
     }
 
     @Throws(IOException::class)
@@ -170,6 +177,7 @@ object Settings : AbstractProperties("Settings") {
         this[UseMeoFileAsDefault].set(useMeoFileAsDefault)
         this[UseExportNameTemplate].set(useExportNameTemplate)
         this[ExportNameTemplate].set(exportNameTemplate)
+        this[AutoCheckUpdate].set(autoCheckUpdate)
 
         save(Options.settings, this)
     }

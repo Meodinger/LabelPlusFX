@@ -528,6 +528,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault          = value as Boolean
             Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate        = value as Boolean
             Settings.ExportNameTemplate       -> Settings.exportNameTemplate           = value as String
+            Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate              = value as Boolean
             else -> doNothing()
         }
     }

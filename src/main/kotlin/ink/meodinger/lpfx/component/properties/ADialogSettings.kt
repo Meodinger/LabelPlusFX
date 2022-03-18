@@ -75,6 +75,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
     private val lLabelAlpha = CInputLabel()
     private val lTextOpaqueCheckBox = CheckBox(I18N["settings.label.text_opaque"])
 
+    private val xUpdCheckBox = CheckBox(I18N["settings.other.auto_check_upd"])
     private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
     private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
     private val xUseTCheckBox = CheckBox(I18N["settings.other.template_enable"])
@@ -330,15 +331,17 @@ class ADialogSettings : AbstractPropertiesDialog() {
                     hgap = COMMON_GAP
 
                     //   0        1
-                    // 0 O InstantTranslate
-                    // 1 O UseMeoFileAsDefault
-                    // 2 O UseExportTemplate
-                    // 3   |  template text  |
+                    // 0 O UpdateCheck
+                    // 1 O InstantTranslate
+                    // 2 O UseMeoFileAsDefault
+                    // 3 O UseExportTemplate
+                    // 4   |  template text  |
 
-                    add(xInstCheckBox, 0, 0, 2, 1)
-                    add(xUseMCheckBox, 0, 1, 2, 1)
-                    add(xUseTCheckBox, 0, 2, 2, 1)
-                    add(xTemplateField, 1, 3) {
+                    add(xUpdCheckBox, 0, 0, 2, 1)
+                    add(xInstCheckBox, 0, 1, 2, 1)
+                    add(xUseMCheckBox, 0, 2, 2, 1)
+                    add(xUseTCheckBox, 0, 3, 2, 1)
+                    add(xTemplateField, 1, 4) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
                         textFormatter = TextFormatter<String> {
                             it.apply { text = text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
@@ -496,6 +499,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
         lTextOpaqueCheckBox.isSelected = Settings.labelTextOpaque
 
         // Other
+        xUpdCheckBox.isSelected = Settings.autoCheckUpdate
         xInstCheckBox.isSelected = Settings.instantTranslate
         xUseMCheckBox.isSelected = Settings.useMeoFileAsDefault
         xUseTCheckBox.isSelected = Settings.useExportNameTemplate
@@ -572,6 +576,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
     private fun convertOther(): Map<String, Any> {
         val map = HashMap<String, Any>()
 
+        map[Settings.AutoCheckUpdate] = xUpdCheckBox.isSelected
         map[Settings.InstantTranslate] = xInstCheckBox.isSelected
         map[Settings.UseMeoFileAsDefault] = xUseMCheckBox.isSelected
         map[Settings.UseExportNameTemplate] = xUseTCheckBox.isSelected

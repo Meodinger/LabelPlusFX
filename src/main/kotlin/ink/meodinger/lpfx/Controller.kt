@@ -4,8 +4,6 @@ import ink.meodinger.lpfx.action.ActionType
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
-import ink.meodinger.lpfx.component.CSpecifyDialog
-import ink.meodinger.lpfx.component.CTreeMenu
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -15,14 +13,14 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.Version
-import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.collection.contains
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.existsOrNull
-import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.file.notExists
+import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.string.emptyString
@@ -51,7 +49,6 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
-import kotlin.collections.LinkedHashMap
 
 
 /**
@@ -121,7 +118,7 @@ class Controller(private val view: View, private val state: State) {
     }.schedule()
 
     // Following Bindings should create in order to avoid unexpected Exceptions
-    // And must invoke get() explicitly or by delegation every time to let the property validate
+    // And must invoke get() explicitly or by delegatation every time to let the property validate
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
             state.transFileProperty().get()?.groupListProperty
@@ -1079,7 +1076,7 @@ class Controller(private val view: View, private val state: State) {
      */
     fun checkUpdate(showWhenUpdated: Boolean = false) {
         val release = "https://github.com/Meodinger/LabelPlusFX/releases"
-        val delay = 604800L
+        val delay = 1000 * 60 * 24 * 30L
 
         val time = Date().time
         val last = Preference.lastUpdateNotice

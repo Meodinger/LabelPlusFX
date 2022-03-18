@@ -26,11 +26,7 @@ import java.io.File
 /**
  * Modal & Manager for LPFX
  */
-class State private constructor() {
-
-    companion object {
-        fun getInstance(): State = State()
-    }
+class State {
 
     lateinit var application: HookedApplication
     lateinit var controller: Controller
@@ -165,14 +161,18 @@ class State private constructor() {
     }
 
     fun undo() {
-        if (undoStack.isNotEmpty()) redoStack.push(undoStack.pop().apply(Action::revert))
+        if (undoStack.isEmpty()) return
+
+        redoStack.push(undoStack.pop().apply(Action::revert))
 
         canUndoProperty.set(undoStack.isNotEmpty())
         canRedoProperty.set(true)
     }
 
     fun redo() {
-        if (redoStack.isNotEmpty()) undoStack.push(redoStack.pop().apply(Action::commit))
+        if (redoStack.isEmpty()) return
+
+        undoStack.push(redoStack.pop().apply(Action::commit))
 
         canUndoProperty.set(true)
         canRedoProperty.set(redoStack.isNotEmpty())

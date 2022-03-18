@@ -399,6 +399,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
                 override fun commit() {
                     state.transFile.comment = it
+                    state.isChanged = true
                 }
 
                 override fun revert() {
@@ -406,7 +407,6 @@ class CMenuBar(private val state: State) : MenuBar() {
                 }
 
             })
-            state.isChanged = true
         }
     }
     private fun editProjectPictures() {
@@ -427,7 +427,6 @@ class CMenuBar(private val state: State) : MenuBar() {
 
             val picNames = state.transFile.sortedPicNames
 
-            // Edit date
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
             val toRemove = ArrayList<String>()
@@ -443,9 +442,8 @@ class CMenuBar(private val state: State) : MenuBar() {
                 toAdd.map { picName -> PictureAction(ActionType.ADD, state, picName) },
                 toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
             ))
+            // Update selection
             state.currentPicName = state.transFile.sortedPicNames[0]
-            // Mark change
-            state.isChanged = true
         }
     }
     private fun addExternalPicture() {
@@ -460,10 +458,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 continue
             }
 
-            // Edit data
             state.doAction(PictureAction(ActionType.ADD, state, picName, file))
-            // Mark Change
-            state.isChanged = true
         }
         if (conflictList.isNotEmpty()) {
             showWarning(

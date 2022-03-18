@@ -118,7 +118,7 @@ class Controller(private val view: View, private val state: State) {
     }.schedule()
 
     // Following Bindings should create in order to avoid unexpected Exceptions
-    // And must invoke get() explicitly or by delegatation every time to let the property validate
+    // And must invoke get() explicitly or by delegation every time to let the property validate
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
             state.transFileProperty().get()?.groupListProperty
@@ -244,15 +244,12 @@ class Controller(private val view: View, private val state: State) {
                 if (state.currentLabelIndex != -1) state.currentLabelIndex + 1
                 else state.transFile.getTransList(state.currentPicName).size + 1
 
-            // Edit data
             state.doAction(LabelAction(
                 ActionType.ADD, state,
                 state.currentPicName,
                 TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
             ))
-            // Mark change
-            state.isChanged = true
-            // Select it
+            // Update selection
             cTreeView.selectLabel(newIndex)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
@@ -260,16 +257,13 @@ class Controller(private val view: View, private val state: State) {
         cLabelPane.setOnLabelRemove {
             if (state.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
-            // Edit data
             state.doAction(LabelAction(
                 ActionType.REMOVE, state,
                 state.currentPicName,
                 state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
             ))
-            // Change state
+            // Clear selection
             if (state.currentLabelIndex == it.labelIndex) state.currentLabelIndex = NOT_FOUND
-            // Mark change
-            state.isChanged = true
         }
         cLabelPane.setOnLabelHover {
             val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
@@ -300,7 +294,6 @@ class Controller(private val view: View, private val state: State) {
                 newX = it.labelX,
                 newY = it.labelY
             ))
-            state.isChanged = true
         }
         cLabelPane.setOnLabelOther {
             if (state.workMode != WorkMode.LabelMode) return@setOnLabelOther

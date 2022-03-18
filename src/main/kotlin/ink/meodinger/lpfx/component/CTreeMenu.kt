@@ -84,10 +84,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                 return@ifPresent
             }
 
-            // Edit data
             state.doAction(GroupAction(ActionType.ADD, state, newGroup))
-            // Mark change
-            state.isChanged = true
         }
     }
     private val rAddGroupItem       = MenuItem(I18N["context.add_group"]).apply {
@@ -110,14 +107,11 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                 return@ifPresent
             }
 
-            // Edit data
             state.doAction(GroupAction(
                 ActionType.CHANGE, state,
                 state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName)),
                 newName = newName
             ))
-            // Mark change
-            state.isChanged = true
         }
     }
     private val gRenameItem         = MenuItem(I18N["context.rename_group"])
@@ -129,14 +123,11 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val groupName = it.source as String
         val newColor = (it.target as ColorPicker).value
 
-        // Edit data
         state.doAction(GroupAction(
             ActionType.CHANGE, state,
             state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName)),
             newColorHex = newColor.toHexRGB()
         ))
-        // Mark change
-        state.isChanged = true
     }
     private val gChangeColorItem    = MenuItem().apply {
         graphic = gChangeColorPicker
@@ -149,13 +140,10 @@ class CTreeMenu(private val state: State) : ContextMenu() {
     private val gDeleteHandler      = EventHandler<ActionEvent> {
         val groupName = it.source as String
 
-        // Edit data
         state.doAction(GroupAction(
             ActionType.REMOVE, state,
             state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName))
         ))
-        // Mark change
-        state.isChanged = true
     }
     private val gDeleteItem         = MenuItem(I18N["context.delete_group"])
 
@@ -172,6 +160,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())
 
             for (item in items) state.controller.moveLabelTreeItem(item.index, newGroupId)
+
             state.doAction(ComplexAction.of(items.map {
                 LabelAction(
                     ActionType.CHANGE, state,
@@ -180,8 +169,6 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                     newGroupId = newGroupId
                 )
             }))
-            // Mark change
-            state.isChanged = true
         }
     }
     private val lMoveToItem         = MenuItem(I18N["context.move_to"])
@@ -203,9 +190,8 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                     state.transFile.getTransLabel(state.currentPicName, it.index),
                 )
             }))
+            // Clear selection
             state.currentLabelIndex = NOT_FOUND
-            // Mark change
-            state.isChanged = true
         }
     }
     private val lDeleteItem         = MenuItem(I18N["context.delete_label"])

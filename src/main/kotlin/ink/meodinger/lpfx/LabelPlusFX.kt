@@ -33,12 +33,14 @@ class LabelPlusFX: HookedApplication() {
         const val PARAM_UNNAMED_NO_CHECK_UPDATE = "--no-check-update"
     }
 
-    private val state: State = State.getInstance()
+    private val state: State = State()
 
     init {
         Logger.tic()
 
         Logger.info("App initializing...", LOGSRC_APPLICATION)
+
+        state.application = this
 
         Options.load()
 
@@ -47,8 +49,6 @@ class LabelPlusFX: HookedApplication() {
             Logger.exception(e)
             showException(null, e)
         }
-
-        state.application = this
 
         Logger.info("App initialized", LOGSRC_APPLICATION)
     }

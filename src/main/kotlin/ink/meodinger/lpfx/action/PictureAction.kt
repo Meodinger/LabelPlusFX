@@ -17,7 +17,7 @@ import java.io.File
  */
 
 /**
- * Action changes Pictures.
+ * Action changes Picture.
  * The `targetPicName` indicates which picture that will be processed.
  *
  * If action type is `ADD`, `targetPicName` will be added to TransFile's
@@ -70,6 +70,7 @@ class PictureAction(
             ActionType.REMOVE -> removePicture(targetPicName)
             ActionType.CHANGE -> applyPicFile(targetPicFile!!)
         }
+        state.isChanged = true
     }
 
     override fun revert() {

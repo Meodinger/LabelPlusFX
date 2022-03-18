@@ -121,9 +121,9 @@ class Controller(private val view: View, private val state: State) {
     }.schedule()
 
     // Following Bindings should create in order to avoid unexpected Exceptions
+    // And must invoke get() explicitly or by delegation every time to let the property validate
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
-            // Must invoke get() to let the code run correctly, check State::isOpened is not enough
             state.transFileProperty().get()?.groupListProperty
                 ?: FXCollections.emptyObservableList()
         }, state.transFileProperty()

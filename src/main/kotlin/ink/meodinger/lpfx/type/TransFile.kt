@@ -111,7 +111,7 @@ open class TransFile @JsonCreator constructor(
     val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
 
     val picNamesProperty: ReadOnlySetProperty<String> = transMapProperty.keysProperty()
-    val sortedPicNamesObservable: ObservableList<String> = picNamesProperty.sorted(::sortByDigit)
+    val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(picNamesProperty.sorted(::sortByDigit)).readOnlyProperty
 
     // ----- Accessible Fields ----- //
     // Observables can be used for bindings' dependencies and data edit;
@@ -119,6 +119,7 @@ open class TransFile @JsonCreator constructor(
 
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
+    val sortedPicNamesObservable: ObservableList<String> by sortedPicNamesProperty
 
     val version: IntArray by versionProperty
     var comment: String by commentProperty

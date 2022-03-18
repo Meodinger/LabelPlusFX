@@ -140,13 +140,14 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty)
             textProperty().bind(transLabel.textProperty)
-            if (viewMode == ViewMode.IndexMode)
+            if (viewMode == ViewMode.IndexMode) {
+                val colorBinding = groupsProperty.valueAt(transLabel.groupIdProperty)
+
                 graphicProperty().bind(Bindings.createObjectBinding(
-                    { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(groups[transLabel.groupId].colorHex)) },
-                    // GroupsProperty will change when group's color change
-                    groupsProperty, transLabel.groupIdProperty,
-                    // TODO: https://stackoverflow.com/questions/71513087/javafx-valueat-binding-only-compute-once
+                    { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(colorBinding.value.colorHex)) },
+                    colorBinding
                 ))
+            }
         }
 
         // Add view

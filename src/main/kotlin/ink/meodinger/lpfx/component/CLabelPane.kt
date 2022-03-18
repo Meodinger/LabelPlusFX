@@ -391,13 +391,13 @@ class CLabelPane : ScrollPane() {
 
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
+            val colorBinding = groupsProperty.valueAt(transLabel.groupIdProperty)
+
             radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
             colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(groups[transLabel.groupId].colorHex) },
-                // GroupsProperty will change when group's color change
-                groupsProperty, transLabel.groupIdProperty,
-                // TODO: https://stackoverflow.com/questions/71513087/javafx-valueat-binding-only-compute-once
+                { Color.web(colorBinding.value.colorHex) },
+                colorBinding
             ))
             colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)

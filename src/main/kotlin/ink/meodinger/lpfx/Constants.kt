@@ -1,9 +1,9 @@
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.Version
+import ink.meodinger.lpfx.util.component.genTextFormatter
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.scene.control.TextFormatter
 import java.io.File
@@ -128,19 +128,8 @@ enum class FileType(private val description: String, val extension: String) {
 }
 
 /**
- * Get a TextFormatter for TransGroup name
+ * Get a TextFormatter for Text should have '|' ' ' ','
  */
-fun genGroupNameFormatter(): TextFormatter<String> {
-    return TextFormatter<String> { it.apply {
-        text = text.trim().replace(Regex("[| ]"), "_")
-    } }
-}
-
-/**
- * Get a TextFormatter for CProperty
- */
-fun genPropertyFormatter(): TextFormatter<String> {
-    return  TextFormatter<String> { it.apply {
-        text = text.trim().replace(Regex("[|, ]"), "_")
-    } }
+fun genGeneralFormatter(): TextFormatter<String> = genTextFormatter {
+    it.text.trim().replace(Regex("[|, ]"), "_")
 }

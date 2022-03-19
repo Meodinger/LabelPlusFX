@@ -251,28 +251,6 @@ class CMenuBar(private val state: State) : MenuBar() {
                 )
             }
         }
-        menu(I18N["mm.about"]) {
-            item(I18N["m.settings"]) {
-                does { settings() }
-            }
-            item(I18N["m.logs"]) {
-                does { logs() }
-            }
-            separator()
-            item(I18N["m.about"]) {
-                does { about() }
-            }
-            item(I18N["m.update"]) {
-                does { checkUpdate() }
-            }
-            item(I18N["m.cheat"]) {
-                does { cheatSheet() }
-            }
-            separator()
-            item(I18N["m.crash"]) {
-                does { crash() }
-            }
-        }
         menu(I18N["mm.tools"]) {
             checkItem(I18N["m.dict"]) {
                 does { showDict() }
@@ -294,6 +272,28 @@ class CMenuBar(private val state: State) : MenuBar() {
             separator()
             checkItem(I18N["m.stats_bar"]) {
                 selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
+            }
+        }
+        menu(I18N["mm.about"]) {
+            item(I18N["m.settings"]) {
+                does { settings() }
+            }
+            item(I18N["m.logs"]) {
+                does { logs() }
+            }
+            separator()
+            item(I18N["m.about"]) {
+                does { about() }
+            }
+            item(I18N["m.update"]) {
+                does { checkUpdate() }
+            }
+            item(I18N["m.cheat"]) {
+                does { cheatSheet() }
+            }
+            separator()
+            item(I18N["m.crash"]) {
+                does { crash() }
             }
         }
 

@@ -17,6 +17,7 @@ import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.isMathematicalDecimal
 import javafx.beans.binding.Bindings
 
@@ -259,15 +260,10 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         })
                     }
                     add(lLabelRadius, 2, 1) {
-                        textFormatter = TextFormatter { change ->
-                            if (!change.isAdded) return@TextFormatter change
-
-                            if (!change.text.isMathematicalDecimal())
-                                return@TextFormatter change.apply { text = "" }
-                            if (!change.controlNewText.isMathematicalDecimal())
-                                return@TextFormatter change.apply { text = "" }
-
-                            return@TextFormatter change
+                        textFormatter = genTextFormatter {
+                            if (!it.text.isMathematicalDecimal() ||
+                                !it.controlNewText.isMathematicalDecimal()
+                            ) emptyString() else it.text
                         }
                         setOnChangeToLabel {
                             lSliderRadius.value = fieldText.padStart(5, '0').toDouble()
@@ -296,15 +292,10 @@ class ADialogSettings : AbstractPropertiesDialog() {
                         })
                     }
                     add(lLabelAlpha, 2, 3) {
-                        textFormatter = TextFormatter { change ->
-                            if (!change.isAdded) return@TextFormatter change
-
-                            if (change.text.uppercase().contains(Regex("[^0-9A-F]")))
-                                return@TextFormatter change.apply { text = "" }
-                            if (change.controlNewText.length > 2)
-                                return@TextFormatter change.apply { text = "" }
-
-                            return@TextFormatter change
+                        textFormatter = genTextFormatter {
+                            if (it.text.uppercase().contains(Regex("[^0-9A-F]")) ||
+                                it.controlNewText.length > 2
+                            ) emptyString() else it.text
                         }
                         setOnChangeToField {
                             fieldText = labelText.substring(2)
@@ -343,10 +334,10 @@ class ADialogSettings : AbstractPropertiesDialog() {
                     add(xUseTCheckBox, 0, 3, 2, 1)
                     add(xTemplateField, 1, 4) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
-                        textFormatter = TextFormatter<String> {
-                            it.apply { text = text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
+                        textFormatter = genTextFormatter<String> { it.text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
+                        tooltip = Tooltip(I18N["settings.other.template_hint"]).apply {
+                            showDelay = Duration(500.0)
                         }
-                        tooltip = Tooltip(I18N["settings.other.template_hint"]).apply { showDelay = Duration(500.0) }
                     }
                 }
             }
@@ -383,7 +374,7 @@ class ADialogSettings : AbstractPropertiesDialog() {
         val colorHex = if (color.isColorHex()) color else TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId % 9]
 
         val checkBox = CheckBox().apply { isSelected = createOnNew }
-        val textField = TextField(name).apply { textFormatter = genGroupNameFormatter() }
+        val textField = TextField(name).apply { textFormatter = genGeneralFormatter() }
         val colorPicker = CColorPicker(Color.web(colorHex))
         val button = Button(I18N["common.delete"]) does { removeGroupRow(GridPane.getRowIndex(this)) }
 
@@ -435,12 +426,12 @@ class ADialogSettings : AbstractPropertiesDialog() {
         }
 
         val fromField = TextField(from).apply {
-            textFormatter = genPropertyFormatter()
+            textFormatter = genGeneralFormatter()
             properties[rRuleIndex] = newRowIndex - rRowShift
             properties[rIsFrom] = true
         }
         val toField = TextField(to).apply {
-            textFormatter = genPropertyFormatter()
+            textFormatter = genGeneralFormatter()
             properties[rRuleIndex] = newRowIndex - rRowShift
             properties[rIsFrom] = false
         }

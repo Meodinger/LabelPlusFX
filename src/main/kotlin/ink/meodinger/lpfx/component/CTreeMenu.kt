@@ -7,7 +7,7 @@ import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.GroupAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.common.CColorPicker
-import ink.meodinger.lpfx.genGroupNameFormatter
+import ink.meodinger.lpfx.genGeneralFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
@@ -43,7 +43,7 @@ import javafx.scene.paint.Color
 class CTreeMenu(private val state: State) : ContextMenu() {
 
     private val rAddGroupField      = TextField().apply {
-        textFormatter = genGroupNameFormatter()
+        textFormatter = genGeneralFormatter()
     }
     private val rAddGroupPicker     = CColorPicker().apply {
         hide()
@@ -99,7 +99,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             I18N["context.rename_group.dialog.title"],
             I18N["context.rename_group.dialog.header"],
             groupName,
-            genGroupNameFormatter()
+            genGeneralFormatter()
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
             if (state.transFile.groupList.contains { g -> g.name == newName }) {

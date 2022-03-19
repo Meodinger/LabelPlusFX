@@ -49,6 +49,8 @@ class CColorPicker() : ColorPicker() {
                     }
                 }
                 change.text = builder.toString()
+                change.anchor = change.rangeStart + builder.length
+                change.caretPosition = change.rangeStart + builder.length
             }
             change
         }

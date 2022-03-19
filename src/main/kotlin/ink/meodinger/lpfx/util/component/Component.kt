@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.util.component
 import javafx.event.ActionEvent
 import javafx.scene.control.Button
 import javafx.scene.control.MenuItem
+import javafx.scene.control.TextFormatter
 
 
 /**
@@ -21,4 +22,14 @@ infix fun Button.does(onAction: Button.(ActionEvent) -> Unit): Button {
 
 infix fun MenuItem.does(onAction: MenuItem.(ActionEvent) -> Unit): MenuItem {
     return apply { setOnAction { onAction(this, it) } }
+}
+
+fun <T> genTextFormatter(replacer: (TextFormatter.Change) -> String): TextFormatter<T> {
+    return TextFormatter<T> {
+        if (it.isAdded) it.apply {
+            text = replacer(this)
+            anchor = rangeStart + text.length
+            caretPosition = rangeStart + text.length
+        } else it
+    }
 }

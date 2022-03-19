@@ -38,9 +38,13 @@ Remove:
  - 删除了配置文件自动更正功能，调整为跳过无效配置并对未发现的配置使用默认值；
 
 TODO:
+ - 如果FX已经启动，uncaught handler使用stage
+ - 简繁转换按钮居中
+ - 基于鼠标的缩放
  - 增加全文搜索替换功能
- - 彩色Dict（多色彩TextArea）
  - 拼写检查（默认开启：多行空行、省略号）
+ - 保存specify（Next 2.3.1）
+ - 彩色Dict（多色彩TextArea）
 
 # 2.2.2
 

@@ -22,6 +22,8 @@ import kotlin.system.exitProcess
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    System.loadLibrary("IMEWrapper")
+
     // Use System Proxies
     System.setProperty("java.net.useSystemProxies", "true")
 

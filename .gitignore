@@ -5,13 +5,15 @@
 !/.idea/artifacts
 !/.idea/vcs.xml
 
-/src/jni/*/.vs/
-/src/jni/IMEInterface/bin/
-/src/jni/IMEInterface/obj/
-/src/jni/IMEInterface/*.sln
-/src/jni/IMEWrapper/x64/
+/src/jni/IMEInterface/*/.vs/
+/src/jni/IMEInterface/*/bin/
+/src/jni/IMEInterface/*/obj/
+/src/jni/IMEWrapper/*/.vs/
+/src/jni/IMEWrapper/*/Debug/
 /src/jni/IMEWrapper/*/x64/
-/src/jni/IMEWrapper/*.sln
+/src/jni/.vs/
+/src/jni/x64
+/src/jni/*.sln
 
 /script/jlink/*
 !/script/jlink/*.bat

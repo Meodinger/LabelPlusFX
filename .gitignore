@@ -8,11 +8,13 @@
 /src/jni/IMEInterface/*/.vs/
 /src/jni/IMEInterface/*/bin/
 /src/jni/IMEInterface/*/obj/
+/src/jni/IMEWrapper/IMEWrapper/IMEInterface.dll
 /src/jni/IMEWrapper/*/.vs/
 /src/jni/IMEWrapper/*/Debug/
 /src/jni/IMEWrapper/*/x64/
 /src/jni/.vs/
-/src/jni/x64
+/src/jni/Debug/
+/src/jni/x64/
 /src/jni/*.sln
 
 /script/jlink/*

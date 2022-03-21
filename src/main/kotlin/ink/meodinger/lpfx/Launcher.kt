@@ -2,6 +2,7 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
+import ink.meodinger.lpfx.util.platform.isWin
 
 import javafx.application.Application
 import javafx.application.Platform
@@ -22,7 +23,9 @@ import kotlin.system.exitProcess
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
-    System.loadLibrary("IMEWrapper")
+
+    // Load IME-related jni library
+    if (isWin) System.loadLibrary("IMEWrapper")
 
     // Use System Proxies
     System.setProperty("java.net.useSystemProxies", "true")

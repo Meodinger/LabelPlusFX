@@ -8,7 +8,6 @@ C#库的JNI/C++中间件
 
 编译选项注意事项：
  - 附加包含目录添加 $(JAVA_HOME)\include\* 
- - 附加包含目录添加 $(JAVA_HOME)\include\* 
  - 调试信息使用C7兼容 /C7
  - 使用公共运行时支持 /clr
  - 关闭C++异常

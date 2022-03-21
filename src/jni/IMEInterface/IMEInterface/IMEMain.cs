@@ -23,6 +23,7 @@ namespace IMEInterface
                 if (language.Culture.Name.Equals(name))
                 {
                     InputLanguage.CurrentInputLanguage = language;
+                    break;
                 }
             }
         }

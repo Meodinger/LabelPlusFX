@@ -36,7 +36,7 @@ private external fun setLanguage(lang: String): Boolean
 /**
  * Set IME Conversion Mode
  */
-private external fun setImeConversionMode(hWnd: Long, cMode: Int, sMode: Int): Boolean
+private external fun setImeConversionMode(hWnd: Long, conversionMode: Int, sentenceMode: Int): Boolean
 
 // ----- JVM Method ----- //
 
@@ -63,12 +63,29 @@ fun setCurrentLanguage(lang: String): Boolean {
 }
 
 @Deprecated("Currently not functional")
-fun setImeConversionMode(hWnd: Long, sMode: ImeSentenceMode, vararg cModes: ImeConversionMode): Boolean {
+fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conversionModes: ImeConversionMode): Boolean {
     if (!enableJNI) return false
 
-    var cmode = 0
-    for (conversions in cModes) cmode = cmode or conversions.value
+    var conversionMode = 0
+    for (mode in conversionModes) conversionMode = conversionMode or mode.value
 
-    if (isWin) return setImeConversionMode(hWnd, cmode, sMode.value)
+    if (isWin) return setImeConversionMode(hWnd, conversionMode, sentenceMode.value)
+    else throw UnsupportedOperationException("Only usable in Win")
+}
+
+@Deprecated("Currently not functional")
+fun setImeInputMode(hWnd: Long, mode: ImeMode): Boolean {
+    if (!enableJNI) return false
+
+    val conversion = when (mode) {
+        ImeMode.OFF           -> 0b0000
+        ImeMode.HIRAGANA      -> 0b1001
+        ImeMode.KATAKANA      -> 0b1011
+        ImeMode.ALPHA         -> 0b1000
+        ImeMode.KATAKANA_HALF -> 0b0011
+        ImeMode.ALPHA_HALF    -> 0b0000
+    }
+
+    if (isWin) return setImeConversionMode(hWnd, conversion, ImeSentenceMode.AUTOMATIC.value)
     else throw UnsupportedOperationException("Only usable in Win")
 }

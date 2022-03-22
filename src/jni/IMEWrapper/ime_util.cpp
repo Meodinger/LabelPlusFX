@@ -1,17 +1,19 @@
 #include "pch.h"
 #include "ime_util.h"
 
+#define WCHAR_RATIO (sizeof(WCHAR) / sizeof(CHAR))
+
 #pragma managed
 
 using namespace System::Runtime::InteropServices;
 
 void string2jstring(JNIEnv* env, System::String^ ori, jstring* dst)
 {
-    size_t buffer = sizeof(WCHAR) / sizeof(CHAR) * ori->Length;
+    size_t size   = WCHAR_RATIO * ori->Length;
+    CHAR*  chars  = (CHAR*)malloc(sizeof(CHAR) * size);
     WCHAR* wchars = (WCHAR*)Marshal::StringToHGlobalUni(ori).ToPointer();
-    CHAR* chars = (CHAR*)malloc(buffer);
-
-    wcstombs_s(0, chars, buffer, wchars, buffer);
+    
+    wcstombs_s(0, chars, size, wchars, size);
 
     *dst = env->NewStringUTF(chars);
 
@@ -27,17 +29,15 @@ void jstring2string(JNIEnv* env, jstring ori, System::String^* dst)
     env->ReleaseStringUTFChars(ori, chars);
 }
 
-JNIEXPORT jlong JNICALL Java_ink_meodinger_lpfx_util_ime_IMEUtil_getWindowHandle(JNIEnv* env, jclass clazz, jstring jString)
+JNIEXPORT jlong JNICALL Java_ink_meodinger_lpfx_util_ime_IMEUtil_getWindowHandle(JNIEnv* env, jclass clazz, jstring title)
 {
+    size_t len  = WCHAR_RATIO * env->GetStringLength(title);
+    auto wchars = (WCHAR*)malloc(sizeof(WCHAR) * len);
+    auto string = env->GetStringUTFChars(title, JNI_FALSE);
 
-	size_t size = sizeof(WCHAR) * env->GetStringLength(jString);
-	auto string = env->GetStringUTFChars(jString, JNI_FALSE);
-	auto wchars = (WCHAR*)malloc(size);
+    mbstowcs_s(0, wchars, len, string, len);
 
-	mbstowcs_s(0, wchars, size, string, size);
+    env->ReleaseStringUTFChars(title, JNI_FALSE);
 
-	HWND handle = FindWindow(NULL, wchars);
-	env->ReleaseStringUTFChars(jString, JNI_FALSE);
-
-	return (jlong)handle;
+    return (jlong)FindWindow(NULL, wchars);
 }

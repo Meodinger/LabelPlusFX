@@ -112,16 +112,18 @@ class COnlineDict : Stage() {
                         it.consume()
                     }
                     addEventFilter(MouseEvent.MOUSE_CLICKED) {
-                        windowHandle = getWindowHandle(this@COnlineDict)
                         languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
-                        // println("HWND: $windowHandle")
+                        windowHandle = getWindowHandle(this@COnlineDict)
+                        println("HWND: $windowHandle")
+                        setImeInputMode(windowHandle, ImeMode.HIRAGANA)
+                        /*
                         setImeConversionMode(
                             windowHandle,
                             ImeSentenceMode.PHRASE_PREDICT,
-                            ImeConversionMode.ROMAN,
                             ImeConversionMode.JAPANESE,
                             ImeConversionMode.FULL_SHAPE,
                         )
+                         */
                     }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]

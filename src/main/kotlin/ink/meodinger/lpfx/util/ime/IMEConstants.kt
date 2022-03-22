@@ -37,7 +37,7 @@ enum class ImeConversionMode(val value: Int) {
     CHINESE                (0b0000_0001),
     HANGUL                 (0b0000_0001),
     JAPANESE               (0b0000_0001),
-    KATAKANA               (0b0000_0010), // only effect under NATIVE
+    KATAKANA               (0b0000_0010),
     LANGUAGE               (0b0000_0011),
     FULL_SHAPE             (0b0000_1000),
     ROMAN                  (0b0001_0000),
@@ -63,3 +63,5 @@ enum class ImeSentenceMode(val value: Int) {
     CONVERSATION           (0b0001_0000),
     RESERVED               (0xF000)
 }
+
+enum class ImeMode { OFF, HIRAGANA, KATAKANA, ALPHA, KATAKANA_HALF, ALPHA_HALF, }

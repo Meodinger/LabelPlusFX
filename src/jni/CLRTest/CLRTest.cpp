@@ -23,5 +23,5 @@ int main()
 
 	cin >> index;
 	printf("Index: %d\n", index);
-	// IMEMain::SetImeConversionMode(index);
+	IMEMain::SetImeConversionMode(index);
 }

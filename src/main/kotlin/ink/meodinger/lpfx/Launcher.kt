@@ -2,6 +2,7 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
+import ink.meodinger.lpfx.util.platform.enableJNI
 import ink.meodinger.lpfx.util.platform.isWin
 
 import javafx.application.Application
@@ -23,9 +24,11 @@ import kotlin.system.exitProcess
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    // If CLI disabled JNI
+    for (arg in args) if (arg == "--jni-disable") enableJNI = false
 
     // Load IME-related jni library
-    if (isWin) System.loadLibrary("IMEWrapper")
+    if (isWin && enableJNI) System.loadLibrary("IMEWrapper")
 
     // Use System Proxies
     System.setProperty("java.net.useSystemProxies", "true")

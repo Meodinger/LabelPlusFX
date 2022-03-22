@@ -28,18 +28,38 @@ const val EN_GB   = "en-GB"
 const val JA      = "ja"
 const val JA_JP   = "ja-JP"
 
-// Conversion Mode
+// Conversion Status
 
 enum class ImeConversionMode(val value: Int) {
-    NATIVE                 (0x0000_0001),
-    KATAKANA               (0x0000_0002),
-    FULL_SHAPE             (0x0000_0004),
-    ROMAN                  (0x0000_0008),
-    CHAR_CODE              (0x0000_0010),
-    NO_CONVERSION          (0x0000_0020),
-    END_USER_DEFINED_CHAR  (0x0000_0040),
-    SYMBOL                 (0x0000_0080),
-    FIXED                  (0x0000_0100),
-    ALPHA_NUMERIC          (0x0000_0200),
-    DO_NOT_CARE            (-2147483648),
+    // ime_cmodes.h
+    ALPHA_NUMERIC          (0b0000_0000),
+    NATIVE                 (0b0000_0001),
+    CHINESE                (0b0000_0001),
+    HANGUL                 (0b0000_0001),
+    JAPANESE               (0b0000_0001),
+    KATAKANA               (0b0000_0010), // only effect under NATIVE
+    LANGUAGE               (0b0000_0011),
+    FULL_SHAPE             (0b0000_1000),
+    ROMAN                  (0b0001_0000),
+    CHAR_CODE              (0b0010_0000),
+    HANJA_CONVERT          (0b0100_0000),
+    NATIVE_SYMBOL          (0b1000_0000),
+    // imm.h
+    HANGEUL                (0b0000_0000_0001),
+    SOFTKBD                (0b0000_1000_0000),
+    NO_CONVERSION          (0b0001_0000_0000),
+    END_USER_DEFINED_CHAR  (0b0010_0000_0000),
+    SYMBOL                 (0b0100_0000_0000),
+    FIXED                  (0b1000_0000_0000),
+    RESERVED               (0xF000_0000.toInt());
+}
+
+enum class ImeSentenceMode(val value: Int) {
+    NONE                   (0b0000_0000),
+    PLURAL_CLAUSE          (0b0000_0001),
+    SINGLE_CONVERT         (0b0000_0010),
+    AUTOMATIC              (0b0000_0100),
+    PHRASE_PREDICT         (0b0000_1000),
+    CONVERSATION           (0b0001_0000),
+    RESERVED               (0xF000)
 }

@@ -184,11 +184,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="ime4j.h" />
+    <ClInclude Include="ime_main.h" />
+    <ClInclude Include="ime_util.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ime4j.cpp" />
+    <ClCompile Include="ime_main.cpp" />
+    <ClCompile Include="ime_util.cpp" />
     <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,11 @@
 #include "jni.h"
 
-#ifndef _IME4J_H
-#define _IME4J_H
+#ifndef _IME_MAIN_H
+#define _IME_MAIN_H
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /*
  * Class:     ink_meodinger_lpfx_util_ime_IMEMain
  * Method:    getLanguages
@@ -29,9 +30,9 @@ JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(
 /*
  * Class:     ink_meodinger_lpfx_util_ime_IMEMain
  * Method:    setImeConversionMode
- * Signature: (I)V
+ * Signature: (JII)Z
  */
-JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv*, jclass, jint);
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv*, jclass, jlong, jint, jint);
 
 #ifdef __cplusplus
 }

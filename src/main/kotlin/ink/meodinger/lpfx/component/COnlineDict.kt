@@ -13,13 +13,16 @@ import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
+import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.IntegerProperty
+import javafx.beans.property.LongProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleLongProperty
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -28,6 +31,7 @@ import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
@@ -67,9 +71,12 @@ class COnlineDict : Stage() {
     private var transState: Int by transStateProperty
 
     private var oriLang: String = emptyString()
+    private val windowHandleProperty: LongProperty = SimpleLongProperty()
+    private var windowHandle: Long by windowHandleProperty
 
     init {
         icons.add(ICON)
+        title = "${INFO["application.name"]} - Dict"
         width = 300.0
         height = 200.0
         scene = Scene(BorderPane().apply {
@@ -104,6 +111,18 @@ class COnlineDict : Stage() {
                         transState = (transState + 1) % 2
                         it.consume()
                     }
+                    addEventFilter(MouseEvent.MOUSE_CLICKED) {
+                        windowHandle = getWindowHandle(this@COnlineDict)
+                        languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+                        // println("HWND: $windowHandle")
+                        setImeConversionMode(
+                            windowHandle,
+                            ImeSentenceMode.PHRASE_PREDICT,
+                            ImeConversionMode.ROMAN,
+                            ImeConversionMode.JAPANESE,
+                            ImeConversionMode.FULL_SHAPE,
+                        )
+                    }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
                         when (transState) {
@@ -121,11 +140,8 @@ class COnlineDict : Stage() {
             }
         })
 
-        focusedProperty().addListener(onNew{
-            if (it) {
-                oriLang = getCurrentLanguage()
-                languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
-            } else setCurrentLanguage(oriLang)
+        focusedProperty().addListener(onNew {
+            if (it) oriLang = getCurrentLanguage() else setCurrentLanguage(oriLang)
         })
     }
 

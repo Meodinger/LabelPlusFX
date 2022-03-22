@@ -19,16 +19,22 @@ namespace IMEInterface
             return langNames;
         }
 
-        public static void SetInputLanguage(string name)
+        public static string GetInputLanguage()
+        {
+            return InputLanguage.CurrentInputLanguage.Culture.Name;
+        }
+
+        public static bool SetInputLanguage(string name)
         {
             foreach (InputLanguage language in InputLanguage.InstalledInputLanguages)
             {
                 if (language.Culture.Name.Equals(name))
                 {
                     InputLanguage.CurrentInputLanguage = language;
-                    break;
+                    return true;
                 }
             }
+            return false;
         }
 
         [Obsolete("Currently is not usable.", true)]

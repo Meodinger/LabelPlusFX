@@ -14,10 +14,17 @@ JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLangu
 
 /*
  * Class:     ink_meodinger_lpfx_util_ime_IMEMain
- * Method:    getLanguages
- * Signature: (Ljava/lang/String;)V
+ * Method:    getLanguage
+ * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv*, jclass, jstring);
+JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguage(JNIEnv*, jclass);
+
+/*
+ * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Method:    setLanguage
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv*, jclass, jstring);
 
 /*
  * Class:     ink_meodinger_lpfx_util_ime_IMEMain

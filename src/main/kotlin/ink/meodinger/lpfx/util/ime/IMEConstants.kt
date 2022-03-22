@@ -10,27 +10,23 @@ package ink.meodinger.lpfx.util.ime
  * Language Tags
  */
 
-@JvmInline
-value class LangTag(val name: String)
-
 // Simplified Chinese
-val ZH_HANS = LangTag("zh-Hans")
-val ZH_CN = LangTag("zh-CN")
+const val ZH_HANS = "zh-Hans"
+const val ZH_CN   = "zh-CN"
 
 // Traditional Chinese
-val ZH_HANT = LangTag("zh-Hant")
-val ZH_HK = LangTag("zh-HK")
-val ZH_TW = LangTag("zh-TW")
+const val ZH_HANT = "zh-Hant"
+const val ZH_HK   = "zh-HK"
+const val ZH_TW   = "zh-TW"
 
 // English
-val EN = LangTag("en")
-val EN_US = LangTag("en-US")
-val EN_GB = LangTag("en-GB")
+const val EN      = "en"
+const val EN_US   = "en-US"
+const val EN_GB   = "en-GB"
 
 // Japanese
-val JA = LangTag("ja")
-val JA_JP = LangTag("ja-JP")
-
+const val JA      = "ja"
+const val JA_JP   = "ja-JP"
 
 // Conversion Mode
 

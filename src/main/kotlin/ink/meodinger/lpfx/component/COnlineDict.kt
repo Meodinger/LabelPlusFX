@@ -7,13 +7,14 @@ import ink.meodinger.lpfx.LOGSRC_DICTIONARY
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.event.keyEvent
 import ink.meodinger.lpfx.util.ime.*
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.beans.binding.Bindings
@@ -27,7 +28,6 @@ import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
@@ -66,6 +66,8 @@ class COnlineDict : Stage() {
     private val transStateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
     private var transState: Int by transStateProperty
 
+    private var oriLang: String = emptyString()
+
     init {
         icons.add(ICON)
         width = 300.0
@@ -102,10 +104,6 @@ class COnlineDict : Stage() {
                         transState = (transState + 1) % 2
                         it.consume()
                     }
-                    addEventFilter(MouseEvent.MOUSE_CLICKED) {
-                        setCurrentLanguage(JA_JP)
-                        // setImeConversionMode(ImeConversionMode.KATAKANA)
-                    }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
                         when (transState) {
@@ -121,6 +119,13 @@ class COnlineDict : Stage() {
                 isEditable = false
                 font = font.s(16.0)
             }
+        })
+
+        focusedProperty().addListener(onNew{
+            if (it) {
+                oriLang = getCurrentLanguage()
+                languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+            } else setCurrentLanguage(oriLang)
         })
     }
 

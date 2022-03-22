@@ -8,9 +8,7 @@
 /src/jni/IMEInterface/.vs/
 /src/jni/IMEInterface/bin/
 /src/jni/IMEInterface/obj/
-/src/jni/*/IMEInterface.dll
 /src/jni/*/.vs/
-/src/jni/*/Debug/
 /src/jni/*/x64/
 /src/jni/.vs/
 /src/jni/x64/

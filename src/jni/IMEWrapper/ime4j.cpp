@@ -32,3 +32,9 @@ JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIE
     IMEInterface::IMEMain::SetInputLanguage(string);
 }
 
+JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv* env, jclass clazz, jint jInt)
+{
+    IMEInterface::IMEMain::SetImeConversionMode((int) jInt);
+}
+
+

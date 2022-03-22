@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace IMEInterface
 {
@@ -26,6 +28,11 @@ namespace IMEInterface
                     break;
                 }
             }
+        }
+
+        public static void SetImeConversionMode(int mode)
+        {
+            InputMethod.Current.ImeConversionMode = (ImeConversionModeValues)mode;
         }
 
     }

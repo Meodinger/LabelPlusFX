@@ -19,6 +19,13 @@ JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLangu
  */
 JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv*, jclass, jstring);
 
+/*
+ * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Method:    setImeConversionMode
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv*, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

@@ -7,6 +7,8 @@ import ink.meodinger.lpfx.LOGSRC_DICTIONARY
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
+import ink.meodinger.lpfx.util.event.keyEvent
+import ink.meodinger.lpfx.util.ime.*
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.I18N
@@ -25,6 +27,7 @@ import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
@@ -99,6 +102,10 @@ class COnlineDict : Stage() {
                         transState = (transState + 1) % 2
                         it.consume()
                     }
+                    addEventFilter(MouseEvent.MOUSE_CLICKED) {
+                        setCurrentLanguage(JA_JP)
+                        // setImeConversionMode(ImeConversionMode.KATAKANA)
+                    }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
                         when (transState) {
@@ -124,8 +131,8 @@ class COnlineDict : Stage() {
 
         val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText()
         val searchResults = parse(searchHTML).body.children[1].children[2]
-        val first = searchResults.children[0]
-        if (first.attributes["id"] == "out-search") return I18N["dict.not_found"]
+        val first = searchResults.children.getOrNull(0)
+        if (first == null || first.attributes["id"] == "out-search") return I18N["dict.not_found"]
 
         val target = JD_SITE + first.attributes["href"]
         val contentConnection = URL(target).openConnection().apply { connect() } as HttpsURLConnection

@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("IMEInterface")]
 [assembly: AssemblyCopyright("Copyright © Meodinger Wang 2022")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("zh-CN")]
+[assembly: AssemblyCulture("")]
 
 // 将 ComVisible 设置为 false 会使此程序集中的类型对 COM 组件不可见。
 // 如果需要从 COM 访问此程序集中的类型

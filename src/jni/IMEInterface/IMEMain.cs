@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -30,9 +31,10 @@ namespace IMEInterface
             }
         }
 
+        [Obsolete("Currently is not usable.", true)]
         public static void SetImeConversionMode(int mode)
         {
-            InputMethod.Current.ImeConversionMode = (ImeConversionModeValues)mode;
+            // InputMethod.Current.ImeConversionMode = (ImeConversionModeValues)mode;
         }
 
     }

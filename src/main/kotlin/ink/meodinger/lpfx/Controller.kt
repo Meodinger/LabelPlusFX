@@ -227,7 +227,7 @@ class Controller(private val view: View, private val state: State) {
         // Alias redo in TransArea
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (!it.isShiftDown || !it.isControlOrMetaDown || it.code != KeyCode.Z) return@addEventHandler
-            cTransArea.fireEvent(keyEvent(it, isShiftDown = false, code = KeyCode.Y))
+            cTransArea.fireEvent(keyEvent(it,  code = KeyCode.Y, isShiftDown = false))
         }
         Logger.info("Aliased redo in TransArea", LOGSRC_CONTROLLER)
 
@@ -679,10 +679,10 @@ class Controller(private val view: View, private val state: State) {
                 if (backward) KeyCode.UP else KeyCode.DOWN
             }
 
-            cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = code))
+            cLabelPane.fireEvent(keyEvent(it, code = code, character = "\u0000", text = ""))
             when (code) {
-                KeyCode.LEFT  -> cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = KeyCode.UP))
-                KeyCode.RIGHT -> cLabelPane.fireEvent(keyEvent(it, character = "\u0000", text = "", code = KeyCode.DOWN))
+                KeyCode.LEFT  -> cLabelPane.fireEvent(keyEvent(it, code = KeyCode.UP, character = "\u0000", text = ""))
+                KeyCode.RIGHT -> cLabelPane.fireEvent(keyEvent(it, code = KeyCode.DOWN, character = "\u0000", text = "" ))
                 else -> doNothing()
             }
 

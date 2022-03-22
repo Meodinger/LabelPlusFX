@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 
 #pragma managed
-#using "IMEInterface.dll"
 
 using namespace std;
 using namespace IMEInterface;
@@ -20,8 +19,9 @@ int main()
 	cin >> index;
 	auto lang = langs[index];
 	IMEMain::SetInputLanguage(lang);
-	printf("%s\n", lang);
+	printf("Lang: %s\n", lang);
 
 	cin >> index;
-	IMEMain::SetImeConversionMode(index);
+	printf("Index: %d\n", index);
+	// IMEMain::SetImeConversionMode(index);
 }

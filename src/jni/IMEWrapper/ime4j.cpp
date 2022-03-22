@@ -2,14 +2,13 @@
 #include "ime4j.h"
 
 #pragma managed
-#using "IMEInterface.dll"
 
 using namespace System::Runtime::InteropServices;
 using namespace IMEInterface;
 
 JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguages(JNIEnv* env, jclass clazz)
 {
-	auto langs = IMEInterface::IMEMain::GetInstalledLanguages();
+	auto langs = IMEMain::GetInstalledLanguages();
     auto array = env->NewObjectArray((jsize)langs->Length, env->FindClass("java/lang/String"), 0);
     for (size_t i = 0; i < langs -> Length; i++)
     {
@@ -29,12 +28,12 @@ JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIE
 {
     auto chars  = env->GetStringUTFChars(jString, 0);
     auto string = gcnew System::String(chars);
-    IMEInterface::IMEMain::SetInputLanguage(string);
+    IMEMain::SetInputLanguage(string);
 }
 
 JNIEXPORT void JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv* env, jclass clazz, jint jInt)
 {
-    IMEInterface::IMEMain::SetImeConversionMode((int) jInt);
+    // IMEMain::SetImeConversionMode((int) jInt);
 }
 
 

@@ -18,29 +18,24 @@ import ink.meodinger.lpfx.util.string.emptyString
 
 // ----- Native Methods ----- //
 
-/**
- * Get all available languages (cultures, not actual input methods)
- */
 private external fun getLanguages(): Array<String>
 
-/**
- * Get current language
- */
 private external fun getLanguage(): String
 
-/**
- * Set current language
- */
 private external fun setLanguage(lang: String): Boolean
 
-/**
- * Set IME Conversion Mode
- */
 private external fun setImeConversionMode(hWnd: Long, conversionMode: Int, sentenceMode: Int): Boolean
 
 // ----- JVM Method ----- //
 
+/**
+ * All available languages (cultures) by lazy
+ */
 val languages: List<String> by lazy(::getAvailableLanguages)
+
+/**
+ * Get all available languages (cultures)
+ */
 fun getAvailableLanguages(): List<String> {
     if (!enableJNI) return emptyList()
 
@@ -48,6 +43,9 @@ fun getAvailableLanguages(): List<String> {
     else throw UnsupportedOperationException("Only usable in Win")
 }
 
+/**
+ * Get current language
+ */
 fun getCurrentLanguage(): String {
     if (!enableJNI) return emptyString()
 
@@ -55,6 +53,9 @@ fun getCurrentLanguage(): String {
     else throw UnsupportedOperationException("Only usable in Win")
 }
 
+/**
+ * Set current language
+ */
 fun setCurrentLanguage(lang: String): Boolean {
     if (!enableJNI) return false
 
@@ -62,7 +63,9 @@ fun setCurrentLanguage(lang: String): Boolean {
     else throw UnsupportedOperationException("Only usable in Win")
 }
 
-@Deprecated("Currently not functional")
+/**
+ * Set IME Conversion Mode
+ */
 fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conversionModes: ImeConversionMode): Boolean {
     if (!enableJNI) return false
 
@@ -73,17 +76,18 @@ fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conve
     else throw UnsupportedOperationException("Only usable in Win")
 }
 
-@Deprecated("Currently not functional")
-fun setImeInputMode(hWnd: Long, mode: ImeMode): Boolean {
+/**
+ * Set Japan IME Conversion Mode
+ */
+fun setJapanInputMode(hWnd: Long, mode: JapanMode): Boolean {
     if (!enableJNI) return false
 
     val conversion = when (mode) {
-        ImeMode.OFF           -> 0b0000
-        ImeMode.HIRAGANA      -> 0b1001
-        ImeMode.KATAKANA      -> 0b1011
-        ImeMode.ALPHA         -> 0b1000
-        ImeMode.KATAKANA_HALF -> 0b0011
-        ImeMode.ALPHA_HALF    -> 0b0000
+        JapanMode.HIRAGANA      -> 0b1001
+        JapanMode.KATAKANA      -> 0b1011
+        JapanMode.ALPHA         -> 0b1000
+        JapanMode.KATAKANA_HALF -> 0b0011
+        JapanMode.ALPHA_HALF    -> 0b0000
     }
 
     if (isWin) return setImeConversionMode(hWnd, conversion, ImeSentenceMode.AUTOMATIC.value)

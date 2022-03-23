@@ -61,7 +61,7 @@ enum class ImeSentenceMode(val value: Int) {
     AUTOMATIC              (0b0000_0100),
     PHRASE_PREDICT         (0b0000_1000),
     CONVERSATION           (0b0001_0000),
-    RESERVED               (0xF000)
+    RESERVED               (0x0000_F000)
 }
 
-enum class ImeMode { OFF, HIRAGANA, KATAKANA, ALPHA, KATAKANA_HALF, ALPHA_HALF, }
+enum class JapanMode { HIRAGANA, KATAKANA, ALPHA, KATAKANA_HALF, ALPHA_HALF, }

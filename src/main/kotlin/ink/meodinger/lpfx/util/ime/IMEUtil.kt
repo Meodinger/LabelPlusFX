@@ -10,9 +10,9 @@ import javafx.stage.Stage
  * Have fun with my code!
  */
 
-/**
- *
- */
 private external fun getWindowHandle(title: String): Long
 
+/**
+ * Get the Window Handle of the stage
+ */
 fun getWindowHandle(stage: Stage): Long = getWindowHandle(stage.title)

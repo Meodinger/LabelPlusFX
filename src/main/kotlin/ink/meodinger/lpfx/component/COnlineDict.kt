@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.LOGSRC_DICTIONARY
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
+import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.ime.*
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -20,9 +21,7 @@ import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.IntegerProperty
-import javafx.beans.property.LongProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleLongProperty
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -71,8 +70,6 @@ class COnlineDict : Stage() {
     private var transState: Int by transStateProperty
 
     private var oriLang: String = emptyString()
-    private val windowHandleProperty: LongProperty = SimpleLongProperty()
-    private var windowHandle: Long by windowHandleProperty
 
     init {
         icons.add(ICON)
@@ -111,19 +108,10 @@ class COnlineDict : Stage() {
                         transState = (transState + 1) % 2
                         it.consume()
                     }
-                    addEventFilter(MouseEvent.MOUSE_CLICKED) {
-                        languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
-                        windowHandle = getWindowHandle(this@COnlineDict)
-                        println("HWND: $windowHandle")
-                        setImeInputMode(windowHandle, ImeMode.HIRAGANA)
-                        /*
-                        setImeConversionMode(
-                            windowHandle,
-                            ImeSentenceMode.PHRASE_PREDICT,
-                            ImeConversionMode.JAPANESE,
-                            ImeConversionMode.FULL_SHAPE,
-                        )
-                         */
+                    addEventHandler(MouseEvent.MOUSE_CLICKED) {
+                        if (it.isDoubleClick) {
+                            setJapanInputMode(getWindowHandle(this@COnlineDict), JapanMode.HIRAGANA)
+                        }
                     }
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
@@ -143,7 +131,12 @@ class COnlineDict : Stage() {
         })
 
         focusedProperty().addListener(onNew {
-            if (it) oriLang = getCurrentLanguage() else setCurrentLanguage(oriLang)
+            if (it) {
+                oriLang = getCurrentLanguage()
+                languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+            } else {
+                setCurrentLanguage(oriLang)
+            }
         })
     }
 

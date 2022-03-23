@@ -12,11 +12,11 @@ JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLangu
 	auto langs = IMEMain::GetInstalledLanguages();
     auto array = env->NewObjectArray((jsize)langs->Length, env->FindClass("java/lang/String"), 0);
 
-    jstring jString;
+    jstring lang;
     for (int i = 0; i < langs -> Length; i++)
     {
-        string2jstring(env, langs[i], &jString);
-        env->SetObjectArrayElement(array, (jsize) i, jString);
+        string2jstring(env, langs[i], &lang);
+        env->SetObjectArrayElement(array, (jsize) i, lang);
     }
 
     return array;
@@ -26,9 +26,9 @@ JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguage(J
 {
     auto lang = IMEMain::GetInputLanguage();
 
-    jstring retval;
-    string2jstring(env, lang, &retval);
-    return retval;
+    jstring string;
+    string2jstring(env, lang, &string);
+    return string;
 }
 
 JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv* env, jclass clazz, jstring language)
@@ -42,7 +42,6 @@ JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(
 
 JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv* env, jclass clazz, jlong hWnd, jint conversionMode, jint sentenceMode)
 {
-    // TODO: Issue when change conversion mode, only functional when manually change to non-aphla/numbric
     HWND hwnd = (HWND)hWnd;
     HIMC himc = ImmGetContext(hwnd);
 

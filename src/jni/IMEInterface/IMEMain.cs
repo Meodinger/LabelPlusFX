@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -37,7 +36,7 @@ namespace IMEInterface
             return false;
         }
 
-        [Obsolete("Currently is not functional. Maybe use Win32 instaead", true)]
+        [Obsolete("Currently is not functional. Use Win32 instaead", true)]
         public static void SetImeConversionMode(int mode)
         {
             // InputMethod.Current.ImeConversionMode = (ImeConversionModeValues)mode;

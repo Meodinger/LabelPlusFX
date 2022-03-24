@@ -19,5 +19,3 @@ val isMac = OS.contains("mac")
 
 val MonoFont = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
 val TextFont = if (isWin) "SimSun" else if (isMac) "" else ""
-
-var enableJNI: Boolean = true

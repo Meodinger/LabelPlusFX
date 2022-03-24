@@ -44,17 +44,17 @@ class LabelPlusFX: HookedApplication() {
 
         Options.load()
 
-        // Cannot catch Exceptions occurred when starting
-        Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
-            Logger.exception(e)
-            showException(null, e)
-        }
-
         Logger.info("App initialized", LOGSRC_APPLICATION)
     }
 
     override fun start(primaryStage: Stage) {
         Logger.info("App starting...", LOGSRC_APPLICATION)
+
+        Thread.currentThread().setUncaughtExceptionHandler { t, e ->
+            Logger.error("Exception uncaught in Thread: ${t.name}", LOGSRC_APPLICATION)
+            Logger.exception(e)
+            showException(primaryStage, e)
+        }
 
         state.stage = primaryStage
 

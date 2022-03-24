@@ -19,17 +19,13 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.platform.isMac
-import ink.meodinger.lpfx.util.property.BidirectionalListener
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.divAssign
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
-
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
@@ -40,6 +36,9 @@ import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.stage.FileChooser
 import java.io.File
 import java.nio.file.Files
@@ -607,9 +606,23 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         Dialog<ButtonType>().apply {
             initOwner(state.stage)
-            dialogPane.buttonTypes.add(ButtonType.CANCEL)
 
-            val button = dialogPane.lookupButton(ButtonType.CANCEL)
+            // Center the button
+            dialogPane = object : DialogPane() {
+                override fun createButtonBar() = (super.createButtonBar() as ButtonBar).apply {
+                    buttonOrder = ButtonBar.BUTTON_ORDER_NONE
+                }
+            }
+            dialogPane.applyCss()
+            dialogPane.buttonTypes.add(ButtonType.CANCEL)
+            dialogPane.lookup(".container").apply {
+                (this as HBox).children.add(Region().also {
+                    HBox.setHgrow(it, Priority.ALWAYS)
+                    ButtonBar.setButtonData(it, ButtonBar.ButtonData.BIG_GAP)
+                })
+            }
+
+            val button = dialogPane.lookupButton(ButtonType.CANCEL) as Button
             fun cancel() = button.fireEvent(ActionEvent())
 
             dialogPane.withContent(ProgressBar()) {

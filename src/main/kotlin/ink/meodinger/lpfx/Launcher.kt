@@ -2,7 +2,6 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
-import ink.meodinger.lpfx.util.platform.enableJNI
 import ink.meodinger.lpfx.util.platform.isWin
 
 import javafx.application.Application
@@ -24,18 +23,23 @@ import kotlin.system.exitProcess
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
-    // If CLI disabled JNI
-    for (arg in args) if (arg == "--jni-disable") enableJNI = false
+    // CLI commands to App args
+    val appArgs = ArrayList<String>()
+    for (arg in args) when (arg) {
+        "--disable-jni"   -> Config.enableJNI   = false
+        "--disable-proxy" -> Config.enableProxy = false
+        else -> appArgs.add(arg)
+    }
 
     // Load IME-related jni library
-    if (isWin && enableJNI) System.loadLibrary("IMEWrapper")
+    if (Config.enableJNI && isWin) System.loadLibrary("IMEWrapper")
 
     // Use System Proxies
-    System.setProperty("java.net.useSystemProxies", "true")
+    if (Config.enableProxy) System.setProperty("java.net.useSystemProxies", "true")
 
     // Global Uncaught Exception Handler
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
-        System.err.println("On thread ${t.name}: ${e.stackTraceToString()}")
+        System.err.println("<UncaughtHandler>: On thread ${t.name}:\n${e.stackTraceToString()}")
 
         if (!Logger.isStarted) return@setDefaultUncaughtExceptionHandler
 
@@ -46,7 +50,7 @@ fun main(vararg args: String) {
     // Immediately log exception and send if Logger started successfully
     // Note that we can only get exception information from log file if happened in this period
     // And if Options or Logger init failed, we can only get information from Swing window
-    Thread.currentThread().uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e ->
+    Thread.currentThread().setUncaughtExceptionHandler { _, e ->
         if (Logger.isStarted) {
             Logger.fatal("Launch failed", "Main")
             Logger.exception(e)
@@ -77,7 +81,7 @@ fun main(vararg args: String) {
     Options.init()
 
     Logger.start()
-    Application.launch(LabelPlusFX::class.java, *args)
+    Application.launch(LabelPlusFX::class.java, *appArgs.toTypedArray())
     Logger.stop()
 
     exitProcess(0)

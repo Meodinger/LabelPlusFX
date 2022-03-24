@@ -14,5 +14,6 @@ private external fun getWindowHandle(title: String): Long
 
 /**
  * Get the Window Handle of the stage
+ * @param stage The window whose HWND will be got.
  */
 fun getWindowHandle(stage: Stage): Long = getWindowHandle(stage.title)

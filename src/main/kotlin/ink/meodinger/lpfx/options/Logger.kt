@@ -136,8 +136,7 @@ object Logger {
     fun exception(e: Throwable) {
         val str = e.stackTraceToString()
 
-        System.err.println("<Logger>: ")
-        System.err.println(str)
+        System.err.println("<Logger>: $str")
         writer.write(str)
         writer.flush()
     }

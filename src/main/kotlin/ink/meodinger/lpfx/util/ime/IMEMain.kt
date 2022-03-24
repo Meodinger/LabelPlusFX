@@ -2,7 +2,7 @@
 
 package ink.meodinger.lpfx.util.ime
 
-import ink.meodinger.lpfx.util.platform.enableJNI
+import ink.meodinger.lpfx.Config.enableJNI
 import ink.meodinger.lpfx.util.platform.isWin
 import ink.meodinger.lpfx.util.string.emptyString
 
@@ -35,6 +35,7 @@ val languages: List<String> by lazy(::getAvailableLanguages)
 
 /**
  * Get all available languages (cultures)
+ * @return A list contains all installed languages' culture codes
  */
 fun getAvailableLanguages(): List<String> {
     if (!enableJNI) return emptyList()
@@ -45,6 +46,7 @@ fun getAvailableLanguages(): List<String> {
 
 /**
  * Get current language
+ * @return Current language's culture code
  */
 fun getCurrentLanguage(): String {
     if (!enableJNI) return emptyString()
@@ -55,6 +57,8 @@ fun getCurrentLanguage(): String {
 
 /**
  * Set current language
+ * @param lang The culture code of the wanted language
+ * @return true if success, false if no installed language meet the requirement
  */
 fun setCurrentLanguage(lang: String): Boolean {
     if (!enableJNI) return false
@@ -65,6 +69,10 @@ fun setCurrentLanguage(lang: String): Boolean {
 
 /**
  * Set IME Conversion Mode
+ * @param hWnd The window handle of target window, use getWindowHandle(Stage) to get the hWnd
+ * @param sentenceMode Sentence mode
+ * @param conversionModes Conversion modes that will be combined
+ * @return true if success
  */
 fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conversionModes: ImeConversionMode): Boolean {
     if (!enableJNI) return false
@@ -73,23 +81,5 @@ fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conve
     for (mode in conversionModes) conversionMode = conversionMode or mode.value
 
     if (isWin) return setImeConversionMode(hWnd, conversionMode, sentenceMode.value)
-    else throw UnsupportedOperationException("Only usable in Win")
-}
-
-/**
- * Set Japan IME Conversion Mode
- */
-fun setJapanInputMode(hWnd: Long, mode: JapanMode): Boolean {
-    if (!enableJNI) return false
-
-    val conversion = when (mode) {
-        JapanMode.HIRAGANA      -> 0b1001
-        JapanMode.KATAKANA      -> 0b1011
-        JapanMode.ALPHA         -> 0b1000
-        JapanMode.KATAKANA_HALF -> 0b0011
-        JapanMode.ALPHA_HALF    -> 0b0000
-    }
-
-    if (isWin) return setImeConversionMode(hWnd, conversion, ImeSentenceMode.AUTOMATIC.value)
     else throw UnsupportedOperationException("Only usable in Win")
 }

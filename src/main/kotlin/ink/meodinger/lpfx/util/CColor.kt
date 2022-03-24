@@ -11,13 +11,15 @@ import javafx.scene.paint.Color
 
 /**
  * Get color RGBA in hex
+ * @return String format in RRGGBBAA
  */
-fun Color.toHexRGBA(): String = toString().uppercase()
+fun Color.toHexRGBA(): String = toString().uppercase().substring(2, 10)
 
 /**
  * Get color RGB in hex
+ * @return String format in RRGGBB
  */
-fun Color.toHexRGB(): String = toHexRGBA().substring(2, 8)
+fun Color.toHexRGB(): String = toString().uppercase().substring(2, 8)
 
 /**
  * Is a string ColorHex

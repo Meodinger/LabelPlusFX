@@ -44,6 +44,7 @@ enum class ImeConversionMode(val value: Int) {
     CHAR_CODE              (0b0010_0000),
     HANJA_CONVERT          (0b0100_0000),
     NATIVE_SYMBOL          (0b1000_0000),
+
     // imm.h
     HANGEUL                (0b0000_0000_0001),
     SOFTKBD                (0b0000_1000_0000),
@@ -51,7 +52,14 @@ enum class ImeConversionMode(val value: Int) {
     END_USER_DEFINED_CHAR  (0b0010_0000_0000),
     SYMBOL                 (0b0100_0000_0000),
     FIXED                  (0b1000_0000_0000),
-    RESERVED               (0xF000_0000.toInt());
+    RESERVED               (0xF000_0000.toInt()),
+
+    // JA
+    JA_HIRAGANA            (0b0000_1001),
+    JA_KATAKANA            (0b0000_1011),
+    JA_ALPHA               (0b0000_1000),
+    JA_KATAKANA_HALF       (0b0000_0011),
+    JA_ALPHA_HALF          (0b0000_0000),
 }
 
 enum class ImeSentenceMode(val value: Int) {
@@ -63,5 +71,3 @@ enum class ImeSentenceMode(val value: Int) {
     CONVERSATION           (0b0001_0000),
     RESERVED               (0x0000_F000)
 }
-
-enum class JapanMode { HIRAGANA, KATAKANA, ALPHA, KATAKANA_HALF, ALPHA_HALF, }

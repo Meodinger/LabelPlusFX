@@ -109,8 +109,12 @@ class COnlineDict : Stage() {
                         it.consume()
                     }
                     addEventHandler(MouseEvent.MOUSE_CLICKED) {
-                        if (it.isDoubleClick) {
-                            setJapanInputMode(getWindowHandle(this@COnlineDict), JapanMode.HIRAGANA)
+                        if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
+                            setImeConversionMode(
+                                getWindowHandle(this@COnlineDict),
+                                ImeSentenceMode.AUTOMATIC,
+                                ImeConversionMode.JA_HIRAGANA
+                            )
                         }
                     }
                     setOnAction {

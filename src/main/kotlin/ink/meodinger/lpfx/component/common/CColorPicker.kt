@@ -1,11 +1,18 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHexRGB
+import ink.meodinger.lpfx.util.color.toHexRGBA
 import ink.meodinger.lpfx.util.event.actionEvent
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.repeat
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.StringProperty
+import javafx.event.Event
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
@@ -31,10 +38,13 @@ import javafx.scene.paint.Color
  */
 class CColorPicker() : ColorPicker() {
 
+    // DO NOT EXPORT this property, use valueProperty() instead.
     private val colorHexField: TextField = TextField()
     private val colorHexProperty: StringProperty = colorHexField.textProperty()
-    // fun colorHexProperty(): StringProperty = colorHexProperty
-    // var colorHex: String by colorHexProperty
+
+    private val enableAlphaProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun enableAlphaProperty(): BooleanProperty = enableAlphaProperty
+    var enableAlpha: Boolean by enableAlphaProperty
 
     constructor(color: Color): this() { value = color }
 
@@ -67,17 +77,19 @@ class CColorPicker() : ColorPicker() {
                 2 -> value = Color.web(it.repeat(3))
                 3 -> {
                     val builder = StringBuilder()
-                    for (c in it.toCharArray()) {
-                        builder.append(c.repeat(2))
-                    }
+                    for (c in it.toCharArray()) builder.append(c.repeat(2))
                     value = Color.web(builder.toString())
                 }
                 6 -> value = Color.web(it)
+                8 -> if (enableAlpha) value = Color.web(it)
             }
         })
 
-        addEventHandler(ON_SHOWN) { colorHexProperty.set(value.toHexRGB()) }
-        addEventHandler(ON_HIDDEN) { colorHexProperty.set(value.toHexRGB()) }
+        val handler = EventHandler<Event> {
+            colorHexProperty.set(if (enableAlpha) value.toHexRGBA() else value.toHexRGB())
+        }
+        addEventHandler(ON_SHOWN, handler)
+        addEventHandler(ON_HIDDEN, handler)
     }
 
     override fun createDefaultSkin(): Skin<*> {

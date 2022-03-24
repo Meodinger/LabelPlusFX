@@ -18,7 +18,8 @@ import kotlin.math.floor
  * Tool ROOT
  */
 private const val ROOT = "https://fanyi-api.baidu.com/api/trans/vip/translate"
-private const val KEY  = "Wo9lvMK4qjxpLVrFktt3"
+private const val KEY  = "Wo9lvMK4qjxpLVrFktt3" // 200M words per month
+private const val ID   = 20220208001077250
 
 private val utf8Charset = Charset.forName("UTF-8")
 private val md5Instance = MessageDigest.getInstance("MD5")
@@ -29,11 +30,10 @@ private fun md5(text: String): String {
     }.toString()
 }
 private fun query(q: String, from: String, to: String): String {
-    val appID = 20220208001077250
     val salt  = floor(Math.random() * 10000)
-    val sign  = md5("$appID$q$salt$KEY").lowercase()
+    val sign  = md5("$ID$q$salt$KEY").lowercase()
 
-    return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$appID&salt=$salt&sign=$sign"
+    return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$ID&salt=$salt&sign=$sign"
 }
 
 @Throws(IOException::class)

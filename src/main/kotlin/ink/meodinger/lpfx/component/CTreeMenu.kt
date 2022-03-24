@@ -121,12 +121,12 @@ class CTreeMenu(private val state: State) : ContextMenu() {
     }
     private val gChangeColorHandler = EventHandler<ActionEvent> {
         val groupName = it.source as String
-        val newColor = (it.target as ColorPicker).value
+        val newColorHex = (it.target as ColorPicker).value.toHexRGB()
 
         state.doAction(GroupAction(
             ActionType.CHANGE, state,
             state.transFile.getTransGroup(state.transFile.getGroupIdByName(groupName)),
-            newColorHex = newColor.toHexRGB()
+            newColorHex = newColorHex
         ))
     }
     private val gChangeColorItem    = MenuItem().apply {

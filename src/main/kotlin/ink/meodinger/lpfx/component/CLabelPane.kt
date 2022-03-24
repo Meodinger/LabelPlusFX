@@ -291,7 +291,16 @@ class CLabelPane : ScrollPane() {
         // Scale
         root.addEventFilter(ScrollEvent.SCROLL) {
             if (it.isControlOrMetaDown || it.isAltDown) {
-                scale += if (it.deltaY > 0) 0.1 else -0.1
+                val deltaScale = if (it.deltaY > 0) 0.1 else -0.1
+
+                scale += deltaScale
+
+                // x, y -> location irrelated with scale, based on left-top of the image
+                // nLx = Lx + dx; dx = (imgW / 2 - x) * (nS - S); dS = nS - S
+                // nLx = Lx + (imgW / 2 - x) * dS
+                root.layoutX += deltaScale * (image.width  / 2 - it.x)
+                root.layoutY += deltaScale * (image.height / 2 - it.y)
+
                 it.consume()
             }
         }
@@ -302,7 +311,7 @@ class CLabelPane : ScrollPane() {
 
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
-        // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
+        // nLx = Lx + (nSx - Sx)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
             shiftX = root.layoutX - it.sceneX

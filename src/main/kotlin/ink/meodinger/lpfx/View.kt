@@ -59,6 +59,8 @@ class View(state: State) : BorderPane() {
     var showStatsBar: Boolean by showStatsBarProperty
 
     init {
+        state.view = this
+
         top(menuBar)
         center(pMain) {
             add(BorderPane()) {

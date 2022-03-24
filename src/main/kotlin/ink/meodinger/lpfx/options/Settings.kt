@@ -144,40 +144,40 @@ object Settings : AbstractProperties("Settings") {
     override fun load() {
         load(Options.settings, this)
 
-        defaultGroupNameList = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
-        defaultGroupColorHexList = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
+        defaultGroupNameList        = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
+        defaultGroupColorHexList    = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
         isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans].asBooleanList())
-        newPictureScalePicture = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
-        viewModes = FXCollections.observableList(this[ViewModes].asIntegerList().map { ViewMode.values()[it] })
-        logLevel = Logger.LogLevel.values()[this[LogLevel].asInteger()]
-        labelRadius = this[LabelRadius].asDouble()
-        labelColorOpacity = this[LabelColorOpacity].asInteger(16) / 255.0
-        labelTextOpaque = this[LabelTextOpaque].asBoolean()
-        ligatureRules = FXCollections.observableList(this[LigatureRules].asPairList())
-        instantTranslate = this[InstantTranslate].asBoolean()
-        useMeoFileAsDefault = this[UseMeoFileAsDefault].asBoolean()
-        useExportNameTemplate = this[UseExportNameTemplate].asBoolean()
-        exportNameTemplate = this[ExportNameTemplate].asString()
-        autoCheckUpdate = this[AutoCheckUpdate].asBoolean()
+        newPictureScalePicture      = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
+        viewModes                   = FXCollections.observableList(this[ViewModes].asIntegerList().map(ViewMode.values()::get))
+        logLevel                    = Logger.LogLevel.values()[this[LogLevel].asInteger()]
+        labelRadius                 = this[LabelRadius].asDouble()
+        labelColorOpacity           = this[LabelColorOpacity].asInteger(16) / 255.0
+        labelTextOpaque             = this[LabelTextOpaque].asBoolean()
+        ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
+        instantTranslate            = this[InstantTranslate].asBoolean()
+        useMeoFileAsDefault         = this[UseMeoFileAsDefault].asBoolean()
+        useExportNameTemplate       = this[UseExportNameTemplate].asBoolean()
+        exportNameTemplate          = this[ExportNameTemplate].asString()
+        autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[DefaultGroupNameList].set(defaultGroupNameList)
+        this[DefaultGroupNameList]    .set(defaultGroupNameList)
         this[DefaultGroupColorHexList].set(defaultGroupColorHexList)
-        this[IsGroupCreateOnNewTrans].set(isGroupCreateOnNewTransList)
-        this[NewPictureScale].set(newPictureScalePicture.ordinal)
-        this[ViewModes].set(viewModes.map(Enum<*>::ordinal))
-        this[LogLevel].set(logLevel.ordinal)
-        this[LabelRadius].set(labelRadius)
-        this[LabelColorOpacity].set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
-        this[LabelTextOpaque].set(labelTextOpaque)
-        this[LigatureRules].set(ligatureRules)
-        this[InstantTranslate].set(instantTranslate)
-        this[UseMeoFileAsDefault].set(useMeoFileAsDefault)
-        this[UseExportNameTemplate].set(useExportNameTemplate)
-        this[ExportNameTemplate].set(exportNameTemplate)
-        this[AutoCheckUpdate].set(autoCheckUpdate)
+        this[IsGroupCreateOnNewTrans] .set(isGroupCreateOnNewTransList)
+        this[NewPictureScale]         .set(newPictureScalePicture.ordinal)
+        this[ViewModes]               .set(viewModes.map(Enum<*>::ordinal))
+        this[LogLevel]                .set(logLevel.ordinal)
+        this[LabelRadius]             .set(labelRadius)
+        this[LabelColorOpacity]       .set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
+        this[LabelTextOpaque]         .set(labelTextOpaque)
+        this[LigatureRules]           .set(ligatureRules)
+        this[InstantTranslate]        .set(instantTranslate)
+        this[UseMeoFileAsDefault]     .set(useMeoFileAsDefault)
+        this[UseExportNameTemplate]   .set(useExportNameTemplate)
+        this[ExportNameTemplate]      .set(exportNameTemplate)
+        this[AutoCheckUpdate]         .set(autoCheckUpdate)
 
         save(Options.settings, this)
     }

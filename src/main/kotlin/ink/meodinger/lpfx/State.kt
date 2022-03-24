@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.collection.ArrayStack
 import ink.meodinger.lpfx.util.collection.Stack
 import ink.meodinger.lpfx.util.collection.isNotEmpty
+import ink.meodinger.lpfx.util.assignOnce
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString
@@ -28,9 +29,10 @@ import java.io.File
  */
 class State {
 
-    lateinit var application: HookedApplication
-    lateinit var controller: Controller
-    lateinit var stage: Stage
+    var application: HookedApplication by assignOnce()
+    var controller: Controller by assignOnce()
+    var stage: Stage by assignOnce()
+    var view: View by assignOnce()
 
     private val openedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun openedProperty(): BooleanProperty = openedProperty

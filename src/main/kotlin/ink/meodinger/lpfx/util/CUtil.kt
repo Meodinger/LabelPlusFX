@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.util
 import javafx.application.Application
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.regex.Pattern
+import kotlin.reflect.KProperty
 
 
 /**
@@ -454,3 +455,21 @@ class ReLazy<T>(private val initializer: () -> T) : Lazy<T> {
         _initialized = false
     }
 }
+
+/**
+ * Can assign only once
+ */
+class AssignOnce<T> {
+
+    private var _backing: T? = null
+
+    operator fun getValue(thisRef: Any, property: KProperty<*>) = _backing!!
+    operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        synchronized(this) {
+            if (_backing == null) _backing = value
+            else throw IllegalStateException("Value already set")
+        }
+    }
+
+}
+fun <T> assignOnce() = AssignOnce<T>()

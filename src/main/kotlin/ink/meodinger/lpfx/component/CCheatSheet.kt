@@ -7,10 +7,9 @@ import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 
-import javafx.application.HostServices
+import javafx.event.ActionEvent
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -29,7 +28,7 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-class CCheatSheet(services: HostServices) : Stage() {
+class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
 
     init {
         title = I18N["m.cheat"]
@@ -72,7 +71,7 @@ class CCheatSheet(services: HostServices) : Stage() {
             add(Label(I18N["cheat.double_label.res"]), 1, 9)
             add(Hyperlink(I18N["cheat.more_help"]), 0, 10, 2, 1) {
                 gridHAlign = HPos.CENTER
-                setOnAction { services.showDocument(INFO["application.help"]) }
+                setOnAction(onAction)
             }
         })
 

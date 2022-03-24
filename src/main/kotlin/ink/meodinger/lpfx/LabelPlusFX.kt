@@ -62,7 +62,7 @@ class LabelPlusFX: HookedApplication() {
         val controller: Controller
         try {
             root = View(state)
-            controller = Controller(root, state)
+            controller = Controller(state)
         } catch (e: Throwable) {
             Logger.exception(e)
             showException(null, e)

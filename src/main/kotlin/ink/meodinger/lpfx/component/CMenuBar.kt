@@ -26,6 +26,7 @@ import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
+
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleListProperty
@@ -86,7 +87,9 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Dialogs ----- //
 
-    private val cheatSheet     by lazy { CCheatSheet(state.application.hostServices) }
+    private val cheatSheet     by lazy { CCheatSheet {
+        state.application.hostServices.showDocument(INFO["application.help"])
+    } }
     private val onlineDict     by lazy { COnlineDict() }
     private val dialogLogs     by lazy { ADialogLogs() }
     private val dialogSettings by lazy { ADialogSettings() }

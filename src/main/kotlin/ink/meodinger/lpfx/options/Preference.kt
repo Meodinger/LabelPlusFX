@@ -71,22 +71,23 @@ object Preference : AbstractProperties("Preference") {
         load(Options.preference, this)
 
         val windowSizes = this[WINDOW_SIZE].asDoubleList()
-        windowWidth = windowSizes[0]
-        windowHeight = windowSizes[1]
-        mainDividerPosition = this[MAIN_DIVIDER].asDouble()
+
+        windowWidth          = windowSizes[0]
+        windowHeight         = windowSizes[1]
+        mainDividerPosition  = this[MAIN_DIVIDER].asDouble()
         rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
-        textAreaFont = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
-        isShowStatsBar = this[SHOW_STATS_BAR].asBoolean()
-        lastUpdateNotice = this[LAST_UPDATE_NOTICE].asLong()
+        textAreaFont         = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
+        isShowStatsBar       = this[SHOW_STATS_BAR].asBoolean()
+        lastUpdateNotice     = this[LAST_UPDATE_NOTICE].asLong()
     }
 
     @Throws(IOException::class)
     override fun save() {
-        this[WINDOW_SIZE].set(windowWidth, windowHeight)
-        this[MAIN_DIVIDER].set(mainDividerPosition)
-        this[RIGHT_DIVIDER].set(rightDividerPosition)
+        this[WINDOW_SIZE]       .set(windowWidth, windowHeight)
+        this[MAIN_DIVIDER]      .set(mainDividerPosition)
+        this[RIGHT_DIVIDER]     .set(rightDividerPosition)
         this[TEXTAREA_FONT_SIZE].set(textAreaFont.size)
-        this[SHOW_STATS_BAR].set(isShowStatsBar)
+        this[SHOW_STATS_BAR]    .set(isShowStatsBar)
         this[LAST_UPDATE_NOTICE].set(lastUpdateNotice)
 
         save(Options.preference, this)

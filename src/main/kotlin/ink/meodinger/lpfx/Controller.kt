@@ -60,7 +60,7 @@ import javax.net.ssl.HttpsURLConnection
 /**
  * Main controller
  */
-class Controller(private val view: View, private val state: State) {
+class Controller(private val state: State) {
 
     companion object {
         private const val ONE_SECOND = 1000L
@@ -72,8 +72,9 @@ class Controller(private val view: View, private val state: State) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * ONE_SECOND
     }
 
-    private val dialogSpecify: CSpecifyDialog = CSpecifyDialog(state)
+    private val dialogSpecify: CSpecifyDialog by lazy { CSpecifyDialog(state) }
 
+    private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
     private val lInfo: Label                     = view.lInfo
@@ -1041,6 +1042,7 @@ class Controller(private val view: View, private val state: State) {
     /**
      * May deprecate in some time
      */
+    @Deprecated("Not elegant", level = DeprecationLevel.WARNING)
     fun moveLabelTreeItem(labelIndex: Int, dstGroupId: Int) {
         val oriGroupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
         cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)

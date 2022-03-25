@@ -190,8 +190,6 @@ class CTreeMenu(private val state: State) : ContextMenu() {
                     state.transFile.getTransLabel(state.currentPicName, it.index),
                 )
             }))
-            // Clear selection
-            state.currentLabelIndex = NOT_FOUND
         }
     }
     private val lDeleteItem         = MenuItem(I18N["context.delete_label"])

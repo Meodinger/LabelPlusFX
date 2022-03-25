@@ -263,8 +263,6 @@ class Controller(private val state: State) {
                 state.currentPicName,
                 state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
             ))
-            // Clear selection
-            if (state.currentLabelIndex == it.labelIndex) state.currentLabelIndex = NOT_FOUND
         }
         cLabelPane.setOnLabelHover {
             val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)

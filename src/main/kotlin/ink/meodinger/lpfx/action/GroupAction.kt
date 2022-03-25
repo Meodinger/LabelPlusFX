@@ -67,6 +67,7 @@ class GroupAction(
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
     private fun removeTransGroup(transGroup: TransGroup) {
+        // No need to clear selection because GroupId is bound
         val toRemoveId = state.transFile.groupListObservable.indexOfFirst { it.name == transGroup.name }
 
         state.transFile.groupListObservable.removeAt(toRemoveId)

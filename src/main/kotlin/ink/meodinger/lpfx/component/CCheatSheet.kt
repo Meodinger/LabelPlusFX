@@ -20,7 +20,6 @@ import javafx.scene.control.Separator
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
-import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
 
 /**
@@ -46,7 +45,6 @@ class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
 
             add(Label(I18N["cheat.accelerator"]), 0, 0, 2, 1) {
                 gridHAlign = HPos.CENTER
-                textAlignment = TextAlignment.CENTER
             }
             add(Label("Ctrl/Meta + ↑/↓"), 0, 1)
             add(Label(I18N["cheat.switch_label"]), 1, 1)
@@ -61,7 +59,6 @@ class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
 
             add(Label(I18N["cheat.mouse"]), 0, 6, 2, 1) {
                 gridHAlign = HPos.CENTER
-                textAlignment = TextAlignment.CENTER
             }
             add(Label(I18N["cheat.dnd.dsc"]), 0, 7)
             add(Label(I18N["cheat.dnd.res"]), 1, 7)

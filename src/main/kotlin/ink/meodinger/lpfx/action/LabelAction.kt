@@ -89,6 +89,9 @@ class LabelAction(
         Logger.info("Added $picName @ $transLabel", LOGSRC_ACTION)
     }
     private fun removeTransLabel(picName: String, transLabel: TransLabel) {
+        // Clear selection if needed
+        if (state.currentLabelIndex == targetTransLabel.index) state.currentLabelIndex = NOT_FOUND
+
         val list = state.transFile.transMapObservable[picName]
             ?: throw TransFile.TransFileException.pictureNotFound(picName)
         val labelIndex = transLabel.index

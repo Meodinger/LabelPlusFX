@@ -62,9 +62,9 @@ class COnlineDict : Stage() {
         private const val STATE_SENTENCE = 1
     }
 
-    private val stateLabel = Label()
-    private val inputField = TextField()
-    private val outputArea = TextArea()
+    private val stateLabel: Label = Label()
+    private val inputField: TextField = TextField()
+    private val outputArea: TextArea = TextArea()
 
     private val transStateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
     private var transState: Int by transStateProperty
@@ -120,7 +120,7 @@ class COnlineDict : Stage() {
                     setOnAction {
                         outputArea.text = I18N["dict.fetching"]
                         when (transState) {
-                            STATE_WORD -> fetchInfo(text, outputArea::setText)
+                            STATE_WORD     -> fetchInfo(text, outputArea::setText)
                             STATE_SENTENCE -> outputArea.text = translateJP(text)
                             else -> throw IllegalStateException("State invalid")
                         }

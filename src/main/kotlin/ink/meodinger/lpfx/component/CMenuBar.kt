@@ -18,7 +18,6 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.notExists
-import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.INFO
@@ -90,6 +89,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private val cheatSheet     by lazy { CCheatSheet {
         state.application.hostServices.showDocument(INFO["application.help"])
     } }
+    private val findAndReplace by lazy { CFindReplace(state) }
     private val onlineDict     by lazy { COnlineDict() }
     private val dialogLogs     by lazy { ADialogLogs() }
     private val dialogSettings by lazy { ADialogSettings() }
@@ -140,17 +140,11 @@ class CMenuBar(private val state: State) : MenuBar() {
         menu(I18N["mm.file"]) {
             item(I18N["m.new"]) {
                 does { newTranslation() }
-                accelerator = KeyCodeCombination(
-                    KeyCode.N,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN)
             }
             item(I18N["m.open"]) {
                 does { openTranslation() }
-                accelerator = KeyCodeCombination(
-                    KeyCode.O,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN)
             }
             menu(mOpenRecent) {
                 disableProperty().bind(Bindings.createBooleanBinding(items::isEmpty, items))
@@ -163,19 +157,12 @@ class CMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.save"]) {
                 does { saveTranslation() }
                 disableProperty().bind(!state.openedProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.S,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN)
             }
             item(I18N["m.save_as"]) {
                 does { saveAsTranslation() }
                 disableProperty().bind(!state.openedProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.S,
-                    KeyCombination.SHIFT_DOWN,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
             }
             separator()
             item(I18N["m.bak_recovery"]) {
@@ -190,19 +177,18 @@ class CMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.undo"]) {
                 does { state.undo() }
                 disableProperty().bind(!state.canUndoProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.Z,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN)
             }
             item(I18N["m.redo"]) {
                 does { state.redo() }
                 disableProperty().bind(!state.canRedoProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.Z,
-                    KeyCombination.SHIFT_DOWN,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
+            }
+            separator()
+            item("FindAndReplace") {
+                does { findAndReplace() }
+                // disableProperty().bind(!state.openedProperty())
+                accelerator = KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN)
             }
             separator()
             item(I18N["m.comment"]) {
@@ -227,19 +213,12 @@ class CMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
                 disableProperty().bind(!state.openedProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.E,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN)
             }
             item(I18N["m.meo"]) {
                 does { exportTransFile(FileType.MeoFile) }
                 disableProperty().bind(!state.openedProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.E,
-                    KeyCombination.SHIFT_DOWN,
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
-                )
+                accelerator = KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
             }
             separator()
             item(I18N["m.pack"]) {
@@ -249,7 +228,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                     KeyCode.S,
                     KeyCombination.ALT_DOWN,
                     KeyCombination.SHIFT_DOWN, // Ctrl+Alt+S is occupied by QQ Screen Record
-                    if (isMac) KeyCombination.META_DOWN else KeyCombination.CONTROL_DOWN
+                    KeyCombination.SHORTCUT_DOWN
                 )
             }
         }
@@ -391,6 +370,10 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.recovery(bak, rec)
     }
 
+    private fun findAndReplace() {
+        findAndReplace.show()
+        findAndReplace.toFront()
+    }
     private fun editComment() {
         showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
             state.doAction(object : Action {

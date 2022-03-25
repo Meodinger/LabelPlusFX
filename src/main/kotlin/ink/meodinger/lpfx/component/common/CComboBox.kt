@@ -6,12 +6,10 @@ import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.*
 import javafx.collections.ObservableList
+import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
-import javafx.scene.control.SelectionModel
 import javafx.scene.layout.HBox
-import javafx.scene.text.TextAlignment
-import javafx.util.StringConverter
 
 
 /**
@@ -59,8 +57,8 @@ class CComboBox<T> : HBox() {
         next.setOnMouseClicked { next() }
 
         comboBox.prefWidth = 150.0
-        back.textAlignment = TextAlignment.CENTER
-        next.textAlignment = TextAlignment.CENTER
+        back.alignment = Pos.CENTER
+        next.alignment = Pos.CENTER
 
         children.addAll(comboBox, back, next)
     }

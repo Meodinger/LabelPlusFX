@@ -25,14 +25,19 @@ import java.io.File
  */
 
 /**
- * Modal & Manager for LPFX
+ * Modal & Manager for LPFX.
+ * MUST Initialize some values in order: App -> Stage -> View -> Controller.
  */
 class State {
 
+    // ----- Global Variables ------ //
+
     var application: HookedApplication by assignOnce()
-    var controller: Controller by assignOnce()
     var stage: Stage by assignOnce()
     var view: View by assignOnce()
+    var controller: Controller by assignOnce()
+
+    // ----- Runtime Properties ----- //
 
     private val openedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun openedProperty(): BooleanProperty = openedProperty
@@ -118,7 +123,7 @@ class State {
         Logger.info("Reset", LOGSRC_STATE)
     }
 
-    // ----- File related ----- //
+    // ----- File-Related Methods ----- //
 
     /**
      * Get current picture's FileSystem file

@@ -30,9 +30,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.input.MouseButton
-import javafx.scene.input.MouseEvent
-import javafx.scene.input.ScrollEvent
+import javafx.scene.input.*
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
@@ -281,11 +279,16 @@ class CLabelPane : ScrollPane() {
         imageView.isPickOnBounds = true
         root.alignment = Pos.CENTER
 
+        // Disable mnemonic parsing event from LabelPane
+        addEventFilter(KeyEvent.ANY) {
+            if (it.code == KeyCode.ALT) it.consume()
+        }
+
+        // Remove text when scroll event fired
+        // NOTE: Horizon scroll use default impl: Shift + Scroll
         addEventFilter(ScrollEvent.SCROLL) {
-            // Remove text when scroll event fired
             removeText()
 
-            // NOTE: Horizon scroll use default impl: Shift+Scroll
         }
 
         // Scale

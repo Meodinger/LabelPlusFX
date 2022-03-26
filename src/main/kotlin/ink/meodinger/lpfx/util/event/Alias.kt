@@ -18,23 +18,13 @@ import javafx.scene.input.MouseEvent
  * For multi-platform use
  * Some macOS users will use Command (Control) as their Shortcut key.
  */
-val GestureEvent.isControlOrMetaDown: Boolean get() = (isControlDown || isMac && isMetaDown)
+val GestureEvent.isControlOrMetaDown: Boolean get() = (isControlDown || (isMac && isMetaDown))
 
 /**
  * For multi-platform use
  * Some macOS users will use Command (Control) as their Shortcut key.
  */
-val KeyEvent.isControlOrMetaDown: Boolean get() = (isControlDown || isMac && isMetaDown)
-
-/**
- * For multi-platform use
- */
-val GestureEvent.isAltOrMetaDown: Boolean get() = (isAltDown || isMac && isMetaDown)
-
-/**
- * For multi-platform use
- */
-val KeyEvent.isAltOrMetaDown: Boolean get() = (isAltDown || isMac && isMetaDown)
+val KeyEvent.isControlOrMetaDown: Boolean get() = (isControlDown || (isMac && isMetaDown))
 
 /**
  * If click count equals 2

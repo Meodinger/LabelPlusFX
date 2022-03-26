@@ -36,7 +36,7 @@ import javafx.stage.Stage
  * Date: 2022/3/24
  * Have fun with my code!
  */
-class CFindReplace(private val state: State) : Stage() {
+class CSearchReplace(private val state: State) : Stage() {
 
     companion object {
         private const val BUTTON_WIDTH: Double = 96.0
@@ -208,9 +208,9 @@ class CFindReplace(private val state: State) : Stage() {
 
     private fun handleFindNext() {
         if (!findNext(wrapFind)) {
-            val result = showConfirm(this@CFindReplace, I18N["snr.not_found_re"])
+            val result = showConfirm(this@CSearchReplace, I18N["snr.not_found_re"])
             if (result.isPresent && result.get() == ButtonType.YES) {
-                if (!findNext(true)) showInfo(this@CFindReplace, I18N["snr.not_found"])
+                if (!findNext(true)) showInfo(this@CSearchReplace, I18N["snr.not_found"])
             }
         }
     }
@@ -220,9 +220,9 @@ class CFindReplace(private val state: State) : Stage() {
     private fun handleReplaceAll() {
         val count = replaceAll()
         if (count == 0) {
-            showInfo(this@CFindReplace, I18N["snr.not_found"])
+            showInfo(this@CSearchReplace, I18N["snr.not_found"])
         } else {
-            showInfo(this@CFindReplace, String.format(I18N["snr.replace_count.i"], count))
+            showInfo(this@CSearchReplace, String.format(I18N["snr.replace_count.i"], count))
         }
     }
 

@@ -62,13 +62,10 @@ class COnlineDict : Stage() {
         private const val STATE_SENTENCE = 1
     }
 
-    private val stateLabel: Label = Label()
-    private val inputField: TextField = TextField()
-    private val outputArea: TextArea = TextArea()
-
     private val transStateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
     private var transState: Int by transStateProperty
 
+    private var outputArea: TextArea = TextArea()
     private var oriLang: String = emptyString()
 
     init {
@@ -90,7 +87,7 @@ class COnlineDict : Stage() {
                         Insets(0.0)
                     ))
                 }, transStateProperty))
-                add(stateLabel) {
+                add(Label()) {
                     minWidth = 75.0
                     alignment = Pos.CENTER
                     textProperty().bind(Bindings.createStringBinding({
@@ -101,7 +98,7 @@ class COnlineDict : Stage() {
                         }
                     }, transStateProperty))
                 }
-                add(inputField) {
+                add(TextField()) {
                     boxHGrow = Priority.ALWAYS
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter

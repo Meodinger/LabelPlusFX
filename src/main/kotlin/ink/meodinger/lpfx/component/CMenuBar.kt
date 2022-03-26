@@ -86,13 +86,13 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Dialogs ----- //
 
-    private val cheatSheet     by lazy { CCheatSheet {
+    private val cheatSheet       by lazy { CCheatSheet {
         state.application.hostServices.showDocument(INFO["application.help"])
     } }
-    private val findAndReplace by lazy { CFindReplace(state) }
-    private val onlineDict     by lazy { COnlineDict() }
-    private val dialogLogs     by lazy { ADialogLogs() }
-    private val dialogSettings by lazy { ADialogSettings() }
+    private val searchAndReplace by lazy { CSearchReplace(state) }
+    private val onlineDict       by lazy { COnlineDict() }
+    private val dialogLogs       by lazy { ADialogLogs() }
+    private val dialogSettings   by lazy { ADialogSettings() }
 
     // ----- Choosers ----- //
 
@@ -136,8 +136,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         exportPackChooser.title = I18N["chooser.pack"]
         exportPackChooser.extensionFilters.add(packFilter)
 
-        disableMnemonicParsingForAll()
-        menu(I18N["mm.file"]) {
+        menu(I18N["mm.file"]   + "(_F)") {
             item(I18N["m.new"]) {
                 does { newTranslation() }
                 accelerator = KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN)
@@ -173,7 +172,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 does { if (!state.controller.stay()) state.application.exit() }
             }
         }
-        menu(I18N["mm.edit"]) {
+        menu(I18N["mm.edit"]   + "(_E)") {
             item(I18N["m.undo"]) {
                 does { state.undo() }
                 disableProperty().bind(!state.canUndoProperty())
@@ -185,9 +184,9 @@ class CMenuBar(private val state: State) : MenuBar() {
                 accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
             }
             separator()
-            item("FindAndReplace") {
-                does { findAndReplace() }
-                // disableProperty().bind(!state.openedProperty())
+            item(I18N["m.snr"]) {
+                does { searchAndReplace() }
+                disableProperty().bind(!state.openedProperty())
                 accelerator = KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN)
             }
             separator()
@@ -209,7 +208,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 disableProperty().bind(!state.openedProperty())
             }
         }
-        menu(I18N["mm.export"]) {
+        menu(I18N["mm.export"] + "(_X)") {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
                 disableProperty().bind(!state.openedProperty())
@@ -224,18 +223,12 @@ class CMenuBar(private val state: State) : MenuBar() {
             item(I18N["m.pack"]) {
                 does { exportTransPack() }
                 disableProperty().bind(!state.openedProperty())
-                accelerator = KeyCodeCombination(
-                    KeyCode.S,
-                    KeyCombination.ALT_DOWN,
-                    KeyCombination.SHIFT_DOWN, // Ctrl+Alt+S is occupied by QQ Screen Record
-                    KeyCombination.SHORTCUT_DOWN
-                )
             }
         }
-        menu(I18N["mm.tools"]) {
+        menu(I18N["mm.tools"]  + "(_T)") {
             checkItem(I18N["m.dict"]) {
                 does { showDict() }
-                accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN)
+                accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN)
                 BidirectionalListener.listen(
                     selectedProperty(), { _, _, _ -> isSelected = onlineDict.isShowing },
                     onlineDict.showingProperty(), { _, _, new  -> isSelected = new }
@@ -255,7 +248,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
             }
         }
-        menu(I18N["mm.about"]) {
+        menu(I18N["mm.about"]  + "(_H)") {
             item(I18N["m.settings"]) {
                 does { settings() }
             }
@@ -370,9 +363,9 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.recovery(bak, rec)
     }
 
-    private fun findAndReplace() {
-        findAndReplace.show()
-        findAndReplace.toFront()
+    private fun searchAndReplace() {
+        searchAndReplace.show()
+        searchAndReplace.toFront()
     }
     private fun editComment() {
         showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
@@ -457,7 +450,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun specifyPictures() {
         val completed = state.controller.specifyPicFiles() ?: return
         if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
-        state.controller.requestRepaint()
+        state.controller.requestUpdatePane()
     }
 
     private fun exportTransFile(type: FileType) {

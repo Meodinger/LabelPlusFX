@@ -49,6 +49,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import kotlin.math.roundToInt
 
 
 /**
@@ -77,8 +78,8 @@ class Controller(private val state: State) {
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
-    private val lInfo: Label                     = view.lInfo
     private val lBackup: Label                   = view.lBackup.apply { text = I18N["stats.not_backed"] }
+    private val lLocation: Label                 = view.lLocation
     private val lAccEditTime: Label              = view.lAccEditTime
     private val pMain: SplitPane                 = view.pMain
     private val pRight: SplitPane                = view.pRight
@@ -120,6 +121,7 @@ class Controller(private val state: State) {
 
     // Following Bindings should create in order to avoid unexpected Exceptions
     // And must invoke get() explicitly or by delegation every time to let the property validate
+    // Or by using InvalidationListener (which needs another listener but more literal)
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
             state.transFileProperty().get()?.groupListProperty
@@ -147,12 +149,10 @@ class Controller(private val state: State) {
 
     private fun switchViewMode() {
         state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
-        labelInfo("Switched work mode to ${state.viewMode}")
     }
     private fun switchWorkMode() {
         state.workMode = WorkMode.values()[(state.workMode.ordinal + 1) % WorkMode.values().size]
         state.viewMode = Settings.viewModes[state.workMode.ordinal]
-        labelInfo("Switched work mode to ${state.workMode}")
     }
 
     init {
@@ -221,16 +221,38 @@ class Controller(private val state: State) {
         }
         Logger.info("Enabled Drag and Drop", LOGSRC_CONTROLLER)
 
-        // Global event catch, prevent mnemonic parsing and the beep
-        view.addEventHandler(KeyEvent.KEY_PRESSED) { if (it.isAltDown) it.consume() }
-        Logger.info("Prevented Alt-Key mnemonic", LOGSRC_CONTROLLER)
-
-        // Alias redo in TransArea
-        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (!it.isShiftDown || !it.isControlOrMetaDown || it.code != KeyCode.Z) return@addEventHandler
-            cTransArea.fireEvent(keyEvent(it,  code = KeyCode.Y, isShiftDown = false))
+        // Disable mnemonic parsing in TransArea
+        cTransArea.addEventFilter(KeyEvent.ANY) {
+            if (it.code == KeyCode.ALT) it.consume()
         }
-        Logger.info("Aliased redo in TransArea", LOGSRC_CONTROLLER)
+        Logger.info("Registered CTransArea mnemonic parsing", LOGSRC_CONTROLLER)
+
+        // Register Alias & Global redo/undo in TransArea
+        cTransArea.addEventFilter(KeyEvent.KEY_PRESSED) {
+            if (it.isControlOrMetaDown && it.code == KeyCode.Z) {
+                if (!it.isShiftDown) {
+                    if (!cTransArea.isUndoable) state.undo() else cTransArea.undo()
+                } else {
+                    if (!cTransArea.isRedoable) state.redo() else cTransArea.redo()
+                }
+                it.consume() // disable default undo/redo
+            }
+        }
+        Logger.info("Registered CTransArea Alias & Global undo/redo", LOGSRC_CONTROLLER)
+
+        // Register Ctrl/Meta + Scroll with font size change in TransArea
+        cTransArea.addEventHandler(ScrollEvent.SCROLL) {
+            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
+
+            val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).roundToInt()
+                .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
+
+            cTransArea.font = cTransArea.font.s(newSize.toDouble())
+            cTransArea.positionCaret(0)
+
+            it.consume()
+        }
+        Logger.info("Registered TransArea font size change", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
         cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
@@ -453,14 +475,9 @@ class Controller(private val state: State) {
     private fun effect() {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
 
-        // Update LabelInfo
-        state.currentGroupIdProperty().addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND) labelInfo("Cleared group selection")
-            else labelInfo("Selected group $it, ${state.transFile.getTransGroup(it).name}")
-        })
+        // Update StatsBar
         state.currentPicNameProperty().addListener(onNew {
-            if (it.isEmpty()) labelInfo("Cleared picture selection")
-            else labelInfo("Changed picture to $it")
+            lLocation.text = String.format("%s : --", it)
 
             if (state.isOpened) {
                 val file = state.transFile.getFile(it).takeIf(File?::notExists) ?: return@onNew
@@ -469,8 +486,11 @@ class Controller(private val state: State) {
             }
         })
         state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND) labelInfo("Cleared label selection")
-            else labelInfo("Selected label $it")
+            if (it == NOT_FOUND) {
+                lLocation.text = String.format("%s : --", state.currentPicName)
+            } else {
+                lLocation.text = String.format("%s : %02d", state.currentPicName, it)
+            }
         })
         Logger.info("Added effect: show info on InfoLabel", LOGSRC_CONTROLLER)
 
@@ -504,20 +524,6 @@ class Controller(private val state: State) {
             cTransArea.bindBidirectional(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
         })
         Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOGSRC_CONTROLLER)
-
-        // Bind Ctrl/Alt/Meta + Scroll with font size change
-        cTransArea.addEventHandler(ScrollEvent.SCROLL) {
-            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
-
-            val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).toInt()
-                .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
-
-            cTransArea.font = cTransArea.font.s(newSize.toDouble())
-            cTransArea.positionCaret(0)
-
-            labelInfo("Set text font size to $newSize")
-        }
-        Logger.info("Added effect: change font size on Ctrl/Alt/Meta + Scroll", LOGSRC_CONTROLLER)
 
         // Bind Label and Tree
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -898,8 +904,7 @@ class Controller(private val state: State) {
 
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name
-
-        labelInfo("Opened TransFile: ${file.path}")
+        Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
     }
     /**
      * Save a TransFile
@@ -959,8 +964,9 @@ class Controller(private val state: State) {
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name
 
-        labelInfo("Saved TransFile to ${file.path}")
         if (!silent) showInfo(state.stage, I18N["info.saved_successfully"])
+
+        Logger.info("Saved TransFile", LOGSRC_CONTROLLER)
     }
     /**
      * Recover from backup file
@@ -1003,7 +1009,6 @@ class Controller(private val state: State) {
             showException(state.stage, e)
         }
 
-        labelInfo("Exported to ${file.path}")
         showInfo(state.stage, I18N["info.exported_successful"])
     }
     /**
@@ -1022,7 +1027,6 @@ class Controller(private val state: State) {
             showException(state.stage, e)
         }
 
-        labelInfo("Packed to ${file.path}")
         showInfo(state.stage, I18N["info.exported_successful"])
     }
 
@@ -1035,37 +1039,21 @@ class Controller(private val state: State) {
         state.stage.title = INFO["application.name"]
     }
 
-    // ----- Component Methods ----- //
-
-    /**
-     * May deprecate in some time
-     */
-    @Deprecated("Not elegant", level = DeprecationLevel.WARNING)
-    fun moveLabelTreeItem(labelIndex: Int, dstGroupId: Int) {
-        val oriGroupId = state.transFile.getTransLabel(state.currentPicName, labelIndex).groupId
-        cTreeView.moveLabelItem(labelIndex, oriGroupId, dstGroupId)
-
-        Logger.info("Moved label item @ $labelIndex @ ori=$oriGroupId, dst=$dstGroupId", LOGSRC_CONTROLLER)
-    }
-    fun labelInfo(info: String, source: String = LOGSRC_CONTROLLER) {
-        lInfo.text = info
-        Logger.info(info, source)
-    }
-
     // ----- Global Methods ----- //
 
-    /**
-     * Request repaint the view, usually the CLabelPane
-     */
-    fun requestRepaint() {
+    fun requestUpdatePane() {
+        cLabelPane.requestRemoveLabels()
         imageBinding.invalidate()
         cLabelPane.requestShowImage()
         cLabelPane.requestCreateLabels()
     }
+    fun requestUpdateTree() {
+        cTreeView.requestUpdate()
+    }
 
     /**
      * Start a new LPFX task to check and show update info
-     * @param
+     * @param showWhenUpdated If true, show info if already updated
      */
     fun checkUpdate(showWhenUpdated: Boolean = false) {
         val release = "https://github.com/Meodinger/LabelPlusFX/releases"

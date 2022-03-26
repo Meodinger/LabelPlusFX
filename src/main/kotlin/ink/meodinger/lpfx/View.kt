@@ -36,11 +36,13 @@ import javafx.util.StringConverter
  */
 class View(state: State) : BorderPane() {
 
+    private val statsBar = HBox()
+    private val cTreeViewMenu = CTreeMenu(state)
+
     val menuBar         = CMenuBar(state)
     val bSwitchViewMode = Button()
     val bSwitchWorkMode = Button()
-    val statsBar        = HBox()
-    val lInfo           = Label()
+    val lLocation       = Label()
     val lBackup         = Label()
     val lAccEditTime    = Label()
     val pMain           = SplitPane()
@@ -51,7 +53,6 @@ class View(state: State) : BorderPane() {
     val cPicBox         = CComboBox<String>()
     val cGroupBox       = CComboBox<TransGroup>()
     val cTreeView       = CTreeView()
-    val cTreeViewMenu   = CTreeMenu(state)
     val cTransArea      = CLigatureArea()
 
     private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty(false)
@@ -120,23 +121,29 @@ class View(state: State) : BorderPane() {
 
         statsBar.apply {
             val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
-            add(lInfo) {
-                padding = generalPadding
-                prefWidthProperty().bind(statsBar.widthProperty() * 0.60)
+            add(HBox()) {
+                boxHGrow = Priority.ALWAYS
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
             }
             add(lBackup) {
                 padding = generalPadding
-                prefWidthProperty().bind(statsBar.widthProperty() * 0.20)
+                prefWidth = 120.0
+            }
+            add(Separator()) {
+                orientation = Orientation.VERTICAL
+            }
+            add(lLocation) {
+                padding = generalPadding
+                prefWidth = 90.0
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
             }
             add(lAccEditTime) {
                 padding = generalPadding
-                prefWidthProperty().bind(statsBar.widthProperty() * 0.20)
+                prefWidth = 180.0
             }
         }
 

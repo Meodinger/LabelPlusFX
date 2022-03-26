@@ -75,7 +75,7 @@ object Settings : AbstractProperties("Settings") {
         CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, "%FILE% 翻译：XXX"),
-        CProperty(AutoCheckUpdate, true)
+        CProperty(AutoCheckUpdate, true),
     )
 
     private val defaultGroupNameListProperty: ListProperty<String> = SimpleListProperty()

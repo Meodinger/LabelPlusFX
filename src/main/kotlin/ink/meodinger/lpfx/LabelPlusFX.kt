@@ -7,7 +7,6 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.property.onChange
-import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
@@ -86,7 +85,6 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.show()
 
         Logger.info("App started", LOGSRC_APPLICATION)
-        controller.labelInfo(I18N["common.ready"], LOGSRC_APPLICATION)
 
         if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE))
             if (Settings.autoCheckUpdate)

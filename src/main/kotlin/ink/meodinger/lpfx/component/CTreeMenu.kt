@@ -2,10 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.action.ActionType
-import ink.meodinger.lpfx.action.ComplexAction
-import ink.meodinger.lpfx.action.GroupAction
-import ink.meodinger.lpfx.action.LabelAction
+import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGeneralFormatter
 import ink.meodinger.lpfx.options.Settings
@@ -159,16 +156,19 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         if (choice.isPresent) {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())
 
-            for (item in items) state.controller.moveLabelTreeItem(item.index, newGroupId)
-
-            state.doAction(ComplexAction.of(items.map {
+            val labelActions = items.map {
                 LabelAction(
                     ActionType.CHANGE, state,
                     state.currentPicName,
                     state.transFile.getTransLabel(state.currentPicName, it.index),
                     newGroupId = newGroupId
                 )
-            }))
+            }
+            val moveAction = FunctionAction(
+                { labelActions.forEach(Action::commit); state.controller.requestUpdateTree() },
+                { labelActions.forEach(Action::revert); state.controller.requestUpdateTree() }
+            )
+            state.doAction(moveAction)
         }
     }
     private val lMoveToItem         = MenuItem(I18N["context.move_to"])

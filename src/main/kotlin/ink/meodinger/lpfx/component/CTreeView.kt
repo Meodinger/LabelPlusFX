@@ -60,7 +60,7 @@ class CTreeView: TreeView<String>() {
         // Listen & bind
         root.valueProperty().bind(rootNameProperty())
         root.valueProperty().addListener(onNew { Platform.runLater { root.expandAll() } })
-        viewModeProperty.addListener { _, o, n -> update(o, n) }
+        viewModeProperty.addListener(onNew { update() })
         groupsProperty.addListener(ListChangeListener {
             while (it.next()) {
                 if (it.wasPermutated()) {
@@ -71,7 +71,7 @@ class CTreeView: TreeView<String>() {
                 } else {
                     if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
                     if (it.wasAdded()) it.addedSubList.forEach { group ->
-                        createGroupItem(group, index = it.list.indexOf(group))
+                        createGroupItem(group, groupId = it.list.indexOf(group))
                     }
                 }
             }
@@ -92,13 +92,25 @@ class CTreeView: TreeView<String>() {
         })
     }
 
-    private fun update(fromMode: ViewMode, toMode: ViewMode) {
-        for (transLabel in labels) removeLabelItem(transLabel, fromMode)
-        for (transGroup in groups) removeGroupItem(transGroup, fromMode)
-        for (transGroup in groups) createGroupItem(transGroup, toMode)
-        for (transLabel in labels) createLabelItem(transLabel, toMode)
+    private fun update() {
+        for (item in groupItems) {
+            item.nameProperty().unbind()
+            item.colorProperty().unbind()
+        }
+        for (items in labelItems) for (item in items) {
+            item.indexProperty().unbind()
+            item.textProperty().unbind()
+            item.graphicProperty().unbind()
+        }
+
+        root.children.clear()
+        groupItems.clear()
+        labelItems.clear()
+
+        for (transGroup in groups) createGroupItem(transGroup)
+        for (transLabel in labels) createLabelItem(transLabel)
     }
-    private fun createGroupItem(transGroup: TransGroup, viewMode: ViewMode = this.viewMode, index: Int = groupItems.size) {
+    private fun createGroupItem(transGroup: TransGroup, groupId: Int = groupItems.size) {
         labelItems.add(ArrayList())
 
         val groupItem = CTreeGroupItem().apply {
@@ -110,15 +122,15 @@ class CTreeView: TreeView<String>() {
         }
 
         // Add data
-        groupItems.add(index, groupItem)
+        groupItems.add(groupId, groupItem)
 
         // In IndexMode registration is enough
         if (viewMode == ViewMode.IndexMode) return
 
         // Add view
-        root.children.add(index, groupItem)
+        root.children.add(groupId, groupItem)
     }
-    private fun removeGroupItem(transGroup: TransGroup, viewMode: ViewMode = this.viewMode) {
+    private fun removeGroupItem(transGroup: TransGroup) {
         val groupId = groupItems.indexOfFirst { it.name == transGroup.name }
         labelItems.removeAt(groupId)
 
@@ -136,7 +148,7 @@ class CTreeView: TreeView<String>() {
         // Remove view
         root.children.remove(groupItem)
     }
-    private fun createLabelItem(transLabel: TransLabel, viewMode: ViewMode = this.viewMode) {
+    private fun createLabelItem(transLabel: TransLabel) {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty)
             textProperty().bind(transLabel.textProperty)
@@ -160,7 +172,7 @@ class CTreeView: TreeView<String>() {
         // Add data
         labelItems[transLabel.groupId].add(labelItem)
     }
-    private fun removeLabelItem(transLabel: TransLabel, viewMode: ViewMode = this.viewMode) {
+    private fun removeLabelItem(transLabel: TransLabel) {
         val labelItem = labelItems[transLabel.groupId].first { it.index == transLabel.index }
 
         // Unbind
@@ -201,16 +213,6 @@ class CTreeView: TreeView<String>() {
         select(getLabelItem(labelIndex), scrollTo)
     }
 
-    fun moveLabelItem(labelIndex: Int, oriGroupId: Int, dstGroupId: Int) {
-        val labelItem = getLabelItem(labelIndex)
-
-        labelItems[oriGroupId].remove(labelItem)
-        labelItems[dstGroupId].add(labelItem)
-
-        if (viewMode == ViewMode.GroupMode) {
-            groupItems[oriGroupId].children.remove(labelItem)
-            groupItems[dstGroupId].children.add(labelItem)
-        }
-    }
+    fun requestUpdate() { update() }
 
 }

@@ -29,6 +29,19 @@ interface Action {
 
 enum class ActionType { ADD, REMOVE, CHANGE }
 
+class FunctionAction(
+    private val commitFunc: () -> Unit,
+    private val revertFunc: () -> Unit,
+) : Action {
+
+    override val type: ActionType get() = throw UnsupportedOperationException("ActionType is not fit to FunctionAction")
+
+    override fun commit() = commitFunc()
+    override fun revert() = revertFunc()
+
+}
+
+
 /**
  * A `ComplexAction` is an `Action` that is made up of a bench of `Action`.
  * Its commit method will call each action's commit method by order, and

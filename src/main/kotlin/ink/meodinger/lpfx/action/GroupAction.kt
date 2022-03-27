@@ -6,7 +6,6 @@ import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.string.deleteTailEOL
 import ink.meodinger.lpfx.util.string.emptyString
 
 /**
@@ -41,18 +40,20 @@ class GroupAction(
     private val oriColorHex: String = targetTransGroup.colorHex
 
     private fun applyGroupProps(name: String, colorHex: String) {
-        val builder = StringBuilder().apply { appendLine("Applied new props to group $oriName") }
+        val builder = StringBuilder().apply {
+            append("Applied new props to group <${targetTransGroup.name}> ")
+        }
 
         if (newName.isNotEmpty()) {
-            builder.appendLine("name: ${targetTransGroup.name} -> $name")
+            builder.append("@name: ${targetTransGroup.name} -> $name; ")
             targetTransGroup.name = name
         }
         if (newColorHex.isNotEmpty()) {
-            builder.appendLine("colorHex: ${targetTransGroup.colorHex} -> $colorHex")
+            builder.append("@colorHex: ${targetTransGroup.colorHex} -> $colorHex; ")
             targetTransGroup.colorHex = colorHex
         }
 
-        Logger.info(builder.deleteTailEOL().toString(), LOGSRC_ACTION)
+        Logger.info(builder.toString(), LOGSRC_ACTION)
     }
     private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
         for (group in state.transFile.groupListObservable)

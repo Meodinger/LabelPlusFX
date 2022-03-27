@@ -55,7 +55,7 @@ import kotlin.io.path.name
  */
 
 /**
- * A MenuBar for main scene, did not make it singleton for fxml loader
+ * A MenuBar for main scene
  */
 class CMenuBar(private val state: State) : MenuBar() {
 
@@ -301,15 +301,13 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.reset()
 
         val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
-        val filename = "Nova traduko" // It's Esperanto!
-        newChooser.initialFilename = "$filename.$extension"
+        newChooser.initialFilename = "$FILENAME_DEFAULT.$extension"
 
-        val file = newChooser.showSaveDialog(state.stage)?.let {
-            if (EXTENSIONS_FILE.contains(it.extension)) {
-                if (filename == it.nameWithoutExtension) {
-                    it.parentFile.let { f -> f.resolve("${f.name}.${it.extension}") }
-                } else it
-            } else File("${it.nameWithoutExtension}.$extension")
+        val file = newChooser.showSaveDialog(state.stage)?.let file@{
+            val name = it.nameWithoutExtension.takeUnless(FILENAME_DEFAULT::equals) ?: it.parentFile.name
+            val ext  = it.extension.takeIf(EXTENSIONS_FILE::contains) ?: extension
+
+            return@file File("$name.$ext")
         } ?: return
         if (file.exists()) {
             val confirm = showConfirm(state.stage, I18N["m.new.dialog.overwrite"])
@@ -352,10 +350,14 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         backupChooser.initialDirectory = state.getBakFolder() ?: CFileChooser.lastDirectory
         val bak = backupChooser.showOpenDialog(state.stage) ?: return
+        if (bak.parentFile?.parentFile != null) fileChooser.initialDirectory = bak.parentFile.parentFile
+
+        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
+        val filename  = "Re.${bak.parentFile?.parentFile?.name ?: "cover"}"
 
         fileChooser.title = I18N["chooser.rec"]
         fileChooser.selectedExtensionFilter = fileFilter
-        fileChooser.initialFilename = "Re.${bak.parentFile.parentFile.name}.$EXTENSION_FILE_MEO"
+        fileChooser.initialFilename = "$filename.$extension"
         val rec = fileChooser.showSaveDialog(state.stage) ?: return
 
         state.reset()

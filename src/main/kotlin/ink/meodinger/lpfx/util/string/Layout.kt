@@ -57,3 +57,13 @@ fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String
 
     return builder.toString()
 }
+
+/**
+ * Alias to String.padStart(len, ' ')
+ */
+fun String.alignRight(length: Int) = padStart(length, ' ')
+
+/**
+ * Alias to String.padEnd(len, ' ')
+ */
+fun String.alignLeft(length: Int) = padEnd(length, ' ')

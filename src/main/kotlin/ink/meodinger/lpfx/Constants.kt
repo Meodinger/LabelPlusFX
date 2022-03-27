@@ -49,6 +49,7 @@ const val FONT_SIZE_MAX = 64
  */
 const val GRAPHICS_CIRCLE_RADIUS = 8.0
 
+const val FILENAME_DEFAULT   = "Nova traduko" // It's Esperanto!
 const val FOLDER_NAME_BAK    = "backup"
 const val EXTENSION_PIC_PNG  = "png"
 const val EXTENSION_PIC_JPG  = "jpg"

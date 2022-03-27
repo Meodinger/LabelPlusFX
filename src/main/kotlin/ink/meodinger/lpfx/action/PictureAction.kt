@@ -44,7 +44,7 @@ class PictureAction(
 
     private fun applyPicFile(picFile: File) {
         val curFile = state.transFile.getFile(targetPicName)!!
-        Logger.info("Change file of picture <$targetPicFile>: ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
+        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
         state.transFile.setFile(targetPicName, picFile)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {

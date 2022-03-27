@@ -6,10 +6,7 @@ import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.string.deleteTailEOL
-import ink.meodinger.lpfx.util.string.emptyString
-import ink.meodinger.lpfx.util.string.fixed
-import ink.meodinger.lpfx.util.string.replaceEOL
+import ink.meodinger.lpfx.util.string.*
 
 /**
  * Author: Meodinger
@@ -50,26 +47,30 @@ class LabelAction(
     private val oriText: String = targetTransLabel.text
 
     private fun applyLabelProps(index: Int, groupId: Int, x: Double, y: Double, text: String) {
-        val builder = StringBuilder().apply { appendLine("Applied new props to $targetPicName:$oriLabelIndex") }
+        val builder = StringBuilder().apply {
+            append("Applied new props to <$targetPicName:${targetTransLabel.index.pad(2)}> ")
+        }
 
         if (newLabelIndex != NOT_FOUND) {
-            builder.appendLine("index: ${targetTransLabel.index} -> $index")
+            builder.append("@index: ${targetTransLabel.index.pad(2)} -> ${index.pad(2)}; ")
             targetTransLabel.index = index
         }
         if (newGroupId != NOT_FOUND) {
-            builder.appendLine("groupId: ${targetTransLabel.groupId} -> $groupId")
+            builder.append("@groupId: ${targetTransLabel.groupId.pad(2)} -> ${groupId.pad(2)}; ")
             targetTransLabel.groupId = groupId
         }
         if (!newX.isNaN()) {
-            builder.appendLine("x: ${targetTransLabel.x.fixed(4)} -> ${x.fixed(4)}")
+            builder.append("@x: ${targetTransLabel.x.fixed(4)} -> ${x.fixed(4)}; ")
             targetTransLabel.x = x
         }
         if (!newY.isNaN()) {
-            builder.appendLine("y: ${targetTransLabel.y.fixed(4)} -> ${y.fixed(4)}")
+            builder.append("@y: ${targetTransLabel.y.fixed(4)} -> ${y.fixed(4)}; ")
             targetTransLabel.y = y
         }
         if (newText.isNotEmpty()) {
-            builder.appendLine("text: ${text.replaceEOL()}")
+            builder.appendLine()
+            builder.appendLine("from: ${targetTransLabel.text.replaceEOL()}")
+            builder.appendLine("dest: ${text.replaceEOL()}")
             targetTransLabel.text = text
         }
 

@@ -129,7 +129,7 @@ class View(state: State) : BorderPane() {
             }
             add(lBackup) {
                 padding = generalPadding
-                prefWidth = 120.0
+                prefWidth = 150.0
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL

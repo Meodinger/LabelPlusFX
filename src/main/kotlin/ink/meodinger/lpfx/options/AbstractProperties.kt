@@ -56,7 +56,7 @@ abstract class AbstractProperties(val name: String) {
                             .append(property.key)
                             .append(KV_SPILT)
                             .append(property.value)
-                            .append("\n")
+                            .append('\n')
                             .toString()
                     )
                 }

@@ -91,14 +91,16 @@ class Controller(private val state: State) {
     private val cTreeView: CTreeView             = view.cTreeView
     private val cTransArea: CLigatureArea        = view.cTransArea
 
-    private val backupFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
+    private val bakTimeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
+    private val bakFileFormatter = SimpleDateFormat("yyyy-HH-mm")
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (state.isChanged) {
-            val bak = state.getBakFolder()!!.resolve("${Date().time}.${EXTENSION_BAK}")
+            val time = Date()
+            val bak = state.getBakFolder()!!.resolve("${bakFileFormatter.format(time)}.$EXTENSION_BAK")
             try {
                 export(bak, FileType.MeoFile, state.transFile)
                 Platform.runLater {
-                    lBackup.text = String.format(I18N["stats.last_backup.s"], backupFormatter.format(Date()))
+                    lBackup.text = String.format(I18N["stats.last_backup.s"], bakTimeFormatter.format(time))
                 }
                 Logger.info("Backed TransFile", LOGSRC_CONTROLLER)
             } catch (e: IOException) {
@@ -117,7 +119,7 @@ class Controller(private val state: State) {
                 lAccEditTime.text = String.format(I18N["stats.accumulator.s"], accumulatorFormatter.format(accumulator))
             }
         }
-    }.schedule()
+    }
 
     // Following Bindings should create in order to avoid unexpected Exceptions
     // And must invoke get() explicitly or by delegation every time to let the property validate
@@ -902,6 +904,10 @@ class Controller(private val state: State) {
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 
+        // Accumulator
+        accumulatorManager.clear()
+        accumulatorManager.schedule()
+
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name
         Logger.info("Opened TransFile", LOGSRC_CONTROLLER)
@@ -1032,6 +1038,7 @@ class Controller(private val state: State) {
 
     fun reset() {
         backupManager.clear()
+        accumulatorManager.clear()
 
         lBackup.text = I18N["stats.not_backed"]
         cTransArea.unbindBidirectional()

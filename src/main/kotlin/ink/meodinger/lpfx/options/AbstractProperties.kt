@@ -23,20 +23,38 @@ abstract class AbstractProperties(val name: String) {
 
     companion object {
 
-        private const val KV_SPILT = "="
-        private const val COMMENT_HEAD = "#"
+        private const val COMMENT_HEAD = '#'
+        private const val KV_SPILT = '='
 
         @Throws(IOException::class)
         fun load(path: Path, instance: AbstractProperties) {
             try {
                 val lines = Files.newBufferedReader(path).readLines()
-                for (line in lines) {
+                var index = 0
+
+                while (index < lines.size) {
+                    val line = lines[index]
+
                     if (line.isBlank()) continue
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
-                    val prop = line.split(KV_SPILT, limit = 2)
-                    if (prop.size == 2) {
-                        if (instance.tryGet(prop[0]) != null) instance[prop[0]].set(prop[1]) else continue
+                    val prop = line.split(KV_SPILT, limit = 2).takeIf {
+                        it.size == 2 && instance.tryGet(it[0]) != null
+                    } ?: continue
+
+                    // property=|
+                    // |element 1
+                    // |element 2
+                    // ...
+                    if (prop[1][0] == CProperty.LIST_SEPARATOR) {
+                        val propList = ArrayList<String>()
+                        while (++index < lines.size && lines[index].startsWith(CProperty.LIST_SEPARATOR)) {
+                            propList.add(lines[index].substring(1))
+                        }
+                        instance[prop[0]].set(propList)
+                    } else {
+                        instance[prop[0]].set(prop[1])
+                        index++
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -51,14 +69,14 @@ abstract class AbstractProperties(val name: String) {
             using {
                 val writer = Files.newBufferedWriter(path).autoClose()
                 for (property in instance.properties) {
-                    writer.write(
-                        StringBuilder()
-                            .append(property.key)
-                            .append(KV_SPILT)
-                            .append(property.value)
-                            .append('\n')
-                            .toString()
-                    )
+                    val builder = StringBuilder()
+                    if (property.isList) {
+                        builder.append(property.key).append(KV_SPILT).append(CProperty.LIST_SEPARATOR).append('\n')
+                        for (value in property.asStringList()) builder.append(CProperty.LIST_SEPARATOR).appendLine(value)
+                    } else {
+                        builder.append(property.key).append(KV_SPILT).append(property.value).append('\n')
+                    }
+                    writer.write(builder.toString())
                 }
             } catch { e: Exception ->
                 throw IOException("Save properties I/O failed").initCause(e)

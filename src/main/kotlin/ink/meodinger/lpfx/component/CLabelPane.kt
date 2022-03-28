@@ -394,8 +394,12 @@ class CLabelPane : ScrollPane() {
                     // will not happen
                     throw IllegalStateException("Updated: $it")
                 } else {
-                    if (it.wasRemoved()) it.removed.forEach(this::removeLabel)
-                    if (it.wasAdded() && shouldCreate) it.addedSubList.forEach(this::createLabel)
+                    if (it.wasRemoved()) {
+                        it.removed.forEach(this::removeLabel)
+                    }
+                    if (it.wasAdded() && shouldCreate) {
+                        it.addedSubList.forEach(this::createLabel)
+                    }
                 }
             }
         })

@@ -286,8 +286,9 @@ class CMenuBar(private val state: State) : MenuBar() {
                         }
                     }
                     if (it.wasAdded()) {
-                        it.addedSubList.forEach { file ->
-                            mOpenRecent.items.addFirst(MenuItem(file.path) does { openRecentTranslation(this) })
+                        it.addedSubList.forEachIndexed { index, file ->
+                            val item = MenuItem(file.path) does { openRecentTranslation(this) }
+                            mOpenRecent.items.add(it.from + index, item)
                         }
                     }
                 }

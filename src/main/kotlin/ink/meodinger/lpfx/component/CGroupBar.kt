@@ -66,9 +66,13 @@ class CGroupBar : HBox() {
                 } else if (it.wasUpdated()) {
                     // Ignore, TransGroup's Property changed,
                 } else {
-                    if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
-                    if (it.wasAdded()) it.addedSubList.forEach { group ->
-                        createGroupItem(group, groupId = it.list.indexOf(group))
+                    if (it.wasRemoved()) {
+                        it.removed.forEach(this::removeGroupItem)
+                    }
+                    if (it.wasAdded()) {
+                        it.addedSubList.forEachIndexed { index, group ->
+                            createGroupItem(group, groupId = it.from + index)
+                        }
                     }
                 }
             }

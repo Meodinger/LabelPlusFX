@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.string.emptyString
 
 
 /**
@@ -12,29 +13,27 @@ import ink.meodinger.lpfx.util.string.deleteTail
 /**
  * A data class for property storage
  */
-data class CProperty(val key: String, var value: String = EMPTY) {
+data class CProperty(val key: String, var value: String = emptyString()) {
 
     // NOTE: May be deprecated in 3.x versions. May use serialize/java.util.properties instead.
 
     companion object {
-        private const val LIST_SEPARATOR = "|"
-        private const val PAIR_SEPARATOR = ","
-        private const val PAIR_START     = "<"
-        private const val PAIR_STOP      = ">"
-
-        const val EMPTY = ""
+        internal const val LIST_SEPARATOR = '|'
+        private const val PAIR_SEPARATOR = ','
+        private const val PAIR_START     = '<'
+        private const val PAIR_STOP      = '>'
 
         private fun parseList(values: List<*>): String {
             val builder = StringBuilder()
             for (value in values) {
                 val content = when (value) {
-                    is Pair<*, *> -> PAIR_START + value.first + PAIR_SEPARATOR + value.second + PAIR_STOP
+                    is Pair<*, *> -> "$PAIR_START${value.first}$PAIR_SEPARATOR${value.second}$PAIR_STOP"
                     else -> value.toString()
                 }
 
                 builder.append(content).append(LIST_SEPARATOR)
             }
-            return builder.deleteTail(LIST_SEPARATOR).toString()
+            return builder.deleteTail(LIST_SEPARATOR.toString()).toString()
         }
 
     }
@@ -45,6 +44,9 @@ data class CProperty(val key: String, var value: String = EMPTY) {
     constructor(key: String, value: Number) : this(key, value.toString())
     constructor(key: String, value: List<*>) : this(key, parseList(value))
     constructor(key: String, vararg value: Any) : this(key, listOf(*value))
+
+    val isList: Boolean get() = value.contains(LIST_SEPARATOR)
+    val isEmpty: Boolean get() = value.isEmpty()
 
     fun asString(): String {
         return value

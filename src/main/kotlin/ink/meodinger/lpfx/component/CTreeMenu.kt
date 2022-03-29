@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CColorPicker
@@ -12,7 +11,6 @@ import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.showChoice
-import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.dialog.showInput
 import ink.meodinger.lpfx.util.doNothing
@@ -174,23 +172,16 @@ class CTreeMenu(private val state: State) : ContextMenu() {
     private val lMoveToItem         = MenuItem(I18N["context.move_to"])
 
     private val lDeleteHandler      = EventHandler<ActionEvent> { event ->
-        @Suppress("UNCHECKED_CAST") val items = event.source as List<CTreeLabelItem>
+        // Reversed to delete big-index label first, make logger more literal
+        @Suppress("UNCHECKED_CAST") val items = (event.source as List<CTreeLabelItem>).reversed()
 
-        val confirm = showConfirm(
-            state.stage,
-            if (items.size == 1) I18N["context.delete_label.dialog.header"] else I18N["context.delete_label.dialog.header.pl"],
-            StringBuilder().apply { for (item in items) appendLine(item.text) }.toString(),
-            I18N["context.delete_label.dialog.title"]
-        )
-        if (confirm.isPresent && confirm.get() == ButtonType.YES) {
-            state.doAction(ComplexAction.of(items.map {
-                LabelAction(
-                    ActionType.REMOVE, state,
-                    state.currentPicName,
-                    state.transFile.getTransLabel(state.currentPicName, it.index),
-                )
-            }))
-        }
+        state.doAction(ComplexAction.of(items.map {
+            LabelAction(
+                ActionType.REMOVE, state,
+                state.currentPicName,
+                state.transFile.getTransLabel(state.currentPicName, it.index),
+            )
+        }))
     }
     private val lDeleteItem         = MenuItem(I18N["context.delete_label"])
 

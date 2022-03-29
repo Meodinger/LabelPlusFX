@@ -13,7 +13,6 @@ import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
-import ink.meodinger.lpfx.util.collection.addFirst
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing

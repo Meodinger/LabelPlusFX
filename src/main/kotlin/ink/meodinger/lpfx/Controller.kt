@@ -258,7 +258,7 @@ class Controller(private val state: State) {
 
         // Register CGroupBar handler
         cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
-        Logger.info("Registered CGroupBar Handler", LOGSRC_CONTROLLER)
+        Logger.info("Registered CGroupBar Add Handler", LOGSRC_CONTROLLER)
 
         // Register CLabelPane handler
         cLabelPane.setOnLabelCreate {

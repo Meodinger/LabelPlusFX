@@ -15,8 +15,6 @@ import javafx.scene.control.Dialog
  */
 abstract class AbstractPropertiesDialog : Dialog<Map<String, Any>>() {
 
-    /// TODO: Use value, not CProperty
-
     init {
         setResultConverter {
             when (it) {

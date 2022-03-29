@@ -33,6 +33,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.collections.SetChangeListener
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
@@ -548,7 +549,7 @@ class Controller(private val state: State) {
         Logger.info("Added effect: move to label on CTreeLabelItem select", LOGSRC_CONTROLLER)
 
         // When LabelPane Box Selection
-        cLabelPane.selectedLabels.addListener(ListChangeListener { cTreeView.selectLabels(it.list) })
+        cLabelPane.selectedLabelsProperty().addListener(SetChangeListener { cTreeView.selectLabels(it.set) })
 
         // Work Progress
         val workProgressListener = onChange<Any> {

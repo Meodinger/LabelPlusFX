@@ -220,7 +220,7 @@ class CTreeView: TreeView<String>() {
     /**
      * Select some labels
      */
-    fun selectLabels(labelIndices: List<Int>) {
+    fun selectLabels(labelIndices: Collection<Int>) {
         val sorted = labelIndices.toSortedSet()
         val selected = ArrayList<TreeItem<String>>()
         for (items in labelItems) for (item in items) if (sorted.contains(item.index)) selected.add(item)

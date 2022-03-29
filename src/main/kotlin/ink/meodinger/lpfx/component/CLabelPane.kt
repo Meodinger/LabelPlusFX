@@ -22,6 +22,7 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.collections.ObservableSet
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.event.EventType
@@ -272,9 +273,9 @@ class CLabelPane : ScrollPane() {
 
     // ----- Selection ------ //
 
-    private val selectedLabelsProperty: ListProperty<Int> = SimpleListProperty(FXCollections.observableArrayList())
-    fun selectedLabelsProperty(): ListProperty<Int> = selectedLabelsProperty
-    var selectedLabels: ObservableList<Int> by selectedLabelsProperty
+    private val selectedLabelsProperty: SetProperty<Int> = SimpleSetProperty(FXCollections.observableSet(HashSet()))
+    fun selectedLabelsProperty(): SetProperty<Int> = selectedLabelsProperty
+    var selectedLabels: ObservableSet<Int> by selectedLabelsProperty
         private set
 
     // ----- Others ------ //
@@ -380,14 +381,29 @@ class CLabelPane : ScrollPane() {
 
                 val rangeX = shiftX.autoRangeTo(it.x) / image.width
                 val rangeY = shiftY.autoRangeTo(it.y) / image.height
-                val indices = ArrayList<Int>()
+                val indices = HashSet<Int>()
                 for (label in labels) {
                     if (rangeX.contains(label.x) && rangeY.contains(label.y)) {
                         indices.add(label.index)
                     }
                 }
 
-                selectedLabels.setAll(indices)
+                if (it.isShiftDown && it.isAltDown) {
+                    // Shift + Alt -> Select labels in both box-selection and selected
+                    val result = selectedLabels.filter(indices::contains)
+                    selectedLabels.clear()
+                    selectedLabels.addAll(result)
+                } else if (it.isShiftDown) {
+                    // Shift -> Add mode
+                    selectedLabels.addAll(indices)
+                } else if (it.isAltDown) {
+                    // Alt -> Subtract mode
+                    selectedLabels.removeAll(indices)
+                } else {
+                    // Else -> Select mode
+                    selectedLabels.clear()
+                    selectedLabels.addAll(indices)
+                }
             }
 
             selecting = false

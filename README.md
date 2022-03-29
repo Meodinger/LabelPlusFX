@@ -12,7 +12,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Meodinger/LabelPlusFX">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80" />
   </a>
   <h3 align="center">Label Plus FX</h3>
   <p align="center">
@@ -26,7 +26,6 @@
     <a href="https://github.com/Meodinger/LabelPlusFX/issues">Request Feature</a>
   </p>
 </p>
-
 
 
 <!-- TABLE OF CONTENTS -->
@@ -50,15 +49,13 @@
 </details>
 
 
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]]()
+[![Product Screen Shot][product-screenshot]]()
 
 This project is inspired by [LabelPlus](https://noodlefighter.com/label_plus/).
-Cause there is only a C# version, I wrote a javafx version for mac/linux user.
-
+Because there is only a C# version, I wrote a javafx version for mac/linux user.
 
 
 <!-- GETTING STARTED -->
@@ -67,10 +64,11 @@ Cause there is only a C# version, I wrote a javafx version for mac/linux user.
 To get a local copy up and running follow these simple steps.
 
 
-
 ### Prerequisites
 
-* [Liberica JDK 17 (Full)](https://bell-sw.com/pages/downloads/#/java-17-lts%20/%20current)
+ * [Liberica JDK 17 (Full)](https://bell-sw.com/pages/downloads/#/java-17-lts%20/%20current) : For main application;
+
+ * [Optional] [Visual Studio 2019](https://visualstudio.microsoft.com/zh-hans/downloads/) : For Windows IME JNI Interface;
 
 
 ### Installation
@@ -79,13 +77,16 @@ To get a local copy up and running follow these simple steps.
    ```sh
    git clone https://github.com/Meodinger/LabelPlusFX.git
    ```
-   
-2. Run maven plugins idea:module
+
+2. Run maven action `idea:module`
 
 3. Build artifact `lpfx:jar`
 
-4. Build with script
+4. Build with script, both `jink.bat` and `build.bat` is OK
 
+5. For Windows User, build solution `IMEWrapper` and copy the `IMEInterface.dll` and `IMEWrapper.dll` to the same folder with `LabelPlusFX.exe` if used `jpackage` or `runtime\java.exe` if used `jlink`.
+
+> If you don't want to use the Windows IME JNI Interface, try `run.bat --disable-jni` or `LabelPlusFX.exe --disable-jni`
 
 
 <!-- USAGE EXAMPLES -->
@@ -94,7 +95,6 @@ To get a local copy up and running follow these simple steps.
 Label Plus FX's function design based on [LabelPlus](https://noodlefighter.com/label_plus/)
 
 _For more examples, please refer to the [User Manual](https://www.kdocs.cn/l/seRSJCKVOn0Y) and [Wiki](https://github.com/Meodinger/LabelPlusFX/wiki)_
-
 
 
 <!-- CONTRIBUTING -->
@@ -114,7 +114,6 @@ Contributions are what make the open source community such an amazing place to l
 ## License
 
 Distributed under the AGPLv3 License. See `LICENSE` for more information.
-
 
 
 <!-- CONTACT -->

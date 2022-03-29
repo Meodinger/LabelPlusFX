@@ -31,6 +31,7 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
 import javafx.geometry.Insets
@@ -292,7 +293,7 @@ class Controller(private val state: State) {
             val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
 
             // Text display
-            cLabelPane.removeText()
+            cLabelPane.clearCanvas()
             when (state.workMode) {
                 WorkMode.InputMode -> {
                     cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
@@ -324,7 +325,7 @@ class Controller(private val state: State) {
 
             val transGroup = state.transFile.getTransGroup(state.currentGroupId)
 
-            cLabelPane.removeText()
+            cLabelPane.clearCanvas()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         Logger.info("Registered CLabelPane Handler", LOGSRC_CONTROLLER)
@@ -497,7 +498,7 @@ class Controller(private val state: State) {
         Logger.info("Added effect: show info on InfoLabel", LOGSRC_CONTROLLER)
 
         // Clear text when some state change
-        val clearTextListener = onChange<Any> { cLabelPane.removeText() }
+        val clearTextListener = onChange<Any> { cLabelPane.clearCanvas() }
         state.currentGroupIdProperty().addListener(clearTextListener)
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)
@@ -545,6 +546,9 @@ class Controller(private val state: State) {
             if (item != null && item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
         }
         Logger.info("Added effect: move to label on CTreeLabelItem select", LOGSRC_CONTROLLER)
+
+        // When LabelPane Box Selection
+        cLabelPane.selectedLabels.addListener(ListChangeListener { cTreeView.selectLabels(it.list) })
 
         // Work Progress
         val workProgressListener = onChange<Any> {

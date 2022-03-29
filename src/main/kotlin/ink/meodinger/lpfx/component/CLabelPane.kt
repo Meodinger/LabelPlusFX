@@ -3,8 +3,10 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.util.autoRangeTo
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.div
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.isControlOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
@@ -36,6 +38,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
+import kotlin.math.abs
 
 
 /**
@@ -134,7 +137,9 @@ class CLabelPane : ScrollPane() {
 
     private var shiftX = 0.0
     private var shiftY = 0.0
-    private var labelDragged = false
+    private var dragging = false
+    private var selecting = false
+
     private val cLabels = ArrayList<CLabel>()
 
     // ----- Properties ----- //
@@ -265,6 +270,15 @@ class CLabelPane : ScrollPane() {
     fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
     var commonCursor: Cursor by commonCursorProperty
 
+    // ----- Selection ------ //
+
+    private val selectedLabelsProperty: ListProperty<Int> = SimpleListProperty(FXCollections.observableArrayList())
+    fun selectedLabelsProperty(): ListProperty<Int> = selectedLabelsProperty
+    var selectedLabels: ObservableList<Int> by selectedLabelsProperty
+        private set
+
+    // ----- Others ------ //
+
     private val shouldCreate: Boolean get() = image !== INIT_IMAGE
 
     init {
@@ -287,8 +301,7 @@ class CLabelPane : ScrollPane() {
         // Remove text when scroll event fired
         // NOTE: Horizon scroll use default impl: Shift + Scroll
         addEventFilter(ScrollEvent.SCROLL) {
-            removeText()
-
+            clearCanvas()
         }
 
         // Scale
@@ -313,18 +326,74 @@ class CLabelPane : ScrollPane() {
         })
 
         // Draggable
-        // ScenePos -> CursorPos; LayoutPos -> CtxPos
+        // ScenePos -> CursorPos; LayoutPos -> ContextPos
         // nLx = Lx + (nSx - Sx)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            if (!it.isPrimaryButtonDown) return@addEventHandler
+
             shiftX = root.layoutX - it.sceneX
             shiftY = root.layoutY - it.sceneY
             root.cursor = Cursor.MOVE
         }
         root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            if (!it.isPrimaryButtonDown) return@addEventHandler
+
+            dragging = true
+
             root.layoutX = shiftX + it.sceneX
             root.layoutY = shiftY + it.sceneY
         }
+        root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
+            dragging = false
+        }
+
+        // Box selection
+        // ScenePos -> CursorPos; LayoutPos -> ContextPos
+        // W = abs(nLx - Lx), H = abs(nLy - Ly)
+        root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            if (!it.isSecondaryButtonDown) return@addEventHandler
+
+            shiftX = it.x
+            shiftY = it.y
+            root.cursor = Cursor.CROSSHAIR
+        }
+        root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            if (!it.isSecondaryButtonDown) return@addEventHandler
+
+            selecting = true
+
+            val x = shiftX.coerceAtMost(it.x)
+            val y = shiftY.coerceAtMost(it.y)
+            val w = abs(it.x - shiftX)
+            val h = abs(it.y - shiftY)
+
+            clearCanvas()
+            val gc = textLayer.graphicsContext2D
+            gc.lineWidth = 2.0 / scale
+            gc.stroke = Color.BLACK
+            gc.strokeRect(x, y, w, h)
+        }
+        root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
+            if (selecting) {
+                clearCanvas()
+
+                val rangeX = shiftX.autoRangeTo(it.x) / image.width
+                val rangeY = shiftY.autoRangeTo(it.y) / image.height
+                val indices = ArrayList<Int>()
+                for (label in labels) {
+                    if (rangeX.contains(label.x) && rangeY.contains(label.y)) {
+                        indices.add(label.index)
+                    }
+                }
+
+                selectedLabels.setAll(indices)
+            }
+
+            selecting = false
+        }
+
+        // Restore cursor
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             root.cursor = commonCursor
         }
@@ -338,7 +407,7 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
             root.cursor = commonCursor
-            removeText()
+            clearCanvas()
         }
 
         // Handle
@@ -432,9 +501,9 @@ class CLabelPane : ScrollPane() {
             it.consume() // make sure root will not move together
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-            labelDragged = true
+            dragging = true
 
-            removeText()
+            clearCanvas()
 
             val newLayoutX = shiftX + it.sceneX / scale
             val newLayoutY = shiftY + it.sceneY / scale
@@ -454,7 +523,7 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             label.cursor = Cursor.HAND
 
-            if (labelDragged) fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
+            if (dragging) fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
                 it, transLabel.index,
                 label.layoutX + it.x,
                 label.layoutY + it.y,
@@ -462,7 +531,9 @@ class CLabelPane : ScrollPane() {
                 label.layoutY / image.height,
             ))
 
-            labelDragged = false
+            dragging = false
+
+            it.consume() // prevent further propagation
         }
 
         // Cursor
@@ -474,7 +545,7 @@ class CLabelPane : ScrollPane() {
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
             label.cursor = commonCursor
-            removeText()
+            clearCanvas()
         }
 
         // Event handle
@@ -531,6 +602,9 @@ class CLabelPane : ScrollPane() {
         cLabels.remove(label)
     }
 
+    fun clearCanvas() {
+        textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
+    }
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val s = omitWideText(omitHighText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
@@ -560,13 +634,11 @@ class CLabelPane : ScrollPane() {
 
         gc.fill = Color.web(Color.WHEAT.toHexRGB() + TEXT_ALPHA)
         gc.fillRect(shapeX, shapeY, shapeW, shapeH)
+        gc.lineWidth = 2.0
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)
         gc.fill = color
         gc.fillText(t.text, textX, textY)
-    }
-    fun removeText() {
-        textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
     }
 
     fun moveToLabel(labelIndex: Int) {

@@ -228,10 +228,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             checkItem(I18N["m.dict"]) {
                 does { showDict() }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN)
-                BidirectionalListener.listen(
-                    selectedProperty(), { _, _, _ -> isSelected = onlineDict.isShowing },
-                    onlineDict.showingProperty(), { _, _, new  -> isSelected = new }
-                )
+                onlineDict.showingProperty().addListener(onNew(this::setSelected))
             }
             separator()
             item(I18N["m.cht2zh"]) {

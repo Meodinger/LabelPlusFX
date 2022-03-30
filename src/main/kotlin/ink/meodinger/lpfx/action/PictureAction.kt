@@ -28,7 +28,7 @@ import java.io.File
  * just leave it default.
  *
  * If action type is `CHANGE`, file related to `targetPicName` will be
- * updated to `targetPicFile`.
+ * updated to non-nullable `targetPicFile`.
  *
  * @see Action
  */

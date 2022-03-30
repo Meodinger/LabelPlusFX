@@ -405,7 +405,7 @@ class Controller(private val state: State) {
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
         RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), rule@{ _, _, newValue, _ -> newValue ?: emptyString() },
+            cPicBox.valueProperty(), { _, _, newValue, _ -> newValue ?: emptyString() },
             state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
         )
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)

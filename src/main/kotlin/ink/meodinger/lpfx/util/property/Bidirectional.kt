@@ -15,10 +15,7 @@ import java.lang.ref.WeakReference
 
 /**
  * Base class for bidirectional bindings (listener based)
- *
- * All implementations should not have public constructors
- *
- * This class is a copy of com.sun.javafx.binding.BidirectionalBinding.
+ * This class is a copy of com.sun.javafx.binding.BidirectionalBinding
  */
 abstract class BidirectionalBinding<T>(
     property1: Property<T>,
@@ -84,6 +81,11 @@ abstract class BidirectionalBinding<T>(
     }
 
 }
+
+/**
+ * Base class for generic bidirectional bindings (listener based)
+ * This class is a copy of com.sun.javafx.binding.BidirectionalBinding.TypedGenericBidirectionalBinding
+ */
 open class TypedGenericBidirectionalBinding<T> protected constructor(
     property1: Property<T>,
     property2: Property<T>
@@ -190,105 +192,6 @@ class RuledGenericBidirectionalBinding<T> private constructor(
             // Use super to set value
             super.changed(sourceProperty, oldValue, newRuledValue)
         }
-    }
-
-}
-
-/**
- * Provide a convenient way to bind two ReadonlyProperty (or other) (by lambdas)
- *
- * Actually, this binding is to add a listener to both of the given observables.
- * Sometimes a property cannot be changed by its property but can via another way.
- * (Like the selectedIndexProperty of ComboBox) So this Binding is useful when
- * you don't want to manually add listener to the properties to be bound together
- * @param listener1 Lambda to change o2 when o1 change
- * @param listener2 Lambda to change o1 when o2 change
- */
-class BidirectionalListener<T> private constructor(
-    observable1: ObservableValue<T>,
-    private val listener1: ChangeListener<T>,
-    observable2: ObservableValue<T>,
-    private val listener2: ChangeListener<T>,
-) : ChangeListener<T>, WeakListener {
-
-    companion object {
-        fun <T> listen(
-            observable1: ObservableValue<T>, lambda1: ChangeListener<T>,
-            observable2: ObservableValue<T>, lambda2: ChangeListener<T>
-        ) {
-            BidirectionalListener(observable1, lambda1, observable2, lambda2).also {
-                observable1.addListener(it)
-                observable2.addListener(it)
-            }
-        }
-
-        fun <T> dismiss(observable1: ObservableValue<T>?, observable2: ObservableValue<T>?) {
-            requireNotNull(observable1) { "Both properties must be specified." }
-            requireNotNull(observable2) { "Both properties must be specified." }
-            require(observable1 !== observable2) { "Cannot bind property to itself" }
-
-            @Suppress("UNCHECKED_CAST")
-            val binding = BidirectionalListener(
-                observable1 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
-                observable2 as ObservableValue<Any?>, onChange { throw RuntimeException("Should not reach here") },
-            )
-            observable1.removeListener(binding)
-            observable2.removeListener(binding)
-        }
-    }
-
-    private val observableRef1: WeakReference<ObservableValue<T>> = WeakReference(observable1)
-    private val observableRef2: WeakReference<ObservableValue<T>> = WeakReference(observable2)
-    private val observable1: ObservableValue<T>? get() = observableRef1.get()
-    private val observable2: ObservableValue<T>? get() = observableRef2.get()
-    private val cachedHashCode: Int by lazy { observable1.hashCode() * observable2.hashCode() }
-    private var updating: Boolean = false
-
-    init { cachedHashCode }
-
-    override fun changed(sourceProperty: ObservableValue<out T>?, oldValue: T, newValue: T) {
-        if (updating) return
-
-        val o1 = observableRef1.get()
-        val o2 = observableRef2.get()
-        if (o1 == null || o2 == null) {
-            o1?.removeListener(this)
-            o2?.removeListener(this)
-        } else {
-            try {
-                updating = true
-                if (o1 === sourceProperty) {
-                    listener1.changed(o1, oldValue, newValue)
-                } else {
-                    listener2.changed(o2, oldValue, newValue)
-                }
-            } catch (e: RuntimeException) {
-                throw RuntimeException("Bidirectional binding lambda invoke failed", e)
-            } finally {
-                updating = false
-            }
-        }
-    }
-
-    override fun wasGarbageCollected(): Boolean = observable1 == null || observable2 == null
-    override fun hashCode(): Int = cachedHashCode
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-
-        val oA1 = observable1
-        val oA2 = observable2
-        if (oA1 == null || oA2 == null) return false
-
-        if (other is BidirectionalListener<*>) {
-            val oB1 = other.observable1
-            val oB2 = other.observable2
-            if (oB1 == null || oB2 == null) return false
-
-            if (oA1 === oB1 && oA2 === oB2) return true
-            if (oA1 === oB2 && oA2 === oB1) return true
-        }
-
-        return false
     }
 
 }

@@ -37,7 +37,7 @@ class LabelAction(
     private val newGroupId: Int = NOT_FOUND,
     private val newX: Double = Double.NaN,
     private val newY: Double = Double.NaN,
-    private val newText: String = emptyString()
+    private val newText: String? = null
 ) : Action {
 
     private val oriLabelIndex: Int = targetTransLabel.index
@@ -67,7 +67,7 @@ class LabelAction(
             builder.append("@y: ${targetTransLabel.y.fixed(4)} -> ${y.fixed(4)}; ")
             targetTransLabel.y = y
         }
-        if (newText.isNotEmpty()) {
+        if (newText != null) {
             builder.appendLine()
             builder.appendLine("from: ${targetTransLabel.text.replaceEOL()}")
             builder.appendLine("dest: ${text.replaceEOL()}")
@@ -107,7 +107,7 @@ class LabelAction(
         when (type) {
             ActionType.ADD    -> addTransLabel(targetPicName, targetTransLabel)
             ActionType.REMOVE -> removeTransLabel(targetPicName, targetTransLabel)
-            ActionType.CHANGE -> applyLabelProps(newLabelIndex, newGroupId, newX, newY, newText)
+            ActionType.CHANGE -> applyLabelProps(newLabelIndex, newGroupId, newX, newY, newText ?: emptyString())
         }
         state.isChanged = true
     }

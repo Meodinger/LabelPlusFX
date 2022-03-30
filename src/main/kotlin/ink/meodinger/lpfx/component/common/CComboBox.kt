@@ -48,10 +48,10 @@ class CComboBox<T> : HBox() {
 
     init {
         comboBox.itemsProperty().bind(itemsProperty)
-        BidirectionalListener.listen(
-            indexProperty, onNew<Number, Int> { comboBox.selectionModel.select(it) },
-            comboBox.selectionModel.selectedIndexProperty(), onNew<Number, Int> { indexProperty.set(it) }
-        )
+
+        // Bind bidirectionally
+        indexProperty.addListener(onNew<Number, Int>(comboBox.selectionModel::select))
+        comboBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
 
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }

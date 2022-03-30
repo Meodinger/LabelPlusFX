@@ -564,6 +564,7 @@ class Controller(private val state: State) {
                 }))
             }
         }
+        Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", LOGSRC_CONTROLLER)
 
         // Work Progress
         val workProgressListener = onChange<Any> {
@@ -1094,7 +1095,7 @@ class Controller(private val state: State) {
 
         LPFXTask.createTask<Unit> {
             Logger.info("Fetching latest version...", LOGSRC_CONTROLLER)
-            val version = fetchUpdateSync()
+            val version = fetchLatestSync()
             if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOGSRC_CONTROLLER)
 
             if (version > V) Platform.runLater {
@@ -1132,7 +1133,7 @@ class Controller(private val state: State) {
             }
         }()
     }
-    private fun fetchUpdateSync(): Version {
+    private fun fetchLatestSync(): Version {
         val api = "https://api.github.com/repos/Meodinger/LabelPlusFX/releases"
         try {
             val proxy = ProxySelector.getDefault().select(URI(api))[0].also {
@@ -1159,6 +1160,5 @@ class Controller(private val state: State) {
         }
         return Version.V0
     }
-
 
 }

@@ -1,5 +1,8 @@
 package ink.meodinger.lpfx
 
+import java.io.File
+
+
 /**
  * Author: Meodinger
  * Date: 2022/3/23
@@ -13,5 +16,6 @@ object Config {
 
     var enableJNI:   Boolean = true
     var enableProxy: Boolean = true
+    val workingDir:  File    = File(System.getProperty("user.dir"))
 
 }

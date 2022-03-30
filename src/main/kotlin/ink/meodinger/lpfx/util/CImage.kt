@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.util.image
 
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
+import java.io.File
 
 
 /**
@@ -73,3 +74,5 @@ fun Image.toGreyScale(): Image {
     }
     return grayImage
 }
+
+fun imageFromFile(file: File): Image = Image(file.toURI().toURL().toString())

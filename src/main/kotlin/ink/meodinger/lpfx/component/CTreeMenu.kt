@@ -7,7 +7,6 @@ import ink.meodinger.lpfx.genGeneralFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.showChoice
@@ -65,7 +64,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val newGroupId = state.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
         if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
-            if (!state.transFile.groupList.contains { g -> g.name == nameList[newGroupId] }) {
+            if (!state.transFile.groupList.any { g -> g.name == nameList[newGroupId] }) {
                 newName = nameList[newGroupId]
             }
         }
@@ -74,7 +73,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         rAddGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
         rAddGroupDialog.result = null
         rAddGroupDialog.showAndWait().ifPresent { newGroup ->
-            if (state.transFile.groupList.contains { g -> g.name == newName }) {
+            if (state.transFile.groupList.any { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }
@@ -97,7 +96,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             genGeneralFormatter()
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
-            if (state.transFile.groupList.contains { g -> g.name == newName }) {
+            if (state.transFile.groupList.any { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }

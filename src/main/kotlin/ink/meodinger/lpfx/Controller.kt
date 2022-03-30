@@ -13,7 +13,6 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.Version
-import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
@@ -27,11 +26,11 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.action.ComplexAction
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.SetChangeListener
 import javafx.event.EventHandler
@@ -550,6 +549,21 @@ class Controller(private val state: State) {
 
         // When LabelPane Box Selection
         cLabelPane.selectedLabelsProperty().addListener(SetChangeListener { cTreeView.selectLabels(it.set) })
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (cLabelPane.selectedLabels.isEmpty()) return@addEventHandler
+
+            if (it.code == KeyCode.DELETE) {
+                val indices = cLabelPane.selectedLabels.toSortedSet().reversed()
+
+                state.doAction(ComplexAction.of(indices.map { index ->
+                    LabelAction(
+                        ActionType.REMOVE, state,
+                        state.currentPicName,
+                        state.transFile.getTransLabel(state.currentPicName, index),
+                    )
+                }))
+            }
+        }
 
         // Work Progress
         val workProgressListener = onChange<Any> {
@@ -906,7 +920,7 @@ class Controller(private val state: State) {
         val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
         state.currentGroupId = 0
         state.currentPicName = state.transFile.sortedPicNames[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
-        state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).contains { l -> l.index == it } } ?: NOT_FOUND
+        state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 
         // Accumulator

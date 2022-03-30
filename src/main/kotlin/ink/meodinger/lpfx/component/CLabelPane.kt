@@ -274,7 +274,7 @@ class CLabelPane : ScrollPane() {
     // ----- Selection ------ //
 
     private val selectedLabelsProperty: SetProperty<Int> = SimpleSetProperty(FXCollections.observableSet(HashSet()))
-    fun selectedLabelsProperty(): SetProperty<Int> = selectedLabelsProperty
+    fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
     var selectedLabels: ObservableSet<Int> by selectedLabelsProperty
         private set
 
@@ -389,10 +389,9 @@ class CLabelPane : ScrollPane() {
                 }
 
                 if (it.isShiftDown && it.isAltDown) {
-                    // Shift + Alt -> Select labels in both box-selection and selected
-                    val result = selectedLabels.filter(indices::contains)
-                    selectedLabels.clear()
-                    selectedLabels.addAll(result)
+                    // Shift + Alt -> Preserve mode
+                    // Select labels in both box-selection and selected
+                    selectedLabels = FXCollections.observableSet(selectedLabels.filter(indices::contains).toSet())
                 } else if (it.isShiftDown) {
                     // Shift -> Add mode
                     selectedLabels.addAll(indices)
@@ -401,8 +400,7 @@ class CLabelPane : ScrollPane() {
                     selectedLabels.removeAll(indices)
                 } else {
                     // Else -> Select mode
-                    selectedLabels.clear()
-                    selectedLabels.addAll(indices)
+                    selectedLabels = FXCollections.observableSet(indices)
                 }
             }
 

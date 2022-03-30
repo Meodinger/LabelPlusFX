@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.util
 
 import ink.meodinger.lpfx.util.collection.ArrayStack
-import ink.meodinger.lpfx.util.collection.addLast
 import org.junit.Test
 
 import org.junit.Assert.*

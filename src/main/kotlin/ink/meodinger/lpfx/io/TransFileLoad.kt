@@ -5,7 +5,6 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.collection.contains
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
@@ -163,7 +162,7 @@ private fun loadLP(file: File): TransFile {
         val groupName = lines[pointer]
         val groupColor = LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId]
 
-        if (groupList.contains { it.name == groupName }) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], groupName))
+        if (groupList.any { it.name == groupName }) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], groupName))
 
         groupList.add(TransGroup(groupName, groupColor))
 

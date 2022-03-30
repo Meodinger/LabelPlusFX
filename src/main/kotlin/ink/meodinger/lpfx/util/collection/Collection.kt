@@ -6,10 +6,4 @@ package ink.meodinger.lpfx.util.collection
  * Have fun with my code!
  */
 
-/**
- * Contains If
- */
-fun <E> Collection<E>.contains(predicate: (E) -> Boolean): Boolean {
-    for (element in this) if (predicate(element)) return true
-    return false
-}
+// nothing

@@ -92,8 +92,8 @@ class COnlineDict : Stage() {
                     alignment = Pos.CENTER
                     textProperty().bind(Bindings.createStringBinding({
                         when (transState) {
-                            STATE_WORD -> "Word: "
-                            STATE_SENTENCE -> "Sentence: "
+                            STATE_WORD -> I18N["dict.word"]
+                            STATE_SENTENCE -> I18N["dict.sentence"]
                             else -> throw IllegalStateException("State invalid")
                         }
                     }, transStateProperty))
@@ -147,7 +147,7 @@ class COnlineDict : Stage() {
         if (searchConnection.responseCode != 200) return String.format(I18N["dict.search_error.i"], searchConnection.responseCode)
 
         val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText()
-        val searchResults = parse(searchHTML).body.children[1].children[2]
+        val searchResults = parse(searchHTML).body.children[1].children[3]
         val first = searchResults.children.getOrNull(0)
         if (first == null || first.attributes["id"] == "out-search") return I18N["dict.not_found"]
 

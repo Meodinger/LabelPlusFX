@@ -127,7 +127,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         fileChooser.extensionFilters.addAll(fileFilter, meoFilter, lpFilter)
 
         backupChooser.title = I18N["chooser.bak"]
-        backupChooser.extensionFilters.add(bakFilter)
+        backupChooser.extensionFilters.addAll(bakFilter, anyFilter)
 
         exportChooser.title = I18N["chooser.export"]
         // exportChooser's filter will change
@@ -226,7 +226,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         }
         menu(I18N["mm.tools"]  + "(_T)") {
             checkItem(I18N["m.dict"]) {
-                does { showDict() }
+                does { showDict(); isSelected = true; }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN)
                 onlineDict.showingProperty().addListener(onNew(this::setSelected))
             }
@@ -304,7 +304,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             val name = it.nameWithoutExtension.takeUnless(FILENAME_DEFAULT::equals) ?: it.parentFile.name
             val ext  = it.extension.takeIf(EXTENSIONS_FILE::contains) ?: extension
 
-            return@file File("$name.$ext")
+            return@file it.parentFile.resolve("$name.$ext")
         } ?: return
         if (file.exists()) {
             val confirm = showConfirm(state.stage, I18N["m.new.dialog.overwrite"])

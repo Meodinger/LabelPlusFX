@@ -32,10 +32,16 @@ fun main(vararg args: String) {
     }
 
     // Load IME-related jni library
-    if (Config.enableJNI && isWin) System.loadLibrary("IMEWrapper")
+    if (Config.enableJNI) {
+        if (isWin) System.loadLibrary("IMEWrapper")
+        System.err.println("Loaded JNI Libraries")
+    }
 
     // Use System Proxies
-    if (Config.enableProxy) System.setProperty("java.net.useSystemProxies", "true")
+    if (Config.enableProxy) {
+        System.setProperty("java.net.useSystemProxies", "true")
+        System.err.println("Enabled System Proxies")
+    }
 
     // Global Uncaught Exception Handler
     Thread.setDefaultUncaughtExceptionHandler { t, e ->

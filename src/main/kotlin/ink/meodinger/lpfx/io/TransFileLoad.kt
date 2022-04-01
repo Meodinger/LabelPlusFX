@@ -147,7 +147,7 @@ private fun loadLP(file: File): TransFile {
         if (size != 2) throw IOException(String.format(I18N["exception.loader.invalid_version_head.s"], lines[pointer]))
         forEach { v -> if (!v.isMathematicalNatural()) throw IOException(String.format(I18N["exception.loader.invalid_version_text.s"], v)) }
     }
-    val version = intArrayOf(v[0].trim().toInt(), v[1].trim().toInt())
+    val version = listOf(v[0].trim().toInt(), v[1].trim().toInt())
     pointer++
 
     // Separator

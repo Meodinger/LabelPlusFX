@@ -32,7 +32,7 @@ import java.io.File
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
 open class TransFile @JsonCreator constructor(
-    @JsonProperty("version")   version:   IntArray                                    = DEFAULT_VERSION,
+    @JsonProperty("version")   version:   List<Int>                                   = DEFAULT_VERSION,
     @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT,
     @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
     @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
@@ -40,7 +40,7 @@ open class TransFile @JsonCreator constructor(
 
     companion object {
 
-        val DEFAULT_VERSION = intArrayOf(1, 0)
+        val DEFAULT_VERSION = listOf(1, 0)
 
         const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
         val DEFAULT_COMMENT_LIST = arrayListOf(
@@ -105,7 +105,7 @@ open class TransFile @JsonCreator constructor(
     // ----- Properties ----- //
     // Properties can only be used for bindings' values;
 
-    val versionProperty: ReadOnlyObjectProperty<IntArray> = SimpleObjectProperty(version)
+    val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
     val commentProperty: StringProperty = SimpleStringProperty(comment)
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
     val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
@@ -121,7 +121,7 @@ open class TransFile @JsonCreator constructor(
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
     val sortedPicNamesObservable: ObservableList<String> by sortedPicNamesProperty
 
-    val version: IntArray by versionProperty
+    val version: List<Int> by versionProperty
     var comment: String by commentProperty
     val groupList: List<TransGroup> by groupListObservable
     val transMap: Map<String, List<TransLabel>> by transMapObservable
@@ -157,7 +157,7 @@ open class TransFile @JsonCreator constructor(
     // ----- Other ----- //
 
     fun sorted(): TransFile {
-        val version = this.version.clone()
+        val version = this.version.toList()
         val comment = this.comment
         val groupList = MutableList(groupListObservable.size) { groupListObservable[it].clone() }
         val transMap = LinkedHashMap<String, MutableList<TransLabel>>().apply {

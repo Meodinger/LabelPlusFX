@@ -123,6 +123,12 @@ Meodinger Wang - [@Meodinger_Wang](https://twitter.com/Meodinger_Wang) - meoding
 
 Project Link: [https://github.com/Meodinger/LabelPlusFX](https://github.com/Meodinger/LabelPlusFX)
 
+<!-- SPONSOR -->
 
+## Sponsor
+
+<a href="https://afdian.net/@Meodinger">
+  <img src="https://s2.loli.net/2022/04/01/p4kequKy9g7EMZb.jpg" alt="Aifadian" width="375" />
+</a>
 
 [product-screenshot]: https://s2.loli.net/2022/02/04/2H7bguJ9rcyBjUO.png

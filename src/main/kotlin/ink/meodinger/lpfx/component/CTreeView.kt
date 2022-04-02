@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.component.expandAll
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -48,6 +49,24 @@ class CTreeView: TreeView<String>() {
     private val labelsProperty: ListProperty<TransLabel> = SimpleListProperty(FXCollections.emptyObservableList())
     fun labelsProperty(): ListProperty<TransLabel> = labelsProperty
     val labels: ObservableList<TransLabel> by labelsProperty
+
+    // ----- Selection ----- //
+
+    private val selectedGroupProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    fun selectedGroupProperty(): IntegerProperty = selectedGroupProperty
+    /**
+     * Selected GroupItem's GroupId, note that set this will not clear previous selection
+     */
+    var selectedGroup: Int by selectedGroupProperty
+
+    private val selectedLabelProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    fun selectedLabelProperty(): IntegerProperty = selectedLabelProperty
+    /**
+     * Selected LabelItem's index, note that set this will not clear previous selection
+     */
+    var selectedLabel: Int by selectedLabelProperty
+
+    // ----- Others ----- //
 
     private val groupItems: MutableList<CTreeGroupItem> = ArrayList()
     private val labelItems: MutableList<MutableList<CTreeLabelItem>> = ArrayList()
@@ -94,6 +113,24 @@ class CTreeView: TreeView<String>() {
                 }
             }
         })
+
+        // Selection
+        selectedGroupProperty.addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND || viewMode != ViewMode.GroupMode) return@onNew
+            selectionModel.select(getGroupItem(groups[it].name))
+        })
+        selectedLabelProperty.addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND) return@onNew
+            selectionModel.select(getLabelItem(it))
+        })
+        selectionModel.selectedItemProperty().addListener(onNew {
+            when (it) {
+                is CTreeGroupItem -> selectedGroup = groups.indexOfFirst { g -> g.name == it.name }
+                is CTreeLabelItem -> selectedLabel = it.index
+                else -> doNothing()
+            }
+        })
+
     }
 
     private fun update() {
@@ -213,20 +250,15 @@ class CTreeView: TreeView<String>() {
 
         select(getGroupItem(groupName), scrollTo)
     }
-    fun selectLabel(labelIndex: Int, scrollTo: Boolean = true) {
+    fun selectLabel(labelIndex: Int, scrollTo: Boolean) {
         select(getLabelItem(labelIndex), scrollTo)
     }
 
-    /**
-     * Select some labels
-     */
     fun selectLabels(labelIndices: Collection<Int>) {
-        val sorted = labelIndices.toSortedSet()
-        val selected = ArrayList<TreeItem<String>>()
-        for (items in labelItems) for (item in items) if (sorted.contains(item.index)) selected.add(item)
-
         selectionModel.clearSelection()
-        for (item in selected) selectionModel.select(item)
+
+        // A little trick
+        labelIndices.toSortedSet().forEach(selectedLabelProperty::set)
     }
 
     fun requestUpdate() { update() }

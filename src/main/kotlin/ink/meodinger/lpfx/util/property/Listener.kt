@@ -25,8 +25,10 @@ fun <T, U : T> onNew(action: (U) -> Unit) = ChangeListener<T> { _, _, new -> act
  * Listen once
  */
 fun <T> ObservableValue<T>.once(listener: ChangeListener<T>) {
-    addListener { o, oldV, newV ->
-        listener.changed(o, oldV, newV)
-        removeListener(listener)
-    }
+    addListener(object : ChangeListener<T> {
+        override fun changed(observable: ObservableValue<out T>?, oldValue: T, newValue: T) {
+            listener.changed(observable, oldValue, newValue)
+            removeListener(this)
+        }
+    })
 }

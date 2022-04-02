@@ -204,7 +204,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             // root
             items.add(rAddGroupItem)
         } else if (rootCount == 0 && groupCount == 1 && labelCount == 0) {
-            // group
+            // single group
             val groupItem = selectedItems[0] as CTreeGroupItem
             val groupName = groupItem.name
 
@@ -218,6 +218,14 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             items.add(gRenameItem)
             items.add(gChangeColorItem)
             items.add(SeparatorMenuItem())
+            items.add(gDeleteItem)
+        } else if (rootCount == 0 && groupCount >= 2 && labelCount == 0) {
+            // multi groups
+            val groupNames = selectedItems.map { (it as CTreeGroupItem).name }
+
+            gDeleteItem.isDisable = !groupNames.all { state.transFile.isGroupUnused(state.transFile.getGroupIdByName(it)) }
+            gDeleteItem.setOnAction { groupNames.forEach { gDeleteHandler.handle(ActionEvent(it, gDeleteItem)) } }
+
             items.add(gDeleteItem)
         } else if (rootCount == 0 && groupCount == 0 && labelCount > 0) {
             // label(s)

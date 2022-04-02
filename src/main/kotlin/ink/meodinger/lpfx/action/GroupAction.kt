@@ -84,7 +84,6 @@ class GroupAction(
             ActionType.REMOVE -> removeTransGroup(targetTransGroup)
             ActionType.CHANGE -> applyGroupProps(newName, newColorHex)
         }
-        state.isChanged = true
     }
 
     override fun revert() {

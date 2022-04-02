@@ -20,6 +20,6 @@ fun String.replaceEOL(replacement: String = "\\n"): String = replace("\n", repla
 
 /**
  * Return an empty String
- * @return String("")
+ * @return ""
  */
 fun emptyString(): String = ""

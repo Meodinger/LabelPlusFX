@@ -1,10 +1,7 @@
 package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.*
-import ink.meodinger.lpfx.action.Action
-import ink.meodinger.lpfx.action.ActionType
-import ink.meodinger.lpfx.action.ComplexAction
-import ink.meodinger.lpfx.action.PictureAction
+import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.component.properties.ADialogLogs
 import ink.meodinger.lpfx.component.properties.ADialogSettings
@@ -555,19 +552,18 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun cht2zh(inverse: Boolean = false) {
         val converter = if (inverse) ::convert2Traditional else ::convert2Simplified
 
-        // TODO: Use Action
         val task = object : LPFXTask<Unit>() {
             val DELIMITER = "#|#"
             val state = this@CMenuBar.state
 
             override fun call() {
-               state.isChanged = true
+                val actions = ArrayList<LabelAction>()
 
                 val picNames = state.transFile.sortedPicNames
                 val picCount = state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
                     if (isCancelled) return
-                    updateProgress(1.0 * (picIndex + 1) / picCount, 1.0)
+                    updateProgress(1.0 * (picIndex + 1) / picCount, 1.2)
 
                     val labels = state.transFile.getTransList(picName)
                     val labelCount = labels.size
@@ -583,8 +579,11 @@ class CMenuBar(private val state: State) : MenuBar() {
                         }
                     }.iterator()
                     // Sometimes will get whitespaces at label start
-                    for (label in labels) label.text = iterator.next().trim()
+                    labels.mapTo(actions) { LabelAction(ActionType.CHANGE, state, picName, it, newText = iterator.next().trim()) }
                 }
+
+                state.doAction(ComplexAction.of(actions))
+                updateProgress(1.0, 1.0)
             }
         }
 

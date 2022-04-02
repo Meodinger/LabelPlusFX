@@ -109,7 +109,6 @@ class LabelAction(
             ActionType.REMOVE -> removeTransLabel(targetPicName, targetTransLabel)
             ActionType.CHANGE -> applyLabelProps(newLabelIndex, newGroupId, newX, newY, newText ?: emptyString())
         }
-        state.isChanged = true
     }
 
     override fun revert() {

@@ -163,6 +163,7 @@ class State {
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
 
+        isChanged = true
         canUndoProperty.set(true)
         canRedoProperty.set(false)
     }

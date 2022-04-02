@@ -79,9 +79,15 @@ class Controller(private val state: State) {
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
-    private val lBackup: Label                   = view.lBackup.apply { text = I18N["stats.not_backed"] }
-    private val lLocation: Label                 = view.lLocation
-    private val lAccEditTime: Label              = view.lAccEditTime
+    private val lBackup: Label                   = view.lBackup.apply {
+        text = I18N["stats.not_backed"]
+    }
+    private val lLocation: Label                 = view.lLocation.apply {
+        text = "-- : --"
+    }
+    private val lAccEditTime: Label              = view.lAccEditTime.apply {
+        text = String.format(I18N["stats.accumulator.s"], "--:--:--")
+    }
     private val pMain: SplitPane                 = view.pMain
     private val pRight: SplitPane                = view.pRight
     private val cGroupBar: CGroupBar             = view.cGroupBar
@@ -472,19 +478,23 @@ class Controller(private val state: State) {
     private fun effect() {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
 
-        // Update StatsBar
+        // Show error if file not found
         state.currentPicNameProperty().addListener(onNew {
-            lLocation.text = String.format("%s : --", it)
-
             if (state.isOpened) {
                 val file = state.transFile.getFile(it).takeIf(File?::notExists) ?: return@onNew
                 Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
                 showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
             }
         })
+        Logger.info("Added effect: show error if file not found", LOGSRC_CONTROLLER)
+
+        // Update StatsBar
+        state.currentPicNameProperty().addListener(onNew {
+            lLocation.text = String.format("%s : --", it.ifEmpty { "--" })
+        })
         state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) {
-                lLocation.text = String.format("%s : --", state.currentPicName)
+                lLocation.text = String.format("%s : --", state.currentPicName.ifEmpty { "--" })
             } else {
                 lLocation.text = String.format("%s : %02d", state.currentPicName, it)
             }

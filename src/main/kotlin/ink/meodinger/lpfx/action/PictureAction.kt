@@ -70,7 +70,6 @@ class PictureAction(
             ActionType.REMOVE -> removePicture(targetPicName)
             ActionType.CHANGE -> applyPicFile(targetPicFile!!)
         }
-        state.isChanged = true
     }
 
     override fun revert() {

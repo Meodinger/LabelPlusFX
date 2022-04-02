@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.action.ActionType
 import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.closeOnEscape
 import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.dialog.showConfirm
@@ -58,14 +59,12 @@ class CSearchReplace(private val state: State) : Stage() {
     private var foundIndex: Int by foundIndexProperty
 
     init {
+        icons.add(ICON)
         title = I18N["snr.title"]
         width = PANE_WIDTH * 0.8
         height = PANE_HEIGHT / 2
-
-        icons.add(ICON)
         isResizable = false
-
-        val root = StackPane().withContent(GridPane()) {
+        scene = Scene(StackPane().withContent(GridPane()) {
             padding = Insets(COMMON_GAP)
             hgap = COMMON_GAP
             vgap = COMMON_GAP / 2
@@ -118,8 +117,9 @@ class CSearchReplace(private val state: State) : Stage() {
                 prefWidth = BUTTON_WIDTH
                 setOnAction { hide() }
             }
-        }
-        scene = Scene(root)
+        })
+
+        closeOnEscape()
     }
 
     private fun findNext(wrap: Boolean): Boolean {
@@ -145,25 +145,13 @@ class CSearchReplace(private val state: State) : Stage() {
             }
         }
 
-        // Find in the latter rest
+        // Find in the rest
         val picNames = state.transFile.sortedPicNames
         val picIndex = picNames.indexOf(state.currentPicName)
-        for (i in (picIndex + 1) until picNames.size) {
-            val labels = state.transFile.getTransList(picNames[i])
-            for (label in labels) {
-                val index = label.text.indexOf(searchText, 0, ignoreCase)
-                if (index != NOT_FOUND) {
-                    foundIndex = index
-                    state.currentPicName = picNames[i]
-                    state.currentLabelIndex = label.index
-                    state.view.cTransArea.selectRange(foundIndex, foundIndex + searchText.length)
-                    return true
-                }
-            }
-        }
+        for (i in picNames.indices) {
+            // continue if not wrap search
+            if (i < picIndex && !wrap) continue
 
-        // Find in the former rest
-        if (wrap) for (i in 0 until picIndex) {
             val labels = state.transFile.getTransList(picNames[i])
             for (label in labels) {
                 val index = label.text.indexOf(searchText, 0, ignoreCase)

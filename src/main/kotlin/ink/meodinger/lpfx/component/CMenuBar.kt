@@ -85,13 +85,23 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Dialogs ----- //
 
-    private val cheatSheet       by lazy { CCheatSheet {
-        state.application.hostServices.showDocument(INFO["application.help"])
-    } }
-    private val searchAndReplace by lazy { CSearchReplace(state) }
-    private val onlineDict       by lazy { COnlineDict() }
-    private val dialogLogs       by lazy { ADialogLogs() }
-    private val dialogSettings   by lazy { ADialogSettings() }
+    private val cheatSheet       by lazy {
+        CCheatSheet {
+            state.application.hostServices.showDocument(INFO["application.help"])
+        } withOwner state.stage
+    }
+    private val searchAndReplace by lazy {
+        CSearchReplace(state) withOwner state.stage
+    }
+    private val onlineDict       by lazy {
+        COnlineDict() withOwner state.stage
+    }
+    private val dialogLogs       by lazy {
+        ADialogLogs() withOwner state.stage
+    }
+    private val dialogSettings   by lazy {
+        ADialogSettings() withOwner state.stage
+    }
 
     // ----- Choosers ----- //
 
@@ -478,8 +488,6 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
 
     private fun settings() {
-        dialogSettings.owner ?: dialogSettings.initOwner(state.stage)
-
         val map = dialogSettings.generateProperties()
 
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
@@ -505,8 +513,6 @@ class CMenuBar(private val state: State) : MenuBar() {
         }
     }
     private fun logs() {
-        dialogLogs.owner ?: dialogLogs.initOwner(state.stage)
-
         val map = dialogLogs.generateProperties()
 
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)

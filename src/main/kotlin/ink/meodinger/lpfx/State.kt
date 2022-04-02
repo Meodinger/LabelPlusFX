@@ -32,7 +32,7 @@ class State {
 
     // ----- Global Variables ------ //
 
-    var application: HookedApplication by assignOnce()
+    var application: LabelPlusFX by assignOnce()
     var stage: Stage by assignOnce()
     var view: View by assignOnce()
     var controller: Controller by assignOnce()

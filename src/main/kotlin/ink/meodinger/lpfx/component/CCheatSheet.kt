@@ -4,6 +4,7 @@ import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
 import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.closeOnEscape
 import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
@@ -17,8 +18,6 @@ import javafx.scene.Scene
 import javafx.scene.control.Hyperlink
 import javafx.scene.control.Label
 import javafx.scene.control.Separator
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.GridPane
 import javafx.stage.Stage
 
@@ -30,13 +29,11 @@ import javafx.stage.Stage
 class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
 
     init {
+        icons.add(ICON)
         title = I18N["m.cheat"]
         width = PANE_WIDTH / 3 * 2
         height = PANE_HEIGHT
-
-        icons.add(ICON)
         isResizable = false
-
         scene = Scene(GridPane().apply {
             padding = Insets(COMMON_GAP)
             vgap = COMMON_GAP
@@ -72,7 +69,7 @@ class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
             }
         })
 
-        addEventHandler(KeyEvent.KEY_PRESSED) { if (it.code == KeyCode.ESCAPE) hide() }
+        closeOnEscape()
     }
 
 }

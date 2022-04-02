@@ -7,14 +7,19 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.property.onChange
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.INFO
-import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.resource.*
 
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.scene.Scene
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
+import java.awt.SystemTray
+import java.awt.Toolkit
+import java.awt.TrayIcon
+import java.awt.MenuItem as AwtMenuItem
+import java.awt.PopupMenu as AwtPopupMenu
 
 
 /**
@@ -33,6 +38,36 @@ class LabelPlusFX: HookedApplication() {
     }
 
     private val state: State = State()
+    private val icon: TrayIcon by lazy {
+        TrayIcon(Toolkit.getDefaultToolkit().getImage(loadAsURL("/file/image/icon.png"))).apply {
+            fun restore() {
+                Platform.runLater {
+                    state.stage.show()
+                    state.stage.toFront()
+                    SystemTray.getSystemTray().remove(this)
+                }
+            }
+            fun destroy() {
+                Platform.runLater {
+                    if (!state.isOpened || !state.isChanged)
+                        this@LabelPlusFX.exit()
+                }
+            }
+
+            isImageAutoSize = true
+            popupMenu = AwtPopupMenu().apply {
+                // AWT has problem with unicode characters display
+                add(AwtMenuItem("Show").apply {
+                    addActionListener { restore() }
+                })
+                addSeparator()
+                add(AwtMenuItem("Exit").apply {
+                    addActionListener { destroy() }
+                })
+            }
+            addActionListener { restore() }
+        }
+    }
 
     init {
         Logger.tic()
@@ -74,6 +109,7 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.scene = Scene(root, Preference.windowWidth, Preference.windowHeight)
         primaryStage.setOnCloseRequest { if (!controller.stay()) exit() else it.consume() }
 
+        // Window Size Listener
         val windowSizeListener: ChangeListener<Number> = onChange {
             if (primaryStage.isMaximized) return@onChange
             Preference.windowWidth = primaryStage.scene.width
@@ -81,6 +117,11 @@ class LabelPlusFX: HookedApplication() {
         }
         primaryStage.scene.widthProperty().addListener(windowSizeListener)
         primaryStage.scene.heightProperty().addListener(windowSizeListener)
+
+        // BOSS key
+        primaryStage.addEventFilter(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.ESCAPE) iconify()
+        }
 
         primaryStage.show()
 
@@ -111,4 +152,13 @@ class LabelPlusFX: HookedApplication() {
         )
     }
 
+    fun iconify() {
+        if (Config.supportSysTray) {
+            state.stage.hide()
+
+            SystemTray.getSystemTray().add(icon)
+        } else {
+            state.stage.isIconified = true
+        }
+    }
 }

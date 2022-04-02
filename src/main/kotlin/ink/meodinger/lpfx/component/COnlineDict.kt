@@ -159,6 +159,7 @@ class COnlineDict : Stage() {
                 setCurrentLanguage(oriLang)
             }
         })
+        closeOnEscape()
     }
 
     private fun searchWordSync(word: String) {

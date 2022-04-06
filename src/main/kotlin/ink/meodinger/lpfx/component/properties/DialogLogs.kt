@@ -41,7 +41,7 @@ import kotlin.io.path.name
 /**
  * A Dialog Singleton for logs set/clean/send
  */
-class ADialogLogs : AbstractPropertiesDialog() {
+class DialogLogs : AbstractPropertiesDialog() {
 
     private class LogFile(val file: File) {
 

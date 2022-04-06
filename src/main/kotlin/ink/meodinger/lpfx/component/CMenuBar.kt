@@ -3,8 +3,11 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CFileChooser
-import ink.meodinger.lpfx.component.properties.ADialogLogs
-import ink.meodinger.lpfx.component.properties.ADialogSettings
+import ink.meodinger.lpfx.component.properties.DialogLogs
+import ink.meodinger.lpfx.component.properties.DialogSettings
+import ink.meodinger.lpfx.component.tools.CheatSheet
+import ink.meodinger.lpfx.component.tools.OnlineDict
+import ink.meodinger.lpfx.component.tools.SearchReplace
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
@@ -83,21 +86,21 @@ class CMenuBar(private val state: State) : MenuBar() {
     // ----- Dialogs ----- //
 
     private val cheatSheet       by lazy {
-        CCheatSheet {
+        CheatSheet {
             state.application.hostServices.showDocument(INFO["application.help"])
         } withOwner state.stage
     }
     private val searchAndReplace by lazy {
-        CSearchReplace(state) withOwner state.stage
+        SearchReplace(state) withOwner state.stage
     }
     private val onlineDict       by lazy {
-        COnlineDict() withOwner state.stage
+        OnlineDict() withOwner state.stage
     }
     private val dialogLogs       by lazy {
-        ADialogLogs() withOwner state.stage
+        DialogLogs() withOwner state.stage
     }
     private val dialogSettings   by lazy {
-        ADialogSettings() withOwner state.stage
+        DialogSettings() withOwner state.stage
     }
 
     // ----- Choosers ----- //
@@ -334,9 +337,13 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.open(file)
     }
     private fun saveTranslation() {
+        state.controller.checkText()
+
         state.controller.save(state.translationFile, silent = true)
     }
     private fun saveAsTranslation() {
+        state.controller.checkText()
+
         fileChooser.title = I18N["chooser.save"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = state.translationFile.name

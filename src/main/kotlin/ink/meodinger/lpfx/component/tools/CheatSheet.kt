@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component
+package ink.meodinger.lpfx.component.tools
 
 import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.PANE_HEIGHT
@@ -26,7 +26,7 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-class CCheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
+class CheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
 
     init {
         icons.add(ICON)

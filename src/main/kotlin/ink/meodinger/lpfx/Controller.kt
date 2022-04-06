@@ -1,9 +1,11 @@
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.action.ActionType
+import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
+import ink.meodinger.lpfx.component.tools.SpecifyFiles
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -26,7 +28,6 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import ink.meodinger.lpfx.action.ComplexAction
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -74,7 +75,7 @@ class Controller(private val state: State) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * ONE_SECOND
     }
 
-    private val dialogSpecify: CSpecifyDialog by lazy { CSpecifyDialog(state) }
+    private val dialogSpecify: SpecifyFiles by lazy { SpecifyFiles(state) withOwner state.stage }
 
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
@@ -713,8 +714,6 @@ class Controller(private val state: State) {
      * @return true if completed; false if not; null if cancel
      */
     fun specifyPicFiles(): Boolean? {
-        dialogSpecify.owner ?: dialogSpecify.initOwner(state.stage)
-
         val picFiles = dialogSpecify.specify()
 
         // Closed or Cancelled
@@ -732,6 +731,13 @@ class Controller(private val state: State) {
             state.transFile.setFile(picNames[i], picFile!!)
         }
         return completed
+    }
+
+    /**
+     *
+     */
+    fun checkText() {
+        // Use CTextCheck
     }
 
     /**

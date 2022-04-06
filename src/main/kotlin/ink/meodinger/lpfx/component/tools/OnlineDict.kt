@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component
+package ink.meodinger.lpfx.component.tools
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
@@ -53,7 +53,7 @@ import javax.net.ssl.HttpsURLConnection
 /**
  * Simple online dictionary, better than none, anyway.
  */
-class COnlineDict : Stage() {
+class OnlineDict : Stage() {
 
     companion object {
         private const val JD_SITE = "https://nekodict.com"
@@ -123,7 +123,7 @@ class COnlineDict : Stage() {
                     addEventHandler(MouseEvent.MOUSE_CLICKED) {
                         if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
                             setImeConversionMode(
-                                getWindowHandle(this@COnlineDict),
+                                getWindowHandle(this@OnlineDict),
                                 ImeSentenceMode.AUTOMATIC,
                                 ImeConversionMode.JA_HIRAGANA
                             )

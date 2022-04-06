@@ -44,7 +44,7 @@ import kotlin.math.roundToInt
 /**
  * A Dialog Singleton for settings
  */
-class ADialogSettings : AbstractPropertiesDialog() {
+class DialogSettings : AbstractPropertiesDialog() {
 
     companion object {
         private const val gRowShift = 1

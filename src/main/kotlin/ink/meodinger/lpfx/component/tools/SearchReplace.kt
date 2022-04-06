@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.component
+package ink.meodinger.lpfx.component.tools
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.ActionType
@@ -37,7 +37,7 @@ import javafx.stage.Stage
  * Date: 2022/3/24
  * Have fun with my code!
  */
-class CSearchReplace(private val state: State) : Stage() {
+class SearchReplace(private val state: State) : Stage() {
 
     companion object {
         private const val BUTTON_WIDTH: Double = 96.0
@@ -196,9 +196,9 @@ class CSearchReplace(private val state: State) : Stage() {
 
     private fun handleFindNext() {
         if (!findNext(wrapFind)) {
-            val result = showConfirm(this@CSearchReplace, I18N["snr.not_found_re"])
+            val result = showConfirm(this@SearchReplace, I18N["snr.not_found_re"])
             if (result.isPresent && result.get() == ButtonType.YES) {
-                if (!findNext(true)) showInfo(this@CSearchReplace, I18N["snr.not_found"])
+                if (!findNext(true)) showInfo(this@SearchReplace, I18N["snr.not_found"])
             }
         }
     }
@@ -208,9 +208,9 @@ class CSearchReplace(private val state: State) : Stage() {
     private fun handleReplaceAll() {
         val count = replaceAll()
         if (count == 0) {
-            showInfo(this@CSearchReplace, I18N["snr.not_found"])
+            showInfo(this@SearchReplace, I18N["snr.not_found"])
         } else {
-            showInfo(this@CSearchReplace, String.format(I18N["snr.replace_count.i"], count))
+            showInfo(this@SearchReplace, String.format(I18N["snr.replace_count.i"], count))
         }
     }
 

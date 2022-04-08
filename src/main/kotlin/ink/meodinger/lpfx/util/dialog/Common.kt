@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.util.dialog
 
 import ink.meodinger.lpfx.COMMON_GAP
+import ink.meodinger.lpfx.GENERAL_ICON_RADIUS
 import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
 import ink.meodinger.lpfx.options.Logger
@@ -11,7 +12,6 @@ import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.string.omitHighText
@@ -34,16 +34,10 @@ import java.util.*
  * Have fun with my code!
  */
 
-/**
- * Constant
- */
-const val DIALOG_ICON_RADIUS = 32.0
-
-val iconImageView    = ImageView(ICON.resizeByRadius(DIALOG_ICON_RADIUS))
-val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(DIALOG_ICON_RADIUS))
-val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(DIALOG_ICON_RADIUS))
-val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(DIALOG_ICON_RADIUS))
-val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(DIALOG_ICON_RADIUS))
+private val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(GENERAL_ICON_RADIUS))
+private val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(GENERAL_ICON_RADIUS))
+private val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS))
+private val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(GENERAL_ICON_RADIUS))
 fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)

@@ -3,11 +3,6 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CFileChooser
-import ink.meodinger.lpfx.component.properties.DialogLogs
-import ink.meodinger.lpfx.component.properties.DialogSettings
-import ink.meodinger.lpfx.component.tools.CheatSheet
-import ink.meodinger.lpfx.component.tools.OnlineDict
-import ink.meodinger.lpfx.component.tools.SearchReplace
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
@@ -17,8 +12,10 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.notExists
+import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.INFO
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
@@ -32,6 +29,7 @@ import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.scene.control.*
+import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.KeyCombination
@@ -82,26 +80,6 @@ class CMenuBar(private val state: State) : MenuBar() {
     private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
     val recentFiles: ObservableList<File> by recentFilesProperty
-
-    // ----- Dialogs ----- //
-
-    private val cheatSheet       by lazy {
-        CheatSheet {
-            state.application.hostServices.showDocument(INFO["application.help"])
-        } withOwner state.stage
-    }
-    private val searchAndReplace by lazy {
-        SearchReplace(state) withOwner state.stage
-    }
-    private val onlineDict       by lazy {
-        OnlineDict() withOwner state.stage
-    }
-    private val dialogLogs       by lazy {
-        DialogLogs() withOwner state.stage
-    }
-    private val dialogSettings   by lazy {
-        DialogSettings() withOwner state.stage
-    }
 
     // ----- Choosers ----- //
 
@@ -238,7 +216,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             checkItem(I18N["m.dict"]) {
                 does { showDict(); isSelected = true; }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN)
-                onlineDict.showingProperty().addListener(onNew(this::setSelected))
+                state.application.onlineDict.showingProperty().addListener(onNew(this::setSelected))
             }
             separator()
             item(I18N["m.cht2zh"]) {
@@ -337,19 +315,21 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.open(file)
     }
     private fun saveTranslation() {
-        state.controller.checkText()
-
         state.controller.save(state.translationFile, silent = true)
+
+        if (!state.application.textChecker.isShowing) showAlert(state.stage, "Some Typos!")
+        state.application.textChecker.check()
     }
     private fun saveAsTranslation() {
-        state.controller.checkText()
-
         fileChooser.title = I18N["chooser.save"]
         fileChooser.selectedExtensionFilter = fileFilter
         fileChooser.initialFilename = state.translationFile.name
         val file = fileChooser.showSaveDialog(state.stage) ?: return
 
         state.controller.save(file)
+
+        if (!state.application.textChecker.isShowing) showAlert(state.stage, "Some Typos!")
+        state.application.textChecker.check()
     }
     private fun closeTranslation() {
         if (state.controller.stay()) return
@@ -377,8 +357,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
 
     private fun searchAndReplace() {
-        searchAndReplace.show()
-        searchAndReplace.toFront()
+        state.application.searchAndReplace.show()
+        state.application.searchAndReplace.toFront()
     }
     private fun editComment() {
         showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
@@ -461,7 +441,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         }
     }
     private fun specifyPictures() {
-        val completed = state.controller.specifyPicFiles() ?: return
+        val completed = state.application.dialogSpecify.specify() ?: return
         if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
         state.controller.requestUpdatePane()
     }
@@ -492,7 +472,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
 
     private fun settings() {
-        val map = dialogSettings.generateProperties()
+        val map = state.application.dialogSettings.generateProperties()
 
         Logger.info("Generated common settings", LOGSRC_DIALOGS)
         Logger.debug("got $map", LOGSRC_DIALOGS)
@@ -517,7 +497,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         }
     }
     private fun logs() {
-        val map = dialogLogs.generateProperties()
+        val map = state.application.dialogLogs.generateProperties()
 
         Logger.info("Generated logs settings", LOGSRC_DIALOGS)
         Logger.debug("got $map", LOGSRC_DIALOGS)
@@ -533,7 +513,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun about() {
         showLink(
             state.stage,
-            iconImageView,
+            ImageView(ICON.resizeByRadius(GENERAL_ICON_RADIUS)),
             I18N["m.about.dialog.title"],
             null,
             StringBuilder()
@@ -549,8 +529,8 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.checkUpdate(true)
     }
     private fun cheatSheet() {
-        cheatSheet.show()
-        cheatSheet.toFront()
+        state.application.cheatSheet.show()
+        state.application.cheatSheet.toFront()
     }
     private fun crash() {
         throw RuntimeException("Crash")
@@ -630,8 +610,8 @@ class CMenuBar(private val state: State) : MenuBar() {
         task()
     }
     private fun showDict() {
-        onlineDict.showDict(state.stage)
-        onlineDict.toFront()
+        state.application.onlineDict.showDict(state.stage)
+        state.application.onlineDict.toFront()
     }
 
 }

@@ -5,7 +5,6 @@ import ink.meodinger.lpfx.action.ComplexAction
 import ink.meodinger.lpfx.action.LabelAction
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
-import ink.meodinger.lpfx.component.tools.SpecifyFiles
 import ink.meodinger.lpfx.io.export
 import ink.meodinger.lpfx.io.load
 import ink.meodinger.lpfx.io.pack
@@ -28,6 +27,7 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.util.image.resizeByRadius
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -39,6 +39,7 @@ import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.*
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
@@ -74,8 +75,6 @@ class Controller(private val state: State) {
         private const val AUTO_SAVE_DELAY = 5 * 60 * ONE_SECOND
         private const val AUTO_SAVE_PERIOD = 3 * 60 * ONE_SECOND
     }
-
-    private val dialogSpecify: SpecifyFiles by lazy { SpecifyFiles(state) withOwner state.stage }
 
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
@@ -710,37 +709,6 @@ class Controller(private val state: State) {
     // ----- Controller Methods ----- //
 
     /**
-     * Specify pictures of current translation file
-     * @return true if completed; false if not; null if cancel
-     */
-    fun specifyPicFiles(): Boolean? {
-        val picFiles = dialogSpecify.specify()
-
-        // Closed or Cancelled
-        if (picFiles.isEmpty()) return null
-
-        val picCount = state.transFile.picCount
-        val picNames = state.transFile.sortedPicNames
-        var completed = true
-        for (i in 0 until picCount) {
-            val picFile = picFiles[i]
-            if (picFile.notExists()) {
-                completed = false
-                continue
-            }
-            state.transFile.setFile(picNames[i], picFile!!)
-        }
-        return completed
-    }
-
-    /**
-     *
-     */
-    fun checkText() {
-        // Use CTextCheck
-    }
-
-    /**
      * Whether stay here or not
      */
     fun stay(): Boolean {
@@ -902,7 +870,7 @@ class Controller(private val state: State) {
             // Specify now?
             showConfirm(state.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
                 if (it == ButtonType.YES) {
-                    val completed = specifyPicFiles()
+                    val completed = state.application.dialogSpecify.specify()
                     if (completed == null) showInfo(state.stage, I18N["specify.info.cancelled"])
                     else if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
                 }
@@ -1096,7 +1064,7 @@ class Controller(private val state: State) {
                 val dialog = Dialog<ButtonType>()
                 dialog.initOwner(this@Controller.state.stage)
                 dialog.title = I18N["update.dialog.title"]
-                dialog.graphic = infoImageView
+                dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(GENERAL_ICON_RADIUS))
                 dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
                 dialog.withContent(VBox()) {
                     add(Label(String.format(I18N["update.dialog.content.s"], version)))

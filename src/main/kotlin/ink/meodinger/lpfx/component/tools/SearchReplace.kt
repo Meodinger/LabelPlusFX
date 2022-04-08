@@ -68,7 +68,7 @@ class SearchReplace(private val state: State) : Stage() {
             padding = Insets(COMMON_GAP)
             hgap = COMMON_GAP
             vgap = COMMON_GAP / 2
-            alignment = Pos.TOP_CENTER
+            alignment = Pos.CENTER
 
             //    0        1            2
             // 0    Find: |          | FindNext

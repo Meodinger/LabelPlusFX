@@ -9,8 +9,12 @@ import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.util.property.getValue
 
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -26,7 +30,13 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-class CheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
+class CheatSheet() : Stage() {
+
+    private val onActionProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(null)
+    val onAction: EventHandler<ActionEvent> by onActionProperty
+    fun setOnAction(onAction: (ActionEvent) -> Unit) {
+        onActionProperty.set(onAction)
+    }
 
     init {
         icons.add(ICON)
@@ -38,7 +48,7 @@ class CheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
             padding = Insets(COMMON_GAP)
             vgap = COMMON_GAP
             hgap = COMMON_GAP
-            alignment = Pos.TOP_CENTER
+            alignment = Pos.CENTER
 
             add(Label(I18N["cheat.accelerator"]), 0, 0, 2, 1) {
                 gridHAlign = HPos.CENTER
@@ -65,7 +75,7 @@ class CheatSheet(onAction: (ActionEvent) -> Unit) : Stage() {
             add(Label(I18N["cheat.double_label.res"]), 1, 9)
             add(Hyperlink(I18N["cheat.more_help"]), 0, 10, 2, 1) {
                 gridHAlign = HPos.CENTER
-                setOnAction(onAction)
+                onActionProperty().bind(this@CheatSheet.onActionProperty)
             }
         })
 

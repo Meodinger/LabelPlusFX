@@ -1,10 +1,14 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.component.properties.DialogLogs
+import ink.meodinger.lpfx.component.properties.DialogSettings
+import ink.meodinger.lpfx.component.tools.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.HookedApplication
+import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.resource.*
@@ -67,6 +71,30 @@ class LabelPlusFX: HookedApplication() {
             }
             addActionListener { restore() }
         }
+    }
+
+    val cheatSheet       by lazy {
+        CheatSheet().apply {
+            setOnAction { state.application.hostServices.showDocument(INFO["application.help"]) }
+        } withOwner state.stage
+    }
+    val onlineDict       by lazy {
+        OnlineDict() withOwner state.stage
+    }
+    val searchAndReplace by lazy {
+        SearchReplace(state) withOwner state.stage
+    }
+    val textChecker      by lazy {
+        TextChecker(state) withOwner state.stage
+    }
+    val dialogSpecify    by lazy {
+        SpecifyFiles(state) withOwner state.stage
+    }
+    val dialogLogs       by lazy {
+        DialogLogs() withOwner state.stage
+    }
+    val dialogSettings   by lazy {
+        DialogSettings() withOwner state.stage
     }
 
     init {

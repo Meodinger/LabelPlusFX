@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.file.existsOrNull
+import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.resource.I18N
 import ink.meodinger.lpfx.util.resource.get
@@ -35,12 +36,17 @@ import kotlin.io.path.*
 class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
     companion object {
-        private const val rowShift = 1
+        private const val RowShift = 1
+        private val Unspecified = I18N["specify.unspecified"]
     }
 
-    private val contentGridPane = GridPane()
-
     private val thisWindow = dialogPane.scene.window
+    private val contentGridPane = GridPane().apply {
+        hgap = COMMON_GAP
+        vgap = COMMON_GAP
+        padding = Insets(COMMON_GAP)
+        alignment = Pos.CENTER
+    }
     private val fileChooser = FileChooser().apply {
         extensionFilters.add(FileChooser.ExtensionFilter(
             I18N["filetype.pictures"],
@@ -50,13 +56,10 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
     private val dirChooser = DirectoryChooser()
 
     private lateinit var workingTransFile: TransFile
-    private lateinit var projectFolder: File
     private var picCount: Int = 0
     private var picNames: List<String> = ArrayList()
     private var files: MutableList<File?> = ArrayList()
     private var labels: MutableList<CRollerLabel> = ArrayList()
-
-    private val unspecified = I18N["specify.unspecified"]
 
     init {
         title = I18N["specify.title"]
@@ -64,12 +67,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         dialogPane.prefHeight = PANE_HEIGHT
         dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
         withContent(BorderPane()) {
-            val stackPane = StackPane(contentGridPane.apply {
-                hgap = COMMON_GAP
-                vgap = COMMON_GAP
-                padding = Insets(COMMON_GAP)
-                alignment = Pos.TOP_CENTER
-            })
+            val stackPane = StackPane(contentGridPane)
             val scrollPane = ScrollPane(stackPane)
             stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
 
@@ -82,7 +80,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
                     does {
                         // need show confirm?
                         var show = false
-                        for (label in labels) if (label.text != unspecified) {
+                        for (label in labels) if (label.text != Unspecified) {
                             show = true
                             break
                         }
@@ -136,12 +134,10 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
     }
 
     /**
-     * Specify current TransFile's Picture Files.
-     * Returned list has the same order as TransFile.sortedPicNames.
-     * @return EmptyList if Closed or Cancelled; List of specific
-     *         files (not-null) or null (didn't specify for Picture)
+     * Specify pictures of current translation file
+     * @return true if completed; false if not; null if cancel
      */
-    fun specify(): List<File?> {
+    fun specify(): Boolean? {
         // clear & re-init
         contentGridPane.children.clear()
         contentGridPane.add(Label(I18N["specify.dialog.pic_name"]), 0, 0)
@@ -149,25 +145,24 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
         // update variables
         workingTransFile = state.transFile
-        projectFolder = state.transFile.projectFolder
         picCount = state.transFile.picCount
         picNames = state.transFile.sortedPicNames
 
         // prepare
-        fileChooser.initialDirectory = projectFolder
-        dirChooser.initialDirectory = projectFolder
+        fileChooser.initialDirectory = state.transFile.projectFolder
+        dirChooser.initialDirectory = state.transFile.projectFolder
 
         files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).existsOrNull() }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
-            text = if (files[it].exists()) files[it]!!.path else unspecified
+            text = if (files[it].exists()) files[it]!!.path else Unspecified
             tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
                 init { bind(this@apply.textProperty()) }
                 override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }
             })
             textFillProperty().bind(object : ObjectBinding<Color>() {
                 init { bind(this@apply.textProperty()) }
-                override fun computeValue(): Color = if (this@apply.text == unspecified) Color.RED else Color.BLACK
+                override fun computeValue(): Color = if (this@apply.text == Unspecified) Color.RED else Color.BLACK
             })
         } }
 
@@ -180,9 +175,9 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
                 files[i] = picFile
             }
 
-            contentGridPane.add(Label(picNames[i]), 0, i + rowShift)
-            contentGridPane.add(labels[i], 1, i + rowShift)
-            contentGridPane.add(button, 2, i + rowShift)
+            contentGridPane.add(Label(picNames[i]), 0, i + RowShift)
+            contentGridPane.add(labels[i], 1, i + RowShift)
+            contentGridPane.add(button, 2, i + RowShift)
         }
 
         // manually control label roll to save resource
@@ -190,7 +185,26 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         val result = showAndWait()
         for (label in labels) label.stopRoll()
 
-        return if (result.isPresent) result.get() else emptyList()
+        // Result list has the same order as TransFile.sortedPicNames.
+        // Empty list if Closed or Cancelled;
+        // List of specified files (not-null) or didn't specified files (null)
+        val picFiles = if (result.isPresent) result.get() else emptyList()
+
+        // Closed or Cancelled
+        if (picFiles.isEmpty()) return null
+
+        val picCount = state.transFile.picCount
+        val picNames = state.transFile.sortedPicNames
+        var completed = true
+        for (i in 0 until picCount) {
+            val picFile = picFiles[i]
+            if (picFile.notExists()) {
+                completed = false
+                continue
+            }
+            state.transFile.setFile(picNames[i], picFile!!)
+        }
+        return completed
     }
 
 }

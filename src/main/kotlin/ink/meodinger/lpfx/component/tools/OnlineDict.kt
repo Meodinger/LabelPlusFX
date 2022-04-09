@@ -241,14 +241,4 @@ class OnlineDict : Stage() {
         }() // Remember to invoke
     }
 
-    fun showDict(relativeTo: Window?) {
-        if (relativeTo != null) {
-            x = relativeTo.x - (width + COMMON_GAP * 2) + relativeTo.width
-            y = relativeTo.y + (COMMON_GAP * 2)
-        } else {
-            centerOnScreen()
-        }
-        show()
-    }
-
 }

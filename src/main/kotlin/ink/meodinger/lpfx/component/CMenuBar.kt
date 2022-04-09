@@ -317,8 +317,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun saveTranslation() {
         state.controller.save(state.translationFile, silent = true)
 
-        if (!state.application.textChecker.isShowing) showAlert(state.stage, "Some Typos!")
-        state.application.textChecker.check()
+        showChecker()
     }
     private fun saveAsTranslation() {
         fileChooser.title = I18N["chooser.save"]
@@ -328,8 +327,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         state.controller.save(file)
 
-        if (!state.application.textChecker.isShowing) showAlert(state.stage, "Some Typos!")
-        state.application.textChecker.check()
+        showChecker()
     }
     private fun closeTranslation() {
         if (state.controller.stay()) return
@@ -610,8 +608,22 @@ class CMenuBar(private val state: State) : MenuBar() {
         task()
     }
     private fun showDict() {
-        state.application.onlineDict.showDict(state.stage)
-        state.application.onlineDict.toFront()
+        val dict = state.application.onlineDict
+        dict.x = state.stage.x - (dict.width + COMMON_GAP * 2) + state.stage.width
+        dict.y = state.stage.y + (COMMON_GAP * 2)
+        dict.show()
+        dict.toFront()
+    }
+    private fun showChecker() {
+        val checker = state.application.textChecker
+
+        if (checker.check()) return
+        if (!checker.isShowing) showAlert(state.stage, "Some Typos!")
+
+        checker.x = state.stage.x - (checker.width + COMMON_GAP * 2) + state.stage.width
+        checker.y = state.stage.y + (COMMON_GAP * 2) + state.application.onlineDict.height
+        checker.show()
+        checker.toFront()
     }
 
 }

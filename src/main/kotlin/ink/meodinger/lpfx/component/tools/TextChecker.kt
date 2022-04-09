@@ -113,12 +113,12 @@ class TextChecker(private val state: State) : Stage() {
     }
 
     fun check(): Boolean {
+        index = NOT_FOUND
         collectTypos()
+
         if (typoList.isEmpty()) return true
 
         index = 0
-
-        show()
         return false
     }
 

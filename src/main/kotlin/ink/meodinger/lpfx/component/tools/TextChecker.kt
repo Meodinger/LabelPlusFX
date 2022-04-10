@@ -1,9 +1,7 @@
 package ink.meodinger.lpfx.component.tools
 
 import ink.meodinger.lpfx.*
-import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.does
-import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.property.getValue
@@ -11,7 +9,6 @@ import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.string.emptyString
-import ink.meodinger.lpfx.util.string.replaceEOL
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.IntegerProperty
@@ -19,14 +16,15 @@ import javafx.beans.property.ListProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.image.ImageView
-import javafx.scene.layout.GridPane
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.*
+import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
 
 /**
@@ -38,18 +36,24 @@ import javafx.stage.Stage
 
 class TextChecker(private val state: State) : Stage() {
 
+    data class TextError(val text: String, val description: String)
+
     companion object {
         private val TypoTexts: List<String> = listOf("\n\n", "..")
+        private val TypoErrors: List<TextError> = listOf(
+            TextError("\n\n", "empty lines"),
+            TextError("..", "Incorrect Dots")
+        )
     }
 
-    private val typoListProperty: ListProperty<Pair<Pair<String, Int>, Pair<String, Pair<Int, Int>>>> = SimpleListProperty(FXCollections.observableArrayList())
-    private val typoList: MutableList<Pair<Pair<String, Int>, Pair<String, Pair<Int, Int>>>> by typoListProperty
+    private val typoListProperty: ListProperty<Pair<Pair<String, Int>, Pair<TextError, Int>>> = SimpleListProperty(FXCollections.observableArrayList())
+    private val typoList: MutableList<Pair<Pair<String, Int>, Pair<TextError, Int>>> by typoListProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     private var index: Int by indexProperty
 
     init {
-        //   0     1     2
+        //   HBox  0     1
         // 0 Alert #x of #total
         // 1 image Next  Complete
         icons.add(ICON)
@@ -57,28 +61,42 @@ class TextChecker(private val state: State) : Stage() {
         width = PANE_WIDTH / 2
         height = PANE_HEIGHT / 3
         isResizable = false
-        scene = Scene(StackPane().withContent(GridPane()) {
+        scene = Scene(StackPane().withContent(HBox()) {
             padding = Insets(COMMON_GAP)
-            hgap = COMMON_GAP
-            vgap = COMMON_GAP / 2
-            alignment = Pos.CENTER
 
-            add(ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS)), 0, 0, 1, 2)
-            add(Label(), 1, 0, 2, 1) {
-                textProperty().bind(Bindings.createStringBinding(
-                    {
-                        if (index != NOT_FOUND)
-                           "#${index + 1} of #${typoListProperty.size} (${typoList[index].second.first.replaceEOL()})"
-                        else emptyString()
-                    },
-                    indexProperty, typoListProperty.sizeProperty()
-                ))
-            }
-            add(Button("Next"), 1, 1) {
-                does { if (index + 1 < typoList.size) index++ else close() }
-            }
-            add(Button("Complete"), 2, 1) {
-                does { close() }
+            add(ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS)))
+            add(GridPane()) {
+                hgap = COMMON_GAP
+                vgap = COMMON_GAP / 2
+
+                // Why 4 GAPs ?
+                // isGridLinesVisible = true
+                val colWidth = (this@TextChecker.width - GENERAL_ICON_RADIUS * 2 - 4 * COMMON_GAP) / 2
+                columnConstraints.addAll(ColumnConstraints(colWidth), ColumnConstraints(colWidth))
+
+                add(Label(), 0, 0, 2, 1) {
+                    gridHAlign = HPos.CENTER
+                    textAlignment = TextAlignment.CENTER
+                    textProperty().bind(Bindings.createStringBinding(
+                        {
+                            if (index != NOT_FOUND)
+                                """
+                                #${index + 1} of #${typoListProperty.size}
+                                ==> ${typoList[index].second.first.description} <==
+                                """.trimIndent()
+                            else emptyString()
+                        },
+                        indexProperty, typoListProperty.sizeProperty()
+                    ))
+                }
+                add(Button("Next One"), 0, 1) {
+                    gridHAlign = HPos.CENTER
+                    does { if (index + 1 < typoList.size) index++ else close() }
+                }
+                add(Button("Complete"), 1, 1) {
+                    gridHAlign = HPos.CENTER
+                    does { close() }
+                }
             }
         })
 
@@ -89,7 +107,7 @@ class TextChecker(private val state: State) : Stage() {
             state.currentPicName = location.first
             state.currentLabelIndex = location.second
             state.view.cTreeView.selectionModel.clearSelection()
-            state.view.cTransArea.selectRange(typo.second.first, typo.second.second)
+            state.view.cTransArea.selectRange(typo.second, typo.second + typo.first.text.length)
         })
     }
 
@@ -103,9 +121,8 @@ class TextChecker(private val state: State) : Stage() {
                 while (true) {
                     val (start, error) = label.text.findAnyOf(TypoTexts, index) ?: break
                     val location = picName to label.index
-                    val range = start to (start + error.length)
 
-                    typoList.add((location) to (error to range))
+                    typoList.add((location) to (TypoErrors.first { it.text == error } to start))
                     index = start + error.length
                 }
             }

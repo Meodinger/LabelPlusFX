@@ -126,7 +126,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                         alignment = Pos.CENTER_RIGHT
                         padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
                         add(Label(I18N["settings.ligature.sample"]))
-                        add(HBox()) { boxHGrow = Priority.ALWAYS }
+                        add(HBox()) { hgrow = Priority.ALWAYS }
                         add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
                     }
                 }

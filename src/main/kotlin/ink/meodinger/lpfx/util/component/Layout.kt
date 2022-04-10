@@ -222,11 +222,11 @@ fun VBox.addAll(vararg nodes: Node): VBox {
     return apply { children.addAll(*nodes) }
 }
 
-var Node.boxHGrow: Priority
+var Node.hgrow: Priority
     get() = HBox.getHgrow(this) ?: Priority.NEVER
     set(value) { HBox.setHgrow(this, value) }
 
-var Node.boxVGrow: Priority
+var Node.vgrow: Priority
     get() = VBox.getVgrow(this) ?: Priority.NEVER
     set(value) { VBox.setVgrow(this, value) }
 

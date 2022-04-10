@@ -38,7 +38,6 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
-import javafx.stage.Window
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
@@ -114,7 +113,7 @@ class OnlineDict : Stage() {
                     }, transStateProperty))
                 }
                 add(TextField()) {
-                    boxHGrow = Priority.ALWAYS
+                    hgrow = Priority.ALWAYS
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter
                         transState = (transState + 1) % 2

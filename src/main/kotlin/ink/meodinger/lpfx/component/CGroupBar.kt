@@ -2,7 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.component.boxHGrow
+import ink.meodinger.lpfx.util.component.hgrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
@@ -51,7 +51,7 @@ class CGroupBar : HBox() {
 
     private val cGroups: MutableList<CGroup> = ArrayList()
     private val placeHolder: HBox = HBox().apply {
-        boxHGrow = Priority.ALWAYS
+        hgrow = Priority.ALWAYS
     }
     private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
         onSelectProperty().bind(onGroupCreateProperty)

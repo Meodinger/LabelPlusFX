@@ -78,7 +78,7 @@ class View(state: State) : BorderPane() {
                         maxScale = SCALE_MAX
                     }
                     add(HBox()) {
-                        boxHGrow = Priority.ALWAYS
+                        hgrow = Priority.ALWAYS
                     }
                     add(cPicBox) {
                         isWrapped = true
@@ -100,7 +100,7 @@ class View(state: State) : BorderPane() {
                         }
                         add(HBox()) {
                             alignment = Pos.CENTER
-                            boxHGrow = Priority.ALWAYS
+                            hgrow = Priority.ALWAYS
                         }
                         add(bSwitchViewMode) {
                             isMnemonicParsing = false
@@ -122,7 +122,7 @@ class View(state: State) : BorderPane() {
         statsBar.apply {
             val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
             add(HBox()) {
-                boxHGrow = Priority.ALWAYS
+                hgrow = Priority.ALWAYS
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL

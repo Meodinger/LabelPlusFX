@@ -6,7 +6,7 @@ import ink.meodinger.lpfx.PANE_HEIGHT
 import ink.meodinger.lpfx.PANE_WIDTH
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.boxVGrow
+import ink.meodinger.lpfx.util.component.vgrow
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.event.isDoubleClick
@@ -187,7 +187,7 @@ fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
         add(Label("The exception stacktrace is:"))
         add(TextArea(e.stackTraceToString())) {
             isEditable = false
-            boxVGrow = Priority.ALWAYS
+            vgrow = Priority.ALWAYS
         }
     }
 

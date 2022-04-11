@@ -18,7 +18,6 @@ import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 import javafx.geometry.HPos
 import javafx.geometry.Insets
-import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -36,18 +35,15 @@ import javafx.stage.Stage
 
 class TextChecker(private val state: State) : Stage() {
 
-    data class TextError(val text: String, val description: String)
-
     companion object {
-        private val TypoTexts: List<String> = listOf("\n\n", "..")
-        private val TypoErrors: List<TextError> = listOf(
-            TextError("\n\n", "empty lines"),
-            TextError("..", "Incorrect Dots")
+        private val Typos: Map<String, String> = mapOf(
+            "\n\n" to "Empty Lines",
+            ".."   to "Incorrect Dots"
         )
     }
 
-    private val typoListProperty: ListProperty<Pair<Pair<String, Int>, Pair<TextError, Int>>> = SimpleListProperty(FXCollections.observableArrayList())
-    private val typoList: MutableList<Pair<Pair<String, Int>, Pair<TextError, Int>>> by typoListProperty
+    private val typoListProperty: ListProperty<Pair<Pair<String, Int>, String>> = SimpleListProperty(FXCollections.observableArrayList())
+    private val typoList: MutableList<Pair<Pair<String, Int>, String>> by typoListProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     private var index: Int by indexProperty
@@ -69,8 +65,7 @@ class TextChecker(private val state: State) : Stage() {
                 hgap = COMMON_GAP
                 vgap = COMMON_GAP / 2
 
-                // Why 4 GAPs ?
-                // isGridLinesVisible = true
+                // Why 4 GAPs? Stage.width != Scene.width
                 val colWidth = (this@TextChecker.width - GENERAL_ICON_RADIUS * 2 - 4 * COMMON_GAP) / 2
                 columnConstraints.addAll(ColumnConstraints(colWidth), ColumnConstraints(colWidth))
 
@@ -82,7 +77,7 @@ class TextChecker(private val state: State) : Stage() {
                             if (index != NOT_FOUND)
                                 """
                                 #${index + 1} of #${typoListProperty.size}
-                                ==> ${typoList[index].second.first.description} <==
+                                ==> ${Typos[typoList[index].second]} <==
                                 """.trimIndent()
                             else emptyString()
                         },
@@ -103,11 +98,22 @@ class TextChecker(private val state: State) : Stage() {
         indexProperty.addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) return@onNew
             val (location, typo) = typoList[it]
+            val (picName, labelIndex) = location
 
-            state.currentPicName = location.first
-            state.currentLabelIndex = location.second
+            val index: Int
+            if (state.currentPicName == picName && state.currentLabelIndex == labelIndex) {
+                val caret = if (state.view.cTransArea.selectedText != typo) 0 else state.view.cTransArea.caretPosition
+                index = state.view.cTransArea.text.indexOf(typo, caret)
+
+                if (index == NOT_FOUND) return@onNew
+            } else {
+                index = state.transFile.getTransLabel(location.first, location.second).text.indexOf(typo)
+            }
+
+            state.currentPicName = picName
+            state.currentLabelIndex = labelIndex
             state.view.cTreeView.selectionModel.clearSelection()
-            state.view.cTransArea.selectRange(typo.second, typo.second + typo.first.text.length)
+            state.view.cTransArea.selectRange(index, index + typo.length)
         })
     }
 
@@ -119,10 +125,10 @@ class TextChecker(private val state: State) : Stage() {
                 var index = NOT_FOUND
 
                 while (true) {
-                    val (start, error) = label.text.findAnyOf(TypoTexts, index) ?: break
+                    val (start, error) = label.text.findAnyOf(Typos.keys, index) ?: break
                     val location = picName to label.index
 
-                    typoList.add((location) to (TypoErrors.first { it.text == error } to start))
+                    typoList.add(location to error)
                     index = start + error.length
                 }
             }

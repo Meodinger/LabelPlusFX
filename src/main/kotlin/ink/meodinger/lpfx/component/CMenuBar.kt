@@ -609,8 +609,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
     private fun showDict() {
         val dict = state.application.onlineDict
-        dict.x = state.stage.x - (dict.width + COMMON_GAP * 2) + state.stage.width
-        dict.y = state.stage.y + (COMMON_GAP * 2)
+        dict.x = state.stage.x - COMMON_GAP + state.stage.width - dict.width
+        dict.y = state.stage.y + COMMON_GAP
         dict.show()
         dict.toFront()
     }
@@ -620,8 +620,8 @@ class CMenuBar(private val state: State) : MenuBar() {
         if (checker.check()) return
         if (!checker.isShowing) showAlert(state.stage, "Some Typos!")
 
-        checker.x = state.stage.x - (checker.width + COMMON_GAP * 2) + state.stage.width
-        checker.y = state.stage.y + (COMMON_GAP * 2) + state.application.onlineDict.height
+        checker.x = state.stage.x - COMMON_GAP + state.stage.width - checker.width
+        checker.y = state.stage.y + COMMON_GAP + state.application.onlineDict.height
         checker.show()
         checker.toFront()
     }

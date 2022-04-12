@@ -16,7 +16,7 @@
         <developer>
             <timezone>GMT+8:00</timezone>
             <name>Meodinger Wang</name>
-            <email>me@meodinger.ink</email>
+            <email>meodinger@std.uestc.edu.cn</email>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -35,6 +35,10 @@
         <repository>
             <id>mavenCentral</id>
             <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -81,7 +85,7 @@
         </dependency>
 
         <dependency>
-            <groupId>ink.meodinger</groupId>
+            <groupId>com.github.meodinger</groupId>
             <artifactId>htmlparser</artifactId>
             <version>0.0.1</version>
         </dependency>

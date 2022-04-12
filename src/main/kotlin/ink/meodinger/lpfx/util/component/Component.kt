@@ -4,6 +4,7 @@ import javafx.event.ActionEvent
 import javafx.scene.control.Button
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TextFormatter
+import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
 
@@ -27,7 +28,7 @@ infix fun MenuItem.does(onAction: MenuItem.(ActionEvent) -> Unit): MenuItem {
 }
 
 fun <T : Stage> T.closeOnEscape() {
-    addEventFilter(KeyEvent.KEY_PRESSED) { close() }
+    addEventFilter(KeyEvent.KEY_PRESSED) { if (it.code == KeyCode.ESCAPE) close() }
 }
 
 fun <T> genTextFormatter(replacer: (TextFormatter.Change) -> String): TextFormatter<T> {

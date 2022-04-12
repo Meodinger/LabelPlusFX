@@ -618,7 +618,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         val checker = state.application.textChecker
 
         if (checker.check()) return
-        if (!checker.isShowing) showAlert(state.stage, "Some Typos!")
+        if (!checker.isShowing) showAlert(state.stage, I18N["checker.warning"])
 
         checker.x = state.stage.x - COMMON_GAP + state.stage.width - checker.width
         checker.y = state.stage.y + COMMON_GAP + state.application.onlineDict.height

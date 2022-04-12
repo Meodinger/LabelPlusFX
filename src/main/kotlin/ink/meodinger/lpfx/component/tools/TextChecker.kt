@@ -7,6 +7,8 @@ import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.string.emptyString
 
@@ -53,7 +55,7 @@ class TextChecker(private val state: State) : Stage() {
         // 0 Alert #x of #total
         // 1 image Next  Complete
         icons.add(ICON)
-        title = "Fix Texts"
+        title = I18N["checker.title"]
         width = PANE_WIDTH / 2
         height = PANE_HEIGHT / 3
         isResizable = false
@@ -75,20 +77,18 @@ class TextChecker(private val state: State) : Stage() {
                     textProperty().bind(Bindings.createStringBinding(
                         {
                             if (index != NOT_FOUND)
-                                """
-                                #${index + 1} of #${typoListProperty.size}
-                                ==> ${Typos[typoList[index].second]} <==
-                                """.trimIndent()
-                            else emptyString()
+                                String.format(I18N["checker.label.iis"], index + 1, typoList.size, Typos[typoList[index].second])
+                            else
+                                emptyString()
                         },
                         indexProperty, typoListProperty.sizeProperty()
                     ))
                 }
-                add(Button("Next One"), 0, 1) {
+                add(Button(I18N["checker.continue"]), 0, 1) {
                     gridHAlign = HPos.CENTER
                     does { if (index + 1 < typoList.size) index++ else close() }
                 }
-                add(Button("Complete"), 1, 1) {
+                add(Button(I18N["checker.complete"]), 1, 1) {
                     gridHAlign = HPos.CENTER
                     does { close() }
                 }
@@ -100,15 +100,14 @@ class TextChecker(private val state: State) : Stage() {
             val (location, typo) = typoList[it]
             val (picName, labelIndex) = location
 
-            val index: Int
-            if (state.currentPicName == picName && state.currentLabelIndex == labelIndex) {
-                val caret = if (state.view.cTransArea.selectedText != typo) 0 else state.view.cTransArea.caretPosition
-                index = state.view.cTransArea.text.indexOf(typo, caret)
-
-                if (index == NOT_FOUND) return@onNew
-            } else {
-                index = state.transFile.getTransLabel(location.first, location.second).text.indexOf(typo)
-            }
+            val index =
+                if (state.currentPicName == picName && state.currentLabelIndex == labelIndex) {
+                    val caret = if (state.view.cTransArea.selectedText != typo) 0 else state.view.cTransArea.caretPosition
+                    state.view.cTransArea.text.indexOf(typo, caret)
+                } else {
+                    state.transFile.getTransLabel(location.first, location.second).text.indexOf(typo)
+                }
+            if (index == NOT_FOUND) return@onNew
 
             state.currentPicName = picName
             state.currentLabelIndex = labelIndex

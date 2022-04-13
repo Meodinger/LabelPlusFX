@@ -88,6 +88,7 @@ To get a local copy up and running follow these simple steps.
 
 > If you don't want to use the Windows IME JNI Interface, try `run.bat --disable-jni` or `LabelPlusFX.exe --disable-jni`
 
+> If you want to run LPFX in IDE, make sure you add the argument `--disable-jni` to CommandLine
 
 <!-- USAGE EXAMPLES -->
 ## Usage

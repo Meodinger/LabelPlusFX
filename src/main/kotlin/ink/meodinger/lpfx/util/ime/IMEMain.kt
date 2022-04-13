@@ -30,18 +30,13 @@ private external fun setImeConversionMode(hWnd: Long, conversionMode: Int, sente
 
 /**
  * All available languages (cultures) by lazy
- */
-val languages: List<String> by lazy(::getAvailableLanguages)
-
-/**
- * Get all available languages (cultures)
  * @return A list contains all installed languages' culture codes
  */
-fun getAvailableLanguages(): List<String> {
-    if (!enableJNI) return emptyList()
+val availableLanguages: List<String> by lazy {
+    if (!enableJNI) return@lazy emptyList()
 
-    if (isWin) return getLanguages().toList()
-    else throw UnsupportedOperationException("Only usable in Win")
+    if (isWin) return@lazy getLanguages().toList()
+    else throw UnsupportedOperationException("Only Win")
 }
 
 /**
@@ -52,7 +47,7 @@ fun getCurrentLanguage(): String {
     if (!enableJNI) return emptyString()
 
     if (isWin) return getLanguage()
-    else throw UnsupportedOperationException("Only usable in Win")
+    else throw UnsupportedOperationException("Only Win")
 }
 
 /**
@@ -64,7 +59,7 @@ fun setCurrentLanguage(lang: String): Boolean {
     if (!enableJNI) return false
 
     if (isWin) return setLanguage(lang)
-    else throw UnsupportedOperationException("Only usable in Win")
+    else throw UnsupportedOperationException("Only Win")
 }
 
 /**
@@ -81,5 +76,5 @@ fun setImeConversionMode(hWnd: Long, sentenceMode: ImeSentenceMode, vararg conve
     for (mode in conversionModes) conversionMode = conversionMode or mode.value
 
     if (isWin) return setImeConversionMode(hWnd, conversionMode, sentenceMode.value)
-    else throw UnsupportedOperationException("Only usable in Win")
+    else throw UnsupportedOperationException("Only Win")
 }

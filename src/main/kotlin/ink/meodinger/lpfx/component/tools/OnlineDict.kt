@@ -153,7 +153,7 @@ class OnlineDict : Stage() {
         focusedProperty().addListener(onNew {
             if (it) {
                 oriLang = getCurrentLanguage()
-                languages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+                availableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
             } else {
                 setCurrentLanguage(oriLang)
             }

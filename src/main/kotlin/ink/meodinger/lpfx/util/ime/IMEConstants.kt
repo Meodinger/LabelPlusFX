@@ -55,11 +55,11 @@ enum class ImeConversionMode(val value: Int) {
     RESERVED               (0xF000_0000.toInt()),
 
     // JA
-    JA_HIRAGANA            (0b0000_1001),
-    JA_KATAKANA            (0b0000_1011),
-    JA_ALPHA               (0b0000_1000),
-    JA_KATAKANA_HALF       (0b0000_0011),
-    JA_ALPHA_HALF          (0b0000_0000),
+    JA_HIRAGANA            (0b0000_1001), // FULL_SHAPE JAPANESE
+    JA_KATAKANA            (0b0000_1011), // FULL_SHAPE KATAKANA JAPANESE
+    JA_ALPHA               (0b0000_1000), // FULL_SHAPE
+    JA_KATAKANA_HALF       (0b0000_0011), // KATAKANA JAPANESE
+    JA_ALPHA_HALF          (0b0000_0000), // ALPHA_NUMERIC
 }
 
 enum class ImeSentenceMode(val value: Int) {

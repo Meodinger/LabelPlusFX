@@ -4,6 +4,8 @@ import ink.meodinger.lpfx.ViewMode
 import ink.meodinger.lpfx.component.CLabelPane
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.resource.I18N
+import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.*
 import javafx.collections.FXCollections
@@ -50,7 +52,7 @@ object Settings : AbstractProperties("Settings") {
     // ----- Default ----- //
 
     override val default = listOf(
-        CProperty(DefaultGroupNameList, "框内", "框外"),
+        CProperty(DefaultGroupNameList, I18N["settings.group.default.1"], I18N["settings.group.default.2"]),
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
         CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
@@ -74,7 +76,7 @@ object Settings : AbstractProperties("Settings") {
         CProperty(InstantTranslate, false),
         CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
-        CProperty(ExportNameTemplate, "%FILE% 翻译：XXX"),
+        CProperty(ExportNameTemplate, I18N["settings.other.template.default"]),
         CProperty(AutoCheckUpdate, true),
     )
 

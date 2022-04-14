@@ -39,8 +39,9 @@ class TextChecker(private val state: State) : Stage() {
 
     companion object {
         private val Typos: Map<String, String> = mapOf(
-            "\n\n" to "Empty Lines",
-            ".."   to "Incorrect Dots"
+            "\n\n" to I18N["typo.lines"],
+            ".."   to I18N["typo.dots"],
+            I18N["typo.dots.ch"] to I18N["typo.dots"],
         )
     }
 

@@ -19,7 +19,6 @@ import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
 import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.isMathematicalDecimal
-import javafx.beans.binding.Bindings
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -32,7 +31,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.TextAlignment
 import javafx.util.Duration
 import javafx.util.StringConverter
-import kotlin.math.roundToInt
+import kotlin.math.ceil
 
 
 /**
@@ -57,12 +56,22 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
     private val gLabelName = Label(I18N["settings.group.name"])
     private val gLabelColor = Label(I18N["settings.group.color"])
-    private val gGridPane = GridPane()
+    private val gGridPane = GridPane().apply {
+        alignment = Pos.TOP_CENTER
+        padding = Insets(COMMON_GAP)
+        vgap = COMMON_GAP
+        hgap = COMMON_GAP
+    }
 
     private val rLabelHint = Label(I18N["settings.ligature.hint"])
     private val rLabelFrom = Label(I18N["settings.ligature.from"])
     private val rLabelTo = Label(I18N["settings.ligature.to"])
-    private val rGridPane = GridPane()
+    private val rGridPane = GridPane().apply {
+        alignment = Pos.TOP_CENTER
+        padding = Insets(COMMON_GAP)
+        vgap = COMMON_GAP
+        hgap = COMMON_GAP
+    }
 
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
@@ -79,7 +88,7 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val xUpdCheckBox = CheckBox(I18N["settings.other.auto_check_upd"])
     private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
     private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
-    private val xUseTCheckBox = CheckBox(I18N["settings.other.template_enable"])
+    private val xUseTCheckBox = CheckBox(I18N["settings.other.template.enable"])
     private val xTemplateField = TextField()
 
     init {
@@ -93,12 +102,7 @@ class DialogSettings : AbstractPropertiesDialog() {
 
             add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
-                    val stackPane = StackPane(gGridPane.apply {
-                        alignment = Pos.TOP_CENTER
-                        padding = Insets(COMMON_GAP)
-                        vgap = COMMON_GAP
-                        hgap = COMMON_GAP
-                    })
+                    val stackPane = StackPane(gGridPane)
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
 
@@ -112,12 +116,7 @@ class DialogSettings : AbstractPropertiesDialog() {
             }
             add(I18N["settings.ligature.title"]) {
                 withContent(BorderPane()) {
-                    val stackPane = StackPane(rGridPane.apply {
-                        alignment = Pos.TOP_CENTER
-                        padding = Insets(COMMON_GAP)
-                        vgap = COMMON_GAP
-                        hgap = COMMON_GAP
-                    })
+                    val stackPane = StackPane(rGridPane)
                     val scrollPane = ScrollPane(stackPane)
                     stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
 
@@ -198,11 +197,9 @@ class DialogSettings : AbstractPropertiesDialog() {
                         setPrefSize(320.0, 320.0)
                         add(lCLabel) {
                             radiusProperty().bind(lSliderRadius.valueProperty())
-                            colorOpacityProperty().bind(Bindings.createDoubleBinding(
-                                { lSliderAlpha.value / 255 },
-                                lSliderAlpha.valueProperty()
-                            ))
+                            colorOpacityProperty().bind(lSliderAlpha.valueProperty())
                             textOpaqueProperty().bind(lTextOpaqueCheckBox.selectedProperty())
+
                             // Draggable & drag-limitation
                             var shiftX = 0.0
                             var shiftY = 0.0
@@ -276,24 +273,24 @@ class DialogSettings : AbstractPropertiesDialog() {
                         prefWidth = 160.0
 
                         min = 0.0
-                        max = 255.0  // Use 255 to have more precise values
-                        majorTickUnit = 64.0
+                        max = 1.0
+                        majorTickUnit = max / 4
                         minorTickCount = 3
-                        blockIncrement = 16.0
+                        blockIncrement = majorTickUnit / (minorTickCount + 1)
                         isShowTickMarks = true
                         isShowTickLabels = true
                         labelFormatter = object : StringConverter<Double>() {
-                            override fun toString(double: Double): String = double.roundToInt().toString(16).padStart(2, '0')
-                            override fun fromString(string: String): Double = string.toInt(16).toDouble()
+                            override fun toString(double: Double): String = ceil(double * 255.0).toInt().toString(16).padStart(2, '0')
+                            override fun fromString(string: String): Double = string.toInt(16).toDouble() / 255.0
                         }
                         valueProperty().addListener(onNew<Number, Double> {
-                            val alphaPart = it.roundToInt().toString(16).padStart(2, '0')
+                            val alphaPart = ceil(it * 255.0).toInt().toString(16).padStart(2, '0')
                             lLabelAlpha.text = (if (lLabelAlpha.isEditing) "" else "0x") + alphaPart
                         })
                     }
                     add(lLabelAlpha, 2, 3) {
                         textFormatter = genTextFormatter {
-                            if (it.text.uppercase().contains(Regex("[^0-9A-F]")) ||
+                            if (it.text.uppercase().contains(Regex("[^\\dA-F]")) ||
                                 it.controlNewText.length > 2
                             ) emptyString() else it.text
                         }
@@ -302,7 +299,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                         }
                         setOnChangeToLabel {
                             val alphaStr = fieldText.padStart(2, '0').uppercase()
-                            lSliderAlpha.value = alphaStr.toInt(16).toDouble()
+                            lSliderAlpha.value = alphaStr.toInt(16).toDouble() / 255.0
 
                             labelText = "0x$alphaStr"
                         }
@@ -335,7 +332,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                     add(xTemplateField, 1, 4) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
                         textFormatter = genTextFormatter<String> { it.text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
-                        tooltip = Tooltip(I18N["settings.other.template_hint"]).apply {
+                        tooltip = Tooltip(I18N["settings.other.template.hint"]).apply {
                             showDelay = Duration(500.0)
                         }
                     }
@@ -480,12 +477,10 @@ class DialogSettings : AbstractPropertiesDialog() {
         lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
 
         lLabelRadius.isEditing = false
-        lLabelRadius.text = String.format("%05.2f", Settings.labelRadius)
         lSliderRadius.value = Settings.labelRadius
 
         lLabelAlpha.isEditing = false
-        lLabelAlpha.text = "0x${(Settings.labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0')}"
-        lSliderAlpha.value = Settings.labelColorOpacity * 255
+        lSliderAlpha.value = Settings.labelColorOpacity
 
         lTextOpaqueCheckBox.isSelected = Settings.labelTextOpaque
 
@@ -559,7 +554,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         val map = HashMap<String, Any>()
 
         map[Settings.LabelRadius] = lSliderRadius.value
-        map[Settings.LabelColorOpacity] = lSliderAlpha.value / 255
+        map[Settings.LabelColorOpacity] = lSliderAlpha.value
         map[Settings.LabelTextOpaque] = lTextOpaqueCheckBox.isSelected
 
         return map

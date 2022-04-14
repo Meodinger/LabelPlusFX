@@ -1,13 +1,13 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.hgrow
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*

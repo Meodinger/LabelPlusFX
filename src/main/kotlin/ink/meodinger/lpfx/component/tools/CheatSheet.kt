@@ -1,14 +1,9 @@
 package ink.meodinger.lpfx.component.tools
 
-import ink.meodinger.lpfx.COMMON_GAP
-import ink.meodinger.lpfx.PANE_HEIGHT
-import ink.meodinger.lpfx.PANE_WIDTH
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.closeOnEscape
 import ink.meodinger.lpfx.util.component.gridHAlign
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.property.ObjectProperty

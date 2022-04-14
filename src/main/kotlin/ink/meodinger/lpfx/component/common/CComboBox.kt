@@ -1,8 +1,8 @@
 package ink.meodinger.lpfx.component.common
 
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.*
 import javafx.collections.ObservableList

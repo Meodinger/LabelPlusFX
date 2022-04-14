@@ -12,8 +12,6 @@ import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.platform.isMac
 import ink.meodinger.lpfx.util.platform.isWin
 import ink.meodinger.lpfx.util.property.onChange
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty

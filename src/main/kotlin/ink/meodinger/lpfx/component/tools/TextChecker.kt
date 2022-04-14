@@ -3,13 +3,9 @@ package ink.meodinger.lpfx.component.tools
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.image.resizeByRadius
-import ink.meodinger.lpfx.util.resource.ICON
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
@@ -39,9 +35,9 @@ class TextChecker(private val state: State) : Stage() {
 
     companion object {
         private val Typos: Map<String, String> = mapOf(
-            "\n\n" to I18N["typo.lines"],
-            ".."   to I18N["typo.dots"],
-            I18N["typo.dots.ch"] to I18N["typo.dots"],
+            "\n\n"         to I18N["typo.lines"],
+            ".."           to I18N["typo.dots"],
+            "\u3002\u3002" to I18N["typo.dots"],
         )
     }
 

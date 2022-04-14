@@ -8,8 +8,6 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.application.Platform

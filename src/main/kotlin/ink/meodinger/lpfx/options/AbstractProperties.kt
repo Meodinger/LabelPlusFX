@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException

@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.util.string
 
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 
 import javafx.scene.text.Font
 import javafx.scene.text.Text

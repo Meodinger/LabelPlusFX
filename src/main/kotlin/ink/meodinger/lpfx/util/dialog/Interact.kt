@@ -1,11 +1,11 @@
 package ink.meodinger.lpfx.util.dialog
 
 import ink.meodinger.lpfx.COMMON_GAP
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.does
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.event.ActionEvent
 import javafx.event.EventHandler

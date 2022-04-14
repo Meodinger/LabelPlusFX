@@ -11,7 +11,6 @@ import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.property.onChange
-import ink.meodinger.lpfx.util.resource.*
 
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener

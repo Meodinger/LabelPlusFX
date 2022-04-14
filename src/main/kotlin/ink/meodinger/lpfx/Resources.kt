@@ -1,7 +1,5 @@
-package ink.meodinger.lpfx.util.resource
+package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.Config
-import ink.meodinger.lpfx.LabelPlusFX
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.image.imageFromFile
 

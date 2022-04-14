@@ -2,8 +2,7 @@ package ink.meodinger.lpfx.component.tools
 
 import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
-import ink.meodinger.lpfx.COMMON_GAP
-import ink.meodinger.lpfx.LOGSRC_DICTIONARY
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CTextFlow
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
@@ -15,10 +14,6 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.INFO
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP
 

@@ -1,8 +1,8 @@
 package ink.meodinger.lpfx.type
 
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.color.isColorHex
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import com.fasterxml.jackson.annotation.*
 import javafx.beans.property.SimpleStringProperty

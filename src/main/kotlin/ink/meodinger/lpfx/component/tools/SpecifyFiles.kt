@@ -9,8 +9,6 @@ import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.minus
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.ObjectBinding
 import javafx.geometry.Insets
@@ -49,7 +47,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
     }
     private val fileChooser = FileChooser().apply {
         extensionFilters.add(FileChooser.ExtensionFilter(
-            I18N["filetype.pictures"],
+            I18N["file_type.pictures"],
             List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
         ))
     }

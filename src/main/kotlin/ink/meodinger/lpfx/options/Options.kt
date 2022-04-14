@@ -1,9 +1,9 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.LOGSRC_OPTIONS
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.dialog.*
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
 import java.io.File

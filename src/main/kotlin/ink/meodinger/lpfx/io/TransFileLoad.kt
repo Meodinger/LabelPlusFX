@@ -1,12 +1,12 @@
 package ink.meodinger.lpfx.io
 
+import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.FileType
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect

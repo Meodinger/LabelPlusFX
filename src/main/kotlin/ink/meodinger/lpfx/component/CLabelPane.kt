@@ -1,6 +1,9 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.INIT_IMAGE
 import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.autoRangeTo
@@ -11,9 +14,6 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.isControlOrMetaDown
 import ink.meodinger.lpfx.util.platform.MonoFont
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.INIT_IMAGE
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 

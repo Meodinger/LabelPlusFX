@@ -14,10 +14,6 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.INFO
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.deleteTail
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
@@ -83,26 +79,26 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     // ----- Choosers ----- //
 
-    private val anyFilter         = FileChooser.ExtensionFilter(I18N["filetype.any"], "*.*")
+    private val anyFilter         = FileChooser.ExtensionFilter(I18N["file_type.any"], "*.*")
 
     private val picChooser        = CFileChooser()
-    private val picFilter         = FileChooser.ExtensionFilter(I18N["filetype.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
-    private val pngFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_png"], "*.${EXTENSION_PIC_PNG}")
-    private val jpgFilter         = FileChooser.ExtensionFilter(I18N["filetype.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
-    private val jpegFilter        = FileChooser.ExtensionFilter(I18N["filetype.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
+    private val picFilter         = FileChooser.ExtensionFilter(I18N["file_type.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
+    private val pngFilter         = FileChooser.ExtensionFilter(I18N["file_type.picture_png"], "*.${EXTENSION_PIC_PNG}")
+    private val jpgFilter         = FileChooser.ExtensionFilter(I18N["file_type.picture_jpg"], "*.${EXTENSION_PIC_JPG}")
+    private val jpegFilter        = FileChooser.ExtensionFilter(I18N["file_type.picture_jpeg"], "*.${EXTENSION_PIC_JPEG}")
 
     private val newChooser        = CFileChooser()
     private val fileChooser       = CFileChooser()
     private val exportChooser     = CFileChooser()
-    private val fileFilter        = FileChooser.ExtensionFilter(I18N["filetype.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
-    private val lpFilter          = FileChooser.ExtensionFilter(I18N["filetype.translation_lp"], "*.${EXTENSION_FILE_LP}")
-    private val meoFilter         = FileChooser.ExtensionFilter(I18N["filetype.translation_meo"], "*.${EXTENSION_FILE_MEO}")
+    private val fileFilter        = FileChooser.ExtensionFilter(I18N["file_type.translation"],  List(EXTENSIONS_FILE.size) { index -> "*.${EXTENSIONS_FILE[index]}" })
+    private val lpFilter          = FileChooser.ExtensionFilter(I18N["file_type.translation_lp"], "*.${EXTENSION_FILE_LP}")
+    private val meoFilter         = FileChooser.ExtensionFilter(I18N["file_type.translation_meo"], "*.${EXTENSION_FILE_MEO}")
 
     private val backupChooser     = FileChooser()
-    private val bakFilter         = FileChooser.ExtensionFilter(I18N["filetype.backup"], "*.${EXTENSION_BAK}")
+    private val bakFilter         = FileChooser.ExtensionFilter(I18N["file_type.backup"], "*.${EXTENSION_BAK}")
 
     private val exportPackChooser = CFileChooser()
-    private val packFilter        = FileChooser.ExtensionFilter(I18N["filetype.pack"], "*.${EXTENSION_PACK}")
+    private val packFilter        = FileChooser.ExtensionFilter(I18N["file_type.pack"], "*.${EXTENSION_PACK}")
 
     init {
         picChooser.title = I18N["m.externalPic.chooser.title"]

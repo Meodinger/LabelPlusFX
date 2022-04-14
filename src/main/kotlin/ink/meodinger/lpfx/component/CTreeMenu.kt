@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.genGeneralFormatter
@@ -13,8 +15,6 @@ import ink.meodinger.lpfx.util.dialog.showChoice
 import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.dialog.showInput
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.beans.binding.Bindings
 import javafx.event.ActionEvent

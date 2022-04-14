@@ -22,7 +22,6 @@ import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.resource.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 

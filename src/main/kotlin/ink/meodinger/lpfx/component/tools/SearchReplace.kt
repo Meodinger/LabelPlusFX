@@ -12,9 +12,6 @@ import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.dialog.showInfo
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.ICON
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.property.BooleanProperty

@@ -14,9 +14,6 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.SAMPLE_IMAGE
-import ink.meodinger.lpfx.util.resource.get
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.isMathematicalDecimal
 

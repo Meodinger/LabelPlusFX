@@ -2,8 +2,6 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.component.genTextFormatter
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
 
 import javafx.scene.control.TextFormatter
 import java.io.File
@@ -113,8 +111,8 @@ enum class ViewMode(private val description: String) {
  * Translation File Type
  */
 enum class FileType(private val description: String, val extension: String) {
-    LPFile(I18N["filetype.translation_lp"], EXTENSION_FILE_LP),
-    MeoFile(I18N["filetype.translation_meo"], EXTENSION_FILE_MEO);
+    LPFile(I18N["file_type.translation_lp"], EXTENSION_FILE_LP),
+    MeoFile(I18N["file_type.translation_meo"], EXTENSION_FILE_MEO);
 
     override fun toString(): String = description
 

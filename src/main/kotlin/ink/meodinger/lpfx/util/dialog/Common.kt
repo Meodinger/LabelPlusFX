@@ -1,9 +1,6 @@
 package ink.meodinger.lpfx.util.dialog
 
-import ink.meodinger.lpfx.COMMON_GAP
-import ink.meodinger.lpfx.GENERAL_ICON_RADIUS
-import ink.meodinger.lpfx.PANE_HEIGHT
-import ink.meodinger.lpfx.PANE_WIDTH
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.vgrow
@@ -11,9 +8,6 @@ import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.image.resizeByRadius
-import ink.meodinger.lpfx.util.resource.I18N
-import ink.meodinger.lpfx.util.resource.get
-import ink.meodinger.lpfx.util.resource.loadAsImage
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 

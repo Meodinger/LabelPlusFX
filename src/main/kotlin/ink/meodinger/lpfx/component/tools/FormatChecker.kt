@@ -31,13 +31,13 @@ import javafx.stage.Stage
  */
 
 
-class TextChecker(private val state: State) : Stage() {
+class FormatChecker(private val state: State) : Stage() {
 
     companion object {
         private val Typos: Map<String, String> = mapOf(
-            "\n\n"         to I18N["typo.lines"],
-            ".."           to I18N["typo.dots"],
-            "\u3002\u3002" to I18N["typo.dots"],
+            "\n\n"         to I18N["format.lines"],
+            ".."           to I18N["format.dots"],
+            "\u3002\u3002" to I18N["format.dots"],
         )
     }
 
@@ -65,7 +65,7 @@ class TextChecker(private val state: State) : Stage() {
                 vgap = COMMON_GAP / 2
 
                 // Why 4 GAPs? Stage.width != Scene.width
-                val colWidth = (this@TextChecker.width - GENERAL_ICON_RADIUS * 2 - 4 * COMMON_GAP) / 2
+                val colWidth = (this@FormatChecker.width - GENERAL_ICON_RADIUS * 2 - 4 * COMMON_GAP) / 2
                 columnConstraints.addAll(ColumnConstraints(colWidth), ColumnConstraints(colWidth))
 
                 add(Label(), 0, 0, 2, 1) {
@@ -107,8 +107,8 @@ class TextChecker(private val state: State) : Stage() {
             if (index == NOT_FOUND) return@onNew
 
             state.currentPicName = picName
+            state.view.cTreeView.selectionModel.clearSelection() // Clear before select
             state.currentLabelIndex = labelIndex
-            state.view.cTreeView.selectionModel.clearSelection()
             state.view.cTransArea.selectRange(index, index + typo.length)
         })
     }

@@ -83,8 +83,8 @@ class LabelPlusFX: HookedApplication() {
     val searchAndReplace by lazy {
         SearchReplace(state) withOwner state.stage
     }
-    val textChecker      by lazy {
-        TextChecker(state) withOwner state.stage
+    val formatChecker    by lazy {
+        FormatChecker(state) withOwner state.stage
     }
     val dialogSpecify    by lazy {
         SpecifyFiles(state) withOwner state.stage

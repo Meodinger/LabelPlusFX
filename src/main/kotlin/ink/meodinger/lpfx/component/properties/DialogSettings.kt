@@ -84,6 +84,7 @@ class DialogSettings : AbstractPropertiesDialog() {
 
     private val xUpdCheckBox = CheckBox(I18N["settings.other.auto_check_upd"])
     private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
+    private val xCheckFormatBox = CheckBox(I18N["settings.other.check_format"])
     private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
     private val xUseTCheckBox = CheckBox(I18N["settings.other.template.enable"])
     private val xTemplateField = TextField()
@@ -318,15 +319,17 @@ class DialogSettings : AbstractPropertiesDialog() {
                     //   0        1
                     // 0 O UpdateCheck
                     // 1 O InstantTranslate
-                    // 2 O UseMeoFileAsDefault
-                    // 3 O UseExportTemplate
-                    // 4   |  template text  |
+                    // 2 O CheckFormatWhenSave
+                    // 3 O UseMeoFileAsDefault
+                    // 4 O UseExportTemplate
+                    // 5   |  template text  |
 
                     add(xUpdCheckBox, 0, 0, 2, 1)
                     add(xInstCheckBox, 0, 1, 2, 1)
-                    add(xUseMCheckBox, 0, 2, 2, 1)
-                    add(xUseTCheckBox, 0, 3, 2, 1)
-                    add(xTemplateField, 1, 4) {
+                    add(xCheckFormatBox, 0, 2, 2, 1)
+                    add(xUseMCheckBox, 0, 3, 2, 1)
+                    add(xUseTCheckBox, 0, 4, 2, 1)
+                    add(xTemplateField, 1, 5) {
                         disableProperty().bind(!xUseTCheckBox.selectedProperty())
                         textFormatter = genTextFormatter<String> { it.text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
                         tooltip = Tooltip(I18N["settings.other.template.hint"]).apply {
@@ -484,6 +487,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         // Other
         xUpdCheckBox.isSelected = Settings.autoCheckUpdate
         xInstCheckBox.isSelected = Settings.instantTranslate
+        xCheckFormatBox.isSelected = Settings.checkFormatWhenSave
         xUseMCheckBox.isSelected = Settings.useMeoFileAsDefault
         xUseTCheckBox.isSelected = Settings.useExportNameTemplate
         xTemplateField.text = Settings.exportNameTemplate
@@ -561,6 +565,7 @@ class DialogSettings : AbstractPropertiesDialog() {
 
         map[Settings.AutoCheckUpdate] = xUpdCheckBox.isSelected
         map[Settings.InstantTranslate] = xInstCheckBox.isSelected
+        map[Settings.CheckFormatWhenSave] = xCheckFormatBox.isSelected
         map[Settings.UseMeoFileAsDefault] = xUseMCheckBox.isSelected
         map[Settings.UseExportNameTemplate] = xUseTCheckBox.isSelected
         map[Settings.ExportNameTemplate] = xTemplateField.text

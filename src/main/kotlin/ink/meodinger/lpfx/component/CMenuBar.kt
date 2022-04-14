@@ -482,11 +482,12 @@ class CMenuBar(private val state: State) : MenuBar() {
             Settings.LabelColorOpacity        -> Settings.labelColorOpacity            = value as Double
             Settings.LabelTextOpaque          -> Settings.labelTextOpaque              = value as Boolean
             Settings.LigatureRules            -> Settings.ligatureRules               /= value as List<Pair<String, String>>
+            Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate              = value as Boolean
             Settings.InstantTranslate         -> Settings.instantTranslate             = value as Boolean
+            Settings.CheckFormatWhenSave      -> Settings.checkFormatWhenSave          = value as Boolean
             Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault          = value as Boolean
             Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate        = value as Boolean
             Settings.ExportNameTemplate       -> Settings.exportNameTemplate           = value as String
-            Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate              = value as Boolean
             else -> doNothing()
         }
     }
@@ -611,7 +612,9 @@ class CMenuBar(private val state: State) : MenuBar() {
         dict.toFront()
     }
     private fun showChecker() {
-        val checker = state.application.textChecker
+        if (!Settings.checkFormatWhenSave) return
+
+        val checker = state.application.formatChecker
 
         if (checker.check()) return
         if (!checker.isShowing) showAlert(state.stage, I18N["checker.warning"])

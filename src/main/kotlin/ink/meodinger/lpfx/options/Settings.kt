@@ -43,11 +43,12 @@ object Settings : AbstractProperties("Settings") {
     const val LabelColorOpacity        = "LabelColorOpacity"
     const val LabelTextOpaque          = "LabelTextOpaque"
     const val LigatureRules            = "LigatureRules"
+    const val AutoCheckUpdate          = "AutoCheckUpdate"
     const val InstantTranslate         = "InstantTranslate"
+    const val CheckFormatWhenSave      = "CheckFormatWhenSave"
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
     const val UseExportNameTemplate    = "UseExportNameTemplate"
     const val ExportNameTemplate       = "ExportNameTemplate"
-    const val AutoCheckUpdate          = "AutoCheckUpdate"
 
     // ----- Default ----- //
 
@@ -73,11 +74,12 @@ object Settings : AbstractProperties("Settings") {
             "cc"     to "◎",
             "*"      to "※",
         ),
+        CProperty(AutoCheckUpdate, true),
         CProperty(InstantTranslate, false),
+        CProperty(CheckFormatWhenSave, true),
         CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, I18N["settings.other.template.default"]),
-        CProperty(AutoCheckUpdate, true),
     )
 
     private val defaultGroupNameListProperty: ListProperty<String> = SimpleListProperty()
@@ -120,9 +122,17 @@ object Settings : AbstractProperties("Settings") {
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
+    private val autoCheckUpdateProperty: BooleanProperty = SimpleBooleanProperty()
+    fun autoCheckUpdateProperty(): BooleanProperty = autoCheckUpdateProperty
+    var autoCheckUpdate: Boolean by autoCheckUpdateProperty
+
     private val instantTranslateProperty: BooleanProperty = SimpleBooleanProperty()
     fun instantTranslateProperty(): BooleanProperty = instantTranslateProperty
     var instantTranslate: Boolean by instantTranslateProperty
+
+    private val checkFormatWhenSaveProperty: BooleanProperty = SimpleBooleanProperty()
+    fun checkFormatWhenSaveProperty(): BooleanProperty = checkFormatWhenSaveProperty
+    var checkFormatWhenSave: Boolean by checkFormatWhenSaveProperty
 
     private val useMeoFileAsDefaultProperty: BooleanProperty = SimpleBooleanProperty()
     fun useMeoFileAsDefaultProperty(): BooleanProperty = useMeoFileAsDefaultProperty
@@ -135,10 +145,6 @@ object Settings : AbstractProperties("Settings") {
     private val exportNameTemplateProperty: StringProperty = SimpleStringProperty()
     fun exportNameTemplateProperty(): StringProperty = exportNameTemplateProperty
     var exportNameTemplate: String by exportNameTemplateProperty
-
-    private val autoCheckUpdateProperty: BooleanProperty = SimpleBooleanProperty()
-    fun autoCheckUpdateProperty(): BooleanProperty = autoCheckUpdateProperty
-    var autoCheckUpdate: Boolean by autoCheckUpdateProperty
 
     init { useDefault() }
 
@@ -156,11 +162,12 @@ object Settings : AbstractProperties("Settings") {
         labelColorOpacity           = this[LabelColorOpacity].asInteger(16) / 255.0
         labelTextOpaque             = this[LabelTextOpaque].asBoolean()
         ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
+        autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
         instantTranslate            = this[InstantTranslate].asBoolean()
+        checkFormatWhenSave           = this[CheckFormatWhenSave].asBoolean()
         useMeoFileAsDefault         = this[UseMeoFileAsDefault].asBoolean()
         useExportNameTemplate       = this[UseExportNameTemplate].asBoolean()
         exportNameTemplate          = this[ExportNameTemplate].asString()
-        autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
     }
 
     @Throws(IOException::class)
@@ -175,11 +182,12 @@ object Settings : AbstractProperties("Settings") {
         this[LabelColorOpacity]       .set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LabelTextOpaque]         .set(labelTextOpaque)
         this[LigatureRules]           .set(ligatureRules)
+        this[AutoCheckUpdate]         .set(autoCheckUpdate)
         this[InstantTranslate]        .set(instantTranslate)
+        this[CheckFormatWhenSave]     .set(checkFormatWhenSave)
         this[UseMeoFileAsDefault]     .set(useMeoFileAsDefault)
         this[UseExportNameTemplate]   .set(useExportNameTemplate)
         this[ExportNameTemplate]      .set(exportNameTemplate)
-        this[AutoCheckUpdate]         .set(autoCheckUpdate)
 
         save(Options.settings, this)
     }

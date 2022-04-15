@@ -164,7 +164,7 @@ object Settings : AbstractProperties("Settings") {
         ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
         autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
         instantTranslate            = this[InstantTranslate].asBoolean()
-        checkFormatWhenSave           = this[CheckFormatWhenSave].asBoolean()
+        checkFormatWhenSave         = this[CheckFormatWhenSave].asBoolean()
         useMeoFileAsDefault         = this[UseMeoFileAsDefault].asBoolean()
         useExportNameTemplate       = this[UseExportNameTemplate].asBoolean()
         exportNameTemplate          = this[ExportNameTemplate].asString()

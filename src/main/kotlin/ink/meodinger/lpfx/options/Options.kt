@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.options
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.LOGSRC_OPTIONS
 import ink.meodinger.lpfx.get
+import ink.meodinger.lpfx.util.assignOnce
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
@@ -28,24 +29,20 @@ import kotlin.system.exitProcess
  */
 object Options {
 
-    private const val LPFX = ".lpfx"
     private const val FileName_Preference = "preference"
     private const val FileName_Settings = "settings"
     private const val FileName_RecentFiles = "recent_files"
     private const val FolderName_Logs = "logs"
     private const val Logfile_MAXCOUNT = 20
 
-    lateinit var profileDir: Path
-        private set
+    private var profileDir: Path by assignOnce()
 
     val preference:  Path get() = profileDir.resolve(FileName_Preference)
     val settings:    Path get() = profileDir.resolve(FileName_Settings)
     val recentFiles: Path get() = profileDir.resolve(FileName_RecentFiles)
     val logs:        Path get() = profileDir.resolve(FolderName_Logs)
 
-    fun init(dirname: String = LPFX) {
-        if (this::profileDir.isInitialized) throw IllegalStateException("Already set profile dirname")
-
+    fun init(dirname: String = ".lpfx") {
         profileDir = Paths.get(System.getProperty("user.home")).resolve(dirname)
 
         // project data folder

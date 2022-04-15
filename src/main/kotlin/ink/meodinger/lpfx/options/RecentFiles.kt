@@ -28,17 +28,17 @@ object RecentFiles : AbstractProperties("Recent Files") {
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
     val recentFiles: ObservableList<File> by recentFilesProperty
 
-    private val progressMapProperty: MapProperty<String, Pair<Int, Int>> = SimpleMapProperty()
-    fun progressMapProperty(): MapProperty<String, Pair<Int, Int>> = progressMapProperty
-    val progressMap: ObservableMap<String, Pair<Int, Int>> by progressMapProperty
-
     private val lastFileProperty: ObjectProperty<File?> = SimpleObjectProperty()
     fun lastFileProperty(): ReadOnlyObjectProperty<File?> = lastFileProperty
     val lastFile: File? by lastFileProperty
 
+    private val progressMapProperty: MapProperty<String, Pair<Int, Int>> = SimpleMapProperty()
+    fun progressMapProperty(): MapProperty<String, Pair<Int, Int>> = progressMapProperty
+    val progressMap: ObservableMap<String, Pair<Int, Int>> by progressMapProperty
+
     override val default = listOf(
         CProperty(RECENT),
-        CProperty(PROGRESS)
+        CProperty(PROGRESS),
     )
 
     init { useDefault() }
@@ -50,11 +50,11 @@ object RecentFiles : AbstractProperties("Recent Files") {
         val recentPaths = this[RECENT].asStringList()
         recentFilesProperty.set(FXCollections.observableArrayList(recentPaths.map(::File)))
 
+        lastFileProperty.bind(recentFilesProperty.valueAt(0))
+
         val progressPairList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
         val progressList = recentPaths.mapIndexed { index, path -> path to progressPairList.getOrElse(index) { -1 to -1 } }
         progressMapProperty.set(FXCollections.observableHashMap<String, Pair<Int, Int>>().apply { putAll(progressList) })
-
-        lastFileProperty.bind(recentFilesProperty.valueAt(0))
     }
 
     @Throws(IOException::class)
@@ -73,7 +73,6 @@ object RecentFiles : AbstractProperties("Recent Files") {
 
         if (recentFiles.size > MAX_SIZE) progressMap.remove(recentFiles.removeLast().path)
     }
-
     fun remove(file: File) {
         recentFiles.remove(file)
         progressMap.remove(file.path)
@@ -82,7 +81,6 @@ object RecentFiles : AbstractProperties("Recent Files") {
     fun getProgressOf(path: String): Pair<Int, Int> {
         return progressMap[path] ?: (-1 to -1)
     }
-
     fun setProgressOf(path: String, current: Pair<Int, Int>) {
         progressMap[path] = current
     }

@@ -111,6 +111,7 @@ class FormatChecker(private val state: State) : Stage() {
             state.currentLabelIndex = labelIndex
             state.view.cTransArea.selectRange(index, index + typo.length)
         })
+        closeOnEscape()
     }
 
     private fun collectTypos() {

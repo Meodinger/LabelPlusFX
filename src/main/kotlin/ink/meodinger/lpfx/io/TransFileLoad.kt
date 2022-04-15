@@ -54,10 +54,11 @@ fun load(file: File, type: FileType): TransFile {
  */
 @Throws(IOException::class)
 private fun loadLP(file: File): TransFile {
-    val stream = FileInputStream(file).apply { mark(3) }
+    // Raw FIS doesn't support mark/reset
+    val stream = BufferedInputStream(FileInputStream(file)).apply { mark(3) }
     val reader = BufferedReader(InputStreamReader(stream, StandardCharsets.UTF_8))
 
-    // Remove BOM (EF BB BF)
+    // Remove BOM (EF BB BF as \uFEFF)
     val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
     val buf = ByteArray(3)
     val len = stream.read(buf, 0, 3)

@@ -30,11 +30,11 @@ infix fun <T : Stage> T.withOwner(owner: Window?): T {
 ///// Dialog / DialogPane
 ////////////////////////////////////////////////////////////
 
-fun <T : Node> DialogPane.withContent(content: T, operation: T.() -> Unit = {}): DialogPane {
-    return apply { this.content = content.apply(operation) }
+fun <T : Node> DialogPane.withContent(node: T, operation: T.() -> Unit = {}): DialogPane {
+    return apply { content = node.apply(operation) }
 }
-infix fun <T : Node> DialogPane.withContent(content: T) : DialogPane {
-    return apply { this.content = content }
+infix fun <T : Node> DialogPane.withContent(node: T) : DialogPane {
+    return apply { content = node }
 }
 
 /**
@@ -66,16 +66,6 @@ infix fun <T : Dialog<*>> T.withOwner(owner: Window?): T {
  */
 fun <T : Node> Pane.add(node: T, operation: T.() -> Unit = {}): Pane {
     return apply { children.add(node.apply(operation)) }
-}
-
-fun <T : Node> Pane.withContent(content: T, operation: T.() -> Unit = {}): Pane {
-    return apply {
-        children.clear()
-        add(content, operation)
-    }
-}
-infix fun <T : Node> Pane.withContent(content: T): Pane {
-    return withContent(content) {}
 }
 
 ////////////////////////////////////////////////////////////
@@ -113,6 +103,23 @@ var Node.anchorPaneRight: Double
 var Node.anchorPaneBottom: Double
     get() = AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
+
+////////////////////////////////////////////////////////////
+///// StackPane
+////////////////////////////////////////////////////////////
+
+fun <T : Node> StackPane.withContent(content: T, operation: T.() -> Unit = {}): StackPane {
+    return apply {
+        children.clear()
+        children.add(content.apply(operation))
+    }
+}
+infix fun <T : Node> StackPane.withContent(content: T): StackPane {
+    return apply {
+        children.clear()
+        children.add(content)
+    }
+}
 
 ////////////////////////////////////////////////////////////
 ///// BorderPane
@@ -179,11 +186,22 @@ var Node.gridVAlign: VPos
 ///// ScrollPane
 ////////////////////////////////////////////////////////////
 
-fun <T : Node> ScrollPane.withContent(content: T, operation: T.() -> Unit = {}): ScrollPane {
-    return apply { this.content = content.apply(operation) }
+fun <T : Node> ScrollPane.withContent(node: T, operation: T.() -> Unit = {}): ScrollPane {
+    return apply { content = node.apply(operation) }
 }
-infix fun <T : Node> ScrollPane.withContent(content: T): ScrollPane {
-    return withContent(content) {}
+infix fun <T : Node> ScrollPane.withContent(node: T): ScrollPane {
+    return apply { content = node }
+}
+
+////////////////////////////////////////////////////////////
+///// TitledPane
+////////////////////////////////////////////////////////////
+
+fun <T : Node> TitledPane.withContent(node: T, operation: T.() -> Unit = {}): TitledPane {
+    return apply { content = node.apply(operation) }
+}
+infix fun <T : Node> TitledPane.withContent(node: T): TitledPane {
+    return apply { content = node }
 }
 
 ////////////////////////////////////////////////////////////
@@ -201,7 +219,7 @@ fun <T : Node> Tab.withContent(node: T, operation: T.() -> Unit): Tab {
     return apply { content = node.apply(operation) }
 }
 infix fun <T : Node> Tab.withContent(node: T): Tab {
-    return withContent(node) {}
+    return apply { content = node }
 }
 
 ////////////////////////////////////////////////////////////

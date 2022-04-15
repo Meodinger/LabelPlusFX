@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.autoRangeTo
 import ink.meodinger.lpfx.util.color.toHexRGB
+import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.div
 import ink.meodinger.lpfx.util.doNothing
@@ -446,12 +447,12 @@ class CLabelPane : ScrollPane() {
             }
         }
 
-        // Init layer system
-        root.children.add(imageView)
-        root.children.add(labelLayer)
-        root.children.add(textLayer)
-
-        content = container withContent root
+        withContent(container.add(root) root@{
+            // Layer system
+            add(imageView)
+            add(labelLayer)
+            add(textLayer)
+        })
 
         imageProperty.addListener(onNew {
             if (it === INIT_IMAGE) {

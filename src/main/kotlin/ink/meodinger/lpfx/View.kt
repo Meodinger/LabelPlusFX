@@ -9,15 +9,16 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
-import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.Separator
 import javafx.scene.control.SplitPane
+import javafx.scene.control.TitledPane
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
@@ -99,7 +100,6 @@ class View(state: State) : BorderPane() {
                             }
                         }
                         add(HBox()) {
-                            alignment = Pos.CENTER
                             hgrow = Priority.ALWAYS
                         }
                         add(bSwitchViewMode) {
@@ -113,8 +113,14 @@ class View(state: State) : BorderPane() {
                         }
                     }
                 }
-                add(cTransArea) {
-                    isWrapText = true
+                add(TitledPane()) {
+                    textProperty().bind(Bindings.createStringBinding(
+                        { state.currentLabelIndex.takeIf { it != NOT_FOUND }?.toString() ?: emptyString() },
+                        state.currentLabelIndexProperty()
+                    ))
+                    withContent(cTransArea) {
+                        isWrapText = true
+                    }
                 }
             }
         }
@@ -147,7 +153,7 @@ class View(state: State) : BorderPane() {
             }
         }
 
-        showStatsBarProperty().addListener(onNew {
+        showStatsBarProperty.addListener(onNew {
             if (it) this@View.bottom(statsBar) else this@View.children.remove(statsBar)
         })
     }

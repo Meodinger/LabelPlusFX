@@ -71,6 +71,7 @@ class CGroup(
         colorProperty.addListener(onNew { update(color = it) })
         selectedProperty.addListener(onNew { if (it) onSelect.handle(ActionEvent(name, this)) })
 
+        widthProperty().addListener(onChange { text.layoutX = (width - text.boundsInLocal.width) / 2 })
         addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
 
         backgroundProperty().bind(Bindings.createObjectBinding({
@@ -90,9 +91,6 @@ class CGroup(
         }, hoverProperty()))
 
         children.add(text)
-
-        widthProperty().addListener(onChange { text.layoutX = (width - text.boundsInLocal.width) / 2 })
-
         update()
     }
 

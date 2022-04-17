@@ -33,12 +33,14 @@ import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.collections.SetChangeListener
+import javafx.embed.swing.SwingFXUtils
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.image.WritableImage
 import javafx.scene.input.*
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
@@ -50,7 +52,9 @@ import java.net.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.imageio.ImageIO
 import javax.net.ssl.HttpsURLConnection
+import javax.swing.SwingUtilities
 import kotlin.math.roundToInt
 
 
@@ -145,7 +149,18 @@ class Controller(private val state: State) {
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
-            state.getPicFileNow().existsOrNull()?.let { Image(FileInputStream(it)) }
+            state.getPicFileNow().existsOrNull()?.let {
+                when (it.extension) {
+                    EXTENSION_PIC_TIFF -> {
+                        val imageSwing = ImageIO.read(FileInputStream(it))
+                        val imageFX = WritableImage(imageSwing.width, imageSwing.height)
+                        SwingFXUtils.toFXImage(imageSwing, imageFX)
+
+                        imageFX
+                    }
+                    else -> Image(FileInputStream(it))
+                }
+            }
                 ?: INIT_IMAGE
         }, state.currentPicNameProperty()
     )

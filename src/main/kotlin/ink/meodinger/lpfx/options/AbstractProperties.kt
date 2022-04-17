@@ -33,7 +33,7 @@ abstract class AbstractProperties(val name: String) {
                 var index = 0
 
                 while (index < lines.size) {
-                    val line = lines[index]
+                    val line = lines[index++]
 
                     if (line.isBlank()) continue
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
@@ -46,15 +46,14 @@ abstract class AbstractProperties(val name: String) {
                     // |element 1
                     // |element 2
                     // ...
-                    if (prop[1][0] == CProperty.LIST_SEPARATOR) {
+                    if (prop[1].isNotEmpty() && prop[1][0] == CProperty.LIST_SEPARATOR) {
                         val propList = ArrayList<String>()
-                        while (++index < lines.size && lines[index].startsWith(CProperty.LIST_SEPARATOR)) {
-                            propList.add(lines[index].substring(1))
+                        while (index < lines.size && lines[index].startsWith(CProperty.LIST_SEPARATOR)) {
+                            propList.add(lines[index++].substring(1))
                         }
                         instance[prop[0]].set(propList)
                     } else {
                         instance[prop[0]].set(prop[1])
-                        index++
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {

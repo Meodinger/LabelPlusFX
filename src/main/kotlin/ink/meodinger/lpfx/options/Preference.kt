@@ -70,13 +70,13 @@ object Preference : AbstractProperties("Preference") {
     override fun load() {
         load(Options.preference, this)
 
-        val windowSizes = this[WINDOW_SIZE].asDoubleList()
+        val windowSizes = this[WINDOW_SIZE].asDoubleList().takeIf { it.size >= 2 } ?: default[0].asDoubleList()
 
         windowWidth          = windowSizes[0]
         windowHeight         = windowSizes[1]
         mainDividerPosition  = this[MAIN_DIVIDER].asDouble()
         rightDividerPosition = this[RIGHT_DIVIDER].asDouble()
-        textAreaFont         = Font.font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
+        textAreaFont         = Font(TextFont, this[TEXTAREA_FONT_SIZE].asDouble())
         isShowStatsBar       = this[SHOW_STATS_BAR].asBoolean()
         lastUpdateNotice     = this[LAST_UPDATE_NOTICE].asLong()
     }

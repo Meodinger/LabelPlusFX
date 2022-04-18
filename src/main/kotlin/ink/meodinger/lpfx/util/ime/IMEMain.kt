@@ -3,7 +3,7 @@
 package ink.meodinger.lpfx.util.ime
 
 import ink.meodinger.lpfx.Config.enableJNI
-import ink.meodinger.lpfx.util.platform.isWin
+import ink.meodinger.lpfx.isWin
 import ink.meodinger.lpfx.util.string.emptyString
 
 /**

@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.platform.TextFont
+import ink.meodinger.lpfx.TextFont
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 

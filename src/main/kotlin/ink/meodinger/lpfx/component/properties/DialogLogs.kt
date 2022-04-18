@@ -9,8 +9,6 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.event.isDoubleClick
-import ink.meodinger.lpfx.util.platform.isMac
-import ink.meodinger.lpfx.util.platform.isWin
 import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.beans.property.ReadOnlyStringProperty

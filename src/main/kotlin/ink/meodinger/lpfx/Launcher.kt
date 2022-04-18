@@ -2,7 +2,6 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
-import ink.meodinger.lpfx.util.platform.isWin
 
 import javafx.application.Application
 import javafx.application.Platform

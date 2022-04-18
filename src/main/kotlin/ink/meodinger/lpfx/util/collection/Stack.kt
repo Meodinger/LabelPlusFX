@@ -45,15 +45,11 @@ interface Stack<E> {
 }
 
 /**
- * Alias fot !isEmpty()
- */
-fun <E> Stack<E>.isNotEmpty(): Boolean = !isEmpty()
-
-/**
  * A Stack implemented with an array as internal storage.
  * Its read method `pop()` and `peek()` is faster than
  * `kotlin.collections.ArrayDeque`, but its write method
- * `push()` will be very slow if the stack is too large.
+ * `push()` will be very slow if the need-to-grew size
+ * is too large (like ArrayList).
  */
 class ArrayStack<E>(initialCapacity: Int = DEFAULT_CAPACITY) : Stack<E> {
 

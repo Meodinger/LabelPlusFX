@@ -4,10 +4,8 @@ import ink.meodinger.lpfx.action.Action
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.collection.ArrayStack
 import ink.meodinger.lpfx.util.collection.Stack
-import ink.meodinger.lpfx.util.collection.isNotEmpty
 import ink.meodinger.lpfx.util.assignOnce
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
@@ -173,7 +171,7 @@ class State {
 
         redoStack.push(undoStack.pop().apply(Action::revert))
 
-        canUndoProperty.set(undoStack.isNotEmpty())
+        canUndoProperty.set(!undoStack.isEmpty())
         canRedoProperty.set(true)
     }
 
@@ -183,7 +181,7 @@ class State {
         undoStack.push(redoStack.pop().apply(Action::commit))
 
         canUndoProperty.set(true)
-        canRedoProperty.set(redoStack.isNotEmpty())
+        canRedoProperty.set(!redoStack.isEmpty())
     }
 
 }

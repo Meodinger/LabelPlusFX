@@ -16,6 +16,17 @@ import java.util.*
  */
 
 /**
+ * OS name
+ */
+private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefault())
+
+val isWin = OS.contains("win")
+val isMac = OS.contains("mac")
+
+val MonoFont = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
+val TextFont = if (isWin) "SimSun" else if (isMac) "" else ""
+
+/**
  * Load file in module as URL
  */
 fun loadAsURL(fileName: String): URL = LabelPlusFX::class.java.getResource(fileName)!!
@@ -46,6 +57,15 @@ val SCRIPT      = loadAsBytes("/file/script/Meo_PS_Script")
 val TEMPLATE_EN = loadAsBytes("/file/script/ps_script_res/en.psd")
 val TEMPLATE_ZH = loadAsBytes("/file/script/ps_script_res/zh.psd")
 
+/**
+ * Langauge
+ */
+val lang: Locale = when (Locale.getDefault().country) {
+    "CN"             -> Locale.SIMPLIFIED_CHINESE  // zh_CN
+    "HK", "MO", "TW" -> Locale.TRADITIONAL_CHINESE // zh_TW
+    else -> Locale.ENGLISH
+}
+
 val INFO = ResourceBundle.getBundle("ink.meodinger.lpfx.LabelPlusFX")!!
-val I18N = ResourceBundle.getBundle("ink.meodinger.lpfx.Lang")!!
+val I18N = ResourceBundle.getBundle("ink.meodinger.lpfx.Lang", lang)!!
 operator fun ResourceBundle.get(key: String): String = this.getString(key)

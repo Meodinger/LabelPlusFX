@@ -56,6 +56,7 @@ const val EXTENSION_PIC_JPG  = "jpg"
 const val EXTENSION_PIC_JPEG = "jpeg"
 const val EXTENSION_PIC_GIF  = "gif"
 const val EXTENSION_PIC_BMP  = "bmp"
+const val EXTENSION_PIC_TIF  = "tif"
 const val EXTENSION_PIC_TIFF = "tiff"
 const val EXTENSION_FILE_LP  = "txt"
 const val EXTENSION_FILE_MEO = "json"
@@ -65,7 +66,15 @@ const val EXTENSION_BAK      = "bak"
 /**
  * Extensions: png, jpg, jpeg
  */
-val EXTENSIONS_PIC  = listOf(EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG, EXTENSION_PIC_GIF, EXTENSION_PIC_BMP, EXTENSION_PIC_TIFF)
+val EXTENSIONS_PIC  = listOf(
+    EXTENSION_PIC_PNG,
+    EXTENSION_PIC_JPG,
+    EXTENSION_PIC_JPEG,
+    EXTENSION_PIC_GIF,
+    EXTENSION_PIC_BMP,
+    EXTENSION_PIC_TIF,
+    EXTENSION_PIC_TIFF
+)
 val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 
 /**

@@ -21,40 +21,36 @@ import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.file.transfer
+import ink.meodinger.lpfx.util.image.imageFromFile
+import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import ink.meodinger.lpfx.util.image.resizeByRadius
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.collections.SetChangeListener
-import javafx.embed.swing.SwingFXUtils
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.image.WritableImage
 import javafx.scene.input.*
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.net.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.imageio.ImageIO
 import javax.net.ssl.HttpsURLConnection
-import javax.swing.SwingUtilities
 import kotlin.math.roundToInt
 
 
@@ -150,18 +146,25 @@ class Controller(private val state: State) {
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
             state.getPicFileNow().existsOrNull()?.let {
-                when (it.extension) {
-                    EXTENSION_PIC_TIFF -> {
-                        val imageSwing = ImageIO.read(FileInputStream(it))
-                        val imageFX = WritableImage(imageSwing.width, imageSwing.height)
-                        SwingFXUtils.toFXImage(imageSwing, imageFX)
-
-                        imageFX
+                try {
+                    val image = imageFromFile(it)
+                    if (image.isError) {
+                        Platform.runLater {
+                            showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
+                            showException(state.stage, image.exception)
+                        }
+                        INIT_IMAGE
+                    } else {
+                        image
                     }
-                    else -> Image(FileInputStream(it))
+                } catch (e: IOException) {
+                    Platform.runLater {
+                        showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
+                        showException(state.stage, e)
+                    }
+                    INIT_IMAGE
                 }
-            }
-                ?: INIT_IMAGE
+            } ?: INIT_IMAGE
         }, state.currentPicNameProperty()
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(

@@ -1,8 +1,14 @@
 package ink.meodinger.lpfx.util.image
 
+import ink.meodinger.lpfx.*
+
+import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import javax.imageio.ImageIO
 
 
 /**
@@ -75,4 +81,24 @@ fun Image.toGreyScale(): Image {
     return grayImage
 }
 
-fun imageFromFile(file: File): Image = Image(file.toURI().toURL().toString())
+/**
+ * Load an image from a file. Default uses JFX::Image, if file type
+ * not supported by JFX, use ImageIO instead.
+ * @return null if load failed
+ * @throws IOException if ImageIO load failed
+ */
+@Throws(IOException::class)
+fun imageFromFile(file: File): Image {
+    return when (file.extension) {
+        EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG, EXTENSION_PIC_GIF, EXTENSION_PIC_BMP -> {
+            // JFX supported image types
+            Image(file.toURI().toURL().toString())
+        }
+        else -> {
+            // JFX not support, use ImageIO.
+            ImageIO.read(FileInputStream(file))?.let {
+                WritableImage(it.width, it.height).apply { SwingFXUtils.toFXImage(it, this) }
+            } ?: throw IOException(I18N["util.image.unsupported"])
+        }
+    }
+}

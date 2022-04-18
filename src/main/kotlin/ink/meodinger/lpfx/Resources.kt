@@ -16,17 +16,6 @@ import java.util.*
  */
 
 /**
- * OS name
- */
-private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefault())
-
-val isWin = OS.contains("win")
-val isMac = OS.contains("mac")
-
-val MonoFont = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
-val TextFont = if (isWin) "SimSun" else if (isMac) "" else ""
-
-/**
  * Load file in module as URL
  */
 fun loadAsURL(fileName: String): URL = LabelPlusFX::class.java.getResource(fileName)!!

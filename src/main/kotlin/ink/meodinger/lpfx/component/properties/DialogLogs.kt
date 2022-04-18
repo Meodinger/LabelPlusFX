@@ -95,8 +95,8 @@ class DialogLogs : AbstractPropertiesDialog() {
                 selectionModel.selectedItemProperty().addListener(onChange { labelSent.text = "" })
                 setRowFactory { TableRow<LogFile>().apply { setOnMouseClicked { e ->
                     if (e.isDoubleClick) Runtime.getRuntime().exec(
-                        if (isWin) "notepad ${item.file.absolutePath}"
-                        else if (isMac) "open -t ${item.file.absolutePath}"
+                        if (Config.isWin) "notepad ${item.file.absolutePath}"
+                        else if (Config.isMac) "open -t ${item.file.absolutePath}"
                         else "vi ${item.file.absolutePath}"
                     )
                 } } }

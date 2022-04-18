@@ -1,6 +1,6 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.MonoFont
+import ink.meodinger.lpfx.Config.MonoFont
 import ink.meodinger.lpfx.util.color.opacity
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew

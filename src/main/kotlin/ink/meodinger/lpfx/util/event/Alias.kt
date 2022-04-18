@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.util.event
 
-import ink.meodinger.lpfx.isMac
+import ink.meodinger.lpfx.Config.isMac
+
 import javafx.scene.input.GestureEvent
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent

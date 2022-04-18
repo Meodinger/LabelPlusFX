@@ -32,7 +32,7 @@ fun main(vararg args: String) {
 
     // Load IME-related jni library
     if (Config.enableJNI) {
-        if (isWin) System.loadLibrary("IMEWrapper")
+        if (Config.isWin) System.loadLibrary("IMEWrapper")
         System.err.println("Loaded JNI Libraries")
     }
 

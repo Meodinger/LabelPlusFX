@@ -83,10 +83,10 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     private val chooserPic    = CFileChooser()
     private val filterPic     = FileChooser.ExtensionFilter(I18N["file_type.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" })
-    private val filterPNG     = FileChooser.ExtensionFilter(I18N["file_type.picture_png"], "*.${EXTENSION_PIC_PNG}")
-    private val filterJPG     = FileChooser.ExtensionFilter(I18N["file_type.picture_jpg"], "*.${EXTENSION_PIC_JPG}", "*.${EXTENSION_PIC_JPEG}")
-    private val filterGIF     = FileChooser.ExtensionFilter(I18N["file_type.picture_gif"], "*.${EXTENSION_PIC_GIF}")
     private val filterBMP     = FileChooser.ExtensionFilter(I18N["file_type.picture_bmp"], "*.${EXTENSION_PIC_BMP}")
+    private val filterGIF     = FileChooser.ExtensionFilter(I18N["file_type.picture_gif"], "*.${EXTENSION_PIC_GIF}")
+    private val filterPNG     = FileChooser.ExtensionFilter(I18N["file_type.picture_png"], "*.${EXTENSION_PIC_PNG}")
+    private val filterJPEG    = FileChooser.ExtensionFilter(I18N["file_type.picture_jpeg"], "*.${EXTENSION_PIC_JPG}", "*.${EXTENSION_PIC_JPEG}")
     private val filterTIFF    = FileChooser.ExtensionFilter(I18N["file_type.picture_tiff"], "*.${EXTENSION_PIC_TIF}", "*.${EXTENSION_PIC_TIFF}")
 
     private val chooserNew    = CFileChooser()
@@ -104,7 +104,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     init {
         chooserPic.title = I18N["m.externalPic.chooser.title"]
-        chooserPic.extensionFilters.addAll(filterPic, filterPNG, filterJPG, filterGIF, filterBMP, filterTIFF)
+        chooserPic.extensionFilters.addAll(filterPic, filterPNG, filterJPEG, filterGIF, filterBMP, filterTIFF)
 
         chooserNew.title = I18N["chooser.new"]
         chooserNew.extensionFilters.addAll(filterAny, filterFile, filterLP, filterMEO)
@@ -511,7 +511,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         showLink(
             state.stage,
             ImageView(ICON.resizeByRadius(GENERAL_ICON_RADIUS)),
-            I18N["m.about.dialog.title"],
+            I18N["common.about"],
             null,
             StringBuilder()
                 .append(INFO["application.name"]).append(" - ").append(V).append("\n")

@@ -46,10 +46,14 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         alignment = Pos.CENTER
     }
     private val fileChooser = FileChooser().apply {
-        extensionFilters.add(FileChooser.ExtensionFilter(
-            I18N["file_type.pictures"],
-            List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }
-        ))
+        extensionFilters.addAll(
+            FileChooser.ExtensionFilter(I18N["file_type.pictures"], List(EXTENSIONS_PIC.size) { index -> "*.${EXTENSIONS_PIC[index]}" }),
+            FileChooser.ExtensionFilter(I18N["file_type.picture_bmp"], "*.${EXTENSION_PIC_BMP}"),
+            FileChooser.ExtensionFilter(I18N["file_type.picture_gif"], "*.${EXTENSION_PIC_GIF}"),
+            FileChooser.ExtensionFilter(I18N["file_type.picture_png"], "*.${EXTENSION_PIC_PNG}"),
+            FileChooser.ExtensionFilter(I18N["file_type.picture_jpeg"], "*.${EXTENSION_PIC_JPG}", "*.${EXTENSION_PIC_JPEG}"),
+            FileChooser.ExtensionFilter(I18N["file_type.picture_tiff"], "*.${EXTENSION_PIC_TIF}", "*.${EXTENSION_PIC_TIFF}"),
+        )
     }
     private val dirChooser = DirectoryChooser()
 

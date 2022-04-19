@@ -88,6 +88,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private val filterPNG     = FileChooser.ExtensionFilter(I18N["file_type.picture_png"], "*.${EXTENSION_PIC_PNG}")
     private val filterJPEG    = FileChooser.ExtensionFilter(I18N["file_type.picture_jpeg"], "*.${EXTENSION_PIC_JPG}", "*.${EXTENSION_PIC_JPEG}")
     private val filterTIFF    = FileChooser.ExtensionFilter(I18N["file_type.picture_tiff"], "*.${EXTENSION_PIC_TIF}", "*.${EXTENSION_PIC_TIFF}")
+    private val filterWEBP    = FileChooser.ExtensionFilter(I18N["file_type.picture_webp"], "*.${EXTENSION_PIC_WEBP}")
 
     private val chooserNew    = CFileChooser()
     private val chooserFile   = CFileChooser()
@@ -104,7 +105,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     init {
         chooserPic.title = I18N["m.externalPic.chooser.title"]
-        chooserPic.extensionFilters.addAll(filterPic, filterPNG, filterJPEG, filterGIF, filterBMP, filterTIFF)
+        chooserPic.extensionFilters.addAll(filterPic, filterPNG, filterJPEG, filterGIF, filterBMP, filterTIFF, filterWEBP)
 
         chooserNew.title = I18N["chooser.new"]
         chooserNew.extensionFilters.addAll(filterAny, filterFile, filterLP, filterMEO)

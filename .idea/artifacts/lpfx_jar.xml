@@ -17,6 +17,12 @@
       <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.2" />
       <element id="library" level="project" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.2" />
       <element id="library" level="project" name="Maven: com.github.meodinger:htmlparser:0.0.1" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-image:3.9.0-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-io:3.9.0-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-lang:3.9.0-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-core:3.9.0-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-metadata:3.9.0-SNAPSHOT" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-webp:3.9.0-SNAPSHOT" />
     </root>
   </artifact>
 </component>

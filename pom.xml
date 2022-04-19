@@ -61,6 +61,21 @@
             <version>1.6.20</version>
         </dependency>
 
+        <!-- For send mail -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- Will be replaced by Jsoup in some time -->
+        <dependency>
+            <groupId>com.github.meodinger</groupId>
+            <artifactId>htmlparser</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
+        <!-- JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -77,17 +92,11 @@
             <version>2.13.2</version>
         </dependency>
 
-        <!-- For send mail -->
+        <!-- WebP support -->
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.meodinger</groupId>
-            <artifactId>htmlparser</artifactId>
-            <version>0.0.1</version>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>3.9.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

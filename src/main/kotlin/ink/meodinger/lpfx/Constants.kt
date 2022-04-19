@@ -58,6 +58,7 @@ const val EXTENSION_PIC_JPG  = "jpg"
 const val EXTENSION_PIC_JPEG = "jpeg"
 const val EXTENSION_PIC_TIF  = "tif"
 const val EXTENSION_PIC_TIFF = "tiff"
+const val EXTENSION_PIC_WEBP = "webp"
 const val EXTENSION_FILE_LP  = "txt"
 const val EXTENSION_FILE_MEO = "json"
 const val EXTENSION_PACK     = "zip"
@@ -73,7 +74,8 @@ val EXTENSIONS_PIC  = listOf(
     EXTENSION_PIC_JPG,
     EXTENSION_PIC_JPEG,
     EXTENSION_PIC_TIF,
-    EXTENSION_PIC_TIFF
+    EXTENSION_PIC_TIFF,
+    EXTENSION_PIC_WEBP,
 )
 val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
 

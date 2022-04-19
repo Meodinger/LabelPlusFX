@@ -28,7 +28,6 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import ink.meodinger.lpfx.util.ime.getCurrentWindow
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -170,7 +169,7 @@ class Controller(private val state: State) {
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
         {
-            state.currentPicName.takeIf(String::isNotEmpty)?.let { state.transFile.transMapProperty[it]!! }
+            state.currentPicName.takeIf(String::isNotEmpty)?.let(state.transFile.transMapProperty::get)
                 ?: FXCollections.emptyObservableList()
         }, state.currentPicNameProperty()
     )

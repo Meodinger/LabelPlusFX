@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.type
 
 import ink.meodinger.lpfx.NOT_FOUND
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.keysProperty
@@ -11,8 +13,6 @@ import ink.meodinger.lpfx.util.string.sortByDigit
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.get
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList

@@ -47,7 +47,7 @@ val TEMPLATE_EN = loadAsBytes("/file/script/ps_script_res/en.psd")
 val TEMPLATE_ZH = loadAsBytes("/file/script/ps_script_res/zh.psd")
 
 /**
- * Langauge
+ * Language
  */
 val lang: Locale = when (Locale.getDefault().country) {
     "CN"             -> Locale.SIMPLIFIED_CHINESE  // zh_CN

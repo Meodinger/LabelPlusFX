@@ -10,10 +10,18 @@ import javafx.stage.Stage
  * Have fun with my code!
  */
 
+private external fun getActiveWindow(): Long
 private external fun getWindowHandle(title: String): Long
 
 /**
- * Get the Window Handle of the stage
- * @param stage The window whose HWND will be got.
+ * Get the current working window
+ * @return hWnd in Long
+ */
+fun getCurrentWindow(): Long = getActiveWindow()
+
+/**
+ * Get the Window Handle of the stage.
+ * @param stage The stage whose hWnd will be got.
+ * @return hWnd in Long
  */
 fun getWindowHandle(stage: Stage): Long = getWindowHandle(stage.title)

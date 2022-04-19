@@ -117,7 +117,7 @@ class OnlineDict : Stage() {
                     addEventHandler(MouseEvent.MOUSE_CLICKED) {
                         if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
                             setImeConversionMode(
-                                getWindowHandle(this@OnlineDict),
+                                getCurrentWindow(),
                                 ImeSentenceMode.AUTOMATIC,
                                 ImeConversionMode.JA_HIRAGANA
                             )
@@ -146,11 +146,15 @@ class OnlineDict : Stage() {
         })
 
         focusedProperty().addListener(onNew {
+            // We do not set the IMEConversion mode here because switch language need time.
             if (it) {
                 oriLang = getCurrentLanguage()
+                // Focus gain will take place after the rendering, so it's safe to set by sync.
                 availableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
             } else {
-                setCurrentLanguage(oriLang)
+                // If set immediately after lose focus will cause focus on other stages fail.
+                // Use runLater to set language after the rendering.
+                Platform.runLater { setCurrentLanguage(oriLang) }
             }
         })
         closeOnEscape()

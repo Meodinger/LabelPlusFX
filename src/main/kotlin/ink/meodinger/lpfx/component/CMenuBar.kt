@@ -121,7 +121,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         chooserPack.title = I18N["chooser.pack"]
         chooserPack.extensionFilters.add(filterPack)
 
-        menu(I18N["mm.file"]   + "(_F)") {
+        menu(I18N["mm.file"]) {
             item(I18N["m.new"]) {
                 does { newTranslation() }
                 accelerator = KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN)
@@ -157,7 +157,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 does { if (!state.controller.stay()) state.application.exit() }
             }
         }
-        menu(I18N["mm.edit"]   + "(_E)") {
+        menu(I18N["mm.edit"]) {
             item(I18N["m.undo"]) {
                 does { state.undo() }
                 disableProperty().bind(!state.canUndoProperty())
@@ -193,7 +193,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 disableProperty().bind(!state.openedProperty())
             }
         }
-        menu(I18N["mm.export"] + "(_X)") {
+        menu(I18N["mm.export"]) {
             item(I18N["m.lp"]) {
                 does { exportTransFile(FileType.LPFile) }
                 disableProperty().bind(!state.openedProperty())
@@ -210,7 +210,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 disableProperty().bind(!state.openedProperty())
             }
         }
-        menu(I18N["mm.tools"]  + "(_T)") {
+        menu(I18N["mm.tools"]) {
             checkItem(I18N["m.dict"]) {
                 does { showDict(); isSelected = true; }
                 accelerator = KeyCodeCombination(KeyCode.D, KeyCombination.SHORTCUT_DOWN)
@@ -230,7 +230,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 selectedProperty().bindBidirectional(Preference.showStatsBarProperty())
             }
         }
-        menu(I18N["mm.about"]  + "(_H)") {
+        menu(I18N["mm.about"]) {
             item(I18N["m.settings"]) {
                 does { settings() }
             }

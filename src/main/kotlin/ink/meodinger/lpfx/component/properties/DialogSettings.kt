@@ -7,7 +7,7 @@ import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.component.common.CComboBox
 import ink.meodinger.lpfx.component.common.CInputLabel
 import ink.meodinger.lpfx.options.Settings
-import ink.meodinger.lpfx.type.TransFile
+import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.util.color.isColorHex
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.*
@@ -368,7 +368,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         }
 
         val groupId = newRowIndex - gRowShift
-        val colorHex = if (color.isColorHex()) color else TransFile.Companion.LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId % 9]
+        val colorHex = if (color.isColorHex()) color else LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId % 9]
 
         val checkBox = CheckBox().apply { isSelected = createOnNew }
         val textField = TextField(name).apply { textFormatter = genGeneralFormatter() }

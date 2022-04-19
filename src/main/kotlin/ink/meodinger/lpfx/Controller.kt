@@ -28,6 +28,7 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.util.ime.getCurrentWindow
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -861,7 +862,7 @@ class Controller(private val state: State) {
         // Show info if comment not in default list
         // Should do this before update RecentFiles
         if (!RecentFiles.recentFiles.contains(file)) {
-            val comment = transFile.comment.trim()
+            val comment = transFile.comment.trim().replace(Regex("\n(\\s)+"), "\n")
             if (!TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
                 Logger.info("Showed modified comment", LOGSRC_CONTROLLER)
                 showInfo(state.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])

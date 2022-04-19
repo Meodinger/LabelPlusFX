@@ -123,6 +123,7 @@ class CTreeView: TreeView<String>() {
         })
         selectionModel.selectedItemProperty().addListener(onNew {
             when (it) {
+                // These set will be ignored if select by set selected properties. (old == new)
                 is CTreeGroupItem -> selectedGroup = groups.indexOfFirst { g -> g.name == it.name }
                 is CTreeLabelItem -> selectedLabel = it.index
                 else -> doNothing()
@@ -242,7 +243,7 @@ class CTreeView: TreeView<String>() {
         if (scrollTo) scrollTo(getRow(item))
     }
     fun selectGroup(groupName: String, scrollTo: Boolean) {
-        // In IndexMode this will not available
+        // In IndexMode this is not available
         if (viewMode == ViewMode.IndexMode)
             throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
 
@@ -254,6 +255,7 @@ class CTreeView: TreeView<String>() {
 
     fun selectLabels(labelIndices: Collection<Int>) {
         selectionModel.clearSelection()
+        selectedLabel = NOT_FOUND // Make sure selection will update
 
         // A little trick
         labelIndices.toSortedSet().forEach(selectedLabelProperty::set)

@@ -29,6 +29,11 @@ void jstring2string(JNIEnv* env, jstring ori, System::String^* dst)
     env->ReleaseStringUTFChars(ori, chars);
 }
 
+JNIEXPORT jlong JNICALL Java_ink_meodinger_lpfx_util_ime_IMEUtil_getActiveWindow(JNIEnv*, jclass)
+{
+    return (jlong)GetForegroundWindow();
+}
+
 JNIEXPORT jlong JNICALL Java_ink_meodinger_lpfx_util_ime_IMEUtil_getWindowHandle(JNIEnv* env, jclass clazz, jstring title)
 {
     size_t len  = WCHAR_RATIO * env->GetStringLength(title);

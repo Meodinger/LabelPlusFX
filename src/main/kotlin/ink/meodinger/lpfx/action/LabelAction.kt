@@ -77,26 +77,23 @@ class LabelAction(
         Logger.info(builder.deleteTailEOL().toString(), LOGSRC_ACTION)
     }
     private fun addTransLabel(picName: String, transLabel: TransLabel) {
+        val list = state.transFile.transMapObservable[picName]
+            ?: throw TransFile.TransFileException.pictureNotFound(picName)
+
         if (transLabel.groupId >= state.transFile.groupCount)
             throw TransLabel.TransLabelException.groupIdInvalid(transLabel.groupId)
 
-        val list = state.transFile.transMapObservable[picName]
-            ?: throw TransFile.TransFileException.pictureNotFound(picName)
         val labelIndex = transLabel.index
-
         for (label in list) if (label.index >= labelIndex) label.index++
         list.add(transLabel)
 
         Logger.info("Added $picName @ $transLabel", LOGSRC_ACTION)
     }
     private fun removeTransLabel(picName: String, transLabel: TransLabel) {
-        // Clear selection if needed
-        if (state.currentLabelIndex == targetTransLabel.index) state.currentLabelIndex = NOT_FOUND
-
         val list = state.transFile.transMapObservable[picName]
             ?: throw TransFile.TransFileException.pictureNotFound(picName)
-        val labelIndex = transLabel.index
 
+        val labelIndex = transLabel.index
         list.remove(list.first { it.index == labelIndex })
         for (label in list) if (label.index > labelIndex) label.index--
 

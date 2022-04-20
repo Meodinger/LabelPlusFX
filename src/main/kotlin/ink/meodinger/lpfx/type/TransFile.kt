@@ -77,6 +77,8 @@ open class TransFile @JsonCreator constructor(
                 TransFileException(String.format(I18N["exception.trans_file.group_not_found.s"], groupName))
             fun transGroupNameRepeated(groupName: String) =
                 TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.s"], groupName))
+            fun transGroupStillInUse(groupName: String) =
+                TransFileException(String.format(I18N["exception.trans_file.group_still_in_use.s"], groupName))
 
             fun pictureNotFound(picName: String) =
                 TransFileException(String.format(I18N["exception.trans_file.picture_not_found.s"], picName))
@@ -137,9 +139,9 @@ open class TransFile @JsonCreator constructor(
         if (index == NOT_FOUND) throw TransFileException.transGroupNotFound(name)
         return index
     }
-    fun isGroupUnused(groupId: Int): Boolean {
-        for (list in transMapObservable.values) for (label in list) if (label.groupId == groupId) return false
-        return true
+    fun isGroupStillInUse(groupId: Int): Boolean {
+        for (list in transMapObservable.values) for (label in list) if (label.groupId == groupId) return true
+        return false
     }
 
     // ----- DATA ----- //

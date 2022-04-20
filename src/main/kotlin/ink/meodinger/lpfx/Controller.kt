@@ -307,13 +307,15 @@ class Controller(private val state: State) {
         cLabelPane.setOnLabelRemove {
             if (state.workMode != WorkMode.LabelMode) return@setOnLabelRemove
 
+            // Clear selection if current label will be removed
+            if (it.labelIndex == state.currentLabelIndex) {
+                state.currentLabelIndex = NOT_FOUND
+            }
             state.doAction(LabelAction(
                 ActionType.REMOVE, state,
                 state.currentPicName,
                 state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
             ))
-            // Update selection
-            cTreeView.selectionModel.clearSelection()
         }
         cLabelPane.setOnLabelHover {
             val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
@@ -565,6 +567,10 @@ class Controller(private val state: State) {
             if (it.code == KeyCode.DELETE) {
                 val indices = cLabelPane.selectedLabels.toSortedSet().reversed()
 
+                // Clear selection if current label will be removed
+                if (indices.contains(state.currentLabelIndex)) {
+                    state.currentLabelIndex = NOT_FOUND
+                }
                 state.doAction(ComplexAction.of(indices.map { index ->
                     LabelAction(
                         ActionType.REMOVE, state,
@@ -916,6 +922,8 @@ class Controller(private val state: State) {
      * @param silent Whether the save procedure is done in silence or not
      */
     fun save(file: File, type: FileType = FileType.getFileType(file), silent: Boolean = false) {
+        // TODO: Update RecentFiles Here (For SaveAs and others)
+
         // Whether overwriting existing file
         val overwrite = file.exists()
 

@@ -387,6 +387,8 @@ class CLabelPane : ScrollPane() {
                     }
                 }
 
+                // TODO: selection should update even if selected indices not change
+                // Reproduce: select some labels, use `Delete` to remove them, revert, re-select them
                 if (it.isShiftDown && it.isAltDown) {
                     // Shift + Alt -> Preserve mode
                     // Select labels in both box-selection and selected

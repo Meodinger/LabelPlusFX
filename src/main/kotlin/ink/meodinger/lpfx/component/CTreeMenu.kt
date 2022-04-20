@@ -1,11 +1,8 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.State
-import ink.meodinger.lpfx.get
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CColorPicker
-import ink.meodinger.lpfx.genGeneralFormatter
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransGroup
@@ -174,6 +171,10 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         // Reversed to delete big-index label first, make logger more literal
         @Suppress("UNCHECKED_CAST") val items = (event.source as List<CTreeLabelItem>).reversed()
 
+        // Clear selection if current label will be removed
+        if (items.any { it.index == state.currentLabelIndex }) {
+            state.currentLabelIndex = NOT_FOUND
+        }
         state.doAction(ComplexAction.of(items.map {
             LabelAction(
                 ActionType.REMOVE, state,
@@ -209,7 +210,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             val groupName = groupItem.name
 
             gChangeColorPicker.value = groupItem.color
-            gDeleteItem.isDisable = !state.transFile.isGroupUnused(state.transFile.getGroupIdByName(groupItem.value))
+            gDeleteItem.isDisable = state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(groupItem.value))
 
             gRenameItem.setOnAction { gRenameHandler.handle(ActionEvent(groupName, gRenameItem)) }
             gChangeColorPicker.setOnAction { gChangeColorHandler.handle(ActionEvent(groupName, gChangeColorPicker)) }
@@ -223,7 +224,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             // multi groups
             val groupNames = selectedItems.map { (it as CTreeGroupItem).name }
 
-            gDeleteItem.isDisable = !groupNames.all { state.transFile.isGroupUnused(state.transFile.getGroupIdByName(it)) }
+            gDeleteItem.isDisable = groupNames.any { state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(it)) }
             gDeleteItem.setOnAction { groupNames.forEach { gDeleteHandler.handle(ActionEvent(it, gDeleteItem)) } }
 
             items.add(gDeleteItem)

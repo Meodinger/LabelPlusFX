@@ -29,7 +29,13 @@ interface Action {
 
 enum class ActionType { ADD, REMOVE, CHANGE }
 
-class FunctionAction(
+/**
+ * Provide a convenient way to run functions in `Action`.
+ * Note that this class doesn't logically force the
+ * revert function to revert the changes of commit function
+ * has made. So it's an internal class.
+ */
+internal class FunctionAction(
     private val commitFunc: () -> Unit,
     private val revertFunc: () -> Unit,
 ) : Action {
@@ -46,8 +52,7 @@ class FunctionAction(
  * A `ComplexAction` is an `Action` that is made up of a bench of `Action`.
  * Its commit method will call each action's commit method by order, and
  * its revert method will call each action's revert method by reversed order.
- * Known that all actions may not have the same type, so it will throw
- * `UnsupportedOperationException` if `type` is requested.
+ * Notice that all actions may not have the same type, its type is set to `CHANGE`
  */
 class ComplexAction(private val actions: List<Action>) : Action {
 
@@ -56,7 +61,7 @@ class ComplexAction(private val actions: List<Action>) : Action {
         fun of(vararg actions: List<Action>) = ComplexAction(contact(*actions))
     }
 
-    override val type: ActionType get() = throw UnsupportedOperationException("ActionType is not fit to ComplexAction")
+    override val type: ActionType = ActionType.CHANGE
 
     override fun commit() {
         actions.forEach(Action::commit)

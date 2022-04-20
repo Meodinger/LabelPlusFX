@@ -25,7 +25,7 @@ module lpfx {
 
     // Use services to enable webp support. Actually we don't need to
     // write these lines because 12Monkeys are multi-release modules
-    // that specified service providers in META-INF/services.
+    // that have specified service providers in META-INF/services.
     uses javax.imageio.spi.ImageInputStreamSpi;
     uses javax.imageio.spi.ImageReaderSpi;
 

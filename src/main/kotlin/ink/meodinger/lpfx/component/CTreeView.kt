@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.component.expandAll
-import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
@@ -114,21 +113,35 @@ class CTreeView: TreeView<String>() {
 
         // Selection
         selectedGroupProperty.addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND || viewMode != ViewMode.GroupMode) return@onNew
-            selectionModel.select(getGroupItem(groups[it].name))
-        })
-        selectedLabelProperty.addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND) return@onNew
-            selectionModel.select(getLabelItem(it))
-        })
-        selectionModel.selectedItemProperty().addListener(onNew {
-            when (it) {
-                // These set will be ignored if select by set selected properties. (old == new)
-                is CTreeGroupItem -> selectedGroup = groups.indexOfFirst { g -> g.name == it.name }
-                is CTreeLabelItem -> selectedLabel = it.index
-                else -> doNothing()
+            if (viewMode != ViewMode.GroupMode) return@onNew
+            if (it == NOT_FOUND) {
+                selectionModel.clearSelection()
+            } else {
+                selectionModel.select(getGroupItem(groups[it].name))
             }
         })
+        selectedLabelProperty.addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND) {
+                selectionModel.clearSelection()
+            } else {
+                selectionModel.select(getLabelItem(it))
+            }
+        })
+        selectionModel.selectedItemProperty().addListener { _, oldV, newV ->
+            when (newV) {
+                // These set will be ignored if select by set selected properties. (old == new)
+                is CTreeGroupItem -> {
+                    selectedGroup = groups.indexOfFirst { g -> g.name == newV.name }
+                }
+                is CTreeLabelItem -> {
+                    selectedLabel = newV.index
+                }
+                null -> when (oldV) {
+                    is CTreeGroupItem -> selectedGroup = NOT_FOUND
+                    is CTreeLabelItem -> selectedLabel = NOT_FOUND
+                }
+            }
+        }
 
     }
 

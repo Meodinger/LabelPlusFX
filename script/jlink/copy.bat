@@ -5,4 +5,4 @@ rd /S /Q "jar"
 mkdir "jar"
 
 rem Copy new files
-copy "..\..\out\artifacts\lpfx_jar\*.jar" ".\jar\"
+copy "..\..\target\build\*.jar" ".\jar\"

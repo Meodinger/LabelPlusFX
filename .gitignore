@@ -1,9 +1,7 @@
 /out/
 /target/
 
-/.idea/*
-!/.idea/artifacts
-!/.idea/vcs.xml
+/.idea/
 
 /src/jni/IMEInterface/.vs/
 /src/jni/IMEInterface/bin/

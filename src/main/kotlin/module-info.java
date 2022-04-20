@@ -15,8 +15,7 @@ module lpfx {
     requires jakarta.mail;
     // HTML Parser
     requires ink.meodinger.htmlparser;
-    // JSON. Actually we only need to require databind because
-    // it transitively requires modules core and annotation.
+    // JSON
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
@@ -24,9 +23,8 @@ module lpfx {
     requires com.twelvemonkeys.imageio.webp;
 
     // Use services to enable webp support. Actually we don't need to
-    // write these lines because 12Monkeys are multi-release modules
+    // write this line because 12Monkeys are multi-release modules
     // that have specified service providers in META-INF/services.
-    uses javax.imageio.spi.ImageInputStreamSpi;
     uses javax.imageio.spi.ImageReaderSpi;
 
     opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;

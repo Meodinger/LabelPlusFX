@@ -77,18 +77,15 @@ To get a local copy up and running follow these simple steps.
    ```sh
    git clone https://github.com/Meodinger/LabelPlusFX.git
    ```
+2. Run maven build `package`
 
-2. Run maven action `idea:module`
+3. Build with script, both `link.bat` and `build.bat` is OK
 
-3. Build artifact `lpfx:jar`
-
-4. Build with script, both `jink.bat` and `build.bat` is OK
-
-5. For Windows User, build solution `IMEWrapper` and copy the `IMEInterface.dll` and `IMEWrapper.dll` to the same folder with `LabelPlusFX.exe` if used `jpackage` or `runtime\java.exe` if used `jlink`.
+4. For Windows User, build solution `IMEWrapper` and copy the `IMEInterface.dll` and `IMEWrapper.dll` to the same folder with `LabelPlusFX.exe` if used `jpackage` or `runtime\java.exe` if used `jlink`.
 
 > If you don't want to use the Windows IME JNI Interface, try `run.bat --disable-jni` or `LabelPlusFX.exe --disable-jni`
 
-> If you want to run LPFX in IDE, make sure you add the argument `--disable-jni` to CommandLine
+> If you want to run LPFX in IDE, execute maven goal `exec:java@run` to start the application
 
 <!-- USAGE EXAMPLES -->
 ## Usage

@@ -132,6 +132,7 @@ class Controller(private val state: State) {
     // Or by using InvalidationListener (which needs another listener but more literal)
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
+            // TODO: Incorrect! Maybe the wrapper is the problem
             FXCollections.observableList(state.transFileProperty().get()?.groupListProperty ?: emptyList()) {
                 arrayOf(it.nameProperty, it.colorHexProperty)
             }
@@ -139,6 +140,7 @@ class Controller(private val state: State) {
     )
     private val picNamesBinding: ObjectBinding<ObservableList<String>> = Bindings.createObjectBinding(
         {
+            // TODO: Incorrect! Maybe the wrapper is the problem (See sorted)
             state.transFileProperty().get()?.sortedPicNamesObservable
                 ?: FXCollections.emptyObservableList()
         }, state.transFileProperty()

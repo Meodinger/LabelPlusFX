@@ -1,6 +1,5 @@
-package ink.meodinger.lpfx.util
+package ink.meodinger.lpfx.util.string
 
-import ink.meodinger.lpfx.util.string.*
 import org.junit.Test
 import org.junit.Assert.*
 
@@ -34,31 +33,17 @@ class CStringKtTest {
         "image_11.jpg", "image_13.jpg", "image_21.jpg",
     )
 
-    private val names3 = listOf(
-        "5 (1).jpg", "5 (2).jpg", "5 (3).jpg", "5 (4).jpg", "5 (5).jpg",
-        "5 (6).jpg", "5 (7).jpg", "5 (8).jpg", "5 (9).jpg", "5(10).jpg",
-        "5(11).jpg", "5(21).jpg", "5(13).jpg"
-    )
-    private val expected3 = listOf(
-        "5 (1).jpg", "5 (2).jpg", "5 (3).jpg", "5 (4).jpg", "5 (5).jpg",
-        "5 (6).jpg", "5 (7).jpg", "5 (8).jpg", "5 (9).jpg", "5(10).jpg",
-        "5(11).jpg", "5(13).jpg", "5(21).jpg"
-    )
-
     @Test
-    fun sortByDigit() {
+    fun sortByDigitTest() {
         val sorted1 = sortByDigit(names1)
         for (i in sorted1.indices) assertEquals(expected1[i], sorted1[i])
 
         val sorted2 = sortByDigit(names2)
         for (i in sorted2.indices) assertEquals(expected2[i], sorted2[i])
-
-        // val sorted3 = sortByDigit(names3)
-        // for (i in sorted3.indices) assertEquals(expected3[i], sorted3[i])
     }
 
     @Test
-    fun isMathNatural()  {
+    fun isMathNaturalTest()  {
         assertTrue("123".isMathematicalNatural())
 
         assertFalse("-123".isMathematicalNatural())
@@ -84,7 +69,7 @@ class CStringKtTest {
     }
 
     @Test
-    fun isMathInt()  {
+    fun isMathIntegerTest()  {
         assertTrue("123".isMathematicalInteger())
 
         assertTrue("-123".isMathematicalInteger())
@@ -110,7 +95,7 @@ class CStringKtTest {
     }
 
     @Test
-    fun isMathDecimal()  {
+    fun isMathDecimalTest()  {
         assertTrue("123".isMathematicalDecimal())
 
         assertTrue("-123".isMathematicalDecimal())
@@ -136,7 +121,7 @@ class CStringKtTest {
     }
 
     @Test
-    fun deleteTail() {
+    fun deleteTailTest() {
         // Empty tail
         assertEquals("1", StringBuilder("1").deleteTail("").toString())
         assertEquals("", StringBuilder("").deleteTail("").toString())

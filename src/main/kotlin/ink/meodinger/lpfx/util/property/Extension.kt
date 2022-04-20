@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.util.property
 
+import ink.meodinger.lpfx.util.doNothing
 import javafx.beans.property.*
 import javafx.collections.*
 
@@ -21,21 +22,6 @@ inline val <T> Property<T>.isNotBound: Boolean get() = !isBound
  */
 operator fun <E> ObservableList<E>.divAssign(value: List<E>) { setAll(value) }
 
-fun <E> ObservableSet<E>.sorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
-    val list = FXCollections.observableArrayList(sorter(this))
-
-    addListener(SetChangeListener { list.setAll(sorter(it.set)) })
-
-    return list
-}
-fun <E> ObservableList<E>.sorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
-    val list = FXCollections.observableArrayList(sorter(this))
-
-    addListener(ListChangeListener { list.setAll(sorter(it.list)) })
-
-    return list
-}
-
 fun <E> ObservableMap<E, *>.observableKeys(): ObservableSet<E> {
     val set = FXCollections.observableSet(HashSet(keys))
 
@@ -51,6 +37,18 @@ fun <E> ObservableMap<E, *>.observableKeys(): ObservableSet<E> {
 
     return FXCollections.unmodifiableObservableSet(set)
 }
-fun <E> MapProperty<E, *>.keysProperty(): ReadOnlySetProperty<E> {
-    return ReadOnlySetWrapper<E>(observableKeys()).readOnlyProperty
+
+fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
+    val list = FXCollections.observableArrayList(sorter(this))
+
+    addListener(SetChangeListener { list.setAll(sorter(it.set)) })
+
+    return FXCollections.unmodifiableObservableList(list)
+}
+fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
+    val list = FXCollections.observableArrayList(sorter(this))
+
+    addListener(ListChangeListener { list.setAll(sorter(it.list)) })
+
+    return FXCollections.unmodifiableObservableList(list)
 }

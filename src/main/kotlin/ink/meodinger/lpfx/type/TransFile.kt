@@ -4,15 +4,12 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.file.notExists
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.keysProperty
-import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.sorted
 import ink.meodinger.lpfx.util.string.sortByDigit
 
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import ink.meodinger.lpfx.util.property.*
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -112,16 +109,14 @@ open class TransFile @JsonCreator constructor(
     val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
     val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
 
-    val picNamesProperty: ReadOnlySetProperty<String> = transMapProperty.keysProperty()
-    val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(picNamesProperty.sorted(::sortByDigit)).readOnlyProperty
-
     // ----- Accessible Fields ----- //
     // Observables can be used for bindings' dependencies and data edit;
     // Raw values can be used as simple data, they are all immutable except comment;
 
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
-    val sortedPicNamesObservable: ObservableList<String> by sortedPicNamesProperty
+
+    val sortedPicNamesObservable: ObservableList<String> = transMapProperty.observableKeys().observableSorted(::sortByDigit)
 
     val version: List<Int> by versionProperty
     var comment: String by commentProperty

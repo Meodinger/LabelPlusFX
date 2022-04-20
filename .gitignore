@@ -10,7 +10,6 @@
 /src/jni/*/x64/
 /src/jni/.vs/
 /src/jni/x64/
-/src/jni/*.sln
 
 /script/jlink/*
 !/script/jlink/*.bat

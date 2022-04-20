@@ -36,7 +36,7 @@ namespace IMEInterface
             return false;
         }
 
-        [Obsolete("Currently is not functional. Use Win32 instaead", true)]
+        [Obsolete("Currently is not functional. Use Win32 instead", true)]
         public static void SetImeConversionMode(int mode)
         {
             // InputMethod.Current.ImeConversionMode = (ImeConversionModeValues)mode;

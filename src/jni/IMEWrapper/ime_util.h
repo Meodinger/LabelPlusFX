@@ -1,4 +1,4 @@
-#include "jni.h"
+#include "pch.h"
 
 #ifndef _IME_UTIL_H
 #define _IME_UTIL_H

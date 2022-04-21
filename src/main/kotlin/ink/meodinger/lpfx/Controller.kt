@@ -121,32 +121,26 @@ class Controller(private val state: State) {
     // And must invoke get() explicitly or by delegation every time to let the property validate
     // Or by using InvalidationListener (which needs another listener but more literal)
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
-        {
-            // TODO: Fix not update
-            state.transFileProperty().get()?.let {
-                FXCollections.observableList(it.groupListObservable) { group -> arrayOf(group.nameProperty, group.colorHexProperty) }
-            } ?: FXCollections.emptyObservableList()
-        }, state.transFileProperty()
+        { state.transFileProperty().get()?.groupListObservable ?: FXCollections.emptyObservableList() },
+        state.transFileProperty()
     )
     private val picNamesBinding: ObjectBinding<ObservableList<String>> = Bindings.createObjectBinding(
-        {
-            state.transFileProperty().get()?.sortedPicNamesObservable
-                ?: FXCollections.emptyObservableList()
-        }, state.transFileProperty()
+        { state.transFileProperty().get()?.sortedPicNamesObservable ?: FXCollections.emptyObservableList() },
+        state.transFileProperty()
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
             state.getPicFileNow().existsOrNull()?.let {
                 try {
                     val image = imageFromFile(it)
-                    if (image.isError) {
+                    if (!image.isError) {
+                        image
+                    } else {
                         Platform.runLater {
                             showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
                             showException(state.stage, image.exception)
                         }
                         INIT_IMAGE
-                    } else {
-                        image
                     }
                 } catch (e: IOException) {
                     Platform.runLater {

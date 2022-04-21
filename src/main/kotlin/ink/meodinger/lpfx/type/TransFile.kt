@@ -103,11 +103,14 @@ class TransFile @JsonCreator constructor(
 
     // ----- Properties ----- //
     // Only internal use to avoid accidentally invoking their `set` methods
+    // Note1: all backing list/map/set should be mutable
+    // Note2: version is immutable
+    // Note3: groups' properties' changes will be listened
 
     private val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
     private val commentProperty: StringProperty = SimpleStringProperty(comment)
-    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
-    private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
+    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty, it.colorHexProperty) })
+    private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableList(it.value) }))
 
     // ----- Accessible Fields ----- //
 

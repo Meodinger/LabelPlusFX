@@ -143,7 +143,7 @@ class SearchReplace(private val state: State) : Stage() {
         }
 
         // Find in the rest
-        val picNames = state.transFile.sortedPicNamesObservable
+        val picNames = state.transFile.sortedPicNames
         val picIndex = picNames.indexOf(state.currentPicName)
         for (i in picNames.indices) {
             // continue if not wrap search
@@ -173,7 +173,7 @@ class SearchReplace(private val state: State) : Stage() {
 
         var count = 0
         val actions = ArrayList<LabelAction>()
-        for (picName in state.transFile.sortedPicNamesObservable) {
+        for (picName in state.transFile.sortedPicNames) {
             for (label in state.transFile.getTransList(picName)) {
                 var index = label.text.indexOf(searchText, 0, ignoreCase)
                 if (index == NOT_FOUND) continue

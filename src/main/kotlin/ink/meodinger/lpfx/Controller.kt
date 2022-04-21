@@ -39,7 +39,7 @@ import java.io.IOException
 import java.net.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 import javax.net.ssl.HttpsURLConnection
 import kotlin.math.roundToInt
 
@@ -117,16 +117,18 @@ class Controller(private val state: State) {
         }
     }
 
-    // Following Bindings should create in order to avoid unexpected Exceptions
-    // And must invoke get() explicitly or by delegation every time to let the property validate
-    // Or by using InvalidationListener (which needs another listener but more literal)
+    // Following Bindings should create in order to avoid unexpected exceptions.
+    // When ObjectProperty changes, its value will temporarily set to null.
+    // So an elvis expression is needed to handle the null value.
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
-        { state.transFileProperty().get()?.groupListObservable ?: FXCollections.emptyObservableList() },
-        state.transFileProperty()
+        {
+            state.transFileProperty().get()?.groupListObservable ?: FXCollections.emptyObservableList()
+        }, state.transFileProperty()
     )
     private val picNamesBinding: ObjectBinding<ObservableList<String>> = Bindings.createObjectBinding(
-        { state.transFileProperty().get()?.sortedPicNamesObservable ?: FXCollections.emptyObservableList() },
-        state.transFileProperty()
+        {
+            state.transFileProperty().get()?.sortedPicNamesObservable ?: FXCollections.emptyObservableList()
+        }, state.transFileProperty()
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
@@ -570,7 +572,7 @@ class Controller(private val state: State) {
         // Work Progress
         val workProgressListener = onChange<Any> {
             if (state.isOpened) RecentFiles.setProgressOf(state.translationFile.path,
-                state.transFile.sortedPicNamesObservable.indexOf(state.currentPicName) to state.currentLabelIndex
+                state.transFile.sortedPicNames.indexOf(state.currentPicName) to state.currentLabelIndex
             )
         }
         state.currentPicNameProperty().addListener(workProgressListener)
@@ -730,7 +732,7 @@ class Controller(private val state: State) {
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
-                save(state.translationFile, silent = true)
+                save(state.translationFile, true)
                 return false
             }
             ButtonType.NO -> return false
@@ -743,11 +745,10 @@ class Controller(private val state: State) {
     /**
      * Create a new TransFile file and its FileSystem file.
      * @param file Which file the TransFile will write to
-     * @param type Which type the Translation file will be
      * @return ProjectFolder if success, null if fail
      */
-    fun new(file: File, type: FileType = FileType.getFileType(file)): File? {
-        Logger.info("Newing $type to ${file.path}", LOGSRC_CONTROLLER)
+    fun new(file: File): File? {
+        Logger.info("Newing to ${file.path}", LOGSRC_CONTROLLER)
 
         // Choose Pics
         var projectFolder = file.parentFile
@@ -795,21 +796,20 @@ class Controller(private val state: State) {
         Logger.info("Chose pictures", LOGSRC_CONTROLLER)
 
         // Prepare new TransFile
-        val groupNameList = Settings.defaultGroupNameList
-        val groupColorList = Settings.defaultGroupColorHexList
         val groupCreateList = Settings.isGroupCreateOnNewTransList
-        val groupList = ArrayList<TransGroup>()
-        for (i in groupNameList.indices)
-            if (groupCreateList[i]) groupList.add(TransGroup(groupNameList[i], groupColorList[i]))
-        val transMap = LinkedHashMap<String, MutableList<TransLabel>>()
-        for (pic in selectedPics)
-            transMap[pic] = ArrayList()
-        val transFile = TransFile(TransFile.DEFAULT_VERSION, TransFile.DEFAULT_COMMENT, groupList, transMap)
+        val groupNames = Settings.defaultGroupNameList.filterIndexed { index, _ -> groupCreateList[index] }
+        val groupColors = Settings.defaultGroupColorHexList.filterIndexed { index, _ -> groupCreateList[index] }
+        val transFile = TransFile(
+            TransFile.DEFAULT_VERSION,
+            TransFile.DEFAULT_COMMENT,
+            groupNames.mapIndexedTo(ArrayList()) { index, name -> TransGroup(name, groupColors[index]) },
+            selectedPics.associateWithTo(HashMap()) { ArrayList() }
+        )
         Logger.info("Built TransFile", LOGSRC_CONTROLLER)
 
         // Export to file
         try {
-            export(file, type, transFile)
+            export(file, FileType.getFileType(file), transFile)
         } catch (e: IOException) {
             Logger.error("New failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -824,16 +824,15 @@ class Controller(private val state: State) {
     /**
      * Open a translation file
      * @param file Which file will be open
-     * @param type Which type the file is
-     * @param projectFolder Which folder the pictures locate in; translation file's folder by default
+     * @param projectFolder Which folder the pictures locate in
      */
-    fun open(file: File, type: FileType = FileType.getFileType(file), projectFolder: File = file.parentFile) {
+    fun open(file: File, projectFolder: File = file.parentFile) {
         Logger.info("Opening TransFile: ${file.path}", LOGSRC_CONTROLLER)
 
         // Load File
         val transFile: TransFile
         try {
-            transFile = load(file, type)
+            transFile = load(file, FileType.getFileType(file))
             transFile.projectFolder = projectFolder
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
@@ -888,7 +887,7 @@ class Controller(private val state: State) {
         // Initialize workspace
         val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
         state.currentGroupId = 0
-        state.currentPicName = state.transFile.sortedPicNamesObservable[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
+        state.currentPicName = state.transFile.sortedPicNames[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 
@@ -903,10 +902,9 @@ class Controller(private val state: State) {
     /**
      * Save a TransFile
      * @param file Which file will the TransFile write to
-     * @param type Which type will the translation file be
      * @param silent Whether the save procedure is done in silence or not
      */
-    fun save(file: File, type: FileType = FileType.getFileType(file), silent: Boolean = false) {
+    fun save(file: File, silent: Boolean = false) {
         // TODO: Update RecentFiles Here (For SaveAs and others)
 
         // Whether overwriting existing file
@@ -925,7 +923,7 @@ class Controller(private val state: State) {
 
         // Export
         try {
-            export(exportDest, type, state.transFile)
+            export(exportDest, FileType.getFileType(file), state.transFile)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -969,14 +967,14 @@ class Controller(private val state: State) {
      * @param from The backup file
      * @param to Which file will the backup recover to
      */
-    fun recovery(from: File, to: File, type: FileType = FileType.getFileType(to)) {
+    fun recovery(from: File, to: File) {
         Logger.info("Recovering from ${from.path}", LOGSRC_CONTROLLER)
 
         try {
-            val tempFile = File.createTempFile("temp", type.name).apply(File::deleteOnExit)
+            val tempFile = File.createTempFile("LPFXTempFile", to.extension).apply(File::deleteOnExit)
             val transFile = load(from, FileType.MeoFile)
 
-            export(tempFile, type, transFile)
+            export(tempFile, FileType.getFileType(to), transFile)
             transfer(tempFile, to)
         } catch (e: Exception) {
             Logger.error("Recover failed", LOGSRC_CONTROLLER)
@@ -986,14 +984,14 @@ class Controller(private val state: State) {
         }
         Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
 
-        open(to, type)
+        open(to)
     }
     /**
      * Export a TransFile in specific type
      * @param file Which file will the TransFile write to
      * @param type Which type will the translation file be
      */
-    fun export(file: File, type: FileType = FileType.getFileType(file)) {
+    fun export(file: File, type: FileType) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
@@ -1039,8 +1037,8 @@ class Controller(private val state: State) {
     // ----- Global Methods ----- //
 
     fun requestUpdatePane() {
-        cLabelPane.requestRemoveLabels()
         imageBinding.invalidate()
+        cLabelPane.requestRemoveLabels()
         cLabelPane.requestShowImage()
         cLabelPane.requestCreateLabels()
     }

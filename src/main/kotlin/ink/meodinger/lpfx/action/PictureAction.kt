@@ -25,7 +25,7 @@ import java.io.File
  *
  * If action type is `REMOVE`, `targetPicName` will be removed from
  * TransFile's transMap. The argument `targetPicFile` will not be used,
- * just leave it default.
+ * just leave it as default.
  *
  * If action type is `CHANGE`, file related to `targetPicName` will be
  * updated to non-nullable `targetPicFile`.
@@ -43,26 +43,28 @@ class PictureAction(
     private val oriPicFile: File? = state.transFile.getFile(targetPicName)
 
     private fun applyPicFile(picFile: File) {
-        val curFile = state.transFile.getFile(targetPicName)!!
-        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
+        val curFile = state.transFile.getFile(targetPicName)
+            ?: throw TransFile.TransFileException.pictureNotFound(targetPicName)
+
         state.transFile.setFile(targetPicName, picFile)
+
+        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
-        if (state.transFile.transMapObservable.contains(picName)) {
+        if (state.transFile.transMapObservable.contains(picName))
             throw TransFile.TransFileException.pictureNameRepeated(picName)
-        } else {
-            state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
-        }
 
+        state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
         if (picFile.exists()) state.transFile.setFile(picName, picFile!!)
 
         Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", LOGSRC_ACTION)
     }
     private fun removePicture(picName: String) {
-        state.transFile.transMapObservable.remove(picName)
-            ?: throw TransFile.TransFileException.pictureNotFound(picName)
+        if (!state.transFile.transMapObservable.contains(picName))
+            throw TransFile.TransFileException.pictureNotFound(picName)
 
-        // TODO: decide whether to remove file map or not
+        state.transFile.setFile(picName, null)
+        state.transFile.transMapObservable.remove(picName)
 
         Logger.info("Removed picture <$picName>", LOGSRC_ACTION)
     }

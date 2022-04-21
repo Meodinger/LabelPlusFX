@@ -4,16 +4,14 @@ import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.file.notExists
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.sortByDigit
 
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import ink.meodinger.lpfx.util.property.*
 import javafx.beans.property.*
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
-import javafx.collections.ObservableMap
+import javafx.collections.*
 import java.io.File
 
 
@@ -86,17 +84,36 @@ class TransFile @JsonCreator constructor(
 
     // ----- Project Files Management ----- //
 
+    /**
+     * This will be set while opening
+     */
     lateinit var projectFolder: File
 
     private val fileMap = HashMap<String, File>()
+
+    /**
+     * Get the actual file of the given picture name
+     * @param picName Name of target picture
+     * @return null if the trans-map does not contain the given name
+     */
     fun getFile(picName: String): File? {
         if (!transMapObservable.keys.contains(picName)) return null
         return fileMap[picName] ?: projectFolder.resolve(picName).also { setFile(picName, it) }
     }
-    fun setFile(picName: String, file: File) {
+
+    /**
+     * Set the actual file of the given picture name
+     * @param picName Name of target picture
+     * @param file Actual file of the picture, null to remove the file have set.
+     */
+    fun setFile(picName: String, file: File?) {
         if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
-        fileMap[picName] = file
+        if (file == null) fileMap.remove(picName) else fileMap[picName] = file
     }
+
+    /**
+     * Check whether files of some pictures not exist
+     */
     fun checkLost(): List<String> {
         return transMapObservable.keys.filter { getFile(it).notExists() }
     }
@@ -112,17 +129,23 @@ class TransFile @JsonCreator constructor(
     private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty, it.colorHexProperty) })
     private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableList(it.value) }))
 
+    private val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(transMapProperty.observableKeySet().observableSorted(::sortByDigit)).readOnlyProperty
+
     // ----- Accessible Fields ----- //
 
+    // Following properties provide JSON getters
     val version: List<Int> by versionProperty
     var comment: String by commentProperty
+    val groupList: List<TransGroup> by groupListProperty
+    val transMap: Map<String, List<TransLabel>> by transMapProperty
+
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
+    val sortedPicNamesObservable: ObservableList<String> by sortedPicNamesProperty
 
     val groupCount: Int get() = groupListProperty.size
     val picCount: Int get() = transMapProperty.size
-
-    val sortedPicNamesObservable: ObservableList<String> = transMapProperty.observableKeySet().observableSorted(::sortByDigit)
+    val sortedPicNames: List<String> by sortedPicNamesProperty
 
     // ----- TransGroup ----- //
 
@@ -151,14 +174,12 @@ class TransFile @JsonCreator constructor(
     // ----- Other ----- //
 
     fun sorted(): TransFile {
-        val version = this.version.toList()
-        val comment = this.comment
-        val groupList = MutableList(groupListObservable.size) { groupListObservable[it].clone() }
-        val transMap = LinkedHashMap<String, MutableList<TransLabel>>().apply {
-            putAll(sortedPicNamesObservable.map { it to transMapObservable[it]!!.sorted { l1, l2 -> l1.index - l2.index } })
-        }
-
-        return TransFile(version, comment, groupList, transMap)
+        return TransFile(
+            version.toList(),
+            comment,
+            groupList.mapTo(ArrayList(), TransGroup::clone),
+            sortedPicNames.associateWithTo(LinkedHashMap()) { transMap[it]!!.map(TransLabel::clone).sortedBy(TransLabel::index).toMutableList() }
+        )
     }
 
     fun toJsonString(): String {

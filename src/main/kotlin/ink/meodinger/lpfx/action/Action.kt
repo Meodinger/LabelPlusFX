@@ -62,13 +62,7 @@ class ComplexAction(private val actions: List<Action>) : Action {
     }
 
     override val type: ActionType = ActionType.CHANGE
-
-    override fun commit() {
-        actions.forEach(Action::commit)
-    }
-
-    override fun revert() {
-        actions.reversed().forEach(Action::revert)
-    }
+    override fun commit() = actions.forEach(Action::commit)
+    override fun revert() = actions.reversed().forEach(Action::revert)
 
 }

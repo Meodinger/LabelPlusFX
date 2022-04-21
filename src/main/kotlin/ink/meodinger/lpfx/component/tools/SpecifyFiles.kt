@@ -149,7 +149,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         // update variables
         workingTransFile = state.transFile
         picCount = state.transFile.picCount
-        picNames = state.transFile.sortedPicNamesObservable
+        picNames = state.transFile.sortedPicNames
 
         // prepare
         fileChooser.initialDirectory = state.transFile.projectFolder
@@ -197,7 +197,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         if (picFiles.isEmpty()) return null
 
         val picCount = state.transFile.picCount
-        val picNames = state.transFile.sortedPicNamesObservable
+        val picNames = state.transFile.sortedPicNames
         var completed = true
         for (i in 0 until picCount) {
             val picFile = picFiles[i]

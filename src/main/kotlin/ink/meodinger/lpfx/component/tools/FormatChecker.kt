@@ -117,7 +117,7 @@ class FormatChecker(private val state: State) : Stage() {
     private fun collectTypos() {
         typoList.clear()
 
-        for (picName in state.transFile.sortedPicNamesObservable) {
+        for (picName in state.transFile.sortedPicNames) {
             for (label in state.transFile.getTransList(picName)) {
                 var index = NOT_FOUND
 

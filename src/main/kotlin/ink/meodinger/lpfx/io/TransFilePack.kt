@@ -32,7 +32,7 @@ fun pack(target: File, transFile: TransFile) {
     val content = exportAsString(transFile, FileType.getFileType(target))
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.${target.extension}")
 
-    for (picName in transFile.sortedPicNamesObservable) zip.zip(transFile.getFile(picName)!!, "/images/$picName")
+    for (picName in transFile.sortedPicNames) zip.zip(transFile.getFile(picName)!!, "/images/$picName")
 
     zip.close()
 }

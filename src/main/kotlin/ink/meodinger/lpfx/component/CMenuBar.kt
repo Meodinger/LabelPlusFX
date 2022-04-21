@@ -294,7 +294,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             return@file it.parentFile.resolve("$name.$ext")
         } ?: return
         if (file.exists()) {
-            val confirm = showConfirm(state.stage, I18N["m.new.dialog.overwrite"])
+            val confirm = showConfirm(state.stage, String.format(I18N["m.new.dialog.overwrite.s"], file.name))
             if (confirm.isEmpty || confirm.get() == ButtonType.NO) return
         }
 
@@ -314,7 +314,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.controller.open(file)
     }
     private fun saveTranslation() {
-        state.controller.save(state.translationFile, silent = true)
+        state.controller.save(state.translationFile, true)
 
         showChecker()
     }
@@ -379,7 +379,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
     private fun editProjectPictures() {
         // Choose Pics
-        val selected = state.transFile.sortedPicNamesObservable
+        val selected = state.transFile.sortedPicNames
         val unselected = Files.walk(state.transFile.projectFolder.toPath(), 1)
             .filter {
                 if (selected.contains(it.name)) return@filter false
@@ -393,7 +393,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 return@ifPresent
             }
 
-            val picNames = state.transFile.sortedPicNamesObservable
+            val picNames = state.transFile.sortedPicNames
 
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
@@ -411,12 +411,12 @@ class CMenuBar(private val state: State) : MenuBar() {
                 toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
             ))
             // Update selection
-            state.currentPicName = state.transFile.sortedPicNamesObservable[0]
+            state.currentPicName = state.transFile.sortedPicNames[0]
         }
     }
     private fun addExternalPicture() {
         val files = chooserPic.showOpenMultipleDialog(state.stage) ?: return
-        val picNames = state.transFile.sortedPicNamesObservable
+        val picNames = state.transFile.sortedPicNames
 
         val conflictList = ArrayList<String>()
         for (file in files) {
@@ -544,7 +544,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             override fun call() {
                 val actions = ArrayList<LabelAction>()
 
-                val picNames = state.transFile.sortedPicNamesObservable
+                val picNames = state.transFile.sortedPicNames
                 val picCount = state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
                     if (isCancelled) return

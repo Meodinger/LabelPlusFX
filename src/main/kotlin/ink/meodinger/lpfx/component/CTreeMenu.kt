@@ -61,7 +61,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         val newGroupId = state.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
         if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
-            if (!state.transFile.groupList.any { g -> g.name == nameList[newGroupId] }) {
+            if (!state.transFile.groupListObservable.any { g -> g.name == nameList[newGroupId] }) {
                 newName = nameList[newGroupId]
             }
         }
@@ -70,7 +70,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         rAddGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
         rAddGroupDialog.result = null
         rAddGroupDialog.showAndWait().ifPresent { newGroup ->
-            if (state.transFile.groupList.any { g -> g.name == newName }) {
+            if (state.transFile.groupListObservable.any { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }
@@ -93,7 +93,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             genGeneralFormatter()
         ).ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
-            if (state.transFile.groupList.any { g -> g.name == newName }) {
+            if (state.transFile.groupListObservable.any { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
                 return@ifPresent
             }
@@ -145,7 +145,7 @@ class CTreeMenu(private val state: State) : ContextMenu() {
             state.stage,
             I18N["context.move_to.dialog.title"],
             if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
-            state.transFile.groupList.map(TransGroup::name)
+            state.transFile.groupListObservable.map(TransGroup::name)
         )
         if (choice.isPresent) {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())

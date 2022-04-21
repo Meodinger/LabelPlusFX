@@ -36,13 +36,13 @@ object Settings : AbstractProperties("Settings") {
     const val DefaultGroupNameList     = "DefaultGroupNameList"
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans  = "IsGroupCreateOnNew"
-    const val NewPictureScale          = "ScaleOnNewPicture"
+    const val LigatureRules            = "LigatureRules"
     const val ViewModes                = "ViewMode"
+    const val NewPictureScale          = "ScaleOnNewPicture"
     const val LogLevel                 = "LogLevel"
     const val LabelRadius              = "LabelRadius"
     const val LabelColorOpacity        = "LabelColorOpacity"
     const val LabelTextOpaque          = "LabelTextOpaque"
-    const val LigatureRules            = "LigatureRules"
     const val AutoCheckUpdate          = "AutoCheckUpdate"
     const val InstantTranslate         = "InstantTranslate"
     const val CheckFormatWhenSave      = "CheckFormatWhenSave"
@@ -56,12 +56,6 @@ object Settings : AbstractProperties("Settings") {
         CProperty(DefaultGroupNameList, I18N["settings.group.default.1"], I18N["settings.group.default.2"]),
         CProperty(DefaultGroupColorHexList, "FF0000", "0000FF"),
         CProperty(IsGroupCreateOnNewTrans, true, true),
-        CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
-        CProperty(ViewModes, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
-        CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
-        CProperty(LabelRadius, 24.0),
-        CProperty(LabelColorOpacity, "80"),
-        CProperty(LabelTextOpaque, false),
         CProperty(LigatureRules,
             "("      to "「",
             ")"      to "」",
@@ -74,6 +68,12 @@ object Settings : AbstractProperties("Settings") {
             "cc"     to "◎",
             "*"      to "※",
         ),
+        CProperty(ViewModes, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
+        CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
+        CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
+        CProperty(LabelRadius, 24.0),
+        CProperty(LabelColorOpacity, "80"),
+        CProperty(LabelTextOpaque, false),
         CProperty(AutoCheckUpdate, true),
         CProperty(InstantTranslate, false),
         CProperty(CheckFormatWhenSave, true),
@@ -94,13 +94,17 @@ object Settings : AbstractProperties("Settings") {
     fun isGroupCreateOnNewTransListProperty(): ListProperty<Boolean> = isGroupCreateOnNewTransListProperty
     var isGroupCreateOnNewTransList: ObservableList<Boolean> by isGroupCreateOnNewTransListProperty
 
-    private val newPictureScaleProperty: ObjectProperty<CLabelPane.NewPictureScale> = SimpleObjectProperty()
-    fun newPictureScaleProperty(): ObjectProperty<CLabelPane.NewPictureScale> = newPictureScaleProperty
-    var newPictureScalePicture: CLabelPane.NewPictureScale by newPictureScaleProperty
+    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty()
+    fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
+    var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
     private val viewModesProperty: ListProperty<ViewMode> = SimpleListProperty()
     fun viewModesProperty(): ListProperty<ViewMode> = viewModesProperty
     var viewModes: ObservableList<ViewMode> by viewModesProperty
+
+    private val newPictureScaleProperty: ObjectProperty<CLabelPane.NewPictureScale> = SimpleObjectProperty()
+    fun newPictureScaleProperty(): ObjectProperty<CLabelPane.NewPictureScale> = newPictureScaleProperty
+    var newPictureScalePicture: CLabelPane.NewPictureScale by newPictureScaleProperty
 
     private val logLevelProperty: ObjectProperty<Logger.LogLevel> = SimpleObjectProperty()
     fun logLevelProperty(): ObjectProperty<Logger.LogLevel> = logLevelProperty
@@ -117,10 +121,6 @@ object Settings : AbstractProperties("Settings") {
     private val labelTextOpaqueProperty: BooleanProperty = SimpleBooleanProperty()
     fun labelTextOpaqueProperty(): BooleanProperty = labelTextOpaqueProperty
     var labelTextOpaque: Boolean by labelTextOpaqueProperty
-
-    private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty()
-    fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
-    var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
     private val autoCheckUpdateProperty: BooleanProperty = SimpleBooleanProperty()
     fun autoCheckUpdateProperty(): BooleanProperty = autoCheckUpdateProperty
@@ -155,13 +155,13 @@ object Settings : AbstractProperties("Settings") {
         defaultGroupNameList        = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
         defaultGroupColorHexList    = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
         isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans].asBooleanList())
-        newPictureScalePicture      = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
+        ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
         viewModes                   = FXCollections.observableList(this[ViewModes].asIntegerList().map(ViewMode.values()::get))
+        newPictureScalePicture      = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
         logLevel                    = Logger.LogLevel.values()[this[LogLevel].asInteger()]
         labelRadius                 = this[LabelRadius].asDouble()
         labelColorOpacity           = this[LabelColorOpacity].asInteger(16) / 255.0
         labelTextOpaque             = this[LabelTextOpaque].asBoolean()
-        ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
         autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
         instantTranslate            = this[InstantTranslate].asBoolean()
         checkFormatWhenSave         = this[CheckFormatWhenSave].asBoolean()
@@ -175,13 +175,13 @@ object Settings : AbstractProperties("Settings") {
         this[DefaultGroupNameList]    .set(defaultGroupNameList)
         this[DefaultGroupColorHexList].set(defaultGroupColorHexList)
         this[IsGroupCreateOnNewTrans] .set(isGroupCreateOnNewTransList)
-        this[NewPictureScale]         .set(newPictureScalePicture.ordinal)
+        this[LigatureRules]           .set(ligatureRules)
         this[ViewModes]               .set(viewModes.map(Enum<*>::ordinal))
+        this[NewPictureScale]         .set(newPictureScalePicture.ordinal)
         this[LogLevel]                .set(logLevel.ordinal)
         this[LabelRadius]             .set(labelRadius)
         this[LabelColorOpacity]       .set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LabelTextOpaque]         .set(labelTextOpaque)
-        this[LigatureRules]           .set(ligatureRules)
         this[AutoCheckUpdate]         .set(autoCheckUpdate)
         this[InstantTranslate]        .set(instantTranslate)
         this[CheckFormatWhenSave]     .set(checkFormatWhenSave)

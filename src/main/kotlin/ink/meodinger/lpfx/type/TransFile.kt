@@ -28,7 +28,7 @@ import java.io.File
  */
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
-open class TransFile @JsonCreator constructor(
+class TransFile @JsonCreator constructor(
     @JsonProperty("version")   version:   List<Int>                                   = DEFAULT_VERSION,
     @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT,
     @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
@@ -102,30 +102,24 @@ open class TransFile @JsonCreator constructor(
     }
 
     // ----- Properties ----- //
-    // Properties can only be used for bindings' values;
+    // Only internal use to avoid accidentally invoking their `set` methods
 
-    val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
-    val commentProperty: StringProperty = SimpleStringProperty(comment)
-    val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
-    val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
+    private val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
+    private val commentProperty: StringProperty = SimpleStringProperty(comment)
+    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList(groupList))
+    private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableArrayList(it.value) }))
 
     // ----- Accessible Fields ----- //
-    // Observables can be used for bindings' dependencies and data edit;
-    // Raw values can be used as simple data, they are all immutable except comment;
-
-    val groupListObservable: ObservableList<TransGroup> by groupListProperty
-    val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
-
-    val sortedPicNamesObservable: ObservableList<String> = transMapProperty.observableKeys().observableSorted(::sortByDigit)
 
     val version: List<Int> by versionProperty
     var comment: String by commentProperty
-    val groupList: List<TransGroup> by groupListObservable
-    val transMap: Map<String, List<TransLabel>> by transMapObservable
-    val sortedPicNames: List<String> by sortedPicNamesObservable
+    val groupListObservable: ObservableList<TransGroup> by groupListProperty
+    val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
 
-    val groupCount: Int get() = groupListObservable.size
-    val picCount: Int get() = transMapObservable.size
+    val groupCount: Int get() = groupListProperty.size
+    val picCount: Int get() = transMapProperty.size
+
+    val sortedPicNamesObservable: ObservableList<String> = transMapProperty.observableKeySet().observableSorted(::sortByDigit)
 
     // ----- TransGroup ----- //
 
@@ -139,12 +133,12 @@ open class TransFile @JsonCreator constructor(
         return false
     }
 
-    // ----- DATA ----- //
+    // ----- Data ----- //
 
     fun getTransGroup(groupId: Int): TransGroup {
         return groupListObservable[groupId]
     }
-    open fun getTransList(picName: String): List<TransLabel> {
+    fun getTransList(picName: String): List<TransLabel> {
         return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
     }
     fun getTransLabel(picName: String, labelIndex: Int): TransLabel {

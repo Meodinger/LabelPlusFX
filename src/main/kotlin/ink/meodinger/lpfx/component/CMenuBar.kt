@@ -379,7 +379,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
     private fun editProjectPictures() {
         // Choose Pics
-        val selected = state.transFile.sortedPicNames
+        val selected = state.transFile.sortedPicNamesObservable
         val unselected = Files.walk(state.transFile.projectFolder.toPath(), 1)
             .filter {
                 if (selected.contains(it.name)) return@filter false
@@ -393,7 +393,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 return@ifPresent
             }
 
-            val picNames = state.transFile.sortedPicNames
+            val picNames = state.transFile.sortedPicNamesObservable
 
             val toAdd = ArrayList<String>()
             for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
@@ -411,12 +411,12 @@ class CMenuBar(private val state: State) : MenuBar() {
                 toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
             ))
             // Update selection
-            state.currentPicName = state.transFile.sortedPicNames[0]
+            state.currentPicName = state.transFile.sortedPicNamesObservable[0]
         }
     }
     private fun addExternalPicture() {
         val files = chooserPic.showOpenMultipleDialog(state.stage) ?: return
-        val picNames = state.transFile.sortedPicNames
+        val picNames = state.transFile.sortedPicNamesObservable
 
         val conflictList = ArrayList<String>()
         for (file in files) {
@@ -476,21 +476,21 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {
-            Settings.DefaultGroupNameList     -> Settings.defaultGroupNameList        /= value as List<String>
-            Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList    /= value as List<String>
-            Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList /= value as List<Boolean>
-            Settings.NewPictureScale          -> Settings.newPictureScalePicture       = value as CLabelPane.NewPictureScale
-            Settings.ViewModes                -> Settings.viewModes                   /= value as List<ViewMode>
-            Settings.LabelRadius              -> Settings.labelRadius                  = value as Double
-            Settings.LabelColorOpacity        -> Settings.labelColorOpacity            = value as Double
-            Settings.LabelTextOpaque          -> Settings.labelTextOpaque              = value as Boolean
-            Settings.LigatureRules            -> Settings.ligatureRules               /= value as List<Pair<String, String>>
-            Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate              = value as Boolean
-            Settings.InstantTranslate         -> Settings.instantTranslate             = value as Boolean
-            Settings.CheckFormatWhenSave      -> Settings.checkFormatWhenSave          = value as Boolean
-            Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault          = value as Boolean
-            Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate        = value as Boolean
-            Settings.ExportNameTemplate       -> Settings.exportNameTemplate           = value as String
+            Settings.DefaultGroupNameList     -> Settings.defaultGroupNameList        .setAll(value as List<String>)
+            Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList    .setAll(value as List<String>)
+            Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList .setAll(value as List<Boolean>)
+            Settings.LigatureRules            -> Settings.ligatureRules               .setAll(value as List<Pair<String, String>>)
+            Settings.ViewModes                -> Settings.viewModes                   .setAll(value as List<ViewMode>)
+            Settings.NewPictureScale          -> Settings.newPictureScalePicture      = value as CLabelPane.NewPictureScale
+            Settings.LabelRadius              -> Settings.labelRadius                 = value as Double
+            Settings.LabelColorOpacity        -> Settings.labelColorOpacity           = value as Double
+            Settings.LabelTextOpaque          -> Settings.labelTextOpaque             = value as Boolean
+            Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate             = value as Boolean
+            Settings.InstantTranslate         -> Settings.instantTranslate            = value as Boolean
+            Settings.CheckFormatWhenSave      -> Settings.checkFormatWhenSave         = value as Boolean
+            Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault         = value as Boolean
+            Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate       = value as Boolean
+            Settings.ExportNameTemplate       -> Settings.exportNameTemplate          = value as String
             else -> doNothing()
         }
     }
@@ -544,7 +544,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             override fun call() {
                 val actions = ArrayList<LabelAction>()
 
-                val picNames = state.transFile.sortedPicNames
+                val picNames = state.transFile.sortedPicNamesObservable
                 val picCount = state.transFile.picCount
                 for ((picIndex, picName) in picNames.withIndex()) {
                     if (isCancelled) return

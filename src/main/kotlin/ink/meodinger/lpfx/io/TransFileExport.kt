@@ -71,13 +71,13 @@ fun exportAsString(transFile: TransFile, targetType: FileType): String {
 
         fun exportGroup(): String {
             val gBuilder = StringBuilder()
-            for (name in transFile.groupList.map(TransGroup::name)) gBuilder.append(name).append("\n")
+            for (name in transFile.groupListObservable.map(TransGroup::name)) gBuilder.append(name).append("\n")
             return gBuilder.deleteCharAt(gBuilder.length - 1).toString()
         }
 
         fun exportTranslation(): String {
             val tBuilder = StringBuilder()
-            for (picName in transFile.sortedPicNames) tBuilder.append(buildPic(picName))
+            for (picName in transFile.sortedPicNamesObservable) tBuilder.append(buildPic(picName))
             return tBuilder.toString()
         }
 

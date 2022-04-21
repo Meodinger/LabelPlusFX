@@ -1,28 +1,18 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.action.ActionType
-import ink.meodinger.lpfx.action.ComplexAction
-import ink.meodinger.lpfx.action.LabelAction
+import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
-import ink.meodinger.lpfx.io.export
-import ink.meodinger.lpfx.io.load
-import ink.meodinger.lpfx.io.pack
+import ink.meodinger.lpfx.io.*
 import ink.meodinger.lpfx.options.*
-import ink.meodinger.lpfx.type.LPFXTask
-import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.type.TransLabel
+import ink.meodinger.lpfx.type.*
 import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
-import ink.meodinger.lpfx.util.file.existsOrNull
-import ink.meodinger.lpfx.util.file.notExists
-import ink.meodinger.lpfx.util.file.transfer
-import ink.meodinger.lpfx.util.image.imageFromFile
-import ink.meodinger.lpfx.util.image.resizeByRadius
+import ink.meodinger.lpfx.util.file.*
+import ink.meodinger.lpfx.util.image.*
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
@@ -132,15 +122,14 @@ class Controller(private val state: State) {
     // Or by using InvalidationListener (which needs another listener but more literal)
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
-            // TODO: Incorrect! Maybe the wrapper is the problem
-            FXCollections.observableList(state.transFileProperty().get()?.groupListProperty ?: emptyList()) {
-                arrayOf(it.nameProperty, it.colorHexProperty)
-            }
+            // TODO: Fix not update
+            state.transFileProperty().get()?.let {
+                FXCollections.observableList(it.groupListObservable) { group -> arrayOf(group.nameProperty, group.colorHexProperty) }
+            } ?: FXCollections.emptyObservableList()
         }, state.transFileProperty()
     )
     private val picNamesBinding: ObjectBinding<ObservableList<String>> = Bindings.createObjectBinding(
         {
-            // TODO: Incorrect! Maybe the wrapper is the problem (See sorted)
             state.transFileProperty().get()?.sortedPicNamesObservable
                 ?: FXCollections.emptyObservableList()
         }, state.transFileProperty()
@@ -171,7 +160,7 @@ class Controller(private val state: State) {
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
         {
-            state.currentPicName.takeIf(String::isNotEmpty)?.let(state.transFile.transMapProperty::get)
+            state.currentPicName.takeIf(String::isNotEmpty)?.let(state.transFile.transMapObservable::get)
                 ?: FXCollections.emptyObservableList()
         }, state.currentPicNameProperty()
     )
@@ -587,7 +576,7 @@ class Controller(private val state: State) {
         // Work Progress
         val workProgressListener = onChange<Any> {
             if (state.isOpened) RecentFiles.setProgressOf(state.translationFile.path,
-                state.transFile.sortedPicNames.indexOf(state.currentPicName) to state.currentLabelIndex
+                state.transFile.sortedPicNamesObservable.indexOf(state.currentPicName) to state.currentLabelIndex
             )
         }
         state.currentPicNameProperty().addListener(workProgressListener)
@@ -905,7 +894,7 @@ class Controller(private val state: State) {
         // Initialize workspace
         val (picIndex, labelIndex) = RecentFiles.getProgressOf(file.path)
         state.currentGroupId = 0
-        state.currentPicName = state.transFile.sortedPicNames[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
+        state.currentPicName = state.transFile.sortedPicNamesObservable[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
         if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
 

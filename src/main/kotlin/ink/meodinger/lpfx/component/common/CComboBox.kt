@@ -64,8 +64,8 @@ class CComboBox<T> : HBox() {
     }
 
     fun reset() {
-        if (itemsProperty.isNotBound) comboBox.items.clear()
-        if (valueProperty.isNotBound) comboBox.selectionModel.clearSelection()
+        if (!itemsProperty.isBound) comboBox.items.clear()
+        if (!valueProperty.isBound) comboBox.selectionModel.clearSelection()
     }
 
     fun back() {

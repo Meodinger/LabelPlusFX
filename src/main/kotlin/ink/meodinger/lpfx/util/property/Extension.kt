@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.util.property
 
-import ink.meodinger.lpfx.util.doNothing
-import javafx.beans.property.*
 import javafx.collections.*
 
 
@@ -11,26 +9,23 @@ import javafx.collections.*
  * Have fun with my code!
  */
 
-/**
- * Is a property was bound (bidirectional not included)
- */
-inline val <T> Property<T>.isNotBound: Boolean get() = !isBound
 
 /**
- * Alias for setAll
- * @see ObservableList.setAll
+ * Return a ObservableSet that reflect the keys and their changes of the ObservableMap
+ * @return An unmodifiable ObservableSet
  */
-operator fun <E> ObservableList<E>.divAssign(value: List<E>) { setAll(value) }
-
-fun <E> ObservableMap<E, *>.observableKeys(): ObservableSet<E> {
+fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
     val set = FXCollections.observableSet(HashSet(keys))
 
     addListener(MapChangeListener {
+        // Note that if change was added and removed, it means
+        // the key was unchanged and a value was just replaced.
+        // That shouldn't affect the key set, so we do nothing.
         if (it.wasAdded() != it.wasRemoved()) {
-            if (it.wasRemoved()) {
-                set.remove(it.key)
-            } else {
+            if (it.wasAdded()) {
                 set.add(it.key)
+            } else {
+                set.remove(it.key)
             }
         }
     })

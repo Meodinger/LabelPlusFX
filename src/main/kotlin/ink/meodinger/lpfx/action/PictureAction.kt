@@ -48,10 +48,11 @@ class PictureAction(
         state.transFile.setFile(targetPicName, picFile)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
-        if (state.transFile.transMapObservable.contains(picName))
+        if (state.transFile.transMapObservable.contains(picName)) {
             throw TransFile.TransFileException.pictureNameRepeated(picName)
-        else
+        } else {
             state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
+        }
 
         if (picFile.exists()) state.transFile.setFile(picName, picFile!!)
 
@@ -60,6 +61,8 @@ class PictureAction(
     private fun removePicture(picName: String) {
         state.transFile.transMapObservable.remove(picName)
             ?: throw TransFile.TransFileException.pictureNotFound(picName)
+
+        // TODO: decide whether to remove file map or not
 
         Logger.info("Removed picture <$picName>", LOGSRC_ACTION)
     }

@@ -45,6 +45,10 @@ operator fun FloatProperty.setValue(thisRef: Any, property: KProperty<*>, value:
 operator fun ObservableDoubleValue.getValue(thisRef: Any, property: KProperty<*>): Double = get()
 operator fun DoubleProperty.setValue(thisRef: Any, property: KProperty<*>, value: Double) = set(value)
 
-operator fun <K, V> ObservableMap<K, V>.getValue(thisRef: Any, property: KProperty<*>): Map<K, V> = toMap()
-operator fun <E> ObservableList<E>.getValue(thisRef: Any, property: KProperty<*>): List<E> = toList()
-operator fun <E> ObservableSet<E>.getValue(thisRef: Any, property: KProperty<*>): Set<E> = toSet()
+// These delegations may cause their observable backing collection not observable.
+// Checkout commit@c8a13e8 to reproduce the issue. (PicNamesBinding not update when pic removed/added)
+// The reason is unclear now, but I'll find out some time.
+//
+// operator fun <K, V> ObservableMap<K, V>.getValue(thisRef: Any, property: KProperty<*>): Map<K, V> = toMap()
+// operator fun <E> ObservableList<E>.getValue(thisRef: Any, property: KProperty<*>): List<E> = toList()
+// operator fun <E> ObservableSet<E>.getValue(thisRef: Any, property: KProperty<*>): Set<E> = toSet()

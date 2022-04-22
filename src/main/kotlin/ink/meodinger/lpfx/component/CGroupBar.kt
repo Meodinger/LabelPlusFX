@@ -78,7 +78,7 @@ class CGroupBar : HBox() {
             }
 
             if (cGroups.isEmpty()) index = NOT_FOUND
-            if (index != NOT_FOUND && index < cGroups.size) cGroups[index].select()
+            else if (index != NOT_FOUND && index < cGroups.size) cGroups[index].select()
         })
 
         indexProperty.addListener { _, o, n ->

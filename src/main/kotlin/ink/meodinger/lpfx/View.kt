@@ -1,12 +1,12 @@
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.component.*
-import ink.meodinger.lpfx.component.common.CComboBox
-import ink.meodinger.lpfx.component.common.CLigatureArea
-import ink.meodinger.lpfx.component.common.CTextSlider
+import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.property.*
+import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
@@ -14,16 +14,14 @@ import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
-import javafx.scene.control.Button
-import javafx.scene.control.Label
-import javafx.scene.control.Separator
-import javafx.scene.control.SplitPane
-import javafx.scene.control.TitledPane
+import javafx.scene.control.*
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.util.StringConverter
+import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
+import javafx.util.Callback
 
 
 /**
@@ -82,6 +80,7 @@ class View(state: State) : BorderPane() {
                         hgrow = Priority.ALWAYS
                     }
                     add(cPicBox) {
+                        prefWidth = 200.0
                         isWrapped = true
                     }
                 }
@@ -94,9 +93,27 @@ class View(state: State) : BorderPane() {
                             isMnemonicParsing = false
                         }
                         add(cGroupBox) {
-                            innerBox.converter = object : StringConverter<TransGroup>() {
-                                override fun toString(group: TransGroup?): String = group?.name ?: emptyString()
-                                override fun fromString(string: String?): TransGroup? = cGroupBox.items.firstOrNull { it.name == string }
+                            prefWidth = 160.0
+                            innerBox.buttonCell = object : ListCell<TransGroup>() {
+                                override fun updateItem(item: TransGroup?, empty: Boolean) {
+                                    super.updateItem(item, empty)
+                                    text = if (empty) null else item?.name
+                                }
+                            }
+                            innerBox.cellFactory = Callback {
+                                object : ListCell<TransGroup>() {
+                                    override fun updateItem(item: TransGroup?, empty: Boolean) {
+                                        super.updateItem(item, empty)
+
+                                        if (empty || item == null) {
+                                            text = null
+                                            graphic = null
+                                        } else {
+                                            text = item.name
+                                            graphic = Circle(GRAPHICS_CIRCLE_RADIUS, item.colorHex.let(Color::web))
+                                        }
+                                    }
+                                }
                             }
                         }
                         add(HBox()) {

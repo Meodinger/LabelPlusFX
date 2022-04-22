@@ -22,9 +22,9 @@ import java.io.IOException
  */
 @Throws(IOException::class)
 fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
-    if (ori.notExists()) throw IOException(String.format(I18N["util.io.file_not_exists.s"], ori))
-    if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["util.io.cannot_transfer_directory"])
+    if (!ori.exists()) throw IOException(String.format(I18N["util.io.file_not_exists.s"], ori))
     if (!overwrite && dst.exists()) throw IOException(String.format(I18N["util.io.overwrite_disable.s"], dst))
+    if (ori.isDirectory || dst.isDirectory) throw IOException(I18N["util.io.cannot_transfer_directory"])
 
     val input = FileInputStream(ori).channel
     val output = FileOutputStream(dst).channel
@@ -40,21 +40,3 @@ fun transfer(ori: File, dst: File, overwrite: Boolean = true) {
  */
 @Throws(SecurityException::class)
 fun File?.exists(): Boolean = this != null && exists()
-
-/**
- * Whether this file not null and exists. If not, return null
- */
-@Throws(SecurityException::class)
-fun File?.existsOrNull(): File? = takeIf(File?::exists)
-
-/**
- * Whether this file not null and exists. If not, return default
- */
-@Throws(SecurityException::class)
-fun File?.existsOrElse(default: File): File = existsOrNull() ?: default
-
-/**
- * Alias for !File?.exists()
- */
-@Throws(SecurityException::class)
-fun File?.notExists(): Boolean = !exists()

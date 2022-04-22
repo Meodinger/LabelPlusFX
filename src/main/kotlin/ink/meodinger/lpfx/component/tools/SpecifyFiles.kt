@@ -6,8 +6,6 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.file.exists
-import ink.meodinger.lpfx.util.file.existsOrNull
-import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.minus
 
 import javafx.beans.binding.ObjectBinding
@@ -155,10 +153,10 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         fileChooser.initialDirectory = state.transFile.projectFolder
         dirChooser.initialDirectory = state.transFile.projectFolder
 
-        files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).existsOrNull() }
+        files = MutableList(picCount) { workingTransFile.getFile(picNames[it])?.takeIf(File::exists) }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
-            text = if (files[it].exists()) files[it]!!.path else Unspecified
+            text = files[it]?.let { if (it.exists()) it.path else Unspecified } ?: Unspecified
             tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
                 init { bind(this@apply.textProperty()) }
                 override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }
@@ -201,11 +199,12 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         var completed = true
         for (i in 0 until picCount) {
             val picFile = picFiles[i]
-            if (picFile.notExists()) {
+            if (!picFile.exists()) {
                 completed = false
                 continue
             }
-            state.transFile.setFile(picNames[i], picFile!!)
+
+            state.transFile.setFile(picNames[i], picFile)
         }
         return completed
     }

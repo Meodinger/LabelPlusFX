@@ -1,9 +1,9 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.util.file.existsOrNull
 import ink.meodinger.lpfx.util.image.imageFromFile
 
 import javafx.scene.image.Image
+import java.io.File
 import java.io.InputStream
 import java.net.URL
 import java.util.*
@@ -39,7 +39,7 @@ val ICON         = loadAsImage("/file/image/icon.png")
 val SAMPLE_IMAGE = loadAsImage("/file/image/sample_320x320.jpg")
 
 // NOTE: Should not larger than 480x480
-val INIT_IMAGE   = Config.workingDir.resolve("init-image.png").existsOrNull()?.let(::imageFromFile)
+val INIT_IMAGE   = Config.workingDir.resolve("init-image.png").takeIf(File::exists)?.let(::imageFromFile)
     ?: loadAsImage("/file/image/init_image.png")
 
 val SCRIPT      = loadAsBytes("/file/script/Meo_PS_Script")

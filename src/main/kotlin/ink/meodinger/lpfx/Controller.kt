@@ -132,7 +132,7 @@ class Controller(private val state: State) {
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
-            state.getPicFileNow().existsOrNull()?.let {
+            state.getPicFileNow()?.takeIf(File::exists)?.let {
                 try {
                     val image = imageFromFile(it)
                     if (!image.isError) {
@@ -400,28 +400,42 @@ class Controller(private val state: State) {
         }, state.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
-        // GroupBox
-        cGroupBox.itemsProperty().bind(groupsBinding)
-        RuledGenericBidirectionalBinding.bind(
-            cGroupBox.indexProperty(), { _, _, newValue, _ -> cTreeView.selectionModel.clearSelection(); newValue },
-            state.currentGroupIdProperty(), { _, _, newValue, _ -> newValue }
-        )
-        Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
-
         // GroupBar
         cGroupBar.groupsProperty().bind(groupsBinding)
-        RuledGenericBidirectionalBinding.bind(
-            cGroupBar.indexProperty(), { _, _, newValue, _ -> cTreeView.selectionModel.clearSelection(); newValue },
-            state.currentGroupIdProperty(), { _, _, newValue, _ -> newValue }
-        )
+        cGroupBar.indexProperty().addListener(onNew<Number, Int> {
+            if (state.viewMode == ViewMode.GroupMode) {
+                // In GroupMode, CurrentGroupId is set by CTreeView
+                // SelectionModal::SelectedIndex will be temporarily set to -1 when it changes, we ignore that value
+                if (it != NOT_FOUND) cTreeView.selectGroup(state.transFile.getTransGroup(it).name, true)
+            } else {
+                // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
+                state.currentGroupId = it
+            }
+        })
+        state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBar.indexProperty()::set))
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
+
+        // GroupBox
+        cGroupBox.itemsProperty().bind(groupsBinding)
+        cGroupBox.valueProperty().addListener(onNew {
+            if (state.viewMode == ViewMode.GroupMode) {
+                // In GroupMode, CurrentGroupId is set by CTreeView
+                // SelectionModal::SelectedIndex will be temporarily set to null when it changes, we ignore that value
+                if (it != null) cTreeView.selectGroup(it.name, true)
+            } else {
+                // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
+                state.currentGroupId = state.transFile.getGroupIdByName(it.name)
+            }
+        })
+        state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBox.indexProperty()::set))
+        Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
-        RuledGenericBidirectionalBinding.bind(
-            cPicBox.valueProperty(), { _, _, newValue, _ -> newValue ?: emptyString() },
-            state.currentPicNameProperty(), { _, _, newValue, _ -> newValue!! }
-        )
+        cPicBox.valueProperty().addListener(onNew {
+            state.currentPicName = it ?: emptyString()
+        })
+        state.currentPicNameProperty().addListener(onNew(cPicBox.valueProperty()::set))
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // TreeView
@@ -457,10 +471,10 @@ class Controller(private val state: State) {
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
-            if (!state.isOpened || state.getPicFileNow().notExists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         cLabelPane.heightProperty().addListener(onChange {
-            if (!state.isOpened || state.getPicFileNow().notExists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
         Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
 
@@ -487,7 +501,7 @@ class Controller(private val state: State) {
         // Show error if file not found
         state.currentPicNameProperty().addListener(onNew {
             if (state.isOpened) {
-                val file = state.transFile.getFile(it).takeIf(File?::notExists) ?: return@onNew
+                val file = state.transFile.getFile(it)?.takeUnless(File::exists) ?: return@onNew
                 Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
                 showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
             }

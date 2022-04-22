@@ -100,7 +100,8 @@ class CLigatureArea: TextArea() {
     }
 
     init {
-        textFormatter = defaultTextFormatter
+        // Make text-formatter immutable
+        textFormatterProperty().bind(ReadOnlyObjectWrapper(defaultTextFormatter))
     }
 
     /**

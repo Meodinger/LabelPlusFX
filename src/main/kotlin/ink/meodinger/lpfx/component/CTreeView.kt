@@ -114,28 +114,16 @@ class CTreeView: TreeView<String>() {
         // Selection
         selectedGroupProperty.addListener(onNew<Number, Int> {
             if (viewMode != ViewMode.GroupMode) return@onNew
-            if (it == NOT_FOUND) {
-                selectionModel.clearSelection()
-            } else {
-                selectionModel.select(getGroupItem(groups[it].name))
-            }
+            if (it != NOT_FOUND) selectionModel.select(getGroupItem(groups[it].name))
         })
         selectedLabelProperty.addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND) {
-                selectionModel.clearSelection()
-            } else {
-                selectionModel.select(getLabelItem(it))
-            }
+            if (it != NOT_FOUND) selectionModel.select(getLabelItem(it))
         })
         selectionModel.selectedItemProperty().addListener { _, oldV, newV ->
             when (newV) {
                 // These set will be ignored if select by set selected properties. (old == new)
-                is CTreeGroupItem -> {
-                    selectedGroup = groups.indexOfFirst { g -> g.name == newV.name }
-                }
-                is CTreeLabelItem -> {
-                    selectedLabel = newV.index
-                }
+                is CTreeGroupItem -> selectedGroup = groups.indexOfFirst { g -> g.name == newV.name }
+                is CTreeLabelItem -> selectedLabel = newV.index
                 null -> when (oldV) {
                     is CTreeGroupItem -> selectedGroup = NOT_FOUND
                     is CTreeLabelItem -> selectedLabel = NOT_FOUND

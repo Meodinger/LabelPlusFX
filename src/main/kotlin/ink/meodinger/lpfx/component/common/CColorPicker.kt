@@ -2,15 +2,14 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.color.toHexRGBA
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.actionEvent
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.repeat
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.geometry.Pos
@@ -34,7 +33,7 @@ import javafx.scene.paint.Color
  * replaces the link with a ColorHex TextField which can be used
  * to enter a hex string.
  *
- * @see <a href="https://stackoverflow.com/questions/42812471/javafx-colorpicker-nullpointerexception">colorpicker-nullpointerexception</a>
+ * @see <a href="https://stackoverflow.com/questions/42812471/javafx-colorpicker-nullpointerexception">ColorPicker-NullPointerException</a>
  */
 class CColorPicker() : ColorPicker() {
 
@@ -50,38 +49,31 @@ class CColorPicker() : ColorPicker() {
 
     init {
         colorHexField.textFormatter = TextFormatter<String> { change ->
-            change.text = change.text.uppercase()
             if (change.isAdded) {
-                val builder = StringBuilder()
-                for (c in change.text.toCharArray()) {
-                    if ((c in '0'..'9') || (c in 'A'..'F')) {
-                        builder.append(c)
-                    }
-                }
-                change.text = builder.toString()
-                change.anchor = change.rangeStart + builder.length
-                change.caretPosition = change.rangeStart + builder.length
+                val text = change.text.uppercase().filter { (it in '0'..'9') || (it in 'A'..'F') }
+
+                change.text = text
+                change.anchor = change.rangeStart + text.length
+                change.caretPosition = change.rangeStart + text.length
             }
             change
         }
         colorHexField.setOnAction {
+            // Add to recent colors
             if (!customColors.contains(value)) customColors.add(value)
 
             fireEvent(actionEvent(it, source = this))
-            hide() // Manually invoke hide() to let PopupControl really hide
+            hide() // Manually invoke hide() to let PopupControl logically hide
         }
 
         colorHexProperty.addListener(onNew {
             when (it.length) {
                 1 -> value = Color.web(it.repeat(6))
                 2 -> value = Color.web(it.repeat(3))
-                3 -> {
-                    val builder = StringBuilder()
-                    for (c in it.toCharArray()) builder.append(c.repeat(2))
-                    value = Color.web(builder.toString())
-                }
+                3 -> value = Color.web(it.map { c -> c.repeat(2) }.joinToString())
                 6 -> value = Color.web(it)
-                8 -> if (enableAlpha) value = Color.web(it)
+                8 -> value = Color.web(if (enableAlpha) it else it.dropLast(2))
+                else -> doNothing()
             }
         })
 

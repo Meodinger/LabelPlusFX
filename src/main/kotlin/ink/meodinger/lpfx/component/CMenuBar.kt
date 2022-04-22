@@ -11,7 +11,6 @@ import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.deleteTail
@@ -61,7 +60,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         if (state.controller.stay()) return
 
         val file = File(item.text)
-        if (file.notExists()) {
+        if (!file.exists()) {
             showError(state.stage, String.format(I18N["error.file_not_exist.s"], file.path))
             RecentFiles.remove(file)
             mOpenRecent.items.remove(item)

@@ -55,7 +55,7 @@ class PictureAction(
             throw TransFile.TransFileException.pictureNameRepeated(picName)
 
         state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
-        if (picFile.exists()) state.transFile.setFile(picName, picFile!!)
+        if (picFile.exists()) state.transFile.setFile(picName, picFile)
 
         Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", LOGSRC_ACTION)
     }

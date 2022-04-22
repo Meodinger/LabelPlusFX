@@ -42,8 +42,8 @@ fun load(file: File, type: FileType): TransFile {
             }
         } catch (_: Throwable) {
             // Load as another file type failed, but we don't care
-            // actually what problem occurred. Throw the original
-            // exception just like we never tried.
+            // actually what problem occurred. Throw the origin
+            // exception just like we have never tried.
             throw e
         }
     }

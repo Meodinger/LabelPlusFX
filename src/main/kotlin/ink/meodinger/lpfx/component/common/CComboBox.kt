@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.*
 
@@ -19,26 +20,25 @@ import javafx.scene.layout.HBox
  */
 
 /**
- * A ComboBox with back/next Button (in HBox)
+ * A ComboBox with back/next Button (wrapped in a HBox).
+ * Provided some common wrapped properties and accessibility
+ * to the inner ComboBox by field `innerBox`.
  */
 class CComboBox<T> : HBox() {
 
-    private val comboBox = ComboBox<T>()
     private val back = Button("<")
     private val next = Button(">")
+    val innerBox = ComboBox<T>()
 
-    val innerBox: ComboBox<T> get() = comboBox
-    val size: Int get() = comboBox.items.size
-
-    private val itemsProperty: ListProperty<T> = SimpleListProperty(comboBox.items)
+    private val itemsProperty: ListProperty<T> = SimpleListProperty(null)
     fun itemsProperty(): ListProperty<T> = itemsProperty
     var items: ObservableList<T> by itemsProperty
 
-    private val valueProperty: ObjectProperty<T> = comboBox.valueProperty()
+    private val valueProperty: ObjectProperty<T> = SimpleObjectProperty(null)
     fun valueProperty(): ObjectProperty<T> = valueProperty
     var value: T by valueProperty
 
-    private val indexProperty: IntegerProperty = SimpleIntegerProperty(comboBox.selectionModel.selectedIndex)
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
@@ -47,50 +47,46 @@ class CComboBox<T> : HBox() {
     var isWrapped: Boolean by wrappedProperty
 
     init {
-        comboBox.itemsProperty().bind(itemsProperty)
+        innerBox.itemsProperty().bindBidirectional(itemsProperty)
+        innerBox.valueProperty().bindBidirectional(valueProperty)
 
-        // Bind bidirectionally
-        indexProperty.addListener(onNew<Number, Int>(comboBox.selectionModel::select))
-        comboBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
+        // Bind bidirectionally by listeners
+        indexProperty.addListener(onNew<Number, Int>(innerBox.selectionModel::select))
+        innerBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
 
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
 
-        comboBox.prefWidth = 150.0
+        innerBox.prefWidthProperty().bind(prefWidthProperty() - back.widthProperty() - next.widthProperty())
         back.alignment = Pos.CENTER
         next.alignment = Pos.CENTER
 
-        children.addAll(comboBox, back, next)
-    }
-
-    fun reset() {
-        if (!itemsProperty.isBound) comboBox.items.clear()
-        if (!valueProperty.isBound) comboBox.selectionModel.clearSelection()
+        children.addAll(innerBox, back, next)
     }
 
     fun back() {
-        val size = comboBox.items.size
+        val size = items.size
         var newIndex = index - 1
 
         if (isWrapped) if (newIndex < 0) newIndex += size
-        if (newIndex >= 0) comboBox.value = comboBox.items[newIndex]
+        if (newIndex >= 0) value = items[newIndex]
     }
     fun next() {
-        val size = comboBox.items.size
+        val size = items.size
         var newIndex = index + 1
 
         if (isWrapped) if (newIndex > size - 1) newIndex -= size
-        if (newIndex <= size - 1) comboBox.value = comboBox.items[newIndex]
+        if (newIndex <= size - 1) value = items[newIndex]
     }
 
     fun select(index: Int) {
-        if (comboBox.items.size == 0 && index == 0) return
+        if (items.size == 0 && index == 0) return
 
-        if (index in 0 until comboBox.items.size) comboBox.selectionModel.select(index)
+        if (index in 0 until items.size) innerBox.selectionModel.select(index)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
     }
     fun select(item: T) {
-        if (comboBox.items.contains(item)) comboBox.selectionModel.select(item)
+        if (items.contains(item)) innerBox.selectionModel.select(item)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }
 

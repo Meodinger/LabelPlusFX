@@ -3,7 +3,6 @@ package ink.meodinger.lpfx.type
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
-import ink.meodinger.lpfx.util.file.notExists
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.sortByDigit
 
@@ -115,7 +114,7 @@ class TransFile @JsonCreator constructor(
      * Check whether files of some pictures not exist
      */
     fun checkLost(): List<String> {
-        return transMapObservable.keys.filter { getFile(it).notExists() }
+        return transMapObservable.keys.filter { getFile(it)!!.exists() }
     }
 
     // ----- Properties ----- //

@@ -142,15 +142,14 @@ class DialogSettings : AbstractPropertiesDialog() {
                     // 3 Scale on new picture
                     // 4 | selection | < >       (String)
 
-                    val viewModeList = listOf(*ViewMode.values())
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
-                        items.setAll(viewModeList)
+                        items.setAll(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(Label(I18N["mode.work.label"]), 0, 1)
                     add(mComboLabel, 1, 1) {
-                        items.setAll(viewModeList)
+                        items.setAll(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(HBox(), 0, 2)
@@ -546,8 +545,8 @@ class DialogSettings : AbstractPropertiesDialog() {
     private fun convertMode(): Map<String, Any> {
         val map = HashMap<String, Any>()
 
-        map[Settings.ViewModes] = listOf(mComboInput.value, mComboLabel.value)
-        map[Settings.NewPictureScale] = mComboScale.value
+        map[Settings.ViewModes] = listOf(mComboInput.index, mComboLabel.index)
+        map[Settings.NewPictureScale] = mComboScale.index
 
         return map
     }

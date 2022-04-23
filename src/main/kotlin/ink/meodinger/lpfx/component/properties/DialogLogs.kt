@@ -138,7 +138,7 @@ class DialogLogs : AbstractPropertiesDialog() {
     }
 
     override fun initProperties() {
-        comboLevel.value = Settings.logLevel
+        comboLevel.index = Settings.logLevel.ordinal
 
         val files = Files
             .walk(Options.logs, 1).filter { it.name != Options.logs.name }

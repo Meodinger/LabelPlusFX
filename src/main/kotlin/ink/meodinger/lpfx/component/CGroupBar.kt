@@ -32,6 +32,8 @@ import javafx.scene.paint.Color
  */
 class CGroupBar : HBox() {
 
+    // TODO: Fix the overlap when there are not enough space to layout
+
     // ----- Properties ----- //
 
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
@@ -54,7 +56,7 @@ class CGroupBar : HBox() {
         hgrow = Priority.ALWAYS
     }
     private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
-        onSelectProperty().bind(onGroupCreateProperty)
+        setOnSelect { onGroupCreate.handle(it); isSelected = false }
     }
 
     init {
@@ -71,23 +73,18 @@ class CGroupBar : HBox() {
                     }
                     if (it.wasAdded()) {
                         it.addedSubList.forEachIndexed { index, group ->
-                            createGroupItem(group, groupId = it.from + index)
+                            createGroupItem(group, it.from + index)
                         }
                     }
                 }
             }
 
-            if (cGroups.isEmpty()) index = NOT_FOUND
-            else if (index != NOT_FOUND && index < cGroups.size) cGroups[index].select()
+            if (it.list.isEmpty()) index = NOT_FOUND
+            if (index != NOT_FOUND && index < it.list.size) cGroups[index].select()
         })
-
-        indexProperty.addListener { _, o, n ->
-            if ((o as Int) != NOT_FOUND && o < cGroups.size) cGroups[o].unselect()
-            if ((n as Int) != NOT_FOUND && n < cGroups.size) cGroups[n].select()
-        }
     }
 
-    private fun createGroupItem(transGroup: TransGroup, groupId: Int = cGroups.size) {
+    private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
         if (cGroups.isEmpty()) {
             children.add(placeHolder)
             children.add(addItem)
@@ -114,8 +111,8 @@ class CGroupBar : HBox() {
     }
 
     fun select(groupId: Int) {
-        if (groupId in 0 until cGroups.size) index = groupId
-        else if (cGroups.size == 0 && groupId == 0) doNothing()
+        if (groupId in 0 until groups.size) index = groupId
+        else if (groups.size == 0 && groupId == 0) doNothing()
         else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
     }
 

@@ -23,6 +23,9 @@ import javafx.scene.layout.HBox
  * A ComboBox with back/next Button (wrapped in a HBox).
  * Provided some common wrapped properties and accessibility
  * to the inner ComboBox by field `innerBox`.
+ * Note that we do not export property value because
+ * **it can be anything as long as it is a valid value of type T.**
+ * You can use bindings like `itemsProperty.valueAt(indexProperty)`
  */
 class CComboBox<T> : HBox() {
 
@@ -34,10 +37,6 @@ class CComboBox<T> : HBox() {
     fun itemsProperty(): ListProperty<T> = itemsProperty
     var items: ObservableList<T> by itemsProperty
 
-    private val valueProperty: ObjectProperty<T> = SimpleObjectProperty(null)
-    fun valueProperty(): ObjectProperty<T> = valueProperty
-    var value: T by valueProperty
-
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
@@ -47,12 +46,10 @@ class CComboBox<T> : HBox() {
     var isWrapped: Boolean by wrappedProperty
 
     init {
-        innerBox.itemsProperty().bindBidirectional(itemsProperty)
-        innerBox.valueProperty().bindBidirectional(valueProperty)
-
         // Bind bidirectionally by listeners
-        indexProperty.addListener(onNew<Number, Int>(innerBox.selectionModel::select))
+        innerBox.itemsProperty().bindBidirectional(itemsProperty)
         innerBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
+        indexProperty.addListener(onNew<Number, Int>(innerBox.selectionModel::select))
 
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
@@ -69,14 +66,14 @@ class CComboBox<T> : HBox() {
         var newIndex = index - 1
 
         if (isWrapped) if (newIndex < 0) newIndex += size
-        if (newIndex >= 0) value = items[newIndex]
+        if (newIndex >= 0) innerBox.selectionModel.select(newIndex)
     }
     fun next() {
         val size = items.size
         var newIndex = index + 1
 
-        if (isWrapped) if (newIndex > size - 1) newIndex -= size
-        if (newIndex <= size - 1) value = items[newIndex]
+        if (isWrapped) if (newIndex >= size) newIndex -= size
+        if (newIndex < size) innerBox.selectionModel.select(newIndex)
     }
 
     fun select(index: Int) {

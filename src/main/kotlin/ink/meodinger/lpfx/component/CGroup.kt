@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onChange
 import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.binding.Bindings
@@ -31,6 +30,8 @@ class CGroup(
     groupName:  String = DEFAULT_NAME,
     groupColor: Color  = Color.web(DEFAULT_COLOR_HEX)
 ) : Region() {
+
+    // TODO: see CheckBox or something like it to make selected-property can be bound
 
     companion object {
         private const val DEFAULT_NAME = ""
@@ -67,50 +68,45 @@ class CGroup(
     init {
         padding = Insets(PADDING)
 
-        nameProperty.addListener(onNew { update(name = it) })
-        colorProperty.addListener(onNew { update(color = it) })
         selectedProperty.addListener(onNew { if (it) onSelect.handle(ActionEvent(name, this)) })
-
-        widthProperty().addListener(onChange { text.layoutX = (width - text.boundsInLocal.width) / 2 })
         addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
 
-        backgroundProperty().bind(Bindings.createObjectBinding({
-            if (isSelected) Background(BackgroundFill(
-                Color.LIGHTGRAY,
-                CornerRadii(CORNER_RADII),
-                Insets(0.0)
-            )) else null
-        }, selectedProperty))
-        borderProperty().bind(Bindings.createObjectBinding({
-            Border(BorderStroke(
-                if (isHover) this.color else Color.TRANSPARENT,
-                BorderStrokeStyle.SOLID,
-                CornerRadii(CORNER_RADII),
-                BorderWidths(BORDER_WIDTH)
-            ))
-        }, hoverProperty()))
+        backgroundProperty().bind(Bindings.createObjectBinding(
+            {
+                if (isSelected) Background(BackgroundFill(
+                    Color.LIGHTGRAY,
+                    CornerRadii(CORNER_RADII),
+                    Insets(0.0)
+                )) else null
+            }, selectedProperty
+        ))
+        borderProperty().bind(Bindings.createObjectBinding(
+            {
+                Border(BorderStroke(
+                    if (isHover) this.color else Color.TRANSPARENT,
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii(CORNER_RADII),
+                    BorderWidths(BORDER_WIDTH)
+                ))
+            }, hoverProperty()
+        ))
+        prefWidthProperty().bind(Bindings.createDoubleBinding(
+            { text.boundsInLocal.width + (BORDER_WIDTH + PADDING) * 2 }, text.textProperty()
+        ))
+        prefHeightProperty().bind(Bindings.createDoubleBinding(
+            { text.boundsInLocal.height + (BORDER_WIDTH + PADDING) * 2 }, text.textProperty()
+        ))
+
+        text.textProperty().bind(nameProperty)
+        text.fillProperty().bind(colorProperty)
+        text.layoutXProperty().bind(Bindings.createDoubleBinding(
+            { (width - text.boundsInLocal.width) / 2 }, widthProperty()
+        ))
+        text.layoutYProperty().bind(Bindings.createDoubleBinding(
+            { height / 2 }, heightProperty()
+        ))
 
         children.add(text)
-        update()
-    }
-
-    private fun update(name: String = this.name, color: Color = this.color) {
-        text.text = name
-        text.fill = color
-
-        val textW = text.boundsInLocal.width
-        val textH = text.boundsInLocal.height
-        val prefW = textW + (BORDER_WIDTH + PADDING) * 2
-        val prefH = textH + (BORDER_WIDTH + PADDING) * 2
-
-        // TEXT----
-        // |      |
-        // --------
-        // Layout first to avoid width listener overwrite value set there
-        text.layoutX = BORDER_WIDTH + PADDING
-        text.layoutY = prefH / 2
-
-        setPrefSize(prefW, prefH)
     }
 
     fun select() {

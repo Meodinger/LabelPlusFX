@@ -161,6 +161,8 @@ class Controller(private val state: State) {
         }, state.currentPicNameProperty()
     )
 
+    // TODO: Consider and more wrapper properties like PicIndexProperty for State
+
     private fun switchViewMode() {
         state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
     }
@@ -400,9 +402,7 @@ class Controller(private val state: State) {
         }, state.viewModeProperty()))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
-        // GroupBar
-        cGroupBar.groupsProperty().bind(groupsBinding)
-        cGroupBar.indexProperty().addListener(onNew<Number, Int> {
+        val groupIndexListener = onNew<Number, Int> {
             if (state.viewMode == ViewMode.GroupMode) {
                 // In GroupMode, CurrentGroupId is set by CTreeView
                 // SelectionModal::SelectedIndex will be temporarily set to -1 when it changes, we ignore that value
@@ -411,31 +411,28 @@ class Controller(private val state: State) {
                 // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
                 state.currentGroupId = it
             }
-        })
+        }
+
+        // GroupBar
+        cGroupBar.groupsProperty().bind(groupsBinding)
+        cGroupBar.indexProperty().addListener(groupIndexListener)
         state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBar.indexProperty()::set))
         Logger.info("Bound GroupBar & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // GroupBox
         cGroupBox.itemsProperty().bind(groupsBinding)
-        cGroupBox.valueProperty().addListener(onNew {
-            if (state.viewMode == ViewMode.GroupMode) {
-                // In GroupMode, CurrentGroupId is set by CTreeView
-                // SelectionModal::SelectedIndex will be temporarily set to null when it changes, we ignore that value
-                if (it != null) cTreeView.selectGroup(it.name, true)
-            } else {
-                // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
-                state.currentGroupId = state.transFile.getGroupIdByName(it.name)
-            }
-        })
+        cGroupBox.indexProperty().addListener(groupIndexListener)
         state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBox.indexProperty()::set))
         Logger.info("Bound GroupBox & CurrentGroupId", LOGSRC_CONTROLLER)
 
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
-        cPicBox.valueProperty().addListener(onNew {
-            state.currentPicName = it ?: emptyString()
+        cPicBox.indexProperty().addListener(onNew<Number, Int> {
+            state.currentPicName = if (it != NOT_FOUND) state.transFile.sortedPicNames[it] else emptyString()
         })
-        state.currentPicNameProperty().addListener(onNew(cPicBox.valueProperty()::set))
+        state.currentPicNameProperty().addListener(onNew {
+            cPicBox.index = state.transFile.sortedPicNames.indexOf(it)
+        })
         Logger.info("Bound PicBox & CurrentPicName", LOGSRC_CONTROLLER)
 
         // TreeView

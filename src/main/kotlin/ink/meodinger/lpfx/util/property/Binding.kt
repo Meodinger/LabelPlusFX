@@ -2,8 +2,8 @@
 
 package ink.meodinger.lpfx.util.property
 
-import javafx.beans.*
 import javafx.beans.binding.*
+import javafx.beans.property.*
 import javafx.beans.value.*
 
 
@@ -105,28 +105,13 @@ operator fun DoubleExpression.div(other: Number): DoubleBinding = divide(other.t
 // Kotlin will translate `!` to `.not()`. So this operator function is unnecessary
 // operator fun BooleanExpression.not(): BooleanBinding = not()
 
-class BooleanConstant private constructor(private val constantValue: Boolean) : ObservableBooleanValue {
-
-    companion object {
-        fun of(value: Boolean) = BooleanConstant(value)
-    }
-
-    override fun addListener(listener: ChangeListener<in Boolean>?) { /* no-op */ }
-    override fun addListener(listener: InvalidationListener?) { /* no-op */ }
-    override fun removeListener(listener: InvalidationListener?) { /* no-op */ }
-    override fun removeListener(listener: ChangeListener<in Boolean>?) { /* no-op */ }
-    override fun getValue(): Boolean = constantValue
-    override fun get(): Boolean = constantValue
-
-}
-
-infix fun BooleanExpression.and(other: Boolean): BooleanBinding = and(BooleanConstant.of(other))
+infix fun BooleanExpression.and(other: Boolean): BooleanBinding = and(ReadOnlyBooleanWrapper(other))
 infix fun BooleanExpression.and(other: ObservableBooleanValue): BooleanBinding = and(other)
-infix fun BooleanExpression.or(other: Boolean): BooleanBinding = or(BooleanConstant.of(other))
+infix fun BooleanExpression.or(other: Boolean): BooleanBinding = or(ReadOnlyBooleanWrapper(other))
 infix fun BooleanExpression.or(other: ObservableBooleanValue): BooleanBinding = or(other)
 infix fun BooleanExpression.xor(other: Boolean): BooleanBinding = Bindings.createBooleanBinding( { get() xor other }, this )
 infix fun BooleanExpression.xor(other: ObservableBooleanValue): BooleanBinding = Bindings.createBooleanBinding( { get() xor other.get() }, this )
-infix fun BooleanExpression.eq(other: Boolean): BooleanBinding = isEqualTo(BooleanConstant.of(other))
+infix fun BooleanExpression.eq(other: Boolean): BooleanBinding = isEqualTo(ReadOnlyBooleanWrapper(other))
 infix fun BooleanExpression.eq(other: ObservableBooleanValue): BooleanBinding = isEqualTo(other)
 
 infix fun NumberExpression.gt(other: Int): BooleanBinding = greaterThan(other)
@@ -152,3 +137,16 @@ infix fun NumberExpression.lt(other: Long): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: Float): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: Double): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: ObservableNumberValue): BooleanBinding = lessThan(other)
+
+fun <R> IntegerExpression.transform(transformer: (Int) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+fun <R> LongExpression.transform(transformer: (Long) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+fun <R> FloatExpression.transform(transformer: (Float) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+fun <R> DoubleExpression.transform(transformer: (Double) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+fun <R> StringExpression.transform(transformer: (String) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+fun <T, R> ObjectExpression<T>.transform(transformer: (T) -> R): ObjectBinding<R>
+    = Bindings.createObjectBinding({ transformer(this.get()) }, this)

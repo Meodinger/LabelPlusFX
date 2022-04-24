@@ -6,10 +6,13 @@ import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.*
 
 import javafx.beans.property.*
+import javafx.beans.value.WeakChangeListener
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
+import javafx.scene.control.SingleSelectionModel
 import javafx.scene.layout.HBox
 
 
@@ -33,7 +36,7 @@ class CComboBox<T> : HBox() {
     private val next = Button(">")
     val innerBox = ComboBox<T>()
 
-    private val itemsProperty: ListProperty<T> = SimpleListProperty(null)
+    private val itemsProperty: ListProperty<T> = SimpleListProperty(FXCollections.emptyObservableList())
     fun itemsProperty(): ListProperty<T> = itemsProperty
     var items: ObservableList<T> by itemsProperty
 
@@ -41,15 +44,29 @@ class CComboBox<T> : HBox() {
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
+    private val selectionModelProperty: ObjectProperty<SingleSelectionModel<T>> = SimpleObjectProperty(null)
+    fun selectionModelProperty(): ReadOnlyObjectProperty<SingleSelectionModel<T>> = selectionModelProperty
+    val selectionModel: SingleSelectionModel<T> by selectionModelProperty
+
     private val wrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun wrappedProperty(): BooleanProperty = wrappedProperty
     var isWrapped: Boolean by wrappedProperty
 
     init {
+        itemsProperty.bindBidirectional(innerBox.itemsProperty())
+        selectionModelProperty.bindBidirectional(innerBox.selectionModelProperty())
+
         // Bind bidirectionally by listeners
-        innerBox.itemsProperty().bindBidirectional(itemsProperty)
-        innerBox.selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
-        indexProperty.addListener(onNew<Number, Int>(innerBox.selectionModel::select))
+        val listenerSelection = onNew<Number, Int>(indexProperty::set)
+        val listenerIndex = onNew<Number, Int> { selectionModel.select(it) }
+        indexProperty.addListener(listenerIndex)
+        innerBox.selectionModel.selectedIndexProperty().addListener(listenerSelection)
+        innerBox.selectionModelProperty().addListener(WeakChangeListener { _, o, n ->
+            o?.selectedIndexProperty()?.removeListener(listenerSelection)
+            n?.selectedIndexProperty()?.addListener(listenerSelection)
+
+            index = selectionModel.selectedIndex
+        })
 
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
@@ -66,24 +83,24 @@ class CComboBox<T> : HBox() {
         var newIndex = index - 1
 
         if (isWrapped) if (newIndex < 0) newIndex += size
-        if (newIndex >= 0) innerBox.selectionModel.select(newIndex)
+        if (newIndex >= 0) selectionModel.select(newIndex)
     }
     fun next() {
         val size = items.size
         var newIndex = index + 1
 
         if (isWrapped) if (newIndex >= size) newIndex -= size
-        if (newIndex < size) innerBox.selectionModel.select(newIndex)
+        if (newIndex < size) selectionModel.select(newIndex)
     }
 
     fun select(index: Int) {
         if (items.size == 0 && index == 0) return
 
-        if (index in 0 until items.size) innerBox.selectionModel.select(index)
+        if (index in 0 until items.size) selectionModel.select(index)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
     }
     fun select(item: T) {
-        if (items.contains(item)) innerBox.selectionModel.select(item)
+        if (items.contains(item)) selectionModel.select(item)
         else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }
 

@@ -31,6 +31,10 @@ import javafx.scene.shape.Circle
  */
 class CTreeView: TreeView<String>() {
 
+    // TODO: Figure ou why when remove a group
+    //       with all items expanded and their are labels in the group above
+    //       will make TreeView select the label-item just above the above group-item
+
     private val rootNameProperty: StringProperty = SimpleStringProperty(emptyString())
     fun rootNameProperty(): StringProperty = rootNameProperty
     var rootName: String by rootNameProperty

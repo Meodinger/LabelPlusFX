@@ -1,21 +1,18 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransGroup
+import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.hgrow
-import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
-
-import javafx.beans.binding.Bindings
+import ink.meodinger.lpfx.util.property.transform
 import javafx.beans.property.*
-import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
-import javafx.collections.ObservableList
+import javafx.collections.*
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.control.SingleSelectionModel
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
@@ -38,26 +35,20 @@ class CGroupBar : HBox() {
 
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
-    val groups: ObservableList<TransGroup> by groupsProperty
+    var groups: ObservableList<TransGroup> by groupsProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
+    private val selectionModelProperty: ObjectProperty<SingleSelectionModel<TransGroup>> = SimpleObjectProperty(GroupBarSelectionModel())
+    fun selectionModelProperty(): ReadOnlyObjectProperty<SingleSelectionModel<TransGroup>> = selectionModelProperty
+    val selectionModel: SingleSelectionModel<TransGroup> by selectionModelProperty
+
     private val onGroupCreateProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
     fun onGroupCreateProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupCreateProperty
     val onGroupCreate: EventHandler<ActionEvent> by onGroupCreateProperty
     fun setOnGroupCreate(handler: EventHandler<ActionEvent>) = onGroupCreateProperty.set(handler)
-
-    // ----- Common Components ----- //
-
-    private val cGroups: MutableList<CGroup> = ArrayList()
-    private val placeHolder: HBox = HBox().apply {
-        hgrow = Priority.ALWAYS
-    }
-    private val addItem: CGroup = CGroup("+", Color.BLACK).apply {
-        setOnSelect { onGroupCreate.handle(it); isSelected = false }
-    }
 
     init {
         groupsProperty.addListener(ListChangeListener {
@@ -78,42 +69,69 @@ class CGroupBar : HBox() {
                     }
                 }
             }
-
-            if (it.list.isEmpty()) index = NOT_FOUND
-            if (index != NOT_FOUND && index < it.list.size) cGroups[index].select()
         })
+
+        indexProperty.addListener(onNew<Number, Int>(selectionModel::select))
+        selectionModel.selectedIndexProperty().addListener(onNew<Number, Int>(indexProperty::set))
     }
 
     private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
-        if (cGroups.isEmpty()) {
-            children.add(placeHolder)
-            children.add(addItem)
+        if (children.isEmpty()) {
+            add(HBox()) { hgrow = Priority.ALWAYS }
+            add(CGroup("+", Color.BLACK)) { setOnSelect { onGroupCreate.handle(it); isSelected = false } }
         }
 
         children.add(groupId, CGroup().apply {
             nameProperty().bind(transGroup.nameProperty)
-            colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(transGroup.colorHex) },
-                transGroup.colorHexProperty
-            ))
-            setOnSelect { select(cGroups.indexOf(this)) }
-        }.also { cGroups.add(groupId, it) })
+            colorProperty().bind(transGroup.colorHexProperty.transform(Color::web))
+            setOnSelect { selectionModel.select(transGroup) }
+        })
     }
     private fun removeGroupItem(transGroup: TransGroup) {
-        val groupId = cGroups.indexOfFirst { it.name == transGroup.name }
-
-        children.remove(cGroups.removeAt(groupId))
-
-        if (cGroups.isEmpty()) {
-            children.remove(placeHolder)
-            children.remove(addItem)
+        if (children.size == 3) {
+            children.removeLast()
+            children.removeLast()
         }
+
+        children.remove(children.filterIsInstance(CGroup::class.java).first {
+            it.name == transGroup.name
+        }.apply {
+            nameProperty().unbind()
+            colorProperty().unbind()
+        })
     }
 
-    fun select(groupId: Int) {
-        if (groupId in 0 until groups.size) index = groupId
-        else if (groups.size == 0 && groupId == 0) doNothing()
-        else throw IllegalArgumentException(String.format(I18N["exception.group_bar.group_id_invalid.i"], groupId))
+    // ----- SelectionModel ---- //
+
+    private inner class GroupBarSelectionModel : SingleSelectionModel<TransGroup>() {
+
+        init {
+            groupsProperty.addListener(WeakListChangeListener {
+                select(groupsProperty.get()?.indexOf(selectedItem) ?: NOT_FOUND)
+            })
+
+            selectedIndexProperty().addListener { _, o, n ->
+                if (o != NOT_FOUND && o in 0 until children.size - 2) (children[o as Int] as CGroup).unselect()
+                if (n != NOT_FOUND && n in 0 until children.size - 2) (children[n as Int] as CGroup).select()
+            }
+        }
+
+        override fun getModelItem(index: Int): TransGroup? = groups.getOrNull(index)
+        override fun getItemCount(): Int = groups.size
+
+        /**
+         * Overridden to not set if `selectedItem` is it not contained in the `items`.
+         */
+        override fun select(transGroup: TransGroup?) {
+            if (transGroup == null || !groups.contains(transGroup)) {
+                selectedIndex = -1
+                selectedItem = null
+            } else {
+                selectedIndex = groups.indexOf(transGroup)
+                selectedItem = transGroup
+            }
+        }
+
     }
 
 }

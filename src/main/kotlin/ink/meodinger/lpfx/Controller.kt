@@ -619,7 +619,7 @@ class Controller(private val state: State) {
             if (!it.code.isDigitKey) return@addEventHandler
 
             val index = it.text.toInt() - 1
-            if (index in 0..cGroupBox.items.size) cGroupBox.select(index)
+            if (index in 0 until state.transFile.groupCount) cGroupBox.select(index)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 

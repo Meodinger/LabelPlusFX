@@ -14,7 +14,6 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
-import javafx.scene.text.TextAlignment
 
 
 /**
@@ -31,8 +30,6 @@ class CGroup(
     groupColor: Color  = Color.web(DEFAULT_COLOR_HEX)
 ) : Region() {
 
-    // TODO: see CheckBox or something like it to make selected-property can be bound
-
     companion object {
         private const val DEFAULT_NAME = ""
         private const val DEFAULT_COLOR_HEX = "66CCFF"
@@ -40,12 +37,6 @@ class CGroup(
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0
         private const val PADDING = 4.0
-    }
-
-    private val text: Text = Text(groupName).apply {
-        fill = groupColor
-        textAlignment = TextAlignment.CENTER
-        textOrigin = VPos.CENTER
     }
 
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
@@ -67,9 +58,17 @@ class CGroup(
 
     init {
         padding = Insets(PADDING)
+        addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
 
         selectedProperty.addListener(onNew { if (it) onSelect.handle(ActionEvent(name, this)) })
-        addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
+
+        val text = Text().apply {
+            textOrigin = VPos.TOP
+            textProperty().bind(nameProperty)
+            fillProperty().bind(colorProperty)
+            layoutXProperty().bind(Bindings.createDoubleBinding({ (width - boundsInLocal.width) / 2 }, widthProperty()))
+            layoutYProperty().bind(Bindings.createDoubleBinding({ (height - boundsInLocal.height) / 2 }, heightProperty()))
+        }
 
         backgroundProperty().bind(Bindings.createObjectBinding(
             {
@@ -91,19 +90,14 @@ class CGroup(
             }, hoverProperty()
         ))
         prefWidthProperty().bind(Bindings.createDoubleBinding(
-            { text.boundsInLocal.width + (BORDER_WIDTH + PADDING) * 2 }, text.textProperty()
+            {
+                text.boundsInLocal.width + (BORDER_WIDTH + PADDING) * 2
+            }, text.textProperty()
         ))
         prefHeightProperty().bind(Bindings.createDoubleBinding(
-            { text.boundsInLocal.height + (BORDER_WIDTH + PADDING) * 2 }, text.textProperty()
-        ))
-
-        text.textProperty().bind(nameProperty)
-        text.fillProperty().bind(colorProperty)
-        text.layoutXProperty().bind(Bindings.createDoubleBinding(
-            { (width - text.boundsInLocal.width) / 2 }, widthProperty()
-        ))
-        text.layoutYProperty().bind(Bindings.createDoubleBinding(
-            { height / 2 }, heightProperty()
+            {
+                text.boundsInLocal.height + (BORDER_WIDTH + PADDING) * 2
+            }, text.textProperty()
         ))
 
         children.add(text)

@@ -13,6 +13,7 @@ import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -79,7 +80,7 @@ class DialogLogs : AbstractPropertiesDialog() {
 
             add(Label(I18N["logs.label.level"]), 0, 0)
             add(comboLevel, 1, 0) {
-                items.setAll(LogLevel.values().toList())
+                items = FXCollections.observableList(LogLevel.values().toList())
             }
 
             val labelSent = Label()

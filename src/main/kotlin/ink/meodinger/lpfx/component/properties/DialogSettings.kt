@@ -17,6 +17,7 @@ import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.isMathematicalDecimal
 
+import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Cursor
@@ -144,18 +145,18 @@ class DialogSettings : AbstractPropertiesDialog() {
 
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
-                        items.setAll(ViewMode.values().toList())
+                        items = FXCollections.observableList(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(Label(I18N["mode.work.label"]), 0, 1)
                     add(mComboLabel, 1, 1) {
-                        items.setAll(ViewMode.values().toList())
+                        items = FXCollections.observableList(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(HBox(), 0, 2)
                     add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
                     add(mComboScale, 0, 4, 2, 1) {
-                        items.setAll(CLabelPane.NewPictureScale.values().toList())
+                        items = FXCollections.observableList(CLabelPane.NewPictureScale.values().toList())
                         isWrapped = true
                     }
                 }

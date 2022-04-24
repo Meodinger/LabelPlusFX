@@ -70,9 +70,13 @@ class CComboBox<T> : HBox() {
         back.setOnMouseClicked { back() }
         next.setOnMouseClicked { next() }
 
+        // HGrow not work for resizeable node, use bind instead
         innerBox.prefWidthProperty().bind(prefWidthProperty() - back.widthProperty() - next.widthProperty())
         back.alignment = Pos.CENTER
         next.alignment = Pos.CENTER
+
+        // Set a proper default width
+        prefWidth = 160.0
 
         children.addAll(innerBox, back, next)
     }

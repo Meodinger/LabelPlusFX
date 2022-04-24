@@ -45,36 +45,44 @@ class TransLabel @JsonCreator constructor(
 
     // ----- Properties ----- //
 
-    val indexProperty:   IntegerProperty = SimpleIntegerProperty()
-    val groupIdProperty: IntegerProperty = SimpleIntegerProperty()
-    val xProperty:       DoubleProperty  = SimpleDoubleProperty()
-    val yProperty:       DoubleProperty  = SimpleDoubleProperty()
-    val textProperty:    StringProperty  = SimpleStringProperty(text)
-
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty()
+    fun indexProperty(): IntegerProperty = indexProperty
     var index: Int
         get() = indexProperty.get()
         set(value) {
             if (value < 0) throw TransLabelException.indexInvalid(value)
             indexProperty.set(value)
         }
+
+    private val groupIdProperty: IntegerProperty = SimpleIntegerProperty()
+    fun groupIdProperty(): IntegerProperty = groupIdProperty
     var groupId: Int
         get() = groupIdProperty.get()
         set(value) {
             if (value < 0) throw TransLabelException.groupIdInvalid(value)
             groupIdProperty.set(value)
         }
+
+    private val xProperty: DoubleProperty = SimpleDoubleProperty()
+    fun xProperty(): DoubleProperty = xProperty
     var x: Double
         get() = xProperty.get()
         set(value) {
             if (value < 0 || value > 1) throw TransLabelException.xInvalid(value)
             xProperty.set(value)
         }
+
+    private val yProperty: DoubleProperty = SimpleDoubleProperty()
+    fun yProperty(): DoubleProperty = yProperty
     var y: Double
         get() = yProperty.get()
         set(value) {
             if (value < 0 || value > 1) throw TransLabelException.yInvalid(value)
             yProperty.set(value)
         }
+
+    val textProperty: StringProperty = SimpleStringProperty(text)
+    fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 
     init {
@@ -92,6 +100,7 @@ class TransLabel @JsonCreator constructor(
         if (other == null) return false
         if (other !is TransLabel) return false
         if (other.hashCode() != hashCode()) return false
+
         if (index != other.index) return false
         if (groupId != other.groupId) return false
         if (x != other.x) return false

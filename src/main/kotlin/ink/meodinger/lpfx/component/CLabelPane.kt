@@ -15,7 +15,6 @@ import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
@@ -60,8 +59,6 @@ class CLabelPane : ScrollPane() {
         private val TEXT_FONT = Font(MonoFont, 32.0)
     }
 
-    // TODO: Use selectionModel
-
     // ----- Event ----- //
 
     class LabelEvent(
@@ -104,7 +101,6 @@ class CLabelPane : ScrollPane() {
      * label     | with image | image width
      * image     | left-top   | image width
      * root      | with image | image width
-     * container | 0 - Fixed  | ?
      * pane      | -          | actual width
      */
 
@@ -124,14 +120,9 @@ class CLabelPane : ScrollPane() {
     private val imageView = ImageView(INIT_IMAGE)
 
     /**
-     * For display, scale, drag, label, event handle
+     * For contain, display, scale, drag, label, event handle, internal disable
      */
     private val root = StackPane()
-
-    /**
-     * For contain (provide space to drag root)
-     */
-    private val container = AnchorPane()
 
     // ----- Runtime Data ----- //
 
@@ -274,23 +265,36 @@ class CLabelPane : ScrollPane() {
     fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
     val selectedLabels: Set<Int> by selectedLabelsProperty
 
-    fun clearSelection() = selectedLabelsProperty.clear()
-
     // ----- Others ------ //
 
+    @Suppress("UNCHECKED_CAST")
+    private val labelNodes: ObservableList<CLabel> get() = labelLayer.children as ObservableList<CLabel>
     private val shouldCreate: Boolean get() = image !== INIT_IMAGE
 
     init {
-        textLayer.isMouseTransparent = true
-        textLayer.graphicsContext2D.font = TEXT_FONT
-        textLayer.graphicsContext2D.textBaseline = VPos.TOP
-        textLayer.widthProperty().bind(Bindings.createDoubleBinding({ image.width }, imageProperty))
-        textLayer.heightProperty().bind(Bindings.createDoubleBinding({ image.height }, imageProperty))
-        labelLayer.prefWidthProperty().bind(Bindings.createDoubleBinding({ image.width }, imageProperty))
-        labelLayer.prefHeightProperty().bind(Bindings.createDoubleBinding({ image.height }, imageProperty))
-        imageView.isPreserveRatio = true
-        imageView.isPickOnBounds = true
-        root.alignment = Pos.CENTER
+        withContent(root) {
+            alignment = Pos.CENTER
+
+            // Layer system
+            val imageWidthBinding = imageProperty.transform(Image::getWidth)
+            val imageHeightBinding = imageProperty.transform(Image::getHeight)
+            add(imageView) {
+                isPreserveRatio = true
+                isPickOnBounds = true
+            }
+            add(labelLayer) {
+                prefWidthProperty().bind(imageWidthBinding)
+                prefHeightProperty().bind(imageHeightBinding)
+            }
+            add(textLayer) {
+                isMouseTransparent = true
+                graphicsContext2D.font = TEXT_FONT
+                graphicsContext2D.textBaseline = VPos.TOP
+
+                widthProperty().bind(imageWidthBinding)
+                heightProperty().bind(imageHeightBinding)
+            }
+        }
 
         // Disable mnemonic parsing event from LabelPane
         addEventFilter(KeyEvent.ANY) {
@@ -304,35 +308,35 @@ class CLabelPane : ScrollPane() {
         }
 
         // Scale
+        scaleProperty.addListener(onNew<Number, Double> {
+            root.scaleX = it
+            root.scaleY = it
+        })
         root.addEventFilter(ScrollEvent.SCROLL) {
             if (it.isControlOrMetaDown || it.isAltDown) {
                 val deltaScale = if (it.deltaY > 0) 0.1 else -0.1
 
                 scale += deltaScale
 
-                // x, y -> location irrelated with scale, based on left-top of the image
-                // nLx = Lx + dx; dx = (imgW / 2 - x) * (nS - S); dS = nS - S
+                // x, y -> location not related to scale, based on left-top of the image
                 // nLx = Lx + (imgW / 2 - x) * dS
-                root.layoutX += deltaScale * (image.width  / 2 - it.x)
-                root.layoutY += deltaScale * (image.height / 2 - it.y)
+                root.translateX += deltaScale * (image.width  / 2 - it.x)
+                root.translateY += deltaScale * (image.height / 2 - it.y)
 
                 it.consume()
             }
         }
-        scaleProperty.addListener(onNew<Number, Double> {
-            root.scaleX = it
-            root.scaleY = it
-        })
 
         // Draggable
+        // Note: Will somebody help me impl this using pannable & viewport?
         // ScenePos -> CursorPos; LayoutPos -> ContextPos
         // nLx = Lx + (nSx - Sx)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         root.addEventHandler(MouseEvent.MOUSE_PRESSED) {
             if (!it.isPrimaryButtonDown) return@addEventHandler
 
-            shiftX = root.layoutX - it.sceneX
-            shiftY = root.layoutY - it.sceneY
+            shiftX = root.translateX - it.sceneX
+            shiftY = root.translateY - it.sceneY
             root.cursor = Cursor.MOVE
         }
         root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
@@ -340,8 +344,8 @@ class CLabelPane : ScrollPane() {
 
             dragging = true
 
-            root.layoutX = shiftX + it.sceneX
-            root.layoutY = shiftY + it.sceneY
+            root.translateX = shiftX + it.sceneX
+            root.translateY = shiftY + it.sceneY
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             dragging = false
@@ -444,20 +448,13 @@ class CLabelPane : ScrollPane() {
             }
         }
 
-        withContent(container.add(root) root@{
-            // Layer system
-            add(imageView)
-            add(labelLayer)
-            add(textLayer)
-        })
-
         imageProperty.addListener(onNew {
             if (it === INIT_IMAGE) {
-                container.isDisable = true
+                root.isDisable = true
                 scale = initScale
                 moveToCenter()
             } else {
-                container.isDisable = false
+                root.isDisable = false
                 when (newPictureScale) {
                     NewPictureScale.DEFAULT  -> scale = initScale
                     NewPictureScale.FULL     -> scale = 1.0 // 100%
@@ -478,6 +475,7 @@ class CLabelPane : ScrollPane() {
                 } else {
                     if (it.wasRemoved()) {
                         it.removed.forEach(this::removeLabel)
+                        it.removed.map(TransLabel::index).forEach(selectedLabelsProperty::remove)
                     }
                     if (it.wasAdded() && shouldCreate) {
                         it.addedSubList.forEach(this::createLabel)
@@ -489,9 +487,9 @@ class CLabelPane : ScrollPane() {
 
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
-            indexProperty().bind(transLabel.indexProperty)
+            indexProperty().bind(transLabel.indexProperty())
             radiusProperty().bind(labelRadiusProperty)
-            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty).transform { Color.web(it.colorHex) })
+            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
             colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)
         }
@@ -592,19 +590,20 @@ class CLabelPane : ScrollPane() {
         label.layoutY = -label.radius + transLabel.y * image.height
 
         // Layout
-        labelLayer.children.add(label)
+        labelNodes.add(label)
     }
     private fun removeLabel(transLabel: TransLabel) {
-        val label = labelLayer.children.firstOrNull { (it as CLabel).index == transLabel.index } as CLabel?
-            ?: return
+        val label = labelNodes.first { it.index == transLabel.index } ?: return
 
         // Unbind
         label.radiusProperty().unbind()
         label.indexProperty().unbind()
         label.colorProperty().unbind()
+        label.colorOpacityProperty().unbind()
+        label.textOpaqueProperty().unbind()
 
         // Remove view
-        labelLayer.children.remove(label)
+        labelNodes.remove(label)
     }
 
     fun clearCanvas() {
@@ -649,7 +648,7 @@ class CLabelPane : ScrollPane() {
     fun moveToLabel(labelIndex: Int) {
         if (!shouldCreate) return
 
-        val label = labelLayer.children.firstOrNull { (it as CLabel).index == labelIndex } as CLabel?
+        val label = labelNodes.firstOrNull { it.index == labelIndex }
             ?: throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
 
         vvalue = 0.0
@@ -658,28 +657,28 @@ class CLabelPane : ScrollPane() {
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
-        val fakeX = image.width / 2 * (1 - scale) + label.layoutX * scale
-        val fakeY = image.height / 2 * (1 - scale) + label.layoutY * scale
+        val fakeX = image.width / 2 * (1 - scale) + label.translateX * scale
+        val fakeY = image.height / 2 * (1 - scale) + label.translateY * scale
 
         // To center
         // -> Scroll / 2 = Layout + Fake
         // -> Layout = Scroll / 2 - Fake
-        root.layoutX = width / 2 - fakeX
-        root.layoutY = height / 2 - fakeY
+        root.translateX = width / 2 - fakeX
+        root.translateY = height / 2 - fakeY
     }
     fun moveToZero() {
         vvalue = 0.0
         hvalue = 0.0
 
-        root.layoutX = - (1 - scale) * image.width / 2
-        root.layoutY = - (1 - scale) * image.height / 2
+        root.translateX = - (1 - scale) * image.width / 2
+        root.translateY = - (1 - scale) * image.height / 2
     }
     fun moveToCenter() {
         vvalue = 0.0
         hvalue = 0.0
 
-        root.layoutX = (width - image.width) / 2
-        root.layoutY = (height - image.height) / 2
+        root.translateX = (width - image.width) / 2
+        root.translateY = (height - image.height) / 2
     }
 
     fun fitToPane() {

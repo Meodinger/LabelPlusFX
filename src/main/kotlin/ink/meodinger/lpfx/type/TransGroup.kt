@@ -40,9 +40,8 @@ class TransGroup @JsonCreator constructor(
 
     // ----- Properties ----- //
 
-    val nameProperty: StringProperty = SimpleStringProperty()
-    val colorHexProperty: StringProperty = SimpleStringProperty()
-
+    private val nameProperty: StringProperty = SimpleStringProperty()
+    fun nameProperty(): StringProperty = nameProperty
     var name: String
         get() = nameProperty.get()
         set(value) {
@@ -50,6 +49,9 @@ class TransGroup @JsonCreator constructor(
             for (c in value.toCharArray()) if (c == '|' || c.isWhitespace()) throw TransGroupException.nameInvalid(value)
             nameProperty.set(value)
         }
+
+    private val colorHexProperty: StringProperty = SimpleStringProperty()
+    fun colorHexProperty(): StringProperty = colorHexProperty
     var colorHex: String
         @JsonGetter("color") get() = colorHexProperty.get()
         @JsonSetter("color") set(value) {
@@ -68,6 +70,7 @@ class TransGroup @JsonCreator constructor(
         if (other == null) return false
         if (other !is TransGroup) return false
         if (other.hashCode() != hashCode()) return false
+
         if (name != other.name) return false
         if (colorHex != other.colorHex) return false
         return true

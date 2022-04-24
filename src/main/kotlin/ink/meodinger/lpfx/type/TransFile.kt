@@ -125,7 +125,7 @@ class TransFile @JsonCreator constructor(
 
     private val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
     private val commentProperty: StringProperty = SimpleStringProperty(comment)
-    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty, it.colorHexProperty) })
+    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty(), it.colorHexProperty()) })
     private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableList(it.value) }))
 
     private val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(transMapProperty.observableKeySet().observableSorted(::sortByDigit)).readOnlyProperty

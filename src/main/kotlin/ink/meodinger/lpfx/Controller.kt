@@ -161,8 +161,6 @@ class Controller(private val state: State) {
         }, state.currentPicNameProperty()
     )
 
-    // TODO: Consider and more wrapper properties like PicIndexProperty for State
-
     private fun switchViewMode() {
         state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
     }
@@ -388,18 +386,22 @@ class Controller(private val state: State) {
         Logger.info("Bound scale", LOGSRC_CONTROLLER)
 
         // Switch Button text
-        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding({
-            when (state.workMode) {
-                WorkMode.InputMode -> I18N["mode.work.input"]
-                WorkMode.LabelMode -> I18N["mode.work.label"]
-            }
-        }, state.workModeProperty()))
-        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding({
-            when (state.viewMode) {
-                ViewMode.IndexMode -> I18N["mode.view.index"]
-                ViewMode.GroupMode -> I18N["mode.view.group"]
-            }
-        }, state.viewModeProperty()))
+        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding(
+            {
+                when (state.workMode) {
+                    WorkMode.InputMode -> I18N["mode.work.input"]
+                    WorkMode.LabelMode -> I18N["mode.work.label"]
+                }
+            }, state.workModeProperty()
+        ))
+        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding(
+            {
+                when (state.viewMode) {
+                    ViewMode.IndexMode -> I18N["mode.view.index"]
+                    ViewMode.GroupMode -> I18N["mode.view.group"]
+                }
+            }, state.viewModeProperty()
+        ))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         val groupIndexListener = onNew<Number, Int> {
@@ -452,12 +454,14 @@ class Controller(private val state: State) {
         cLabelPane.labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
         cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
-        cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding({
-            when (state.workMode) {
-                WorkMode.LabelMode -> Cursor.CROSSHAIR
-                WorkMode.InputMode -> Cursor.DEFAULT
-            }
-        }, state.workModeProperty()))
+        cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding(
+            {
+                when (state.workMode) {
+                    WorkMode.LabelMode -> Cursor.CROSSHAIR
+                    WorkMode.InputMode -> Cursor.DEFAULT
+                }
+            }, state.workModeProperty())
+        )
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
     }
     /**
@@ -577,7 +581,6 @@ class Controller(private val state: State) {
                         state.transFile.getTransLabel(state.currentPicName, index),
                     )
                 }))
-                cLabelPane.clearSelection()
             }
         }
         Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", LOGSRC_CONTROLLER)
@@ -641,7 +644,6 @@ class Controller(private val state: State) {
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         Logger.info("Transformed Ctrl + Left/Right", LOGSRC_CONTROLLER)
 
-        // Transform Ctrl + Up/Down KeyEvent to CTreeView select (and have effect: move to label)
         /**
          * Find next LabelItem as int index.
          * @return NOT_FOUND when have no next
@@ -662,6 +664,8 @@ class Controller(private val state: State) {
 
             return index
         }
+
+        // Transform Ctrl + Up/Down KeyEvent to CTreeView select (and have effect: move to label)
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
             if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
             // Direction
@@ -918,8 +922,6 @@ class Controller(private val state: State) {
      * @param silent Whether the save procedure is done in silence or not
      */
     fun save(file: File, silent: Boolean = false) {
-        // TODO: Update RecentFiles Here (For SaveAs and others)
-
         // Whether overwriting existing file
         val overwrite = file.exists()
 
@@ -967,6 +969,9 @@ class Controller(private val state: State) {
         // Update state
         state.translationFile = file
         state.isChanged = false
+
+        // Update recent files
+        RecentFiles.add(file)
 
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name

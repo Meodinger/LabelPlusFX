@@ -158,8 +158,8 @@ class CTreeView: TreeView<String>() {
         labelItems.add(ArrayList())
 
         val groupItem = CTreeGroupItem().apply {
-            nameProperty().bind(transGroup.nameProperty)
-            colorProperty().bind(transGroup.colorHexProperty.transform(Color::web))
+            nameProperty().bind(transGroup.nameProperty())
+            colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
         }
 
         // Add data
@@ -191,11 +191,11 @@ class CTreeView: TreeView<String>() {
     }
     private fun createLabelItem(transLabel: TransLabel) {
         val labelItem = CTreeLabelItem().apply {
-            indexProperty().bind(transLabel.indexProperty)
-            textProperty().bind(transLabel.textProperty)
+            indexProperty().bind(transLabel.indexProperty())
+            textProperty().bind(transLabel.textProperty())
 
             if (viewMode != ViewMode.IndexMode) return@apply
-            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty).transform { Color.web(it.colorHex) })
+            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
         }
 
         // Add view

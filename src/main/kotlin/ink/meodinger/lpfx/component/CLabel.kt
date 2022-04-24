@@ -95,13 +95,13 @@ class CLabel(
         // Update
         val updateListener = onChange<Any> {
             children.clear() // make circle & text have no parents
-            children.setAll(Shape.subtract(circle, text).apply {
+            children.setAll(text, Shape.subtract(circle, text).apply {
                 fillProperty().bind(Bindings.createObjectBinding(
                     {
                         color.opacity(colorOpacity)
                     }, colorProperty, colorOpacityProperty
                 ))
-            }, text)
+            })
         }
         indexProperty.addListener(updateListener)
         radiusProperty.addListener(updateListener)

@@ -210,8 +210,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                                 it.consume()
                             }
                             addEventHandler(MouseEvent.MOUSE_DRAGGED) {
-                                val newLayoutX = shiftX + it.sceneX
-                                val newLayoutY = shiftY + it.sceneY
+                                val newAnchorX = shiftX + it.sceneX
+                                val newAnchorY = shiftY + it.sceneY
 
                                 //  0--L-----    0 LR LR |
                                 //  |  R         LR      |
@@ -219,11 +219,11 @@ class DialogSettings : AbstractPropertiesDialog() {
                                 //  |  |         --------|
                                 val limitX = SAMPLE_IMAGE.width - prefWidth - 2 * lLabelPaneBorderWidth
                                 val limitY = SAMPLE_IMAGE.height - prefHeight - 2 * lLabelPaneBorderWidth
-                                if (newLayoutX < 0 || newLayoutX > limitX) return@addEventHandler
-                                if (newLayoutY < 0 || newLayoutY > limitY) return@addEventHandler
+                                if (newAnchorX < 0 || newAnchorX > limitX) return@addEventHandler
+                                if (newAnchorY < 0 || newAnchorY > limitY) return@addEventHandler
 
-                                anchorPaneLeft = newLayoutX
-                                anchorPaneTop = newLayoutY
+                                anchorPaneLeft = newAnchorX
+                                anchorPaneTop = newAnchorY
 
                                 it.consume()
                             }

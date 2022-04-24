@@ -5,9 +5,10 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.hgrow
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.transform
+import ink.meodinger.lpfx.util.property.onNew
+
 import javafx.beans.property.*
 import javafx.collections.*
 import javafx.event.ActionEvent
@@ -82,8 +83,8 @@ class CGroupBar : HBox() {
         }
 
         children.add(groupId, CGroup().apply {
-            nameProperty().bind(transGroup.nameProperty)
-            colorProperty().bind(transGroup.colorHexProperty.transform(Color::web))
+            nameProperty().bind(transGroup.nameProperty())
+            colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
             setOnSelect { selectionModel.select(transGroup) }
         })
     }

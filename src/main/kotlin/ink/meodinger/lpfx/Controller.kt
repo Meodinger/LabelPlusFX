@@ -271,7 +271,7 @@ class Controller(private val state: State) {
         Logger.info("Registered TransArea font size change", LOGSRC_CONTROLLER)
 
         // Register CGroupBar handler
-        cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).toggleGroupCreate() }
+        cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).triggerGroupCreate() }
         Logger.info("Registered CGroupBar Add Handler", LOGSRC_CONTROLLER)
 
         // Register CLabelPane handler

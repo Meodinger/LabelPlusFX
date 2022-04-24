@@ -501,7 +501,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {
-            Settings.LogLevel -> Settings.logLevel = Logger.LogLevel.values()[value as Int]
+            Settings.LogLevel -> Settings.logLevel = value as Logger.LogLevel
             else -> doNothing()
         }
 

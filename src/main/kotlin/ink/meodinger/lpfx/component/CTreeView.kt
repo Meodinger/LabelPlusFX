@@ -7,17 +7,16 @@ import ink.meodinger.lpfx.util.component.expandAll
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.control.*
 import javafx.scene.paint.Color
-import javafx.scene.shape.Circle
 
 
 /**
@@ -67,7 +66,7 @@ class CTreeView: TreeView<String>() {
      */
     var selectedLabel: Int by selectedLabelProperty
 
-    // ----- Others ----- //
+    // ----- Data ----- //
 
     private val groupItems: MutableList<CTreeGroupItem> = ArrayList()
     private val labelItems: MutableList<MutableList<CTreeLabelItem>> = ArrayList()
@@ -160,10 +159,7 @@ class CTreeView: TreeView<String>() {
 
         val groupItem = CTreeGroupItem().apply {
             nameProperty().bind(transGroup.nameProperty)
-            colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(transGroup.colorHex) },
-                transGroup.colorHexProperty
-            ))
+            colorProperty().bind(transGroup.colorHexProperty.transform(Color::web))
         }
 
         // Add data
@@ -197,14 +193,9 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty)
             textProperty().bind(transLabel.textProperty)
-            if (viewMode == ViewMode.IndexMode) {
-                val colorBinding = groupsProperty.valueAt(transLabel.groupIdProperty)
 
-                graphicProperty().bind(Bindings.createObjectBinding(
-                    { Circle(GRAPHICS_CIRCLE_RADIUS, Color.web(colorBinding.value.colorHex)) },
-                    colorBinding
-                ))
-            }
+            if (viewMode != ViewMode.IndexMode) return@apply
+            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty).transform { Color.web(it.colorHex) })
         }
 
         // Add view

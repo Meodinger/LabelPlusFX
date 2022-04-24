@@ -152,7 +152,7 @@ class DialogLogs : AbstractPropertiesDialog() {
 
     override fun convertResult(): Map<String, Any> {
         return mapOf(
-            Settings.LogLevel to comboLevel.index,
+            Settings.LogLevel to comboLevel.index.let(LogLevel.values()::get),
         )
     }
 }

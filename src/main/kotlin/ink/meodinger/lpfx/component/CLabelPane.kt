@@ -139,8 +139,6 @@ class CLabelPane : ScrollPane() {
     private var dragging = false
     private var selecting = false
 
-    private val cLabels = ArrayList<CLabel>()
-
     // ----- Properties ----- //
 
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(Double.NaN)
@@ -491,14 +489,9 @@ class CLabelPane : ScrollPane() {
 
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
-            val colorBinding = groupsProperty.valueAt(transLabel.groupIdProperty)
-
-            radiusProperty().bind(labelRadiusProperty)
             indexProperty().bind(transLabel.indexProperty)
-            colorProperty().bind(Bindings.createObjectBinding(
-                { Color.web(colorBinding.value.colorHex) },
-                colorBinding
-            ))
+            radiusProperty().bind(labelRadiusProperty)
+            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty).transform { Color.web(it.colorHex) })
             colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)
         }
@@ -600,11 +593,10 @@ class CLabelPane : ScrollPane() {
 
         // Layout
         labelLayer.children.add(label)
-        // Add cLabel to list
-        cLabels.add(label)
     }
     private fun removeLabel(transLabel: TransLabel) {
-        val label = cLabels.firstOrNull { it.index == transLabel.index } ?: return
+        val label = labelLayer.children.firstOrNull { (it as CLabel).index == transLabel.index } as CLabel?
+            ?: return
 
         // Unbind
         label.radiusProperty().unbind()
@@ -613,8 +605,6 @@ class CLabelPane : ScrollPane() {
 
         // Remove view
         labelLayer.children.remove(label)
-        // Remove data
-        cLabels.remove(label)
     }
 
     fun clearCanvas() {
@@ -659,7 +649,7 @@ class CLabelPane : ScrollPane() {
     fun moveToLabel(labelIndex: Int) {
         if (!shouldCreate) return
 
-        val label = cLabels.firstOrNull { it.index == labelIndex }
+        val label = labelLayer.children.firstOrNull { (it as CLabel).index == labelIndex } as CLabel?
             ?: throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
 
         vvalue = 0.0

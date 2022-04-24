@@ -546,8 +546,8 @@ class DialogSettings : AbstractPropertiesDialog() {
     private fun convertMode(): Map<String, Any> {
         val map = HashMap<String, Any>()
 
-        map[Settings.ViewModes] = listOf(mComboInput.index, mComboLabel.index)
-        map[Settings.NewPictureScale] = mComboScale.index
+        map[Settings.ViewModes] = listOf(mComboInput.index, mComboLabel.index).map(ViewMode.values()::get)
+        map[Settings.NewPictureScale] = mComboScale.index.let(CLabelPane.NewPictureScale.values()::get)
 
         return map
     }

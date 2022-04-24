@@ -242,13 +242,13 @@ class CTreeMenu(private val state: State) : ContextMenu() {
         }
     }
 
-    fun toggleGroupCreate() {
+    fun triggerGroupCreate() {
         rAddGroupItem.fire()
     }
-    fun toggleGroupRename(groupName: String) {
+    fun triggerGroupRename(groupName: String) {
         gRenameItem.onAction.handle(ActionEvent(groupName, null))
     }
-    fun toggleGroupDelete(groupName: String) {
+    fun triggerGroupDelete(groupName: String) {
         gDeleteItem.onAction.handle(ActionEvent(groupName, null))
     }
 

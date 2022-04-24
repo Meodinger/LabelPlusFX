@@ -3,13 +3,10 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.string.replaceEOL
 
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.binding.Bindings
+import javafx.beans.property.*
 import javafx.scene.control.TreeItem
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -25,9 +22,9 @@ import javafx.scene.shape.Circle
  * A TreeItem for TransLabel containing
  */
 class CTreeLabelItem(
-    index: Int    = DEFAULT_INDEX,
-    text:  String = DEFAULT_TEXT,
-    color: Color? = null
+    labelIndex: Int    = DEFAULT_INDEX,
+    labelText:  String = DEFAULT_TEXT,
+    labelColor: Color? = null
 ) : TreeItem<String>() {
 
     companion object {
@@ -35,25 +32,29 @@ class CTreeLabelItem(
         private const val DEFAULT_TEXT = ""
     }
 
-    private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
 
-    private val textProperty: StringProperty = SimpleStringProperty(text)
+    private val textProperty: StringProperty = SimpleStringProperty(labelText)
     fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 
+    private val colorProperty: ObjectProperty<Color?> = SimpleObjectProperty(labelColor)
+    fun colorProperty(): ObjectProperty<Color?> = colorProperty
+    var color: Color? by colorProperty
+
     init {
-        if (color != null) graphic = Circle(GRAPHICS_CIRCLE_RADIUS, color)
-
-        indexProperty.addListener(onNew<Number, Int> { update(index = it) })
-        textProperty.addListener(onNew { update(text = it) })
-
-        update()
-    }
-
-    private fun update(index: Int = this.index, text: String = this.text) {
-        value = "${String.format("%02d", index)}: ${text.replaceEOL(" ")}"
+        graphicProperty().bind(Bindings.createObjectBinding(
+            {
+                color?.let { Circle(GRAPHICS_CIRCLE_RADIUS, color) }
+            }, colorProperty
+        ))
+        valueProperty().bind(Bindings.createStringBinding(
+            {
+                "${String.format("%02d", index)}: ${text.replaceEOL(" ")}"
+            }, indexProperty, textProperty
+        ))
     }
 
 }

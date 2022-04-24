@@ -2,10 +2,9 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.Config.MonoFont
 import ink.meodinger.lpfx.util.color.opacity
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.*
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.geometry.VPos
 import javafx.scene.layout.Region
@@ -15,7 +14,6 @@ import javafx.scene.shape.Shape
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
-import javafx.scene.text.TextAlignment
 
 
 /**
@@ -41,10 +39,6 @@ class CLabel(
         const val MIN_PICK_RADIUS = 16.0
     }
 
-    private val text = Text()
-    private val circle = Circle()
-    private var contour: Shape = circle
-
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
@@ -66,72 +60,54 @@ class CLabel(
     var isTextOpaque: Boolean by textOpaqueProperty
 
     init {
-        text.textAlignment = TextAlignment.CENTER
-        text.textOrigin = VPos.CENTER // to get rid of editing layoutY
+        val pickerRadiusBinding = Bindings.createDoubleBinding({ radius.coerceAtLeast(MIN_PICK_RADIUS) }, radiusProperty)
 
-        indexProperty.addListener(onNew<Number, Int> { updateShape(index = it) })
-        radiusProperty.addListener(onNew<Number, Double> { updateShape(radius = it) })
-        colorProperty.addListener(onNew { updateColor(color = it) })
-        colorOpacityProperty.addListener(onNew<Number, Double> { updateColor(colorOpacity = it) })
-        textOpaqueProperty.addListener(onNew { updateColor(isTextOpaque = it) })
+        prefWidthProperty().bind(pickerRadiusBinding * 2)
+        prefHeightProperty().bind(pickerRadiusBinding * 2)
 
-        update()
+        val circle = Circle().apply {
+            radiusProperty().bind(radiusProperty)
+            centerXProperty().bind(pickerRadiusBinding)
+            centerYProperty().bind(pickerRadiusBinding)
+        }
+        val text = Text().apply {
+            textOrigin = VPos.CENTER
+
+            textProperty().bind(indexProperty.asString())
+            fillProperty().bind(Bindings.createObjectBinding(
+                {
+                    if (isTextOpaque) Color.WHITE else Color.WHITE.opacity(colorOpacity)
+                }, textOpaqueProperty, colorOpacityProperty
+            ))
+            fontProperty().bind(Bindings.createObjectBinding(
+                {
+                    Font.font(MonoFont, FontWeight.BOLD, (if (index < 10) 1.7 else 1.3) * radius)
+                }, indexProperty, radiusProperty
+            ))
+            layoutXProperty().bind(Bindings.createDoubleBinding(
+                {
+                    pickerRadiusBinding.get() - boundsInLocal.width / 2
+                }, pickerRadiusBinding, indexProperty
+            ))
+            layoutYProperty().bind(Bindings.createDoubleBinding(
+                {
+                    pickerRadiusBinding.get()
+                }, pickerRadiusBinding, indexProperty
+            ))
+        }
+
+        // Update
+        val updateListener = onChange<Any> {
+            children.setAll(text, Shape.subtract(circle, text).apply {
+                fillProperty().bind(Bindings.createObjectBinding(
+                    {
+                        color.opacity(colorOpacity)
+                    }, colorProperty, colorOpacityProperty
+                ))
+            })
+        }
+        indexProperty.addListener(updateListener)
+        radiusProperty.addListener(updateListener)
     }
 
-    private fun update(
-        index: Int = this.index,
-        radius: Double = this.radius,
-        color: Color = this.color,
-        colorOpacity: Double = this.colorOpacity,
-        isTextOpaque: Boolean = this.isTextOpaque
-    ) {
-        updateShape(index, radius)
-        updateColor(color, colorOpacity, isTextOpaque)
-    }
-
-    private fun updateShape(
-        index: Int = this.index,
-        radius: Double = this.radius
-    ) {
-        children.clear()
-
-        text.text = index.toString()
-        circle.radius = radius
-
-        // Font size vary from 1.7R to 1.3R
-        // 0..9 -> 1.7R
-        // 10.. -> 1.3R
-        val r = if (index < 10) 1.7 * radius else 1.3 * radius
-        text.font = Font.font(MonoFont, FontWeight.BOLD, r)
-
-        val pickerRadius = radius.coerceAtLeast(MIN_PICK_RADIUS)
-        // Circle display based on center
-        // Text display based on left-center
-        // 0 →
-        // ↓
-        // Move to Region Center
-
-        text.layoutX = pickerRadius - text.boundsInLocal.width / 2
-        text.layoutY = pickerRadius
-
-        circle.centerX = pickerRadius
-        circle.centerY = pickerRadius
-
-        setPrefSize(pickerRadius * 2, pickerRadius * 2)
-
-        val shape = Shape.subtract(circle, text).apply {
-            fill = contour.fill
-        }.also { contour = it }
-
-        children.addAll(shape, text)
-    }
-
-    private fun updateColor(
-        color: Color = this.color,
-        colorOpacity: Double = this.colorOpacity,
-        isTextOpaque: Boolean = this.isTextOpaque
-    ) {
-        text.fill = if (isTextOpaque) Color.WHITE else Color.WHITE.opacity(colorOpacity)
-        contour.fill = color.opacity(colorOpacity)
-    }
 }

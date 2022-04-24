@@ -151,10 +151,10 @@ class CTreeView: TreeView<String>() {
         groupItems.clear()
         labelItems.clear()
 
-        for (transGroup in groups) createGroupItem(transGroup)
+        for ((groupId, transGroup) in groups.withIndex()) createGroupItem(transGroup, groupId)
         for (transLabel in labels) createLabelItem(transLabel)
     }
-    private fun createGroupItem(transGroup: TransGroup, groupId: Int = groupItems.size) {
+    private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
         labelItems.add(ArrayList())
 
         val groupItem = CTreeGroupItem().apply {

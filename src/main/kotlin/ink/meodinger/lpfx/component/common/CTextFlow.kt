@@ -46,9 +46,8 @@ class CTextFlow : TextFlow() {
      */
     var isInstant: Boolean by instantProperty
 
-    private val listener = ListChangeListener<Node> { flow() }
-
     init {
+        val listener = ListChangeListener<Node> { flow() }
         instantProperty.addListener(onNew {
             if (it) nodes.addListener(listener) else nodes.removeListener(listener)
         })

@@ -13,15 +13,6 @@ import javafx.scene.input.KeyEvent
  */
 
 /**
- * Gen ActionEvent
- */
-fun actionEvent(
-    it:     ActionEvent,
-    source: Any         = it.source,
-    target: EventTarget = it.target
-): ActionEvent = ActionEvent(source, target)
-
-/**
  * Gen KeyEvent
  */
 fun keyEvent(

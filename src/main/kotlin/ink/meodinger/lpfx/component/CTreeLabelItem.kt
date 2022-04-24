@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.replaceEOL
 
 import javafx.beans.binding.Bindings
@@ -22,15 +23,10 @@ import javafx.scene.shape.Circle
  * A TreeItem for TransLabel containing
  */
 class CTreeLabelItem(
-    labelIndex: Int    = DEFAULT_INDEX,
-    labelText:  String = DEFAULT_TEXT,
+    labelIndex: Int    = -1,
+    labelText:  String = emptyString(),
     labelColor: Color? = null
 ) : TreeItem<String>() {
-
-    companion object {
-        private const val DEFAULT_INDEX = -1
-        private const val DEFAULT_TEXT = ""
-    }
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty

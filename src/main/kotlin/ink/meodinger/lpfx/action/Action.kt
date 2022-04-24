@@ -40,7 +40,7 @@ internal class FunctionAction(
     private val revertFunc: () -> Unit,
 ) : Action {
 
-    override val type: ActionType get() = throw UnsupportedOperationException("ActionType is not fit to FunctionAction")
+    override val type: ActionType = ActionType.CHANGE
 
     override fun commit() = commitFunc()
     override fun revert() = revertFunc()

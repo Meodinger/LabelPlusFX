@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
@@ -21,14 +22,9 @@ import javafx.scene.shape.Circle
  * A TreeItem for TransGroup containing
  */
 class CTreeGroupItem(
-    groupName:  String = DEFAULT_NAME,
-    groupColor: Color  = Color.web(DEFAULT_COLOR_HEX)
+    groupName:  String = emptyString(),
+    groupColor: Color  = Color.web("66CCFF")
 ) : TreeItem<String>() {
-
-    companion object {
-        private const val DEFAULT_NAME = ""
-        private const val DEFAULT_COLOR_HEX = "66CCFF"
-    }
 
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
     fun nameProperty(): StringProperty = nameProperty

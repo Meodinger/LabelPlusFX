@@ -3,13 +3,13 @@ package ink.meodinger.lpfx.component.common
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.color.toHexRGBA
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.event.actionEvent
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.repeat
 
 import javafx.beans.property.*
+import javafx.event.ActionEvent
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.geometry.Pos
@@ -62,18 +62,18 @@ class CColorPicker() : ColorPicker() {
             // Add to recent colors
             if (!customColors.contains(value)) customColors.add(value)
 
-            fireEvent(actionEvent(it, source = this))
+            fireEvent(ActionEvent(it.source, this))
             hide() // Manually invoke hide() to let PopupControl logically hide
         }
 
         colorHexProperty.addListener(onNew {
-            when (it.length) {
-                1 -> value = Color.web(it.repeat(6))
-                2 -> value = Color.web(it.repeat(3))
-                3 -> value = Color.web(it.map { c -> c.repeat(2) }.joinToString())
-                6 -> value = Color.web(it)
-                8 -> value = Color.web(if (enableAlpha) it else it.dropLast(2))
-                else -> doNothing()
+            value = when (it.length) {
+                1 -> Color.web(it.repeat(6))
+                2 -> Color.web(it.repeat(3))
+                3 -> Color.web(it.map { c -> c.repeat(2) }.joinToString())
+                6 -> Color.web(it)
+                8 -> Color.web(if (enableAlpha) it else it.dropLast(2))
+                else -> value
             }
         })
 

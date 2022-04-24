@@ -27,7 +27,7 @@ class CFileChooser {
         private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
         fun lastDirectoryProperty(): ReadOnlyObjectProperty<File> = lastDirectoryProperty
         var lastDirectory : File?
-            get() = lastDirectoryProperty.get()?.takeIf(File::exists)
+            get() = lastDirectoryProperty.get().takeIf(File::exists)
             set(value) {
                 if (value == null || !value.exists()) return
                 if (value.isDirectory) lastDirectoryProperty.set(value)

@@ -3,8 +3,8 @@ package ink.meodinger.lpfx.component.common
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.transform
 
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -54,9 +54,9 @@ class CTextSlider : HBox() {
     var scale: Double by scaleProperty
 
     init {
-        scaleProperty.addListener(onNew<Number, Double> { label.text = (it * 100).roundToInt().toString() + "%" })
+        label.textProperty().bind(scaleProperty.transform { "${(it * 100).roundToInt()}%" })
 
-        alignment = Pos.CENTER
+        alignment = Pos.CENTER_LEFT
         children.addAll(slider, label)
     }
 }

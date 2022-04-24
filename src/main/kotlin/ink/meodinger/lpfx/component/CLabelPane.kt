@@ -20,7 +20,6 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.collections.ObservableSet
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.event.EventType
@@ -60,6 +59,8 @@ class CLabelPane : ScrollPane() {
         private const val TEXT_ALPHA = "A0"
         private val TEXT_FONT = Font(MonoFont, 32.0)
     }
+
+    // TODO: Use selectionModel
 
     // ----- Event ----- //
 
@@ -273,7 +274,7 @@ class CLabelPane : ScrollPane() {
     fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
     val selectedLabels: Set<Int> by selectedLabelsProperty
 
-    private var selectedIndices: ObservableSet<Int> by selectedLabelsProperty
+    fun clearSelection() = selectedLabelsProperty.clear()
 
     // ----- Others ------ //
 
@@ -385,21 +386,20 @@ class CLabelPane : ScrollPane() {
                     }
                 }
 
-                // TODO: selection should update even if selected indices not change
-                // Reproduce: select some labels, use `Delete` to remove them, revert, re-select them
                 if (it.isShiftDown && it.isAltDown) {
                     // Shift + Alt -> Preserve mode
                     // Select labels in both box-selection and selected
-                    selectedIndices = FXCollections.observableSet(selectedIndices.filter(indices::contains).toSet())
+                    val newSelected = selectedLabelsProperty.filter(indices::contains).toSet()
+                    selectedLabelsProperty.set(FXCollections.observableSet(newSelected))
                 } else if (it.isShiftDown) {
                     // Shift -> Add mode
-                    selectedIndices.addAll(indices)
+                    selectedLabelsProperty.addAll(indices)
                 } else if (it.isAltDown) {
                     // Alt -> Subtract mode
-                    selectedIndices.removeAll(indices)
+                    selectedLabelsProperty.removeAll(indices)
                 } else {
                     // Else -> Select mode
-                    selectedIndices = FXCollections.observableSet(indices)
+                    selectedLabelsProperty.set(FXCollections.observableSet(indices))
                 }
             }
 

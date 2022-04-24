@@ -26,16 +26,12 @@ import javafx.scene.text.Text
  * A Label component for LabelPane
  */
 class CLabel(
-    labelIndex:  Int    = DEFAULT_INDEX,
-    labelRadius: Double = DEFAULT_RADIUS,
-    labelColor:  Color  = Color.web(DEFAULT_COLOR),
+    labelIndex:  Int    = -1,
+    labelRadius: Double = 24.0,
+    labelColor:  Color  = Color.web("66CCFF"),
 ) : Region() {
 
     companion object {
-        private const val DEFAULT_INDEX = -1
-        private const val DEFAULT_RADIUS = 24.0
-        private const val DEFAULT_COLOR = "66CCFF"
-
         const val MIN_PICK_RADIUS = 16.0
     }
 
@@ -98,13 +94,14 @@ class CLabel(
 
         // Update
         val updateListener = onChange<Any> {
-            children.setAll(text, Shape.subtract(circle, text).apply {
+            children.clear() // make circle & text have no parents
+            children.setAll(Shape.subtract(circle, text).apply {
                 fillProperty().bind(Bindings.createObjectBinding(
                     {
                         color.opacity(colorOpacity)
                     }, colorProperty, colorOpacityProperty
                 ))
-            })
+            }, text)
         }
         indexProperty.addListener(updateListener)
         radiusProperty.addListener(updateListener)

@@ -58,8 +58,7 @@ class CComboBox<T> : HBox() {
 
         // Bind bidirectionally by listeners
         val listenerSelection = onNew<Number, Int>(indexProperty::set)
-        val listenerIndex = onNew<Number, Int> { selectionModel.select(it) }
-        indexProperty.addListener(listenerIndex)
+        indexProperty.addListener(onNew<Number, Int>(selectionModel::select))
         innerBox.selectionModel.selectedIndexProperty().addListener(listenerSelection)
         innerBox.selectionModelProperty().addListener(WeakChangeListener { _, o, n ->
             o?.selectedIndexProperty()?.removeListener(listenerSelection)

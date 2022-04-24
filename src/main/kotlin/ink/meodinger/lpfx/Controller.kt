@@ -569,6 +569,7 @@ class Controller(private val state: State) {
                 if (indices.contains(state.currentLabelIndex)) {
                     state.currentLabelIndex = NOT_FOUND
                 }
+
                 state.doAction(ComplexAction.of(indices.map { index ->
                     LabelAction(
                         ActionType.REMOVE, state,
@@ -576,6 +577,7 @@ class Controller(private val state: State) {
                         state.transFile.getTransLabel(state.currentPicName, index),
                     )
                 }))
+                cLabelPane.clearSelection()
             }
         }
         Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", LOGSRC_CONTROLLER)

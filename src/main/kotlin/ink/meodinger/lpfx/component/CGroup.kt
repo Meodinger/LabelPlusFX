@@ -2,7 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
@@ -26,14 +26,11 @@ import javafx.scene.text.Text
  * A Region that displays a TransGroup
  */
 class CGroup(
-    groupName:  String = DEFAULT_NAME,
-    groupColor: Color  = Color.web(DEFAULT_COLOR_HEX)
+    groupName:  String = emptyString(),
+    groupColor: Color  = Color.web("66CCFF")
 ) : Region() {
 
     companion object {
-        private const val DEFAULT_NAME = ""
-        private const val DEFAULT_COLOR_HEX = "66CCFF"
-
         private const val CORNER_RADII = 4.0
         private const val BORDER_WIDTH = 1.0
         private const val PADDING = 4.0
@@ -58,9 +55,10 @@ class CGroup(
 
     init {
         padding = Insets(PADDING)
-        addEventHandler(MouseEvent.MOUSE_CLICKED) { select() }
-
-        selectedProperty.addListener(onNew { if (it) onSelect.handle(ActionEvent(name, this)) })
+        addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            select()
+            onSelect.handle(ActionEvent(it.source, this))
+        }
 
         val text = Text().apply {
             textOrigin = VPos.TOP

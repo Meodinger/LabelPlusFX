@@ -7,15 +7,14 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
+import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.scene.control.*
-import javafx.scene.input.ContextMenuEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -34,9 +33,6 @@ import javafx.util.Callback
  * Main View
  */
 class View(state: State) : BorderPane() {
-
-    private val statsBar = HBox()
-    private val cTreeViewMenu = CTreeMenu(state)
 
     val menuBar         = CMenuBar(state)
     val bSwitchViewMode = Button()
@@ -124,17 +120,13 @@ class View(state: State) : BorderPane() {
                         }
                     }
                     center(cTreeView) {
-                        contextMenu = cTreeViewMenu.apply { update(emptyList()) }
-                        addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED) {
-                            cTreeViewMenu.update(selectionModel.selectedItems.toList())
-                        }
+                        contextMenu = CTreeMenu(state, this)
                     }
                 }
                 add(TitledPane()) {
-                    textProperty().bind(Bindings.createStringBinding(
-                        { state.currentLabelIndex.takeIf { it != NOT_FOUND }?.toString() ?: emptyString() },
-                        state.currentLabelIndexProperty()
-                    ))
+                    textProperty().bind(state.currentLabelIndexProperty().transform {
+                        if (it == NOT_FOUND) emptyString() else it.toString()
+                    })
                     withContent(cTransArea) {
                         isWrapText = true
                     }
@@ -142,7 +134,7 @@ class View(state: State) : BorderPane() {
             }
         }
 
-        statsBar.apply {
+        val statsBar = HBox().apply {
             val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
             add(HBox()) {
                 hgrow = Priority.ALWAYS

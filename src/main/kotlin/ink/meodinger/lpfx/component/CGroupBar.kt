@@ -30,9 +30,9 @@ import javafx.scene.paint.Color
  */
 class CGroupBar : HBox() {
 
-    // TODO: Fix the overlap when there are not enough space to layout
+    // Maybe: Fix the overlap when there are not enough space to layout
 
-    // ----- Properties ----- //
+    // region Properties
 
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
@@ -50,6 +50,8 @@ class CGroupBar : HBox() {
     fun onGroupCreateProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupCreateProperty
     val onGroupCreate: EventHandler<ActionEvent> by onGroupCreateProperty
     fun setOnGroupCreate(handler: EventHandler<ActionEvent>) = onGroupCreateProperty.set(handler)
+
+    // endregion
 
     init {
         groupsProperty.addListener(ListChangeListener {
@@ -101,8 +103,6 @@ class CGroupBar : HBox() {
             colorProperty().unbind()
         })
     }
-
-    // ----- SelectionModel ---- //
 
     private inner class GroupBarSelectionModel : SingleSelectionModel<TransGroup>() {
 

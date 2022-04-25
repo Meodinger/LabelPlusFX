@@ -107,7 +107,7 @@ class CLigatureArea: TextArea() {
     /**
      * Bind the StringProperty of this TextArea to another StringProperty bidirectionally.
      */
-    fun bindBidirectional(property: StringProperty) {
+    fun bindText(property: StringProperty) {
         textProperty().bindBidirectional(property)
         boundTextPropertyProperty.set(property)
     }
@@ -115,7 +115,7 @@ class CLigatureArea: TextArea() {
     /**
      * Unbind the bound StringProperty (if not null), and clear text.
      */
-    fun unbindBidirectional() {
+    fun unbindText() {
         val bound = boundTextPropertyProperty.get() ?: return
 
         textProperty().unbindBidirectional(bound)

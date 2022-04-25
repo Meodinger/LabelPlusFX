@@ -51,7 +51,7 @@ import kotlin.io.path.name
  */
 class CMenuBar(private val state: State) : MenuBar() {
 
-    // ----- Recent ----- //
+    // region RecentFiles
 
     private val mOpenRecent = Menu(I18N["m.recent"])
     private fun openRecentTranslation(item: MenuItem) {
@@ -76,7 +76,9 @@ class CMenuBar(private val state: State) : MenuBar() {
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
     val recentFiles: ObservableList<File> by recentFilesProperty
 
-    // ----- Choosers ----- //
+    // endregion
+
+    // region Choosers & Filters
 
     private val filterAny     = FileChooser.ExtensionFilter(I18N["file_type.any"], "*.*")
 
@@ -101,6 +103,8 @@ class CMenuBar(private val state: State) : MenuBar() {
 
     private val chooserPack   = CFileChooser()
     private val filterPack    = FileChooser.ExtensionFilter(I18N["file_type.pack"], "*.${EXTENSION_PACK}")
+
+    // endregion
 
     init {
         chooserPic.title = I18N["m.externalPic.chooser.title"]

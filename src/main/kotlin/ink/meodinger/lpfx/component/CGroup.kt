@@ -2,6 +2,7 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
@@ -36,6 +37,8 @@ class CGroup(
         private const val PADDING = 4.0
     }
 
+    // region Properties
+
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
     fun nameProperty(): StringProperty = nameProperty
     var name: String by nameProperty
@@ -53,10 +56,13 @@ class CGroup(
     val onSelect: EventHandler<ActionEvent> by onSelectProperty
     fun setOnSelect(handler: EventHandler<ActionEvent>) = onSelectProperty.set(handler)
 
+    // endregion
+
     init {
         padding = Insets(PADDING)
         addEventHandler(MouseEvent.MOUSE_CLICKED) {
-            select()
+            requestFocus()
+            isSelected = true
             onSelect.handle(ActionEvent(it.source, this))
         }
 
@@ -64,8 +70,8 @@ class CGroup(
             textOrigin = VPos.TOP
             textProperty().bind(nameProperty)
             fillProperty().bind(colorProperty)
-            layoutXProperty().bind(Bindings.createDoubleBinding({ (width - boundsInLocal.width) / 2 }, widthProperty()))
-            layoutYProperty().bind(Bindings.createDoubleBinding({ (height - boundsInLocal.height) / 2 }, heightProperty()))
+            layoutXProperty().bind(widthProperty().transform { (it - boundsInLocal.width) / 2 })
+            layoutYProperty().bind(heightProperty().transform { (height - boundsInLocal.height) / 2 })
         }
 
         backgroundProperty().bind(Bindings.createObjectBinding(
@@ -104,7 +110,6 @@ class CGroup(
     fun select() {
         isSelected = true
     }
-
     fun unselect() {
         isSelected = false
     }

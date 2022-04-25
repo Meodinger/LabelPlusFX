@@ -77,7 +77,10 @@ val EXTENSIONS_PIC  = listOf(
     EXTENSION_PIC_TIFF,
     EXTENSION_PIC_WEBP,
 )
-val EXTENSIONS_FILE = listOf(EXTENSION_FILE_LP, EXTENSION_FILE_MEO)
+val EXTENSIONS_FILE = listOf(
+    EXTENSION_FILE_LP,
+    EXTENSION_FILE_MEO
+)
 
 /**
  * For label/group not found
@@ -101,34 +104,26 @@ const val LOGSRC_DICTIONARY  = "Dictionary"
  * Work Mode
  * @param description Display name for WorkMode
  */
-enum class WorkMode(private val description: String) {
+enum class WorkMode(val description: String) {
     InputMode(I18N["mode.work.input"]),
     LabelMode(I18N["mode.work.label"]);
-
-    override fun toString(): String = description
-
 }
 
 /**
  * Label View Mode
  * @param description Display name for ViewMode
  */
-enum class ViewMode(private val description: String) {
+enum class ViewMode(val description: String) {
     IndexMode(I18N["mode.view.index"]),
     GroupMode(I18N["mode.view.group"]);
-
-    override fun toString(): String = description
-
 }
 
 /**
  * Translation File Type
  */
-enum class FileType(private val description: String, val extension: String) {
+enum class FileType(val description: String, val extension: String) {
     LPFile(I18N["file_type.translation_lp"], EXTENSION_FILE_LP),
     MeoFile(I18N["file_type.translation_meo"], EXTENSION_FILE_MEO);
-
-    override fun toString(): String = description
 
     companion object {
         /**

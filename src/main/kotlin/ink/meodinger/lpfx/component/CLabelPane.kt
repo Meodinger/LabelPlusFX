@@ -10,7 +10,6 @@ import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.div
 import ink.meodinger.lpfx.util.doNothing
-import ink.meodinger.lpfx.util.event.isControlOrMetaDown
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
@@ -59,7 +58,7 @@ class CLabelPane : ScrollPane() {
         private val TEXT_FONT = Font(MonoFont, 32.0)
     }
 
-    // ----- Event ----- //
+    // region LabelEvent
 
     class LabelEvent(
         eventType: EventType<LabelEvent>,
@@ -81,7 +80,9 @@ class CLabelPane : ScrollPane() {
         }
     }
 
-    // ----- Enum ----- //
+    // endregion
+
+    // region NewPicScale Enum
 
     enum class NewPictureScale(private val description: String) {
         DEFAULT(I18N["label_pane.nps.default"]),
@@ -92,7 +93,9 @@ class CLabelPane : ScrollPane() {
         override fun toString(): String = description
     }
 
-    // ----- Layer System ----- //
+    // endregion
+
+    // region Layer System
 
     /*
      *           |   Layout   | Width
@@ -124,14 +127,22 @@ class CLabelPane : ScrollPane() {
      */
     private val root = StackPane()
 
-    // ----- Runtime Data ----- //
+    // endregion
+
+    // region Runtime Data
 
     private var shiftX = 0.0
     private var shiftY = 0.0
     private var dragging = false
     private var selecting = false
 
-    // ----- Properties ----- //
+    @Suppress("UNCHECKED_CAST")
+    private val labelNodes: ObservableList<CLabel> get() = labelLayer.children as ObservableList<CLabel>
+    private val shouldCreate: Boolean get() = image !== INIT_IMAGE
+
+    // endregion
+
+    // region Properties:Scale
 
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(Double.NaN)
     private val minScaleProperty:  DoubleProperty = SimpleDoubleProperty(Double.NaN)
@@ -177,6 +188,10 @@ class CLabelPane : ScrollPane() {
                 scaleProperty.set(temp)
             }
         }
+
+    // endregion
+
+    // region Properties:Handler
 
     private val onLabelCreateProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
     private val onLabelRemoveProperty: ObjectProperty<EventHandler<LabelEvent>> = SimpleObjectProperty(EventHandler<LabelEvent> {})
@@ -227,6 +242,10 @@ class CLabelPane : ScrollPane() {
         addEventHandler(LabelEvent.LABEL_OTHER, onLabelOther)
     }
 
+    // endregion
+
+    // region Properties:Layout
+
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList())
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
     var groups: ObservableList<TransGroup> by groupsProperty
@@ -259,17 +278,17 @@ class CLabelPane : ScrollPane() {
     fun commonCursorProperty(): ObjectProperty<Cursor> = commonCursorProperty
     var commonCursor: Cursor by commonCursorProperty
 
-    // ----- Selection ------ //
+    // endregion
+
+    // region Properties:Selection
 
     private val selectedLabelsProperty: SetProperty<Int> = SimpleSetProperty(FXCollections.observableSet(HashSet()))
     fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
     val selectedLabels: Set<Int> by selectedLabelsProperty
 
-    // ----- Others ------ //
+    // endregion
 
-    @Suppress("UNCHECKED_CAST")
-    private val labelNodes: ObservableList<CLabel> get() = labelLayer.children as ObservableList<CLabel>
-    private val shouldCreate: Boolean get() = image !== INIT_IMAGE
+    // ----- Others ------ //
 
     init {
         withContent(root) {
@@ -313,7 +332,7 @@ class CLabelPane : ScrollPane() {
             root.scaleY = it
         })
         root.addEventFilter(ScrollEvent.SCROLL) {
-            if (it.isControlOrMetaDown || it.isAltDown) {
+            if (it.isControlDown || it.isAltDown || it.isMetaDown) {
                 val deltaScale = if (it.deltaY > 0) 0.1 else -0.1
 
                 scale += deltaScale
@@ -657,8 +676,8 @@ class CLabelPane : ScrollPane() {
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
-        val fakeX = image.width / 2 * (1 - scale) + label.translateX * scale
-        val fakeY = image.height / 2 * (1 - scale) + label.translateY * scale
+        val fakeX = image.width / 2 * (1 - scale) + label.layoutX * scale
+        val fakeY = image.height / 2 * (1 - scale) + label.layoutY * scale
 
         // To center
         // -> Scroll / 2 = Layout + Fake

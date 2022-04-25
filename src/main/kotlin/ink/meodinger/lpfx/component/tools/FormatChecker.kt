@@ -39,6 +39,14 @@ class FormatChecker(private val state: State) : Stage() {
             ".."           to I18N["format.dots"],
             "\u3002\u3002" to I18N["format.dots"],
         )
+        /*
+        Maybe: Use RegEx
+        private val TyposRegex: Map<Regex, String> = mapOf(
+            Regex("\n(\n)+")         to I18N["format.lines"],
+            Regex("\\.(\\.)+")       to I18N["format.dots"],
+            Regex("\u3002(\u3002)+") to I18N["format.dots"],
+        )
+         */
     }
 
     private val typoListProperty: ListProperty<Pair<Pair<String, Int>, String>> = SimpleListProperty(FXCollections.observableArrayList())
@@ -106,9 +114,12 @@ class FormatChecker(private val state: State) : Stage() {
                 }
             if (index == NOT_FOUND) return@onNew
 
+            // Update status
             state.currentPicName = picName
-            state.view.cTreeView.selectionModel.clearSelection() // Clear before select
+            // Clear before select
+            state.view.cTreeView.clearSelection()
             state.currentLabelIndex = labelIndex
+            // Select Range
             state.view.cTransArea.selectRange(index, index + typo.length)
         })
         closeOnEscape()

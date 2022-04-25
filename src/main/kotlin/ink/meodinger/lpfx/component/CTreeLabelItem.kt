@@ -28,6 +28,8 @@ class CTreeLabelItem(
     labelColor: Color? = null
 ) : TreeItem<String>() {
 
+    // region Properties
+
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
@@ -39,6 +41,8 @@ class CTreeLabelItem(
     private val colorProperty: ObjectProperty<Color?> = SimpleObjectProperty(labelColor)
     fun colorProperty(): ObjectProperty<Color?> = colorProperty
     var color: Color? by colorProperty
+
+    // endregion
 
     init {
         graphicProperty().bind(Bindings.createObjectBinding(

@@ -35,6 +35,8 @@ class CLabel(
         const val MIN_PICK_RADIUS = 16.0
     }
 
+    // region Properties
+
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int by indexProperty
@@ -54,6 +56,8 @@ class CLabel(
     private val textOpaqueProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun textOpaqueProperty(): BooleanProperty = textOpaqueProperty
     var isTextOpaque: Boolean by textOpaqueProperty
+
+    // endregion
 
     init {
         val pickerRadiusBinding = Bindings.createDoubleBinding({ radius.coerceAtLeast(MIN_PICK_RADIUS) }, radiusProperty)

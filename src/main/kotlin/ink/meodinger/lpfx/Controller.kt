@@ -132,26 +132,37 @@ class Controller(private val state: State) {
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
-            state.getPicFileNow()?.takeIf(File::exists)?.let {
-                try {
-                    val image = imageFromFile(it)
-                    if (!image.isError) {
-                        image
-                    } else {
+            val file = state.getPicFileNow()
+            if (file == null) {
+                INIT_IMAGE
+            } else {
+                if (file.exists()) {
+                    try {
+                        val image = imageFromFile(file)
+                        if (!image.isError) {
+                            image
+                        } else {
+                            Platform.runLater {
+                                showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
+                                showException(state.stage, image.exception)
+                            }
+                            INIT_IMAGE
+                        }
+                    } catch (e: IOException) {
                         Platform.runLater {
                             showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                            showException(state.stage, image.exception)
+                            showException(state.stage, e)
                         }
                         INIT_IMAGE
                     }
-                } catch (e: IOException) {
+                } else {
+                    Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
                     Platform.runLater {
-                        showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                        showException(state.stage, e)
+                        showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
                     }
                     INIT_IMAGE
                 }
-            } ?: INIT_IMAGE
+            }
         }, state.currentPicNameProperty()
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
@@ -243,7 +254,7 @@ class Controller(private val state: State) {
 
         // Register Alias & Global redo/undo in TransArea
         cTransArea.addEventFilter(KeyEvent.KEY_PRESSED) {
-            if (it.isControlOrMetaDown && it.code == KeyCode.Z) {
+            if ((it.isControlDown || it.isMetaDown) && it.code == KeyCode.Z) {
                 if (!it.isShiftDown) {
                     if (!cTransArea.isUndoable) state.undo() else cTransArea.undo()
                 } else {
@@ -256,7 +267,7 @@ class Controller(private val state: State) {
 
         // Register Ctrl/Meta + Scroll with font size change in TransArea
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
-            if (!(it.isControlOrMetaDown || it.isAltDown)) return@addEventHandler
+            if (!(it.isControlDown || it.isAltDown || it.isMetaDown)) return@addEventHandler
 
             val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).roundToInt()
                 .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
@@ -286,7 +297,8 @@ class Controller(private val state: State) {
                 state.currentPicName,
                 TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
             ))
-            // Update selection, will also update currentLabelIndex
+            // Update selection
+            cTreeView.clearSelection()
             cTreeView.selectLabel(newIndex, true)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
@@ -324,7 +336,8 @@ class Controller(private val state: State) {
 
             if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 
-            // Update selection, will also update currentLabelIndex
+            // Update selection
+            cTreeView.clearSelection()
             cTreeView.selectLabel(it.labelIndex, true)
         }
         cLabelPane.setOnLabelMove {
@@ -386,29 +399,24 @@ class Controller(private val state: State) {
         Logger.info("Bound scale", LOGSRC_CONTROLLER)
 
         // Switch Button text
-        bSwitchWorkMode.textProperty().bind(Bindings.createStringBinding(
-            {
-                when (state.workMode) {
-                    WorkMode.InputMode -> I18N["mode.work.input"]
-                    WorkMode.LabelMode -> I18N["mode.work.label"]
-                }
-            }, state.workModeProperty()
-        ))
-        bSwitchViewMode.textProperty().bind(Bindings.createStringBinding(
-            {
-                when (state.viewMode) {
-                    ViewMode.IndexMode -> I18N["mode.view.index"]
-                    ViewMode.GroupMode -> I18N["mode.view.group"]
-                }
-            }, state.viewModeProperty()
-        ))
+        bSwitchWorkMode.textProperty().bind(state.workModeProperty().transform(WorkMode::description))
+        bSwitchViewMode.textProperty().bind(state.viewModeProperty().transform(ViewMode::description))
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         val groupIndexListener = onNew<Number, Int> {
             if (state.viewMode == ViewMode.GroupMode) {
                 // In GroupMode, CurrentGroupId is set by CTreeView
                 // SelectionModal::SelectedIndex will be temporarily set to -1 when it changes, we ignore that value
-                if (it != NOT_FOUND) cTreeView.selectGroup(state.transFile.getTransGroup(it).name, true)
+                if (it != NOT_FOUND) {
+                    if (cTreeView.isFocused) {
+                        // if the change is result of CTreeView selection, add
+                        doNothing()
+                    } else {
+                        // if the change is result of GroupBar/Box selection, set
+                        cTreeView.clearSelection()
+                    }
+                    cTreeView.selectGroup(state.transFile.getTransGroup(it).name, true)
+                }
             } else {
                 // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
                 state.currentGroupId = it
@@ -454,14 +462,12 @@ class Controller(private val state: State) {
         cLabelPane.labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
         cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
-        cLabelPane.commonCursorProperty().bind(Bindings.createObjectBinding(
-            {
-                when (state.workMode) {
-                    WorkMode.LabelMode -> Cursor.CROSSHAIR
-                    WorkMode.InputMode -> Cursor.DEFAULT
-                }
-            }, state.workModeProperty())
-        )
+        cLabelPane.commonCursorProperty().bind(state.workModeProperty().transform {
+            when (state.workMode) {
+                WorkMode.LabelMode -> Cursor.CROSSHAIR
+                WorkMode.InputMode -> Cursor.DEFAULT
+            }
+        })
         Logger.info("Bound CLabelPane properties", LOGSRC_CONTROLLER)
     }
     /**
@@ -484,30 +490,12 @@ class Controller(private val state: State) {
             if (cTransArea.isBound) state.isChanged = true
         })
         Logger.info("Listened for isChanged", LOGSRC_CONTROLLER)
-
-        // currentLabelIndex
-        state.currentPicNameProperty().addListener(onChange {
-            // Clear selected when change pic
-            cTreeView.selectionModel.clearSelection()
-            state.currentLabelIndex = NOT_FOUND
-        })
-        Logger.info("Listened for CurrentLabelIndex", LOGSRC_CONTROLLER)
     }
     /**
      * Properties' effect on view
      */
     private fun effect() {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
-
-        // Show error if file not found
-        state.currentPicNameProperty().addListener(onNew {
-            if (state.isOpened) {
-                val file = state.transFile.getFile(it)?.takeUnless(File::exists) ?: return@onNew
-                Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
-                showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
-            }
-        })
-        Logger.info("Added effect: show error if file not found", LOGSRC_CONTROLLER)
 
         // Update StatsBar
         state.currentPicNameProperty().addListener(onNew {
@@ -533,12 +521,12 @@ class Controller(private val state: State) {
             if (!state.isOpened) return@onNew
 
             // unbind TextArea
-            cTransArea.unbindBidirectional()
+            cTransArea.unbindText()
 
             if (it == NOT_FOUND) return@onNew
 
             // bind new text property
-            cTransArea.bindBidirectional(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
+            cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
         })
         Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
@@ -562,7 +550,10 @@ class Controller(private val state: State) {
         Logger.info("Added effect: move to label on CTreeLabelItem select", LOGSRC_CONTROLLER)
 
         // When LabelPane Box Selection
-        cLabelPane.selectedLabelsProperty().addListener(SetChangeListener { cTreeView.selectLabels(it.set) })
+        cLabelPane.selectedLabelsProperty().addListener(SetChangeListener {
+            cTreeView.clearSelection()
+            cTreeView.selectLabels(it.set)
+        })
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (cLabelPane.selectedLabels.isEmpty()) return@addEventHandler
 
@@ -630,7 +621,7 @@ class Controller(private val state: State) {
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
-            if (!it.isControlOrMetaDown) return@EventHandler
+            if (!(it.isControlDown || it.isMetaDown)) return@EventHandler
 
             when (it.code) {
                 KeyCode.LEFT -> cPicBox.back()
@@ -667,7 +658,7 @@ class Controller(private val state: State) {
 
         // Transform Ctrl + Up/Down KeyEvent to CTreeView select (and have effect: move to label)
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> {
-            if (!(it.isControlOrMetaDown && it.code.isArrowKey)) return@EventHandler
+            if (!((it.isControlDown || it.isMetaDown) && it.code.isArrowKey)) return@EventHandler
             // Direction
             val labelItemShift: Int = when (it.code) {
                 KeyCode.UP -> -1
@@ -705,7 +696,7 @@ class Controller(private val state: State) {
 
         // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
-            if (!(it.isControlOrMetaDown && it.code == KeyCode.ENTER)) return@EventHandler
+            if (!((it.isControlDown || it.isMetaDown) && it.code == KeyCode.ENTER)) return@EventHandler
 
             val backward = it.isShiftDown
             val selectedItemIndex = cTreeView.selectionModel.selectedIndex
@@ -1047,7 +1038,7 @@ class Controller(private val state: State) {
         accumulatorManager.clear()
 
         lBackup.text = I18N["stats.not_backed"]
-        cTransArea.unbindBidirectional()
+        cTransArea.unbindText()
 
         state.stage.title = INFO["application.name"]
     }

@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
@@ -26,6 +27,8 @@ class CTreeGroupItem(
     groupColor: Color  = Color.web("66CCFF")
 ) : TreeItem<String>() {
 
+    // region Properties
+
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
     fun nameProperty(): StringProperty = nameProperty
     var name: String by nameProperty
@@ -34,12 +37,10 @@ class CTreeGroupItem(
     fun colorProperty(): ObjectProperty<Color> = colorProperty
     var color: Color by colorProperty
 
+    // endregion
+
     init {
-        graphicProperty().bind(Bindings.createObjectBinding(
-            {
-                Circle(GRAPHICS_CIRCLE_RADIUS, color)
-            }, colorProperty
-        ))
+        graphicProperty().bind(colorProperty.transform { Circle(GRAPHICS_CIRCLE_RADIUS, it) })
         valueProperty().bind(nameProperty)
     }
 

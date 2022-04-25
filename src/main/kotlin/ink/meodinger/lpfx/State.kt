@@ -159,8 +159,10 @@ class State {
     val canRedo: Boolean by canRedoProperty
 
     fun doAction(action: Action) {
+        Logger.info("Action committing", LOGSRC_STATE)
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
+        Logger.info("Action committed", LOGSRC_STATE)
 
         isChanged = true
         canUndoProperty.set(true)
@@ -170,7 +172,9 @@ class State {
     fun undo() {
         if (undoStack.isEmpty()) return
 
+        Logger.info("Action reverting", LOGSRC_STATE)
         redoStack.push(undoStack.pop().apply(Action::revert))
+        Logger.info("Action reverted", LOGSRC_STATE)
 
         canUndoProperty.set(!undoStack.isEmpty())
         canRedoProperty.set(true)
@@ -179,7 +183,9 @@ class State {
     fun redo() {
         if (redoStack.isEmpty()) return
 
+        Logger.info("Action re-reverting", LOGSRC_STATE)
         undoStack.push(redoStack.pop().apply(Action::commit))
+        Logger.info("Action re-reverted", LOGSRC_STATE)
 
         canUndoProperty.set(true)
         canRedoProperty.set(!redoStack.isEmpty())

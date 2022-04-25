@@ -25,7 +25,7 @@ import javafx.stage.Stage
  * Date: 2022/1/29
  * Have fun with my code!
  */
-class CheatSheet() : Stage() {
+class CheatSheet : Stage() {
 
     private val onActionProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(null)
     val onAction: EventHandler<ActionEvent> by onActionProperty

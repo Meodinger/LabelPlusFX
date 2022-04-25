@@ -22,35 +22,35 @@ import javax.imageio.ImageIO
  * @param ratio Scale ratio
  * @return scaled Image
  */
-fun Image.scale(ratio: Double) = Image(this.url, this.width * ratio, this.height * ratio, false, true)
+fun Image.scale(ratio: Double): Image = Image(this.url, this.width * ratio, this.height * ratio, false, true)
 
 /**
  * Scale according to width
  * @param width Width that the image width should scale to
  * @return scaled Image
  */
-fun Image.resizeByWidth(width: Double) = scale(width / this.width)
+fun Image.resizeByWidth(width: Double): Image = scale(width / this.width)
 
 /**
  * Scale according to height
  * @param height Height that the image height should scale to
  * @return scaled Image
  */
-fun Image.resizeByHeight(height: Double) = scale(height / this.height)
+fun Image.resizeByHeight(height: Double): Image = scale(height / this.height)
 
 /**
  * Scale according to max radius
  * @param radius Radius that the image radius should scale to
  * @return scaled Image
  */
-fun Image.resizeByRadius(radius: Double) = scale((radius * 2) / this.height.coerceAtMost(this.width))
+fun Image.resizeByRadius(radius: Double): Image = scale((radius * 2) / this.height.coerceAtMost(this.width))
 
 /**
  * Resize image
  * @param width Width that the image should scale to
  * @param height Height that the image should scale to
  */
-fun Image.resize(width: Double, height: Double) = Image(this.url, width, height, false, true)
+fun Image.resize(width: Double, height: Double): Image = Image(this.url, width, height, false, true)
 
 /**
  * To greyscale image

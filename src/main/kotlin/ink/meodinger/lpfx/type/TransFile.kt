@@ -114,7 +114,7 @@ class TransFile @JsonCreator constructor(
      * Check whether files of some pictures not exist
      */
     fun checkLost(): List<String> {
-        return transMapObservable.keys.filter { getFile(it)!!.exists() }
+        return transMapObservable.keys.filter { !getFile(it)!!.exists() }
     }
 
     // ----- Properties ----- //

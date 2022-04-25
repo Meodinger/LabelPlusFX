@@ -4,10 +4,10 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.component.expandAll
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 
-import javafx.application.Platform
 import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
@@ -50,29 +50,31 @@ class CTreeView: TreeView<String>() {
     // region Properties:Selection
 
     private val selectedGroupProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    fun selectedGroupProperty(): IntegerProperty = selectedGroupProperty
+    fun selectedGroupProperty(): ReadOnlyIntegerProperty = selectedGroupProperty
     /**
      * Selected GroupItem's GroupId, note that set this will not clear previous selection
      */
     var selectedGroup: Int by selectedGroupProperty
+        private set
 
     private val selectedLabelProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    fun selectedLabelProperty(): IntegerProperty = selectedLabelProperty
+    fun selectedLabelProperty(): ReadOnlyIntegerProperty = selectedLabelProperty
     /**
      * Selected LabelItem's index, note that set this will not clear previous selection
      */
     var selectedLabel: Int by selectedLabelProperty
+        private set
 
     // endregion
 
     private val groupItems: MutableList<CTreeGroupItem> = ArrayList()
-    private val labelItems: MutableList<MutableList<CTreeLabelItem>> = ArrayList()
+    private val labelItems: MutableList<CTreeLabelItem> = ArrayList()
 
     init {
         // Init
         root = TreeItem<String?>().apply {
             valueProperty().bind(rootNameProperty())
-            valueProperty().addListener(onNew { Platform.runLater { expandAll() } })
+            valueProperty().addListener(onNew { expandAll() })
         }
         selectionModel.selectionMode = SelectionMode.MULTIPLE
 
@@ -86,9 +88,7 @@ class CTreeView: TreeView<String>() {
                 } else if (it.wasUpdated()) {
                     // Ignore, TransGroup's Property changed
                 } else {
-                    if (it.wasRemoved()) {
-                        it.removed.forEach(this::removeGroupItem)
-                    }
+                    if (it.wasRemoved()) it.removed.forEach(this::removeGroupItem)
                     if (it.wasAdded()) {
                         it.addedSubList.forEachIndexed { index, group ->
                             createGroupItem(group, groupId = it.from + index)
@@ -113,23 +113,6 @@ class CTreeView: TreeView<String>() {
         })
 
         // Selection
-        selectedGroupProperty.addListener(onNew<Number, Int> {
-            if (viewMode != ViewMode.GroupMode) return@onNew
-            if (it != NOT_FOUND) selectionModel.select(getGroupItem(groups[it].name))
-        })
-        selectedLabelProperty.addListener(onNew<Number, Int> {
-            if (it != NOT_FOUND) selectionModel.select(getLabelItem(it))
-        })
-        groupsProperty.addListener(ListChangeListener {
-            while (it.next())
-                if (it.wasRemoved() && it.removed.map(groups::indexOf).contains(selectedGroup))
-                    selectedGroup = NOT_FOUND
-        })
-        labelsProperty.addListener(ListChangeListener {
-            while (it.next())
-                if (it.wasRemoved() && it.removed.map(TransLabel::index).contains(selectedLabel))
-                    selectedLabel = NOT_FOUND
-        })
         selectionModel.selectedItemProperty().addListener(onNew {
             when (it) {
                 // These set will be ignored if select by set selected properties. (old == new)
@@ -144,7 +127,7 @@ class CTreeView: TreeView<String>() {
             item.nameProperty().unbind()
             item.colorProperty().unbind()
         }
-        for (items in labelItems) for (item in items) {
+        for (item in labelItems) {
             item.indexProperty().unbind()
             item.textProperty().unbind()
             item.graphicProperty().unbind()
@@ -158,39 +141,36 @@ class CTreeView: TreeView<String>() {
         for (transLabel in labels) createLabelItem(transLabel)
     }
     private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
-        labelItems.add(ArrayList())
-
         val groupItem = CTreeGroupItem().apply {
             nameProperty().bind(transGroup.nameProperty())
             colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
         }
 
+        // Add view
+        when (viewMode) {
+            ViewMode.IndexMode -> doNothing()
+            ViewMode.GroupMode -> root.children.add(groupId, groupItem)
+        }
         // Add data
         groupItems.add(groupId, groupItem)
-
-        // In IndexMode registration is enough
-        if (viewMode == ViewMode.IndexMode) return
-
-        // Add view
-        root.children.add(groupId, groupItem)
     }
     private fun removeGroupItem(transGroup: TransGroup) {
         val groupId = groupItems.indexOfFirst { it.name == transGroup.name }
-        labelItems.removeAt(groupId)
+        val groupItem = groupItems[groupId]
 
-        val groupItem = groupItems[groupId].apply {
-            nameProperty().unbind()
-            colorProperty().unbind()
+        // Unbind
+        groupItem.nameProperty().unbind()
+        groupItem.colorProperty().unbind()
+
+        // Clear selection
+        selectionModel.clearSelection(getRow(groupItem))
+        // Remove view
+        when (viewMode) {
+            ViewMode.IndexMode -> doNothing()
+            ViewMode.GroupMode -> root.children.remove(groupItem)
         }
-
         // Remove data
         groupItems.remove(groupItem)
-
-        // In IndexMode un-registration is enough
-        if (viewMode == ViewMode.IndexMode) return
-
-        // Remove view
-        root.children.remove(groupItem)
     }
     private fun createLabelItem(transLabel: TransLabel) {
         val labelItem = CTreeLabelItem().apply {
@@ -209,58 +189,51 @@ class CTreeView: TreeView<String>() {
         val index = parent.children.indexOfLast { (it as CTreeLabelItem).index < transLabel.index }
         if (index == parent.children.size - 1) parent.children.add(labelItem) else parent.children.add(index + 1, labelItem)
         // Add data
-        labelItems[transLabel.groupId].add(labelItem)
+        labelItems.add(labelItem)
     }
     private fun removeLabelItem(transLabel: TransLabel) {
-        val labelItem = labelItems[transLabel.groupId].first { it.index == transLabel.index }
+        val labelItem = labelItems.first { it.index == transLabel.index }
 
         // Unbind
         labelItem.indexProperty().unbind()
         labelItem.textProperty().unbind()
         labelItem.graphicProperty().unbind()
 
+        // Clear selection
+        selectionModel.clearSelection(getRow(labelItem))
         // Remove view
         when (viewMode) {
             ViewMode.IndexMode -> root.children.remove(labelItem)
             ViewMode.GroupMode -> groupItems[transLabel.groupId].children.remove(labelItem)
         }
         // Remove data
-        labelItems[transLabel.groupId].remove(labelItem)
+        labelItems.remove(labelItem)
     }
 
-    private fun getGroupItem(groupName: String): CTreeGroupItem {
-        for (item in groupItems) if (item.name == groupName) return item
-        throw IllegalArgumentException(String.format(I18N["exception.tree_view.no_such_group_item.s"], groupName))
-    }
-    private fun getLabelItem(labelIndex: Int): CTreeLabelItem {
-        for (labelItems in labelItems) for (labelItem in labelItems) if (labelItem.index == labelIndex) return labelItem
-        throw IllegalArgumentException(String.format(I18N["exception.tree_view.no_such_label_item.i"], labelIndex))
-    }
-
-    fun clearSelection() {
-        selectionModel.clearSelection()
-        selectedGroup = NOT_FOUND
-        selectedLabel = NOT_FOUND
-    }
-    fun selectGroup(groupName: String, scrollTo: Boolean) {
+    fun selectGroup(groupName: String, clear: Boolean, scrollTo: Boolean) {
         // In IndexMode this is not available
         if (viewMode == ViewMode.IndexMode)
             throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
 
-        val index = getRow(getGroupItem(groupName))
+        if (clear) selectionModel.clearSelection()
+        val item = groupItems.first { it.name == groupName }
 
-        selectionModel.select(index)
-        if (scrollTo) scrollTo(index)
+        selectionModel.select(item)
+        if (scrollTo) scrollTo(getRow(item))
     }
-    fun selectLabel(labelIndex: Int, scrollTo: Boolean) {
-        val index = getRow(getLabelItem(labelIndex))
+    fun selectLabel(labelIndex: Int, clear: Boolean, scrollTo: Boolean) {
+        if (clear) selectionModel.clearSelection()
+        val item = labelItems.first { it.index == labelIndex }
 
-        selectionModel.select(index)
-        if (scrollTo) scrollTo(index)
+        selectionModel.select(item)
+        if (scrollTo) scrollTo(getRow(item))
     }
-    fun selectLabels(labelIndices: Collection<Int>) {
-        // A little trick
-        labelIndices.toSortedSet().forEach(selectedLabelProperty::set)
+    fun selectLabels(labelIndices: Collection<Int>, clear: Boolean, scrollTo: Boolean) {
+        if (clear) selectionModel.clearSelection()
+        val items = labelItems.filter { labelIndices.contains(it.index) }
+
+        items.forEach(selectionModel::select)
+        if (scrollTo) scrollTo(getRow(items.first()))
     }
 
     fun requestUpdate() { update() }

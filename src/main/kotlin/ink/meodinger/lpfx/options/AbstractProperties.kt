@@ -89,7 +89,7 @@ abstract class AbstractProperties(val name: String) {
     }
 
     protected abstract val default: List<CProperty>
-    protected val properties = ArrayList<CProperty>()
+    protected val properties: ArrayList<CProperty> = ArrayList()
 
     @Throws(IOException::class, NumberFormatException::class)
     abstract fun load()

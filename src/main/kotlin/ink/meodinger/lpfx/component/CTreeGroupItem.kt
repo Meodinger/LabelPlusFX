@@ -6,7 +6,6 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.scene.control.TreeItem
 import javafx.scene.paint.Color

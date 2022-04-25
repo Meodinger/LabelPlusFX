@@ -34,7 +34,7 @@ class CComboBox<T> : HBox() {
 
     private val back = Button("<")
     private val next = Button(">")
-    val innerBox = ComboBox<T>()
+    val innerBox: ComboBox<T> = ComboBox()
 
     private val itemsProperty: ListProperty<T> = SimpleListProperty(FXCollections.emptyObservableList())
     fun itemsProperty(): ListProperty<T> = itemsProperty

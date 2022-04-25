@@ -122,15 +122,12 @@ class CTreeMenu(private val state: State, private val view: CTreeView) : Context
         textProperty().bind(gChangeColorPicker.valueProperty().transform(Color::toHexRGB))
     }
     private val gDeleteHandler = EventHandler<ActionEvent> {
-        // Clear CTreeView selection to avoid its selected TreeItem leaping here and there
-        view.clearSelection()
-
         state.doAction(GroupAction(
             ActionType.REMOVE, state,
             state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String))
         ))
 
-        // Select the first group if has
+        // Select the first group if TransFile has
         state.currentGroupId = if (state.transFile.groupCount > 0) 0 else -1
     }
     private val gDeleteItem = MenuItem(I18N["context.delete_group"])
@@ -167,9 +164,6 @@ class CTreeMenu(private val state: State, private val view: CTreeView) : Context
         // Reversed to delete big-index label first, make logger more literal
         @Suppress("UNCHECKED_CAST") val items = (event.source as List<CTreeLabelItem>).reversed()
 
-        // Clear CTreeView selection to avoid its selected TreeItem leaping here and there
-        view.clearSelection()
-
         state.doAction(ComplexAction.of(items.map {
             LabelAction(
                 ActionType.REMOVE, state,
@@ -183,9 +177,9 @@ class CTreeMenu(private val state: State, private val view: CTreeView) : Context
     // endregion
 
     init {
-        view.selectionModel.selectedItems.addListener(ListChangeListener {
+        view.selectionModel.selectedItems.addListener(ListChangeListener { change ->
             items.clear()
-            val selectedItems = it.list
+            val selectedItems = change.list
 
             if (selectedItems.isEmpty()) return@ListChangeListener
 

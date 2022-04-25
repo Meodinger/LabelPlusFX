@@ -15,12 +15,8 @@ import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 
 import javafx.beans.property.*
-import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
-import javafx.collections.ObservableList
-import javafx.event.Event
-import javafx.event.EventHandler
-import javafx.event.EventType
+import javafx.collections.*
+import javafx.event.*
 import javafx.geometry.Pos
 import javafx.geometry.VPos
 import javafx.scene.Cursor
@@ -70,13 +66,13 @@ class CLabelPane : ScrollPane() {
         val labelY: Double = Double.NaN,
     ) : Event(eventType) {
         companion object {
-            val LABEL_ANY    = EventType<LabelEvent>(EventType.ROOT, "LABEL_ANY")
-            val LABEL_CREATE = EventType(LABEL_ANY, "LABEL_CREATE")
-            val LABEL_REMOVE = EventType(LABEL_ANY, "LABEL_REMOVE")
-            val LABEL_HOVER  = EventType(LABEL_ANY, "LABEL_HOVER")
-            val LABEL_CLICK  = EventType(LABEL_ANY, "LABEL_CLICK")
-            val LABEL_MOVE   = EventType(LABEL_ANY, "LABEL_MOVE")
-            val LABEL_OTHER  = EventType(LABEL_ANY, "LABEL_OTHER")
+            val LABEL_ANY   : EventType<LabelEvent> = EventType(EventType.ROOT, "LABEL_ANY")
+            val LABEL_CREATE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CREATE")
+            val LABEL_REMOVE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_REMOVE")
+            val LABEL_HOVER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_HOVER")
+            val LABEL_CLICK : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CLICK")
+            val LABEL_MOVE  : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_MOVE")
+            val LABEL_OTHER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_OTHER")
         }
     }
 
@@ -285,12 +281,16 @@ class CLabelPane : ScrollPane() {
     private val selectedLabelsProperty: SetProperty<Int> = SimpleSetProperty(FXCollections.observableSet(HashSet()))
     fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
     val selectedLabels: Set<Int> by selectedLabelsProperty
+    private var selectedIndices: ObservableSet<Int> by selectedLabelsProperty
 
     // endregion
 
     // ----- Others ------ //
 
     init {
+        // Note that the scroll bar is some kind of useless
+        // They cannot locate the picture properly because
+        // I used so many translateX/Y to layout the root
         withContent(root) {
             alignment = Pos.CENTER
 
@@ -412,17 +412,16 @@ class CLabelPane : ScrollPane() {
                 if (it.isShiftDown && it.isAltDown) {
                     // Shift + Alt -> Preserve mode
                     // Select labels in both box-selection and selected
-                    val newSelected = selectedLabelsProperty.filter(indices::contains).toSet()
-                    selectedLabelsProperty.set(FXCollections.observableSet(newSelected))
+                    selectedIndices = FXCollections.observableSet(selectedIndices.filter(indices::contains).toSet())
                 } else if (it.isShiftDown) {
                     // Shift -> Add mode
-                    selectedLabelsProperty.addAll(indices)
+                    selectedIndices.addAll(indices)
                 } else if (it.isAltDown) {
                     // Alt -> Subtract mode
-                    selectedLabelsProperty.removeAll(indices)
+                    selectedIndices.removeAll(indices)
                 } else {
                     // Else -> Select mode
-                    selectedLabelsProperty.set(FXCollections.observableSet(indices))
+                    selectedIndices = FXCollections.observableSet(indices)
                 }
             }
 

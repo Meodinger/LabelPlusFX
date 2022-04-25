@@ -3,7 +3,7 @@ package ink.meodinger.lpfx.options
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.LOGSRC_OPTIONS
 import ink.meodinger.lpfx.get
-import ink.meodinger.lpfx.util.assignOnce
+import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
@@ -35,7 +35,7 @@ object Options {
     private const val FolderName_Logs = "logs"
     private const val Logfile_MAXCOUNT = 20
 
-    private var profileDir: Path by assignOnce()
+    private var profileDir: Path by once()
 
     val preference:  Path get() = profileDir.resolve(FileName_Preference)
     val settings:    Path get() = profileDir.resolve(FileName_Settings)

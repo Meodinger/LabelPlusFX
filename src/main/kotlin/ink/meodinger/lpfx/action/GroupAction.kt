@@ -62,8 +62,8 @@ class GroupAction(
 
         state.transFile.groupListObservable.add(groupId, transGroup)
 
-        // We don't need to restore labels' groupId changes because
-        // only when no labels using this group can it be removed.
+        for (labels in state.transFile.transMapObservable.values) for (label in labels)
+            if (label.groupId >= groupId) label.groupId++
 
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
@@ -72,10 +72,10 @@ class GroupAction(
         if (state.transFile.isGroupStillInUse(toRemoveId))
             throw TransFile.TransFileException.transGroupStillInUse(transGroup.name)
 
-        state.transFile.groupListObservable.removeAt(toRemoveId)
-
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
             if (label.groupId >= toRemoveId) label.groupId--
+
+        state.transFile.groupListObservable.removeAt(toRemoveId)
 
         Logger.info("Removed TransGroup: $transGroup", LOGSRC_STATE)
     }

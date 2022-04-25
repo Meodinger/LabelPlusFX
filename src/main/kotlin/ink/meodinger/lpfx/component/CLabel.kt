@@ -32,7 +32,7 @@ class CLabel(
 ) : Region() {
 
     companion object {
-        const val MIN_PICK_RADIUS = 16.0
+        const val MIN_PICK_RADIUS: Double = 16.0
     }
 
     // region Properties

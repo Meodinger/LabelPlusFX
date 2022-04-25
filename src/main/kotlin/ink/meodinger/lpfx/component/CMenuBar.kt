@@ -158,7 +158,7 @@ class CMenuBar(private val state: State) : MenuBar() {
             }
             separator()
             item(I18N["m.exit"]) {
-                does { if (!state.controller.stay()) state.application.exit() }
+                does { exitApplication() }
             }
         }
         menu(I18N["mm.edit"]) {
@@ -354,6 +354,11 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.reset()
 
         state.controller.recovery(bak, rec)
+    }
+    private fun exitApplication() {
+        if (state.controller.stay()) return
+
+        state.application.exit()
     }
 
     private fun searchAndReplace() {

@@ -110,6 +110,6 @@ data class CProperty(val key: String, var value: String = emptyString()) {
         set(another.value)
     }
 
-    override fun toString() = "CProperty(key=${key}, value=${value})"
+    override fun toString(): String = "CProperty(key=${key}, value=${value})"
 
 }

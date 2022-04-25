@@ -56,11 +56,11 @@ class CLigatureArea: TextArea() {
             ligatureString += change.text
 
             if (ligatureString.length <= ligatureMaxLength) {
-                if (ligaturing) for (rule in ligatureRules) if (rule.first == ligatureString) {
+                if (ligaturing) for ((from, to) in ligatureRules) if (from == ligatureString) {
                     val ligatureEnd = caretPosition
-                    val caretPosition = ligatureStart + rule.second.length
+                    val caretPosition = ligatureStart + to.length
 
-                    text = text.replaceRange(ligatureStart, ligatureEnd, rule.second)
+                    text = text.replaceRange(ligatureStart, ligatureEnd, to)
 
                     change.text = ""
                     change.setRange(caretPosition, caretPosition)

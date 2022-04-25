@@ -141,21 +141,24 @@ class DialogSettings : AbstractPropertiesDialog() {
                     // 1 Label     | label | < > (ViewMode)
                     // 2
                     // 3 Scale on new picture
-                    // 4 | selection | < >       (String)
+                    // 4 | selection | < >       (NewPicScale)
 
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
+                        prefWidth = 160.0
                         items = FXCollections.observableList(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(Label(I18N["mode.work.label"]), 0, 1)
                     add(mComboLabel, 1, 1) {
+                        prefWidth = 160.0
                         items = FXCollections.observableList(ViewMode.values().toList())
                         isWrapped = true
                     }
                     add(HBox(), 0, 2)
                     add(Label(I18N["settings.mode.scale.label"]), 0, 3, 2, 1)
                     add(mComboScale, 0, 4, 2, 1) {
+                        prefWidth = 224.0
                         items = FXCollections.observableList(CLabelPane.NewPictureScale.values().toList())
                         isWrapped = true
                     }
@@ -410,7 +413,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         if (ruleList.isEmpty()) {
             rGridPane.add(rLabelHint, 0, 0)
         } else {
-            for (rule in ruleList) createLigatureRow(rule.first, rule.second)
+            for ((from, to) in ruleList) createLigatureRow(from, to)
         }
     }
     private fun createLigatureRow(from: String = "", to: String = "") {

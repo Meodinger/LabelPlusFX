@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.util.event
 
-import javafx.event.ActionEvent
 import javafx.event.EventTarget
 import javafx.event.EventType
 import javafx.scene.input.KeyCode

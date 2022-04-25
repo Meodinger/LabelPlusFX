@@ -14,60 +14,60 @@ import java.io.File
  */
 
 // Current Version
-val V = Version(2, 3, 0)
+val V: Version = Version(2, 3, 0)
 
 /**
  * Size related constants
  */
-const val PANE_WIDTH  = 600.0
-const val PANE_HEIGHT = 400.0
-const val COMMON_GAP  = 16.0
+const val PANE_WIDTH : Double = 600.0
+const val PANE_HEIGHT: Double = 400.0
+const val COMMON_GAP : Double = 16.0
 
 /**
  * Scale
  */
-const val SCALE_MIN  = 0.1
-const val SCALE_MAX  = 4.0
-const val SCALE_INIT = 0.8
+const val SCALE_MIN : Double = 0.1
+const val SCALE_MAX : Double = 4.0
+const val SCALE_INIT: Double = 0.8
 
 /**
  * CLabel Radius Range
  */
-const val LABEL_RADIUS_MIN = 8.0
-const val LABEL_RADIUS_MAX = 48.0
+const val LABEL_RADIUS_MIN: Double= 8.0
+const val LABEL_RADIUS_MAX: Double = 48.0
 
 /**
  * TextArea Font Size Range
  */
-const val FONT_SIZE_MIN = 12
-const val FONT_SIZE_MAX = 64
+const val FONT_SIZE_MIN: Int = 12
+const val FONT_SIZE_MAX: Int = 64
 
 /**
  * TreeItem Graphic radius
  */
-const val GRAPHICS_CIRCLE_RADIUS = 8.0
+const val GRAPHICS_CIRCLE_RADIUS: Double = 8.0
 
-const val GENERAL_ICON_RADIUS = 32.0
+const val GENERAL_ICON_RADIUS: Double = 32.0
 
-const val FILENAME_DEFAULT   = "Nova traduko" // It's Esperanto!
-const val FOLDER_NAME_BAK    = "backup"
-const val EXTENSION_PIC_BMP  = "bmp"
-const val EXTENSION_PIC_GIF  = "gif"
-const val EXTENSION_PIC_PNG  = "png"
-const val EXTENSION_PIC_JPG  = "jpg"
-const val EXTENSION_PIC_JPEG = "jpeg"
-const val EXTENSION_PIC_TIF  = "tif"
-const val EXTENSION_PIC_TIFF = "tiff"
-const val EXTENSION_PIC_WEBP = "webp"
-const val EXTENSION_FILE_LP  = "txt"
-const val EXTENSION_FILE_MEO = "json"
-const val EXTENSION_PACK     = "zip"
-const val EXTENSION_BAK      = "bak"
+const val FILENAME_DEFAULT  : String = "Nova traduko" // It's Esperanto!
+const val FOLDER_NAME_BAK   : String = "backup"
+const val EXTENSION_PIC_BMP : String = "bmp"
+const val EXTENSION_PIC_GIF : String = "gif"
+const val EXTENSION_PIC_PNG : String = "png"
+const val EXTENSION_PIC_JPG : String = "jpg"
+const val EXTENSION_PIC_JPEG: String = "jpeg"
+const val EXTENSION_PIC_TIF : String = "tif"
+const val EXTENSION_PIC_TIFF: String = "tiff"
+const val EXTENSION_PIC_WEBP: String = "webp"
+const val EXTENSION_FILE_LP : String = "txt"
+const val EXTENSION_FILE_MEO: String = "json"
+const val EXTENSION_PACK    : String = "zip"
+const val EXTENSION_BAK     : String = "bak"
 
 /**
  * Extensions: png, jpg, jpeg
  */
-val EXTENSIONS_PIC  = listOf(
+val EXTENSIONS_PIC: List<String> = listOf(
     EXTENSION_PIC_BMP,
     EXTENSION_PIC_GIF,
     EXTENSION_PIC_PNG,
@@ -77,7 +77,7 @@ val EXTENSIONS_PIC  = listOf(
     EXTENSION_PIC_TIFF,
     EXTENSION_PIC_WEBP,
 )
-val EXTENSIONS_FILE = listOf(
+val EXTENSIONS_FILE: List<String> = listOf(
     EXTENSION_FILE_LP,
     EXTENSION_FILE_MEO
 )
@@ -85,20 +85,20 @@ val EXTENSIONS_FILE = listOf(
 /**
  * For label/group not found
  */
-const val NOT_FOUND = -1
+const val NOT_FOUND: Int = -1
 
 /**
  * Log Source
  */
-const val LOGSRC_APPLICATION = "Application"
-const val LOGSRC_CONTROLLER  = "Controller"
-const val LOGSRC_STATE       = "State"
-const val LOGSRC_ACTION      = "Action"
-const val LOGSRC_OPTIONS     = "Options"
-const val LOGSRC_DIALOGS     = "Dialog"
-const val LOGSRC_LOGGER      = "Logger"
-const val LOGSRC_SENDER      = "Sender"
-const val LOGSRC_DICTIONARY  = "Dictionary"
+const val LOGSRC_APPLICATION: String = "Application"
+const val LOGSRC_CONTROLLER : String = "Controller"
+const val LOGSRC_STATE      : String = "State"
+const val LOGSRC_ACTION     : String = "Action"
+const val LOGSRC_OPTIONS    : String = "Options"
+const val LOGSRC_DIALOGS    : String = "Dialog"
+const val LOGSRC_LOGGER     : String = "Logger"
+const val LOGSRC_SENDER     : String = "Sender"
+const val LOGSRC_DICTIONARY : String = "Dictionary"
 
 /**
  * Work Mode
@@ -107,6 +107,9 @@ const val LOGSRC_DICTIONARY  = "Dictionary"
 enum class WorkMode(val description: String) {
     InputMode(I18N["mode.work.input"]),
     LabelMode(I18N["mode.work.label"]);
+
+    override fun toString(): String = description
+
 }
 
 /**
@@ -116,6 +119,9 @@ enum class WorkMode(val description: String) {
 enum class ViewMode(val description: String) {
     IndexMode(I18N["mode.view.index"]),
     GroupMode(I18N["mode.view.group"]);
+
+    override fun toString(): String = description
+
 }
 
 /**
@@ -124,6 +130,8 @@ enum class ViewMode(val description: String) {
 enum class FileType(val description: String, val extension: String) {
     LPFile(I18N["file_type.translation_lp"], EXTENSION_FILE_LP),
     MeoFile(I18N["file_type.translation_meo"], EXTENSION_FILE_MEO);
+
+    override fun toString(): String = description
 
     companion object {
         /**

@@ -114,11 +114,10 @@ class FormatChecker(private val state: State) : Stage() {
                 }
             if (index == NOT_FOUND) return@onNew
 
-            // Update status
+            // Select Picture
             state.currentPicName = picName
-            // Clear before select
-            state.view.cTreeView.clearSelection()
-            state.currentLabelIndex = labelIndex
+            // Select Label (Use TreeView select to set State & View at the same time)
+            state.view.cTreeView.selectLabel(labelIndex, clear = true, scrollTo = true)
             // Select Range
             state.view.cTransArea.selectRange(index, index + typo.length)
         })

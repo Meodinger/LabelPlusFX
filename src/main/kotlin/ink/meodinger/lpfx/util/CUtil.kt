@@ -218,7 +218,7 @@ class AssignOnce<T> {
 
     private var _backing: T? = null
 
-    operator fun getValue(thisRef: Any, property: KProperty<*>) = _backing!!
+    operator fun getValue(thisRef: Any, property: KProperty<*>): T = _backing!!
     operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         synchronized(this) {
             if (_backing == null) _backing = value
@@ -227,7 +227,7 @@ class AssignOnce<T> {
     }
 
 }
-fun <T> assignOnce() = AssignOnce<T>()
+fun <T> once(): AssignOnce<T> = AssignOnce()
 
 /**
  * Double Range with automatic start-end detection

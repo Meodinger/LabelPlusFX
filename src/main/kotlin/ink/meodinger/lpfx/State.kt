@@ -6,7 +6,7 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.collection.ArrayStack
 import ink.meodinger.lpfx.util.collection.Stack
-import ink.meodinger.lpfx.util.assignOnce
+import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString
@@ -30,10 +30,10 @@ class State {
 
     // ----- Global Variables ------ //
 
-    var application: LabelPlusFX by assignOnce()
-    var stage: Stage by assignOnce()
-    var view: View by assignOnce()
-    var controller: Controller by assignOnce()
+    var application: LabelPlusFX by once()
+    var stage: Stage by once()
+    var view: View by once()
+    var controller: Controller by once()
 
     // ----- Runtime Properties ----- //
 

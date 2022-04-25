@@ -20,11 +20,11 @@ object Config {
      */
     private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefault())
 
-    val isWin = OS.contains("win")
-    val isMac = OS.contains("mac")
+    val isWin: Boolean = OS.contains("win")
+    val isMac: Boolean = OS.contains("mac")
 
-    val MonoFont = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
-    val TextFont = if (isWin) "SimSun" else if (isMac) "" else ""
+    val MonoFont: String = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
+    val TextFont: String = if (isWin) "SimSun" else if (isMac) "" else ""
 
     var enableJNI:   Boolean = true
     var enableProxy: Boolean = true

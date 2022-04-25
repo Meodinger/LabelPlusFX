@@ -210,7 +210,6 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/build</outputDirectory>
-                            <excludeScope>test</excludeScope>
                             <excludeArtifactIds>junit,hamcrest-core,kotlin-stdlib-common,annotations</excludeArtifactIds>
                         </configuration>
                     </execution>

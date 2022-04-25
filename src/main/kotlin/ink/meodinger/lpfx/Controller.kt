@@ -152,24 +152,21 @@ class Controller(private val state: State) {
                         if (!image.isError) {
                             image
                         } else {
-                            Platform.runLater {
-                                showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                                showException(state.stage, image.exception)
-                            }
+                            showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
+                            showException(state.stage, image.exception)
+
                             INIT_IMAGE
                         }
                     } catch (e: IOException) {
-                        Platform.runLater {
-                            showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                            showException(state.stage, e)
-                        }
+                        showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
+                        showException(state.stage, e)
+
                         INIT_IMAGE
                     }
                 } else {
                     Logger.error("Picture `${file.path}` not exists", LOGSRC_CONTROLLER)
-                    Platform.runLater {
-                        showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
-                    }
+                    showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
+
                     INIT_IMAGE
                 }
             }
@@ -208,6 +205,7 @@ class Controller(private val state: State) {
         // Display default image
         cLabelPane.isVisible = false
         Platform.runLater {
+            // re-locate after the initial rendering
             cLabelPane.moveToCenter()
             cLabelPane.isVisible = true
         }
@@ -244,14 +242,13 @@ class Controller(private val state: State) {
         view.setOnDragDropped {
             if (stay()) return@setOnDragDropped
 
-            state.reset()
-
             val board = it.dragboard
             if (board.hasFiles()) {
                 val file = board.files.first()
 
-                // To make sure exception can be caught
-                Platform.runLater { open(file, file.parentFile) }
+                state.reset()
+                open(file, file.parentFile)
+
                 it.isDropCompleted = true
             }
             it.consume() // Consume used event
@@ -310,8 +307,7 @@ class Controller(private val state: State) {
                 TransLabel(newIndex, state.currentGroupId, it.labelX, it.labelY, "")
             ))
             // Update selection
-            cTreeView.clearSelection()
-            cTreeView.selectLabel(newIndex, true)
+            cTreeView.selectLabel(newIndex, clear = true, scrollTo = true)
             // If instant translate
             if (Settings.instantTranslate) cTransArea.requestFocus()
         }
@@ -349,8 +345,7 @@ class Controller(private val state: State) {
             if (it.source.isDoubleClick) cLabelPane.moveToLabel(it.labelIndex)
 
             // Update selection
-            cTreeView.clearSelection()
-            cTreeView.selectLabel(it.labelIndex, true)
+            cTreeView.selectLabel(it.labelIndex, clear = true, scrollTo = true)
         }
         cLabelPane.setOnLabelMove {
             state.doAction(LabelAction(
@@ -411,23 +406,20 @@ class Controller(private val state: State) {
         Logger.info("Bound scale", LOGSRC_CONTROLLER)
 
         // Switch Button text
-        bSwitchWorkMode.textProperty().bind(state.workModeProperty().transform(WorkMode::description))
-        bSwitchViewMode.textProperty().bind(state.viewModeProperty().transform(ViewMode::description))
+        bSwitchWorkMode.textProperty().bind(state.workModeProperty().asString())
+        bSwitchViewMode.textProperty().bind(state.viewModeProperty().asString())
         Logger.info("Bound switch button text", LOGSRC_CONTROLLER)
 
         val groupIndexListener = onNew<Number, Int> {
             if (state.viewMode == ViewMode.GroupMode) {
-                // In GroupMode, CurrentGroupId is set by CTreeView
-                // SelectionModal::SelectedIndex will be temporarily set to -1 when it changes, we ignore that value
                 if (it != NOT_FOUND) {
                     if (cTreeView.isFocused) {
                         // if the change is result of CTreeView selection, add
-                        doNothing()
+                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = false, scrollTo = false)
                     } else {
                         // if the change is result of GroupBar/Box selection, set
-                        cTreeView.clearSelection()
+                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = true, scrollTo = true)
                     }
-                    cTreeView.selectGroup(state.transFile.getTransGroup(it).name, true)
                 }
             } else {
                 // In other modes, CurrentGroupId is set by CGroupBox/CGroupBar
@@ -462,8 +454,6 @@ class Controller(private val state: State) {
         cTreeView.labelsProperty().bind(labelsBinding)
         cTreeView.rootNameProperty().bind(state.currentPicNameProperty())
         cTreeView.viewModeProperty().bind(state.viewModeProperty())
-        cTreeView.selectedGroupProperty().bindBidirectional(state.currentGroupIdProperty())
-        cTreeView.selectedLabelProperty().bindBidirectional(state.currentLabelIndexProperty())
         Logger.info("Bound CTreeView properties", LOGSRC_CONTROLLER)
 
         // LabelPane
@@ -488,14 +478,14 @@ class Controller(private val state: State) {
     private fun listen() {
         Logger.info("Attaching Listeners...", LOGSRC_CONTROLLER)
 
-        // Default image auto-center
-        cLabelPane.widthProperty().addListener(onChange {
-            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+        // Bind Tree and Current
+        cTreeView.selectedGroupProperty().addListener(onNew<Number, Int> {
+            if (it != NOT_FOUND) state.currentGroupId = it
         })
-        cLabelPane.heightProperty().addListener(onChange {
-            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+        cTreeView.selectedLabelProperty().addListener(onNew<Number, Int> {
+            if (it != NOT_FOUND) state.currentLabelIndex = it
         })
-        Logger.info("Listened for default image location", LOGSRC_CONTROLLER)
+        Logger.info("Listened for selectedGroup/Label", LOGSRC_CONTROLLER)
 
         // isChanged
         cTransArea.textProperty().addListener(onChange {
@@ -508,6 +498,15 @@ class Controller(private val state: State) {
      */
     private fun effect() {
         Logger.info("Applying Affections...", LOGSRC_CONTROLLER)
+
+        // Default image auto-center
+        cLabelPane.widthProperty().addListener(onChange {
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+        })
+        cLabelPane.heightProperty().addListener(onChange {
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+        })
+        Logger.info("Added effect: default image auto-center", LOGSRC_CONTROLLER)
 
         // Update StatsBar
         state.currentPicNameProperty().addListener(onNew {
@@ -528,6 +527,12 @@ class Controller(private val state: State) {
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)
 
+        // Set current-label-index to unbind TextArea
+        // TODO: Clear CTreeView un-wanted item focus
+        state.currentPicNameProperty().addListener(onChange {
+            state.currentLabelIndex = NOT_FOUND
+        })
+
         // Update text area when label change
         state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
             if (!state.isOpened) return@onNew
@@ -542,7 +547,7 @@ class Controller(private val state: State) {
         })
         Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOGSRC_CONTROLLER)
 
-        // Bind Label and Tree
+        // Bind Tree and LabelPane
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button != MouseButton.PRIMARY || !it.isDoubleClick) return@addEventHandler
 
@@ -557,14 +562,13 @@ class Controller(private val state: State) {
             }
 
             val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + direction)
-            if (item is CTreeLabelItem ) cLabelPane.moveToLabel(item.index)
+            if (item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
         }
         Logger.info("Added effect: move to label on CTreeLabelItem select", LOGSRC_CONTROLLER)
 
         // When LabelPane Box Selection
         cLabelPane.selectedLabelsProperty().addListener(SetChangeListener {
-            cTreeView.clearSelection()
-            cTreeView.selectLabels(it.set)
+            cTreeView.selectLabels(it.set, clear = true, scrollTo = true)
         })
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (cLabelPane.selectedLabels.isEmpty()) return@addEventHandler
@@ -587,16 +591,6 @@ class Controller(private val state: State) {
             }
         }
         Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", LOGSRC_CONTROLLER)
-
-        // Work Progress
-        val workProgressListener = onChange<Any> {
-            if (state.isOpened) RecentFiles.setProgressOf(state.translationFile.path,
-                state.transFile.sortedPicNames.indexOf(state.currentPicName) to state.currentLabelIndex
-            )
-        }
-        state.currentPicNameProperty().addListener(workProgressListener)
-        state.currentLabelIndexProperty().addListener(workProgressListener)
-        Logger.info("Added effect: update work progress on PicName/LabelIndex change", LOGSRC_CONTROLLER)
     }
     /**
      * Transformations
@@ -622,12 +616,12 @@ class Controller(private val state: State) {
         }
         Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
-        // Transform number key press to CGroupBox select
-        view.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (!it.code.isDigitKey) return@addEventHandler
+        // Transform number key press to CTreeView select
+        view.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
+            if (!it.code.isDigitKey) return@handler
+            val id = (it.text.toInt() - 1).takeIf { i -> i in 0 until state.transFile.groupCount } ?: return@handler
 
-            val index = it.text.toInt() - 1
-            if (index in 0 until state.transFile.groupCount) cGroupBox.select(index)
+            cTreeView.selectGroup(state.transFile.getTransGroup(id).name, clear = true, scrollTo = false)
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
@@ -696,7 +690,7 @@ class Controller(private val state: State) {
             }
 
             cTreeView.selectionModel.clearSelection()
-            cTreeView.selectionModel.select(labelItemIndex)
+            cTreeView.selectionModel.select(item)
             cTreeView.scrollTo(labelItemIndex)
             cLabelPane.moveToLabel(state.currentLabelIndex)
 
@@ -975,6 +969,11 @@ class Controller(private val state: State) {
 
         // Update recent files
         RecentFiles.add(file)
+
+        // Update work progress
+        RecentFiles.setProgressOf(state.translationFile.path,
+            state.transFile.sortedPicNames.indexOf(state.currentPicName) to state.currentLabelIndex
+        )
 
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name

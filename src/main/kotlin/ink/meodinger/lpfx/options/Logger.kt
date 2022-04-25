@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.LOGSRC_LOGGER
 import ink.meodinger.lpfx.LOGSRC_SENDER
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.type.LPFXTask
-import ink.meodinger.lpfx.util.assignOnce
+import ink.meodinger.lpfx.util.once
 import jakarta.mail.Message
 import jakarta.mail.Session
 import jakarta.mail.Transport
@@ -42,7 +42,7 @@ object Logger {
 
     }
 
-    private var writer: Writer by assignOnce()
+    private var writer: Writer by once()
     private val formatter = SimpleDateFormat("HH:mm:ss:SSS")
 
     // Maybe

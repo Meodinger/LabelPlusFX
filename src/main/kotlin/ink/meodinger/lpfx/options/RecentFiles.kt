@@ -20,7 +20,7 @@ import java.io.IOException
  */
 object RecentFiles : AbstractProperties("Recent Files") {
 
-    private const val MAX_SIZE = 10
+    private const val MAX_SIZE = 20
     private const val RECENT   = "RecentFiles"
     private const val PROGRESS = "ProgressMap"
 

@@ -65,6 +65,8 @@ class Controller(private val state: State) {
         private const val AUTO_SAVE_PERIOD = 3 * 60 * ONE_SECOND
     }
 
+    // region View Components
+
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
@@ -86,6 +88,10 @@ class Controller(private val state: State) {
     private val cGroupBox: CComboBox<TransGroup> = view.cGroupBox
     private val cTreeView: CTreeView             = view.cTreeView
     private val cTransArea: CLigatureArea        = view.cTransArea
+
+    // endregion
+
+    // region TimerManagers
 
     private val bakTimeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
     private val bakFileFormatter = SimpleDateFormat("yyyy-HH-mm")
@@ -116,6 +122,10 @@ class Controller(private val state: State) {
             }
         }
     }
+
+    // endregion
+
+    // region Global Bindings
 
     // Following Bindings should create in order to avoid unexpected exceptions.
     // When ObjectProperty changes, its value will temporarily set to null.
@@ -171,6 +181,8 @@ class Controller(private val state: State) {
                 ?: FXCollections.emptyObservableList()
         }, state.currentPicNameProperty()
     )
+
+    // endregion
 
     private fun switchViewMode() {
         state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
@@ -239,7 +251,7 @@ class Controller(private val state: State) {
                 val file = board.files.first()
 
                 // To make sure exception can be caught
-                Platform.runLater { open(file) }
+                Platform.runLater { open(file, file.parentFile) }
                 it.isDropCompleted = true
             }
             it.consume() // Consume used event
@@ -724,7 +736,7 @@ class Controller(private val state: State) {
         Logger.info("Transformed Ctrl + Enter", LOGSRC_CONTROLLER)
     }
 
-    // ----- Controller Methods ----- //
+    // Controller Methods
 
     /**
      * Whether stay here or not
@@ -834,7 +846,7 @@ class Controller(private val state: State) {
      * @param file Which file will be open
      * @param projectFolder Which folder the pictures locate in
      */
-    fun open(file: File, projectFolder: File = file.parentFile) {
+    fun open(file: File, projectFolder: File) {
         Logger.info("Opening TransFile: ${file.path}", LOGSRC_CONTROLLER)
 
         // Load File
@@ -852,9 +864,9 @@ class Controller(private val state: State) {
         Logger.info("Loaded TransFile", LOGSRC_CONTROLLER)
 
         // Opened, update state
-        state.isOpened = true
-        state.transFile = transFile
         state.translationFile = file
+        state.transFile = transFile
+        state.isOpened = true
 
         // Show info if comment not in default list
         // Should do this before update RecentFiles
@@ -993,7 +1005,7 @@ class Controller(private val state: State) {
         }
         Logger.info("Recovered to ${to.path}", LOGSRC_CONTROLLER)
 
-        open(to)
+        open(to, to.parentFile)
     }
     /**
      * Export a TransFile in specific type
@@ -1043,7 +1055,7 @@ class Controller(private val state: State) {
         state.stage.title = INFO["application.name"]
     }
 
-    // ----- Global Methods ----- //
+    // Global Methods
 
     fun requestUpdatePane() {
         imageBinding.invalidate()

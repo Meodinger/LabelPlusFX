@@ -69,7 +69,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         state.reset()
 
-        state.controller.open(file)
+        state.controller.open(file, file.parentFile)
     }
 
     private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
@@ -285,8 +285,6 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun newTranslation() {
         if (state.controller.stay()) return
 
-        state.reset()
-
         val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
         chooserNew.initialFilename = "$FILENAME_DEFAULT.$extension"
 
@@ -301,8 +299,10 @@ class CMenuBar(private val state: State) : MenuBar() {
             if (confirm.isEmpty || confirm.get() == ButtonType.NO) return
         }
 
+        state.reset()
+
         val projectFolder = state.controller.new(file)
-        if (projectFolder != null) state.controller.open(file, projectFolder = projectFolder)
+        if (projectFolder != null) state.controller.open(file, projectFolder)
     }
     private fun openTranslation() {
         if (state.controller.stay()) return
@@ -314,7 +314,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         state.reset()
 
-        state.controller.open(file)
+        state.controller.open(file, file.parentFile)
     }
     private fun saveTranslation() {
         state.controller.save(state.translationFile, true)

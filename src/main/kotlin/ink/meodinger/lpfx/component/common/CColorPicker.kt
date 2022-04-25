@@ -2,7 +2,6 @@ package ink.meodinger.lpfx.component.common
 
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.color.toHexRGBA
-import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.onNew
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue

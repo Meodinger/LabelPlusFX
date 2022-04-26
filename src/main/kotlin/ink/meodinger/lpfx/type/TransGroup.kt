@@ -27,17 +27,6 @@ class TransGroup @JsonCreator constructor(
         private var ACC = 0
     }
 
-    // ----- Exception ----- //
-
-    class TransGroupException(message: String) : RuntimeException(message) {
-        companion object {
-            fun nameInvalid(groupName: String) =
-                TransGroupException(String.format(I18N["exception.trans_group.name_invalid.s"], groupName))
-            fun colorInvalid(color: String) =
-                TransGroupException(String.format(I18N["exception.trans_group.color_invalid.s"], color))
-        }
-    }
-
     // ----- Properties ----- //
 
     private val nameProperty: StringProperty = SimpleStringProperty()
@@ -45,8 +34,8 @@ class TransGroup @JsonCreator constructor(
     var name: String
         get() = nameProperty.get()
         set(value) {
-            if (value.isEmpty()) throw TransGroupException.nameInvalid(value)
-            for (c in value.toCharArray()) if (c == '|' || c.isWhitespace()) throw TransGroupException.nameInvalid(value)
+            if (value.isEmpty() || value.any { it == '|' || it.isWhitespace() })
+                throw IllegalArgumentException(String.format(I18N["exception.trans_group.name_invalid.s"], value))
             nameProperty.set(value)
         }
 
@@ -55,7 +44,8 @@ class TransGroup @JsonCreator constructor(
     var colorHex: String
         @JsonGetter("color") get() = colorHexProperty.get()
         @JsonSetter("color") set(value) {
-            if (!value.isColorHex()) throw TransGroupException.colorInvalid(value)
+            if (!value.isColorHex())
+                throw IllegalArgumentException(String.format(I18N["exception.trans_group.color_invalid.s"], value))
             colorHexProperty.set(value)
         }
 

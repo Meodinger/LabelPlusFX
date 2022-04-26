@@ -29,7 +29,10 @@ fun pack(target: File, transFile: TransFile) {
     zip.zip(TEMPLATE_ZH, "/ps_script_res/zh.psd")
     zip.zip(TEMPLATE_EN, "/ps_script_res/en.psd")
 
-    val content = exportAsString(transFile, FileType.getFileType(target))
+    val content = when(FileType.getFileType(target)) {
+        FileType.LPFile  -> transFile.toLPString()
+        FileType.MeoFile -> transFile.toJsonString()
+    }
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.${target.extension}")
 
     for (picName in transFile.sortedPicNames) zip.zip(transFile.getFile(picName)!!, "/images/$picName")

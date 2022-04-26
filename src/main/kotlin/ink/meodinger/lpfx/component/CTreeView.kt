@@ -78,7 +78,7 @@ class CTreeView: TreeView<String>() {
         }
         selectionModel.selectionMode = SelectionMode.MULTIPLE
 
-        // Listen
+        // Layout
         viewModeProperty.addListener(onNew { update() })
         groupsProperty.addListener(ListChangeListener {
             while (it.next()) {
@@ -212,8 +212,7 @@ class CTreeView: TreeView<String>() {
 
     fun selectGroup(groupName: String, clear: Boolean, scrollTo: Boolean) {
         // In IndexMode this is not available
-        if (viewMode == ViewMode.IndexMode)
-            throw IllegalStateException(I18N["exception.tree_view.group_operation_in_index_mode"])
+        if (viewMode == ViewMode.IndexMode) return
 
         if (clear) selectionModel.clearSelection()
         val item = groupItems.first { it.name == groupName }

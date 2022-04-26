@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -39,7 +37,7 @@ abstract class AbstractProperties(val name: String) {
                     if (line.trim().startsWith(COMMENT_HEAD)) continue
 
                     val prop = line.split(KV_SPILT, limit = 2).takeIf {
-                        it.size == 2 && instance.tryGet(it[0]) != null
+                        it.size == 2 && instance.properties.any { p -> p.key == it[0] }
                     } ?: continue
 
                     // property=|
@@ -106,6 +104,6 @@ abstract class AbstractProperties(val name: String) {
         return null
     }
 
-    operator fun get(key: String): CProperty = tryGet(key) ?: throw IllegalArgumentException(I18N["exception.property.property_not_found.k"])
+    operator fun get(key: String): CProperty = properties.first { it.key == key }
 
 }

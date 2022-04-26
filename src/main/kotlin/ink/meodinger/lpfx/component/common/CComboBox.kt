@@ -97,14 +97,10 @@ class CComboBox<T> : HBox() {
     }
 
     fun select(index: Int) {
-        if (items.size == 0 && index == 0) return
-
-        if (index in 0 until items.size) selectionModel.select(index)
-        else throw IllegalArgumentException(String.format(I18N["exception.combo_box.item_index_invalid.i"], index))
+        selectionModel.select(index)
     }
     fun select(item: T) {
         if (items.contains(item)) selectionModel.select(item)
-        else throw IllegalArgumentException(String.format(I18N["exception.combo_box.no_such_item.s"], item.toString()))
     }
 
 }

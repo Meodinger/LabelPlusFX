@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.LOGSRC_STATE
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.string.emptyString
 
@@ -58,7 +57,8 @@ class GroupAction(
     private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
         for (group in state.transFile.groupListObservable)
             if (group.name == transGroup.name)
-                throw TransFile.TransFileException.transGroupNameRepeated(transGroup.name)
+                // TODO: I18N
+                throw IllegalStateException("")
 
         state.transFile.groupListObservable.add(groupId, transGroup)
 
@@ -70,7 +70,8 @@ class GroupAction(
     private fun removeTransGroup(transGroup: TransGroup) {
         val toRemoveId = state.transFile.groupListObservable.indexOfFirst { it.name == transGroup.name }
         if (state.transFile.isGroupStillInUse(toRemoveId))
-            throw TransFile.TransFileException.transGroupStillInUse(transGroup.name)
+            // TODO: I18N
+            throw IllegalStateException("")
 
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
             if (label.groupId >= toRemoveId) label.groupId--

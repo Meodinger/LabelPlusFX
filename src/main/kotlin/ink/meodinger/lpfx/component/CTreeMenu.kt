@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CColorPicker
 import ink.meodinger.lpfx.options.Settings
-import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
+import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
@@ -13,8 +13,8 @@ import ink.meodinger.lpfx.util.dialog.showError
 import ink.meodinger.lpfx.util.dialog.showInput
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.transform
-import javafx.collections.ListChangeListener
 
+import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
@@ -32,7 +32,10 @@ import javafx.scene.paint.Color
 /**
  * A ContextMenu Singleton for CTreeView
  */
-class CTreeMenu(private val state: State, private val view: CTreeView) : ContextMenu() {
+class CTreeMenu(
+    private val state: State,
+    private val view: CTreeView,
+) : ContextMenu() {
 
     // region Controls & Handlers
 
@@ -59,7 +62,7 @@ class CTreeMenu(private val state: State, private val view: CTreeView) : Context
         if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(state.stage)
 
         val nameList = Settings.defaultGroupNameList
-        val colorHexList = LPTransFile.DEFAULT_COLOR_HEX_LIST
+        val colorHexList = TransFile.DEFAULT_COLOR_HEX_LIST
 
         val newGroupId = state.transFile.groupCount
         var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)

@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.FileType
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransFile
-import ink.meodinger.lpfx.type.TransFile.Companion.LPTransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
@@ -161,7 +160,7 @@ private fun loadLP(file: File): TransFile {
         if (lines[pointer].isBlank()) throw IOException(I18N["exception.loader.empty_group_name"])
 
         val groupName = lines[pointer]
-        val groupColor = LPTransFile.DEFAULT_COLOR_HEX_LIST[groupId]
+        val groupColor = TransFile.DEFAULT_COLOR_HEX_LIST[groupId]
 
         if (groupList.any { it.name == groupName }) throw IOException(String.format(I18N["exception.loader.repeated_group_name.s"], groupName))
 
@@ -170,7 +169,7 @@ private fun loadLP(file: File): TransFile {
         groupId++
         pointer++
     }
-    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.exporter.too_many_groups"])
+    if (lines[pointer] != LPTransFile.SEPARATOR) throw IOException(I18N["exception.loader.too_many_groups"])
     pointer++
 
     // Comment

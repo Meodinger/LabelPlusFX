@@ -151,38 +151,32 @@ class CLabelPane : ScrollPane() {
     var initScale: Double
         get() = initScaleProperty.get()
         set(value) {
-            if (value >= 0) {
-                var temp = value
-                if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
-                if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
-                initScaleProperty.set(temp)
-            } else {
-                throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
-            }
+            if (value < 0) return
+            var temp = value
+            if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
+            if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
+            initScaleProperty.set(temp)
         }
     var minScale: Double
         get() = minScaleProperty.get()
         set(value) {
-            if (value < 0) return
-            if (!maxScale.isNaN() && value > maxScale) return
+            if (value < 0 || (!maxScale.isNaN() && value > maxScale)) return
             minScaleProperty.set(value)
         }
     var maxScale: Double
         get() = maxScaleProperty.get()
         set(value) {
-            if (value < 0) return
-            if (!minScale.isNaN() && value < minScale) return
+            if (value < 0 || (!minScale.isNaN() && value < minScale)) return
             maxScaleProperty.set(value)
         }
     var scale: Double
         get() = scaleProperty.get()
         set(value) {
-            if (value >= 0) {
-                var temp = value
-                if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
-                if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
-                scaleProperty.set(temp)
-            }
+            if (value < 0) return
+            var temp = value
+            if (!minScale.isNaN()) temp = temp.coerceAtLeast(minScale)
+            if (!maxScale.isNaN()) temp = temp.coerceAtMost(maxScale)
+            scaleProperty.set(temp)
         }
 
     // endregion
@@ -666,8 +660,7 @@ class CLabelPane : ScrollPane() {
     fun moveToLabel(labelIndex: Int) {
         if (!shouldCreate) return
 
-        val label = labelNodes.firstOrNull { it.index == labelIndex }
-            ?: throw IllegalArgumentException(String.format(I18N["exception.label_pane.label_not_found.i"], labelIndex))
+        val label = labelNodes.first { it.index == labelIndex }
 
         vvalue = 0.0
         hvalue = 0.0

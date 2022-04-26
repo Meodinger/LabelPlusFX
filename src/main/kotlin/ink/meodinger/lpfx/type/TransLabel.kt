@@ -28,21 +28,6 @@ class TransLabel @JsonCreator constructor(
     @JsonProperty("text")    text:    String = ""
 ) {
 
-    // ----- Exception ----- //
-
-    class TransLabelException(message: String) : RuntimeException(message) {
-        companion object {
-            fun indexInvalid(index: Int) =
-                TransLabelException(String.format(I18N["exception.trans_label.index_invalid.i"], index))
-            fun groupIdInvalid(groupId: Int) =
-                TransLabelException(String.format(I18N["exception.trans_label.groupId_invalid.i"], groupId))
-            fun xInvalid(x: Double) =
-                TransLabelException(String.format(I18N["exception.trans_label.x_invalid.d"], x))
-            fun yInvalid(y: Double) =
-                TransLabelException(String.format(I18N["exception.trans_label.y_invalid.d"], y))
-        }
-    }
-
     // ----- Properties ----- //
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty()
@@ -50,7 +35,8 @@ class TransLabel @JsonCreator constructor(
     var index: Int
         get() = indexProperty.get()
         set(value) {
-            if (value < 0) throw TransLabelException.indexInvalid(value)
+            if (value < 0)
+                throw IllegalArgumentException(String.format(I18N["exception.trans_label.index_invalid.i"], value))
             indexProperty.set(value)
         }
 
@@ -59,7 +45,8 @@ class TransLabel @JsonCreator constructor(
     var groupId: Int
         get() = groupIdProperty.get()
         set(value) {
-            if (value < 0) throw TransLabelException.groupIdInvalid(value)
+            if (value < 0)
+                throw IllegalArgumentException(String.format(I18N["exception.trans_label.groupId_invalid.i"], value))
             groupIdProperty.set(value)
         }
 
@@ -68,7 +55,8 @@ class TransLabel @JsonCreator constructor(
     var x: Double
         get() = xProperty.get()
         set(value) {
-            if (value < 0 || value > 1) throw TransLabelException.xInvalid(value)
+            if (value < 0 || value > 1)
+                throw IllegalArgumentException(String.format(I18N["exception.trans_label.x_invalid.d"], value))
             xProperty.set(value)
         }
 
@@ -77,7 +65,8 @@ class TransLabel @JsonCreator constructor(
     var y: Double
         get() = yProperty.get()
         set(value) {
-            if (value < 0 || value > 1) throw TransLabelException.yInvalid(value)
+            if (value < 0 || value > 1)
+                throw IllegalArgumentException(String.format(I18N["exception.trans_label.y_invalid.d"], value))
             yProperty.set(value)
         }
 

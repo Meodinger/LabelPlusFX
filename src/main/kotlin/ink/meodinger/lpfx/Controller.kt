@@ -527,10 +527,11 @@ class Controller(private val state: State) {
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)
 
-        // Set current-label-index to unbind TextArea
-        // TODO: Clear CTreeView un-wanted item focus
+        // Set current-label-index to unbind TextArea & clear CTreeView focus
         state.currentPicNameProperty().addListener(onChange {
             state.currentLabelIndex = NOT_FOUND
+            // Use run-later to clear after items rendering
+            Platform.runLater { cTreeView.selectionModel.clearSelection() }
         })
 
         // Update text area when label change
@@ -617,11 +618,17 @@ class Controller(private val state: State) {
         Logger.info("Transformed Tab on CLabelPane", LOGSRC_CONTROLLER)
 
         // Transform number key press to CTreeView select
-        view.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
-            if (!it.code.isDigitKey) return@handler
-            val id = (it.text.toInt() - 1).takeIf { i -> i in 0 until state.transFile.groupCount } ?: return@handler
+        view.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (!it.code.isDigitKey) return@addEventHandler
+            val id = (it.text.toInt() - 1).takeIf { i -> i in 0 until state.transFile.groupCount } ?: return@addEventHandler
 
-            cTreeView.selectGroup(state.transFile.getTransGroup(id).name, clear = true, scrollTo = false)
+            if (state.viewMode == ViewMode.GroupMode) {
+                cTreeView.selectGroup(state.transFile.getTransGroup(id).name, clear = true, scrollTo = false)
+            } else {
+                state.currentGroupId = id
+            }
+
+            it.consume() // Consume used event
         }
         Logger.info("Transformed num-key pressed", LOGSRC_CONTROLLER)
 
@@ -630,15 +637,24 @@ class Controller(private val state: State) {
             if (!(it.isControlDown || it.isMetaDown)) return@EventHandler
 
             when (it.code) {
-                KeyCode.LEFT -> cPicBox.back()
+                KeyCode.LEFT  -> cPicBox.back()
                 KeyCode.RIGHT -> cPicBox.next()
                 else -> return@EventHandler
             }
 
             it.consume() // Consume used event
         }
-        view.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
+            when (it.code) {
+                KeyCode.LEFT  -> cPicBox.back()
+                KeyCode.RIGHT -> cPicBox.next()
+                else -> return@handler
+            }
+
+            it.consume() // Consume used event
+        }
         Logger.info("Transformed Ctrl + Left/Right", LOGSRC_CONTROLLER)
 
         /**
@@ -814,10 +830,8 @@ class Controller(private val state: State) {
         val groupNames = Settings.defaultGroupNameList.filterIndexed { index, _ -> groupCreateList[index] }
         val groupColors = Settings.defaultGroupColorHexList.filterIndexed { index, _ -> groupCreateList[index] }
         val transFile = TransFile(
-            TransFile.DEFAULT_VERSION,
-            TransFile.DEFAULT_COMMENT,
-            groupNames.mapIndexedTo(ArrayList()) { index, name -> TransGroup(name, groupColors[index]) },
-            selectedPics.associateWithTo(HashMap()) { ArrayList() }
+            groupList = groupNames.mapIndexedTo(ArrayList()) { index, name -> TransGroup(name, groupColors[index]) },
+            transMap  = selectedPics.associateWithTo(HashMap()) { ArrayList() }
         )
         Logger.info("Built TransFile", LOGSRC_CONTROLLER)
 
@@ -1044,6 +1058,9 @@ class Controller(private val state: State) {
         showInfo(state.stage, I18N["info.exported_successful"])
     }
 
+    /**
+     * Reset all components
+     */
     fun reset() {
         backupManager.clear()
         accumulatorManager.clear()
@@ -1056,12 +1073,18 @@ class Controller(private val state: State) {
 
     // Global Methods
 
+    /**
+     * Request LabelPane re-render
+     */
     fun requestUpdatePane() {
         imageBinding.invalidate()
         cLabelPane.requestRemoveLabels()
         cLabelPane.requestShowImage()
         cLabelPane.requestCreateLabels()
     }
+    /**
+     * Request TreeView re-render
+     */
     fun requestUpdateTree() {
         cTreeView.requestUpdate()
     }

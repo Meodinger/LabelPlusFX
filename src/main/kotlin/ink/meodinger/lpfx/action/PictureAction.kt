@@ -3,7 +3,6 @@ package ink.meodinger.lpfx.action
 import ink.meodinger.lpfx.LOGSRC_ACTION
 import ink.meodinger.lpfx.State
 import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.file.exists
 
@@ -44,7 +43,8 @@ class PictureAction(
 
     private fun applyPicFile(picFile: File) {
         val curFile = state.transFile.getFile(targetPicName)
-            ?: throw TransFile.TransFileException.pictureNotFound(targetPicName)
+            ?: // TODO: I18N
+            throw IllegalStateException("")
 
         state.transFile.setFile(targetPicName, picFile)
 
@@ -52,7 +52,8 @@ class PictureAction(
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
         if (state.transFile.transMapObservable.contains(picName))
-            throw TransFile.TransFileException.pictureNameRepeated(picName)
+            // TODO: I18N
+            throw IllegalStateException("")
 
         state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
         if (picFile.exists()) state.transFile.setFile(picName, picFile)
@@ -61,7 +62,8 @@ class PictureAction(
     }
     private fun removePicture(picName: String) {
         if (!state.transFile.transMapObservable.contains(picName))
-            throw TransFile.TransFileException.pictureNotFound(picName)
+            // TODO: I18N
+            throw IllegalStateException("")
 
         state.transFile.setFile(picName, null)
         state.transFile.transMapObservable.remove(picName)

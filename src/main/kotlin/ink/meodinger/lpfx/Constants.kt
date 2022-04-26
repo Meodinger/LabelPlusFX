@@ -140,7 +140,7 @@ enum class FileType(val description: String, val extension: String) {
         fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
-            else -> throw IllegalArgumentException(String.format(I18N["exception.file_type.invalid_file_extension.s"], file.extension))
+            else -> throw IllegalArgumentException("") // TODO
         }
     }
 }

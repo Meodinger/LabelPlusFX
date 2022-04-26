@@ -1,14 +1,9 @@
 package ink.meodinger.lpfx.type
 
-import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.sortByDigit
 
 import com.fasterxml.jackson.annotation.*
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import javafx.beans.property.*
 import javafx.collections.*
 import java.io.File
@@ -27,58 +22,24 @@ import java.io.File
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
 class TransFile @JsonCreator constructor(
     @JsonProperty("version")   version:   List<Int>                                   = DEFAULT_VERSION,
-    @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT,
+    @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT_LIST[0],
     @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
     @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
 )  {
 
     companion object {
-
-        val DEFAULT_VERSION = listOf(1, 0)
-
-        const val DEFAULT_COMMENT = "使用 LabelPlusFX 导出"
-        val DEFAULT_COMMENT_LIST = arrayListOf(
-            DEFAULT_COMMENT,
+        val DEFAULT_VERSION: List<Int> = listOf(1, 0)
+        val DEFAULT_COMMENT_LIST: List<String> = arrayListOf(
+            "使用 LabelPlusFX 导出",
             "Default Comment\nYou can edit me",
             "由 MoeFlow.com 导出",
             "由MoeTra.com导出"
         )
-
-        object LPTransFile {
-            const val PIC_START   = ">>>>>>>>["
-            const val PIC_END     = "]<<<<<<<<"
-            const val LABEL_START = "----------------["
-            const val LABEL_END   = "]----------------"
-            const val PROP_START  = "["
-            const val PROP_END    = "]"
-            const val SPLIT       = ","
-            const val SEPARATOR   = "-"
-
-            val DEFAULT_COLOR_HEX_LIST = listOf(
-                "FF0000", "0000FF", "008000",
-                "1E90FF", "FFD700", "FF00FF",
-                "A0522D", "FF4500", "9400D3"
-            )
-        }
-
-    }
-
-    // ----- Exception ----- //
-
-    class TransFileException(message: String) : RuntimeException(message) {
-        companion object {
-            fun transGroupNotFound(groupName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.group_not_found.s"], groupName))
-            fun transGroupNameRepeated(groupName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.group_name_repeated.s"], groupName))
-            fun transGroupStillInUse(groupName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.group_still_in_use.s"], groupName))
-
-            fun pictureNotFound(picName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.picture_not_found.s"], picName))
-            fun pictureNameRepeated(picName: String) =
-                TransFileException(String.format(I18N["exception.trans_file.picture_name_repeated.s"], picName))
-        }
+        val DEFAULT_COLOR_HEX_LIST: List<String> = listOf(
+            "FF0000", "0000FF", "008000",
+            "1E90FF", "FFD700", "FF00FF",
+            "A0522D", "FF4500", "9400D3"
+        )
     }
 
     // ----- Project Files Management ----- //
@@ -102,11 +63,11 @@ class TransFile @JsonCreator constructor(
 
     /**
      * Set the actual file of the given picture name
-     * @param picName Name of target picture
+     * @param picName Name of target picture, if the target picture not exists, this function will do nothing
      * @param file Actual file of the picture, null to remove the file have set.
      */
     fun setFile(picName: String, file: File?) {
-        if (!transMapObservable.keys.contains(picName)) throw TransFileException.pictureNotFound(picName)
+        if (!transMapObservable.keys.contains(picName)) return
         if (file == null) fileMap.remove(picName) else fileMap[picName] = file
     }
 
@@ -146,16 +107,13 @@ class TransFile @JsonCreator constructor(
     val picCount: Int get() = transMapProperty.size
     val sortedPicNames: List<String> by sortedPicNamesProperty
 
-    // ----- TransGroup ----- //
+    // TransGroup
 
     fun getGroupIdByName(name: String): Int {
-        val index = groupListObservable.indexOfFirst { it.name == name }
-        if (index == NOT_FOUND) throw TransFileException.transGroupNotFound(name)
-        return index
+        return groupList.first { it.name == name }.let(groupList::indexOf)
     }
     fun isGroupStillInUse(groupId: Int): Boolean {
-        for (list in transMapObservable.values) for (label in list) if (label.groupId == groupId) return true
-        return false
+        return transMap.values.flatten().any { label -> label.groupId == groupId }
     }
 
     // ----- Data ----- //
@@ -164,30 +122,17 @@ class TransFile @JsonCreator constructor(
         return groupListObservable[groupId]
     }
     fun getTransList(picName: String): List<TransLabel> {
-        return transMapObservable[picName] ?: throw TransFileException.pictureNotFound(picName)
+        return transMapObservable[picName]!!
     }
     fun getTransLabel(picName: String, labelIndex: Int): TransLabel {
         return getTransList(picName).first { it.index == labelIndex }
     }
 
-    // ----- Other ----- //
+    // Destructing
 
-    fun sorted(): TransFile {
-        return TransFile(
-            version.toList(),
-            comment,
-            groupList.mapTo(ArrayList(), TransGroup::clone),
-            sortedPicNames.associateWithTo(LinkedHashMap()) { transMap[it]!!.map(TransLabel::clone).sortedBy(TransLabel::index).toMutableList() }
-        )
-    }
-
-    fun toJsonString(): String {
-        return ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .writeValueAsString(this)
-    }
-
-    override fun toString(): String = ObjectMapper().writeValueAsString(this)
+    operator fun component1(): List<Int>                     = version
+    operator fun component2(): String                        = comment
+    operator fun component3(): List<TransGroup>              = groupList
+    operator fun component4(): Map<String, List<TransLabel>> = transMap
 
 }

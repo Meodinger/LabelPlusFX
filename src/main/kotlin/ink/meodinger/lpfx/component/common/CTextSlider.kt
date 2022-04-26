@@ -32,13 +32,9 @@ class CTextSlider : HBox() {
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(0.0)
     fun initScaleProperty(): DoubleProperty = initScaleProperty
     var initScale: Double
-        get() = initScaleProperty().get()
+        get() = initScaleProperty.get()
         set(value) {
-            if (value >= 0) {
-                initScaleProperty().set(value.coerceAtLeast(minScale).coerceAtMost(maxScale))
-            } else {
-                throw IllegalArgumentException(String.format(I18N["exception.scale.negative_scale.d"], value))
-            }
+            initScaleProperty.set(value.coerceAtLeast(minScale).coerceAtMost(maxScale))
         }
 
     private val minScaleProperty: DoubleProperty = slider.minProperty()

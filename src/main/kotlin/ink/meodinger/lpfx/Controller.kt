@@ -100,7 +100,7 @@ class Controller(private val state: State) {
             val time = Date()
             val bak = state.getBakFolder()!!.resolve("${bakFileFormatter.format(time)}.$EXTENSION_BAK")
             try {
-                export(bak, FileType.MeoFile, state.transFile)
+                export(bak, state.transFile)
                 Platform.runLater {
                     lBackup.text = String.format(I18N["stats.last_backup.s"], bakTimeFormatter.format(time))
                 }
@@ -582,7 +582,7 @@ class Controller(private val state: State) {
                     state.currentLabelIndex = NOT_FOUND
                 }
 
-                state.doAction(ComplexAction.of(indices.map { index ->
+                state.doAction(ComplexAction(indices.map { index ->
                     LabelAction(
                         ActionType.REMOVE, state,
                         state.currentPicName,
@@ -837,7 +837,7 @@ class Controller(private val state: State) {
 
         // Export to file
         try {
-            export(file, FileType.getFileType(file), transFile)
+            export(file, transFile)
         } catch (e: IOException) {
             Logger.error("New failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -860,7 +860,7 @@ class Controller(private val state: State) {
         // Load File
         val transFile: TransFile
         try {
-            transFile = load(file, FileType.getFileType(file))
+            transFile = load(file)
             transFile.projectFolder = projectFolder
         } catch (e: IOException) {
             Logger.error("Open failed", LOGSRC_CONTROLLER)
@@ -949,7 +949,7 @@ class Controller(private val state: State) {
 
         // Export
         try {
-            export(exportDest, FileType.getFileType(file), state.transFile)
+            export(exportDest, state.transFile)
         } catch (e: IOException) {
             Logger.error("Export translation failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -998,7 +998,7 @@ class Controller(private val state: State) {
     }
     /**
      * Recover from backup file
-     * @param from The backup file
+     * @param from The backup file, will be treat as MeoFile
      * @param to Which file will the backup recover to
      */
     fun recovery(from: File, to: File) {
@@ -1006,9 +1006,9 @@ class Controller(private val state: State) {
 
         try {
             val tempFile = File.createTempFile("LPFXTempFile", to.extension).apply(File::deleteOnExit)
-            val transFile = load(from, FileType.MeoFile)
+            val transFile = load(from)
 
-            export(tempFile, FileType.getFileType(to), transFile)
+            export(tempFile, transFile)
             transfer(tempFile, to)
         } catch (e: Exception) {
             Logger.error("Recover failed", LOGSRC_CONTROLLER)
@@ -1023,13 +1023,12 @@ class Controller(private val state: State) {
     /**
      * Export a TransFile in specific type
      * @param file Which file will the TransFile write to
-     * @param type Which type will the translation file be
      */
-    fun export(file: File, type: FileType) {
+    fun export(file: File) {
         Logger.info("Exporting to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
-            export(file, type, state.transFile)
+            export(file, state.transFile)
         } catch (e: IOException) {
             Logger.error("Export failed", LOGSRC_CONTROLLER)
             Logger.exception(e)
@@ -1047,7 +1046,7 @@ class Controller(private val state: State) {
         Logger.info("Packing to ${file.path}", LOGSRC_CONTROLLER)
 
         try {
-            pack(file, state.transFile)
+            pack(file, FileType.getFileType(state.translationFile), state.transFile)
         } catch (e : IOException) {
             Logger.error("Pack failed", LOGSRC_CONTROLLER)
             Logger.exception(e)

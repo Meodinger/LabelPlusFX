@@ -167,7 +167,7 @@ class CTreeMenu(
         // Reversed to delete big-index label first, make logger more literal
         @Suppress("UNCHECKED_CAST") val items = (event.source as List<CTreeLabelItem>).reversed()
 
-        state.doAction(ComplexAction.of(items.map {
+        state.doAction(ComplexAction(items.map {
             LabelAction(
                 ActionType.REMOVE, state,
                 state.currentPicName,

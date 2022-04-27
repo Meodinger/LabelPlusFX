@@ -26,17 +26,19 @@ import java.nio.charset.StandardCharsets
  * Load TransFile
  */
 @Throws(IOException::class)
-fun load(file: File, type: FileType): TransFile {
+fun load(file: File): TransFile {
+    val type = FileType.getFileType(file)
+
     return try {
         when (type) {
-            FileType.LPFile -> loadLP(file)
+            FileType.LPFile  -> loadLP(file)
             FileType.MeoFile -> loadMeo(file)
         }
     } catch (e: IOException) {
         try {
             // Try load as another file type
             when (type) {
-                FileType.LPFile -> loadMeo(file)
+                FileType.LPFile  -> loadMeo(file)
                 FileType.MeoFile -> loadLP(file)
             }
         } catch (_: Throwable) {

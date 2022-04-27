@@ -19,8 +19,8 @@ import java.nio.charset.StandardCharsets
  * Load TransFile
  */
 @Throws(IOException::class)
-fun export(file: File, type: FileType, transFile: TransFile) {
-    when(type) {
+fun export(file: File, transFile: TransFile) {
+    when(FileType.getFileType(file)) {
         FileType.LPFile  -> exportLP(file, transFile)
         FileType.MeoFile -> exportMeo(file, transFile)
     }

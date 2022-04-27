@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.action
 
-import ink.meodinger.lpfx.util.collection.contact
 
 /**
  * Author: Meodinger
@@ -13,6 +12,10 @@ import ink.meodinger.lpfx.util.collection.contact
  */
 interface Action {
 
+    /**
+     * Indicates type of the Action
+     * @see ActionType
+     */
     val type: ActionType
 
     /**
@@ -27,7 +30,25 @@ interface Action {
 
 }
 
-enum class ActionType { ADD, REMOVE, CHANGE }
+/**
+ * ActionType
+ */
+enum class ActionType {
+    /**
+     * Indicates the action will add something
+     */
+    ADD,
+
+    /**
+     * Indicates the action will remove something
+     */
+    REMOVE,
+
+    /**
+     * Indicates the action will change something
+     */
+    CHANGE,
+}
 
 /**
  * Provide a convenient way to run functions in `Action`.
@@ -56,12 +77,8 @@ internal class FunctionAction(
  */
 class ComplexAction(private val actions: List<Action>) : Action {
 
-    companion object {
-        fun of(vararg actions: Action) = ComplexAction(actions.toList())
-        fun of(vararg actions: List<Action>) = ComplexAction(contact(*actions))
-    }
-
     override val type: ActionType = ActionType.CHANGE
+
     override fun commit() = actions.forEach(Action::commit)
     override fun revert() = actions.reversed().forEach(Action::revert)
 

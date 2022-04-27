@@ -187,7 +187,7 @@ class SearchReplace(private val state: State) : Stage() {
                 actions.add(LabelAction(ActionType.CHANGE, state, picName, label, newText = text))
             }
         }
-        state.doAction(ComplexAction.of(actions))
+        state.doAction(ComplexAction(actions))
         return count
     }
 

@@ -22,14 +22,14 @@ import java.nio.charset.StandardCharsets
  * Export a pic pack with Meo_PS_Script
  */
 @Throws(IOException::class)
-fun pack(target: File, transFile: TransFile) {
+fun pack(target: File, type: FileType, transFile: TransFile) {
     val zip = CZip(target)
 
     zip.zip(SCRIPT, "Meo_PS_Script.jsx")
     zip.zip(TEMPLATE_ZH, "/ps_script_res/zh.psd")
     zip.zip(TEMPLATE_EN, "/ps_script_res/en.psd")
 
-    val content = when(FileType.getFileType(target)) {
+    val content = when(type) {
         FileType.LPFile  -> transFile.toLPString()
         FileType.MeoFile -> transFile.toJsonString()
     }

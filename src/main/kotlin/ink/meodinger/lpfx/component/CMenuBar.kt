@@ -8,6 +8,7 @@ import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
+import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
@@ -414,10 +415,10 @@ class CMenuBar(private val state: State) : MenuBar() {
                 if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
             }
 
-            state.doAction(ComplexAction.of(
+            state.doAction(ComplexAction(contact(
                 toAdd.map { picName -> PictureAction(ActionType.ADD, state, picName) },
                 toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
-            ))
+            )))
             // Update selection
             state.currentPicName = state.transFile.sortedPicNames[0]
         }
@@ -467,7 +468,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         chooserExport.initialFilename = "$exportName.${type.extension}"
 
         val file = chooserExport.showSaveDialog(state.stage) ?: return
-        state.controller.export(file, type)
+        state.controller.export(file)
     }
     private fun exportTransPack() {
         chooserPack.initialFilename = "${state.getFileFolder()!!.name}.$EXTENSION_PACK"
@@ -575,7 +576,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                     labels.mapTo(actions) { LabelAction(ActionType.CHANGE, state, picName, it, newText = iterator.next().trim()) }
                 }
 
-                state.doAction(ComplexAction.of(actions))
+                state.doAction(ComplexAction(actions))
                 updateProgress(1.0, 1.0)
             }
         }

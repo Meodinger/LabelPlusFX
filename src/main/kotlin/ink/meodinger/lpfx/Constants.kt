@@ -136,11 +136,13 @@ enum class FileType(val description: String, val extension: String) {
     companion object {
         /**
          * NOTE: It's not safe to determine a file's type by its extension
+         * All files with unknown extension will be treat as MeoFile
          */
         fun getFileType(file: File): FileType = when (file.extension) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
-            else -> throw IllegalArgumentException("") // TODO
+            EXTENSION_BAK -> MeoFile
+            else -> MeoFile
         }
     }
 }

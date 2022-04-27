@@ -1,8 +1,6 @@
 package ink.meodinger.lpfx.action
 
-import ink.meodinger.lpfx.LOGSRC_ACTION
-import ink.meodinger.lpfx.LOGSRC_STATE
-import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.string.emptyString
@@ -48,7 +46,7 @@ class GroupAction(
             targetTransGroup.name = name
         }
         if (newColorHex.isNotEmpty()) {
-            builder.append("@colorHex: ${targetTransGroup.colorHex} -> $colorHex; ")
+            builder.append("@color: ${targetTransGroup.colorHex} -> $colorHex; ")
             targetTransGroup.colorHex = colorHex
         }
 
@@ -57,8 +55,7 @@ class GroupAction(
     private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
         for (group in state.transFile.groupListObservable)
             if (group.name == transGroup.name)
-                // TODO: I18N
-                throw IllegalStateException("")
+                throw IllegalArgumentException(String.format(I18N["exception.action.group_repeated.s"], transGroup.name))
 
         state.transFile.groupListObservable.add(groupId, transGroup)
 
@@ -68,17 +65,16 @@ class GroupAction(
         Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
     }
     private fun removeTransGroup(transGroup: TransGroup) {
-        val toRemoveId = state.transFile.groupListObservable.indexOfFirst { it.name == transGroup.name }
-        if (state.transFile.isGroupStillInUse(toRemoveId))
-            // TODO: I18N
-            throw IllegalStateException("")
+        val groupId = state.transFile.getGroupIdByName(transGroup.name)
+        if (state.transFile.isGroupStillInUse(groupId))
+            throw IllegalArgumentException(String.format(I18N["exception.action.group_still_in_use.s"], transGroup.name))
 
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
-            if (label.groupId >= toRemoveId) label.groupId--
+            if (label.groupId >= groupId) label.groupId--
 
-        state.transFile.groupListObservable.removeAt(toRemoveId)
+        state.transFile.groupListObservable.removeAt(groupId)
 
-        Logger.info("Removed TransGroup: $transGroup", LOGSRC_STATE)
+        Logger.info("Removed TransGroup: $transGroup", LOGSRC_ACTION)
     }
 
     override fun commit() {

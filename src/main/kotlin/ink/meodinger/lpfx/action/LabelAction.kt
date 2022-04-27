@@ -1,8 +1,6 @@
 package ink.meodinger.lpfx.action
 
-import ink.meodinger.lpfx.LOGSRC_ACTION
-import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.State
+import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.string.*
@@ -77,12 +75,11 @@ class LabelAction(
     }
     private fun addTransLabel(picName: String, transLabel: TransLabel) {
         val list = state.transFile.transMapObservable[picName]
-            ?:// TODO: I18N
-            throw IllegalStateException("")
+            ?: throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], picName))
 
+        // Check group index invalid
         if (transLabel.groupId >= state.transFile.groupCount)
-            // TODO: I18N
-            throw IllegalStateException("")
+            throw IllegalArgumentException(String.format(I18N["exception.action.label_group_invalid.i"], transLabel.groupId))
 
         val labelIndex = transLabel.index
         for (label in list) if (label.index >= labelIndex) label.index++
@@ -92,8 +89,7 @@ class LabelAction(
     }
     private fun removeTransLabel(picName: String, transLabel: TransLabel) {
         val list = state.transFile.transMapObservable[picName]
-            ?:// TODO: I18N
-            throw IllegalStateException("")
+            ?: throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], picName))
 
         val labelIndex = transLabel.index
         list.remove(list.first { it.index == labelIndex })

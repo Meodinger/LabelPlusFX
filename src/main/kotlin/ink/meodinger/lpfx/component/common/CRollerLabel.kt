@@ -18,6 +18,9 @@ import javafx.scene.text.Text
  * Have fun with my code!
  */
 
+/**
+ * A Label that will be rolling if there is not enought space to layout all text
+ */
 class CRollerLabel(contentText: String = "") : Region() {
 
     companion object {

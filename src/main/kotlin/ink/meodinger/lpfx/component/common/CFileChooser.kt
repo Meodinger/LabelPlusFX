@@ -18,6 +18,8 @@ import java.io.File
 
 /**
  * A FileChooser with shared initial directory with other CFileChoosers
+ *
+ * @see javafx.stage.FileChooser
  */
 class CFileChooser {
 
@@ -56,18 +58,27 @@ class CFileChooser {
         initialDirectoryProperty.bindBidirectional(lastDirectoryProperty)
     }
 
+    /**
+     * @see javafx.stage.FileChooser.showOpenDialog
+     */
     fun showOpenDialog(owner: Window?): File? {
         return chooser.showOpenDialog(owner).also {
             lastDirectory = it?.parentFile
         }
     }
 
+    /**
+     * @see javafx.stage.FileChooser.showSaveDialog
+     */
     fun showSaveDialog(owner: Window?): File? {
         return chooser.showSaveDialog(owner).also {
             lastDirectory = it?.parentFile
         }
     }
 
+    /**
+     * @see javafx.stage.FileChooser.showOpenMultipleDialog
+     */
     fun showOpenMultipleDialog(owner: Window?) : List<File>? {
         return chooser.showOpenMultipleDialog(owner).also {
             lastDirectory = it?.last()?.parentFile

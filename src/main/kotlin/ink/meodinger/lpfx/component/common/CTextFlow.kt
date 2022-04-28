@@ -23,7 +23,7 @@ import javafx.scene.text.TextFlow
  */
 
 /**
- * Double-click to show TextArea
+ * A TextFlow provides lazy layout
  */
 class CTextFlow : TextFlow() {
 
@@ -60,24 +60,41 @@ class CTextFlow : TextFlow() {
         children.setAll(nodes)
     }
 
+    /**
+     * Append some text to the TextFlow
+     */
     fun appendText(text: String, size: Double = fontSize, bold: Boolean = false, color: Paint = textColor) {
         nodes.add(Text(text).apply {
             fill = color
             font = font.s(size).let { if (bold) it.bold() else it }
         })
     }
+
+    /**
+     * Append some text and an EOL to the TextFlow
+     */
     fun appendLine(text: String, size: Double = fontSize, bold: Boolean = false, color: Paint = textColor) {
         appendText(text.plus("\n"), size, bold, color)
     }
+
+    /**
+     * Append  an EOL to the TextFlow
+     */
     fun appendLine() {
         appendText("\n")
     }
 
+    /**
+     * Cleat all texts and append some text
+     */
     fun setText(text: String, size: Double = fontSize, bold: Boolean = false, color: Paint = textColor) {
         nodes.clear()
         appendText(text, size, bold, color)
     }
 
+    /**
+     * Clear all texts
+     */
     fun clear() {
         nodes.clear()
     }

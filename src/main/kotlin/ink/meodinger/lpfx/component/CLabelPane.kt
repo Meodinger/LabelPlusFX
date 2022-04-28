@@ -56,22 +56,76 @@ class CLabelPane : ScrollPane() {
 
     // region LabelEvent
 
+    /**
+     * When an action related to label occurs, a LabelEvent will be dispatched.
+     * As LabelEvent is the result of MouseEven, it likes some kind of wrapper
+     * of a MouseEvent, but provides more information about the label related.
+     *
+     * @param eventType Type of the LabelEvent
+     * @param source MouseEvent that produces the LabelEvent
+     * @param labelIndex Index of the related label
+     * @param displayX X coordinate based on the displaying image
+     * @param displayY Y coordinate based on the displaying image
+     * @param labelX X coordinate of the related TransLabel
+     * @param labelY Y coordinate of the related TransLabel
+     */
     class LabelEvent(
         eventType: EventType<LabelEvent>,
         val source: MouseEvent,
         val labelIndex: Int,
         val displayX: Double,
         val displayY: Double,
-        val labelX: Double = Double.NaN,
-        val labelY: Double = Double.NaN,
+        val labelX: Double,
+        val labelY: Double,
     ) : Event(eventType) {
         companion object {
+
+            /**
+             * Root type of all LabelEventType
+             */
             val LABEL_ANY   : EventType<LabelEvent> = EventType(EventType.ROOT, "LABEL_ANY")
+
+            /**
+             * Indicate should create a label. `labelIndex` will be NOT_FOUND
+             * because the event target isn't a label. `labelX` and `labelY`
+             * will be the coordinate of the label which will be created.
+             */
             val LABEL_CREATE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CREATE")
+
+            /**
+             * Incicate shoule remove a label. `labelIndex` will be the target
+             * label's index. `labelX` and `labelY` will be `Double.NaN` because
+             * they are useless here and should not make distraction.
+             */
             val LABEL_REMOVE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_REMOVE")
+
+            /**
+             * Incicate we are hovering on a label. `labelIndex` will be the target
+             * label's index. `labelX` and `labelY` will be `Double.NaN` because
+             * they are useless here and should not make distraction.
+             */
             val LABEL_HOVER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_HOVER")
+
+            /**
+             * Incicate we have clicked a label. `labelIndex` will be the target
+             * label's index. `labelX` and `labelY` will be `Double.NaN` because
+             * they are useless here and should not make distraction.
+             */
             val LABEL_CLICK : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CLICK")
+
+            /**
+             * Incicate we moved a label. `labelIndex` will be the target
+             * label's index. `labelX` and `labelY` will be the new coordinates
+             * of the target label. Note that this event will only be dispacted
+             * when we have finished moving a label.
+             */
             val LABEL_MOVE  : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_MOVE")
+
+            /**
+             * Incicate shoule remove a label. `labelIndex` will be NOT_FOUND
+             * because the event target isn't a label. `labelX` and `labelY`
+             * will be `Double.NaN` because the event target isn't a label.
+             */
             val LABEL_OTHER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_OTHER")
         }
     }
@@ -80,10 +134,30 @@ class CLabelPane : ScrollPane() {
 
     // region NewPicScale Enum
 
+    /**
+     * The scale strategy when display a new image
+     */
     enum class NewPictureScale(private val description: String) {
+
+        /**
+         * The scale will be set to `initScale`
+         */
         DEFAULT(I18N["label_pane.nps.default"]),
+
+        /**
+         * The scale will be set to `1.0`
+         */
         FULL(I18N["label_pane.nps.full"]),
+
+        /**
+         * The scale will be set to a value that makes the
+         * width of the image equals to the width of the pane.
+         */
         FIT(I18N["label_pane.nps.fit"]),
+
+        /**
+         * The scale will not change
+         */
         PREVIOUS(I18N["label_pane.nps.previous"]);
 
         override fun toString(): String = description
@@ -279,8 +353,6 @@ class CLabelPane : ScrollPane() {
 
     // endregion
 
-    // ----- Others ------ //
-
     init {
         // Note that the scroll bar is some kind of useless
         // They cannot locate the picture properly because
@@ -317,7 +389,7 @@ class CLabelPane : ScrollPane() {
         // Remove text when scroll event fired
         // NOTE: Horizon scroll use default impl: Shift + Scroll
         addEventFilter(ScrollEvent.SCROLL) {
-            clearCanvas()
+            clearText()
         }
 
         // Scale
@@ -384,7 +456,7 @@ class CLabelPane : ScrollPane() {
             val w = abs(it.x - shiftX)
             val h = abs(it.y - shiftY)
 
-            clearCanvas()
+            clearText()
             val gc = textLayer.graphicsContext2D
             gc.lineWidth = 2.0 / scale
             gc.stroke = Color.BLACK
@@ -392,7 +464,7 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             if (selecting) {
-                clearCanvas()
+                clearText()
 
                 val rangeX = shiftX.autoRangeTo(it.x) / image.width
                 val rangeY = shiftY.autoRangeTo(it.y) / image.height
@@ -436,12 +508,12 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
             root.cursor = commonCursor
-            clearCanvas()
+            clearText()
         }
 
         // Handle
         root.addEventHandler(MouseEvent.MOUSE_MOVED) {
-            fireEvent(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x, it.y))
+            fireEvent(LabelEvent(LabelEvent.LABEL_OTHER, it, NOT_FOUND, it.x, it.y, Double.NaN, Double.NaN))
         }
         root.addEventHandler(MouseEvent.MOUSE_CLICKED) {
             if (it.button == MouseButton.PRIMARY) {
@@ -521,7 +593,7 @@ class CLabelPane : ScrollPane() {
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
             dragging = true
 
-            clearCanvas()
+            clearText()
 
             val newLayoutX = shiftX + it.sceneX / scale
             val newLayoutY = shiftY + it.sceneY / scale
@@ -563,7 +635,7 @@ class CLabelPane : ScrollPane() {
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
             label.cursor = commonCursor
-            clearCanvas()
+            clearText()
         }
 
         // Event handle
@@ -572,6 +644,7 @@ class CLabelPane : ScrollPane() {
                 it, transLabel.index,
                 label.layoutX + it.x,
                 label.layoutY + it.y,
+                Double.NaN, Double.NaN
             ))
         }
         label.setOnMouseClicked {
@@ -581,6 +654,7 @@ class CLabelPane : ScrollPane() {
                     it, transLabel.index,
                     label.layoutX + it.x,
                     label.layoutY + it.y,
+                    Double.NaN, Double.NaN
                 ))
             } else if (it.button == MouseButton.SECONDARY) {
 
@@ -588,6 +662,7 @@ class CLabelPane : ScrollPane() {
                     it, transLabel.index,
                     label.layoutX + it.x,
                     label.layoutY + it.y,
+                    Double.NaN, Double.NaN
                 ))
             }
         }
@@ -618,9 +693,21 @@ class CLabelPane : ScrollPane() {
         labelNodes.remove(label)
     }
 
-    fun clearCanvas() {
+    // Text rendering
+
+    /**
+     * Clear all the texts that are displaying
+     */
+    fun clearText() {
         textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
     }
+    /**
+     * Create some text at the given coordinate
+     * @param text Text to display
+     * @param color Color of the text
+     * @param x X coordinate where the text will be displayed, based on the image width
+     * @param y Y coordinate where the text will be displayed, based on the image width
+     */
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
         val s = omitWideText(omitHighText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
@@ -657,6 +744,13 @@ class CLabelPane : ScrollPane() {
         gc.fillText(t.text, textX, textY)
     }
 
+    // Layout position
+
+    /**
+     * Move the image where will make the target label
+     * be displayed at the center of the LabelPane
+     * @param labelIndex Index of the label which will be displaye at the center
+     */
     fun moveToLabel(labelIndex: Int) {
         if (!shouldCreate) return
 
@@ -677,6 +771,9 @@ class CLabelPane : ScrollPane() {
         root.translateX = width / 2 - fakeX
         root.translateY = height / 2 - fakeY
     }
+    /**
+     * Move the image to the top-left of the LabelPane
+     */
     fun moveToZero() {
         vvalue = 0.0
         hvalue = 0.0
@@ -684,6 +781,9 @@ class CLabelPane : ScrollPane() {
         root.translateX = - (1 - scale) * image.width / 2
         root.translateY = - (1 - scale) * image.height / 2
     }
+    /**
+     * Move the image to the center of the LabelPane
+     */
     fun moveToCenter() {
         vvalue = 0.0
         hvalue = 0.0
@@ -692,11 +792,17 @@ class CLabelPane : ScrollPane() {
         root.translateY = (height - image.height) / 2
     }
 
+    // Scale
+
+    /**
+     * The scale will be set to a value that makes the
+     * width of the image equals to the width of the pane.
+     */
     fun fitToPane() {
         scale = width / image.width
     }
 
-    // ----- Dangerous Zone ----- //
+    // Dangerous Zone
 
     /**
      * This function will let imageProperty re-get its value.

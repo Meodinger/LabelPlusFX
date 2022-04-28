@@ -1,8 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
-import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.NOT_FOUND
-import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.property.*
 
 import javafx.beans.property.*
@@ -29,11 +27,17 @@ import javafx.scene.layout.HBox
  * Note that we do not export property value because
  * **it can be anything as long as it is a valid value of type T.**
  * You can use bindings like `itemsProperty.valueAt(indexProperty)`
+ *
+ * @see javafx.scene.control.ComboBox
  */
 class CComboBox<T> : HBox() {
 
     private val back = Button("<")
     private val next = Button(">")
+
+    /**
+     * The backing ComboBox<T>
+     */
     val innerBox: ComboBox<T> = ComboBox()
 
     private val itemsProperty: ListProperty<T> = SimpleListProperty(FXCollections.emptyObservableList())
@@ -81,6 +85,10 @@ class CComboBox<T> : HBox() {
         children.addAll(innerBox, back, next)
     }
 
+    /**
+     * Select the previous item.
+     * If current item is the first and `isWrapped` is `true` will select the last item
+     */
     fun back() {
         val size = items.size
         var newIndex = index - 1
@@ -88,6 +96,10 @@ class CComboBox<T> : HBox() {
         if (isWrapped) if (newIndex < 0) newIndex += size
         if (newIndex >= 0) selectionModel.select(newIndex)
     }
+    /**
+     * Select the next item.
+     * If current item is the last and `isWrapped` is `true` will select the first item
+     */
     fun next() {
         val size = items.size
         var newIndex = index + 1
@@ -96,9 +108,16 @@ class CComboBox<T> : HBox() {
         if (newIndex < size) selectionModel.select(newIndex)
     }
 
+    /**
+     * Select an item by index
+     */
     fun select(index: Int) {
         selectionModel.select(index)
     }
+
+    /**
+     * Select an item. Note that only when the item exists will it be selected
+     */
     fun select(item: T) {
         if (items.contains(item)) selectionModel.select(item)
     }

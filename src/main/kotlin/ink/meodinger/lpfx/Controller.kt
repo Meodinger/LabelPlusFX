@@ -127,9 +127,11 @@ class Controller(private val state: State) {
 
     // region Global Bindings
 
-    // Following Bindings should create in order to avoid unexpected exceptions.
-    // When ObjectProperty changes, its value will temporarily set to null.
+    // Following Bindings should be created in order to avoid unexpected exceptions.
+    // ----> note @ 2022/4/28 Meodinger: Now only god knows why this order.
+    // Note that when ObjectProperty changes, its value will temporarily set to null.
     // So an elvis expression is needed to handle the null value.
+
     private val groupsBinding: ObjectBinding<ObservableList<TransGroup>> = Bindings.createObjectBinding(
         {
             state.transFileProperty().get()?.groupListObservable ?: FXCollections.emptyObservableList()
@@ -174,8 +176,7 @@ class Controller(private val state: State) {
     )
     private val labelsBinding: ObjectBinding<ObservableList<TransLabel>> = Bindings.createObjectBinding(
         {
-            state.currentPicName.takeIf(String::isNotEmpty)?.let(state.transFile.transMapObservable::get)
-                ?: FXCollections.emptyObservableList()
+            state.currentPicName.let(state.transFile.transMapObservable::get) ?: FXCollections.emptyObservableList()
         }, state.currentPicNameProperty()
     )
 
@@ -274,7 +275,7 @@ class Controller(private val state: State) {
         }
         Logger.info("Registered CTransArea Alias & Global undo/redo", LOGSRC_CONTROLLER)
 
-        // Register Ctrl/Meta + Scroll with font size change in TransArea
+        // Register Ctrl/Alt/Meta + Scroll with font size change in TransArea
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
             if (!(it.isControlDown || it.isAltDown || it.isMetaDown)) return@addEventHandler
 
@@ -328,7 +329,7 @@ class Controller(private val state: State) {
             val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
 
             // Text display
-            cLabelPane.clearCanvas()
+            cLabelPane.clearText()
             when (state.workMode) {
                 WorkMode.InputMode -> {
                     cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
@@ -361,7 +362,7 @@ class Controller(private val state: State) {
 
             val transGroup = state.transFile.getTransGroup(state.currentGroupId)
 
-            cLabelPane.clearCanvas()
+            cLabelPane.clearText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         Logger.info("Registered CLabelPane Handler", LOGSRC_CONTROLLER)
@@ -379,6 +380,10 @@ class Controller(private val state: State) {
         view.showStatsBarProperty().bind(Preference.showStatsBarProperty())
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOGSRC_CONTROLLER)
 
+        // CLigatureTextArea - rules
+        cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
+        Logger.info("Bound ligature rules", LOGSRC_CONTROLLER)
+
         // RecentFiles
         view.menuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
         Logger.info("Bound recent files menu", LOGSRC_CONTROLLER)
@@ -393,10 +398,6 @@ class Controller(private val state: State) {
         cSlider.disableProperty().bind(!state.openedProperty())
         cLabelPane.disableProperty().bind(!state.openedProperty())
         Logger.info("Bound disabled", LOGSRC_CONTROLLER)
-
-        // CLigatureTextArea - rules
-        cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
-        Logger.info("Bound ligature rules", LOGSRC_CONTROLLER)
 
         // CSlider - CLabelPane#scale
         cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
@@ -522,7 +523,7 @@ class Controller(private val state: State) {
         Logger.info("Added effect: show info on InfoLabel", LOGSRC_CONTROLLER)
 
         // Clear text when some state change
-        val clearTextListener = onChange<Any> { cLabelPane.clearCanvas() }
+        val clearTextListener = onChange<Any> { cLabelPane.clearText() }
         state.currentGroupIdProperty().addListener(clearTextListener)
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", LOGSRC_CONTROLLER)

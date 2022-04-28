@@ -83,6 +83,10 @@ class CColorPicker() : ColorPicker() {
         addEventHandler(ON_HIDDEN, handler)
     }
 
+    /**
+     * @see ink.meodinger.lpfx.component.common.CColorPicker
+     * @see javafx.scene.control.ColorPicker.createDefaultSkin
+     */
     override fun createDefaultSkin(): Skin<*> {
         return object : ColorPickerSkin(this) {
             override fun getPopupContent(): Node {

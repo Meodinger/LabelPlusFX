@@ -24,10 +24,19 @@ abstract class AbstractPropertiesDialog : Dialog<Map<String, Any>>() {
         }
     }
 
+    /**
+     * Load properties from `AbstractProperties` into the dialog
+     */
     protected abstract fun initProperties()
 
+    /**
+     * Convert dialog properties into properties map
+     */
     protected abstract fun convertResult(): Map<String, Any>
 
+    /**
+     * Get properties from dialog
+     */
     fun generateProperties(): Map<String, Any> {
         initProperties()
 

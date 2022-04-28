@@ -17,7 +17,11 @@ import javafx.scene.control.TextFormatter
  */
 
 /**
- * A TextArea with a symbol ContextMenu
+ * A TextArea that can transform some text into some other text by given rules
+ *
+ * For examples, if we have the rule "From `foo` to `bar`" and if we type "\foo",
+ * it will be transformed into "bar". Note that the ligature mark "\" can be set
+ * to some other characters.
  */
 class CLigatureArea: TextArea() {
 
@@ -39,7 +43,11 @@ class CLigatureArea: TextArea() {
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
     private val boundTextPropertyProperty: ObjectProperty<StringProperty> = SimpleObjectProperty(null)
-    val isBound: Boolean get() = boundTextPropertyProperty.get() != null
+
+    /**
+     * Whether this LigatureArea is bound to a StringProperty
+     */
+    val isBound: Boolean by boundTextPropertyProperty.isNotNull
 
     // ----- Ligature ----- //
 

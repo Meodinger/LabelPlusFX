@@ -156,7 +156,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         files = MutableList(picCount) { workingTransFile.getFile(picNames[it])?.takeIf(File::exists) }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
-            text = files[it]?.let { if (it.exists()) it.path else Unspecified } ?: Unspecified
+            text = files[it]?.takeIf(File::exists)?.let(File::getPath) ?: Unspecified
             tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
                 init { bind(this@apply.textProperty()) }
                 override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }

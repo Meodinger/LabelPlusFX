@@ -7,8 +7,8 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showConfirm
 import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.property.minus
+import ink.meodinger.lpfx.util.property.transform
 
-import javafx.beans.binding.ObjectBinding
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -157,13 +157,11 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
             text = files[it]?.takeIf(File::exists)?.let(File::getPath) ?: Unspecified
-            tooltipProperty().bind(object : ObjectBinding<Tooltip>() {
-                init { bind(this@apply.textProperty()) }
-                override fun computeValue(): Tooltip = Tooltip(this@apply.text).apply { showDelay = Duration(0.0) }
+            tooltipProperty().bind(textProperty().transform {
+                Tooltip(it).apply { showDelay = Duration.ZERO }
             })
-            textFillProperty().bind(object : ObjectBinding<Color>() {
-                init { bind(this@apply.textProperty()) }
-                override fun computeValue(): Color = if (this@apply.text == Unspecified) Color.RED else Color.BLACK
+            textFillProperty().bind(textProperty().transform {
+                if (it == Unspecified) Color.RED else Color.BLACK
             })
         } }
 

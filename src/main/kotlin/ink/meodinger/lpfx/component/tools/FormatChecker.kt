@@ -35,8 +35,8 @@ class FormatChecker(private val state: State) : Stage() {
 
     companion object {
         private val TypoList: List<Typo> = listOf(
-            Typo(Regex("\n(\n)+"), "\n",I18N["format.lines"]),
-            Typo(Regex("\\.(\\.)+"), "\u2026",I18N["format.dots"]),
+            Typo(Regex("\n(\n)+"), "\n", I18N["format.lines"]),
+            Typo(Regex("\\.(\\.)+"), "\u2026", I18N["format.dots"]),
             Typo(Regex("\u3002(\u3002)+"), "\u2026", I18N["format.dots"]),
         )
     }

@@ -41,7 +41,13 @@ class CColorPicker() : ColorPicker() {
     private val colorHexProperty: StringProperty = colorHexField.textProperty()
 
     private val enableAlphaProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether the color hex could include the alpha channel
+     */
     fun enableAlphaProperty(): BooleanProperty = enableAlphaProperty
+    /**
+     * @see enableAlphaProperty
+     */
     var enableAlpha: Boolean by enableAlphaProperty
 
     constructor(color: Color): this() { value = color }

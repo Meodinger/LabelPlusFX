@@ -28,7 +28,17 @@ import javafx.stage.Stage
 class CheatSheet : Stage() {
 
     private val onActionProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(null)
+    /**
+     * What to do when we click the link below
+     */
+    fun onActionProperty(): ObjectProperty<EventHandler<ActionEvent>> = onActionProperty
+    /**
+     * @see onActionProperty
+     */
     val onAction: EventHandler<ActionEvent> by onActionProperty
+    /**
+     * @see onActionProperty
+     */
     fun setOnAction(onAction: (ActionEvent) -> Unit) {
         onActionProperty.set(onAction)
     }

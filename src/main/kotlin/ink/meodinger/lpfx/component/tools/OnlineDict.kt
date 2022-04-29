@@ -162,6 +162,7 @@ class OnlineDict : Stage() {
 
     private fun searchWordSync(word: String) {
         val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
+        Logger.debug("Dictionary: Fetching URL ${searchConnection.url}", LOG_SRC_OTHER)
         if (searchConnection.responseCode != 200) {
             Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
@@ -174,25 +175,27 @@ class OnlineDict : Stage() {
         }
         val searchPage = parse(searchHTML)
         val searchResults = searchPage.body.children[1].children[3]
+
+        // Look for detail information
         val first = searchResults.children.getOrNull(0)
         if (first == null || first.attributes["id"] == "out-search") {
             outputFlow.setText(I18N["dict.not_found"])
             return
         }
 
-        val target = JD_SITE + first.attributes["href"]
-        val contentConnection = URL(target).openConnection().apply { connect() } as HttpsURLConnection
+        val contentConnection = URL(JD_SITE + first.attributes["href"]).openConnection().apply { connect() } as HttpsURLConnection
+        Logger.debug("Dictionary: Fetching URL ${contentConnection.url}", LOG_SRC_OTHER)
         if (contentConnection.responseCode != 200){
             Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
 
-        // ContentHTML has unclosed div
         val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
             Logger.debug("Dictionary: Got HTML content:", LOG_SRC_OTHER)
             Logger.debug(it, LOG_SRC_OTHER)
         }
+        // ContentHTML has unclosed div
         val contentPage = parse(contentHTML.replace("</body>", "</div></body>"))
         val contentResults = contentPage.body.children[1].children[1].children[0].children
 

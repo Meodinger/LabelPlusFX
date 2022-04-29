@@ -28,28 +28,54 @@ class CRollerLabel(contentText: String = "") : Region() {
     }
 
     private val label = Label(contentText)
-    private var displayText: String by label.textProperty()
-    private var clipped = false
+
+    private val textProperty: StringProperty = SimpleStringProperty(contentText)
+    /**
+     * The text the label should display
+     */
+    fun textProperty(): StringProperty = textProperty
+    /**
+     * @see textProperty
+     */
+    var text: String by textProperty
+
+    private val shiftIntervalProperty: LongProperty = SimpleLongProperty(SHIFT_PERIOD_DEFAULT)
+    /**
+     * The interval between shifts
+     */
+    fun shiftIntervalProperty(): LongProperty = shiftIntervalProperty
+    /**
+     * @see shiftIntervalProperty
+     */
+    var shiftInterval: Long by shiftIntervalProperty
 
     private val tooltipProperty: ObjectProperty<Tooltip> = label.tooltipProperty()
+    /**
+     * An export to `Label::tooltipProperty()`
+     * @see javafx.scene.control.Control.tooltipProperty
+     */
     fun tooltipProperty(): ObjectProperty<Tooltip> = tooltipProperty
+    /**
+     * @see tooltipProperty
+     */
     var tooltip: Tooltip by tooltipProperty
 
     private val textFillProperty: ObjectProperty<Paint> = label.textFillProperty()
+    /**
+     * An export to `Label::textFillProperty()`
+     * @see javafx.scene.control.Labeled.textFill
+     */
     fun textFillProperty(): ObjectProperty<Paint> = textFillProperty
+    /**
+     * @see textFillProperty
+     */
     var textFill: Paint by textFillProperty
 
-    private val textProperty: StringProperty = SimpleStringProperty(contentText)
-    fun textProperty(): StringProperty = textProperty
-    var text: String by textProperty
-
-    private val shiftPeriodProperty: LongProperty = SimpleLongProperty(SHIFT_PERIOD_DEFAULT)
-    fun shiftPeriodProperty(): LongProperty = shiftPeriodProperty
-    var shiftPeriod: Long by shiftPeriodProperty
-
-    private val rollerManager = TimerTaskManager(shiftPeriod, shiftPeriod) {
+    private val rollerManager = TimerTaskManager(shiftInterval, shiftInterval) {
         Platform.runLater { displayText = roll(displayText) }
     }
+    private var displayText: String by label.textProperty()
+    private var clipped = false
 
     init {
         label.prefWidthProperty().bind(widthProperty())
@@ -61,7 +87,7 @@ class CRollerLabel(contentText: String = "") : Region() {
             displayText = roll(" $text ")
             if (clipped) startRoll()
         })
-        shiftPeriodProperty.addListener(onNew<Number, Long> {
+        shiftIntervalProperty.addListener(onNew<Number, Long> {
             rollerManager.clear()
             rollerManager.delay = it
             rollerManager.period = it
@@ -80,10 +106,16 @@ class CRollerLabel(contentText: String = "") : Region() {
         }
     }
 
+    /**
+     * Start the rolling
+     */
     fun startRoll() {
         rollerManager.schedule()
     }
 
+    /**
+     * Stop the rolling
+     */
     fun stopRoll() {
         rollerManager.clear()
     }

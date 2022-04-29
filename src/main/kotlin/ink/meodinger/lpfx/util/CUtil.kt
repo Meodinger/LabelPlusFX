@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.util
 
+import ink.meodinger.lpfx.util.collection.ArrayStack
 import javafx.application.Application
-import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.regex.Pattern
 import kotlin.reflect.KProperty
 
@@ -14,11 +14,17 @@ import kotlin.reflect.KProperty
 
 /**
  * Version
+ * @param a Main version number
+ * @param b Vice version number
+ * @param c Fix version number
  */
 data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
 
     companion object {
-        val V0 = Version(0, 0, 0)
+        /**
+         * Version of v0.0.0
+         */
+        val V0: Version = Version(0, 0, 0)
 
         private val pattern = Pattern.compile("v[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{1,2}", Pattern.CASE_INSENSITIVE)
         private fun check(i : Int): Int {
@@ -111,6 +117,9 @@ abstract class HookedApplication : Application() {
         }
     }
 
+    /**
+     * @see javafx.application.Application.stop
+     */
     abstract fun exit()
 
 }
@@ -132,17 +141,18 @@ inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
 }
 class ResourceManager : AutoCloseable {
 
-    private val resourceQueue = ConcurrentLinkedDeque<AutoCloseable>()
+    private val resourceStack = ArrayStack<AutoCloseable>()
     var throwable: Throwable? = null
 
     fun <T: AutoCloseable> T.autoClose(): T {
         // The last opened Steam is the first closed
-        resourceQueue.addFirst(this)
+        resourceStack.push(this)
         return this
     }
 
     override fun close() {
-        for (closeable in resourceQueue) {
+        while (!resourceStack.isEmpty()) {
+            val closeable = resourceStack.pop()
             try {
                 closeable.close()
             } catch (t: Throwable) {

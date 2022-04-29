@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.util.collection
 
-
 /**
  * Author: Meodinger
  * Date: 2022/3/11
@@ -103,6 +102,35 @@ class ArrayStack<E>(initialCapacity: Int = DEFAULT_CAPACITY) : Stack<E> {
 
     override fun isEmpty(): Boolean {
         return _pointer == 0
+    }
+
+}
+
+/**
+ * A Stack implemented with ArrayDeque, like a wrappper
+ */
+class DequeStack<E>: Stack<E> {
+
+    private val _backing = ArrayDeque<E>()
+
+    override val size: Int get() = _backing.size
+
+    override fun peek(): E {
+        return _backing.first()
+    }
+    override fun pop(): E {
+        return _backing.removeFirst()
+    }
+    override fun push(element: E) {
+        _backing.addFirst(element)
+    }
+
+    override fun empty() {
+        _backing.clear()
+    }
+
+    override fun isEmpty(): Boolean {
+        return _backing.isEmpty()
     }
 
 }

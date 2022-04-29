@@ -28,7 +28,13 @@ class CTextSlider : HBox() {
     private val label = Label()
 
     private val initScaleProperty: DoubleProperty = SimpleDoubleProperty(0.0)
+    /**
+     * The initial scale of the TextSlider
+     */
     fun initScaleProperty(): DoubleProperty = initScaleProperty
+    /**
+     * @see initScaleProperty
+     */
     var initScale: Double
         get() = initScaleProperty.get()
         set(value) {
@@ -36,15 +42,36 @@ class CTextSlider : HBox() {
         }
 
     private val minScaleProperty: DoubleProperty = slider.minProperty()
+    /**
+     * An export to `Slider::minProperty()`
+     * @see javafx.scene.control.Slider.min
+     */
     fun minScaleProperty(): DoubleProperty = minScaleProperty
+    /**
+     * @see minScaleProperty
+     */
     var minScale: Double by minScaleProperty
 
     private val maxScaleProperty: DoubleProperty = slider.maxProperty()
+    /**
+     * An export to `Slider::maxProperty()`
+     * @see javafx.scene.control.Slider.max
+     */
     fun maxScaleProperty(): DoubleProperty = maxScaleProperty
+    /**
+     * @see maxScaleProperty
+     */
     var maxScale: Double by maxScaleProperty
 
     private val scaleProperty: DoubleProperty = slider.valueProperty()
+    /**
+     * An export to `Slider::valueProperty()`
+     * @see javafx.scene.control.Slider.value
+     */
     fun scaleProperty(): DoubleProperty = scaleProperty
+    /**
+     * @see scaleProperty
+     */
     var scale: Double by scaleProperty
 
     init {

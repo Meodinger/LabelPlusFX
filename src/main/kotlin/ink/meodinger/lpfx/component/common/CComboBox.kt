@@ -41,19 +41,47 @@ class CComboBox<T> : HBox() {
     val innerBox: ComboBox<T> = ComboBox()
 
     private val itemsProperty: ListProperty<T> = SimpleListProperty(FXCollections.emptyObservableList())
+    /**
+     * Unlike ComboBox<T>, this is a `ListProperty` instead of
+     * a `ObjectProperty<ObservableList<T>>`.
+     * @see javafx.scene.control.ComboBox.items
+     */
     fun itemsProperty(): ListProperty<T> = itemsProperty
+    /**
+     * @see itemsProperty
+     */
     var items: ObservableList<T> by itemsProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    /**
+     * An export to `innerBox::selectionModel::selectedIndexProperty()`
+     * @see javafx.scene.control.SelectionModel.selectedIndexProperty
+     */
     fun indexProperty(): IntegerProperty = indexProperty
+    /**
+     * @see indexProperty
+     */
     var index: Int by indexProperty
 
     private val selectionModelProperty: ObjectProperty<SingleSelectionModel<T>> = SimpleObjectProperty(null)
+    /**
+     * An export to `innerBox::selectionModelProperty()`
+     * @see javafx.scene.control.ComboBox.selectionModel
+     */
     fun selectionModelProperty(): ReadOnlyObjectProperty<SingleSelectionModel<T>> = selectionModelProperty
+    /**
+     * @see selectionModelProperty
+     */
     val selectionModel: SingleSelectionModel<T> by selectionModelProperty
 
     private val wrappedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether use back & next button could cycle select or not
+     */
     fun wrappedProperty(): BooleanProperty = wrappedProperty
+    /**
+     * @see wrappedProperty
+     */
     var isWrapped: Boolean by wrappedProperty
 
     init {

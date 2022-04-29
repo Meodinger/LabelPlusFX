@@ -28,21 +28,43 @@ import javafx.scene.text.TextFlow
 class CTextFlow : TextFlow() {
 
     private val nodesProperty: ListProperty<Node> = SimpleListProperty(FXCollections.observableArrayList())
+    /**
+     * The nodes to be added, note that before invoking `flow()` these nodes
+     * will not be added to the TextFlow
+     */
     fun nodesProperty(): ListProperty<Node> = nodesProperty
+    /**
+     * @see nodesProperty
+     */
     var nodes: ObservableList<Node> by nodesProperty
 
     private val fontSizeProperty: DoubleProperty = SimpleDoubleProperty(12.0)
+    /**
+     * The default font size for the Text in the TextFlow
+     */
     fun fontSizeProperty(): DoubleProperty = fontSizeProperty
+    /**
+     * @see fontSizeProperty
+     */
     var fontSize: Double by fontSizeProperty
 
     private val textColorProperty: ObjectProperty<Paint> = SimpleObjectProperty(Color.BLACK)
+    /**
+     * The default font color for the Text in the TextFlow
+     */
     fun textColorProperty(): ObjectProperty<Paint> = textColorProperty
+    /**
+     * @see textColorProperty
+     */
     var textColor: Paint by textColorProperty
 
     private val instantProperty: BooleanProperty = SimpleBooleanProperty(true)
-    fun instantProperty(): BooleanProperty = instantProperty
     /**
      * Whether update the flow after nodes changed instantly.
+     */
+    fun instantProperty(): BooleanProperty = instantProperty
+    /**
+     * @see instantProperty
      */
     var isInstant: Boolean by instantProperty
 

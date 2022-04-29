@@ -258,7 +258,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                         })
                     }
                     add(lLabelRadius, 2, 1) {
-                        textFormatter = genTextFormatter {
+                        textFormatter = genTextFormatter<String> {
                             if (!it.text.isMathematicalDecimal() ||
                                 !it.controlNewText.isMathematicalDecimal()
                             ) emptyString() else it.text
@@ -290,7 +290,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                         })
                     }
                     add(lLabelAlpha, 2, 3) {
-                        textFormatter = genTextFormatter {
+                        textFormatter = genTextFormatter<String> {
                             if (it.text.uppercase().contains(Regex("[^\\dA-F]")) ||
                                 it.controlNewText.length > 2
                             ) emptyString() else it.text

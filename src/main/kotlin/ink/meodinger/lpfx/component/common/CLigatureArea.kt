@@ -31,15 +31,37 @@ class CLigatureArea: TextArea() {
     }
 
     private val ligatureMarkProperty: StringProperty = SimpleStringProperty(LIGATURE_MARK)
+    /**
+     * The start mark of a ligature input, should be a char but there isn't `CharProperty`,
+     * so use `StringProperty` instead. Actually use `String` as start mark is possible but
+     * is hard to produce a text change adds multi chars at once (you should use copy/paste
+     * or something else) so make sure this value is a single char.
+     */
     fun ligatureMarkProperty(): StringProperty = ligatureMarkProperty
+    /**
+     * @see ligatureMarkProperty
+     */
     var ligatureMark: String by ligatureMarkProperty
 
     private val ligatureMaxLengthProperty: IntegerProperty = SimpleIntegerProperty(LIGATURE_MAX_LENGTH)
+    /**
+     * The max ligature input length. If a ligature action accmulates chars more than this
+     * amount, it will automatically stop its parse procedure.
+     */
     fun ligatureMaxLengthProperty(): IntegerProperty = ligatureMaxLengthProperty
+    /**
+     * @see ligatureMaxLengthProperty
+     */
     var ligatureMaxLength: Int by ligatureMaxLengthProperty
 
     private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty(FXCollections.emptyObservableList())
+    /**
+     * All ligature rules.
+     */
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
+    /**
+     * @see ligatureRulesProperty
+     */
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
 
     private val boundTextPropertyProperty: ObjectProperty<StringProperty> = SimpleObjectProperty(null)

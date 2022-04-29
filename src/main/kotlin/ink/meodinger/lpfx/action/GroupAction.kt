@@ -50,7 +50,7 @@ class GroupAction(
             targetTransGroup.colorHex = colorHex
         }
 
-        Logger.info(builder.toString(), LOGSRC_ACTION)
+        Logger.info(builder.toString(), LOG_SRC_ACTION)
     }
     private fun addTransGroup(transGroup: TransGroup, groupId: Int) {
         for (group in state.transFile.groupListObservable)
@@ -62,7 +62,7 @@ class GroupAction(
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
             if (label.groupId >= groupId) label.groupId++
 
-        Logger.info("Added TransGroup: $transGroup", LOGSRC_ACTION)
+        Logger.info("Added TransGroup: $transGroup", LOG_SRC_ACTION)
     }
     private fun removeTransGroup(transGroup: TransGroup) {
         val groupId = state.transFile.getGroupIdByName(transGroup.name)
@@ -74,7 +74,7 @@ class GroupAction(
 
         state.transFile.groupListObservable.removeAt(groupId)
 
-        Logger.info("Removed TransGroup: $transGroup", LOGSRC_ACTION)
+        Logger.info("Removed TransGroup: $transGroup", LOG_SRC_ACTION)
     }
 
     override fun commit() {

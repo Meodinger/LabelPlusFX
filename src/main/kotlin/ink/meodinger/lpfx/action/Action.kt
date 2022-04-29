@@ -75,7 +75,7 @@ internal class FunctionAction(
  * its revert method will call each action's revert method by reversed order.
  * Notice that all actions may not have the same type, its type is set to `CHANGE`
  */
-class ComplexAction(private val actions: List<Action>) : Action {
+class ComplexAction(private val actions: Iterable<Action>) : Action {
 
     override val type: ActionType = ActionType.CHANGE
 

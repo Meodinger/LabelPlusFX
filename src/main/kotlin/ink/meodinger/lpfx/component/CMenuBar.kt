@@ -480,8 +480,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun settings() {
         val map = state.application.dialogSettings.generateProperties()
 
-        Logger.info("Generated common settings", LOGSRC_DIALOGS)
-        Logger.debug("got $map", LOGSRC_DIALOGS)
+        Logger.info("Generated common settings", LOG_SRC_OTHER)
+        Logger.debug("got $map", LOG_SRC_OTHER)
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {
@@ -506,8 +506,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun logs() {
         val map = state.application.dialogLogs.generateProperties()
 
-        Logger.info("Generated logs settings", LOGSRC_DIALOGS)
-        Logger.debug("got $map", LOGSRC_DIALOGS)
+        Logger.info("Generated logs settings", LOG_SRC_OTHER)
+        Logger.debug("got $map", LOG_SRC_OTHER)
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {

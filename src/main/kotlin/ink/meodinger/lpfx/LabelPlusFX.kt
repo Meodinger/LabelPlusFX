@@ -37,7 +37,7 @@ import java.awt.PopupMenu as AwtPopupMenu
 class LabelPlusFX: HookedApplication() {
 
     companion object {
-        const val PARAM_UNNAMED_NO_CHECK_UPDATE = "--no-check-update"
+        private const val PARAM_UNNAMED_NO_CHECK_UPDATE = "--no-check-update"
     }
 
     private val state: State = State()
@@ -99,20 +99,20 @@ class LabelPlusFX: HookedApplication() {
     init {
         Logger.tic()
 
-        Logger.info("App initializing...", LOGSRC_APPLICATION)
+        Logger.info("App initializing...", LOG_SRC_APPLICATION)
 
         state.application = this
 
         Options.load()
 
-        Logger.info("App initialized", LOGSRC_APPLICATION)
+        Logger.info("App initialized", LOG_SRC_APPLICATION)
     }
 
     override fun start(primaryStage: Stage) {
-        Logger.info("App starting...", LOGSRC_APPLICATION)
+        Logger.info("App starting...", LOG_SRC_APPLICATION)
 
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
-            Logger.error("Exception uncaught in Thread: ${t.name}", LOGSRC_APPLICATION)
+            Logger.error("Exception uncaught in Thread: ${t.name}", LOG_SRC_APPLICATION)
             Logger.exception(e)
             showException(primaryStage, e)
         }
@@ -152,7 +152,7 @@ class LabelPlusFX: HookedApplication() {
 
         primaryStage.show()
 
-        Logger.info("App started", LOGSRC_APPLICATION)
+        Logger.info("App started", LOG_SRC_APPLICATION)
 
         if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE))
             if (Settings.autoCheckUpdate)
@@ -162,18 +162,18 @@ class LabelPlusFX: HookedApplication() {
     }
 
     override fun exit() {
-        Logger.info("App stopping...", LOGSRC_APPLICATION)
+        Logger.info("App stopping...", LOG_SRC_APPLICATION)
 
         state.stage.close()
         Options.save()
 
         runHooks(
             {
-                Logger.info("App stopped", LOGSRC_APPLICATION)
+                Logger.info("App stopped", LOG_SRC_APPLICATION)
                 Platform.exit()
             },
             {
-                Logger.error("Exception occurred during hooks run", LOGSRC_APPLICATION)
+                Logger.error("Exception occurred during hooks run", LOG_SRC_APPLICATION)
                 Logger.exception(it)
             }
         )

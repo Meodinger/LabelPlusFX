@@ -1,7 +1,6 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.LOGSRC_LOGGER
-import ink.meodinger.lpfx.LOGSRC_SENDER
+import ink.meodinger.lpfx.LOG_SRC_OTHER
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.once
@@ -77,12 +76,12 @@ object Logger {
         builder.append("\n============== End ==============")
         info(builder.toString(), "Logger Init")
 
-        info("Logger start", LOGSRC_LOGGER)
+        info("Logger start", LOG_SRC_OTHER)
     }
     fun stop() {
         if (!isStarted) return
 
-        info("Logger exit", LOGSRC_LOGGER)
+        info("Logger exit", LOG_SRC_OTHER)
 
         writer.close()
         isStarted = false
@@ -95,27 +94,23 @@ object Logger {
         time = Date().time
     }
     fun toc() {
-        info("Used ${Date().time - time}ms", LOGSRC_LOGGER)
+        info("Used ${Date().time - time}ms", LOG_SRC_OTHER)
     }
 
     private fun log(type: LogLevel, text: String, from: String) {
         if (!isStarted || type < level) return
 
-        val logHead = StringBuilder()
+        val log = StringBuilder()
+            .append("<Logger>: ")
             .append("[").append(formatter.format(Date())).append("] ")
             .append("[").append(String.format("%-7s", type)).append("] ")
             .append("[").append(String.format("%-11s", from)).append("] ")
-            .toString()
-
-        val logText = StringBuilder()
-            .append(logHead)
-          //.append("--".repeat(depth)).append("> ")
             .appendLine(text)
             .toString()
 
-        print("<Logger>: $logText")
+        if (type == LogLevel.DEBUG) System.err.print(log) else print(log)
 
-        writer.write(logText)
+        writer.write(log)
         writer.flush()
     }
     fun debug(message: String, from: String) {
@@ -182,13 +177,13 @@ object Logger {
         val task = LPFXTask.createTask<Unit> { sendLogSync(logFile) }
 
         task.setOnFailed {
-            error("Log sent failed", LOGSRC_SENDER)
+            error("Log sent failed", LOG_SRC_OTHER)
             exception(it)
             onFailed(it)
         }
 
         task.setOnSucceeded {
-            info("Sent Log ${logFile.name}", LOGSRC_SENDER)
+            info("Sent Log ${logFile.name}", LOG_SRC_OTHER)
             onSucceeded()
         }
 

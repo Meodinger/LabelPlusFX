@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.string.deleteTailEOL
 import ink.meodinger.lpfx.util.string.emptyString
 
 
@@ -110,6 +111,18 @@ data class CProperty(val key: String, var value: String = emptyString()) {
         set(another.value)
     }
 
-    override fun toString(): String = "CProperty(key=${key}, value=${value})"
+    override fun toString(): String {
+        val builder = StringBuilder()
+        if (isList) {
+            builder.appendLine(LIST_SEPARATOR)
+            for (value in asStringList()) builder.append(LIST_SEPARATOR).appendLine(value)
+            builder.deleteTailEOL()
+        } else {
+            builder.append(value)
+        }
+
+
+        return "CProperty(key=$key, value=$builder)"
+    }
 
 }

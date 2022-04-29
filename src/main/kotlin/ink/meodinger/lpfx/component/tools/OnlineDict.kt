@@ -163,12 +163,17 @@ class OnlineDict : Stage() {
     private fun searchWordSync(word: String) {
         val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
         if (searchConnection.responseCode != 200) {
+            Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
 
-        val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText()
-        val searchResults = parse(searchHTML).body.children[1].children[3]
+        val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
+            Logger.debug("Dictionary: Got HTML content:", LOG_SRC_OTHER)
+            Logger.debug(it, LOG_SRC_OTHER)
+        }
+        val searchPage = parse(searchHTML)
+        val searchResults = searchPage.body.children[1].children[3]
         val first = searchResults.children.getOrNull(0)
         if (first == null || first.attributes["id"] == "out-search") {
             outputFlow.setText(I18N["dict.not_found"])
@@ -178,13 +183,18 @@ class OnlineDict : Stage() {
         val target = JD_SITE + first.attributes["href"]
         val contentConnection = URL(target).openConnection().apply { connect() } as HttpsURLConnection
         if (contentConnection.responseCode != 200){
+            Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
 
         // ContentHTML has unclosed div
-        val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().replace("</body>", "</div></body>")
-        val contentResults = parse(contentHTML).body.children[1].children[1].children[0].children
+        val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
+            Logger.debug("Dictionary: Got HTML content:", LOG_SRC_OTHER)
+            Logger.debug(it, LOG_SRC_OTHER)
+        }
+        val contentPage = parse(contentHTML.replace("</body>", "</div></body>"))
+        val contentResults = contentPage.body.children[1].children[1].children[0].children
 
         // Build WordInfo
         var nodeIndex = 0
@@ -209,11 +219,11 @@ class OnlineDict : Stage() {
     private fun searchWord(word: String) {
         LPFXTask.createTask<Unit> { searchWordSync(word) }.apply {
             setOnSucceeded {
-                Logger.info("Fetched word info: $word", LOGSRC_DICTIONARY)
+                Logger.info("Dictionary: Fetched word info: $word", LOG_SRC_OTHER)
                 Platform.runLater { outputFlow.flow() }
             }
             setOnFailed {
-                Logger.error("Fetch word info failed", LOGSRC_DICTIONARY)
+                Logger.error("Dictionary: Fetch word info failed", LOG_SRC_OTHER)
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
                 showException(null, it)
@@ -227,11 +237,11 @@ class OnlineDict : Stage() {
     private fun translate(text: String) {
         LPFXTask.createTask<Unit> { translateSync(text) }.apply {
             setOnSucceeded {
-                Logger.info("Fetched translation", LOGSRC_DICTIONARY)
+                Logger.info("Dictionary: Fetched translation", LOG_SRC_OTHER)
                 Platform.runLater { outputFlow.flow() }
             }
             setOnFailed {
-                Logger.error("Fetch translation failed", LOGSRC_DICTIONARY)
+                Logger.error("Dictionary: Fetch translation failed", LOG_SRC_OTHER)
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
                 showException(null, it)

@@ -71,7 +71,7 @@ abstract class AbstractProperties(val name: String) {
                         builder.append(property.key).append(KV_SPILT).append(CProperty.LIST_SEPARATOR).append('\n')
                         for (value in property.asStringList()) builder.append(CProperty.LIST_SEPARATOR).appendLine(value)
                     } else {
-                        builder.append(property.key).append(KV_SPILT).append(property.value).append('\n')
+                        builder.append(property.key).append(KV_SPILT).appendLine(property.value)
                     }
                     writer.write(builder.toString())
                 }
@@ -79,11 +79,6 @@ abstract class AbstractProperties(val name: String) {
                 throw IOException("Save properties I/O failed").initCause(e)
             }
         }
-
-        /**
-         * Be careful!
-         */
-        fun getPropertiesOf(properties: AbstractProperties): List<CProperty> = properties.properties
     }
 
     protected abstract val default: List<CProperty>
@@ -99,11 +94,10 @@ abstract class AbstractProperties(val name: String) {
         properties.addAll(default.map(CProperty::copy))
     }
 
-    private fun tryGet(key: String): CProperty? {
-        for (property in properties) if (property.key == key) return property
-        return null
-    }
-
     operator fun get(key: String): CProperty = properties.first { it.key == key }
+
+    override fun toString(): String {
+        return properties.joinToString(", \n", transform = CProperty::toString)
+    }
 
 }

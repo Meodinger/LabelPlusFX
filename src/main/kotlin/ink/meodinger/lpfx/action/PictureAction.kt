@@ -46,7 +46,7 @@ class PictureAction(
 
         state.transFile.setFile(targetPicName, picFile)
 
-        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", LOGSRC_ACTION)
+        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", LOG_SRC_ACTION)
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
         if (state.transFile.transMapObservable.contains(picName))
@@ -55,7 +55,7 @@ class PictureAction(
         state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
         if (picFile.exists()) state.transFile.setFile(picName, picFile)
 
-        Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", LOGSRC_ACTION)
+        Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", LOG_SRC_ACTION)
     }
     private fun removePicture(picName: String) {
         if (!state.transFile.transMapObservable.contains(picName))
@@ -64,7 +64,7 @@ class PictureAction(
         state.transFile.setFile(picName, null)
         state.transFile.transMapObservable.remove(picName)
 
-        Logger.info("Removed picture <$picName>", LOGSRC_ACTION)
+        Logger.info("Removed picture <$picName>", LOG_SRC_ACTION)
     }
 
     override fun commit() {

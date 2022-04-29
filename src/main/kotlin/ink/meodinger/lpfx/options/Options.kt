@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.LOGSRC_OPTIONS
+import ink.meodinger.lpfx.LOG_SRC_OTHER
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.dialog.*
@@ -59,11 +59,11 @@ object Options {
 
             Logger.level = Settings.logLevel
 
-            Logger.debug("Got RecentFiles: ${AbstractProperties.getPropertiesOf(RecentFiles)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Preference:  ${AbstractProperties.getPropertiesOf(Preference)}", LOGSRC_OPTIONS)
-            Logger.debug("Got Settings: ${AbstractProperties.getPropertiesOf(Settings)}", LOGSRC_OPTIONS)
+            Logger.debug("Got RecentFiles:\n$RecentFiles", LOG_SRC_OTHER)
+            Logger.debug("Got Preference:\n$Preference", LOG_SRC_OTHER)
+            Logger.debug("Got Settings:\n$Settings", LOG_SRC_OTHER)
         } catch (e: IOException) {
-            Logger.fatal("Load Options failed", LOGSRC_OPTIONS)
+            Logger.fatal("Load Options failed", LOG_SRC_OTHER)
             Logger.exception(e)
             showError(null, I18N["error.options.load_failed"])
             showException(null, e)
@@ -83,13 +83,13 @@ object Options {
 
         try {
             instance.load()
-            Logger.info("Loaded ${instance.name}", LOGSRC_OPTIONS)
+            Logger.info("Loaded ${instance.name}", LOG_SRC_OTHER)
         } catch (e: NumberFormatException) {
             instance.useDefault()
             AbstractProperties.save(path, instance)
             instance.load()
 
-            Logger.error("Load ${instance.name} properties failed", LOGSRC_OPTIONS)
+            Logger.error("Load ${instance.name} properties failed", LOG_SRC_OTHER)
             Logger.exception(e)
             showError(
                 null,
@@ -102,7 +102,7 @@ object Options {
 
     private fun saveProperties(instance: AbstractProperties) {
         instance.save()
-        Logger.info("Saved ${instance.name}", LOGSRC_OPTIONS)
+        Logger.info("Saved ${instance.name}", LOG_SRC_OTHER)
     }
 
     @Throws(IOException::class)
@@ -120,7 +120,7 @@ object Options {
                     if (del && !file.delete()) failed.add(file)
                 }
         } catch (e : IOException) {
-            Logger.warning("Error occurred when checking old logs, clean procedure cancelled", LOGSRC_OPTIONS)
+            Logger.warning("Error occurred when checking old logs, clean procedure cancelled", LOG_SRC_OTHER)
             Logger.exception(e)
             return
         }
@@ -130,9 +130,9 @@ object Options {
             failed.forEach(File::deleteOnExit)
 
             val names = failed.joinToString("\n") { it.name }
-            Logger.warning("Some error occurred when cleaning following old logs: \n$names", LOGSRC_OPTIONS)
+            Logger.warning("Some error occurred when cleaning following old logs: \n$names", LOG_SRC_OTHER)
         } else {
-            Logger.info("Old logs cleaned", LOGSRC_OPTIONS)
+            Logger.info("Old logs cleaned", LOG_SRC_OTHER)
         }
     }
 

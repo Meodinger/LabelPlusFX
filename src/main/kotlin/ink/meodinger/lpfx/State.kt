@@ -118,7 +118,7 @@ class State {
         transFileProperty.set(null)
         translationFileProperty.set(null)
 
-        Logger.info("Reset", LOGSRC_STATE)
+        Logger.info("Reset", LOG_SRC_STATE)
     }
 
     // ----- File-Related Methods ----- //
@@ -159,10 +159,10 @@ class State {
     val canRedo: Boolean by canRedoProperty
 
     fun doAction(action: Action) {
-        Logger.info("Action committing", LOGSRC_STATE)
+        Logger.info("Action committing", LOG_SRC_STATE)
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
-        Logger.info("Action committed", LOGSRC_STATE)
+        Logger.info("Action committed", LOG_SRC_STATE)
 
         isChanged = true
         canUndoProperty.set(true)
@@ -172,9 +172,9 @@ class State {
     fun undo() {
         if (undoStack.isEmpty()) return
 
-        Logger.info("Action reverting", LOGSRC_STATE)
+        Logger.info("Action reverting", LOG_SRC_STATE)
         redoStack.push(undoStack.pop().apply(Action::revert))
-        Logger.info("Action reverted", LOGSRC_STATE)
+        Logger.info("Action reverted", LOG_SRC_STATE)
 
         canUndoProperty.set(!undoStack.isEmpty())
         canRedoProperty.set(true)
@@ -183,9 +183,9 @@ class State {
     fun redo() {
         if (redoStack.isEmpty()) return
 
-        Logger.info("Action re-reverting", LOGSRC_STATE)
+        Logger.info("Action re-reverting", LOG_SRC_STATE)
         undoStack.push(redoStack.pop().apply(Action::commit))
-        Logger.info("Action re-reverted", LOGSRC_STATE)
+        Logger.info("Action re-reverted", LOG_SRC_STATE)
 
         canUndoProperty.set(true)
         canRedoProperty.set(!redoStack.isEmpty())

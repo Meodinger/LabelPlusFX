@@ -71,7 +71,7 @@ class LabelAction(
             targetTransLabel.text = text
         }
 
-        Logger.info(builder.deleteTailEOL().toString(), LOGSRC_ACTION)
+        Logger.info(builder.deleteTailEOL().toString(), LOG_SRC_ACTION)
     }
     private fun addTransLabel(picName: String, transLabel: TransLabel) {
         val list = state.transFile.transMapObservable[picName]
@@ -85,7 +85,7 @@ class LabelAction(
         for (label in list) if (label.index >= labelIndex) label.index++
         list.add(transLabel)
 
-        Logger.info("Added $picName @ $transLabel", LOGSRC_ACTION)
+        Logger.info("Added $picName @ $transLabel", LOG_SRC_ACTION)
     }
     private fun removeTransLabel(picName: String, transLabel: TransLabel) {
         val list = state.transFile.transMapObservable[picName]
@@ -95,7 +95,7 @@ class LabelAction(
         list.remove(list.first { it.index == labelIndex })
         for (label in list) if (label.index > labelIndex) label.index--
 
-        Logger.info("Removed $picName @ $transLabel", LOGSRC_ACTION)
+        Logger.info("Removed $picName @ $transLabel", LOG_SRC_ACTION)
     }
 
     override fun commit() {

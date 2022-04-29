@@ -4,11 +4,11 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.Config.MonoFont
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.autoRangeTo
+import ink.meodinger.lpfx.util.collection.autoRangeTo
+import ink.meodinger.lpfx.util.collection.div
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.div
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.omitHighText

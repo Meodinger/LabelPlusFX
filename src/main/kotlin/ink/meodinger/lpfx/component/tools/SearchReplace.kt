@@ -14,12 +14,7 @@ import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -36,24 +31,23 @@ import javafx.stage.Stage
  */
 class SearchReplace(private val state: State) : Stage() {
 
+    private data class FindResult(val picName: String, val labelIndex: Int, val range: IntRange)
+
     companion object {
         private const val BUTTON_WIDTH: Double = 96.0
     }
 
     private val searchTextProperty: StringProperty = SimpleStringProperty(emptyString())
-    private val searchText: String by searchTextProperty
+    private var searchText: String by searchTextProperty
 
     private val replaceTextProperty: StringProperty = SimpleStringProperty(emptyString())
-    private val replaceText: String by replaceTextProperty
+    private var replaceText: String by replaceTextProperty
 
     private val wrapFindProperty: BooleanProperty = SimpleBooleanProperty(true)
-    private val wrapFind: Boolean by wrapFindProperty
+    private var wrapFind: Boolean by wrapFindProperty
 
     private val ignoreCaseProperty: BooleanProperty = SimpleBooleanProperty(false)
-    private val ignoreCase: Boolean by ignoreCaseProperty
-
-    private val foundIndexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    private var foundIndex: Int by foundIndexProperty
+    private var ignoreCase: Boolean by ignoreCaseProperty
 
     init {
         icons.add(ICON)
@@ -119,58 +113,64 @@ class SearchReplace(private val state: State) : Stage() {
         closeOnEscape()
     }
 
-    private fun findNext(wrap: Boolean): Boolean {
+    private fun findNext(wrap: Boolean): FindResult? {
         // If in current label
         val currentLabel = state.transFile.getTransLabel(state.currentPicName, state.currentLabelIndex)
-        val findStart = if (foundIndex != NOT_FOUND) foundIndex + searchText.length else 0
-        val nextIndex = currentLabel.text.indexOf(searchText, findStart, ignoreCase)
-        if (nextIndex != NOT_FOUND) {
-            foundIndex = nextIndex
-            state.view.cTransArea.selectRange(nextIndex, nextIndex + searchText.length)
-            return true
+        val currentCaret = state.view.cTransArea.caretPosition
+        val currentIndex = currentLabel.text.indexOf(searchText, currentCaret, ignoreCase)
+        if (currentIndex != NOT_FOUND) {
+            return FindResult(state.currentPicName, state.currentLabelIndex, currentIndex..(currentIndex + searchText.length))
         }
 
         // If in current picture
-        val currentLabels = state.transFile.getTransList(state.currentPicName)
-        for (i in state.currentLabelIndex until currentLabels.size) {
-            val index = currentLabels[i].text.indexOf(searchText, 0, ignoreCase)
+        val labelList = state.transFile.getTransList(state.currentPicName)
+        for (i in (state.currentLabelIndex + 1) until labelList.size) {
+            val index = labelList[i].text.indexOf(searchText, 0, ignoreCase)
             if (index != NOT_FOUND) {
-                foundIndex = index
-                state.currentLabelIndex = currentLabels[i].index
-                state.view.cTransArea.selectRange(index, index + searchText.length)
-                return true
+                return FindResult(state.currentPicName, labelList[i].index, index..(index + searchText.length))
             }
         }
 
         // Find in the rest
         val picNames = state.transFile.sortedPicNames
         val picIndex = picNames.indexOf(state.currentPicName)
-        for (i in picNames.indices) {
-            // continue if not wrap search
-            if (i < picIndex && !wrap) continue
-
-            val labels = state.transFile.getTransList(picNames[i])
-            for (label in labels) {
+        for (i in (picIndex until picNames.size).let { if (wrap) it.plus(0 until picIndex) else it }) {
+            for (label in state.transFile.getTransList(picNames[i])) {
                 val index = label.text.indexOf(searchText, 0, ignoreCase)
                 if (index != NOT_FOUND) {
-                    foundIndex = index
-                    state.currentPicName = picNames[i]
-                    state.currentLabelIndex = label.index
-                    state.view.cTransArea.selectRange(foundIndex, foundIndex + searchText.length)
-                    return true
+                    return FindResult(picNames[i], label.index, index..(index + searchText.length))
                 }
             }
         }
 
-        return false
+        return null
     }
-    private fun replace() {
-        state.view.cTransArea.replaceText(IndexRange(foundIndex, foundIndex + searchText.length), replaceText)
-        foundIndex = NOT_FOUND
-    }
-    private fun replaceAll(): Int {
-        foundIndex = NOT_FOUND
 
+    private fun handleFindNext() {
+        var findResult = findNext(wrapFind)
+        if (findResult == null) {
+            val result = showConfirm(this, I18N["snr.not_found_re"])
+            if (!result.isPresent || result.get() != ButtonType.YES) return
+
+            findResult = findNext(true)
+            if (findResult == null) {
+                showInfo(this@SearchReplace, I18N["snr.not_found"])
+                return
+            }
+        }
+
+        state.currentPicName = findResult.picName
+        state.currentLabelIndex = findResult.labelIndex
+        state.view.cTransArea.selectRange(findResult.range.first, findResult.range.last)
+    }
+    private fun handleReplace() {
+        if (state.view.cTransArea.selectedText == searchText) {
+            state.view.cTransArea.replaceSelection(replaceText)
+        } else {
+            handleFindNext()
+        }
+    }
+    private fun handleReplaceAll() {
         var count = 0
         val actions = ArrayList<LabelAction>()
         for (picName in state.transFile.sortedPicNames) {
@@ -187,26 +187,11 @@ class SearchReplace(private val state: State) : Stage() {
                 actions.add(LabelAction(ActionType.CHANGE, state, picName, label, newText = text))
             }
         }
-        state.doAction(ComplexAction(actions))
-        return count
-    }
 
-    private fun handleFindNext() {
-        if (!findNext(wrapFind)) {
-            val result = showConfirm(this@SearchReplace, I18N["snr.not_found_re"])
-            if (result.isPresent && result.get() == ButtonType.YES) {
-                if (!findNext(true)) showInfo(this@SearchReplace, I18N["snr.not_found"])
-            }
-        }
-    }
-    private fun handleReplace() {
-        if (foundIndex == NOT_FOUND) handleFindNext() else replace()
-    }
-    private fun handleReplaceAll() {
-        val count = replaceAll()
         if (count == 0) {
             showInfo(this@SearchReplace, I18N["snr.not_found"])
         } else {
+            state.doAction(ComplexAction(actions))
             showInfo(this@SearchReplace, String.format(I18N["snr.replace_count.i"], count))
         }
     }

@@ -90,15 +90,11 @@ const val NOT_FOUND: Int = -1
 /**
  * Log Source
  */
-const val LOGSRC_APPLICATION: String = "Application"
-const val LOGSRC_CONTROLLER : String = "Controller"
-const val LOGSRC_STATE      : String = "State"
-const val LOGSRC_ACTION     : String = "Action"
-const val LOGSRC_OPTIONS    : String = "Options"
-const val LOGSRC_DIALOGS    : String = "Dialog"
-const val LOGSRC_LOGGER     : String = "Logger"
-const val LOGSRC_SENDER     : String = "Sender"
-const val LOGSRC_DICTIONARY : String = "Dictionary"
+const val LOG_SRC_APPLICATION: String = "Application"
+const val LOG_SRC_CONTROLLER : String = "Controller"
+const val LOG_SRC_ACTION     : String = "Action"
+const val LOG_SRC_STATE      : String = "State"
+const val LOG_SRC_OTHER      : String = "Other"
 
 /**
  * Work Mode

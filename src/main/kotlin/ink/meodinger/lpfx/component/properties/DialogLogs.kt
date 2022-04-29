@@ -122,7 +122,7 @@ class DialogLogs : AbstractPropertiesDialog() {
                     for (modal in tableLog.items) {
                         if (modal.file.name == Logger.log.name) continue
                         if (!modal.file.delete()) {
-                            Logger.error("Delete ${modal.file.path} failed", LOGSRC_DIALOGS)
+                            Logger.error("Delete log file ${modal.file.path} failed", LOG_SRC_OTHER)
                             showError(owner, String.format(I18N["logs.error.delete_failed.s"], modal.file.name))
                             continue
                         }
@@ -130,7 +130,7 @@ class DialogLogs : AbstractPropertiesDialog() {
                     }
                     tableLog.items.removeAll(toRemove)
 
-                    Logger.info("Cleaned logs", LOGSRC_DIALOGS)
+                    Logger.info("Cleaned logs", LOG_SRC_OTHER)
                 }
             }
         }

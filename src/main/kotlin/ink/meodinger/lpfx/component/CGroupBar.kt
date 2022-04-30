@@ -35,20 +35,48 @@ class CGroupBar : HBox() {
     // region Properties
 
     private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.emptyObservableList())
+    /**
+     * The TransGroups to display
+     */
     fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
+    /**
+     * @see groupsProperty
+     */
     var groups: ObservableList<TransGroup> by groupsProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    /**
+     * An export to `selectionModel::selectedIndexProperty()`
+     * @see javafx.scene.control.SelectionModel.selectedIndexProperty
+     */
     fun indexProperty(): IntegerProperty = indexProperty
+    /**
+     * @see indexProperty
+     */
     var index: Int by indexProperty
 
     private val selectionModelProperty: ObjectProperty<SingleSelectionModel<TransGroup>> = SimpleObjectProperty(GroupBarSelectionModel())
+    /**
+     * The CGroupBar's SingleSelectionModel, readonly
+     */
     fun selectionModelProperty(): ReadOnlyObjectProperty<SingleSelectionModel<TransGroup>> = selectionModelProperty
+    /**
+     * @see selectionModelProperty
+     */
     val selectionModel: SingleSelectionModel<TransGroup> by selectionModelProperty
 
     private val onGroupCreateProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
+    /**
+     * How to handle GroupCreate (Click on Create-CGroup)
+     */
     fun onGroupCreateProperty(): ObjectProperty<EventHandler<ActionEvent>> = onGroupCreateProperty
+    /**
+     * @see onGroupCreateProperty
+     */
     val onGroupCreate: EventHandler<ActionEvent> by onGroupCreateProperty
+    /**
+     * @see onGroupCreateProperty
+     */
     fun setOnGroupCreate(handler: EventHandler<ActionEvent>) = onGroupCreateProperty.set(handler)
 
     // endregion
@@ -81,13 +109,13 @@ class CGroupBar : HBox() {
     private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
         if (children.isEmpty()) {
             add(HBox()) { hgrow = Priority.ALWAYS }
-            add(CGroup("+", Color.BLACK)) { setOnSelect { onGroupCreate.handle(it); isSelected = false } }
+            add(CGroup("+", Color.BLACK)) { setOnAction { onGroupCreate.handle(it); isSelected = false } }
         }
 
         children.add(groupId, CGroup().apply {
             nameProperty().bind(transGroup.nameProperty())
             colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
-            setOnSelect { selectionModel.select(transGroup) }
+            setOnAction { selectionModel.select(transGroup) }
         })
     }
     private fun removeGroupItem(transGroup: TransGroup) {

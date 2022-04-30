@@ -1,17 +1,21 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.event.ActionEvent
+import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
+import javafx.scene.input.TouchEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -40,30 +44,76 @@ class CGroup(
     // region Properties
 
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
+    /**
+     * The group name to display
+     */
     fun nameProperty(): StringProperty = nameProperty
+    /**
+     * @see nameProperty
+     */
     var name: String by nameProperty
 
     private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(groupColor)
+    /**
+     * The group color to display
+     */
     fun colorProperty(): ObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
     var color: Color by colorProperty
 
     private val selectedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether this is selected
+     */
     fun selectedProperty(): BooleanProperty = selectedProperty
+    /**
+     * @see selectedProperty
+     */
     var isSelected: Boolean by selectedProperty
 
-    private val onSelectProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
-    fun onSelectProperty(): ObjectProperty<EventHandler<ActionEvent>> = onSelectProperty
-    val onSelect: EventHandler<ActionEvent> by onSelectProperty
-    fun setOnSelect(handler: EventHandler<ActionEvent>) = onSelectProperty.set(handler)
+    private val onActionProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(EventHandler {})
+    /**
+     * The CGroup's action, which is invoked whenever the CGroup is fired.
+     * This may be due to the user clicking on the button with the mouse,
+     * or by a touch event, or by a key press, or if the developer
+     * programmatically invokes the `fire()` method.
+     *
+     * @return the property to represent the button's action, which is invoked
+     * whenever the button is fired
+     */
+    fun onActionProperty(): ObjectProperty<EventHandler<ActionEvent>> = onActionProperty
+    /**
+     * @see onActionProperty
+     */
+    val onAction: EventHandler<ActionEvent> by onActionProperty
+    /**
+     * @see onActionProperty
+     */
+    fun setOnAction(handler: EventHandler<ActionEvent>) = onActionProperty.set(handler)
 
     // endregion
 
     init {
         padding = Insets(PADDING)
+
+        // Trigger action when clicked/touched/Enter-ed
         addEventHandler(MouseEvent.MOUSE_CLICKED) {
-            requestFocus()
             isSelected = true
-            onSelect.handle(ActionEvent(it.source, this))
+            requestFocus()
+            fire(it)
+        }
+        addEventHandler(TouchEvent.TOUCH_RELEASED) {
+            isSelected = true
+            requestFocus()
+            fire(it)
+        }
+        addEventHandler(KeyEvent.KEY_RELEASED) {
+            if (it.code != KeyCode.ENTER) return@addEventHandler
+            isSelected = true
+            requestFocus()
+            fire(it)
         }
 
         val text = Text().apply {
@@ -107,10 +157,28 @@ class CGroup(
         children.add(text)
     }
 
+    /**
+     * isSelected = true
+     */
     fun select() {
         isSelected = true
     }
+    /**
+     * isSelected = false
+     */
     fun unselect() {
         isSelected = false
     }
+
+    /**
+     * Invoked when a user gesture indicates that an event for this should occur
+     */
+    fun fire(sourceEvent: Event? = null) {
+        if (sourceEvent != null) {
+            onAction.handle(ActionEvent(sourceEvent.source, this))
+        } else {
+            onAction.handle(ActionEvent())
+        }
+    }
+
 }

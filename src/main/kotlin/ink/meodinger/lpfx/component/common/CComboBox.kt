@@ -36,13 +36,13 @@ class CComboBox<T> : HBox() {
     private val next = Button(">")
 
     /**
-     * The backing ComboBox<T>
+     * The backing ComboBox
      */
     val innerBox: ComboBox<T> = ComboBox()
 
     private val itemsProperty: ListProperty<T> = SimpleListProperty(FXCollections.emptyObservableList())
     /**
-     * Unlike ComboBox<T>, this is a `ListProperty` instead of
+     * Unlike ComboBox, this is a `ListProperty` instead of
      * a `ObjectProperty<ObservableList<T>>`.
      * @see javafx.scene.control.ComboBox.items
      */

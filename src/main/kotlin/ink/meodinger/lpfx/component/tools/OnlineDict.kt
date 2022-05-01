@@ -10,15 +10,11 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.dialog.showException
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.ime.*
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.minus
-import ink.meodinger.lpfx.util.property.onNew
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.Insets
@@ -48,6 +44,8 @@ import javax.net.ssl.HttpsURLConnection
  * Simple online dictionary, better than none, anyway.
  */
 class OnlineDict : Stage() {
+
+    // TODO: TransStateEnum
 
     companion object {
         private const val JD_SITE = "https://nekodict.com"
@@ -85,9 +83,9 @@ class OnlineDict : Stage() {
         scene = Scene(BorderPane().apply {
             top(HBox()) {
                 alignment = Pos.CENTER
-                backgroundProperty().bind(Bindings.createObjectBinding({
+                backgroundProperty().bind(transStateProperty.transform {
                     Background(BackgroundFill(
-                        when (transState) {
+                        when (it) {
                             STATE_WORD -> Color.LIGHTGREEN
                             STATE_SENTENCE -> Color.LIGHTBLUE
                             else -> throw IllegalStateException("State invalid")
@@ -95,17 +93,17 @@ class OnlineDict : Stage() {
                         CornerRadii(0.0),
                         Insets(0.0)
                     ))
-                }, transStateProperty))
+                })
                 add(Label()) {
                     minWidth = 75.0
                     alignment = Pos.CENTER
-                    textProperty().bind(Bindings.createStringBinding({
-                        when (transState) {
+                    textProperty().bind(transStateProperty.transform {
+                        when (it) {
                             STATE_WORD -> I18N["dict.word"]
                             STATE_SENTENCE -> I18N["dict.sentence"]
                             else -> throw IllegalStateException("State invalid")
                         }
-                    }, transStateProperty))
+                    })
                 }
                 add(TextField()) {
                     hgrow = Priority.ALWAYS

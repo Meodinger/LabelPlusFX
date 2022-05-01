@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "KDocMissingDocumentation")
 
 package ink.meodinger.lpfx.util.property
 
@@ -114,6 +114,7 @@ infix fun BooleanExpression.xor(other: ObservableBooleanValue): BooleanBinding =
 infix fun BooleanExpression.eq(other: Boolean): BooleanBinding = isEqualTo(ReadOnlyBooleanWrapper(other))
 infix fun BooleanExpression.eq(other: ObservableBooleanValue): BooleanBinding = isEqualTo(other)
 
+// operator function `compareTo` must return Int
 infix fun NumberExpression.gt(other: Int): BooleanBinding = greaterThan(other)
 infix fun NumberExpression.gt(other: Long): BooleanBinding = greaterThan(other)
 infix fun NumberExpression.gt(other: Float): BooleanBinding = greaterThan(other)
@@ -138,15 +139,13 @@ infix fun NumberExpression.lt(other: Float): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: Double): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: ObservableNumberValue): BooleanBinding = lessThan(other)
 
-fun <R> IntegerExpression.transform(transformer: (Int) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
-fun <R> LongExpression.transform(transformer: (Long) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
-fun <R> FloatExpression.transform(transformer: (Float) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
-fun <R> DoubleExpression.transform(transformer: (Double) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
-fun <R> StringExpression.transform(transformer: (String) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
-fun <T, R> ObjectExpression<T>.transform(transformer: (T) -> R): ObjectBinding<R>
-    = Bindings.createObjectBinding({ transformer(this.get()) }, this)
+// Transform, note that if overload with specified return type (at least Number) will have conficts.
+inline fun <R> IntegerExpression.transform(crossinline transformer: (Int) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <R> LongExpression.transform(crossinline transformer: (Long) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <R> FloatExpression.transform(crossinline transformer: (Float) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <R> DoubleExpression.transform(crossinline transformer: (Double) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <R> BooleanExpression.transform(crossinline transformer: (Boolean) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <R> StringExpression.transform(crossinline transformer: (String) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+inline fun <T, R> ObjectExpression<T>.transform(crossinline transformer: (T) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
+
+inline fun <T, R> ObjectExpression<T>.property(crossinline propertyGetter: (T) -> ObservableValue<R>): ObjectBinding<R> = transform { propertyGetter(it).value }

@@ -326,13 +326,13 @@ class CLabelPane : ScrollPane() {
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
     var labelRadius: Double by labelRadiusProperty
 
-    private val labelColorOpacityProperty: DoubleProperty = SimpleDoubleProperty(0.5)
-    fun labelColorOpacityProperty(): DoubleProperty = labelColorOpacityProperty
-    var labelColorOpacity: Double by labelColorOpacityProperty
-
     private val labelTextOpaqueProperty: BooleanProperty = SimpleBooleanProperty(false)
     fun labelTextOpaqueProperty(): BooleanProperty = labelTextOpaqueProperty
     var isLabelTextOpaque: Boolean by labelTextOpaqueProperty
+
+    private val labelColorOpacityProperty: DoubleProperty = SimpleDoubleProperty(0.5)
+    fun labelColorOpacityProperty(): DoubleProperty = labelColorOpacityProperty
+    var labelColorOpacity: Double by labelColorOpacityProperty
 
     private val newPictureScaleProperty: ObjectProperty<NewPictureScale> = SimpleObjectProperty(NewPictureScale.DEFAULT)
     fun newPictureScaleProperty(): ObjectProperty<NewPictureScale> = newPictureScaleProperty
@@ -573,9 +573,13 @@ class CLabelPane : ScrollPane() {
         val label = CLabel().apply {
             indexProperty().bind(transLabel.indexProperty())
             radiusProperty().bind(labelRadiusProperty)
-            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
-            colorOpacityProperty().bind(labelColorOpacityProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)
+            colorOpacityProperty().bind(labelColorOpacityProperty)
+            colorProperty().bind(groupsProperty
+                .valueAt(transLabel.groupIdProperty())
+                .property(TransGroup::colorHexProperty)
+                .transform(Color::web)
+            )
         }
 
         // Draggable

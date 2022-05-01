@@ -32,30 +32,63 @@ class CLabel(
 ) : Region() {
 
     companion object {
+        /**
+         * The minimal pick radius for CLabel
+         */
         const val MIN_PICK_RADIUS: Double = 16.0
     }
 
     // region Properties
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
+    /**
+     * The index to display
+     */
     fun indexProperty(): IntegerProperty = indexProperty
+    /**
+     * @see indexProperty
+     */
     var index: Int by indexProperty
 
     private val radiusProperty: DoubleProperty = SimpleDoubleProperty(labelRadius)
+    /**
+     * The radius of the CLabel
+     */
     fun radiusProperty(): DoubleProperty = radiusProperty
+    /**
+     * @see radiusProperty
+     */
     var radius: Double by radiusProperty
 
-    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(labelColor)
-    fun colorProperty(): ObjectProperty<Color> = colorProperty
-    var color: Color by colorProperty
+    private val textOpaqueProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether the text of the CLabel could be opaque
+     */
+    fun textOpaqueProperty(): BooleanProperty = textOpaqueProperty
+    /**
+     * @see textOpaqueProperty
+     */
+    var isTextOpaque: Boolean by textOpaqueProperty
 
     private val colorOpacityProperty: DoubleProperty = SimpleDoubleProperty(1.0)
+    /**
+     * The opacity of the CLabel
+     */
     fun colorOpacityProperty(): DoubleProperty = colorOpacityProperty
+    /**
+     * @see colorOpacityProperty
+     */
     var colorOpacity: Double by colorOpacityProperty
 
-    private val textOpaqueProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun textOpaqueProperty(): BooleanProperty = textOpaqueProperty
-    var isTextOpaque: Boolean by textOpaqueProperty
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(labelColor)
+    /**
+     * The color of the CLabel
+     */
+    fun colorProperty(): ObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
+    var color: Color by colorProperty
 
     // endregion
 

@@ -3,7 +3,9 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.string.emptyString
+import ink.meodinger.lpfx.util.string.pad
 import ink.meodinger.lpfx.util.string.replaceEOL
 
 import javafx.beans.binding.Bindings
@@ -45,16 +47,8 @@ class CTreeLabelItem(
     // endregion
 
     init {
-        graphicProperty().bind(Bindings.createObjectBinding(
-            {
-                color?.let { Circle(GRAPHICS_CIRCLE_RADIUS, color) }
-            }, colorProperty
-        ))
-        valueProperty().bind(Bindings.createStringBinding(
-            {
-                "${String.format("%02d", index)}: ${text.replaceEOL(" ")}"
-            }, indexProperty, textProperty
-        ))
+        graphicProperty().bind(Bindings.createObjectBinding({ color?.let { Circle(GRAPHICS_CIRCLE_RADIUS, color) } }, colorProperty))
+        valueProperty().bind(Bindings.createStringBinding({ "${index.pad(2)}: ${text.replaceEOL(" ")}" }, indexProperty, textProperty))
     }
 
 }

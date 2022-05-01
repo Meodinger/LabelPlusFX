@@ -121,7 +121,7 @@ class CGroup(
             textProperty().bind(nameProperty)
             fillProperty().bind(colorProperty)
             layoutXProperty().bind(widthProperty().transform { (it - boundsInLocal.width) / 2 })
-            layoutYProperty().bind(heightProperty().transform { (height - boundsInLocal.height) / 2 })
+            layoutYProperty().bind(heightProperty().transform { (it - boundsInLocal.height) / 2 })
         }
 
         backgroundProperty().bind(Bindings.createObjectBinding(

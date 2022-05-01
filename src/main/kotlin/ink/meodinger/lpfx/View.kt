@@ -4,10 +4,7 @@ import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.property.onNew
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.transform
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 
 import javafx.beans.property.BooleanProperty

@@ -62,7 +62,13 @@ fun String.isMathematicalDecimal(): Boolean {
 
 /**
  * Return a String that is the number in fixed style
+ * Alias for String.format("%.[count]f", this.toDouble())
+ * @param count Fix
  */
 fun Number.fixed(count: Int): String = String.format("%.${count}f", toDouble())
 
-fun Int.pad(length: Int): String = toString().padStart(length, '0')
+/**
+ * Alias for String.format("%0[length]", this)
+ * @param length Length
+ */
+fun Int.pad(length: Int): String = String.format("%0$length", this)

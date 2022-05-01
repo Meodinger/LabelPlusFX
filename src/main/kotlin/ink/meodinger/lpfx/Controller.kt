@@ -466,7 +466,7 @@ class Controller(private val state: State) {
         cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
         cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         cLabelPane.commonCursorProperty().bind(state.workModeProperty().transform {
-            when (state.workMode) {
+            when (it!!) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR
                 WorkMode.InputMode -> Cursor.DEFAULT
             }

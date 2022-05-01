@@ -178,7 +178,11 @@ class CTreeView: TreeView<String>() {
             textProperty().bind(transLabel.textProperty())
 
             if (viewMode != ViewMode.IndexMode) return@apply
-            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
+            colorProperty().bind(groupsProperty
+                .valueAt(transLabel.groupIdProperty())
+                .property(TransGroup::colorHexProperty)
+                .transform(Color::web)
+            )
         }
 
         // Add view

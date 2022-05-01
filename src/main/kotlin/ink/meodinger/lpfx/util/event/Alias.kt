@@ -10,6 +10,6 @@ import javafx.scene.input.MouseEvent
  */
 
 /**
- * If click count equals 2
+ * Whether click count equals 2
  */
 val MouseEvent.isDoubleClick: Boolean get() = clickCount == 2

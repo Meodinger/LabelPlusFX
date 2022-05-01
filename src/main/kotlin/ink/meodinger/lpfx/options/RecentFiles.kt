@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.collection.addFirst
 import ink.meodinger.lpfx.util.property.getValue
 
 import javafx.beans.property.*
@@ -23,6 +22,8 @@ object RecentFiles : AbstractProperties("Recent Files") {
     private const val MAX_SIZE = 20
     private const val RECENT   = "RecentFiles"
     private const val PROGRESS = "ProgressMap"
+
+    // TODO: RecentFiles use last as first to improve performance
 
     private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
@@ -67,7 +68,7 @@ object RecentFiles : AbstractProperties("Recent Files") {
 
     fun add(file: File) {
         recentFiles.remove(file)
-        recentFiles.addFirst(file)
+        recentFiles.add(0, file)
 
         if (progressMap[file.path] == null) progressMap[file.path] = (-1 to -1)
 

@@ -8,9 +8,7 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.dialog.showChoice
 import ink.meodinger.lpfx.util.dialog.showError
-import ink.meodinger.lpfx.util.dialog.showInput
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.transform
 
@@ -36,6 +34,8 @@ class CTreeMenu(
     private val state: State,
     private val view: CTreeView,
 ) : ContextMenu() {
+
+    // TODO: Use no ifPresent
 
     // region Controls & Handlers
 
@@ -89,13 +89,14 @@ class CTreeMenu(
     }
 
     private val gRenameHandler = EventHandler<ActionEvent> {
-        showInput(
-            state.stage,
-            I18N["context.rename_group.dialog.title"],
-            I18N["context.rename_group.dialog.header"],
-            it.source as String,
-            genGeneralFormatter()
-        ).ifPresent { newName ->
+        val dialog = TextInputDialog(it.source as String).apply {
+            initOwner(state.stage)
+            title = I18N["context.rename_group.dialog.title"]
+            headerText = I18N["context.rename_group.dialog.header"]
+            editor.textFormatter = genGeneralFormatter()
+        }
+
+        dialog.showAndWait().ifPresent { newName ->
             if (newName.isBlank()) return@ifPresent
             if (state.transFile.groupList.any { g -> g.name == newName }) {
                 showError(state.stage, I18N["context.error.same_group_name"])
@@ -138,12 +139,17 @@ class CTreeMenu(
     private val lMoveToHandler = EventHandler<ActionEvent> { event ->
         @Suppress("UNCHECKED_CAST") val items = event.source as List<CTreeLabelItem>
 
-        val choice = showChoice(
-            state.stage,
-            I18N["context.move_to.dialog.title"],
-            if (items.size == 1) I18N["context.move_to.dialog.header"] else I18N["context.move_to.dialog.header.pl"],
-            state.transFile.groupList.map(TransGroup::name)
-        )
+        // TODO: Use TransGroup
+        val groupNames = state.transFile.groupList.map(TransGroup::name)
+        val dialog = ChoiceDialog<String>(groupNames[0], groupNames).apply {
+            initOwner(state.stage)
+            title = I18N["context.move_to.dialog.title"]
+            contentText =
+                if (items.size == 1) I18N["context.move_to.dialog.header"]
+                else I18N["context.move_to.dialog.header.pl"]
+        }
+        val choice = dialog.showAndWait()
+
         if (choice.isPresent) {
             val newGroupId = state.transFile.getGroupIdByName(choice.get())
 

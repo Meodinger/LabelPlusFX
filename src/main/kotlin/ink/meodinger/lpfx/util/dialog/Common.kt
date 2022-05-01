@@ -32,6 +32,16 @@ private val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm
 private val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(GENERAL_ICON_RADIUS))
 private val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS))
 private val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(GENERAL_ICON_RADIUS))
+
+/**
+ * Show dialog
+ * @param owner Dialog owner
+ * @param graphic Dialog graphic
+ * @param title Dialog title
+ * @param header Dialog header text
+ * @param content Dialog content text
+ * @param buttonTypes Dialog ButtonTypes
+ */
 fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)

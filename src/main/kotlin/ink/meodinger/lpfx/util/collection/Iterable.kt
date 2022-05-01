@@ -6,7 +6,11 @@ package ink.meodinger.lpfx.util.collection
  * Have fun with my code!
  */
 
-// nothing
+/**
+ * Contact some Iterables
+ * @param iterables All Iterables to be contacted
+ * @return An Iterable that contains all iterables in gived order
+ */
 fun <E> contact(vararg iterables: Iterable<E>): Iterable<E> {
-    return iterables.reduce { acc, iterable -> acc.plus(iterable) }
+    return iterables.reduce { acc, iterable -> acc + iterable }
 }

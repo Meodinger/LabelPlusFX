@@ -139,17 +139,30 @@ inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
 
     return Catcher(manager.throwable)
 }
+/**
+ * Manager for AutoCloseable
+ */
 class ResourceManager : AutoCloseable {
 
     private val resourceStack = ArrayStack<AutoCloseable>()
+
+    /**
+     * Caught Throwable when running block
+     */
     var throwable: Throwable? = null
 
+    /**
+     * Register AutoCloseable to auto-close quene
+     */
     fun <T: AutoCloseable> T.autoClose(): T {
         // The last opened Steam is the first closed
         resourceStack.push(this)
         return this
     }
 
+    /**
+     * Close all AutoCloseables
+     */
     override fun close() {
         while (!resourceStack.isEmpty()) {
             val closeable = resourceStack.pop()
@@ -166,10 +179,25 @@ class ResourceManager : AutoCloseable {
         }
     }
 }
-class Catcher(var throwable: Throwable? = null) {
+/**
+ * Catcher for ResourceManager
+ * @param caught Caught Throwable when running
+ */
+class Catcher(caught: Throwable? = null) {
 
+    /**
+     * Caught Throwable former thrown
+     */
+    var throwable: Throwable? = caught
+
+    /**
+     * Handle thrown in catch block
+     */
     var thrown: Throwable? = null
 
+    /**
+     * Catch a Throwable, if throw another Throwable during catching, pending it
+     */
     inline infix fun <reified T : Throwable> catch(block: (T) -> Unit): Catcher {
         if (this.throwable is T) {
             try {
@@ -185,6 +213,9 @@ class Catcher(var throwable: Throwable? = null) {
         return this
     }
 
+    /**
+     * Handle un-caught Throwables and others
+     */
     inline infix fun finally(block: () -> Unit) {
         try {
             block()
@@ -228,13 +259,24 @@ class AssignOnce<T> {
 
     private var _backing: T? = null
 
+    /**
+     * Get the backing value, we assert user is sure that this field has been set when try getting
+     */
     operator fun getValue(thisRef: Any, property: KProperty<*>): T = _backing!!
+
+    /**
+     * Set the backing valye, make sure the value could be only set once
+     */
     operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         synchronized(this) {
-            if (_backing == null) _backing = value
-            else throw IllegalStateException("Value already set")
+            if (_backing != null) throw IllegalStateException("Value already set")
+            _backing = value
         }
     }
 
 }
+
+/**
+ * @see AssignOnce
+ */
 fun <T> once(): AssignOnce<T> = AssignOnce()

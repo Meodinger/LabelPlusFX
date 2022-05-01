@@ -36,10 +36,17 @@ private fun query(q: String, from: String, to: String): String {
     return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$ID&salt=$salt&sign=$sign"
 }
 
+/**
+ * Translate [text] from [ori] language to [dst] language
+ * @param text Text to translate
+ * @param ori The origin language
+ * @param dst The destination language
+ * @return Translated text
+ */
 @Throws(IOException::class)
-fun translate(text: String, from: String, to: String): String {
+fun translate(text: String, ori: String, dst: String): String {
     return try {
-        val connection = URL(query(text, from, to)).openConnection().apply { connect() }
+        val connection = URL(query(text, ori, dst)).openConnection().apply { connect() }
         val result = ObjectMapper().readTree(connection.getInputStream())
         result.get("error_code")?.asText() ?: result.get("trans_result").joinToString("\n") { it.get("dst").asText() }
     } catch (e: NoRouteToHostException) {
@@ -51,9 +58,19 @@ fun translate(text: String, from: String, to: String): String {
     }
 }
 
+/**
+ * Translate Japanese to Simplified Chinese
+ */
 @Throws(IOException::class)
 fun translateJP(text: String): String = translate(text, "jp", "zh")
+
+/**
+ * Translate Traditional Chinese to Simplified Chinese
+ */
 @Throws(IOException::class)
 fun convert2Simplified(text: String): String = translate(text, "cht", "zh")
+/**
+ * Translate Simplified Chinese to Traditional Chinese
+ */
 @Throws(IOException::class)
 fun convert2Traditional(text: String): String = translate(text, "zh", "cht")

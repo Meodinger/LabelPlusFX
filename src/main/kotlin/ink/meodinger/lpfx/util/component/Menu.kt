@@ -16,7 +16,7 @@ import javafx.scene.control.MenuItem
 /**
  * Disable mnemonic parsing for all Menu & MenuItem
  */
-fun MenuBar.disableMnemonicParsingForAll() {
+fun MenuBar.disableMnemonicParsing() {
     for (menu in this.menus) menu.disableMnemonicParsing()
 }
 
@@ -26,7 +26,8 @@ fun MenuBar.disableMnemonicParsingForAll() {
 fun Menu.disableMnemonicParsing() {
     isMnemonicParsing = false
     for (item in this.items) when (item) {
-        is Menu, is MenuItem -> item.disableMnemonicParsing()
+        is Menu -> item.disableMnemonicParsing()
+        is MenuItem -> item.disableMnemonicParsing()
         else -> doNothing()
     }
 }

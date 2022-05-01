@@ -4,14 +4,10 @@ import ink.meodinger.lpfx.LOG_SRC_OTHER
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.once
-import jakarta.mail.Message
-import jakarta.mail.Session
-import jakarta.mail.Transport
-import jakarta.mail.internet.InternetAddress
-import jakarta.mail.internet.MimeBodyPart
-import jakarta.mail.internet.MimeMessage
-import jakarta.mail.internet.MimeMultipart
+import ink.meodinger.lpfx.util.string.alignLeft
 
+import jakarta.mail.*
+import jakarta.mail.internet.*
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -103,8 +99,8 @@ object Logger {
         val log = StringBuilder()
             .append("<Logger>: ")
             .append("[").append(formatter.format(Date())).append("] ")
-            .append("[").append(String.format("%-7s", type)).append("] ")
-            .append("[").append(String.format("%-11s", from)).append("] ")
+            .append("[").append(type.type.padEnd(7)).append("] ")
+            .append("[").append(type.type.padEnd(11)).append("] ")
             .appendLine(text)
             .toString()
 

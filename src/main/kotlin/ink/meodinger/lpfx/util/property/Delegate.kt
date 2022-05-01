@@ -1,3 +1,5 @@
+@file:Suppress("KDocMissingDocumentation")
+
 package ink.meodinger.lpfx.util.property
 
 import javafx.beans.property.*

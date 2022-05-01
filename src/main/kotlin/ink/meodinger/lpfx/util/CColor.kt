@@ -35,4 +35,7 @@ fun String?.isColorHex(): Boolean {
     return true
 }
 
+/**
+ * Apply an opacity to a Color
+ */
 fun Color.opacity(opacity: Double): Color = Color(red, green, blue, opacity)

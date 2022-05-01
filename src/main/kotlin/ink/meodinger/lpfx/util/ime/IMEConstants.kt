@@ -1,3 +1,5 @@
+@file:Suppress("unused", "KDocMissingDocumentation")
+
 package ink.meodinger.lpfx.util.ime
 
 /**
@@ -10,13 +12,26 @@ package ink.meodinger.lpfx.util.ime
  * Language Tags
  */
 
-// Simplified Chinese
+/**
+ * Simplified Chinese
+ */
 const val ZH_HANS = "zh-Hans"
+/**
+ * Simplified Chinese
+ */
 const val ZH_CN   = "zh-CN"
 
-// Traditional Chinese
+/**
+ * Traditional Chinese
+ */
 const val ZH_HANT = "zh-Hant"
+/**
+ * Traditional Chinese in HongKong
+ */
 const val ZH_HK   = "zh-HK"
+/**
+ * Traditional Chinese in Taiwan
+ */
 const val ZH_TW   = "zh-TW"
 
 // English

@@ -5,7 +5,6 @@ import ink.meodinger.lpfx.Config.MonoFont
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.collection.autoRangeTo
-import ink.meodinger.lpfx.util.collection.div
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.withContent
@@ -386,7 +385,8 @@ class CLabelPane : ScrollPane() {
             if (it.code == KeyCode.ALT) it.consume()
         }
 
-        // Remove text when scroll event fired
+        // Remove text when scale / scroll
+        // NOTE: EventFilter is used to disable scroll when scale
         // NOTE: Horizon scroll use default impl: Shift + Scroll
         addEventFilter(ScrollEvent.SCROLL) {
             clearText()
@@ -466,8 +466,13 @@ class CLabelPane : ScrollPane() {
             if (selecting) {
                 clearText()
 
-                val rangeX = shiftX.autoRangeTo(it.x) / image.width
-                val rangeY = shiftY.autoRangeTo(it.y) / image.height
+                val shiftPercentX = shiftX / image.width
+                val shiftPercentY = shiftY / image.height
+                val eventPercentX = it.x / image.width
+                val eventPercentY = it.y / image.height
+
+                val rangeX = shiftPercentX.autoRangeTo(eventPercentX)
+                val rangeY = shiftPercentY.autoRangeTo(eventPercentY)
                 val indices = HashSet<Int>()
                 for (label in labels) {
                     if (rangeX.contains(label.x) && rangeY.contains(label.y)) {

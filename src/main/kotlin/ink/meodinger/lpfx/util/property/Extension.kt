@@ -33,6 +33,10 @@ fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
     return FXCollections.unmodifiableObservableSet(set)
 }
 
+/**
+ * Return a ObservableList that reflect the sorted elements and their changes of the ObservableSet
+ * @return An unmodifiable ObservableList
+ */
 fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 
@@ -40,6 +44,10 @@ fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): Observab
 
     return FXCollections.unmodifiableObservableList(list)
 }
+/**
+ * Return a ObservableList that reflect the sorted elements and their changes of the ObservableList
+ * @return An unmodifiable ObservableList
+ */
 fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 

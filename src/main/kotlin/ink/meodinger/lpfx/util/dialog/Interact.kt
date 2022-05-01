@@ -38,7 +38,15 @@ import java.util.Optional
  * @param handler Handler for link
  * @return ButtonType? OK | CLOSE
  */
-fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, content: String?, link: String, handler: EventHandler<ActionEvent>): Optional<ButtonType> {
+fun showLink(
+    owner: Window?,
+    graphics: Node?,
+    title: String,
+    header: String?,
+    content: String?,
+    link: String,
+    handler: EventHandler<ActionEvent>
+): Optional<ButtonType> {
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
     dialog.title = title
@@ -54,16 +62,13 @@ fun showLink(owner: Window?, graphics: Node?, title: String, header: String?, co
     return dialog.showAndWait()
 }
 
-fun showInput(owner: Window?, title: String, header: String, defaultText: String?, formatter: TextFormatter<String>?): Optional<String> {
-    val dialog = TextInputDialog(defaultText)
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.headerText = header
-    dialog.editor.textFormatter = formatter
-
-    return dialog.showAndWait()
-}
-
+/**
+ * Show a TextArea
+ * @param owner Owner
+ * @param title Dialog title
+ * @param defaultText Text placeholder
+ * @return TextArea text
+ */
 fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<String> {
     val textArea = TextArea(defaultText)
     val dialog = Dialog<String>()
@@ -76,15 +81,13 @@ fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<
     return dialog.showAndWait()
 }
 
-fun <T> showChoice(owner: Window?, title: String, header: String, choices: List<T>): Optional<T> {
-    val dialog = ChoiceDialog(choices[0], choices)
-    dialog.initOwner(owner)
-    dialog.title = title
-    dialog.contentText = header
-
-    return dialog.showAndWait()
-}
-
+/**
+ * Show a dialog that allow user select from a ListView to a ListView
+ * @param owner Owner
+ * @param unselected Potential items
+ * @param selected Already selected items
+ * @return List? of T
+ */
 fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = ArrayList()): Optional<List<T>> {
     val left = ListView<T>()
     val right = ListView<T>()

@@ -13,10 +13,23 @@ fun Double.autoRangeTo(that: Double): ClosedFloatingPointRange<Double> {
     return if (this < that) this.rangeTo(that) else that.rangeTo(this)
 }
 
-operator fun ClosedRange<Double>.times(that: Double): ClosedRange<Double> {
-    return (start * that).rangeTo(endInclusive * that)
+/**
+ * Float Range with automatic start-end detection
+ */
+fun Float.autoRangeTo(that: Float): ClosedFloatingPointRange<Float> {
+    return if (this < that) this.rangeTo(that) else that.rangeTo(this)
 }
 
-operator fun ClosedRange<Double>.div(that: Double): ClosedRange<Double> {
-    return (start / that).rangeTo(endInclusive / that)
+/**
+ * Long Range with automatic start-end detection
+ */
+fun Long.autoRangeTo(that: Long): ClosedRange<Long> {
+    return if (this < that) this.rangeTo(that) else that.rangeTo(this)
+}
+
+/**
+ * Int Range with automatic start-end detection
+ */
+fun Int.autoRangeTo(that: Int): ClosedRange<Int> {
+    return if (this < that) this.rangeTo(that) else that.rangeTo(this)
 }

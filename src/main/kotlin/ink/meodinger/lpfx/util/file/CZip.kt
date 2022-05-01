@@ -25,6 +25,11 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
         }
     }
 
+    /**
+     * Zip a [file] into [path]
+     * @param file File to zip
+     * @param path Path in the Zip file
+     */
     @Throws(IOException::class)
     fun zip(file: File, path: String) {
         if (file.isDirectory) {
@@ -37,6 +42,11 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
         }
     }
 
+    /**
+     * Zip a [inputStream] into [path]
+     * @param inputStream Source stream to zip
+     * @param path Path in the Zip file
+     */
     @Throws(IOException::class)
     fun zip(inputStream: InputStream, path: String) {
         zip.putNextEntry(ZipEntry(path))
@@ -52,6 +62,11 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
         zip.closeEntry()
     }
 
+    /**
+     * Zip some [bytes] into [path]
+     * @param bytes ByteArray to zip
+     * @param path Path in the Zip file
+     */
     @Throws(IOException::class)
     fun zip(bytes: ByteArray, path: String) {
         zip.putNextEntry(ZipEntry(path))
@@ -59,6 +74,9 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
         zip.closeEntry()
     }
 
+    /**
+     * Close the zip stream, complete the zip procedure
+     */
     @Throws(IOException::class)
     fun close() {
         zip.close()

@@ -134,7 +134,7 @@ class SearchReplace(private val state: State) : Stage() {
         // Find in the rest
         val picNames = state.transFile.sortedPicNames
         val picIndex = picNames.indexOf(state.currentPicName)
-        for (i in (picIndex until picNames.size).let { if (wrap) it.plus(0 until picIndex) else it }) {
+        for (i in (picIndex until picNames.size).let { if (wrap) it + (0 until picIndex) else it }) {
             for (label in state.transFile.getTransList(picNames[i])) {
                 val index = label.text.indexOf(searchText, 0, ignoreCase)
                 if (index != NOT_FOUND) {

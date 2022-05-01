@@ -19,18 +19,29 @@ import javafx.stage.Stage
  * Alias of Button.setOnAction
  * @param onAction Handler of ActionEvent, with Button as this and ActionEvent as it
  */
-infix fun Button.does(onAction: Button.(ActionEvent) -> Unit): Button {
+inline infix fun Button.does(crossinline onAction: Button.(ActionEvent) -> Unit): Button {
     return apply { setOnAction { onAction(this, it) } }
 }
 
-infix fun MenuItem.does(onAction: MenuItem.(ActionEvent) -> Unit): MenuItem {
+/**
+ * Alias of MenuItem.setOnAction
+ * @param onAction Handler of ActionEvent, with MenuItem as this and ActionEvent as it
+ */
+inline infix fun MenuItem.does(crossinline onAction: MenuItem.(ActionEvent) -> Unit): MenuItem {
     return apply { setOnAction { onAction(this, it) } }
 }
 
+/**
+ * Close the Stage when Escape-Key pressed. Note that this action
+ * could not be supressed because it uses EventFilter for event catch.
+ */
 fun <T : Stage> T.closeOnEscape() {
     addEventFilter(KeyEvent.KEY_PRESSED) { if (it.code == KeyCode.ESCAPE) close() }
 }
 
+/**
+ * Generate a TextFormatter use a simple replacer to process the Change::text
+ */
 fun <T> genTextFormatter(replacer: (TextFormatter.Change) -> String): TextFormatter<T> {
     return TextFormatter<T> {
         if (it.isAdded) it.apply {

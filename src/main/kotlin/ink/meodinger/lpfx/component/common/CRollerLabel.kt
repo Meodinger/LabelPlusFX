@@ -90,7 +90,7 @@ class CRollerLabel(contentText: String = "") : Region() {
         shiftIntervalProperty.addListener(onNew<Number, Long> {
             rollerManager.clear()
             rollerManager.delay = it
-            rollerManager.period = it
+            rollerManager.interval = it
             rollerManager.schedule()
         })
 

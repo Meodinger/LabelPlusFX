@@ -12,7 +12,7 @@ import javafx.scene.input.KeyEvent
  */
 
 /**
- * Gen KeyEvent
+ * Gen KeyEvent by an exist KeyEvent
  */
 fun keyEvent(
     it:            KeyEvent,

@@ -13,13 +13,17 @@ import javafx.beans.value.ObservableValue
 /**
  * For none-argument use
  */
-fun <T> onChange(action: () -> Unit) = ChangeListener<T> { _, _, _ -> action() }
+inline fun <T> onChange(crossinline action: () -> Unit) = ChangeListener<T> { _, _, _ -> action() }
 
 /**
  * For new-argument use
  */
-@Suppress("UNCHECKED_CAST")
-fun <T, U : T> onNew(action: (U) -> Unit) = ChangeListener<T> { _, _, new -> action(new as U) }
+inline fun <T, reified U : T> onNew(crossinline action: (U) -> Unit) = ChangeListener<T> { _, _, new ->
+    when (new) {
+        is U -> action(new)
+        else -> throw IllegalArgumentException("new value is not ${U::class.qualifiedName}")
+    }
+}
 
 /**
  * Listen once

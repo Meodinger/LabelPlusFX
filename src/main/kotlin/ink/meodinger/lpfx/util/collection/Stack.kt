@@ -50,17 +50,14 @@ interface Stack<E> {
  * `push()` will be very slow if the need-to-grew size
  * is too large (like ArrayList).
  */
-class ArrayStack<E>(initialCapacity: Int = DEFAULT_CAPACITY) : Stack<E> {
+class ArrayStack<E>(initialCapacity: Int = 16) : Stack<E> {
 
     companion object {
-        private const val DEFAULT_CAPACITY = 16
-
         /**
          * A soft maximum array length imposed by stack growth computations.
          * @see jdk.internal.util.ArraysSupport.SOFT_MAX_ARRAY_LENGTH
          */
         private const val SOFT_MAX_ARRAY_LENGTH = Int.MAX_VALUE - 8
-
     }
 
     private var _array: Array<Any?> = arrayOfNulls(initialCapacity)
@@ -70,7 +67,7 @@ class ArrayStack<E>(initialCapacity: Int = DEFAULT_CAPACITY) : Stack<E> {
     private fun elementData(index: Int): E = _array[index] as E
 
     private fun grow() {
-        val increment = (_pointer shr 1).coerceAtLeast(1).coerceAtMost(SOFT_MAX_ARRAY_LENGTH - _pointer)
+        val increment = (_pointer shr 1).coerceAtMost(SOFT_MAX_ARRAY_LENGTH - _pointer).coerceAtLeast(1)
         val newSize = _pointer + increment
         if (newSize < 0) throw OutOfMemoryError("Required array length $_pointer + $increment is too large")
 
@@ -107,7 +104,7 @@ class ArrayStack<E>(initialCapacity: Int = DEFAULT_CAPACITY) : Stack<E> {
 }
 
 /**
- * A Stack implemented with ArrayDeque, like a wrappper
+ * A Stack implemented as a wrapper of ArrayDeque
  */
 class DequeStack<E>: Stack<E> {
 

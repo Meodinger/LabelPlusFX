@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.LOG_SRC_OTHER
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.once
-import ink.meodinger.lpfx.util.string.alignLeft
 
 import jakarta.mail.*
 import jakarta.mail.internet.*

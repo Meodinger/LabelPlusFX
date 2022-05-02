@@ -35,8 +35,6 @@ class CTreeMenu(
     private val view: CTreeView,
 ) : ContextMenu() {
 
-    // TODO: Use no ifPresent
-
     // region Controls & Handlers
 
     private val rAddGroupField = TextField().apply {
@@ -59,30 +57,44 @@ class CTreeMenu(
         }
     }
     private val rAddGroupHandler = EventHandler<ActionEvent> {
+        // State::stage is not set when initializing TreeMenu
         if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(state.stage)
 
         val nameList = Settings.defaultGroupNameList
-        val colorHexList = TransFile.DEFAULT_COLOR_HEX_LIST
+        val colorList = TransFile.DEFAULT_COLOR_HEX_LIST
 
         val newGroupId = state.transFile.groupCount
-        var newName = String.format(I18N["context.add_group.new_group.i"], newGroupId + 1)
-        if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty()) {
-            if (!state.transFile.groupList.any { g -> g.name == nameList[newGroupId] }) {
-                newName = nameList[newGroupId]
+        val newName: String
+
+        if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty() &&
+            state.transFile.groupList.none { g -> g.name == nameList[newGroupId] }
+        ) {
+            newName = nameList[newGroupId]
+        } else {
+            var tempNum = newGroupId + 1
+            var tempName = String.format(I18N["context.add_group.new_group.i"], tempNum)
+            while (state.transFile.groupList.any { g -> g.name == tempName }) {
+                tempName = String.format(I18N["context.add_group.new_group.i"], ++tempNum)
             }
+            newName = tempName
         }
 
         rAddGroupField.text = newName
-        rAddGroupPicker.value = Color.web(colorHexList[newGroupId % colorHexList.size])
+        rAddGroupPicker.value = Color.web(colorList[newGroupId % colorList.size])
         rAddGroupDialog.result = null
-        rAddGroupDialog.showAndWait().ifPresent { newGroup ->
-            if (state.transFile.groupList.any { g -> g.name == newName }) {
-                showError(state.stage, I18N["context.error.same_group_name"])
-                return@ifPresent
-            }
 
-            state.doAction(GroupAction(ActionType.ADD, state, newGroup))
+        val result = rAddGroupDialog.showAndWait()
+        if (!result.isPresent) return@EventHandler
+        val newGroup = result.get()
+        if (newGroup.name.isBlank()) return@EventHandler
+
+        // Check repeat
+        if (state.transFile.groupList.any { g -> g.name == newGroup.name }) {
+            showError(state.stage, I18N["context.error.same_group_name"])
+            return@EventHandler
         }
+        // do Action
+        state.doAction(GroupAction(ActionType.ADD, state, newGroup))
     }
     private val rAddGroupItem = MenuItem(I18N["context.add_group"]).apply {
         onAction = rAddGroupHandler
@@ -96,19 +108,22 @@ class CTreeMenu(
             editor.textFormatter = genGeneralFormatter()
         }
 
-        dialog.showAndWait().ifPresent { newName ->
-            if (newName.isBlank()) return@ifPresent
-            if (state.transFile.groupList.any { g -> g.name == newName }) {
-                showError(state.stage, I18N["context.error.same_group_name"])
-                return@ifPresent
-            }
+        val result = dialog.showAndWait()
+        if (!result.isPresent) return@EventHandler
+        val newName = result.get()
+        if (newName.isBlank()) return@EventHandler
 
-            state.doAction(GroupAction(
-                ActionType.CHANGE, state,
-                state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String)),
-                newName = newName
-            ))
+        // Check repeat
+        if (state.transFile.groupList.any { g -> g.name == newName }) {
+            showError(state.stage, I18N["context.error.same_group_name"])
+            return@EventHandler
         }
+        // do Action
+        state.doAction(GroupAction(
+            ActionType.CHANGE, state,
+            state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String)),
+            newName = newName
+        ))
     }
     private val gRenameItem = MenuItem(I18N["context.rename_group"])
     private val gChangeColorPicker = CColorPicker().apply {
@@ -139,9 +154,8 @@ class CTreeMenu(
     private val lMoveToHandler = EventHandler<ActionEvent> { event ->
         @Suppress("UNCHECKED_CAST") val items = event.source as List<CTreeLabelItem>
 
-        // TODO: Use TransGroup
-        val groupNames = state.transFile.groupList.map(TransGroup::name)
-        val dialog = ChoiceDialog<String>(groupNames[0], groupNames).apply {
+        val groups = state.transFile.groupList.map(TransGroup::name)
+        val dialog = ChoiceDialog(groups[0], groups).apply {
             initOwner(state.stage)
             title = I18N["context.move_to.dialog.title"]
             contentText =
@@ -149,24 +163,22 @@ class CTreeMenu(
                 else I18N["context.move_to.dialog.header.pl"]
         }
         val choice = dialog.showAndWait()
+        if (!choice.isPresent) return@EventHandler
+        val newGroupId = state.transFile.getGroupIdByName(choice.get())
 
-        if (choice.isPresent) {
-            val newGroupId = state.transFile.getGroupIdByName(choice.get())
-
-            val labelActions = items.map {
-                LabelAction(
-                    ActionType.CHANGE, state,
-                    state.currentPicName,
-                    state.transFile.getTransLabel(state.currentPicName, it.index),
-                    newGroupId = newGroupId
-                )
-            }
-            val moveAction = FunctionAction(
-                { labelActions.forEach(Action::commit); state.controller.requestUpdateTree() },
-                { labelActions.forEach(Action::revert); state.controller.requestUpdateTree() }
+        val labelActions = items.map {
+            LabelAction(
+                ActionType.CHANGE, state,
+                state.currentPicName,
+                state.transFile.getTransLabel(state.currentPicName, it.index),
+                newGroupId = newGroupId
             )
-            state.doAction(moveAction)
         }
+        val moveAction = FunctionAction(
+            { labelActions.forEach(Action::commit); state.controller.requestUpdateTree() },
+            { labelActions.forEach(Action::revert); state.controller.requestUpdateTree() }
+        )
+        state.doAction(moveAction)
     }
     private val lMoveToItem = MenuItem(I18N["context.move_to"])
     private val lDeleteHandler = EventHandler<ActionEvent> { event ->

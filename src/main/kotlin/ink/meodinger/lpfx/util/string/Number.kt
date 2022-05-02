@@ -71,4 +71,4 @@ fun Number.fixed(count: Int): String = String.format("%.${count}f", toDouble())
  * Alias for String.format("%0[length]", this)
  * @param length Length
  */
-fun Int.pad(length: Int): String = String.format("%0$length", this)
+fun Int.pad(length: Int): String = String.format("%0${length}d", this)

@@ -142,6 +142,7 @@ class View(state: State) : BorderPane() {
             add(lBackup) {
                 padding = generalPadding
                 prefWidth = 150.0
+                text = I18N["stats.not_backed"]
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
@@ -149,6 +150,7 @@ class View(state: State) : BorderPane() {
             add(lLocation) {
                 padding = generalPadding
                 prefWidth = 90.0
+                text = "-- : --"
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
@@ -156,6 +158,7 @@ class View(state: State) : BorderPane() {
             add(lAccEditTime) {
                 padding = generalPadding
                 prefWidth = 180.0
+                text = String.format(I18N["stats.accumulator.s"], "--:--:--")
             }
         }
 

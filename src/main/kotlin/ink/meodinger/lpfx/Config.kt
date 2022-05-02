@@ -15,21 +15,47 @@ import java.util.*
  * Global Config for current JVM Instance
  */
 object Config {
+
     /**
      * OS name
      */
     private val OS: String = System.getProperty("os.name").lowercase(Locale.getDefault())
 
+    /**
+     * Whether current OS is Windows
+     */
     val isWin: Boolean = OS.contains("win")
+    /**
+     * Whether current OS is macOS
+     */
     val isMac: Boolean = OS.contains("mac")
 
+    /**
+     * Monospace font. Used in CLabel/CLabelPane
+     */
     val MonoFont: String = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
+    /**
+     * Text font. Used in common text display
+     */
     val TextFont: String = if (isWin) "SimSun" else if (isMac) "" else ""
 
+    /**
+     * Whether JNI enabled
+     */
     var enableJNI:   Boolean = true
+    /**
+     * Whether SystemProxy enabled
+     */
     var enableProxy: Boolean = true
-    val workingDir:  File    = File(System.getProperty("user.dir"))
 
+    /**
+     * Whether SystemTray is enabled. Used in BOSS key
+     */
     val supportSysTray: Boolean = SystemTray.isSupported()
+
+    /**
+     * The working dir of current process
+     */
+    val workingDir:  File    = File(System.getProperty("user.dir"))
 
 }

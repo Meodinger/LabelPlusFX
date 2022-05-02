@@ -102,6 +102,7 @@ class FormatChecker(private val state: State) : Stage() {
                     gridHAlign = HPos.CENTER
                     does {
                         close()
+                        state.controller.save(state.translationFile, true)
                     }
                 }
             }

@@ -1,3 +1,5 @@
+@file:Suppress("KDocMissingDocumentation")
+
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.Version
@@ -16,35 +18,29 @@ import java.io.File
 // Current Version
 val V: Version = Version(2, 3, 0)
 
-/**
- * Size related constants
- */
+//Size related constants
 const val PANE_WIDTH : Double = 600.0
 const val PANE_HEIGHT: Double = 400.0
 const val COMMON_GAP : Double = 16.0
 
-/**
- * Scale
- */
+
+// Scale
 const val SCALE_MIN : Double = 0.1
 const val SCALE_MAX : Double = 4.0
 const val SCALE_INIT: Double = 0.8
 
-/**
- * CLabel Radius Range
- */
+
+// CLabel Radius Range
 const val LABEL_RADIUS_MIN: Double= 8.0
 const val LABEL_RADIUS_MAX: Double = 48.0
 
-/**
- * TextArea Font Size Range
- */
+
+// TextArea Font Size Range
 const val FONT_SIZE_MIN: Int = 12
 const val FONT_SIZE_MAX: Int = 64
 
-/**
- * TreeItem Graphic radius
- */
+
+// TreeItem Graphic radius
 const val GRAPHICS_CIRCLE_RADIUS: Double = 8.0
 
 const val GENERAL_ICON_RADIUS: Double = 32.0
@@ -64,9 +60,6 @@ const val EXTENSION_FILE_MEO: String = "json"
 const val EXTENSION_PACK    : String = "zip"
 const val EXTENSION_BAK     : String = "bak"
 
-/**
- * Extensions: png, jpg, jpeg
- */
 val EXTENSIONS_PIC: List<String> = listOf(
     EXTENSION_PIC_BMP,
     EXTENSION_PIC_GIF,
@@ -82,14 +75,10 @@ val EXTENSIONS_FILE: List<String> = listOf(
     EXTENSION_FILE_MEO
 )
 
-/**
- * For label/group not found
- */
+// For label/group not found
 const val NOT_FOUND: Int = -1
 
-/**
- * Log Source
- */
+// Log Source
 const val LOG_SRC_APPLICATION: String = "Application"
 const val LOG_SRC_CONTROLLER : String = "Controller"
 const val LOG_SRC_ACTION     : String = "Action"

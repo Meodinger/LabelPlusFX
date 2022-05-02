@@ -1,3 +1,5 @@
+@file:Suppress("KDocMissingDocumentation")
+
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.image.imageFromFile

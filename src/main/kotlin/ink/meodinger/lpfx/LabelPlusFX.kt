@@ -53,7 +53,7 @@ class LabelPlusFX: HookedApplication() {
             fun destroy() {
                 Platform.runLater {
                     if (!state.isOpened || !state.isChanged)
-                        this@LabelPlusFX.exit()
+                        this@LabelPlusFX.stop()
                 }
             }
 
@@ -72,26 +72,53 @@ class LabelPlusFX: HookedApplication() {
         }
     }
 
-    val cheatSheet       by lazy {
+    /**
+     * Cheat Sheet. To display some hints on how to use LPFX
+     */
+    val cheatSheet by lazy {
         CheatSheet().apply {
             setOnAction { state.application.hostServices.showDocument(INFO["application.help"]) }
         } withOwner state.stage
     }
-    val onlineDict       by lazy {
+
+    /**
+     * Online Dict. To search some text quick and simple
+     */
+    val onlineDict by lazy {
         OnlineDict() withOwner state.stage
     }
+
+    /**
+     * Search & Replace. To search and replace some text in all TransFile
+     */
     val searchAndReplace by lazy {
         SearchReplace(state) withOwner state.stage
     }
-    val formatChecker    by lazy {
+
+    /**
+     * Format Checker. Check format when save
+     */
+    val formatChecker by lazy {
         FormatChecker(state) withOwner state.stage
     }
-    val dialogSpecify    by lazy {
+
+    /**
+     * Specify Dialog. Specify files of pictures
+     */
+    val dialogSpecify by lazy {
         SpecifyFiles(state) withOwner state.stage
     }
-    val dialogLogs       by lazy {
+
+    /**
+     * Log-related Dialog
+     */
+    val dialogLogs by lazy {
         DialogLogs() withOwner state.stage
     }
+
+    /**
+     * Settings Dialog
+     */
     val dialogSettings   by lazy {
         DialogSettings() withOwner state.stage
     }
@@ -108,6 +135,9 @@ class LabelPlusFX: HookedApplication() {
         Logger.info("App initialized", LOG_SRC_APPLICATION)
     }
 
+    /**
+     * Start the Application
+     */
     override fun start(primaryStage: Stage) {
         Logger.info("App starting...", LOG_SRC_APPLICATION)
 
@@ -134,7 +164,7 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, Preference.windowWidth, Preference.windowHeight)
-        primaryStage.setOnCloseRequest { if (!controller.stay()) exit() else it.consume() }
+        primaryStage.setOnCloseRequest { if (!controller.stay()) stop() else it.consume() }
 
         // Window Size Listener
         val windowSizeListener: ChangeListener<Number> = onChange {
@@ -161,25 +191,25 @@ class LabelPlusFX: HookedApplication() {
         Logger.toc()
     }
 
-    override fun exit() {
+    /**
+     * Stop the Application
+     */
+    override fun stop() {
         Logger.info("App stopping...", LOG_SRC_APPLICATION)
 
         state.stage.close()
         Options.save()
 
-        runHooks(
-            {
-                Logger.info("App stopped", LOG_SRC_APPLICATION)
-                stop()
-                Platform.exit()
-            },
-            {
-                Logger.error("Exception occurred during hooks run", LOG_SRC_APPLICATION)
-                Logger.exception(it)
-            }
-        )
+        runHooks {
+            Logger.error("Exception occurred during hooks run", LOG_SRC_APPLICATION)
+            Logger.exception(it)
+        }
     }
 
+    /**
+     * Try to minimal the window to system tray if SystemTray supported.
+     * Otherwise, iconify it.
+     */
     fun iconify() {
         if (Config.supportSysTray) {
             state.stage.hide()
@@ -189,4 +219,5 @@ class LabelPlusFX: HookedApplication() {
             state.stage.isIconified = true
         }
     }
+
 }

@@ -70,15 +70,9 @@ class Controller(private val state: State) {
     private val view: View                       = state.view
     private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
     private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
-    private val lBackup: Label                   = view.lBackup.apply {
-        text = I18N["stats.not_backed"]
-    }
-    private val lLocation: Label                 = view.lLocation.apply {
-        text = "-- : --"
-    }
-    private val lAccEditTime: Label              = view.lAccEditTime.apply {
-        text = String.format(I18N["stats.accumulator.s"], "--:--:--")
-    }
+    private val lBackup: Label                   = view.lBackup
+    private val lLocation: Label                 = view.lLocation
+    private val lAccEditTime: Label              = view.lAccEditTime
     private val pMain: SplitPane                 = view.pMain
     private val pRight: SplitPane                = view.pRight
     private val cGroupBar: CGroupBar             = view.cGroupBar
@@ -299,7 +293,7 @@ class Controller(private val state: State) {
             if (state.currentGroupId == NOT_FOUND) return@setOnLabelCreate
 
             val newIndex =
-                if (state.currentLabelIndex != -1) state.currentLabelIndex + 1
+                if (state.currentLabelIndex != NOT_FOUND) state.currentLabelIndex + 1
                 else state.transFile.getTransList(state.currentPicName).size + 1
 
             state.doAction(LabelAction(
@@ -374,10 +368,10 @@ class Controller(private val state: State) {
         Logger.info("Binding properties...", LOG_SRC_CONTROLLER)
 
         // Preferences
+        view.showStatsBarProperty().bind(Preference.showStatsBarProperty())
         cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
         pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
-        view.showStatsBarProperty().bind(Preference.showStatsBarProperty())
         Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOG_SRC_CONTROLLER)
 
         // CLigatureTextArea - rules
@@ -443,7 +437,7 @@ class Controller(private val state: State) {
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
         cPicBox.indexProperty().addListener(onNew<Number, Int> {
-            state.currentPicName = if (it != NOT_FOUND) state.transFile.sortedPicNames[it] else emptyString()
+            state.currentPicName = state.transFile.sortedPicNames.getOrElse(it) { emptyString() }
         })
         state.currentPicNameProperty().addListener(onNew {
             cPicBox.index = state.transFile.sortedPicNames.indexOf(it)

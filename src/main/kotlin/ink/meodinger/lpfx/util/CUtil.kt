@@ -60,7 +60,7 @@ data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
 }
 
 /**
- * Hooked Application
+ * Hooked Application. Should override exit to handle exit
  */
 abstract class HookedApplication : Application() {
 
@@ -93,34 +93,22 @@ abstract class HookedApplication : Application() {
     }
 
     /**
-     * This method should be called in stop().
      *
      * You MUST run this before stop or hooks will not be executed.
-     * And you should actually shut the app down in the callback function.
      */
-    protected fun runHooks(callback: () -> Unit = {}, onError: (Throwable) -> Unit = {}) {
+    protected fun runHooks(onError: (Throwable) -> Unit) {
         if (shuttingDown) return
 
         shuttingDown = true
 
-        if (shutdownHooks.isEmpty()) {
-            callback()
-        } else {
-            shutdownHooks.values.forEach {
-                try {
-                    it()
-                } catch (e: Throwable) {
-                    onError(e)
-                }
+        shutdownHooks.values.forEach {
+            try {
+                it()
+            } catch (e: Throwable) {
+                onError(e)
             }
-            callback()
         }
     }
-
-    /**
-     * @see javafx.application.Application.stop
-     */
-    abstract fun exit()
 
 }
 

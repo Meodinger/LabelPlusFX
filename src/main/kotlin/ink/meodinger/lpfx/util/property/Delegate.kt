@@ -1,4 +1,4 @@
-@file:Suppress("KDocMissingDocumentation")
+@file:Suppress("unused", "KDocMissingDocumentation")
 
 package ink.meodinger.lpfx.util.property
 

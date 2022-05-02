@@ -359,7 +359,7 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun exitApplication() {
         if (state.controller.stay()) return
 
-        state.application.exit()
+        state.application.stop()
     }
 
     private fun searchAndReplace() {

@@ -79,9 +79,6 @@ fun main(vararg args: String) {
         }
     }
 
-    // For shutdown hooks
-    Platform.setImplicitExit(false)
-
     // Init options
     Options.init()
 

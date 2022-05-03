@@ -15,6 +15,7 @@ import ink.meodinger.lpfx.util.file.*
 import ink.meodinger.lpfx.util.image.*
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
+import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -807,7 +808,7 @@ class Controller(private val state: State) {
                 Logger.info("Project folder set to ${projectFolder.path}", LOG_SRC_CONTROLLER)
             }
         }
-        val result = showChoiceList(state.stage, potentialPics)
+        val result = showChoiceList(state.stage, sortByDigit(potentialPics))
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Cancel (selected none)", LOG_SRC_CONTROLLER)

@@ -81,6 +81,8 @@ fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<
     return dialog.showAndWait()
 }
 
+// TODO: CellFactory
+
 /**
  * Show a dialog that allow user select from a ListView to a ListView
  * @param owner Owner

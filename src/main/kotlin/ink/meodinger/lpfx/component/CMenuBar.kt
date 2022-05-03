@@ -15,6 +15,7 @@ import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
@@ -396,7 +397,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 false
             }.map(Path::name).collect(Collectors.toList())
 
-        showChoiceList(state.stage, unselected, selected).ifPresent {
+        showChoiceList(state.stage, sortByDigit(unselected), sortByDigit(selected)).ifPresent {
             if (it.isEmpty()) {
                 showInfo(state.stage, I18N["info.required_at_least_1_pic"])
                 return@ifPresent

@@ -81,16 +81,15 @@ fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<
     return dialog.showAndWait()
 }
 
-// TODO: CellFactory
-
 /**
  * Show a dialog that allow user select from a ListView to a ListView
  * @param owner Owner
  * @param unselected Potential items
  * @param selected Already selected items
+ * @param cellFactory CellFactory for ListView&lt;T&gt;
  * @return List? of T
  */
-fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = ArrayList()): Optional<List<T>> {
+fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T>, cellFactory: Callback<ListView<T>, ListCell<T>>? = null): Optional<List<T>> {
     val left = ListView<T>()
     val right = ListView<T>()
 
@@ -116,6 +115,8 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
         add(Label(I18N["util.dialog.choose.selected"]), 2, 0)
         add(left, 0, 1) {
             selectionModel.selectionMode = SelectionMode.MULTIPLE
+            if (cellFactory != null) setCellFactory(cellFactory)
+
             items.addAll(unselected)
         }
         add(VBox(), 1, 1) {
@@ -132,6 +133,8 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T> = 
         }
         add(right, 2, 1) {
             selectionModel.selectionMode = SelectionMode.MULTIPLE
+            if (cellFactory != null) setCellFactory(cellFactory)
+
             items.addAll(selected)
         }
     }

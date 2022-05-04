@@ -808,7 +808,7 @@ class Controller(private val state: State) {
                 Logger.info("Project folder set to ${projectFolder.path}", LOG_SRC_CONTROLLER)
             }
         }
-        val result = showChoiceList(state.stage, sortByDigit(potentialPics))
+        val result = showChoiceList(state.stage, sortByDigit(potentialPics), emptyList())
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Cancel (selected none)", LOG_SRC_CONTROLLER)

@@ -1,5 +1,3 @@
-@file:Suppress("KDocMissingDocumentation")
-
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.Version
@@ -15,38 +13,21 @@ import java.io.File
  * Have fun with my code!
  */
 
-// Current Version
+/**
+ * Current Version
+ */
 val V: Version = Version(2, 3, 0)
 
-//Size related constants
-const val PANE_WIDTH : Double = 600.0
-const val PANE_HEIGHT: Double = 400.0
-const val COMMON_GAP : Double = 16.0
+/**
+ * Default Filename Placeholder. It's Esperanto!
+ */
+const val FILENAME_DEFAULT  : String = "Nova traduko"
 
-
-// Scale
-const val SCALE_MIN : Double = 0.1
-const val SCALE_MAX : Double = 4.0
-const val SCALE_INIT: Double = 0.8
-
-
-// CLabel Radius Range
-const val LABEL_RADIUS_MIN: Double= 8.0
-const val LABEL_RADIUS_MAX: Double = 48.0
-
-
-// TextArea Font Size Range
-const val FONT_SIZE_MIN: Int = 12
-const val FONT_SIZE_MAX: Int = 64
-
-
-// TreeItem Graphic radius
-const val GRAPHICS_CIRCLE_RADIUS: Double = 8.0
-
-const val GENERAL_ICON_RADIUS: Double = 32.0
-
-const val FILENAME_DEFAULT  : String = "Nova traduko" // It's Esperanto!
+/**
+ * Backup file folder name
+ */
 const val FOLDER_NAME_BAK   : String = "backup"
+
 const val EXTENSION_PIC_BMP : String = "bmp"
 const val EXTENSION_PIC_GIF : String = "gif"
 const val EXTENSION_PIC_PNG : String = "png"
@@ -75,22 +56,25 @@ val EXTENSIONS_FILE: List<String> = listOf(
     EXTENSION_FILE_MEO
 )
 
-// For label/group not found
+/**
+ * General Int value for something not found
+ */
 const val NOT_FOUND: Int = -1
-
-// Log Source
-const val LOG_SRC_APPLICATION: String = "Application"
-const val LOG_SRC_CONTROLLER : String = "Controller"
-const val LOG_SRC_ACTION     : String = "Action"
-const val LOG_SRC_STATE      : String = "State"
-const val LOG_SRC_OTHER      : String = "Other"
 
 /**
  * Work Mode
  * @param description Display name for WorkMode
  */
 enum class WorkMode(val description: String) {
+
+    /**
+     * A WorkMode that specified for inputing translation of labels
+     */
     InputMode(I18N["mode.work.input"]),
+
+    /**
+     * A WorkMode that specified for creating labels
+     */
     LabelMode(I18N["mode.work.label"]);
 
     override fun toString(): String = description
@@ -102,7 +86,15 @@ enum class WorkMode(val description: String) {
  * @param description Display name for ViewMode
  */
 enum class ViewMode(val description: String) {
+
+    /**
+     * A ViewMode that displays labels by their indices
+     */
     IndexMode(I18N["mode.view.index"]),
+
+    /**
+     * A ViewMode that displays labels group by their gourpId
+     */
     GroupMode(I18N["mode.view.group"]);
 
     override fun toString(): String = description
@@ -111,9 +103,18 @@ enum class ViewMode(val description: String) {
 
 /**
  * Translation File Type
+ * @param description The description for the file type
+ * @param extension The extension of the file type
  */
 enum class FileType(val description: String, val extension: String) {
+    /**
+     * Legacy LP file format
+     */
     LPFile(I18N["file_type.translation_lp"], EXTENSION_FILE_LP),
+
+    /**
+     * JSON Meo file format
+     */
     MeoFile(I18N["file_type.translation_meo"], EXTENSION_FILE_MEO);
 
     override fun toString(): String = description
@@ -123,7 +124,7 @@ enum class FileType(val description: String, val extension: String) {
          * NOTE: It's not safe to determine a file's type by its extension
          * All files with unknown extension will be treat as MeoFile
          */
-        fun getFileType(file: File): FileType = when (file.extension) {
+        fun getFileType(file: File): FileType = when (file.extension.lowercase()) {
             EXTENSION_FILE_MEO -> MeoFile
             EXTENSION_FILE_LP -> LPFile
             EXTENSION_BAK -> MeoFile

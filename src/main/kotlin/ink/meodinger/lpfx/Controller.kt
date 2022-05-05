@@ -99,9 +99,9 @@ class Controller(private val state: State) {
                 Platform.runLater {
                     lBackup.text = String.format(I18N["stats.last_backup.s"], bakTimeFormatter.format(time))
                 }
-                Logger.info("Backed TransFile", LOG_SRC_CONTROLLER)
+                Logger.info("Backed TransFile", "Controller")
             } catch (e: IOException) {
-                Logger.error("Auto-backup failed", LOG_SRC_CONTROLLER)
+                Logger.error("Auto-backup failed", "Controller")
                 Logger.exception(e)
             }
         }
@@ -161,7 +161,7 @@ class Controller(private val state: State) {
                         INIT_IMAGE
                     }
                 } else {
-                    Logger.error("Picture `${file.path}` not exists", LOG_SRC_CONTROLLER)
+                    Logger.error("Picture `${file.path}` not exists", "Controller")
                     showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
 
                     INIT_IMAGE
@@ -188,7 +188,7 @@ class Controller(private val state: State) {
     init {
         state.controller = this
 
-        Logger.info("Controller initializing...", LOG_SRC_CONTROLLER)
+        Logger.info("Controller initializing...", "Controller")
 
         init()
         bind()
@@ -196,7 +196,7 @@ class Controller(private val state: State) {
         effect()
         transform()
 
-        Logger.info("Controller initialized", LOG_SRC_CONTROLLER)
+        Logger.info("Controller initialized", "Controller")
 
         // Display default image
         cLabelPane.isVisible = false
@@ -211,7 +211,7 @@ class Controller(private val state: State) {
      * Components Initialize
      */
     private fun init() {
-        Logger.info("Initializing components...", LOG_SRC_CONTROLLER)
+        Logger.info("Initializing components...", "Controller")
 
         // Last directory
         var lastFile = RecentFiles.lastFile
@@ -224,11 +224,11 @@ class Controller(private val state: State) {
                 lastFile = RecentFiles.lastFile
             }
         }
-        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", LOG_SRC_CONTROLLER)
+        Logger.info("Set CFileChooser lastDirectory: ${CFileChooser.lastDirectory}", "Controller")
 
         // Settings
         state.viewMode = Settings.viewModes[state.workMode.ordinal]
-        Logger.info("Applied Settings @ ViewMode", LOG_SRC_CONTROLLER)
+        Logger.info("Applied Settings @ ViewMode", "Controller")
 
         // Drag and Drop
         view.setOnDragOver {
@@ -249,44 +249,44 @@ class Controller(private val state: State) {
             }
             it.consume() // Consume used event
         }
-        Logger.info("Enabled Drag and Drop", LOG_SRC_CONTROLLER)
+        Logger.info("Enabled Drag and Drop", "Controller")
 
         // Disable mnemonic parsing in TransArea
         cTransArea.addEventFilter(KeyEvent.ANY) {
             if (it.code == KeyCode.ALT) it.consume()
         }
-        Logger.info("Registered CTransArea mnemonic parsing", LOG_SRC_CONTROLLER)
+        Logger.info("Registered CTransArea mnemonic parsing", "Controller")
 
         // Register Alias & Global redo/undo in TransArea
         cTransArea.addEventFilter(KeyEvent.KEY_PRESSED) {
             if ((it.isControlDown || it.isMetaDown) && it.code == KeyCode.Z) {
                 if (!it.isShiftDown) {
-                    if (!cTransArea.isUndoable) state.undo() else cTransArea.undo()
+                    if (cTransArea.isUndoable) cTransArea.undo() else if (state.undoable) state.undo()
                 } else {
-                    if (!cTransArea.isRedoable) state.redo() else cTransArea.redo()
+                    if (cTransArea.isRedoable) cTransArea.redo() else if (state.redoable) state.redo()
                 }
                 it.consume() // disable default undo/redo
             }
         }
-        Logger.info("Registered CTransArea Alias & Global undo/redo", LOG_SRC_CONTROLLER)
+        Logger.info("Registered CTransArea Alias & Global undo/redo", "Controller")
 
         // Register Ctrl/Alt/Meta + Scroll with font size change in TransArea
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
             if (!(it.isControlDown || it.isAltDown || it.isMetaDown)) return@addEventHandler
 
             val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).roundToInt()
-                .coerceAtLeast(FONT_SIZE_MIN).coerceAtMost(FONT_SIZE_MAX)
+                .coerceAtLeast(12).coerceAtMost(64)
 
             cTransArea.font = cTransArea.font.s(newSize.toDouble())
             cTransArea.positionCaret(0)
 
             it.consume()
         }
-        Logger.info("Registered TransArea font size change", LOG_SRC_CONTROLLER)
+        Logger.info("Registered TransArea font size change", "Controller")
 
         // Register CGroupBar handler
         cGroupBar.setOnGroupCreate { (cTreeView.contextMenu as CTreeMenu).triggerGroupCreate() }
-        Logger.info("Registered CGroupBar Add Handler", LOG_SRC_CONTROLLER)
+        Logger.info("Registered CGroupBar Add Handler", "Controller")
 
         // Register CLabelPane handler
         cLabelPane.setOnLabelCreate {
@@ -360,28 +360,28 @@ class Controller(private val state: State) {
             cLabelPane.clearText()
             cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
-        Logger.info("Registered CLabelPane Handler", LOG_SRC_CONTROLLER)
+        Logger.info("Registered CLabelPane Handler", "Controller")
     }
     /**
      * Properties' bindings
      */
     private fun bind() {
-        Logger.info("Binding properties...", LOG_SRC_CONTROLLER)
+        Logger.info("Binding properties...", "Controller")
 
         // Preferences
-        view.showStatsBarProperty().bind(Preference.showStatsBarProperty())
+        view.showStatsBarProperty().bindBidirectional(Preference.showStatsBarProperty())
         cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
         pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
-        Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", LOG_SRC_CONTROLLER)
+        Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", "Controller")
 
         // CLigatureTextArea - rules
         cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
-        Logger.info("Bound ligature rules", LOG_SRC_CONTROLLER)
+        Logger.info("Bound ligature rules", "Controller")
 
         // RecentFiles
         view.menuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
-        Logger.info("Bound recent files menu", LOG_SRC_CONTROLLER)
+        Logger.info("Bound recent files menu", "Controller")
 
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!state.openedProperty())
@@ -392,19 +392,19 @@ class Controller(private val state: State) {
         cGroupBox.disableProperty().bind(!state.openedProperty())
         cSlider.disableProperty().bind(!state.openedProperty())
         cLabelPane.disableProperty().bind(!state.openedProperty())
-        Logger.info("Bound disabled", LOG_SRC_CONTROLLER)
+        Logger.info("Bound disabled", "Controller")
 
         // CSlider - CLabelPane#scale
         cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
         cSlider.minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
         cSlider.maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
         cSlider.scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
-        Logger.info("Bound scale", LOG_SRC_CONTROLLER)
+        Logger.info("Bound scale", "Controller")
 
         // Switch Button text
         bSwitchWorkMode.textProperty().bind(state.workModeProperty().asString())
         bSwitchViewMode.textProperty().bind(state.viewModeProperty().asString())
-        Logger.info("Bound switch button text", LOG_SRC_CONTROLLER)
+        Logger.info("Bound switch button text", "Controller")
 
         val groupIndexListener = onNew<Number, Int> {
             if (state.viewMode == ViewMode.GroupMode) {
@@ -427,13 +427,13 @@ class Controller(private val state: State) {
         cGroupBar.groupsProperty().bind(groupsBinding)
         cGroupBar.indexProperty().addListener(groupIndexListener)
         state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBar.indexProperty()::set))
-        Logger.info("Bound GroupBar & CurrentGroupId", LOG_SRC_CONTROLLER)
+        Logger.info("Bound GroupBar & CurrentGroupId", "Controller")
 
         // GroupBox
         cGroupBox.itemsProperty().bind(groupsBinding)
         cGroupBox.indexProperty().addListener(groupIndexListener)
         state.currentGroupIdProperty().addListener(onNew<Number, Int>(cGroupBox.indexProperty()::set))
-        Logger.info("Bound GroupBox & CurrentGroupId", LOG_SRC_CONTROLLER)
+        Logger.info("Bound GroupBox & CurrentGroupId", "Controller")
 
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
@@ -443,14 +443,14 @@ class Controller(private val state: State) {
         state.currentPicNameProperty().addListener(onNew {
             cPicBox.index = state.transFile.sortedPicNames.indexOf(it)
         })
-        Logger.info("Bound PicBox & CurrentPicName", LOG_SRC_CONTROLLER)
+        Logger.info("Bound PicBox & CurrentPicName", "Controller")
 
         // TreeView
         cTreeView.groupsProperty().bind(groupsBinding)
         cTreeView.labelsProperty().bind(labelsBinding)
         cTreeView.rootNameProperty().bind(state.currentPicNameProperty())
         cTreeView.viewModeProperty().bind(state.viewModeProperty())
-        Logger.info("Bound CTreeView properties", LOG_SRC_CONTROLLER)
+        Logger.info("Bound CTreeView properties", "Controller")
 
         // LabelPane
         cLabelPane.groupsProperty().bind(groupsBinding)
@@ -466,13 +466,13 @@ class Controller(private val state: State) {
                 WorkMode.InputMode -> Cursor.DEFAULT
             }
         })
-        Logger.info("Bound CLabelPane properties", LOG_SRC_CONTROLLER)
+        Logger.info("Bound CLabelPane properties", "Controller")
     }
     /**
      * Properties' listeners (for unbindable)
      */
     private fun listen() {
-        Logger.info("Attaching Listeners...", LOG_SRC_CONTROLLER)
+        Logger.info("Attaching Listeners...", "Controller")
 
         // Bind Tree and Current
         cTreeView.selectedGroupProperty().addListener(onNew<Number, Int> {
@@ -481,19 +481,19 @@ class Controller(private val state: State) {
         cTreeView.selectedLabelProperty().addListener(onNew<Number, Int> {
             if (it != NOT_FOUND) state.currentLabelIndex = it
         })
-        Logger.info("Listened for selectedGroup/Label", LOG_SRC_CONTROLLER)
+        Logger.info("Listened for selectedGroup/Label", "Controller")
 
         // isChanged
         cTransArea.textProperty().addListener(onChange {
             if (cTransArea.isBound) state.isChanged = true
         })
-        Logger.info("Listened for isChanged", LOG_SRC_CONTROLLER)
+        Logger.info("Listened for isChanged", "Controller")
     }
     /**
      * Properties' effect on view
      */
     private fun effect() {
-        Logger.info("Applying Affections...", LOG_SRC_CONTROLLER)
+        Logger.info("Applying Affections...", "Controller")
 
         // Default image auto-center
         cLabelPane.widthProperty().addListener(onChange {
@@ -502,7 +502,7 @@ class Controller(private val state: State) {
         cLabelPane.heightProperty().addListener(onChange {
             if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         })
-        Logger.info("Added effect: default image auto-center", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: default image auto-center", "Controller")
 
         // Update StatsBar
         state.currentPicNameProperty().addListener(onNew {
@@ -515,13 +515,13 @@ class Controller(private val state: State) {
                 lLocation.text = String.format("%s : %02d", state.currentPicName, it)
             }
         })
-        Logger.info("Added effect: show info on InfoLabel", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: show info on InfoLabel", "Controller")
 
         // Clear text when some state change
         val clearTextListener = onChange<Any> { cLabelPane.clearText() }
         state.currentGroupIdProperty().addListener(clearTextListener)
         state.workModeProperty().addListener(clearTextListener)
-        Logger.info("Added effect: clear text when some state change", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: clear text when some state change", "Controller")
 
         // Set current-label-index to unbind TextArea & clear CTreeView focus
         state.currentPicNameProperty().addListener(onChange {
@@ -542,7 +542,7 @@ class Controller(private val state: State) {
             // bind new text property
             cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
         })
-        Logger.info("Added effect: bind text property on CurrentLabelIndex change", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: bind text property on CurrentLabelIndex change", "Controller")
 
         // Bind Tree and LabelPane
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -561,7 +561,7 @@ class Controller(private val state: State) {
             val item = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex + direction)
             if (item is CTreeLabelItem) cLabelPane.moveToLabel(item.index)
         }
-        Logger.info("Added effect: move to label on CTreeLabelItem select", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: move to label on CTreeLabelItem select", "Controller")
 
         // When LabelPane Box Selection
         cLabelPane.selectedLabelsProperty().addListener(SetChangeListener {
@@ -587,13 +587,13 @@ class Controller(private val state: State) {
                 }))
             }
         }
-        Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", LOG_SRC_CONTROLLER)
+        Logger.info("Added effect: CLabelPane box-selection to CTreeView select & delete", "Controller")
     }
     /**
      * Transformations
      */
     private fun transform() {
-        Logger.info("Applying Transformations...", LOG_SRC_CONTROLLER)
+        Logger.info("Applying Transformations...", "Controller")
 
         // Transform tab press in CTreeView to ViewModeBtn click
         cTreeView.addEventFilter(KeyEvent.KEY_PRESSED) {
@@ -602,7 +602,7 @@ class Controller(private val state: State) {
             bSwitchViewMode.fire()
             it.consume() // Disable tab shift
         }
-        Logger.info("Transformed Tab on CTreeView", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed Tab on CTreeView", "Controller")
 
         // Transform tab press in CLabelPane to WorkModeBtn click
         cLabelPane.addEventFilter(KeyEvent.KEY_PRESSED) {
@@ -611,7 +611,7 @@ class Controller(private val state: State) {
             bSwitchWorkMode.fire()
             it.consume() // Disable tab shift
         }
-        Logger.info("Transformed Tab on CLabelPane", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed Tab on CLabelPane", "Controller")
 
         // Transform number key press to CTreeView select
         view.addEventHandler(KeyEvent.KEY_PRESSED) {
@@ -628,7 +628,7 @@ class Controller(private val state: State) {
 
             it.consume() // Consume used event
         }
-        Logger.info("Transformed num-key pressed", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed num-key pressed", "Controller")
 
         // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
         val arrowKeyChangePicHandler = EventHandler<KeyEvent> {
@@ -653,7 +653,7 @@ class Controller(private val state: State) {
 
             it.consume() // Consume used event
         }
-        Logger.info("Transformed Ctrl + Left/Right", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed Ctrl + Left/Right", "Controller")
 
         /**
          * Find next LabelItem as int index.
@@ -712,7 +712,7 @@ class Controller(private val state: State) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
-        Logger.info("Transformed Ctrl + Up/Down", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed Ctrl + Up/Down", "Controller")
 
         // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
@@ -741,7 +741,7 @@ class Controller(private val state: State) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
-        Logger.info("Transformed Ctrl + Enter", LOG_SRC_CONTROLLER)
+        Logger.info("Transformed Ctrl + Enter", "Controller")
     }
 
     // Controller Methods
@@ -776,7 +776,7 @@ class Controller(private val state: State) {
      * @return ProjectFolder if success, null if fail
      */
     fun new(file: File): File? {
-        Logger.info("Newing to ${file.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Newing to ${file.path}", "Controller")
 
         // Choose Pics
         var projectFolder = file.parentFile
@@ -785,7 +785,7 @@ class Controller(private val state: State) {
         while (potentialPics.isEmpty()) {
             // Find pictures
             projectFolder.listFiles()?.forEach {
-                if (it.isFile && EXTENSIONS_PIC.contains(it.extension)) {
+                if (it.isFile && EXTENSIONS_PIC.contains(it.extension.lowercase())) {
                     potentialPics.add(it.name)
                 }
             }
@@ -799,29 +799,29 @@ class Controller(private val state: State) {
                     if (newFolder != null) projectFolder = newFolder
                 } else {
                     // Do not specify, cancel
-                    Logger.info("Cancel (project folder has no pictures)", LOG_SRC_CONTROLLER)
+                    Logger.info("Cancel (project folder has no pictures)", "Controller")
                     showInfo(state.stage, I18N["common.cancel"])
                     return null
                 }
             } else {
                 // Find some pics, continue procedure
-                Logger.info("Project folder set to ${projectFolder.path}", LOG_SRC_CONTROLLER)
+                Logger.info("Project folder set to ${projectFolder.path}", "Controller")
             }
         }
         val result = showChoiceList(state.stage, sortByDigit(potentialPics), emptyList())
         if (result.isPresent) {
             if (result.get().isEmpty()) {
-                Logger.info("Cancel (selected none)", LOG_SRC_CONTROLLER)
+                Logger.info("Cancel (selected none)", "Controller")
                 showInfo(state.stage, I18N["info.required_at_least_1_pic"])
                 return null
             }
             selectedPics.addAll(result.get())
         } else {
-            Logger.info("Cancel (didn't do the selection)", LOG_SRC_CONTROLLER)
+            Logger.info("Cancel (didn't do the selection)", "Controller")
             showInfo(state.stage, I18N["common.cancel"])
             return null
         }
-        Logger.info("Chose pictures", LOG_SRC_CONTROLLER)
+        Logger.info("Chose pictures", "Controller")
 
         // Prepare new TransFile
         val groupCreateList = Settings.isGroupCreateOnNewTransList
@@ -831,19 +831,19 @@ class Controller(private val state: State) {
             groupList = groupNames.mapIndexedTo(ArrayList()) { index, name -> TransGroup(name, groupColors[index]) },
             transMap  = selectedPics.associateWithTo(HashMap()) { ArrayList() }
         )
-        Logger.info("Built TransFile", LOG_SRC_CONTROLLER)
+        Logger.info("Built TransFile", "Controller")
 
         // Export to file
         try {
             export(file, transFile)
         } catch (e: IOException) {
-            Logger.error("New failed", LOG_SRC_CONTROLLER)
+            Logger.error("New failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.new_failed"])
             showException(state.stage, e)
             return null
         }
-        Logger.info("Newed TransFile", LOG_SRC_CONTROLLER)
+        Logger.info("Newed TransFile", "Controller")
 
         return projectFolder
     }
@@ -853,7 +853,7 @@ class Controller(private val state: State) {
      * @param projectFolder Which folder the pictures locate in
      */
     fun open(file: File, projectFolder: File) {
-        Logger.info("Opening TransFile: ${file.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Opening TransFile: ${file.path}", "Controller")
 
         // Load File
         val transFile: TransFile
@@ -861,13 +861,13 @@ class Controller(private val state: State) {
             transFile = load(file)
             transFile.projectFolder = projectFolder
         } catch (e: IOException) {
-            Logger.error("Open failed", LOG_SRC_CONTROLLER)
+            Logger.error("Open failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.open_failed"])
             showException(state.stage, e)
             return
         }
-        Logger.info("Loaded TransFile", LOG_SRC_CONTROLLER)
+        Logger.info("Loaded TransFile", "Controller")
 
         // Opened, update state
         state.translationFile = file
@@ -879,7 +879,7 @@ class Controller(private val state: State) {
         if (!RecentFiles.recentFiles.contains(file)) {
             val comment = transFile.comment.trim().replace(Regex("\n(\\s)+"), "\n")
             if (!TransFile.DEFAULT_COMMENT_LIST.contains(comment)) {
-                Logger.info("Showed modified comment", LOG_SRC_CONTROLLER)
+                Logger.info("Showed modified comment", "Controller")
                 showInfo(state.stage, I18N["m.comment.dialog.content"], comment, I18N["common.info"])
             }
         }
@@ -892,9 +892,9 @@ class Controller(private val state: State) {
         val bakDir = state.getBakFolder()!!
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             backupManager.schedule()
-            Logger.info("Scheduled auto-backup", LOG_SRC_CONTROLLER)
+            Logger.info("Scheduled auto-backup", "Controller")
         } else {
-            Logger.warning("Auto-backup unavailable", LOG_SRC_CONTROLLER)
+            Logger.warning("Auto-backup unavailable", "Controller")
             showWarning(state.stage, I18N["warning.auto_backup_unavailable"])
         }
 
@@ -923,7 +923,7 @@ class Controller(private val state: State) {
 
         // Change title
         state.stage.title = INFO["application.name"] + " - " + file.name
-        Logger.info("Opened TransFile", LOG_SRC_CONTROLLER)
+        Logger.info("Opened TransFile", "Controller")
     }
     /**
      * Save a TransFile
@@ -934,7 +934,7 @@ class Controller(private val state: State) {
         // Whether overwriting existing file
         val overwrite = file.exists()
 
-        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite", LOG_SRC_CONTROLLER)
+        Logger.info("Saving to ${file.path}, silent:$silent, overwrite:$overwrite", "Controller")
 
         // Check folder
         if (!silent) if (file.parentFile != state.transFile.projectFolder) {
@@ -949,30 +949,30 @@ class Controller(private val state: State) {
         try {
             export(exportDest, state.transFile)
         } catch (e: IOException) {
-            Logger.error("Export translation failed", LOG_SRC_CONTROLLER)
+            Logger.error("Export translation failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.save_failed"])
             showException(state.stage, e)
 
-            Logger.info("Save failed", LOG_SRC_CONTROLLER)
+            Logger.info("Save failed", "Controller")
             return
         }
-        Logger.info("Exported translation", LOG_SRC_CONTROLLER)
+        Logger.info("Exported translation", "Controller")
 
         // Transfer to origin file if overwrite
         if (overwrite) {
             try {
                 transfer(exportDest, file)
             } catch (e: Exception) {
-                Logger.error("Transfer temp file failed", LOG_SRC_CONTROLLER)
+                Logger.error("Transfer temp file failed", "Controller")
                 Logger.exception(e)
                 showError(state.stage, I18N["error.save_temp_transfer_failed"])
                 showException(state.stage, e)
 
-                Logger.info("Save failed", LOG_SRC_CONTROLLER)
+                Logger.info("Save failed", "Controller")
                 return
             }
-            Logger.info("Transferred temp file", LOG_SRC_CONTROLLER)
+            Logger.info("Transferred temp file", "Controller")
         }
 
         // Update state
@@ -992,7 +992,7 @@ class Controller(private val state: State) {
 
         if (!silent) showInfo(state.stage, I18N["info.saved_successfully"])
 
-        Logger.info("Saved TransFile", LOG_SRC_CONTROLLER)
+        Logger.info("Saved TransFile", "Controller")
     }
     /**
      * Recover from backup file
@@ -1000,21 +1000,21 @@ class Controller(private val state: State) {
      * @param to Which file will the backup recover to
      */
     fun recovery(from: File, to: File) {
-        Logger.info("Recovering from ${from.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Recovering from ${from.path}", "Controller")
 
         try {
-            val tempFile = File.createTempFile("LPFXTempFile", to.extension).apply(File::deleteOnExit)
+            val tempFile = File.createTempFile("LPFX", null).apply(File::deleteOnExit)
             val transFile = load(from)
 
             export(tempFile, transFile)
             transfer(tempFile, to)
         } catch (e: Exception) {
-            Logger.error("Recover failed", LOG_SRC_CONTROLLER)
+            Logger.error("Recover failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.recovery_failed"])
             showException(state.stage, e)
         }
-        Logger.info("Recovered to ${to.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Recovered to ${to.path}", "Controller")
 
         open(to, to.parentFile)
     }
@@ -1023,12 +1023,12 @@ class Controller(private val state: State) {
      * @param file Which file will the TransFile write to
      */
     fun export(file: File) {
-        Logger.info("Exporting to ${file.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Exporting to ${file.path}", "Controller")
 
         try {
             export(file, state.transFile)
         } catch (e: IOException) {
-            Logger.error("Export failed", LOG_SRC_CONTROLLER)
+            Logger.error("Export failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.export_failed"])
             showException(state.stage, e)
@@ -1041,12 +1041,12 @@ class Controller(private val state: State) {
      * @param file Which file will the zip file write to
      */
     fun pack(file: File) {
-        Logger.info("Packing to ${file.path}", LOG_SRC_CONTROLLER)
+        Logger.info("Packing to ${file.path}", "Controller")
 
         try {
-            pack(file, FileType.getFileType(state.translationFile), state.transFile)
+            pack(file, state.transFile, FileType.getFileType(state.translationFile))
         } catch (e : IOException) {
-            Logger.error("Pack failed", LOG_SRC_CONTROLLER)
+            Logger.error("Pack failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.export_failed"])
             showException(state.stage, e)
@@ -1097,14 +1097,14 @@ class Controller(private val state: State) {
         val time = Date().time
         val last = Preference.lastUpdateNotice
         if (time - last < delay) {
-            Logger.info("Check suppressed, last notice time is $last", LOG_SRC_CONTROLLER)
+            Logger.info("Check suppressed, last notice time is $last", "Controller")
             return
         }
 
         LPFXTask.createTask<Unit> {
-            Logger.info("Fetching latest version...", LOG_SRC_CONTROLLER)
+            Logger.info("Fetching latest version...", "Controller")
             val version = fetchLatestSync()
-            if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", LOG_SRC_CONTROLLER)
+            if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", "Controller")
 
             if (version > V) Platform.runLater {
                 val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
@@ -1112,12 +1112,12 @@ class Controller(private val state: State) {
                 val dialog = Dialog<ButtonType>()
                 dialog.initOwner(this@Controller.state.stage)
                 dialog.title = I18N["update.dialog.title"]
-                dialog.graphic = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(GENERAL_ICON_RADIUS))
+                dialog.graphic = ImageView(IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS))
                 dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
-                dialog.withContent(VBox()) {
+                dialog.dialogPane.withContent(VBox()) {
                     add(Label(String.format(I18N["update.dialog.content.s"], version)))
                     add(Separator()) {
-                        padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0)
+                        padding = Insets(8.0, 0.0, 8.0, 0.0)
                     }
                     add(Hyperlink(I18N["update.dialog.link"])) {
                         padding = Insets(0.0)
@@ -1132,7 +1132,7 @@ class Controller(private val state: State) {
                     if (type == suppressNoticeButtonType) {
                         Preference.lastUpdateNotice = time
                         Logger.info("Check suppressed, next notice time is ${time + delay}",
-                            LOG_SRC_CONTROLLER
+                            "Controller"
                         )
                     }
                 }
@@ -1145,7 +1145,7 @@ class Controller(private val state: State) {
         val api = "https://api.github.com/repos/Meodinger/LabelPlusFX/releases"
         try {
             val proxy = ProxySelector.getDefault().select(URI(api))[0].also {
-                if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", LOG_SRC_CONTROLLER)
+                if (it.type() != Proxy.Type.DIRECT) Logger.info("Using proxy $it", "Controller")
             }
             val connection = URL(api).openConnection(proxy).apply { connect() } as HttpsURLConnection
             if (connection.responseCode != 200) throw ConnectException("Response code ${connection.responseCode}")
@@ -1155,15 +1155,15 @@ class Controller(private val state: State) {
                 else throw IOException("Should get an array, but not")
             }
         } catch (e: NoRouteToHostException) {
-            Logger.warning("No network connection", LOG_SRC_CONTROLLER)
+            Logger.warning("No network connection", "Controller")
         } catch (e: SocketException) {
-            Logger.warning("Socket failed: ${e.message}", LOG_SRC_CONTROLLER)
+            Logger.warning("Socket failed: ${e.message}", "Controller")
         } catch (e: SocketTimeoutException) {
-            Logger.warning("Connect timeout", LOG_SRC_CONTROLLER)
+            Logger.warning("Connect timeout", "Controller")
         } catch (e: ConnectException) {
-            Logger.warning("Connect failed: ${e.message}", LOG_SRC_CONTROLLER)
+            Logger.warning("Connect failed: ${e.message}", "Controller")
         } catch (e: IOException) {
-            Logger.warning("Fetch I/O failed", LOG_SRC_CONTROLLER)
+            Logger.warning("Fetch I/O failed", "Controller")
             Logger.exception(e)
         }
         return Version.V0

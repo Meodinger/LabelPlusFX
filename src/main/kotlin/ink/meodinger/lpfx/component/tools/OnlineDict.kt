@@ -137,8 +137,8 @@ class OnlineDict : Stage() {
                     isInstant = false
                     fontSize = 16.0
 
-                    padding = Insets(COMMON_GAP, 0.0, COMMON_GAP, COMMON_GAP)
-                    prefWidthProperty().bind(this@scroll.widthProperty() - COMMON_GAP)
+                    padding = Insets(16.0, 0.0, 16.0, 16.0)
+                    prefWidthProperty().bind(this@scroll.widthProperty() - 16.0)
                 }
             }
         })
@@ -160,16 +160,16 @@ class OnlineDict : Stage() {
 
     private fun searchWordSync(word: String) {
         val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
-        Logger.debug("Dictionary: Fetching URL ${searchConnection.url}", LOG_SRC_OTHER)
+        Logger.debug("Dictionary: Fetching URL ${searchConnection.url}", "Dictionary")
         if (searchConnection.responseCode != 200) {
-            Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
+            Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
 
         val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
-            Logger.debug("Dictionary: Got HTML content:", LOG_SRC_OTHER)
-            Logger.debug(it, LOG_SRC_OTHER)
+            Logger.debug("Dictionary: Got HTML content:", "Dictionary")
+            Logger.debug(it, "Dictionary")
         }
         val searchPage = parse(searchHTML)
         val searchResults = searchPage.body.children[1].children[3]
@@ -182,16 +182,16 @@ class OnlineDict : Stage() {
         }
 
         val contentConnection = URL(JD_SITE + first.attributes["href"]).openConnection().apply { connect() } as HttpsURLConnection
-        Logger.debug("Dictionary: Fetching URL ${contentConnection.url}", LOG_SRC_OTHER)
+        Logger.debug("Dictionary: Fetching URL ${contentConnection.url}", "Dictionary")
         if (contentConnection.responseCode != 200){
-            Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), LOG_SRC_OTHER)
+            Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
 
         val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
-            Logger.debug("Dictionary: Got HTML content:", LOG_SRC_OTHER)
-            Logger.debug(it, LOG_SRC_OTHER)
+            Logger.debug("Dictionary: Got HTML content:", "Dictionary")
+            Logger.debug(it, "Dictionary")
         }
         // ContentHTML has unclosed div
         val contentPage = parse(contentHTML.replace("</body>", "</div></body>"))
@@ -220,11 +220,11 @@ class OnlineDict : Stage() {
     private fun searchWord(word: String) {
         LPFXTask.createTask<Unit> { searchWordSync(word) }.apply {
             setOnSucceeded {
-                Logger.info("Dictionary: Fetched word info: $word", LOG_SRC_OTHER)
+                Logger.info("Dictionary: Fetched word info: $word", "Dictionary")
                 Platform.runLater { outputFlow.flow() }
             }
             setOnFailed {
-                Logger.error("Dictionary: Fetch word info failed", LOG_SRC_OTHER)
+                Logger.error("Dictionary: Fetch word info failed", "Dictionary")
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
                 showException(null, it)
@@ -238,11 +238,11 @@ class OnlineDict : Stage() {
     private fun translate(text: String) {
         LPFXTask.createTask<Unit> { translateSync(text) }.apply {
             setOnSucceeded {
-                Logger.info("Dictionary: Fetched translation", LOG_SRC_OTHER)
+                Logger.info("Dictionary: Fetched translation", "Dictionary")
                 Platform.runLater { outputFlow.flow() }
             }
             setOnFailed {
-                Logger.error("Dictionary: Fetch translation failed", LOG_SRC_OTHER)
+                Logger.error("Dictionary: Fetch translation failed", "Dictionary")
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
                 showException(null, it)

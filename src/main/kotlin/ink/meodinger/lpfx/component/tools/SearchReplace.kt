@@ -52,13 +52,13 @@ class SearchReplace(private val state: State) : Stage() {
     init {
         icons.add(ICON)
         title = I18N["snr.title"]
-        width = PANE_WIDTH * 0.8
-        height = PANE_HEIGHT / 2
+        width = 500.0
+        height = 200.0
         isResizable = false
         scene = Scene(StackPane().withContent(GridPane()) {
-            padding = Insets(COMMON_GAP)
-            hgap = COMMON_GAP
-            vgap = COMMON_GAP / 2
+            padding = Insets(16.0)
+            hgap = 16.0
+            vgap = 8.0
             alignment = Pos.CENTER
 
             //    0        1            2

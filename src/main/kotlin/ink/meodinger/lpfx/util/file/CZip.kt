@@ -15,6 +15,7 @@ import java.util.zip.ZipOutputStream
  * Zip files easier
  */
 class CZip @Throws(IOException::class) constructor(zipFile: File) {
+
     private val zip: ZipOutputStream
 
     init {
@@ -27,7 +28,7 @@ class CZip @Throws(IOException::class) constructor(zipFile: File) {
 
     /**
      * Zip a [file] into [path]
-     * @param file File to zip
+     * @param file File or Directory to zip
      * @param path Path in the Zip file
      */
     @Throws(IOException::class)

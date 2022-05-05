@@ -47,7 +47,7 @@ class CTreeMenu(
         title = I18N["context.add_group.dialog.title"]
         headerText = I18N["context.add_group.dialog.header"]
         dialogPane.buttonTypes.addAll(ButtonType.FINISH, ButtonType.CANCEL)
-        withContent(HBox(rAddGroupField, rAddGroupPicker)) { alignment = Pos.CENTER }
+        dialogPane.withContent(HBox(rAddGroupField, rAddGroupPicker)) { alignment = Pos.CENTER }
 
         setResultConverter converter@{
             return@converter when (it) {

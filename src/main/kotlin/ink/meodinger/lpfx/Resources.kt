@@ -1,5 +1,3 @@
-@file:Suppress("KDocMissingDocumentation")
-
 package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.util.image.imageFromFile
@@ -37,8 +35,18 @@ fun loadAsBytes(fileName: String): ByteArray = loadAsStream(fileName).readAllByt
  */
 fun loadAsImage(imageFileName: String): Image = Image(loadAsURL(imageFileName).toString())
 
+/**
+ * General Icon Radius
+ */
+const val GENERAL_ICON_RADIUS: Double = 32.0
+
 val ICON         = loadAsImage("/file/image/icon.png")
 val SAMPLE_IMAGE = loadAsImage("/file/image/sample_320x320.jpg")
+
+val IMAGE_CONFIRM = loadAsImage("/file/image/dialog/Confirm.png")
+val IMAGE_INFO    = loadAsImage("/file/image/dialog/Info.png")
+val IMAGE_ALERT   = loadAsImage("/file/image/dialog/Alert.png")
+val IMAGE_ERROR   = loadAsImage("/file/image/dialog/Error.png")
 
 // NOTE: Should not larger than 480x480
 val INIT_IMAGE   = Config.workingDir.resolve("init-image.png").takeIf(File::exists)?.let(::imageFromFile)

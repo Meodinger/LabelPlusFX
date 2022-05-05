@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.string.deleteTailEOL
+import ink.meodinger.lpfx.util.string.deleteTrailingEOL
 import ink.meodinger.lpfx.util.string.fixed
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
@@ -87,7 +87,7 @@ fun TransFile.toLPString(): String {
     // -->
     val gString = StringBuilder()
         .apply { for (group in groupList) append(group.name).append("\n") }
-        .deleteTailEOL().toString()
+        .deleteTrailingEOL().toString()
 
     val tString = StringBuilder()
         .apply { for (name in sortedPicNames) append(buildPic(name)) }

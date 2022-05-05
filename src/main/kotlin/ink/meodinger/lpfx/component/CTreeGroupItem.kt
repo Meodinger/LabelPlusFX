@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.transform
@@ -25,6 +24,13 @@ class CTreeGroupItem(
     groupName:  String = emptyString(),
     groupColor: Color  = Color.web("66CCFF")
 ) : TreeItem<String>() {
+
+    companion object {
+        /**
+         * TreeItem Graphic radius
+         */
+        const val GRAPHICS_CIRCLE_RADIUS: Double = 8.0
+    }
 
     // region Properties
 

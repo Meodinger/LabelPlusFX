@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.component.properties.AbstractPropertiesDialog
 import ink.meodinger.lpfx.component.properties.DialogLogs
 import ink.meodinger.lpfx.component.properties.DialogSettings
 import ink.meodinger.lpfx.component.tools.*
@@ -73,9 +74,23 @@ class LabelPlusFX: HookedApplication() {
     }
 
     /**
+     * Try to minimal the window to system tray if SystemTray supported.
+     * Otherwise, iconify it.
+     */
+    fun iconify() {
+        if (Config.supportSysTray) {
+            state.stage.hide()
+
+            SystemTray.getSystemTray().add(icon)
+        } else {
+            state.stage.isIconified = true
+        }
+    }
+
+    /**
      * Cheat Sheet. To display some hints on how to use LPFX
      */
-    val cheatSheet by lazy {
+    val cheatSheet: CheatSheet by lazy {
         CheatSheet().apply {
             setOnAction { state.application.hostServices.showDocument(INFO["application.help"]) }
         } withOwner state.stage
@@ -84,65 +99,65 @@ class LabelPlusFX: HookedApplication() {
     /**
      * Online Dict. To search some text quick and simple
      */
-    val onlineDict by lazy {
+    val onlineDict: OnlineDict by lazy {
         OnlineDict() withOwner state.stage
     }
 
     /**
      * Search & Replace. To search and replace some text in all TransFile
      */
-    val searchAndReplace by lazy {
+    val searchAndReplace: SearchReplace by lazy {
         SearchReplace(state) withOwner state.stage
     }
 
     /**
      * Format Checker. Check format when save
      */
-    val formatChecker by lazy {
+    val formatChecker: FormatChecker by lazy {
         FormatChecker(state) withOwner state.stage
     }
 
     /**
      * Specify Dialog. Specify files of pictures
      */
-    val dialogSpecify by lazy {
+    val dialogSpecify: SpecifyFiles by lazy {
         SpecifyFiles(state) withOwner state.stage
     }
 
     /**
      * Log-related Dialog
      */
-    val dialogLogs by lazy {
+    val dialogLogs: AbstractPropertiesDialog by lazy {
         DialogLogs() withOwner state.stage
     }
 
     /**
      * Settings Dialog
      */
-    val dialogSettings   by lazy {
+    val dialogSettings: AbstractPropertiesDialog by lazy {
         DialogSettings() withOwner state.stage
     }
 
     init {
         Logger.tic()
 
-        Logger.info("App initializing...", LOG_SRC_APPLICATION)
+        Logger.info("App initializing...", "Application")
 
         state.application = this
 
         Options.load()
 
-        Logger.info("App initialized", LOG_SRC_APPLICATION)
+        Logger.info("App initialized", "Application")
     }
 
     /**
      * Start the Application
      */
     override fun start(primaryStage: Stage) {
-        Logger.info("App starting...", LOG_SRC_APPLICATION)
+        Logger.info("App starting...", "Application")
 
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
-            Logger.error("Exception uncaught in Thread: ${t.name}", LOG_SRC_APPLICATION)
+            Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
             Logger.exception(e)
             showException(primaryStage, e)
         }
@@ -182,7 +197,7 @@ class LabelPlusFX: HookedApplication() {
 
         primaryStage.show()
 
-        Logger.info("App started", LOG_SRC_APPLICATION)
+        Logger.info("App started", "Application")
 
         if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE))
             if (Settings.autoCheckUpdate)
@@ -195,28 +210,14 @@ class LabelPlusFX: HookedApplication() {
      * Stop the Application
      */
     override fun stop() {
-        Logger.info("App stopping...", LOG_SRC_APPLICATION)
+        Logger.info("App stopping...", "Application")
 
         state.stage.close()
         Options.save()
 
         runHooks {
-            Logger.error("Exception occurred during hooks run", LOG_SRC_APPLICATION)
+            Logger.error("Exception occurred during hooks run", "Application")
             Logger.exception(it)
-        }
-    }
-
-    /**
-     * Try to minimal the window to system tray if SystemTray supported.
-     * Otherwise, iconify it.
-     */
-    fun iconify() {
-        if (Config.supportSysTray) {
-            state.stage.hide()
-
-            SystemTray.getSystemTray().add(icon)
-        } else {
-            state.stage.isIconified = true
         }
     }
 

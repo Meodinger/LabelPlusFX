@@ -13,3 +13,8 @@ import javafx.scene.input.MouseEvent
  * Whether click count equals 2
  */
 val MouseEvent.isDoubleClick: Boolean get() = clickCount == 2
+
+/**
+ * Whether click count equals 3
+ */
+val MouseEvent.isTripleClick: Boolean get() = clickCount == 3

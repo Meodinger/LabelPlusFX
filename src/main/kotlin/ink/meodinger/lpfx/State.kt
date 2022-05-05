@@ -28,100 +28,121 @@ import java.io.File
  */
 class State {
 
-    // ----- Global Variables ------ //
+    // region LPFX references
 
+    /**
+     * Reference to the LPFX Application. Available after launched
+     */
     var application: LabelPlusFX by once()
+
+    /**
+     * Reference to the Primary Stage. Available after started
+     */
     var stage: Stage by once()
+
+    /**
+     * Reference to the View. Available after started
+     */
     var view: View by once()
+
+    /**
+     * Reference to the Controller. Available after started
+     */
     var controller: Controller by once()
 
-    // ----- Runtime Properties ----- //
+    // endregion
+
+    // region Workspace Properties
 
     private val openedProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun openedProperty(): BooleanProperty = openedProperty
     /**
      * Whether opened a TransFile or not
+     */
+    fun openedProperty(): BooleanProperty = openedProperty
+    /**
+     * @see openedProperty
      */
     var isOpened: Boolean by openedProperty
 
     private val changedProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun changedProperty(): BooleanProperty = changedProperty
     /**
      * Whether changed a TransFile or not
+     */
+    fun changedProperty(): BooleanProperty = changedProperty
+    /**
+     * @see changedProperty
      */
     var isChanged: Boolean by changedProperty
 
     private val transFileProperty: ObjectProperty<TransFile> = SimpleObjectProperty(null)
-    fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
     /**
      * The opened TransFile
+     */
+    fun transFileProperty(): ObjectProperty<TransFile> = transFileProperty
+    /**
+     * @see transFileProperty
      */
     var transFile: TransFile by transFileProperty
 
     private val translationFileProperty: ObjectProperty<File> = SimpleObjectProperty(null)
-    fun translationFileProperty(): ObjectProperty<File> = translationFileProperty
     /**
      * The FileSystem file of the opened TransFile
+     */
+    fun translationFileProperty(): ObjectProperty<File> = translationFileProperty
+    /**
+     * @see translationFileProperty
      */
     var translationFile: File by translationFileProperty
 
     private val currentGroupIdProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
     /**
      * Index of current selected TransGroup
+     */
+    fun currentGroupIdProperty(): IntegerProperty = currentGroupIdProperty
+    /**
+     * @see currentGroupIdProperty
      */
     var currentGroupId: Int by currentGroupIdProperty
 
     private val currentPicNameProperty: StringProperty = SimpleStringProperty(emptyString())
-    fun currentPicNameProperty(): StringProperty = currentPicNameProperty
     /**
      * Name of current selected picture (usually also picture's FileSystem file's name)
+     */
+    fun currentPicNameProperty(): StringProperty = currentPicNameProperty
+    /**
+     * @see currentPicNameProperty
      */
     var currentPicName: String by currentPicNameProperty
 
     private val currentLabelIndexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
-    fun currentLabelIndexProperty(): IntegerProperty = currentLabelIndexProperty
     /**
      * Index of current selected TransLabel
+     */
+    fun currentLabelIndexProperty(): IntegerProperty = currentLabelIndexProperty
+    /**
+     * @see currentLabelIndexProperty
      */
     var currentLabelIndex: Int by currentLabelIndexProperty
 
     private val workModeProperty: ObjectProperty<WorkMode> = SimpleObjectProperty(WorkMode.InputMode)
-    fun workModeProperty(): ObjectProperty<WorkMode> = workModeProperty
     /**
      * Current work mode
+     */
+    fun workModeProperty(): ObjectProperty<WorkMode> = workModeProperty
+    /**
+     * @see workModeProperty
      */
     var workMode: WorkMode by workModeProperty
 
     private val viewModeProperty: ObjectProperty<ViewMode> = SimpleObjectProperty(ViewMode.IndexMode)
-    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
     /**
      * Current view mode
      */
+    fun viewModeProperty(): ObjectProperty<ViewMode> = viewModeProperty
+    /**
+     * @see viewModeProperty
+     */
     var viewMode: ViewMode by viewModeProperty
-
-    fun reset() {
-        if (!isOpened) return
-
-        controller.reset()
-
-        undoStack.empty()
-        redoStack.empty()
-
-        openedProperty.set(false)
-        changedProperty.set(false)
-        workModeProperty.set(WorkMode.InputMode)
-        viewModeProperty.set(Settings.viewModes[workMode.ordinal])
-        currentGroupIdProperty.set(NOT_FOUND)
-        currentPicNameProperty.set(emptyString())
-        currentLabelIndexProperty.set(NOT_FOUND)
-        transFileProperty.set(null)
-        translationFileProperty.set(null)
-
-        Logger.info("Reset", LOG_SRC_STATE)
-    }
-
-    // ----- File-Related Methods ----- //
 
     /**
      * Get current picture's FileSystem file
@@ -145,50 +166,99 @@ class State {
         return if (isOpened) translationFile.parentFile.resolve(FOLDER_NAME_BAK) else null
     }
 
-    // ----- UNDO/REDO STACK ----- //
+    // endregion
+
+    // region Undo/Redo Stack
 
     private val undoStack: Stack<Action> = ArrayStack()
     private val redoStack: Stack<Action> = ArrayStack()
 
     private val canUndoProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun canUndoProperty(): ReadOnlyBooleanProperty = canUndoProperty
-    val canUndo: Boolean by canUndoProperty
+    /**
+     * Whether undo is available
+     */
+    fun undoableProperty(): ReadOnlyBooleanProperty = canUndoProperty
+    /**
+     * @see undoableProperty
+     */
+    val undoable: Boolean by canUndoProperty
 
-    private val canRedoProperty: BooleanProperty = SimpleBooleanProperty(false)
-    fun canRedoProperty(): ReadOnlyBooleanProperty = canRedoProperty
-    val canRedo: Boolean by canRedoProperty
+    private val redoableProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether redo is available
+     */
+    fun canRedoProperty(): ReadOnlyBooleanProperty = redoableProperty
+    /**
+     * @see redoableProperty
+     */
+    val redoable: Boolean by redoableProperty
 
+    /**
+     * Do an action
+     */
     fun doAction(action: Action) {
-        Logger.info("Action committing", LOG_SRC_STATE)
+        Logger.info("Action committing", "State")
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
-        Logger.info("Action committed", LOG_SRC_STATE)
+        Logger.info("Action committed", "State")
 
         isChanged = true
         canUndoProperty.set(true)
-        canRedoProperty.set(false)
+        redoableProperty.set(false)
     }
 
+    /**
+     * Revert the last action if [undoable]
+     */
     fun undo() {
-        if (undoStack.isEmpty()) return
+        if (!undoable) return
 
-        Logger.info("Action reverting", LOG_SRC_STATE)
+        Logger.info("Action reverting", "State")
         redoStack.push(undoStack.pop().apply(Action::revert))
-        Logger.info("Action reverted", LOG_SRC_STATE)
+        Logger.info("Action reverted", "State")
 
         canUndoProperty.set(!undoStack.isEmpty())
-        canRedoProperty.set(true)
+        redoableProperty.set(true)
     }
 
+    /**
+     * Redo (re-commit) the last reverted action if [redoable]
+     */
     fun redo() {
-        if (redoStack.isEmpty()) return
+        if (!redoable) return
 
-        Logger.info("Action re-reverting", LOG_SRC_STATE)
+        Logger.info("Action re-committing", "State")
         undoStack.push(redoStack.pop().apply(Action::commit))
-        Logger.info("Action re-reverted", LOG_SRC_STATE)
+        Logger.info("Action re-committed", "State")
 
         canUndoProperty.set(true)
-        canRedoProperty.set(!redoStack.isEmpty())
+        redoableProperty.set(!redoStack.isEmpty())
+    }
+
+    // endregion
+
+    /**
+     * Reset the entire worksapce, be ready to open another translation.
+     */
+    fun reset() {
+        if (!isOpened) return
+
+        controller.reset()
+
+        undoStack.empty()
+        redoStack.empty()
+
+        openedProperty.set(false)
+        changedProperty.set(false)
+        workModeProperty.set(WorkMode.InputMode)
+        viewModeProperty.set(Settings.viewModes[workMode.ordinal])
+        currentGroupIdProperty.set(NOT_FOUND)
+        currentPicNameProperty.set(emptyString())
+        currentLabelIndexProperty.set(NOT_FOUND)
+        transFileProperty.set(null)
+        translationFileProperty.set(null)
+
+        Logger.info("Reset", "State")
     }
 
 }

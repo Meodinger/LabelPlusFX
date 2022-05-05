@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.GRAPHICS_CIRCLE_RADIUS
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.transform
@@ -30,6 +29,13 @@ class CTreeLabelItem(
     labelColor: Color? = null
 ) : TreeItem<String>() {
 
+    companion object {
+        /**
+         * TreeItem Graphic radius
+         */
+        const val GRAPHICS_CIRCLE_RADIUS: Double = 8.0
+    }
+
     // region Properties
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
@@ -47,7 +53,7 @@ class CTreeLabelItem(
     // endregion
 
     init {
-        graphicProperty().bind(Bindings.createObjectBinding({ color?.let { Circle(GRAPHICS_CIRCLE_RADIUS, color) } }, colorProperty))
+        graphicProperty().bind(colorProperty.transform { it?.let { Circle(GRAPHICS_CIRCLE_RADIUS, it) } })
         valueProperty().bind(Bindings.createStringBinding({ "${index.pad(2)}: ${text.replaceEOL(" ")}" }, indexProperty, textProperty))
     }
 

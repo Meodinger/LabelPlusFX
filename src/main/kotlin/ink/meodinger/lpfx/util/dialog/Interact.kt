@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.util.dialog
 
-import ink.meodinger.lpfx.COMMON_GAP
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.component.add
@@ -53,9 +52,9 @@ fun showLink(
     dialog.graphic = graphics
     dialog.headerText = header
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CLOSE)
-    dialog.withContent(VBox()) {
+    dialog.dialogPane.withContent(VBox()) {
         add(Label(content))
-        add(Separator()) { padding = Insets(COMMON_GAP / 2, 0.0, COMMON_GAP / 2, 0.0) }
+        add(Separator()) { padding = Insets(8.0, 0.0, 8.0, 0.0) }
         add(Hyperlink(link)) { onAction = handler; padding = Insets(0.0) }
     }
 
@@ -75,8 +74,8 @@ fun showInputArea(owner: Window?, title: String, defaultText: String): Optional<
     dialog.initOwner(owner)
     dialog.title = title
     dialog.dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
+    dialog.dialogPane withContent HBox(textArea)
     dialog.setResultConverter { if (it == ButtonType.OK) textArea.text else defaultText }
-    dialog withContent HBox(textArea)
 
     return dialog.showAndWait()
 }
@@ -107,7 +106,7 @@ fun <T> showChoiceList(owner: Window?, unselected: List<T>, selected: List<T>, c
     dialog.initOwner(owner)
     dialog.title = I18N["util.dialog.choose.title"]
     dialog.dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-    dialog.withContent(GridPane()) {
+    dialog.dialogPane.withContent(GridPane()) {
         hgap = 16.0
         prefWidth = 600.0
         prefHeight = 400.0

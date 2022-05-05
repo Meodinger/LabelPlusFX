@@ -89,7 +89,7 @@ fun Image.toGreyScale(): Image {
  */
 @Throws(IOException::class)
 fun imageFromFile(file: File): Image {
-    return when (file.extension) {
+    return when (file.extension.lowercase()) {
         EXTENSION_PIC_BMP, EXTENSION_PIC_GIF, EXTENSION_PIC_PNG, EXTENSION_PIC_JPG, EXTENSION_PIC_JPEG -> {
             // JFX supported image types
             Image(file.toURI().toURL().toString())

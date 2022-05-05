@@ -14,7 +14,7 @@ import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.string.deleteTail
+import ink.meodinger.lpfx.util.string.deleteTrailing
 import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
@@ -166,7 +166,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         menu(I18N["mm.edit"]) {
             item(I18N["m.undo"]) {
                 does { state.undo() }
-                disableProperty().bind(!state.canUndoProperty())
+                disableProperty().bind(!state.undoableProperty())
                 accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN)
             }
             item(I18N["m.redo"]) {
@@ -292,7 +292,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
         val file = chooserNew.showSaveDialog(state.stage)?.let file@{
             val name = it.nameWithoutExtension.takeUnless(FILENAME_DEFAULT::equals) ?: it.parentFile.name
-            val ext  = it.extension.takeIf(EXTENSIONS_FILE::contains) ?: extension
+            val ext  = it.extension.lowercase().takeIf(EXTENSIONS_FILE::contains) ?: extension
 
             return@file it.parentFile.resolve("$name.$ext")
         } ?: return
@@ -481,8 +481,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun settings() {
         val map = state.application.dialogSettings.generateProperties()
 
-        Logger.info("Generated common settings", LOG_SRC_OTHER)
-        Logger.debug("got $map", LOG_SRC_OTHER)
+        Logger.info("Generated common settings", "MenuBar")
+        Logger.debug("got $map", "MenuBar")
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {
@@ -507,8 +507,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun logs() {
         val map = state.application.dialogLogs.generateProperties()
 
-        Logger.info("Generated logs settings", LOG_SRC_OTHER)
-        Logger.debug("got $map", LOG_SRC_OTHER)
+        Logger.info("Generated logs settings", "MenuBar")
+        Logger.debug("got $map", "MenuBar")
 
         @Suppress("UNCHECKED_CAST")
         for ((key, value) in map) when (key) {
@@ -567,7 +567,7 @@ class CMenuBar(private val state: State) : MenuBar() {
 
                     val builder = StringBuilder()
                     for (label in labels) builder.append(label.text).append(DELIMITER)
-                    val iterator = converter(builder.deleteTail(DELIMITER).toString()).split(DELIMITER).also {
+                    val iterator = converter(builder.deleteTrailing(DELIMITER).toString()).split(DELIMITER).also {
                         if (it.size != labelCount) {
                             updateMessage("at [$picName] ${it.joinToString()}")
                             return
@@ -591,8 +591,8 @@ class CMenuBar(private val state: State) : MenuBar() {
                     buttonOrder = ButtonBar.BUTTON_ORDER_NONE
                 }
             }
-            dialogPane.applyCss()
             dialogPane.buttonTypes.add(ButtonType.CANCEL)
+            dialogPane.applyCss()
             dialogPane.lookup(".container").apply {
                 (this as HBox).children.add(Region().also {
                     HBox.setHgrow(it, Priority.ALWAYS)
@@ -619,8 +619,8 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
     private fun showDict() {
         val dict = state.application.onlineDict
-        dict.x = state.stage.x - COMMON_GAP + state.stage.width - dict.width
-        dict.y = state.stage.y + COMMON_GAP
+        dict.x = state.stage.x - 16.0 + state.stage.width - dict.width
+        dict.y = state.stage.y + 16.0
         dict.show()
         dict.toFront()
     }
@@ -632,8 +632,8 @@ class CMenuBar(private val state: State) : MenuBar() {
         if (checker.check()) return
         if (!checker.isShowing) showAlert(state.stage, I18N["checker.warning"])
 
-        checker.x = state.stage.x - COMMON_GAP + state.stage.width - checker.width
-        checker.y = state.stage.y + COMMON_GAP + state.application.onlineDict.height
+        checker.x = state.stage.x - 16.0 + state.stage.width - checker.width
+        checker.y = state.stage.y + 16.0 + state.application.onlineDict.height
         checker.show()
         checker.toFront()
     }

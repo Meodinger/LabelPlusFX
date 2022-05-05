@@ -28,10 +28,10 @@ import java.util.*
  * Have fun with my code!
  */
 
-private val confirmImageView = ImageView(loadAsImage("/file/image/dialog/Confirm.png").resizeByRadius(GENERAL_ICON_RADIUS))
-private val infoImageView    = ImageView(loadAsImage("/file/image/dialog/Info.png").resizeByRadius(GENERAL_ICON_RADIUS))
-private val alertImageView   = ImageView(loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS))
-private val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.png").resizeByRadius(GENERAL_ICON_RADIUS))
+private val confirmImage = IMAGE_CONFIRM.resizeByRadius(GENERAL_ICON_RADIUS)
+private val infoImage    = IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS)
+private val alertImage   = IMAGE_ALERT.resizeByRadius(GENERAL_ICON_RADIUS)
+private val errorImage   = IMAGE_ERROR.resizeByRadius(GENERAL_ICON_RADIUS)
 
 /**
  * Show dialog
@@ -43,6 +43,9 @@ private val errorImageView   = ImageView(loadAsImage("/file/image/dialog/Error.p
  * @param buttonTypes Dialog ButtonTypes
  */
 fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
+
+    // TODO: Use Enum to handle dialog type
+
     val dialog = Dialog<ButtonType>()
     dialog.initOwner(owner)
     dialog.graphic = graphic
@@ -81,7 +84,7 @@ fun showConfirm(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? YES | NO
  */
 fun showConfirm(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, confirmImageView, title, header, content, ButtonType.YES, ButtonType.NO)
+    return showDialog(owner, ImageView(confirmImage), title, header, content, ButtonType.YES, ButtonType.NO)
 }
 
 /**
@@ -101,7 +104,7 @@ fun showAlert(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? YES | NO | CANCEL
  */
 fun showAlert(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+    return showDialog(owner, ImageView(alertImage), title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
 }
 
 /**
@@ -121,7 +124,7 @@ fun showInfo(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showInfo(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, infoImageView, title, header, content, ButtonType.OK)
+    return showDialog(owner, ImageView(infoImage), title, header, content, ButtonType.OK)
 }
 
 /**
@@ -141,7 +144,7 @@ fun showWarning(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? YES | CLOSE
  */
 fun showWarning(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, alertImageView, title, header, content, ButtonType.YES, ButtonType.CLOSE)
+    return showDialog(owner, ImageView(alertImage), title, header, content, ButtonType.YES, ButtonType.CLOSE)
 }
 
 /**
@@ -161,7 +164,7 @@ fun showError(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? Ok
  */
 fun showError(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, errorImageView, title, header, content, ButtonType.OK)
+    return showDialog(owner, ImageView(errorImage), title, header, content, ButtonType.OK)
 }
 
 
@@ -181,11 +184,11 @@ fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     dialog.title = I18N["common.error"]
     dialog.isResizable = true
     dialog.headerText = e.javaClass.name
-    dialog.dialogPane.prefWidth = PANE_WIDTH
-    dialog.dialogPane.prefHeight = PANE_HEIGHT
+    dialog.dialogPane.prefWidth = 600.0
+    dialog.dialogPane.prefHeight = 400.0
     dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
-    dialog.withContent(VBox()) {
-        spacing = COMMON_GAP / 2
+    dialog.dialogPane.withContent(VBox()) {
+        spacing = 8.0
         add(Label(omitWideText(e.message ?: e.javaClass.name, 400.0)))
         add(Separator())
         add(Label("The exception stacktrace is:"))

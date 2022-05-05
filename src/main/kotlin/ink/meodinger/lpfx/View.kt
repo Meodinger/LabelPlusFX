@@ -31,6 +31,15 @@ import javafx.util.Callback
  */
 class View(state: State) : BorderPane() {
 
+    companion object {
+        // Scale
+        private const val SCALE_MIN : Double = 0.1
+        private const val SCALE_MAX : Double = 4.0
+        private const val SCALE_INIT: Double = 0.8
+    }
+
+    // region Components
+
     val menuBar         = CMenuBar(state)
     val bSwitchViewMode = Button()
     val bSwitchWorkMode = Button()
@@ -47,8 +56,16 @@ class View(state: State) : BorderPane() {
     val cTreeView       = CTreeView()
     val cTransArea      = CLigatureArea()
 
+    // endregion
+
     private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Whether the StatsBar should show
+     */
     fun showStatsBarProperty(): BooleanProperty = showStatsBarProperty
+    /**
+     * @see showStatsBarProperty
+     */
     var showStatsBar: Boolean by showStatsBarProperty
 
     init {
@@ -103,7 +120,7 @@ class View(state: State) : BorderPane() {
                                             graphic = null
                                         } else {
                                             text = item.name
-                                            graphic = Circle(GRAPHICS_CIRCLE_RADIUS, item.colorHex.let(Color::web))
+                                            graphic = Circle(8.0, item.colorHex.let(Color::web))
                                         }
                                     }
                                 }

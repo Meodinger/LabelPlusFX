@@ -1,7 +1,7 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.util.string.deleteTail
-import ink.meodinger.lpfx.util.string.deleteTailEOL
+import ink.meodinger.lpfx.util.string.deleteTrailing
+import ink.meodinger.lpfx.util.string.deleteTrailingEOL
 import ink.meodinger.lpfx.util.string.emptyString
 
 
@@ -34,7 +34,7 @@ data class CProperty(val key: String, var value: String = emptyString()) {
 
                 builder.append(content).append(LIST_SEPARATOR)
             }
-            return builder.deleteTail(LIST_SEPARATOR.toString()).toString()
+            return builder.deleteTrailing(LIST_SEPARATOR.toString()).toString()
         }
 
     }
@@ -116,7 +116,7 @@ data class CProperty(val key: String, var value: String = emptyString()) {
         if (isList) {
             builder.appendLine(LIST_SEPARATOR)
             for (value in asStringList()) builder.append(LIST_SEPARATOR).appendLine(value)
-            builder.deleteTailEOL()
+            builder.deleteTrailingEOL()
         } else {
             builder.append(value)
         }

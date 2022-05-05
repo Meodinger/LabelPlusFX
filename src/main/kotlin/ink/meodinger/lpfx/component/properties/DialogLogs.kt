@@ -59,10 +59,10 @@ class DialogLogs : AbstractPropertiesDialog() {
 
     init {
         title = I18N["logs.title"]
-        dialogPane.prefWidth = PANE_WIDTH
-        dialogPane.prefHeight = PANE_HEIGHT
+        dialogPane.prefWidth = 600.0
+        dialogPane.prefHeight = 400.0
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-        withContent(GridPane()) {
+        dialogPane.withContent(GridPane()) {
             //    0      1           2     3
             // 0  Label  ComboBox
             // 1  Label
@@ -73,9 +73,9 @@ class DialogLogs : AbstractPropertiesDialog() {
             //    -------------------------------
             // 5   (Send?)           Send  Clean
 
-            padding = Insets(COMMON_GAP)
-            vgap = COMMON_GAP
-            hgap = COMMON_GAP
+            padding = Insets(16.0)
+            vgap = 16.0
+            hgap = 16.0
             alignment = Pos.TOP_CENTER
 
             add(Label(I18N["logs.label.level"]), 0, 0)
@@ -122,7 +122,7 @@ class DialogLogs : AbstractPropertiesDialog() {
                     for (modal in tableLog.items) {
                         if (modal.file.name == Logger.log.name) continue
                         if (!modal.file.delete()) {
-                            Logger.error("Delete log file ${modal.file.path} failed", LOG_SRC_OTHER)
+                            Logger.error("Delete log file ${modal.file.path} failed", "DialogLogs")
                             showError(owner, String.format(I18N["logs.error.delete_failed.s"], modal.file.name))
                             continue
                         }
@@ -130,7 +130,7 @@ class DialogLogs : AbstractPropertiesDialog() {
                     }
                     tableLog.items.removeAll(toRemove)
 
-                    Logger.info("Cleaned logs", LOG_SRC_OTHER)
+                    Logger.info("Cleaned logs", "DialogLogs")
                 }
             }
         }

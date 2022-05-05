@@ -60,6 +60,7 @@ class ArrayStack<E>(initialCapacity: Int = 16) : Stack<E> {
         private const val SOFT_MAX_ARRAY_LENGTH = Int.MAX_VALUE - 8
     }
 
+    // We could not use Array<E?> here because we could not instance generic
     private var _array: Array<Any?> = arrayOfNulls(initialCapacity)
     private var _pointer: Int = 0
 
@@ -93,6 +94,12 @@ class ArrayStack<E>(initialCapacity: Int = 16) : Stack<E> {
         return elementData(_pointer - 1)
     }
 
+    /**
+     * Empty the ArrayStack. Note that this **will not**
+     * earease the date that the backing Array holds.
+     * It just sets the head pointer to 0.
+     * @see Stack.empty
+     */
     override fun empty() {
         _pointer = 0
     }
@@ -108,26 +115,26 @@ class ArrayStack<E>(initialCapacity: Int = 16) : Stack<E> {
  */
 class DequeStack<E>: Stack<E> {
 
-    private val _backing = ArrayDeque<E>()
+    private val _deque = ArrayDeque<E>()
 
-    override val size: Int get() = _backing.size
+    override val size: Int get() = _deque.size
 
     override fun peek(): E {
-        return _backing.first()
+        return _deque.first()
     }
     override fun pop(): E {
-        return _backing.removeFirst()
+        return _deque.removeFirst()
     }
     override fun push(element: E) {
-        _backing.addFirst(element)
+        _deque.addFirst(element)
     }
 
     override fun empty() {
-        _backing.clear()
+        _deque.clear()
     }
 
     override fun isEmpty(): Boolean {
-        return _backing.isEmpty()
+        return _deque.isEmpty()
     }
 
 }

@@ -123,19 +123,19 @@ class CStringKtTest {
     @Test
     fun deleteTailTest() {
         // Empty tail
-        assertEquals("1", StringBuilder("1").deleteTail("").toString())
-        assertEquals("", StringBuilder("").deleteTail("").toString())
+        assertEquals("1", StringBuilder("1").deleteTrailing("").toString())
+        assertEquals("", StringBuilder("").deleteTrailing("").toString())
 
         // Empty this
-        assertEquals("", StringBuilder("").deleteTail("1").toString())
+        assertEquals("", StringBuilder("").deleteTrailing("1").toString())
 
         // Incorrect tail
-        assertEquals("1", StringBuilder("1").deleteTail("0").toString())
+        assertEquals("1", StringBuilder("1").deleteTrailing("0").toString())
 
         // run
-        assertEquals("12", StringBuilder("123").deleteTail("3").toString())
-        assertEquals("1", StringBuilder("123").deleteTail("23").toString())
-        assertEquals("", StringBuilder("123").deleteTail("123").toString())
+        assertEquals("12", StringBuilder("123").deleteTrailing("3").toString())
+        assertEquals("1", StringBuilder("123").deleteTrailing("23").toString())
+        assertEquals("", StringBuilder("123").deleteTrailing("123").toString())
     }
 
     @Test

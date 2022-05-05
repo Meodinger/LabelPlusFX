@@ -11,7 +11,6 @@ import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.HPos
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.Button
@@ -53,57 +52,53 @@ class FormatChecker(private val state: State) : Stage() {
         // 1 image Next Complete
         icons.add(ICON)
         title = I18N["checker.title"]
-        width = PANE_WIDTH / 2
-        height = PANE_HEIGHT / 3
+        width = 300.0
+        height = 150.0
         isResizable = false
-        scene = Scene(StackPane().withContent(HBox()) {
+        scene = Scene(GridPane().apply {
             alignment = Pos.CENTER
+            hgap = 16.0
+            vgap = 8.0
 
-            add(ImageView()) {
-                image = loadAsImage("/file/image/dialog/Alert.png").resizeByRadius(GENERAL_ICON_RADIUS)
+            add(ImageView(), 0, 0, 1, 2) {
+                image = IMAGE_ALERT.resizeByRadius(GENERAL_ICON_RADIUS)
             }
-            add(GridPane()) {
-                hgap = COMMON_GAP
-                vgap = COMMON_GAP / 2
-                padding = Insets(COMMON_GAP, 0.0, COMMON_GAP, COMMON_GAP)
+            add(Label(), 1, 0, 3, 1) {
+                gridHAlign = HPos.CENTER
+                textAlignment = TextAlignment.CENTER
+                textProperty().bind(indexProperty.transform {
+                    String.format(
+                        I18N["checker.label.iis"],
+                        it + 1,
+                        typoList.size,
+                        typoList.getOrNull(it)?.typo?.description ?: emptyString()
+                    )
+                })
+            }
+            add(Button(I18N["checker.continue"]), 1, 1) {
+                gridHAlign = HPos.CENTER
+                disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
 
-                add(Label(), 0, 0, 3, 1) {
-                    gridHAlign = HPos.CENTER
-                    textAlignment = TextAlignment.CENTER
-                    textProperty().bind(indexProperty.transform {
-                        String.format(
-                            I18N["checker.label.iis"],
-                            it + 1,
-                            typoList.size,
-                            typoList.getOrNull(it)?.typo?.description ?: emptyString()
-                        )
-                    })
+                does {
+                    if (index + 1 < typoList.size) index++
                 }
-                add(Button(I18N["checker.continue"]), 0, 1) {
-                    gridHAlign = HPos.CENTER
-                    disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
+            }
+            add(Button(I18N["checker.autofix"]), 2, 1) {
+                gridHAlign = HPos.CENTER
+                disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
 
-                    does {
-                        if (index + 1 < typoList.size) index++
+                does {
+                    val typo = typoList[index].typo
+                    if (typo.regex.matches(state.view.cTransArea.selectedText)) {
+                        state.view.cTransArea.replaceSelection(typo.autofix)
                     }
                 }
-                add(Button(I18N["checker.autofix"]), 1, 1) {
-                    gridHAlign = HPos.CENTER
-                    disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
-
-                    does {
-                        val typo = typoList[index].typo
-                        if (typo.regex.matches(state.view.cTransArea.selectedText)) {
-                            state.view.cTransArea.replaceSelection(typo.autofix)
-                        }
-                    }
-                }
-                add(Button(I18N["checker.complete"]), 2, 1) {
-                    gridHAlign = HPos.CENTER
-                    does {
-                        close()
-                        state.controller.save(state.translationFile, true)
-                    }
+            }
+            add(Button(I18N["checker.complete"]), 3, 1) {
+                gridHAlign = HPos.CENTER
+                does {
+                    close()
+                    state.controller.save(state.translationFile, true)
                 }
             }
         })
@@ -119,7 +114,7 @@ class FormatChecker(private val state: State) : Stage() {
                     typo.regex.find(state.transFile.getTransLabel(picName, labelIndex).text)
                 } ?: return@onNew
 
-            Logger.debug("Checker found: (${match.range}) -> `${match.value}`", LOG_SRC_OTHER)
+            Logger.debug("Checker found: (${match.range}) -> `${match.value}`", "FormatChecker")
 
             // Select Picture
             state.currentPicName = picName

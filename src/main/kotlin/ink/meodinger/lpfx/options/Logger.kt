@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.options
 
-import ink.meodinger.lpfx.LOG_SRC_OTHER
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.once
@@ -71,12 +70,12 @@ object Logger {
         builder.append("\n============== End ==============")
         info(builder.toString(), "Logger Init")
 
-        info("Logger start", LOG_SRC_OTHER)
+        info("Logger start", "Logger")
     }
     fun stop() {
         if (!isStarted) return
 
-        info("Logger exit", LOG_SRC_OTHER)
+        info("Logger exit", "Logger")
 
         writer.close()
         isStarted = false
@@ -89,7 +88,7 @@ object Logger {
         time = Date().time
     }
     fun toc() {
-        info("Used ${Date().time - time}ms", LOG_SRC_OTHER)
+        info("Used ${Date().time - time}ms", "Logger")
     }
 
     private fun log(type: LogLevel, text: String, from: String) {
@@ -172,13 +171,13 @@ object Logger {
         val task = LPFXTask.createTask<Unit> { sendLogSync(logFile) }
 
         task.setOnFailed {
-            error("Log sent failed", LOG_SRC_OTHER)
+            error("Log sent failed", "Logger")
             exception(it)
             onFailed(it)
         }
 
         task.setOnSucceeded {
-            info("Sent Log ${logFile.name}", LOG_SRC_OTHER)
+            info("Sent Log ${logFile.name}", "Logger")
             onSucceeded()
         }
 

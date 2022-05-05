@@ -32,18 +32,11 @@ infix fun <T : Stage> T.withOwner(owner: Window?): T {
 ///// Dialog / DialogPane
 ////////////////////////////////////////////////////////////
 
-inline fun <T : Node> DialogPane.withContent(node: T, operation: T.() -> Unit = {}): DialogPane {
+inline fun <T : Node> DialogPane.withContent(node: T, operation: T.() -> Unit): DialogPane {
     return apply { content = node.apply(operation) }
 }
 infix fun <T : Node> DialogPane.withContent(node: T) : DialogPane {
     return apply { content = node }
-}
-
-inline fun <T : Node, R> Dialog<R>.withContent(content: T, operation: T.() -> Unit = {}): Dialog<R> {
-    return apply { dialogPane.withContent(content, operation) }
-}
-infix fun <T : Node, R> Dialog<R>.withContent(content: T) : Dialog<R> {
-    return apply { dialogPane.withContent(content) }
 }
 
 infix fun <T : Dialog<*>> T.withOwner(owner: Window?): T {
@@ -105,7 +98,7 @@ var Node.anchorPaneBottom: Double
  * @param operation Lambda with arguments of Node as this
  * @return this StackPane reference
  */
-inline fun <T : Node> StackPane.withContent(content: T, operation: T.() -> Unit = {}): StackPane {
+inline fun <T : Node> StackPane.withContent(content: T, operation: T.() -> Unit): StackPane {
     return apply {
         children.clear()
         children.add(content.apply(operation))
@@ -180,7 +173,7 @@ var Node.gridVAlign: VPos
 ///// ScrollPane
 ////////////////////////////////////////////////////////////
 
-inline fun <T : Node> ScrollPane.withContent(node: T, operation: T.() -> Unit = {}): ScrollPane {
+inline fun <T : Node> ScrollPane.withContent(node: T, operation: T.() -> Unit): ScrollPane {
     return apply { content = node.apply(operation) }
 }
 infix fun <T : Node> ScrollPane.withContent(node: T): ScrollPane {
@@ -191,7 +184,7 @@ infix fun <T : Node> ScrollPane.withContent(node: T): ScrollPane {
 ///// TitledPane
 ////////////////////////////////////////////////////////////
 
-inline fun <T : Node> TitledPane.withContent(node: T, operation: T.() -> Unit = {}): TitledPane {
+inline fun <T : Node> TitledPane.withContent(node: T, operation: T.() -> Unit): TitledPane {
     return apply { content = node.apply(operation) }
 }
 infix fun <T : Node> TitledPane.withContent(node: T): TitledPane {

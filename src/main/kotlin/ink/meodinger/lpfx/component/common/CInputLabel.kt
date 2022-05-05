@@ -129,7 +129,6 @@ class CInputLabel : Pane() {
         label.prefHeightProperty().bind(prefHeightProperty())
         field.prefWidthProperty().bind(prefWidthProperty())
         field.prefHeightProperty().bind(prefHeightProperty())
-        field.textFormatterProperty().bind(textFormatterProperty)
 
         editingProperty.addListener(onNew {
             children.clear()

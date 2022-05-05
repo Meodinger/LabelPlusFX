@@ -4,7 +4,6 @@ import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
 
 import javafx.application.Application
-import javafx.application.Platform
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel

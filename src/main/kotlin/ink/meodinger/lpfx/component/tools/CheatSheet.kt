@@ -46,13 +46,13 @@ class CheatSheet : Stage() {
     init {
         icons.add(ICON)
         title = I18N["m.cheat"]
-        width = PANE_WIDTH / 3 * 2
-        height = PANE_HEIGHT
+        width = 400.0
+        height = 400.0
         isResizable = false
         scene = Scene(GridPane().apply {
-            padding = Insets(COMMON_GAP)
-            vgap = COMMON_GAP
-            hgap = COMMON_GAP
+            padding = Insets(16.0)
+            vgap = 16.0
+            hgap = 16.0
             alignment = Pos.CENTER
 
             add(Label(I18N["cheat.accelerator"]), 0, 0, 2, 1) {

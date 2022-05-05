@@ -56,9 +56,9 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane().apply {
         alignment = Pos.TOP_CENTER
-        padding = Insets(COMMON_GAP)
-        vgap = COMMON_GAP
-        hgap = COMMON_GAP
+        padding = Insets(16.0)
+        vgap = 16.0
+        hgap = 16.0
     }
 
     private val rLabelHint = Label(I18N["settings.ligature.hint"])
@@ -66,9 +66,9 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val rLabelTo = Label(I18N["settings.ligature.to"])
     private val rGridPane = GridPane().apply {
         alignment = Pos.TOP_CENTER
-        padding = Insets(COMMON_GAP)
-        vgap = COMMON_GAP
-        hgap = COMMON_GAP
+        padding = Insets(16.0)
+        vgap = 16.0
+        hgap = 16.0
     }
 
     private val mComboInput = CComboBox<ViewMode>()
@@ -92,23 +92,22 @@ class DialogSettings : AbstractPropertiesDialog() {
 
     init {
         title = I18N["settings.title"]
+        dialogPane.prefWidth = 600.0
+        dialogPane.prefHeight = 400.0
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
-        withContent(TabPane()) {
-            // DialogPane size depends on TabPane
-            prefWidth = PANE_WIDTH
-            prefHeight = PANE_HEIGHT
+        dialogPane.withContent(TabPane()) {
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
 
             add(I18N["settings.group.title"]) {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(gGridPane)
                     val scrollPane = ScrollPane(stackPane)
-                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - 16.0)
 
                     center(scrollPane) { style = "-fx-background-color:transparent;" }
                     bottom(HBox()) {
                         alignment = Pos.CENTER_RIGHT
-                        padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+                        padding = Insets(16.0, 8.0, 8.0, 16.0)
                         add(Button(I18N["settings.group.add"])) { does { createGroupRow() } }
                     }
                 }
@@ -117,12 +116,12 @@ class DialogSettings : AbstractPropertiesDialog() {
                 withContent(BorderPane()) {
                     val stackPane = StackPane(rGridPane)
                     val scrollPane = ScrollPane(stackPane)
-                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - 16.0)
 
                     center(scrollPane) { style = "-fx-background-color:transparent;" }
                     bottom(HBox()) {
                         alignment = Pos.CENTER_RIGHT
-                        padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+                        padding = Insets(16.0, 8.0, 8.0, 16.0)
                         add(Label(I18N["settings.ligature.sample"]))
                         add(HBox()) { hgrow = Priority.ALWAYS }
                         add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
@@ -132,9 +131,9 @@ class DialogSettings : AbstractPropertiesDialog() {
             add(I18N["settings.mode.title"]) {
                 withContent(GridPane()) {
                     alignment = Pos.TOP_CENTER
-                    padding = Insets(COMMON_GAP)
-                    vgap = COMMON_GAP
-                    hgap = COMMON_GAP
+                    padding = Insets(16.0)
+                    vgap = 16.0
+                    hgap = 16.0
 
                     //   0         1
                     // 0 Input     | input | < > (ViewMode)
@@ -167,9 +166,9 @@ class DialogSettings : AbstractPropertiesDialog() {
             add(I18N["settings.label.title"]) {
                 withContent(GridPane()) {
                     alignment = Pos.CENTER
-                    padding = Insets(COMMON_GAP, COMMON_GAP, 0.0, COMMON_GAP)
-                    vgap = COMMON_GAP
-                    hgap = COMMON_GAP
+                    padding = Insets(16.0, 16.0, 0.0, 16.0)
+                    vgap = 16.0
+                    hgap = 16.0
 
                     // lGridPane.isGridLinesVisible = true
                     //   0           1           2
@@ -245,8 +244,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                     add(lSliderRadius, 1, 1) {
                         prefWidth = 160.0
 
-                        min = LABEL_RADIUS_MIN
-                        max = LABEL_RADIUS_MAX
+                        min = 8.0
+                        max = 48.0
                         majorTickUnit = 8.0
                         minorTickCount = 3
                         blockIncrement = 2.0
@@ -315,9 +314,9 @@ class DialogSettings : AbstractPropertiesDialog() {
             add(I18N["settings.other.title"]) {
                 withContent(GridPane()) {
                     alignment = Pos.TOP_CENTER
-                    padding = Insets(COMMON_GAP)
-                    vgap = COMMON_GAP
-                    hgap = COMMON_GAP
+                    padding = Insets(16.0)
+                    vgap = 16.0
+                    hgap = 16.0
 
                     //   0        1
                     // 0 O UpdateCheck

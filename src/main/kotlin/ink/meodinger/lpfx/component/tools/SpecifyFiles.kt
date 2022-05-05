@@ -38,9 +38,9 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
     private val thisWindow = dialogPane.scene.window
     private val contentGridPane = GridPane().apply {
-        hgap = COMMON_GAP
-        vgap = COMMON_GAP
-        padding = Insets(COMMON_GAP)
+        hgap = 16.0
+        vgap = 16.0
+        padding = Insets(16.0)
         alignment = Pos.CENTER
     }
     private val fileChooser = FileChooser().apply {
@@ -64,18 +64,18 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
     init {
         title = I18N["specify.title"]
-        dialogPane.prefWidth = PANE_WIDTH
-        dialogPane.prefHeight = PANE_HEIGHT
+        dialogPane.prefWidth = 600.0
+        dialogPane.prefHeight = 400.0
         dialogPane.buttonTypes.addAll(ButtonType.APPLY, ButtonType.CANCEL)
-        withContent(BorderPane()) {
+        dialogPane.withContent(BorderPane()) {
             val stackPane = StackPane(contentGridPane)
             val scrollPane = ScrollPane(stackPane)
-            stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - COMMON_GAP)
+            stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - 16.0)
 
             center(scrollPane) { style = "-fx-background-color:transparent;" }
             bottom(HBox()) {
                 alignment = Pos.CENTER_RIGHT
-                padding = Insets(COMMON_GAP, COMMON_GAP / 2, COMMON_GAP / 2, COMMON_GAP)
+                padding = Insets(16.0, 8.0, 8.0, 16.0)
 
                 add(Button(I18N["specify.dialog.choose_folder"])) {
                     does {

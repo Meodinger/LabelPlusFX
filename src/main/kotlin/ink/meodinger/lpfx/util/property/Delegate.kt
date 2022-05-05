@@ -17,9 +17,6 @@ import kotlin.reflect.KProperty
  * Polyfill TornadoFX properties.kt
  */
 
-operator fun <T> ObservableObjectValue<T>.getValue(thisRef: Any, property: KProperty<*>): T = get()
-operator fun <T> ObjectProperty<T>.setValue(thisRef: Any, property: KProperty<*>, value: T) = set(value)
-
 operator fun <K, V> ObservableMapValue<K, V>.getValue(thisRef: Any, property: KProperty<*>): ObservableMap<K, V> = get()
 operator fun <K, V> MapProperty<K, V>.setValue(thisRef: Any, property: KProperty<*>, value: ObservableMap<K, V>) = set(value)
 
@@ -28,6 +25,9 @@ operator fun <E> ListProperty<E>.setValue(thisRef: Any, property: KProperty<*>, 
 
 operator fun <E> ObservableSetValue<E>.getValue(thisRef: Any, property: KProperty<*>): ObservableSet<E> = get()
 operator fun <E> SetProperty<E>.setValue(thisRef: Any, property: KProperty<*>, value: ObservableSet<E>) = set(value)
+
+operator fun <T> ObservableObjectValue<T>.getValue(thisRef: Any, property: KProperty<*>): T = get()
+operator fun <T> ObjectProperty<T>.setValue(thisRef: Any, property: KProperty<*>, value: T) = set(value)
 
 operator fun ObservableStringValue.getValue(thisRef: Any, property: KProperty<*>): String = get()
 operator fun StringProperty.setValue(thisRef: Any, property: KProperty<*>, value: String) = set(value)

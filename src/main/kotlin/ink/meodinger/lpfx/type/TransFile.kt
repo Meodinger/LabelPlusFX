@@ -21,14 +21,13 @@ import java.io.File
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
 class TransFile @JsonCreator constructor(
-    @JsonProperty("version")   version:   List<Int>                                   = DEFAULT_VERSION,
+    @JsonProperty("version")   version:   List<Int>                                   = listOf(1, 0),
     @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT_LIST[0],
     @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
     @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
 )  {
 
     companion object {
-        val DEFAULT_VERSION: List<Int> = listOf(1, 0)
         val DEFAULT_COMMENT_LIST: List<String> = arrayListOf(
             "使用 LabelPlusFX 导出",
             "Default Comment\nYou can edit me",
@@ -62,12 +61,13 @@ class TransFile @JsonCreator constructor(
     }
 
     /**
-     * Set the actual file of the given picture name
-     * @param picName Name of target picture, if the target picture not exists, this function will do nothing
+     * Set the actual file of the given picture name.
+     * Note that we could set even the target picture doesn't in the trans-map.
+     * So make sure you set null when remove a picture.
+     * @param picName Name of target picture
      * @param file Actual file of the picture, null to remove the file have set.
      */
     fun setFile(picName: String, file: File?) {
-        if (!transMapObservable.keys.contains(picName)) return
         if (file == null) fileMap.remove(picName) else fileMap[picName] = file
     }
 
@@ -89,7 +89,7 @@ class TransFile @JsonCreator constructor(
     private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty(), it.colorHexProperty()) })
     private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableList(it.value) }))
 
-    private val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(transMapProperty.observableKeySet().observableSorted(::sortByDigit)).readOnlyProperty
+    private val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(transMapProperty.observableKeySet().observableSorted(Collection<String>::sortByDigit)).readOnlyProperty
 
     // ----- Accessible Fields ----- //
 

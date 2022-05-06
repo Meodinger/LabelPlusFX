@@ -90,12 +90,7 @@ object Options {
 
             Logger.error("Load ${instance.name} properties failed", "Options")
             Logger.exception(e)
-            showError(
-                null,
-                null,
-                String.format(I18N["error.options.load_failed.s"], instance.name),
-                I18N["common.alert"]
-            )
+            showError(null, String.format(I18N["error.options.load_failed.s"], instance.name))
         }
     }
 

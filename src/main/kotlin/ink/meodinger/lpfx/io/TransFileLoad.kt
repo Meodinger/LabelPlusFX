@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets
 
 /**
  * Load TransFile
+ * File save type is based on the extension of the file.
  */
 @Throws(IOException::class)
 fun load(file: File): TransFile {

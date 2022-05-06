@@ -25,6 +25,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.collections.SetChangeListener
+import javafx.embed.swing.SwingFXUtils
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.scene.Cursor
@@ -36,11 +37,13 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.net.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import javax.imageio.ImageIO
 import javax.net.ssl.HttpsURLConnection
 import kotlin.math.roundToInt
 
@@ -144,21 +147,30 @@ class Controller(private val state: State) {
                 INIT_IMAGE
             } else {
                 if (file.exists()) {
-                    try {
-                        val image = imageFromFile(file)
-                        if (!image.isError) {
-                            image
-                        } else {
-                            showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                            showException(state.stage, image.exception)
+                    val imageByFX = Image(file.toURI().toURL().toString())
 
+                    if (!imageByFX.isError) {
+                        imageByFX
+                    } else {
+                        Logger.warning("Load `$file` as FXImage failed", "Controller")
+                        Logger.exception(imageByFX.exception)
+
+                        try {
+                            val imageByIO = ImageIO.read(FileInputStream(file))?.let { SwingFXUtils.toFXImage(it, null) }
+                            if (imageByIO != null) {
+                                imageByIO
+                            } else {
+                                Logger.error("Load `$file` as AWTImage failed: Unsupported", "Controller")
+                                showError(state.stage, I18N["error.picture_type_unsupported"])
+                                INIT_IMAGE
+                            }
+                        } catch (e: IOException) {
+                            Logger.error("Load `$file` as AWTImage failed: Exception", "Controller")
+                            Logger.exception(e)
+                            showError(state.stage, String.format(I18N["error.picture_load_failed.s"], file.name))
+                            showException(state.stage, e)
                             INIT_IMAGE
                         }
-                    } catch (e: IOException) {
-                        showError(state.stage, String.format(I18N["error.picture_load_failed.s"], state.getPicFileNow()!!.name))
-                        showException(state.stage, e)
-
-                        INIT_IMAGE
                     }
                 } else {
                     Logger.error("Picture `${file.path}` not exists", "Controller")
@@ -756,7 +768,7 @@ class Controller(private val state: State) {
         if (!state.isChanged) return false
 
         // Opened but not saved
-        val result = showAlert(state.stage, null, I18N["alert.not_save.content"], I18N["common.exit"])
+        val result = showConfirm(state.stage, null, I18N["alert.not_save.content"], I18N["common.exit"])
         // Dialog present
         if (result.isPresent) when (result.get()) {
             ButtonType.YES -> {
@@ -772,6 +784,7 @@ class Controller(private val state: State) {
 
     /**
      * Create a new TransFile file and its FileSystem file.
+     * File save type is based on the extension of the file.
      * @param file Which file the TransFile will write to
      * @return ProjectFolder if success, null if fail
      */
@@ -808,7 +821,7 @@ class Controller(private val state: State) {
                 Logger.info("Project folder set to ${projectFolder.path}", "Controller")
             }
         }
-        val result = showChoiceList(state.stage, sortByDigit(potentialPics), emptyList())
+        val result = showChoiceList(state.stage, potentialPics.sortByDigit(), emptyList())
         if (result.isPresent) {
             if (result.get().isEmpty()) {
                 Logger.info("Cancel (selected none)", "Controller")
@@ -824,12 +837,13 @@ class Controller(private val state: State) {
         Logger.info("Chose pictures", "Controller")
 
         // Prepare new TransFile
-        val groupCreateList = Settings.isGroupCreateOnNewTransList
-        val groupNames = Settings.defaultGroupNameList.filterIndexed { index, _ -> groupCreateList[index] }
-        val groupColors = Settings.defaultGroupColorHexList.filterIndexed { index, _ -> groupCreateList[index] }
         val transFile = TransFile(
-            groupList = groupNames.mapIndexedTo(ArrayList()) { index, name -> TransGroup(name, groupColors[index]) },
-            transMap  = selectedPics.associateWithTo(HashMap()) { ArrayList() }
+            groupList = Settings.defaultGroupNameList
+                .mapIndexed { index, name -> TransGroup(name, Settings.defaultGroupColorHexList[index]) }
+                .filterIndexed { index, _ -> Settings.isGroupCreateOnNewTransList[index] }
+                .let { if (FileType.getFileType(file) == FileType.LPFile) it.subList(0, 9) else it }
+                .toMutableList(),
+            transMap = selectedPics.associateWithTo(HashMap()) { ArrayList() }
         )
         Logger.info("Built TransFile", "Controller")
 
@@ -848,7 +862,8 @@ class Controller(private val state: State) {
         return projectFolder
     }
     /**
-     * Open a translation file
+     * Open a translation file.
+     * File save type is based on the extension of the file.
      * @param file Which file will be open
      * @param projectFolder Which folder the pictures locate in
      */
@@ -901,12 +916,11 @@ class Controller(private val state: State) {
         // Check lost
         if (state.transFile.checkLost().isNotEmpty()) {
             // Specify now?
-            showConfirm(state.stage, I18N["specify.confirm.lost_pictures"]).ifPresent {
-                if (it == ButtonType.YES) {
-                    val completed = state.application.dialogSpecify.specify()
-                    if (completed == null) showInfo(state.stage, I18N["specify.info.cancelled"])
-                    else if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
-                }
+            val result = showConfirm(state.stage, I18N["specify.confirm.lost_pictures"])
+            if (result.isPresent && result.get() == ButtonType.YES) {
+                val completed = state.application.dialogSpecify.specify()
+                if (completed == null) showInfo(state.stage, I18N["specify.info.cancelled"])
+                else if (!completed) showInfo(state.stage, I18N["specify.info.incomplete"])
             }
         }
 
@@ -926,7 +940,8 @@ class Controller(private val state: State) {
         Logger.info("Opened TransFile", "Controller")
     }
     /**
-     * Save a TransFile
+     * Save a TransFile.
+     * File save type is based on the extension of the file.
      * @param file Which file will the TransFile write to
      * @param silent Whether the save procedure is done in silence or not
      */
@@ -995,7 +1010,8 @@ class Controller(private val state: State) {
         Logger.info("Saved TransFile", "Controller")
     }
     /**
-     * Recover from backup file
+     * Recover from backup file.
+     * File save type is based on the extension of the file.
      * @param from The backup file, will be treat as MeoFile
      * @param to Which file will the backup recover to
      */
@@ -1019,7 +1035,8 @@ class Controller(private val state: State) {
         open(to, to.parentFile)
     }
     /**
-     * Export a TransFile in specific type
+     * Export a TransFile in specific type.
+     * File save type is based on the extension of the file.
      * @param file Which file will the TransFile write to
      */
     fun export(file: File) {
@@ -1038,6 +1055,7 @@ class Controller(private val state: State) {
     }
     /**
      * Generate a zip file with translation file and picture files
+     * Translation file save type is based on the extension of the file.
      * @param file Which file will the zip file write to
      */
     fun pack(file: File) {

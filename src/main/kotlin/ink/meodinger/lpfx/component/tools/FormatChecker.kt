@@ -61,7 +61,7 @@ class FormatChecker(private val state: State) : Stage() {
             vgap = 8.0
 
             add(ImageView(), 0, 0, 1, 2) {
-                image = IMAGE_ALERT.resizeByRadius(GENERAL_ICON_RADIUS)
+                image = IMAGE_WARNING.resizeByRadius(GENERAL_ICON_RADIUS)
             }
             add(Label(), 1, 0, 3, 1) {
                 gridHAlign = HPos.CENTER

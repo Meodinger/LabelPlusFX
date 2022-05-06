@@ -298,7 +298,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         } ?: return
         if (file.exists()) {
             val confirm = showConfirm(state.stage, String.format(I18N["m.new.dialog.overwrite.s"], file.name))
-            if (confirm.isEmpty || confirm.get() == ButtonType.NO) return
+            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
 
         state.reset()
@@ -368,24 +368,27 @@ class CMenuBar(private val state: State) : MenuBar() {
         state.application.searchAndReplace.toFront()
     }
     private fun editComment() {
-        showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment).ifPresent {
-            state.doAction(object : Action {
+        val result = showInputArea(state.stage, I18N["m.comment.dialog.title"], state.transFile.comment)
+        if (!result.isPresent) return
 
-                private val oriComment = state.transFile.comment
+        state.doAction(object : Action {
 
-                override val type: ActionType = ActionType.CHANGE
+            private val oriComment = state.transFile.comment
+            private val dstComment = result.get()
 
-                override fun commit() {
-                    state.transFile.comment = it
-                    state.isChanged = true
-                }
+            override val type: ActionType = ActionType.CHANGE
 
-                override fun revert() {
-                    state.transFile.comment = oriComment
-                }
+            override fun commit() {
+                state.transFile.comment = dstComment
+                state.isChanged = true
+            }
 
-            })
-        }
+            override fun revert() {
+                state.transFile.comment = oriComment
+                state.isChanged = true
+            }
+
+        })
     }
     private fun editProjectPictures() {
         // Choose Pics
@@ -397,47 +400,51 @@ class CMenuBar(private val state: State) : MenuBar() {
                 false
             }.map(Path::name).collect(Collectors.toList())
 
-        showChoiceList(state.stage, sortByDigit(unselected), sortByDigit(selected)).ifPresent {
-            if (it.isEmpty()) {
-                showInfo(state.stage, I18N["info.required_at_least_1_pic"])
-                return@ifPresent
-            }
+        val result = showChoiceList(state.stage, unselected.sortByDigit(), selected.sortByDigit())
+        if (!result.isPresent) return
 
-            val picNames = state.transFile.sortedPicNames
-
-            val toAdd = ArrayList<String>()
-            for (picName in it) if (!picNames.contains(picName)) toAdd.add(picName)
-            val toRemove = ArrayList<String>()
-            for (picName in picNames) if (!it.contains(picName)) toRemove.add(picName)
-
-            if (toAdd.size == 0 && toRemove.size == 0) return@ifPresent
-            if (toRemove.size != 0) {
-                val confirm = showConfirm(state.stage, I18N["confirm.removing_pic"])
-                if (!confirm.isPresent || confirm.get() != ButtonType.YES) return@ifPresent
-            }
-
-            state.doAction(ComplexAction(contact(
-                toAdd.map { picName -> PictureAction(ActionType.ADD, state, picName) },
-                toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
-            )))
-            // Update selection
-            state.currentPicName = state.transFile.sortedPicNames[0]
+        if (result.get().isEmpty()) {
+            showInfo(state.stage, I18N["info.required_at_least_1_pic"])
+            return
         }
+
+        val picNames = state.transFile.sortedPicNames
+        val resNames = result.get()
+
+        val toAdd = ArrayList<String>()
+        for (picName in resNames) if (!picNames.contains(picName)) toAdd.add(picName)
+        val toRemove = ArrayList<String>()
+        for (picName in picNames) if (!resNames.contains(picName)) toRemove.add(picName)
+
+        if (toAdd.size == 0 && toRemove.size == 0) return
+        if (toRemove.size != 0) {
+            val confirm = showConfirm(state.stage, I18N["confirm.removing_pic"])
+            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
+        }
+
+        state.doAction(ComplexAction(contact(
+            toAdd.map { picName -> PictureAction(ActionType.ADD, state, picName) },
+            toRemove.map { picName -> PictureAction(ActionType.REMOVE, state, picName) }
+        )))
+        // Update selection
+        state.currentPicName = state.transFile.sortedPicNames[0]
     }
     private fun addExternalPicture() {
         val files = chooserPic.showOpenMultipleDialog(state.stage) ?: return
         val picNames = state.transFile.sortedPicNames
 
+        val actionList = ArrayList<Action>()
         val conflictList = ArrayList<String>()
         for (file in files) {
-            val picName = file.name
-            if (picNames.contains(picName)) {
-                conflictList.add(picName)
+            if (picNames.contains(file.name)) {
+                conflictList.add(file.path)
                 continue
             }
-
-            state.doAction(PictureAction(ActionType.ADD, state, picName, file))
+            actionList.add(PictureAction(ActionType.ADD, state, file.name, file))
         }
+
+        state.doAction(ComplexAction(actionList))
+        // Show conficts
         if (conflictList.isNotEmpty()) {
             showWarning(
                 state.stage,
@@ -630,7 +637,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         val checker = state.application.formatChecker
 
         if (checker.check()) return
-        if (!checker.isShowing) showAlert(state.stage, I18N["checker.warning"])
+        if (!checker.isShowing) showWarning(state.stage, I18N["checker.warning"])
 
         checker.x = state.stage.x - 16.0 + state.stage.width - checker.width
         checker.y = state.stage.y + 16.0 + state.application.onlineDict.height

@@ -12,7 +12,6 @@ import ink.meodinger.lpfx.util.string.omitHighText
 import ink.meodinger.lpfx.util.string.omitWideText
 
 import javafx.event.ActionEvent
-import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
@@ -28,27 +27,65 @@ import java.util.*
  * Have fun with my code!
  */
 
-private val confirmImage = IMAGE_CONFIRM.resizeByRadius(GENERAL_ICON_RADIUS)
 private val infoImage    = IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS)
-private val alertImage   = IMAGE_ALERT.resizeByRadius(GENERAL_ICON_RADIUS)
+private val warningImage = IMAGE_WARNING.resizeByRadius(GENERAL_ICON_RADIUS)
 private val errorImage   = IMAGE_ERROR.resizeByRadius(GENERAL_ICON_RADIUS)
+private val confirmImage = IMAGE_CONFIRM.resizeByRadius(GENERAL_ICON_RADIUS)
+
+/**
+ * Dialog Type
+ */
+enum class DialogType {
+
+    /**
+     * Dialog will show some information
+     */
+    INFO,
+
+    /**
+     * Dialog will warn you something
+     */
+    WARNING,
+
+    /**
+     * Dialog will show the error occurred
+     */
+    ERROR,
+
+    /**
+     * Dialog will require your confirmation
+     */
+    CONFIRM;
+}
 
 /**
  * Show dialog
  * @param owner Dialog owner
- * @param graphic Dialog graphic
+ * @param type Dialog type
  * @param title Dialog title
  * @param header Dialog header text
  * @param content Dialog content text
  * @param buttonTypes Dialog ButtonTypes
  */
-fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, header: String?, content: String, vararg buttonTypes: ButtonType): Optional<ButtonType> {
-
-    // TODO: Use Enum to handle dialog type
+fun showDialog(
+    owner: Window? = null,
+    type: DialogType,
+    title: String,
+    header: String?,
+    content: String,
+    vararg buttonTypes: ButtonType
+): Optional<ButtonType> {
 
     val dialog = Dialog<ButtonType>()
+
     dialog.initOwner(owner)
-    dialog.graphic = graphic
+    dialog.graphic = when (type) {
+        DialogType.INFO    -> ImageView(infoImage)
+        DialogType.WARNING -> ImageView(warningImage)
+        DialogType.ERROR   -> ImageView(errorImage)
+        DialogType.CONFIRM -> ImageView(confirmImage)
+    }
+
     dialog.title = title
     dialog.headerText = header
     dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
@@ -68,46 +105,6 @@ fun showDialog(owner: Window? = null, graphic: Node? = null, title: String, head
 }
 
 /**
- * Show message for confirm
- * @param content Message to show
- * @return ButtonType? YES | NO
- */
-fun showConfirm(owner: Window?, content: String): Optional<ButtonType> {
-    return showConfirm(owner, null, content, I18N["common.confirm"])
-}
-/**
- * Show message for confirm
- * @param title Dialog title
- * @param header Header text, nullable
- * @param content Content text
- * @param owner Owner window
- * @return ButtonType? YES | NO
- */
-fun showConfirm(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, ImageView(confirmImage), title, header, content, ButtonType.YES, ButtonType.NO)
-}
-
-/**
- * Show alert
- * @param content Alert to show
- * @return ButtonType? YES | NO | CANCEL
- */
-fun showAlert(owner: Window?, content: String): Optional<ButtonType> {
-    return showAlert(owner, null, content, I18N["common.alert"])
-}
-/**
- * Show alert
- * @param title Dialog title
- * @param header Header text, nullable
- * @param content Content text
- * @param owner Owner window
- * @return ButtonType? YES | NO | CANCEL
- */
-fun showAlert(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, ImageView(alertImage), title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
-}
-
-/**
  * Show information
  * @param content Info to show
  * @return ButtonType? OK
@@ -124,7 +121,7 @@ fun showInfo(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? OK
  */
 fun showInfo(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, ImageView(infoImage), title, header, content, ButtonType.OK)
+    return showDialog(owner, DialogType.INFO, title, header, content, ButtonType.OK)
 }
 
 /**
@@ -144,7 +141,7 @@ fun showWarning(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? YES | CLOSE
  */
 fun showWarning(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, ImageView(alertImage), title, header, content, ButtonType.YES, ButtonType.CLOSE)
+    return showDialog(owner, DialogType.WARNING, title, header, content, ButtonType.YES, ButtonType.CLOSE)
 }
 
 /**
@@ -164,7 +161,27 @@ fun showError(owner: Window?, content: String): Optional<ButtonType> {
  * @return ButtonType? Ok
  */
 fun showError(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
-    return showDialog(owner, ImageView(errorImage), title, header, content, ButtonType.OK)
+    return showDialog(owner, DialogType.ERROR, title, header, content, ButtonType.OK)
+}
+
+/**
+ * Show message for confirm
+ * @param content Message to show
+ * @return ButtonType? YES | NO
+ */
+fun showConfirm(owner: Window?, content: String): Optional<ButtonType> {
+    return showConfirm(owner, null, content, I18N["common.confirm"])
+}
+/**
+ * Show message for confirm
+ * @param title Dialog title
+ * @param header Header text, nullable
+ * @param content Content text
+ * @param owner Owner window
+ * @return ButtonType? YES | NO | CANCEL
+ */
+fun showConfirm(owner: Window?, header: String?, content: String, title: String): Optional<ButtonType> {
+    return showDialog(owner, DialogType.CONFIRM, title, header, content, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
 }
 
 

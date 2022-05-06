@@ -9,11 +9,11 @@ package ink.meodinger.lpfx.util.string
 
 /**
  * Trim a list of string
- *
- * @param strings Strings to trim
  * @return A list of String, first two is the same head & tail of input strings, others are strings that trimmed head & tail
  */
-fun trimSame(strings: List<String>): List<String> {
+fun Collection<String>.trimSame(): List<String> {
+    val strings = this.toList()
+
     if (strings.isEmpty()) return listOf("", "")
     if (strings.size == 1) return listOf("", "", strings[0])
 
@@ -48,10 +48,10 @@ fun trimSame(strings: List<String>): List<String> {
 }
 
 /**
- * Sort a list of string by their long value
+ * Sort a list of string by their Long value
  */
-fun sortByDigit(strings: Collection<String>): List<String> {
-    val trimmed = trimSame(if (strings is List) strings else strings.toList())
+fun Collection<String>.sortByDigit(): List<String> {
+    val trimmed = trimSame()
 
     if (trimmed.size > 2) {
         var canCastToIntList = true
@@ -69,5 +69,5 @@ fun sortByDigit(strings: Collection<String>): List<String> {
     }
 
     // default
-    return strings.sorted()
+    return sorted()
 }

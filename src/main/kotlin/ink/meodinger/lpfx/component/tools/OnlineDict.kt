@@ -15,8 +15,8 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP
 
 import javafx.application.Platform
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
@@ -45,14 +45,9 @@ import javax.net.ssl.HttpsURLConnection
  */
 class OnlineDict : Stage() {
 
-    // TODO: TransStateEnum
-
     companion object {
         private const val JD_SITE = "https://nekodict.com"
         private const val JD_API  = "https://nekodict.com/words?q="
-
-        private const val STATE_WORD     = 0
-        private const val STATE_SENTENCE = 1
 
         private const val FONT_SIZE = 16.0
 
@@ -68,8 +63,10 @@ class OnlineDict : Stage() {
         }
     }
 
-    private val transStateProperty: IntegerProperty = SimpleIntegerProperty(STATE_WORD)
-    private var transState: Int by transStateProperty
+    private enum class TransState { WORD, SENTENCE; }
+
+    private val transStateProperty: ObjectProperty<TransState> = SimpleObjectProperty(TransState.WORD)
+    private var transState: TransState by transStateProperty
 
     private val outputFlow: CTextFlow = CTextFlow()
 
@@ -85,10 +82,9 @@ class OnlineDict : Stage() {
                 alignment = Pos.CENTER
                 backgroundProperty().bind(transStateProperty.transform {
                     Background(BackgroundFill(
-                        when (it) {
-                            STATE_WORD -> Color.LIGHTGREEN
-                            STATE_SENTENCE -> Color.LIGHTBLUE
-                            else -> throw IllegalStateException("State invalid")
+                        when (it!!) {
+                            TransState.WORD -> Color.LIGHTGREEN
+                            TransState.SENTENCE -> Color.LIGHTBLUE
                         },
                         CornerRadii(0.0),
                         Insets(0.0)
@@ -98,10 +94,9 @@ class OnlineDict : Stage() {
                     minWidth = 75.0
                     alignment = Pos.CENTER
                     textProperty().bind(transStateProperty.transform {
-                        when (it) {
-                            STATE_WORD -> I18N["dict.word"]
-                            STATE_SENTENCE -> I18N["dict.sentence"]
-                            else -> throw IllegalStateException("State invalid")
+                        when (it!!) {
+                            TransState.WORD -> I18N["dict.word"]
+                            TransState.SENTENCE -> I18N["dict.sentence"]
                         }
                     })
                 }
@@ -109,7 +104,7 @@ class OnlineDict : Stage() {
                     hgrow = Priority.ALWAYS
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter
-                        transState = (transState + 1) % 2
+                        transState = TransState.values()[(transState.ordinal + 1) % TransState.values().size]
                         it.consume()
                     }
                     addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -125,9 +120,8 @@ class OnlineDict : Stage() {
                         outputFlow.setText(I18N["dict.fetching"], FONT_SIZE)
                         outputFlow.flow()
                         when (transState) {
-                            STATE_WORD -> searchWord(text)
-                            STATE_SENTENCE -> translate(text)
-                            else -> throw IllegalStateException("State invalid")
+                            TransState.WORD -> searchWord(text)
+                            TransState.SENTENCE -> translate(text)
                         }
                     }
                 }

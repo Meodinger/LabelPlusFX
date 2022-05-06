@@ -150,7 +150,7 @@ class SearchReplace(private val state: State) : Stage() {
         var findResult = findNext(wrapFind)
         if (findResult == null) {
             val result = showConfirm(this, I18N["snr.not_found_re"])
-            if (!result.isPresent || result.get() != ButtonType.YES) return
+            if (!(result.isPresent && result.get() == ButtonType.YES)) return
 
             findResult = findNext(true)
             if (findResult == null) {

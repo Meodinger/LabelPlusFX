@@ -91,9 +91,7 @@ class LabelPlusFX: HookedApplication() {
      * Cheat Sheet. To display some hints on how to use LPFX
      */
     val cheatSheet: CheatSheet by lazy {
-        CheatSheet().apply {
-            setOnAction { state.application.hostServices.showDocument(INFO["application.help"]) }
-        } withOwner state.stage
+        CheatSheet() withOwner state.stage
     }
 
     /**

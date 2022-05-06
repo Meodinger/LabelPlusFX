@@ -3,7 +3,6 @@ package ink.meodinger.lpfx.action
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.TransLabel
-import ink.meodinger.lpfx.util.file.exists
 
 import javafx.collections.FXCollections
 import java.io.File
@@ -52,8 +51,8 @@ class PictureAction(
         if (state.transFile.transMapObservable.contains(picName))
             throw IllegalArgumentException(String.format(I18N["exception.action.picture_repeated.s"], picName))
 
+        state.transFile.setFile(picName, picFile)
         state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
-        if (picFile.exists()) state.transFile.setFile(picName, picFile)
 
         Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", "Action")
     }

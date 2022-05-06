@@ -1,12 +1,13 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.util.image.imageFromFile
-
+import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
 import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 import java.net.URL
 import java.util.*
+import javax.imageio.ImageIO
 
 
 /**
@@ -40,16 +41,20 @@ fun loadAsImage(imageFileName: String): Image = Image(loadAsURL(imageFileName).t
  */
 const val GENERAL_ICON_RADIUS: Double = 32.0
 
-val ICON         = loadAsImage("/file/image/icon.png")
-val SAMPLE_IMAGE = loadAsImage("/file/image/sample_320x320.jpg")
+val ICON: Image = loadAsImage("/file/image/icon.png")
+val SAMPLE_IMAGE: Image = loadAsImage("/file/image/sample_320x320.jpg")
 
-val IMAGE_CONFIRM = loadAsImage("/file/image/dialog/Confirm.png")
-val IMAGE_INFO    = loadAsImage("/file/image/dialog/Info.png")
-val IMAGE_ALERT   = loadAsImage("/file/image/dialog/Alert.png")
-val IMAGE_ERROR   = loadAsImage("/file/image/dialog/Error.png")
+val IMAGE_CONFIRM: Image = loadAsImage("/file/image/dialog/Confirm.png")
+val IMAGE_INFO   : Image = loadAsImage("/file/image/dialog/Info.png")
+val IMAGE_WARNING: Image = loadAsImage("/file/image/dialog/Alert.png")
+val IMAGE_ERROR  : Image = loadAsImage("/file/image/dialog/Error.png")
 
 // NOTE: Should not larger than 480x480
-val INIT_IMAGE   = Config.workingDir.resolve("init-image.png").takeIf(File::exists)?.let(::imageFromFile)
+val INIT_IMAGE: Image = Config.workingDir.resolve("init-image.png")
+    .takeIf(File::exists)?.let {
+        Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
+            ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
+    }
     ?: loadAsImage("/file/image/init_image.png")
 
 val SCRIPT      = loadAsBytes("/file/script/Meo_PS_Script")

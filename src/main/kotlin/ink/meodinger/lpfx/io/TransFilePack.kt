@@ -19,10 +19,9 @@ import java.nio.charset.StandardCharsets
  */
 
 /**
- * Export a pic pack with Meo_PS_Script
+ * Export a pic pack with Meo_PS_Script.
  * @param target Which file will the zip file write to
  * @param transFile TranFile
- * @param type TransFile save type
  */
 @Throws(IOException::class)
 fun pack(target: File, transFile: TransFile, type: FileType) {

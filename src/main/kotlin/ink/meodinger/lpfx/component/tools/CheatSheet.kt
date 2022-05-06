@@ -4,12 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.closeOnEscape
 import ink.meodinger.lpfx.util.component.gridHAlign
-import ink.meodinger.lpfx.util.property.getValue
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -19,6 +14,8 @@ import javafx.scene.control.Label
 import javafx.scene.control.Separator
 import javafx.scene.layout.GridPane
 import javafx.stage.Stage
+import java.awt.Desktop
+import java.net.URL
 
 /**
  * Author: Meodinger
@@ -26,22 +23,6 @@ import javafx.stage.Stage
  * Have fun with my code!
  */
 class CheatSheet : Stage() {
-
-    private val onActionProperty: ObjectProperty<EventHandler<ActionEvent>> = SimpleObjectProperty(null)
-    /**
-     * What to do when we click the link below
-     */
-    fun onActionProperty(): ObjectProperty<EventHandler<ActionEvent>> = onActionProperty
-    /**
-     * @see onActionProperty
-     */
-    val onAction: EventHandler<ActionEvent> by onActionProperty
-    /**
-     * @see onActionProperty
-     */
-    fun setOnAction(onAction: (ActionEvent) -> Unit) {
-        onActionProperty.set(onAction)
-    }
 
     init {
         icons.add(ICON)
@@ -80,7 +61,11 @@ class CheatSheet : Stage() {
             add(Label(I18N["cheat.double_label.res"]), 1, 9)
             add(Hyperlink(I18N["cheat.more_help"]), 0, 10, 2, 1) {
                 gridHAlign = HPos.CENTER
-                onActionProperty().bind(this@CheatSheet.onActionProperty)
+                setOnAction {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        Desktop.getDesktop().browse(URL(INFO["application.help"]).toURI())
+                    }
+                }
             }
         })
 

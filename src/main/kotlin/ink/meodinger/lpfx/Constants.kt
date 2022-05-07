@@ -28,19 +28,58 @@ const val FILENAME_DEFAULT  : String = "Nova traduko"
  */
 const val FOLDER_NAME_BAK   : String = "backup"
 
+/**
+ * Extension: bmp
+ */
 const val EXTENSION_PIC_BMP : String = "bmp"
+/**
+ * Extension: gif
+ */
 const val EXTENSION_PIC_GIF : String = "gif"
+/**
+ * Extension: png
+ */
 const val EXTENSION_PIC_PNG : String = "png"
+/**
+ * Extension: jpg
+ */
 const val EXTENSION_PIC_JPG : String = "jpg"
+/**
+ * Extension: jpeg
+ */
 const val EXTENSION_PIC_JPEG: String = "jpeg"
+/**
+ * Extension: tif
+ */
 const val EXTENSION_PIC_TIF : String = "tif"
+/**
+ * Extension: tiff
+ */
 const val EXTENSION_PIC_TIFF: String = "tiff"
+/**
+ * Extension: webp
+ */
 const val EXTENSION_PIC_WEBP: String = "webp"
+/**
+ * Extension: txt
+ */
 const val EXTENSION_FILE_LP : String = "txt"
+/**
+ * Extension: json
+ */
 const val EXTENSION_FILE_MEO: String = "json"
+/**
+ * Extension: zip
+ */
 const val EXTENSION_PACK    : String = "zip"
+/**
+ * Extension: bak
+ */
 const val EXTENSION_BAK     : String = "bak"
 
+/**
+ * All extensions of pictures
+ */
 val EXTENSIONS_PIC: List<String> = listOf(
     EXTENSION_PIC_BMP,
     EXTENSION_PIC_GIF,
@@ -51,6 +90,10 @@ val EXTENSIONS_PIC: List<String> = listOf(
     EXTENSION_PIC_TIFF,
     EXTENSION_PIC_WEBP,
 )
+
+/**
+ * All extensions of translation files
+ */
 val EXTENSIONS_FILE: List<String> = listOf(
     EXTENSION_FILE_LP,
     EXTENSION_FILE_MEO

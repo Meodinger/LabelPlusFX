@@ -71,21 +71,18 @@ class Controller(private val state: State) {
 
     // region View Components
 
-    private val view: View                       = state.view
-    private val bSwitchViewMode: Button          = view.bSwitchViewMode does { switchViewMode() }
-    private val bSwitchWorkMode: Button          = view.bSwitchWorkMode does { switchWorkMode() }
-    private val lBackup: Label                   = view.lBackup
-    private val lLocation: Label                 = view.lLocation
-    private val lAccEditTime: Label              = view.lAccEditTime
-    private val pMain: SplitPane                 = view.pMain
-    private val pRight: SplitPane                = view.pRight
-    private val cGroupBar: CGroupBar             = view.cGroupBar
-    private val cLabelPane: CLabelPane           = view.cLabelPane
-    private val cSlider: CTextSlider             = view.cSlider
-    private val cPicBox: CComboBox<String>       = view.cPicBox
-    private val cGroupBox: CComboBox<TransGroup> = view.cGroupBox
-    private val cTreeView: CTreeView             = view.cTreeView
-    private val cTransArea: CLigatureArea        = view.cTransArea
+    private val view            = state.view
+    private val bSwitchViewMode = view.bSwitchViewMode does { switchViewMode() }
+    private val bSwitchWorkMode = view.bSwitchWorkMode does { switchWorkMode() }
+    private val lBackup         = view.lBackup
+    private val lLocation       = view.lLocation
+    private val lAccEditTime    = view.lAccEditTime
+    private val cPicBox         = view.cPicBox
+    private val cGroupBox       = view.cGroupBox
+    private val cGroupBar       = view.cGroupBar
+    private val cLabelPane      = view.cLabelPane
+    private val cTreeView       = view.cTreeView
+    private val cTransArea      = view.cTransArea
 
     // endregion
 
@@ -381,19 +378,12 @@ class Controller(private val state: State) {
         Logger.info("Binding properties...", "Controller")
 
         // Preferences
-        view.showStatsBarProperty().bindBidirectional(Preference.showStatsBarProperty())
         cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
-        pMain.dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
-        pRight.dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
-        Logger.info("Bound Preferences @ DividerPositions, TextAreaFont", "Controller")
+        Logger.info("Bound TransArea font", "Controller")
 
         // CLigatureTextArea - rules
         cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
         Logger.info("Bound ligature rules", "Controller")
-
-        // RecentFiles
-        view.menuBar.recentFilesProperty().bind(RecentFiles.recentFilesProperty())
-        Logger.info("Bound recent files menu", "Controller")
 
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!state.openedProperty())
@@ -402,16 +392,8 @@ class Controller(private val state: State) {
         cTreeView.disableProperty().bind(!state.openedProperty())
         cPicBox.disableProperty().bind(!state.openedProperty())
         cGroupBox.disableProperty().bind(!state.openedProperty())
-        cSlider.disableProperty().bind(!state.openedProperty())
         cLabelPane.disableProperty().bind(!state.openedProperty())
         Logger.info("Bound disabled", "Controller")
-
-        // CSlider - CLabelPane#scale
-        cSlider.initScaleProperty().bindBidirectional(cLabelPane.initScaleProperty())
-        cSlider.minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
-        cSlider.maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
-        cSlider.scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
-        Logger.info("Bound scale", "Controller")
 
         // Switch Button text
         bSwitchWorkMode.textProperty().bind(state.workModeProperty().asString())

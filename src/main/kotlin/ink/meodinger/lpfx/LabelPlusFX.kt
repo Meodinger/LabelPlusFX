@@ -1,13 +1,8 @@
 package ink.meodinger.lpfx
 
-import ink.meodinger.lpfx.component.properties.AbstractPropertiesDialog
-import ink.meodinger.lpfx.component.properties.DialogLogs
-import ink.meodinger.lpfx.component.properties.DialogSettings
+import ink.meodinger.lpfx.component.properties.*
 import ink.meodinger.lpfx.component.tools.*
-import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.options.Options
-import ink.meodinger.lpfx.options.Preference
-import ink.meodinger.lpfx.options.Settings
+import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.dialog.showException
@@ -15,12 +10,12 @@ import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
+import javafx.embed.swing.SwingFXUtils
 import javafx.scene.Scene
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
 import java.awt.SystemTray
-import java.awt.Toolkit
 import java.awt.TrayIcon
 import java.awt.MenuItem as AwtMenuItem
 import java.awt.PopupMenu as AwtPopupMenu
@@ -43,7 +38,7 @@ class LabelPlusFX: HookedApplication() {
 
     private val state: State = State()
     private val icon: TrayIcon by lazy {
-        TrayIcon(Toolkit.getDefaultToolkit().getImage(loadAsURL("/file/image/icon.png"))).apply {
+        TrayIcon(SwingFXUtils.fromFXImage(ICON, null)).apply {
             fun restore() {
                 Platform.runLater {
                     state.stage.show()
@@ -80,7 +75,6 @@ class LabelPlusFX: HookedApplication() {
     fun iconify() {
         if (Config.supportSysTray) {
             state.stage.hide()
-
             SystemTray.getSystemTray().add(icon)
         } else {
             state.stage.isIconified = true

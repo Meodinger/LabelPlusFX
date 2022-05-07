@@ -2,13 +2,13 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
+import ink.meodinger.lpfx.options.Preference
+import ink.meodinger.lpfx.options.RecentFiles
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.scene.control.*
@@ -40,39 +40,72 @@ class View(state: State) : BorderPane() {
 
     // region Components
 
-    val menuBar         = CMenuBar(state)
-    val bSwitchViewMode = Button()
-    val bSwitchWorkMode = Button()
-    val lLocation       = Label()
-    val lBackup         = Label()
-    val lAccEditTime    = Label()
-    val pMain           = SplitPane()
-    val pRight          = SplitPane()
-    val cGroupBar       = CGroupBar()
-    val cLabelPane      = CLabelPane()
-    val cSlider         = CTextSlider()
-    val cPicBox         = CComboBox<String>()
-    val cGroupBox       = CComboBox<TransGroup>()
-    val cTreeView       = CTreeView()
-    val cTransArea      = CLigatureArea()
+    /**
+     * Work mode switch button
+     */
+    val bSwitchWorkMode: Button = Button()
+
+    /**
+     * View mode switch button
+     */
+    val bSwitchViewMode: Button = Button()
+
+    /**
+     * StatsBar label: location
+     */
+    val lLocation: Label = Label()
+
+    /**
+     * StatsBar label: backup information
+     */
+    val lBackup: Label = Label()
+
+    /**
+     * StatsBar label: accumulate editing time
+     */
+    val lAccEditTime: Label = Label()
+
+    /**
+     * Picture ComboBox, change pictures
+     */
+    val cPicBox: CComboBox<String> = CComboBox()
+
+    /**
+     * Group ComboBox, change groups
+     */
+    val cGroupBox: CComboBox<TransGroup> = CComboBox()
+
+    /**
+     * GroupBar, display TransGroups above the LabelPane
+     */
+    val cGroupBar: CGroupBar = CGroupBar()
+
+    /**
+     * LabelPane, display Image & Labels
+     */
+    val cLabelPane: CLabelPane = CLabelPane()
+
+    /**
+     * TreeView, display labels by label-index or by groupId
+     */
+    val cTreeView: CTreeView = CTreeView()
+
+    /**
+     * TransArea, edit label's text
+     */
+    val cTransArea: CLigatureArea = CLigatureArea()
 
     // endregion
-
-    private val showStatsBarProperty: BooleanProperty = SimpleBooleanProperty(false)
-    /**
-     * Whether the StatsBar should show
-     */
-    fun showStatsBarProperty(): BooleanProperty = showStatsBarProperty
-    /**
-     * @see showStatsBarProperty
-     */
-    var showStatsBar: Boolean by showStatsBarProperty
 
     init {
         state.view = this
 
-        top(menuBar)
-        center(pMain) {
+        top(CMenuBar(state)) {
+            recentFilesProperty().bind(RecentFiles.recentFilesProperty())
+        }
+        center(SplitPane()) {
+            dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
+
             add(BorderPane()) {
                 top(cGroupBar)
                 center(cLabelPane) {
@@ -81,10 +114,12 @@ class View(state: State) : BorderPane() {
                     maxScale = SCALE_MAX
                 }
                 bottom(HBox()) {
-                    add(cSlider) {
-                        initScale = SCALE_INIT
-                        minScale = SCALE_MIN
-                        maxScale = SCALE_MAX
+                    add(CTextSlider()) {
+                        disableProperty().bind(cLabelPane.disableProperty())
+                        initScaleProperty().bind(cLabelPane.initScaleProperty())
+                        scaleProperty().bindBidirectional(cLabelPane.scaleProperty())
+                        minScaleProperty().bindBidirectional(cLabelPane.minScaleProperty())
+                        maxScaleProperty().bindBidirectional(cLabelPane.maxScaleProperty())
                     }
                     add(HBox()) {
                         hgrow = Priority.ALWAYS
@@ -95,8 +130,10 @@ class View(state: State) : BorderPane() {
                     }
                 }
             }
-            add(pRight) {
+            add(SplitPane()) {
                 orientation = Orientation.VERTICAL
+                dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
+
                 add(BorderPane()) {
                     top(HBox()) {
                         add(bSwitchWorkMode) {
@@ -179,8 +216,8 @@ class View(state: State) : BorderPane() {
             }
         }
 
-        showStatsBarProperty.addListener(onNew {
-            if (it) this@View.bottom(statsBar) else this@View.children.remove(statsBar)
+        Preference.showStatsBarProperty().addListener(onNew {
+            if (it) bottom(statsBar) else children.remove(statsBar)
         })
     }
 

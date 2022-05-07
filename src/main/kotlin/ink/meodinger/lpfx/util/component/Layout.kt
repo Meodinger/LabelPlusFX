@@ -146,6 +146,8 @@ inline fun <T : Node> SplitPane.add(node: T, operation: T.() -> Unit = {}): Spli
 ///// GridPane
 ////////////////////////////////////////////////////////////
 
+// Maybe: Take back `COMMON_GAP = 16.0` as `GENERAL_GRID_GAP`
+
 inline fun <T : Node> GridPane.add(node: T, col: Int, row: Int, colSpan: Int, rowSpan: Int, operation: T.() -> Unit = {}): GridPane {
     return apply { add(node.apply(operation), col, row, colSpan, rowSpan) }
 }

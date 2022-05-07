@@ -64,13 +64,13 @@ fun main(vararg args: String) {
         // FX Thread not started, cannot use dialog or other FX things
         // Use swing as alternative alert window
         JFrame("ERROR").apply {
+            setLocationRelativeTo(null)
             contentPane.layout = BorderLayout()
             contentPane.add(JPanel().apply {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
                 add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
             }, BorderLayout.CENTER)
-            setSize(300, 100)
-            setLocationRelativeTo(null)
+            pack()
 
             defaultCloseOperation = JFrame.EXIT_ON_CLOSE
             isResizable = false

@@ -18,48 +18,90 @@ import javax.imageio.ImageIO
 
 /**
  * Load file in module as URL
+ * @param path Resource path, start with a slash
  */
-fun loadAsURL(fileName: String): URL = LabelPlusFX::class.java.getResource(fileName)!!
+fun loadAsURL(path: String): URL = LabelPlusFX::class.java.getResource(path)!!
 
 /**
  * Load file in module as InputStream
+ * @param path Resource path, start with a slash
  */
-fun loadAsStream(fileName: String): InputStream = LabelPlusFX::class.java.getResourceAsStream(fileName)!!
+fun loadAsStream(path: String): InputStream = LabelPlusFX::class.java.getResourceAsStream(path)!!
 
 /**
  * Load file in module as ByteArray
+ * @param path Resource path, start with a slash
  */
-fun loadAsBytes(fileName: String): ByteArray = loadAsStream(fileName).readAllBytes()
+fun loadAsBytes(path: String): ByteArray = loadAsStream(path).readAllBytes()
 
 /**
  * Load file in module as Image
+ * @param path Resource path, start with a slash
  */
-fun loadAsImage(imageFileName: String): Image = Image(loadAsURL(imageFileName).toString())
+fun loadAsImage(path: String): Image = Image(loadAsURL(path).toString())
+
+// ---------- Images ---------- //
 
 /**
  * General Icon Radius
  */
 const val GENERAL_ICON_RADIUS: Double = 32.0
 
+/**
+ * Icon Image for LPFX
+ */
 val ICON: Image = loadAsImage("/file/image/icon.png")
-val SAMPLE_IMAGE: Image = loadAsImage("/file/image/sample_320x320.jpg")
 
+/**
+ * Image indicates CONFIRM
+ */
 val IMAGE_CONFIRM: Image = loadAsImage("/file/image/dialog/Confirm.png")
+/**
+ * Image indicates INFORMATION
+ */
 val IMAGE_INFO   : Image = loadAsImage("/file/image/dialog/Info.png")
+/**
+ * Image indicates WARNING
+ */
 val IMAGE_WARNING: Image = loadAsImage("/file/image/dialog/Alert.png")
+/**
+ * Image indicates ERROR
+ */
 val IMAGE_ERROR  : Image = loadAsImage("/file/image/dialog/Error.png")
 
-// NOTE: Should not larger than 480x480
+/**
+ * The initial dafault image for LabelPane. This image should not
+ * larger than 480x480 to have best view.
+ */
 val INIT_IMAGE: Image = Config.workingDir.resolve("init-image.png")
     .takeIf(File::exists)?.let {
         Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
             ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
-    }
-    ?: loadAsImage("/file/image/init_image.png")
+    } ?: loadAsImage("/file/image/init_image.png")
 
-val SCRIPT      = loadAsBytes("/file/script/Meo_PS_Script")
-val TEMPLATE_EN = loadAsBytes("/file/script/ps_script_res/en.psd")
-val TEMPLATE_ZH = loadAsBytes("/file/script/ps_script_res/zh.psd")
+/**
+ * Sample Image for label propertis preview
+ */
+val SAMPLE_IMAGE: Image by lazy { loadAsImage("/file/image/sample_320x320.jpg") }
+
+
+// ---------- Files ---------- //
+
+/**
+ * The PS-Script
+ */
+val SCRIPT     : ByteArray by lazy { loadAsBytes("/file/script/Meo_PS_Script") }
+/**
+ * EN Template fot PS-Script
+ */
+val TEMPLATE_EN: ByteArray by lazy { loadAsBytes("/file/script/ps_script_res/en.psd") }
+/**
+ * ZH Template fot PS-Script
+ */
+val TEMPLATE_ZH: ByteArray by lazy { loadAsBytes("/file/script/ps_script_res/zh.psd") }
+
+
+// ---------- I18N ---------- //
 
 /**
  * Language
@@ -70,6 +112,16 @@ val lang: Locale = when (Locale.getDefault().country) {
     else -> Locale.ENGLISH
 }
 
+/**
+ * General information of LPFX
+ */
 val INFO = ResourceBundle.getBundle("ink.meodinger.lpfx.LabelPlusFX")!!
+/**
+ * I18N for LPFX
+ */
 val I18N = ResourceBundle.getBundle("ink.meodinger.lpfx.Lang", lang)!!
+
+/**
+ * Provide map-like getter
+ */
 operator fun ResourceBundle.get(key: String): String = this.getString(key)

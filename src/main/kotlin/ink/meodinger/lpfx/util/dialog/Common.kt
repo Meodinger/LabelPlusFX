@@ -8,8 +8,8 @@ import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.image.resizeByRadius
-import ink.meodinger.lpfx.util.string.omitHighText
-import ink.meodinger.lpfx.util.string.omitWideText
+import ink.meodinger.lpfx.util.string.shortenLongText
+import ink.meodinger.lpfx.util.string.shortenWideText
 
 import javafx.event.ActionEvent
 import javafx.scene.control.*
@@ -88,7 +88,7 @@ fun showDialog(
 
     dialog.title = title
     dialog.headerText = header
-    dialog.contentText = omitWideText(omitHighText(content), dialog.width / 3 * 2)
+    dialog.contentText = shortenWideText(shortenLongText(content), dialog.width / 3 * 2)
     dialog.dialogPane.buttonTypes.addAll(buttonTypes)
     dialog.dialogPane.setOnMouseClicked {
         if (it.isDoubleClick) {
@@ -206,7 +206,7 @@ fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     dialog.dialogPane.buttonTypes.addAll(sendBtnType, ButtonType.CANCEL)
     dialog.dialogPane.withContent(VBox()) {
         spacing = 8.0
-        add(Label(omitWideText(e.message ?: e.javaClass.name, 400.0)))
+        add(Label(shortenWideText(e.message ?: e.javaClass.name, 400.0)))
         add(Separator())
         add(Label("The exception stacktrace is:"))
         add(TextArea(e.stackTraceToString())) {

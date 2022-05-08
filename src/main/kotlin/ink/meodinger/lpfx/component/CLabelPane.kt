@@ -10,8 +10,8 @@ import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.string.omitHighText
-import ink.meodinger.lpfx.util.string.omitWideText
+import ink.meodinger.lpfx.util.string.shortenLongText
+import ink.meodinger.lpfx.util.string.shortenWideText
 
 import javafx.beans.property.*
 import javafx.collections.*
@@ -719,7 +719,7 @@ class CLabelPane : ScrollPane() {
      */
     fun createText(text: String, color: Color, x: Double, y: Double) {
         val gc = textLayer.graphicsContext2D
-        val s = omitWideText(omitHighText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
+        val s = shortenWideText(shortenLongText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
         val t = Text(s).apply { font = TEXT_FONT }
 
         val textW = t.boundsInLocal.width

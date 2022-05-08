@@ -144,19 +144,10 @@ object Logger {
         props.setProperty("mail.smtp.auth", "true")
         props.setProperty("mail.smtp.host", "smtp.163.com")
 
-        // text part
-        val textPart = MimeBodyPart()
-        textPart.setText("Got a problem! (or not)\nFrom LPFX $V")
-
-        // file part
-        val filePart = MimeBodyPart()
-        filePart.attachFile(logFile)
-        filePart.fileName = "${logFile.name}.txt"
-
         // content
         val content = MimeMultipart()
-        content.addBodyPart(textPart)
-        content.addBodyPart(filePart)
+        content.addBodyPart(MimeBodyPart().apply { setText("Got a problem! (or not)\nFrom LPFX $V") })
+        content.addBodyPart(MimeBodyPart().apply { attachFile(logFile) })
 
         // message
         val message = MimeMessage(Session.getInstance(props))

@@ -14,9 +14,9 @@ import javafx.scene.text.Text
  */
 
 /**
- * Omit high text
+ * Shorten long text
  */
-fun omitHighText(longText: String, maxRowCount: Int = 10): String {
+fun shortenLongText(longText: String, maxRowCount: Int = 10): String {
     val lines = longText.split("\n")
 
     if (lines.size <= maxRowCount) return longText
@@ -29,31 +29,35 @@ fun omitHighText(longText: String, maxRowCount: Int = 10): String {
 }
 
 /**
- * Omit wide text
+ * Shorten wide text
  */
-fun omitWideText(longText: String, maxWidth: Double, font: Font? = null): String {
-    val lines = longText.split("\n")
-    val builder = StringBuilder()
+fun shortenWideText(longText: String, maxWidth: Double, font: Font? = null): String {
+    val lines = longText.lines()
+    val textBuilder = StringBuilder()
 
-    val t = Text().apply { this.font = font }
-    val b = StringBuilder()
-    var p: Int
+    val text = Text().apply { this.font = font }
+    val builder = StringBuilder()
+    var pointer: Int
     for (line in lines) {
-        t.text = line
-        b.clear()
-        p = t.text.length - 1
-        if (t.boundsInLocal.width > maxWidth) {
-            b.append(line).append("...")
-            while (t.boundsInLocal.width > maxWidth) {
-                b.deleteAt(p--)
-                t.text = b.toString()
+        text.text = line
+        builder.clear()
+        pointer = text.text.length - 1
+
+        if (text.boundsInLocal.width > maxWidth) {
+            text.text += "..."
+            builder.append(line).append("...")
+
+            // Fix: p should greater than 0 to hanldle "..." is wide enough case.
+            while (pointer > 0 && text.boundsInLocal.width > maxWidth) {
+                builder.deleteAt(pointer--)
+                text.text = builder.toString()
             }
-            builder.appendLine(b.toString())
+            textBuilder.appendLine(builder.toString())
         } else {
-            builder.appendLine(line)
+            textBuilder.appendLine(line)
         }
     }
-    if (builder.isNotEmpty()) builder.deleteTrailingEOL()
+    if (textBuilder.isNotEmpty()) textBuilder.deleteTrailingEOL()
 
-    return builder.toString()
+    return textBuilder.toString()
 }

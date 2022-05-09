@@ -93,13 +93,12 @@ abstract class HookedApplication : Application() {
 
     /**
      *
-     * You MUST run this before stop or hooks will not be executed.
+     * You MUST run this before or within Application::stop or hooks will not be executed.
      */
     protected fun runHooks(onError: (Throwable) -> Unit) {
         if (shuttingDown) return
 
         shuttingDown = true
-
         shutdownHooks.values.forEach {
             try {
                 it()

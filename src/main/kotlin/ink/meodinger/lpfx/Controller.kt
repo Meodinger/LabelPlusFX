@@ -1055,6 +1055,13 @@ class Controller(private val state: State) {
     }
 
     /**
+     * Backup immediately
+     */
+    fun emergency() {
+        backupManager.fire(false)
+    }
+
+    /**
      * Reset all components
      */
     fun reset() {

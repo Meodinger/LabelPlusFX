@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.Config
 import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.util.once
 
@@ -64,6 +65,7 @@ object Logger {
             .append("Version: ").append(System.getProperty("os.version")).append(", ")
             .append("Arch: ").append(System.getProperty("os.arch")).append(";")
         builder.append("\nApplication Version: ").append(V).append(";")
+        builder.append("\nProxy: ${Config.enableProxy}, JNI: ${Config.enableJNI}, Tray: ${Config.supportSysTray}")
         builder.append("\n============== End ==============")
         info(builder.toString(), "Logger Init")
 

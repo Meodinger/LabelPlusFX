@@ -109,4 +109,16 @@ class TimerTaskManager(
         timerTask = genTask(_task)
     }
 
+    /**
+     * Run the task immediately
+     * @param reset Whether reset the timer or not
+     */
+    fun fire(reset: Boolean = false) {
+        _task()
+        if (reset) {
+            clear()
+            schedule()
+        }
+    }
+
 }

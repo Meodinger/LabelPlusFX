@@ -672,25 +672,22 @@ class CLabelPane : ScrollPane() {
                 label.layoutY + it.y,
                 Double.NaN, Double.NaN
             ))
+            it.consume() // disable further propagation
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
-            if (it.button == MouseButton.PRIMARY) {
-                fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
-                    it, transLabel.index,
-                    label.layoutX + it.x,
-                    label.layoutY + it.y,
-                    Double.NaN, Double.NaN
-                ))
-            } else if (it.button == MouseButton.SECONDARY) {
-
-                fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
-                    it, transLabel.index,
-                    label.layoutX + it.x,
-                    label.layoutY + it.y,
-                    Double.NaN, Double.NaN
-                ))
+            val eventType = when (it.button) {
+                MouseButton.PRIMARY -> LabelEvent.LABEL_CREATE
+                MouseButton.SECONDARY -> LabelEvent.LABEL_REMOVE
+                else -> return@setOnMouseClicked
             }
+            fireEvent(LabelEvent(eventType,
+                it, transLabel.index,
+                label.layoutX + it.x,
+                label.layoutY + it.y,
+                Double.NaN, Double.NaN
+            ))
+            it.consume() // disable further propagation
         }
 
         //Anchor-L-----  Anchor = imageWidth * x - LR
@@ -735,11 +732,9 @@ class CLabelPane : ScrollPane() {
      * @param y Y coordinate where the text will be displayed, based on the image width
      */
     fun createText(text: String, color: Color, x: Double, y: Double) {
-        // TODO: make text size fixed
-
-        val gc = textLayer.graphicsContext2D
         val s = shortenWideText(shortenLongText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
         val t = Text(s).apply { font = TEXT_FONT }
+        val gc = textLayer.graphicsContext2D
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height

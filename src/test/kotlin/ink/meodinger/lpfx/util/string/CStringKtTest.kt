@@ -35,10 +35,10 @@ class CStringKtTest {
 
     @Test
     fun sortByDigitTest() {
-        val sorted1 = sortByDigit(names1)
+        val sorted1 = names1.sortByDigit()
         for (i in sorted1.indices) assertEquals(expected1[i], sorted1[i])
 
-        val sorted2 = sortByDigit(names2)
+        val sorted2 = names2.sortByDigit()
         for (i in sorted2.indices) assertEquals(expected2[i], sorted2[i])
     }
 

@@ -4,11 +4,11 @@ import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CTextFlow
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.ime.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
@@ -30,6 +30,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 import java.net.URL
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
 
@@ -153,14 +154,15 @@ class OnlineDict : Stage() {
     }
 
     private fun searchWordSync(word: String) {
-        val searchConnection = URL("$JD_API$word").openConnection().apply { connect() } as HttpsURLConnection
-        Logger.debug("Dictionary: Fetching URL ${searchConnection.url}", "Dictionary")
+        // URL encode the word to make sure we search the correct thing
+        val searchURL = JD_API + URLEncoder.encode(word, StandardCharsets.UTF_8)
+        Logger.debug("Dictionary: Fetching URL $searchURL", "Dictionary")
+        val searchConnection = URL(searchURL).openConnection().apply { connect() } as HttpsURLConnection
         if (searchConnection.responseCode != 200) {
             Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
-
         val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
             Logger.debug("Dictionary: Got HTML content:", "Dictionary")
             Logger.debug(it, "Dictionary")
@@ -175,20 +177,20 @@ class OnlineDict : Stage() {
             return
         }
 
-        val contentConnection = URL(JD_SITE + first.attributes["href"]).openConnection().apply { connect() } as HttpsURLConnection
-        Logger.debug("Dictionary: Fetching URL ${contentConnection.url}", "Dictionary")
-        if (contentConnection.responseCode != 200){
+        // Go to the content page
+        val contentURL = JD_SITE + first.attributes["href"]
+        Logger.debug("Dictionary: Fetching URL $contentURL", "Dictionary")
+        val contentConnection = URL(contentURL).openConnection().apply { connect() } as HttpsURLConnection
+        if (contentConnection.responseCode != 200) {
             Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
             outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
             return
         }
-
         val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
             Logger.debug("Dictionary: Got HTML content:", "Dictionary")
             Logger.debug(it, "Dictionary")
         }
-        // ContentHTML has unclosed div
-        val contentPage = parse(contentHTML.replace("</body>", "</div></body>"))
+        val contentPage = parse(contentHTML.replace("</body>", "</div></body>")) // ContentHTML has unclosed div
         val contentResults = contentPage.body.children[1].children[1].children[0].children
 
         // Build WordInfo

@@ -151,7 +151,12 @@ class LabelPlusFX: HookedApplication() {
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
             Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
             Logger.exception(e)
-            showException(primaryStage, e, if (state.isOpened) state.translationFile else null)
+            if (state.isOpened) {
+                state.controller.emergency()
+                showException(primaryStage, e, state.translationFile)
+            } else {
+                showException(primaryStage, e)
+            }
         }
 
         state.stage = primaryStage

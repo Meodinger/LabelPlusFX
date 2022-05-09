@@ -11,7 +11,6 @@ import ink.meodinger.lpfx.component.dialog.showError
 import ink.meodinger.lpfx.io.sendMail
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.onChange
-import javafx.application.Platform
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty

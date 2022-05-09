@@ -5,7 +5,7 @@ import ink.meodinger.lpfx.component.tools.*
 import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.component.withOwner
-import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.application.Platform
@@ -151,7 +151,7 @@ class LabelPlusFX: HookedApplication() {
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
             Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
             Logger.exception(e)
-            showException(primaryStage, e)
+            showException(primaryStage, e, if (state.isOpened) state.translationFile else null)
         }
 
         state.stage = primaryStage

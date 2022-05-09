@@ -8,7 +8,6 @@ import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.type.*
 import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.*
@@ -19,6 +18,7 @@ import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.component.dialog.*
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -861,7 +861,7 @@ class Controller(private val state: State) {
             Logger.error("Open failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.open_failed"])
-            showException(state.stage, e)
+            showException(state.stage, e, file)
             return
         }
         Logger.info("Loaded TransFile", "Controller")

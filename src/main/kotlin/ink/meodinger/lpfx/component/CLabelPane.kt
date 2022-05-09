@@ -718,6 +718,8 @@ class CLabelPane : ScrollPane() {
      * @param y Y coordinate where the text will be displayed, based on the image width
      */
     fun createText(text: String, color: Color, x: Double, y: Double) {
+        // TODO: make text size fixed
+
         val gc = textLayer.graphicsContext2D
         val s = shortenWideText(shortenLongText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
         val t = Text(s).apply { font = TEXT_FONT }

@@ -1,6 +1,5 @@
 package ink.meodinger.lpfx.util
 
-import ink.meodinger.lpfx.util.collection.ArrayStack
 import javafx.application.Application
 import java.util.regex.Pattern
 import kotlin.reflect.KProperty
@@ -132,7 +131,7 @@ inline fun using(crossinline block: ResourceManager.() -> Unit): Catcher {
  */
 class ResourceManager : AutoCloseable {
 
-    private val resourceStack = ArrayStack<AutoCloseable>()
+    private val resourceStack = ArrayDeque<AutoCloseable>()
 
     /**
      * Caught Throwable when running block
@@ -144,7 +143,7 @@ class ResourceManager : AutoCloseable {
      */
     fun <T: AutoCloseable> T.autoClose(): T {
         // The last opened Steam is the first closed
-        resourceStack.push(this)
+        resourceStack.addFirst(this)
         return this
     }
 
@@ -153,7 +152,7 @@ class ResourceManager : AutoCloseable {
      */
     override fun close() {
         while (!resourceStack.isEmpty()) {
-            val closeable = resourceStack.pop()
+            val closeable = resourceStack.removeFirst()
             try {
                 closeable.close()
             } catch (t: Throwable) {

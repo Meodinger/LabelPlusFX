@@ -1,7 +1,9 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.io.sendMailSync
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Options
+import ink.meodinger.lpfx.util.doNothing
 
 import javafx.application.Application
 import javax.swing.JFrame
@@ -58,7 +60,12 @@ fun main(vararg args: String) {
         if (Logger.isStarted) {
             Logger.fatal("Launch failed", "Main")
             Logger.exception(e)
-            Logger.sendLogSync()
+
+            try {
+                sendMailSync("Fatal Error!", Logger.log)
+            } catch (_: Throwable) {
+                doNothing()
+            }
         }
 
         // FX Thread not started, cannot use dialog or other FX things

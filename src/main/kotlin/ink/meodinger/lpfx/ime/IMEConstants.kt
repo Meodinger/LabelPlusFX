@@ -1,6 +1,6 @@
 @file:Suppress("unused", "KDocMissingDocumentation")
 
-package ink.meodinger.lpfx.util.ime
+package ink.meodinger.lpfx.ime
 
 /**
  * Author: Meodinger

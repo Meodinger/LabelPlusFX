@@ -7,9 +7,11 @@ import ink.meodinger.lpfx.options.Logger.LogLevel
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.dialog.showError
+import ink.meodinger.lpfx.component.dialog.showError
+import ink.meodinger.lpfx.io.sendMail
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.onChange
+import javafx.application.Platform
 
 import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.SimpleStringProperty
@@ -110,10 +112,11 @@ class DialogLogs : AbstractPropertiesDialog() {
                     val log = tableLog.selectionModel.selectedItem?.file ?: return@does
 
                     labelSent.text = I18N["common.sending"]
-                    Logger.sendLog(log,
-                        { labelSent.text = I18N["common.sent"] + " " + log.name },
-                        { labelSent.text = "${I18N["common.failed"]} - ${(it.cause ?: it)::class.simpleName}" }
-                    )
+
+                    sendMail("Got a problem! (or not)\nFrom LPFX $V", Logger.log).apply {
+                        setOnSucceeded { labelSent.text = I18N["common.sent"] + " " + log.name }
+                        setOnFailed { labelSent.text = "${I18N["common.failed"]} - ${(it.cause ?: it)::class.simpleName}" }
+                    }.startInNewThread()
                 }
             }
             add(Button(I18N["logs.button.clean"]), 3, 5) {

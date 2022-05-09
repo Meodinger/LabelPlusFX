@@ -1,8 +1,5 @@
 package ink.meodinger.lpfx.util.string
 
-import ink.meodinger.lpfx.I18N
-import ink.meodinger.lpfx.get
-
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 
@@ -23,7 +20,7 @@ fun shortenLongText(longText: String, maxRowCount: Int = 10): String {
 
     val builder = StringBuilder()
     for (i in 0 until maxRowCount - 1) builder.appendLine(lines[i])
-    builder.append(String.format(I18N["util.long_text.i"], lines.size - (maxRowCount - 1)))
+    builder.append("... (+ ${lines.size - maxRowCount + 1})")
 
     return builder.toString()
 }

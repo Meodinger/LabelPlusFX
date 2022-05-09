@@ -1,4 +1,4 @@
-package ink.meodinger.lpfx.util.dialog
+package ink.meodinger.lpfx.component.dialog
 
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get

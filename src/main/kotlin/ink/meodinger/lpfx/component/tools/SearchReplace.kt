@@ -8,8 +8,8 @@ import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.closeOnEscape
 import ink.meodinger.lpfx.util.component.gridHAlign
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.dialog.showConfirm
-import ink.meodinger.lpfx.util.dialog.showInfo
+import ink.meodinger.lpfx.component.dialog.showConfirm
+import ink.meodinger.lpfx.component.dialog.showInfo
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.emptyString

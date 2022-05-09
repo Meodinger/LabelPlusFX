@@ -4,12 +4,12 @@ import ink.meodinger.htmlparser.HNode
 import ink.meodinger.htmlparser.parse
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CTextFlow
+import ink.meodinger.lpfx.ime.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.dialog.showException
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.util.event.isDoubleClick
-import ink.meodinger.lpfx.util.ime.*
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.translator.translateJP

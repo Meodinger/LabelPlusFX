@@ -1,11 +1,8 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.V
-import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.once
 
-import jakarta.mail.*
-import jakarta.mail.internet.*
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -129,50 +126,6 @@ object Logger {
         System.err.println("<Logger>: $str")
         writer.write(str)
         writer.flush()
-    }
-
-    fun sendLogSync(logFile: File = log) {
-        // Account owned by Meodinger Wang
-        // DO NOT USE FOR PRIVATE, I trust you.
-        val reportUser = "labelplusfx_report@163.com"
-        val reportAuth = "SUWAYUTJSKWQNDOF"
-        val targetUser = "meodinger@qq.com"
-
-        // properties
-        val props = Properties()
-        props.setProperty("mail.transport.protocol", "smtp")
-        props.setProperty("mail.smtp.auth", "true")
-        props.setProperty("mail.smtp.host", "smtp.163.com")
-
-        // content
-        val content = MimeMultipart()
-        content.addBodyPart(MimeBodyPart().apply { setText("Got a problem! (or not)\nFrom LPFX $V") })
-        content.addBodyPart(MimeBodyPart().apply { attachFile(logFile) })
-
-        // message
-        val message = MimeMessage(Session.getInstance(props))
-        message.subject = "LPFX log report - ${System.getProperty("user.name")}"
-        message.setFrom(reportUser)
-        message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(targetUser))
-        message.setContent(content)
-
-        Transport.send(message, reportUser, reportAuth)
-    }
-    fun sendLog(logFile: File = log, onSucceeded: () -> Unit = {}, onFailed: (Throwable) -> Unit = {}) {
-        val task = LPFXTask.createTask<Unit> { sendLogSync(logFile) }
-
-        task.setOnFailed {
-            error("Log sent failed", "Logger")
-            exception(it)
-            onFailed(it)
-        }
-
-        task.setOnSucceeded {
-            info("Sent Log ${logFile.name}", "Logger")
-            onSucceeded()
-        }
-
-        task.startInNewThread()
     }
 
 }

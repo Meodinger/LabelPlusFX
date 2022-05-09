@@ -3,6 +3,7 @@ package ink.meodinger.lpfx.component
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CFileChooser
+import ink.meodinger.lpfx.component.dialog.*
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Preference
 import ink.meodinger.lpfx.options.RecentFiles
@@ -10,7 +11,6 @@ import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.image.resizeByRadius
 import ink.meodinger.lpfx.util.property.*

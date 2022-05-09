@@ -4,7 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CRollerLabel
 import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.util.dialog.showConfirm
+import ink.meodinger.lpfx.component.dialog.showConfirm
 import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.property.minus
 import ink.meodinger.lpfx.util.property.transform

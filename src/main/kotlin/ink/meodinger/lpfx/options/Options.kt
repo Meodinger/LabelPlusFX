@@ -1,9 +1,10 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.component.dialog.showError
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.once
-import ink.meodinger.lpfx.util.dialog.*
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
 import java.io.File

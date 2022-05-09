@@ -1,8 +1,5 @@
 package ink.meodinger.lpfx.util.timer
 
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.setValue
-
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.LongProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -50,8 +47,9 @@ class TimerTaskManager(
     /**
      * @see runningProperty
      */
-    var isRunning: Boolean by runningProperty
-        private set
+    var isRunning: Boolean
+        get() = runningProperty.get()
+        private set(value) = runningProperty.set(value)
 
     private val delayProperty: LongProperty = SimpleLongProperty(delay)
     /**

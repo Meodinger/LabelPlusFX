@@ -1,6 +1,6 @@
 @file:JvmName("IMEUtil")
 
-package ink.meodinger.lpfx.util.ime
+package ink.meodinger.lpfx.ime
 
 import javafx.stage.Stage
 

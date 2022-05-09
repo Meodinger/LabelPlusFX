@@ -1,6 +1,7 @@
-package ink.meodinger.lpfx.util.dialog
+package ink.meodinger.lpfx.component.dialog
 
 import ink.meodinger.lpfx.*
+import ink.meodinger.lpfx.io.sendMail
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.vgrow
@@ -18,6 +19,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import javafx.stage.Window
+import java.io.File
 import java.util.*
 
 
@@ -192,9 +194,10 @@ fun showConfirm(owner: Window?, header: String?, content: String, title: String)
 /**
  * Show stack trace in expandable content
  * @param e Exception to print
+ * @param file Related translation file
  * @return ButtonType? Cancel
  */
-fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
+fun showException(owner: Window?, e: Throwable, file: File? = null): Optional<ButtonType> {
     val sendBtnType = ButtonType(I18N["common.report"], ButtonBar.ButtonData.OK_DONE)
     val dialog = Dialog<ButtonType>() withOwner owner
 
@@ -223,11 +226,12 @@ fun showException(owner: Window?, e: Throwable): Optional<ButtonType> {
     val applyBtn = dialog.dialogPane.lookupButton(sendBtnType) as Button
     applyBtn.addEventFilter(ActionEvent.ACTION) { event ->
         val button = event.source as Button
+
         button.text = I18N["common.sending"]
-        Logger.sendLog(Logger.log,
-            { button.text = I18N["common.sent"] },
-            { button.text = I18N["common.failed"] }
-        )
+        sendMail("LPFX work-time exception report", Logger.log, file).apply {
+            setOnSucceeded { button.text = I18N["common.sent"] }
+            setOnFailed { button.text = I18N["common.failed"] }
+        }.startInNewThread()
         event.consume()
     }
 

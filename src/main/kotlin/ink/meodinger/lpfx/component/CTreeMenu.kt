@@ -8,7 +8,7 @@ import ink.meodinger.lpfx.type.TransFile
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.withContent
-import ink.meodinger.lpfx.util.dialog.showError
+import ink.meodinger.lpfx.component.dialog.showError
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.transform
 

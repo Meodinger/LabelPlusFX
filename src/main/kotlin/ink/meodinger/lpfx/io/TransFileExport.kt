@@ -1,10 +1,19 @@
 package ink.meodinger.lpfx.io
 
 import ink.meodinger.lpfx.FileType
+import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.type.TransFile
+import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.doNothing
+import ink.meodinger.lpfx.util.string.deleteTrailingEOL
+import ink.meodinger.lpfx.util.string.fixed
 import ink.meodinger.lpfx.util.using
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import java.io.*
 import java.nio.charset.StandardCharsets
 
@@ -66,4 +75,93 @@ private fun exportMeo(file: File, transFile: TransFile) {
     } catch { e: IOException ->
         throw e
     } finally ::doNothing
+}
+
+/**
+ * Build LPFile content
+ * @return LPFile content in String
+ */
+fun TransFile.toLPString(): String {
+    // Group count validate
+    if (groupCount > 9) throw IOException(I18N["exception.loader.too_many_groups"])
+
+    // <--
+    // ----------------[index]----------------[xxxx,yyyy,g]
+    // text
+    //
+    // -->
+    fun buildLabel(transLabel: TransLabel): String {
+        return StringBuilder()
+            .append(LPTransFile.LABEL_START).append(transLabel.index).append(LPTransFile.LABEL_END)
+            .append(LPTransFile.PROP_START)
+            .append(transLabel.x.fixed(4)).append(LPTransFile.SPLIT)
+            .append(transLabel.y.fixed(4)).append(LPTransFile.SPLIT)
+            .append(transLabel.groupId + 1)
+            .append(LPTransFile.PROP_END).append("\n")
+            .append(transLabel.text).append("\n")
+            .toString()
+    }
+
+    // <--
+    // >>>>>>>>[name]<<<<<<<<
+    // label1
+    // label2
+    // ...
+    //
+    // -->
+    fun buildPic(picName: String): String {
+        return StringBuilder()
+            .append(LPTransFile.PIC_START).append(picName).append(LPTransFile.PIC_END).append("\n")
+            .apply { for (label in getTransList(picName)) append(buildLabel(label)).append("\n") }.append("\n")
+            .toString()
+    }
+
+    // <--
+    // 1, 0
+    // -->
+    val vString = StringBuilder()
+        .append(version[0])
+        .append(LPTransFile.SPLIT)
+        .append(version[1])
+        .toString()
+
+    // <--
+    // group1
+    // group2
+    // -->
+    val gString = StringBuilder()
+        .apply { for (group in groupList) append(group.name).append("\n") }
+        .deleteTrailingEOL().toString()
+
+    val tString = StringBuilder()
+        .apply { for (name in sortedPicNames) append(buildPic(name)) }
+        .toString()
+
+    return StringBuilder()
+        .appendLine(vString)
+        .appendLine(LPTransFile.SEPARATOR)
+        .appendLine(gString)
+        .appendLine(LPTransFile.SEPARATOR)
+        .appendLine(comment)
+        .appendLine("\n")
+        .appendLine(tString)
+        .toString()
+}
+
+/**
+ * Build MeoFile content (sorted)
+ * @return MeoFile content in String
+ */
+fun TransFile.toJsonString(): String {
+    return ObjectMapper()
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .writeValueAsString(TransFile(
+            version,
+            comment,
+            groupList.toMutableList(),
+            sortedPicNames.associateWithTo(LinkedHashMap()) {
+                transMap[it]!!.sortedBy(TransLabel::index).toMutableList()
+            }
+        ))
 }

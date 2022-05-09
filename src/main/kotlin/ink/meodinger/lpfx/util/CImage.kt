@@ -1,13 +1,7 @@
 package ink.meodinger.lpfx.util.image
 
-import ink.meodinger.lpfx.*
-
-import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
-import java.io.IOException
-import java.net.URL
-import javax.imageio.ImageIO
 
 
 /**

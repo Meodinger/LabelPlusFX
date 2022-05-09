@@ -1,6 +1,6 @@
 @file:JvmName("IMEMain")
 
-package ink.meodinger.lpfx.util.ime
+package ink.meodinger.lpfx.ime
 
 import ink.meodinger.lpfx.Config.enableJNI
 import ink.meodinger.lpfx.Config.isWin

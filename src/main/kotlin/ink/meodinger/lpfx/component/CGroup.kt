@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component
 
+import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.property.transform
@@ -12,6 +13,9 @@ import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.Node
+import javafx.scene.control.Control
+import javafx.scene.control.Skin
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
@@ -33,7 +37,7 @@ import javafx.scene.text.Text
 class CGroup(
     groupName:  String = emptyString(),
     groupColor: Color  = Color.web("66CCFF")
-) : Region() {
+) : Control() {
 
     companion object {
         private const val CORNER_RADII = 4.0
@@ -95,68 +99,6 @@ class CGroup(
 
     // endregion
 
-    init {
-        padding = Insets(PADDING)
-
-        // Trigger action when clicked/touched/Enter-ed
-        addEventHandler(MouseEvent.MOUSE_CLICKED) {
-            isSelected = true
-            requestFocus()
-            fire(it)
-        }
-        addEventHandler(TouchEvent.TOUCH_RELEASED) {
-            isSelected = true
-            requestFocus()
-            fire(it)
-        }
-        addEventHandler(KeyEvent.KEY_RELEASED) {
-            if (it.code != KeyCode.ENTER) return@addEventHandler
-            isSelected = true
-            requestFocus()
-            fire(it)
-        }
-
-        val text = Text().apply {
-            textOrigin = VPos.TOP
-            textProperty().bind(nameProperty)
-            fillProperty().bind(colorProperty)
-            layoutXProperty().bind(widthProperty().transform { (it - boundsInLocal.width) / 2 })
-            layoutYProperty().bind(heightProperty().transform { (it - boundsInLocal.height) / 2 })
-        }
-
-        backgroundProperty().bind(Bindings.createObjectBinding(
-            {
-                if (isSelected) Background(BackgroundFill(
-                    Color.LIGHTGRAY,
-                    CornerRadii(CORNER_RADII),
-                    Insets(0.0)
-                )) else null
-            }, selectedProperty
-        ))
-        borderProperty().bind(Bindings.createObjectBinding(
-            {
-                Border(BorderStroke(
-                    if (isHover) this.color else Color.TRANSPARENT,
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii(CORNER_RADII),
-                    BorderWidths(BORDER_WIDTH)
-                ))
-            }, hoverProperty()
-        ))
-        prefWidthProperty().bind(Bindings.createDoubleBinding(
-            {
-                text.boundsInLocal.width + (BORDER_WIDTH + PADDING) * 2
-            }, text.textProperty()
-        ))
-        prefHeightProperty().bind(Bindings.createDoubleBinding(
-            {
-                text.boundsInLocal.height + (BORDER_WIDTH + PADDING) * 2
-            }, text.textProperty()
-        ))
-
-        children.add(text)
-    }
-
     /**
      * isSelected = true
      */
@@ -180,5 +122,105 @@ class CGroup(
             onAction.handle(ActionEvent())
         }
     }
+
+    // region Skin
+
+    /**
+     * Create default Skin
+     * @see javafx.scene.control.Control.createDefaultSkin
+     */
+    override fun createDefaultSkin(): Skin<CGroup> = CGroupSkin(this)
+
+    private class CGroupSkin(private val control: CGroup) : Skin<CGroup> {
+
+        private val root = Pane()
+        private val text = Text()
+
+        init {
+            root.apply root@{
+                padding = Insets(PADDING)
+
+                // Trigger action when clicked/touched/Enter-ed
+                val actionListener = EventHandler<Event> {
+                    control.isSelected = true
+                    requestFocus()
+                    control.fire(it)
+                }
+                addEventHandler(MouseEvent.MOUSE_CLICKED) {
+                    if (it.clickCount != 1) return@addEventHandler
+                    actionListener.handle(it)
+                }
+                addEventHandler(TouchEvent.TOUCH_RELEASED) {
+                    if (it.touchCount != 1) return@addEventHandler
+                    actionListener.handle(it)
+                }
+                addEventHandler(KeyEvent.KEY_RELEASED) {
+                    if (it.code != KeyCode.ENTER) return@addEventHandler
+                    actionListener.handle(it)
+                }
+
+                borderProperty().bind(Bindings.createObjectBinding(
+                    {
+                        Border(BorderStroke(
+                            if (isHover) control.color else Color.TRANSPARENT,
+                            BorderStrokeStyle.SOLID,
+                            CornerRadii(CORNER_RADII),
+                            BorderWidths(BORDER_WIDTH)
+                        ))
+                    }, hoverProperty()
+                ))
+                backgroundProperty().bind(Bindings.createObjectBinding(
+                    {
+                        if (control.isSelected) Background(BackgroundFill(
+                            Color.LIGHTGRAY,
+                            CornerRadii(CORNER_RADII),
+                            Insets(0.0)
+                        )) else null
+                    }, control.selectedProperty
+                ))
+                prefWidthProperty().bind(Bindings.createDoubleBinding(
+                    {
+                        text.boundsInLocal.width + (BORDER_WIDTH + PADDING) * 2
+                    }, text.textProperty()
+                ))
+                prefHeightProperty().bind(Bindings.createDoubleBinding(
+                    {
+                        text.boundsInLocal.height + (BORDER_WIDTH + PADDING) * 2
+                    }, text.textProperty()
+                ))
+
+                add(text) {
+                    textOrigin = VPos.TOP
+                    textProperty().bind(control.nameProperty)
+                    fillProperty().bind(control.colorProperty)
+                    layoutXProperty().bind(widthProperty().transform { (it - boundsInLocal.width) / 2 })
+                    layoutYProperty().bind(heightProperty().transform { (it - boundsInLocal.height) / 2 })
+                }
+            }
+        }
+
+        override fun getSkinnable(): CGroup = control
+
+        override fun getNode(): Node = root
+
+        override fun dispose() {
+            text.apply {
+                textProperty().unbind()
+                fillProperty().unbind()
+                layoutXProperty().unbind()
+                layoutYProperty().unbind()
+                root.children.remove(this)
+            }
+            root.apply {
+                borderProperty().unbind()
+                backgroundProperty().unbind()
+                prefWidthProperty().unbind()
+                prefHeightProperty().unbind()
+            }
+        }
+
+    }
+
+    // endregion
 
 }

@@ -158,7 +158,12 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
             prefWidth = 300.0
             text = files[it]?.takeIf(File::exists)?.let(File::getPath) ?: Unspecified
             tooltipProperty().bind(textProperty().transform {
-                Tooltip(it).apply { showDelay = Duration.ZERO }
+                Tooltip(it).apply {
+                    showDelay = Duration.ZERO
+                    hideDelay = Duration.ZERO
+
+                    showDuration = Duration.INDEFINITE
+                }
             })
             textFillProperty().bind(textProperty().transform {
                 if (it == Unspecified) Color.RED else Color.BLACK

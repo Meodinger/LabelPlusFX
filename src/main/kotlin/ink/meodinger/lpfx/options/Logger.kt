@@ -95,7 +95,7 @@ object Logger {
             .append("<Logger>: ")
             .append("[").append(formatter.format(Date())).append("] ")
             .append("[").append(type.type.padEnd(7)).append("] ")
-            .append("[").append(type.type.padEnd(11)).append("] ")
+            .append("[").append(from.padEnd(11)).append("] ")
             .appendLine(text)
             .toString()
 

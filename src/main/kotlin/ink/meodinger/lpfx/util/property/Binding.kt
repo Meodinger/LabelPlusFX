@@ -149,3 +149,11 @@ inline fun <R> StringExpression.transform(crossinline transformer: (String) -> R
 inline fun <T, R> ObjectExpression<T>.transform(crossinline transformer: (T) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
 
 inline fun <T, R> ObjectExpression<T>.property(crossinline propertyGetter: (T) -> ObservableValue<R>): ObjectBinding<R> = transform { propertyGetter(it).value }
+
+// Get the primitive value
+fun ObjectBinding<Int>.primitive(): IntegerBinding = Bindings.createIntegerBinding(this::get, this)
+fun ObjectBinding<Long>.primitive(): LongBinding = Bindings.createLongBinding(this::get, this)
+fun ObjectBinding<Float>.primitive(): FloatBinding = Bindings.createFloatBinding(this::get, this)
+fun ObjectBinding<Double>.primitive(): DoubleBinding = Bindings.createDoubleBinding(this::get, this)
+fun ObjectBinding<Boolean>.primitive(): BooleanBinding = Bindings.createBooleanBinding(this::get, this)
+fun ObjectBinding<String>.primitive(): StringBinding = Bindings.createStringBinding(this::get, this)

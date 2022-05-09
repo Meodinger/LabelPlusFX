@@ -7,6 +7,7 @@ import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.collection.autoRangeTo
 import ink.meodinger.lpfx.util.color.toHexRGB
 import ink.meodinger.lpfx.util.component.add
+import ink.meodinger.lpfx.util.component.s
 import ink.meodinger.lpfx.util.component.withContent
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.*
@@ -21,6 +22,7 @@ import javafx.geometry.VPos
 import javafx.scene.Cursor
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.ScrollPane
+import javafx.scene.control.Tooltip
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.*
@@ -29,6 +31,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
+import javafx.util.Duration
 import kotlin.math.abs
 
 
@@ -44,9 +47,7 @@ import kotlin.math.abs
 class CLabelPane : ScrollPane() {
 
     companion object {
-        /**
-         * Rect based shift
-         */
+        // Text display constants
         private const val SHIFT_X = 20.0
         private const val TEXT_INSET = 10.0
         private const val TEXT_ALPHA = "A0"
@@ -360,8 +361,8 @@ class CLabelPane : ScrollPane() {
             alignment = Pos.CENTER
 
             // Layer system
-            val imageWidthBinding = imageProperty.transform(Image::getWidth)
-            val imageHeightBinding = imageProperty.transform(Image::getHeight)
+            val imageWidthBinding = imageProperty.transform(Image::getWidth).primitive()
+            val imageHeightBinding = imageProperty.transform(Image::getHeight).primitive()
             add(imageView) {
                 isPreserveRatio = true
                 isPickOnBounds = true
@@ -374,6 +375,7 @@ class CLabelPane : ScrollPane() {
                 isMouseTransparent = true
                 graphicsContext2D.font = TEXT_FONT
                 graphicsContext2D.textBaseline = VPos.TOP
+                graphicsContext2D.lineWidth = 2.0
 
                 widthProperty().bind(imageWidthBinding)
                 heightProperty().bind(imageHeightBinding)
@@ -587,6 +589,19 @@ class CLabelPane : ScrollPane() {
             )
         }
 
+        // Tooltip
+        label.tooltip = Tooltip().apply {
+            isWrapText = true
+            font = font.s(24.0)
+            textProperty().bind(transLabel.textProperty())
+
+            // We show and hide it manually
+            showDelay = Duration.INDEFINITE
+            hideDelay = Duration.INDEFINITE
+            showDuration = Duration.INDEFINITE
+        }
+        label.addEventHandler(MouseEvent.MOUSE_EXITED) { label.tooltip.hide() }
+
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
@@ -648,6 +663,8 @@ class CLabelPane : ScrollPane() {
         }
 
         // Event handle
+        // FIXME: Event doesn't dispatch if mouse is still but by scrolling the pointer moves on it
+        // I know the Mouse_Moved event is dispatched when the mouse actually moves, but I want this happen, too.
         label.setOnMouseMoved {
             fireEvent(LabelEvent(LabelEvent.LABEL_HOVER,
                 it, transLabel.index,
@@ -748,11 +765,27 @@ class CLabelPane : ScrollPane() {
 
         gc.fill = Color.web(Color.WHEAT.toHexRGB() + TEXT_ALPHA)
         gc.fillRect(shapeX, shapeY, shapeW, shapeH)
-        gc.lineWidth = 2.0
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)
         gc.fill = color
         gc.fillText(t.text, textX, textY)
+    }
+
+    /**
+     * Show TransLabel's Text
+     * TODO: Change x & y
+     * @param x X corrdinate based on screen
+     * @param y X corrdinate based on screen
+     */
+    fun showLabelText(labelIndex: Int, x: Double, y: Double) {
+        // The image didn't display, we should not move-to
+        if (labelNodes.isEmpty()) return
+
+        val label = labelNodes.first { it.index == labelIndex }
+        label.tooltip.show(label, x, y)
+    }
+    fun hideLabelText() {
+        for (node in labelNodes) node.tooltip.hide()
     }
 
     // Layout position
@@ -763,7 +796,8 @@ class CLabelPane : ScrollPane() {
      * @param labelIndex Index of the label which will be displaye at the center
      */
     fun moveToLabel(labelIndex: Int) {
-        if (!shouldCreate) return
+        // The image didn't display, we should not move-to
+        if (labelNodes.isEmpty()) return
 
         val label = labelNodes.first { it.index == labelIndex }
 

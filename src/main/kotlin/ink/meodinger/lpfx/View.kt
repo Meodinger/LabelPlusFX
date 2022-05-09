@@ -104,8 +104,6 @@ class View(state: State) : BorderPane() {
             recentFilesProperty().bind(RecentFiles.recentFilesProperty())
         }
         center(SplitPane()) {
-            dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
-
             add(BorderPane()) {
                 top(cGroupBar)
                 center(cLabelPane) {
@@ -132,7 +130,6 @@ class View(state: State) : BorderPane() {
             }
             add(SplitPane()) {
                 orientation = Orientation.VERTICAL
-                dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
 
                 add(BorderPane()) {
                     top(HBox()) {
@@ -182,7 +179,11 @@ class View(state: State) : BorderPane() {
                         isWrapText = true
                     }
                 }
+
+                dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
             }
+
+            dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         }
 
         val statsBar = HBox().apply {

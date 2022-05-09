@@ -330,15 +330,14 @@ class Controller(private val state: State) {
             ))
         }
         cLabelPane.setOnLabelHover {
-            val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
-
-            // Text display
             cLabelPane.clearText()
+
             when (state.workMode) {
                 WorkMode.InputMode -> {
-                    cLabelPane.createText(transLabel.text, Color.BLACK, it.displayX, it.displayY)
+                    cLabelPane.showLabelText(it.labelIndex, it.source.screenX + 8, it.source.screenY + 8)
                 }
                 WorkMode.LabelMode -> {
+                    val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
                     val transGroup = state.transFile.getTransGroup(transLabel.groupId)
                     cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
                 }
@@ -534,7 +533,7 @@ class Controller(private val state: State) {
             if (it == NOT_FOUND) return@onNew
 
             // bind new text property
-            cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty)
+            cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty())
         })
         Logger.info("Added effect: bind text property on CurrentLabelIndex change", "Controller")
 

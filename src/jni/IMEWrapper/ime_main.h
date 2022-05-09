@@ -7,32 +7,32 @@ extern "C" {
 #endif
 
 /*
- * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Class:     ink_meodinger_lpfx_ime_IMEMain
  * Method:    getLanguages
  * Signature: ()[Ljava/lang/String;
  */
-JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguages(JNIEnv*, jclass);
+JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_getLanguages(JNIEnv*, jclass);
 
 /*
- * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Class:     ink_meodinger_lpfx_ime_IMEMain
  * Method:    getLanguage
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguage(JNIEnv*, jclass);
+JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_getLanguage(JNIEnv*, jclass);
 
 /*
- * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Class:     ink_meodinger_lpfx_ime_IMEMain
  * Method:    setLanguage
  * Signature: (Ljava/lang/String;)Z
  */
-JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv*, jclass, jstring);
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_setLanguage(JNIEnv*, jclass, jstring);
 
 /*
- * Class:     ink_meodinger_lpfx_util_ime_IMEMain
+ * Class:     ink_meodinger_lpfx_ime_IMEMain
  * Method:    setImeConversionMode
  * Signature: (JII)Z
  */
-JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv*, jclass, jlong, jint, jint);
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_setImeConversionMode(JNIEnv*, jclass, jlong, jint, jint);
 
 #ifdef __cplusplus
 }

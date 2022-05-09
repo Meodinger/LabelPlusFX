@@ -1,13 +1,17 @@
 package ink.meodinger.lpfx.component.common
 
+import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 import ink.meodinger.lpfx.util.property.*
 
 import javafx.application.Platform
 import javafx.beans.property.*
+import javafx.scene.Node
+import javafx.scene.control.Control
 import javafx.scene.control.Label
-import javafx.scene.control.Tooltip
-import javafx.scene.layout.Region
+import javafx.scene.control.Skin
+import javafx.scene.layout.Pane
+import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.text.Text
 
@@ -21,13 +25,11 @@ import javafx.scene.text.Text
 /**
  * A Label that will be rolling if there is not enought space to layout all text
  */
-class CRollerLabel(contentText: String = "") : Region() {
+class CRollerLabel(contentText: String = "") : Control() {
 
     companion object {
         private const val SHIFT_PERIOD_DEFAULT: Long = 400L
     }
-
-    private val label = Label(contentText)
 
     private val textProperty: StringProperty = SimpleStringProperty(contentText)
     /**
@@ -49,18 +51,7 @@ class CRollerLabel(contentText: String = "") : Region() {
      */
     var shiftInterval: Long by shiftIntervalProperty
 
-    private val tooltipProperty: ObjectProperty<Tooltip> = label.tooltipProperty()
-    /**
-     * An export to `Label::tooltipProperty()`
-     * @see javafx.scene.control.Control.tooltipProperty
-     */
-    fun tooltipProperty(): ObjectProperty<Tooltip> = tooltipProperty
-    /**
-     * @see tooltipProperty
-     */
-    var tooltip: Tooltip by tooltipProperty
-
-    private val textFillProperty: ObjectProperty<Paint> = label.textFillProperty()
+    private val textFillProperty: ObjectProperty<Paint> = SimpleObjectProperty(Color.BLACK)
     /**
      * An export to `Label::textFillProperty()`
      * @see javafx.scene.control.Labeled.textFill
@@ -71,17 +62,15 @@ class CRollerLabel(contentText: String = "") : Region() {
      */
     var textFill: Paint by textFillProperty
 
+    private var clipped = false
     private val rollerManager = TimerTaskManager(shiftInterval, shiftInterval) {
         Platform.runLater { displayText = roll(displayText) }
     }
-    private var displayText: String by label.textProperty()
-    private var clipped = false
+
+    private val displayTextProperty: StringProperty = SimpleStringProperty(contentText)
+    private var displayText: String by displayTextProperty
 
     init {
-        label.prefWidthProperty().bind(widthProperty())
-        label.prefHeightProperty().bind(heightProperty())
-        children.add(label)
-
         textProperty.addListener(onNew {
             clipped = Text(it).boundsInLocal.width >= prefWidth
             displayText = roll(" $text ")
@@ -119,5 +108,47 @@ class CRollerLabel(contentText: String = "") : Region() {
     fun stopRoll() {
         rollerManager.clear()
     }
+
+    // region Skin
+
+    /**
+     * Create default Skin
+     * @see javafx.scene.control.Control.createDefaultSkin
+     */
+    override fun createDefaultSkin(): Skin<CRollerLabel> = RollerLabelSkin(this)
+
+    private class RollerLabelSkin(private val control: CRollerLabel) : Skin<CRollerLabel> {
+
+        private val root = Pane()
+        private val label = Label()
+
+        init {
+            root.apply root@{
+                add(label) {
+                    textProperty().bind(control.displayTextProperty)
+                    textFillProperty().bind(control.textFillProperty)
+                    prefWidthProperty().bind(this@root.widthProperty())
+                    prefHeightProperty().bind(this@root.heightProperty())
+                }
+            }
+        }
+
+        override fun getSkinnable(): CRollerLabel = control
+
+        override fun getNode(): Node = root
+
+        override fun dispose() {
+            label.apply {
+                textProperty().unbind()
+                textFillProperty().unbind()
+                prefWidthProperty().unbind()
+                prefHeightProperty().unbind()
+                root.children.remove(this)
+            }
+        }
+
+    }
+
+    // endregion
 
 }

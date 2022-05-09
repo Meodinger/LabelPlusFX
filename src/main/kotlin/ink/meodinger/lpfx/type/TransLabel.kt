@@ -70,7 +70,7 @@ class TransLabel @JsonCreator constructor(
             yProperty.set(value)
         }
 
-    val textProperty: StringProperty = SimpleStringProperty(text)
+    private val textProperty: StringProperty = SimpleStringProperty(text)
     fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 

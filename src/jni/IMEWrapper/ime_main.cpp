@@ -7,7 +7,7 @@
 
 using namespace IMEInterface;
 
-JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguages(JNIEnv* env, jclass clazz)
+JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_getLanguages(JNIEnv* env, jclass clazz)
 {
 	auto langs = IMEMain::GetInstalledLanguages();
     auto array = env->NewObjectArray((jsize)langs->Length, env->FindClass("java/lang/String"), 0);
@@ -22,7 +22,7 @@ JNIEXPORT jobjectArray JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLangu
     return array;
 }
 
-JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguage(JNIEnv* env, jclass clazz)
+JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_getLanguage(JNIEnv* env, jclass clazz)
 {
     auto lang = IMEMain::GetInputLanguage();
 
@@ -31,7 +31,7 @@ JNIEXPORT jstring JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_getLanguage(J
     return string;
 }
 
-JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(JNIEnv* env, jclass clazz, jstring language)
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_setLanguage(JNIEnv* env, jclass clazz, jstring language)
 {
     System::String^ string;
     jstring2string(env, language, &string);
@@ -40,7 +40,7 @@ JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setLanguage(
     return retval ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_util_ime_IMEMain_setImeConversionMode(JNIEnv* env, jclass clazz, jlong hWnd, jint conversionMode, jint sentenceMode)
+JNIEXPORT jboolean JNICALL Java_ink_meodinger_lpfx_ime_IMEMain_setImeConversionMode(JNIEnv* env, jclass clazz, jlong hWnd, jint conversionMode, jint sentenceMode)
 {
     HWND hwnd = (HWND)hWnd;
     HIMC himc = ImmGetContext(hwnd);

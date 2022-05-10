@@ -48,8 +48,7 @@ class LabelPlusFX: HookedApplication() {
             }
             fun destroy() {
                 Platform.runLater {
-                    if (!state.isOpened || !state.isChanged)
-                        this@LabelPlusFX.stop()
+                    if (!state.isOpened || !state.isChanged) this@LabelPlusFX.stop()
                 }
             }
 
@@ -74,8 +73,8 @@ class LabelPlusFX: HookedApplication() {
      */
     fun iconify() {
         if (Config.supportSysTray) {
-            state.stage.hide()
             SystemTray.getSystemTray().add(icon)
+            state.stage.hide()
         } else {
             state.stage.isIconified = true
         }
@@ -152,8 +151,7 @@ class LabelPlusFX: HookedApplication() {
             Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
             Logger.exception(e)
             if (state.isOpened) {
-                state.controller.emergency()
-                showException(primaryStage, e, state.translationFile)
+                showException(primaryStage, e, state.controller.emergency())
             } else {
                 showException(primaryStage, e)
             }
@@ -188,8 +186,15 @@ class LabelPlusFX: HookedApplication() {
         primaryStage.scene.heightProperty().addListener(windowSizeListener)
 
         // BOSS key
+        var counter = 0
         primaryStage.addEventFilter(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.ESCAPE) iconify()
+            if (it.code == KeyCode.ESCAPE) {
+                counter++
+                if (counter == 2) {
+                    iconify()
+                    counter = 0
+                }
+            }
         }
 
         primaryStage.show()
@@ -216,6 +221,8 @@ class LabelPlusFX: HookedApplication() {
             Logger.error("Exception occurred during hooks run", "Application")
             Logger.exception(it)
         }
+
+        Platform.exit()
     }
 
 }

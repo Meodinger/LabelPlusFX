@@ -6,9 +6,7 @@ import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.type.TransLabel
 import ink.meodinger.lpfx.util.collection.autoRangeTo
 import ink.meodinger.lpfx.util.color.toHexRGB
-import ink.meodinger.lpfx.util.component.add
-import ink.meodinger.lpfx.util.component.s
-import ink.meodinger.lpfx.util.component.withContent
+import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.shortenLongText
@@ -208,7 +206,6 @@ class CLabelPane : ScrollPane() {
 
     @Suppress("UNCHECKED_CAST")
     private val labelNodes: ObservableList<CLabel> get() = labelLayer.children as ObservableList<CLabel>
-    private val shouldCreate: Boolean get() = image !== INIT_IMAGE
 
     // endregion
 
@@ -568,7 +565,7 @@ class CLabelPane : ScrollPane() {
                         it.removed.forEach(this::removeLabel)
                         it.removed.map(TransLabel::index).forEach(selectedLabelsProperty::remove)
                     }
-                    if (it.wasAdded() && shouldCreate) {
+                    if (it.wasAdded() && image !== INIT_IMAGE) {
                         it.addedSubList.forEach(this::createLabel)
                     }
                 }
@@ -600,54 +597,60 @@ class CLabelPane : ScrollPane() {
             hideDelay = Duration.INDEFINITE
             showDuration = Duration.INDEFINITE
         }
-        label.addEventHandler(MouseEvent.MOUSE_EXITED) { label.tooltip.hide() }
+        label.addEventHandler(MouseEvent.MOUSE_EXITED) {
+            label.tooltip.hide()
+        }
 
         // Draggable
         // ScenePos -> CursorPos; LayoutPos -> CtxPos
         // nLx = Lx + (nSx - Sx); nLy = Ly + (nSy - Sy)
         // nLx = (Lx - Sx) + nSx -> shiftN + sceneN
         label.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            shiftX = label.layoutX - it.sceneX / scale
-            shiftY = label.layoutY - it.sceneY / scale
+            // Mark immediately when this event will be consumed
+            it.consume() // make sure root will not move together
+
+            shiftX = label.anchorX - it.sceneX / scale
+            shiftY = label.anchorY - it.sceneY / scale
 
             label.cursor = Cursor.MOVE
-
-            it.consume() // make sure root will not move together
         }
         label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            // Mark immediately when this event will be consumed
+            it.consume() // make sure root will not move together
+
             dragging = true
 
+            // Clear all texts when dragging
             clearText()
 
-            val newLayoutX = shiftX + it.sceneX / scale
-            val newLayoutY = shiftY + it.sceneY / scale
+            val newAnchorX = shiftX + it.sceneX / scale
+            val newAnchorY = shiftY + it.sceneY / scale
 
             //  0-----LR----    0 LR LR |
             //  |     LR        LR      |
             //  |LR LR|-----    LR      |
             //  |     |         --------|
-            if (newLayoutX < 0 || newLayoutX > image.width - 2 * label.radius) return@addEventHandler
-            if (newLayoutY < 0 || newLayoutY > image.height - 2 * label.radius) return@addEventHandler
+            if (newAnchorX < 0 || newAnchorX > image.width - 2 * label.radius) return@addEventHandler
+            if (newAnchorY < 0 || newAnchorY > image.height - 2 * label.radius) return@addEventHandler
 
-            label.layoutX = newLayoutX
-            label.layoutY = newLayoutY
-
-            it.consume() // make sure root will not move together
+            label.anchorX = newAnchorX
+            label.anchorY = newAnchorY
         }
         label.addEventHandler(MouseEvent.MOUSE_RELEASED) {
+            // Mark immediately when this event will be consumed
+            it.consume() // make sure root will not move together
+
             label.cursor = Cursor.HAND
 
             if (dragging) fireEvent(LabelEvent(LabelEvent.LABEL_MOVE,
                 it, transLabel.index,
-                label.layoutX + it.x,
-                label.layoutY + it.y,
-                label.layoutX / image.width,
-                label.layoutY / image.height,
+                label.anchorX + it.x,
+                label.anchorY + it.y,
+                (label.anchorX + label.radius) / image.width,
+                (label.anchorY + label.radius) / image.height,
             ))
 
             dragging = false
-
-            it.consume() // prevent further propagation
         }
 
         // Cursor
@@ -666,41 +669,46 @@ class CLabelPane : ScrollPane() {
         // FIXME: Event doesn't dispatch if mouse is still but by scrolling the pointer moves on it
         // I know the Mouse_Moved event is dispatched when the mouse actually moves, but I want this happen, too.
         label.setOnMouseMoved {
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
+
             fireEvent(LabelEvent(LabelEvent.LABEL_HOVER,
                 it, transLabel.index,
-                label.layoutX + it.x,
-                label.layoutY + it.y,
+                label.anchorX + it.x,
+                label.anchorY + it.y,
                 Double.NaN, Double.NaN
             ))
-            it.consume() // disable further propagation
         }
         label.setOnMouseClicked {
             if (!it.isStillSincePress) return@setOnMouseClicked
-            val eventType = when (it.button) {
-                MouseButton.PRIMARY -> LabelEvent.LABEL_CREATE
-                MouseButton.SECONDARY -> LabelEvent.LABEL_REMOVE
-                else -> return@setOnMouseClicked
-            }
-            fireEvent(LabelEvent(eventType,
-                it, transLabel.index,
-                label.layoutX + it.x,
-                label.layoutY + it.y,
-                Double.NaN, Double.NaN
-            ))
+            // Mark immediately when this event will be consumed
             it.consume() // disable further propagation
+
+            if (it.button == MouseButton.PRIMARY) {
+                fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
+                    it, transLabel.index,
+                    label.anchorX + it.x,
+                    label.anchorY + it.y,
+                    Double.NaN, Double.NaN
+                ))
+            } else if (it.button == MouseButton.SECONDARY) {
+                fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
+                    it, transLabel.index,
+                    label.anchorX + it.x,
+                    label.anchorY + it.y,
+                    Double.NaN, Double.NaN
+                ))
+            }
         }
 
+        // Layout
+        labelNodes.add(label)
         //Anchor-L-----  Anchor = imageWidth * x - LR
         //  |    R
         //  | LR X-----  x = (Anchor + LR) / imageWidth
         //  |    |
-
-        // Layout
-        label.layoutX = -label.radius + transLabel.x * image.width
-        label.layoutY = -label.radius + transLabel.y * image.height
-
-        // Layout
-        labelNodes.add(label)
+        label.anchorX = -label.radius + transLabel.x * image.width
+        label.anchorY = -label.radius + transLabel.y * image.height
     }
     private fun removeLabel(transLabel: TransLabel) {
         val label = labelNodes.first { it.index == transLabel.index } ?: return
@@ -773,9 +781,6 @@ class CLabelPane : ScrollPane() {
      * @param y X corrdinate based on screen
      */
     fun showLabelText(labelIndex: Int, x: Double, y: Double) {
-        // The image didn't display, we should not move-to
-        if (labelNodes.isEmpty()) return
-
         val label = labelNodes.first { it.index == labelIndex }
         label.tooltip.show(label, x, y)
     }
@@ -791,9 +796,6 @@ class CLabelPane : ScrollPane() {
      * @param labelIndex Index of the label which will be displaye at the center
      */
     fun moveToLabel(labelIndex: Int) {
-        // The image didn't display, we should not move-to
-        if (labelNodes.isEmpty()) return
-
         val label = labelNodes.first { it.index == labelIndex }
 
         vvalue = 0.0
@@ -802,8 +804,8 @@ class CLabelPane : ScrollPane() {
         // Scaled (fake)
         // -> Image / 2 - (Image / 2 - Center) * Scale
         // -> Image / 2 * (1 - Scale) + Center * Scale
-        val fakeX = image.width / 2 * (1 - scale) + label.layoutX * scale
-        val fakeY = image.height / 2 * (1 - scale) + label.layoutY * scale
+        val fakeX = image.width / 2 * (1 - scale) + label.anchorX * scale
+        val fakeY = image.height / 2 * (1 - scale) + label.anchorY * scale
 
         // To center
         // -> Scroll / 2 = Layout + Fake

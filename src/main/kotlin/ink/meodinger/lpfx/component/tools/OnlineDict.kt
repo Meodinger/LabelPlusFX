@@ -105,8 +105,10 @@ class OnlineDict : Stage() {
                     hgrow = Priority.ALWAYS
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter
+                        // Mark immediately when this event will be consumed
+                        it.consume() // disable further propagation
+
                         transState = TransState.values()[(transState.ordinal + 1) % TransState.values().size]
-                        it.consume()
                     }
                     addEventHandler(MouseEvent.MOUSE_CLICKED) {
                         if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {

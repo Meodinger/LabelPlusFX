@@ -224,15 +224,17 @@ fun showException(owner: Window?, e: Throwable, file: File? = null): Optional<Bu
     }
 
     val applyBtn = dialog.dialogPane.lookupButton(sendBtnType) as Button
-    applyBtn.addEventFilter(ActionEvent.ACTION) { event ->
-        val button = event.source as Button
+    applyBtn.addEventFilter(ActionEvent.ACTION) {
+        // Mark immediately when this event will be consumed
+        it.consume() // disable further propagation
+
+        val button = it.source as Button
 
         button.text = I18N["common.sending"]
         sendMail("LPFX work-time exception report", Logger.log, file).apply {
             setOnSucceeded { button.text = I18N["common.sent"] }
             setOnFailed { button.text = I18N["common.failed"] }
         }.startInNewThread()
-        event.consume()
     }
 
     return dialog.showAndWait()

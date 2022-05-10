@@ -6,6 +6,7 @@ import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.util.doNothing
 
 import javafx.application.Application
+import javafx.application.Platform
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -84,6 +85,9 @@ fun main(vararg args: String) {
             isVisible = true
         }
     }
+
+    // Let FX Thread keep running when Stage closed by BOSS Key
+    Platform.setImplicitExit(false)
 
     // Init options
     Options.init()

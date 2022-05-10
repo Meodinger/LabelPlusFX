@@ -204,14 +204,18 @@ class DialogSettings : AbstractPropertiesDialog() {
                             var shiftX = 0.0
                             var shiftY = 0.0
                             addEventHandler(MouseEvent.MOUSE_PRESSED) {
+                                // Mark immediately when this event will be consumed
+                                it.consume() // disable further propagation
+
                                 cursor = Cursor.MOVE
 
-                                shiftX = anchorPaneLeft - it.sceneX
-                                shiftY = anchorPaneTop - it.sceneY
-
-                                it.consume()
+                                shiftX = anchorX - it.sceneX
+                                shiftY = anchorY - it.sceneY
                             }
                             addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+                                // Mark immediately when this event will be consumed
+                                it.consume() // disable further propagation
+
                                 val newAnchorX = shiftX + it.sceneX
                                 val newAnchorY = shiftY + it.sceneY
 
@@ -224,10 +228,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                                 if (newAnchorX < 0 || newAnchorX > limitX) return@addEventHandler
                                 if (newAnchorY < 0 || newAnchorY > limitY) return@addEventHandler
 
-                                anchorPaneLeft = newAnchorX
-                                anchorPaneTop = newAnchorY
-
-                                it.consume()
+                                anchorX = newAnchorX
+                                anchorY = newAnchorY
                             }
                             addEventHandler(MouseEvent.MOUSE_RELEASED) {
                                 cursor = Cursor.HAND
@@ -235,8 +237,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                             radiusProperty().addListener(onChange {
                                 val limitX = SAMPLE_IMAGE.width - prefWidth - 2 * lLabelPaneBorderWidth
                                 val limitY = SAMPLE_IMAGE.height - prefHeight - 2 * lLabelPaneBorderWidth
-                                if (anchorPaneLeft > limitX) anchorPaneLeft = limitX
-                                if (anchorPaneTop > limitY) anchorPaneTop = limitY
+                                if (anchorX > limitX) anchorX = limitX
+                                if (anchorY > limitY) anchorY = limitY
                             })
                         }
                     }
@@ -475,8 +477,8 @@ class DialogSettings : AbstractPropertiesDialog() {
         mComboScale.select(Settings.newPictureScalePicture)
 
         // Label
-        lCLabel.anchorPaneLeft = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
-        lCLabel.anchorPaneTop = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
+        lCLabel.anchorX = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
+        lCLabel.anchorY = (lLabelPane.prefHeight - lCLabel.prefHeight) / 2
 
         lLabelRadius.isEditing = false
         lSliderRadius.value = Settings.labelRadius

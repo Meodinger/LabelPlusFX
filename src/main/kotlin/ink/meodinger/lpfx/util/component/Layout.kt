@@ -56,34 +56,44 @@ inline fun <T : Node> Pane.add(node: T, operation: T.() -> Unit = {}): Pane {
 ////////////////////////////////////////////////////////////
 
 /**
- * Get AnchorPane anchor - Left
- * @return LayoutX if null
+ * Get AnchorPane anchor - Left. Getter return layoutX if null
+ * @see javafx.scene.layout.AnchorPane.getLeftAnchor
+ * @see javafx.scene.layout.AnchorPane.setLeftAnchor
+ * @see javafx.scene.Node.layoutX
  */
-var Node.anchorPaneLeft: Double
+var Node.anchorX: Double
     get() = AnchorPane.getLeftAnchor(this) ?: layoutX
     set(value) { AnchorPane.setLeftAnchor(this, value) }
 
 /**
- * Get AnchorPane anchor - Top
- * @return LayoutY if null
+ * Get AnchorPane anchor - Top. Getter return layoutY if null
+ * @see javafx.scene.layout.AnchorPane.getTopAnchor
+ * @see javafx.scene.layout.AnchorPane.setTopAnchor
+ * @see javafx.scene.Node.layoutY
  */
-var Node.anchorPaneTop: Double
+var Node.anchorY: Double
     get() = AnchorPane.getTopAnchor(this) ?: layoutY
     set(value) { AnchorPane.setTopAnchor(this, value) }
 
 /**
- * Get AnchorPane anchor - Right
- * @return LayoutX + localBoundsWidth if null
+ * Get AnchorPane anchor - Right. Getter return layoutX + localBoundsWidth if null
+ * @see javafx.scene.layout.AnchorPane.getRightAnchor
+ * @see javafx.scene.layout.AnchorPane.setRightAnchor
+ * @see javafx.scene.Node.layoutX
+ * @see javafx.scene.Node.boundsInLocalProperty
  */
-var Node.anchorPaneRight: Double
+var Node.anchorL: Double
     get() = AnchorPane.getRightAnchor(this) ?: (layoutX + boundsInLocal.width)
     set(value) { AnchorPane.setLeftAnchor(this, value) }
 
 /**
- * Get AnchorPane anchor - Bottom
- * @return LayoutY + localBoundsHeight if null
+ * Get AnchorPane anchor - Bottom. Getter return layoutY + localBoundsHeight if null
+ * @see javafx.scene.layout.AnchorPane.getBottomAnchor
+ * @see javafx.scene.layout.AnchorPane.setBottomAnchor
+ * @see javafx.scene.Node.layoutY
+ * @see javafx.scene.Node.boundsInLocalProperty
  */
-var Node.anchorPaneBottom: Double
+var Node.anchorB: Double
     get() = AnchorPane.getBottomAnchor(this) ?: (layoutY + boundsInLocal.height)
     set(value) { AnchorPane.setBottomAnchor(this, value) }
 

@@ -241,11 +241,15 @@ class Controller(private val state: State) {
 
         // Drag and Drop
         view.setOnDragOver {
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
+
             if (it.dragboard.hasFiles()) it.acceptTransferModes(TransferMode.COPY)
-            it.consume() // Consume used event
         }
         view.setOnDragDropped {
             if (stay()) return@setOnDragDropped
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
 
             val board = it.dragboard
             if (board.hasFiles()) {
@@ -256,7 +260,6 @@ class Controller(private val state: State) {
 
                 it.isDropCompleted = true
             }
-            it.consume() // Consume used event
         }
         Logger.info("Enabled Drag and Drop", "Controller")
 
@@ -268,13 +271,14 @@ class Controller(private val state: State) {
 
         // Register Alias & Global redo/undo in TransArea
         cTransArea.addEventFilter(KeyEvent.KEY_PRESSED) {
-            if ((it.isControlDown || it.isMetaDown) && it.code == KeyCode.Z) {
-                if (!it.isShiftDown) {
-                    if (cTransArea.isUndoable) cTransArea.undo() else if (state.undoable) state.undo()
-                } else {
-                    if (cTransArea.isRedoable) cTransArea.redo() else if (state.redoable) state.redo()
-                }
-                it.consume() // disable default undo/redo
+            if (!(it.isControlDown || it.isMetaDown) || it.code != KeyCode.Z) return@addEventFilter
+            // Mark immediately when this event will be consumed
+            it.consume() // disable default undo/redo
+
+            if (!it.isShiftDown) {
+                if (cTransArea.isUndoable) cTransArea.undo() else if (state.undoable) state.undo()
+            } else {
+                if (cTransArea.isRedoable) cTransArea.redo() else if (state.redoable) state.redo()
             }
         }
         Logger.info("Registered CTransArea Alias & Global undo/redo", "Controller")
@@ -282,14 +286,14 @@ class Controller(private val state: State) {
         // Register Ctrl/Alt/Meta + Scroll with font size change in TransArea
         cTransArea.addEventHandler(ScrollEvent.SCROLL) {
             if (!(it.isControlDown || it.isAltDown || it.isMetaDown)) return@addEventHandler
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
 
             val newSize = (cTransArea.font.size + if (it.deltaY > 0) 1 else -1).roundToInt()
                 .coerceAtLeast(12).coerceAtMost(64)
 
             cTransArea.font = cTransArea.font.s(newSize.toDouble())
             cTransArea.positionCaret(0)
-
-            it.consume()
         }
         Logger.info("Registered TransArea font size change", "Controller")
 
@@ -519,8 +523,16 @@ class Controller(private val state: State) {
         // Set current-label-index to unbind TextArea & clear CTreeView focus
         state.currentPicNameProperty().addListener(onChange {
             state.currentLabelIndex = NOT_FOUND
-            // Use run-later to clear after items rendering
-            Platform.runLater { cTreeView.selectionModel.clearSelection() }
+
+            // If switch picture in CTreeView, the foucs on TreeCell will not clear automatically
+            // So we should manually clear it to make sure we start from the first label
+            if (cTreeView.isFocused) {
+                // Use run-later to clear after items rendering
+                Platform.runLater {
+                    cTreeView.selectionModel.clearSelection()
+                    cTreeView.selectionModel.select(cTreeView.root)
+                }
+            }
         })
 
         // Update text area when label change
@@ -591,35 +603,36 @@ class Controller(private val state: State) {
         // Transform tab press in CTreeView to ViewModeBtn click
         cTreeView.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code != KeyCode.TAB) return@addEventFilter
+            // Mark immediately when this event will be consumed
+            it.consume() // Disable tab shift
 
             bSwitchViewMode.fire()
-            it.consume() // Disable tab shift
         }
         Logger.info("Transformed Tab on CTreeView", "Controller")
 
         // Transform tab press in CLabelPane to WorkModeBtn click
         cLabelPane.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code != KeyCode.TAB) return@addEventFilter
+            // Mark immediately when this event will be consumed
+            it.consume() // Disable tab shift
 
             bSwitchWorkMode.fire()
-            it.consume() // Disable tab shift
         }
         Logger.info("Transformed Tab on CLabelPane", "Controller")
 
         // Transform number key press to CTreeView select
         view.addEventHandler(KeyEvent.KEY_PRESSED) {
             // TODO: 012 -> index 12
-
-            if (!it.code.isDigitKey) return@addEventHandler
-            val id = (it.text.toInt() - 1).takeIf { i -> i in 0 until state.transFile.groupCount } ?: return@addEventHandler
+            val code = it.code.takeIf(KeyCode::isDigitKey) ?: return@addEventHandler
+            val index = (code.char.toInt() - 1).takeIf { i -> i in 0 until state.transFile.groupCount } ?: return@addEventHandler
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
 
             if (state.viewMode == ViewMode.GroupMode) {
-                cTreeView.selectGroup(state.transFile.getTransGroup(id).name, clear = true, scrollTo = false)
+                cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
             } else {
-                state.currentGroupId = id
+                state.currentGroupId = index
             }
-
-            it.consume() // Consume used event
         }
         Logger.info("Transformed num-key pressed", "Controller")
 
@@ -680,6 +693,8 @@ class Controller(private val state: State) {
             }
             // Make sure we'll not get into endless LabelItem find loop
             if (state.transFile.getTransList(state.currentPicName).isEmpty()) return@EventHandler
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
 
             var labelItemIndex: Int = cTreeView.selectionModel.selectedIndex + labelItemShift
 
@@ -695,13 +710,12 @@ class Controller(private val state: State) {
                 , labelItemShift)
                 item = cTreeView.getTreeItem(labelItemIndex)
             }
+            val labelItem = item!! as CTreeLabelItem
 
+            cLabelPane.moveToLabel(labelItem.index)
             cTreeView.selectionModel.clearSelection()
-            cTreeView.selectionModel.select(item)
+            cTreeView.selectionModel.select(labelItem)
             cTreeView.scrollTo(labelItemIndex)
-            cLabelPane.moveToLabel(state.currentLabelIndex)
-
-            it.consume() // Consume used event
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
@@ -710,6 +724,8 @@ class Controller(private val state: State) {
         // Transform Ctrl + Enter to Ctrl + Down / Right (+Shift -> back)
         val enterKeyTransformerHandler = EventHandler<KeyEvent> {
             if (!((it.isControlDown || it.isMetaDown) && it.code == KeyCode.ENTER)) return@EventHandler
+            // Mark immediately when this event will be consumed
+            it.consume() // disable further propagation
 
             val backward = it.isShiftDown
             val selectedItemIndex = cTreeView.selectionModel.selectedIndex
@@ -729,8 +745,6 @@ class Controller(private val state: State) {
                 KeyCode.RIGHT -> cLabelPane.fireEvent(keyEvent(it, code = KeyCode.DOWN, character = "\u0000", text = "" ))
                 else -> doNothing()
             }
-
-            it.consume() // Consume used event
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
@@ -822,7 +836,7 @@ class Controller(private val state: State) {
             groupList = Settings.defaultGroupNameList
                 .mapIndexed { index, name -> TransGroup(name, Settings.defaultGroupColorHexList[index]) }
                 .filterIndexed { index, _ -> Settings.isGroupCreateOnNewTransList[index] }
-                .let { if (FileType.getFileType(file) == FileType.LPFile) it.subList(0, 9) else it }
+                .let { if (FileType.getFileType(file) == FileType.LPFile) it.subList(0, it.size.coerceAtMost(9)) else it }
                 .toMutableList(),
             transMap = selectedPics.associateWithTo(HashMap()) { ArrayList() }
         )
@@ -1057,8 +1071,14 @@ class Controller(private val state: State) {
     /**
      * Backup immediately
      */
-    fun emergency() {
-        backupManager.fire(false)
+    fun emergency(): File? {
+        val bak = state.getBakFolder()!!.resolve("emergency.$EXTENSION_BAK")
+        try {
+            export(bak, state.transFile)
+        } catch (e: IOException) {
+            return null
+        }
+        return bak
     }
 
     /**

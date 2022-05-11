@@ -61,16 +61,12 @@ class CTreeMenu(
         if (rAddGroupDialog.owner == null) rAddGroupDialog.initOwner(state.stage)
 
         val nameList = Settings.defaultGroupNameList
-        val colorList = TransFile.DEFAULT_COLOR_HEX_LIST
+        val colorList = Settings.defaultGroupColorHexList.ifEmpty { TransFile.DEFAULT_COLOR_HEX_LIST }
 
         val newGroupId = state.transFile.groupCount
-        val newName: String
+        var newName: String? = nameList.getOrNull(newGroupId)?.takeIf(String::isNotEmpty)
 
-        if (newGroupId < nameList.size && nameList[newGroupId].isNotEmpty() &&
-            state.transFile.groupList.none { g -> g.name == nameList[newGroupId] }
-        ) {
-            newName = nameList[newGroupId]
-        } else {
+        if (newName == null || state.transFile.groupList.any { g -> g.name == newName }) {
             var tempNum = newGroupId + 1
             var tempName = String.format(I18N["context.add_group.new_group.i"], tempNum)
             while (state.transFile.groupList.any { g -> g.name == tempName }) {

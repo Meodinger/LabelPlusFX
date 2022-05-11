@@ -5,6 +5,7 @@ package ink.meodinger.lpfx.util.property
 import javafx.beans.binding.*
 import javafx.beans.property.*
 import javafx.beans.value.*
+import javafx.collections.*
 
 
 /**
@@ -157,3 +158,8 @@ fun ObjectBinding<Float>.primitive(): FloatBinding = Bindings.createFloatBinding
 fun ObjectBinding<Double>.primitive(): DoubleBinding = Bindings.createDoubleBinding(this::get, this)
 fun ObjectBinding<Boolean>.primitive(): BooleanBinding = Bindings.createBooleanBinding(this::get, this)
 fun ObjectBinding<String>.primitive(): StringBinding = Bindings.createStringBinding(this::get, this)
+
+// isEmpty
+fun <E> ObservableList<E>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)
+fun <E> ObservableSet<E>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)
+fun <K, V> ObservableMap<K ,V>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)

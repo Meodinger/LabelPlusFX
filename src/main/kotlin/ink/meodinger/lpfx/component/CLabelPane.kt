@@ -66,6 +66,12 @@ class CLabelPane : ScrollPane() {
      * @param displayY Y coordinate based on the displaying image
      * @param labelX X coordinate of the related TransLabel
      * @param labelY Y coordinate of the related TransLabel
+     * @see LABEL_CREATE
+     * @see LABEL_REMOVE
+     * @see LABEL_HOVER
+     * @see LABEL_CLICK
+     * @see LABEL_MOVE
+     * @see LABEL_OTHER
      */
     class LabelEvent(
         eventType: EventType<LabelEvent>,
@@ -87,6 +93,7 @@ class CLabelPane : ScrollPane() {
              * Indicate should create a label. `labelIndex` will be NOT_FOUND
              * because the event target isn't a label. `labelX` and `labelY`
              * will be the coordinate of the label which will be created.
+             * @see LabelEvent
              */
             val LABEL_CREATE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CREATE")
 
@@ -94,6 +101,7 @@ class CLabelPane : ScrollPane() {
              * Incicate shoule remove a label. `labelIndex` will be the target
              * label's index. `labelX` and `labelY` will be `Double.NaN` because
              * they are useless here and should not make distraction.
+             * @see LabelEvent
              */
             val LABEL_REMOVE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_REMOVE")
 
@@ -101,6 +109,7 @@ class CLabelPane : ScrollPane() {
              * Incicate we are hovering on a label. `labelIndex` will be the target
              * label's index. `labelX` and `labelY` will be `Double.NaN` because
              * they are useless here and should not make distraction.
+             * @see LabelEvent
              */
             val LABEL_HOVER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_HOVER")
 
@@ -108,6 +117,7 @@ class CLabelPane : ScrollPane() {
              * Incicate we have clicked a label. `labelIndex` will be the target
              * label's index. `labelX` and `labelY` will be `Double.NaN` because
              * they are useless here and should not make distraction.
+             * @see LabelEvent
              */
             val LABEL_CLICK : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CLICK")
 
@@ -116,6 +126,7 @@ class CLabelPane : ScrollPane() {
              * label's index. `labelX` and `labelY` will be the new coordinates
              * of the target label. Note that this event will only be dispacted
              * when we have finished moving a label.
+             * @see LabelEvent
              */
             val LABEL_MOVE  : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_MOVE")
 
@@ -123,6 +134,7 @@ class CLabelPane : ScrollPane() {
              * Incicate shoule remove a label. `labelIndex` will be NOT_FOUND
              * because the event target isn't a label. `labelX` and `labelY`
              * will be `Double.NaN` because the event target isn't a label.
+             * @see LabelEvent
              */
             val LABEL_OTHER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_OTHER")
         }
@@ -372,7 +384,6 @@ class CLabelPane : ScrollPane() {
                 isMouseTransparent = true
                 graphicsContext2D.font = TEXT_FONT
                 graphicsContext2D.textBaseline = VPos.TOP
-                graphicsContext2D.lineWidth = 2.0
 
                 widthProperty().bind(imageWidthBinding)
                 heightProperty().bind(imageHeightBinding)
@@ -768,6 +779,7 @@ class CLabelPane : ScrollPane() {
 
         gc.fill = Color.web(Color.WHEAT.toHexRGB() + TEXT_ALPHA)
         gc.fillRect(shapeX, shapeY, shapeW, shapeH)
+        gc.lineWidth = 2.0
         gc.stroke = Color.DARKGRAY
         gc.strokeRect(shapeX, shapeY, shapeW, shapeH)
         gc.fill = color

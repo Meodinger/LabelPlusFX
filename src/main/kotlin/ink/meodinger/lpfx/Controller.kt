@@ -380,14 +380,6 @@ class Controller(private val state: State) {
     private fun bind() {
         Logger.info("Binding properties...", "Controller")
 
-        // Preferences
-        cTransArea.fontProperty().bindBidirectional(Preference.textAreaFontProperty())
-        Logger.info("Bound TransArea font", "Controller")
-
-        // CLigatureTextArea - rules
-        cTransArea.ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
-        Logger.info("Bound ligature rules", "Controller")
-
         // Set components disabled
         bSwitchViewMode.disableProperty().bind(!state.openedProperty())
         bSwitchWorkMode.disableProperty().bind(!state.openedProperty())
@@ -453,10 +445,6 @@ class Controller(private val state: State) {
         cLabelPane.groupsProperty().bind(groupsBinding)
         cLabelPane.imageProperty().bind(imageBinding)
         cLabelPane.labelsProperty().bind(labelsBinding)
-        cLabelPane.labelRadiusProperty().bind(Settings.labelRadiusProperty())
-        cLabelPane.labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
-        cLabelPane.labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
-        cLabelPane.newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
         cLabelPane.commonCursorProperty().bind(state.workModeProperty().transform {
             when (it!!) {
                 WorkMode.LabelMode -> Cursor.CROSSHAIR

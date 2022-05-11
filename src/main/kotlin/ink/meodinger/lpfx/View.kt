@@ -2,8 +2,7 @@ package ink.meodinger.lpfx
 
 import ink.meodinger.lpfx.component.*
 import ink.meodinger.lpfx.component.common.*
-import ink.meodinger.lpfx.options.Preference
-import ink.meodinger.lpfx.options.RecentFiles
+import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.type.TransGroup
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.property.*
@@ -102,6 +101,9 @@ class View(state: State) : BorderPane() {
 
         top(CMenuBar(state)) {
             recentFilesProperty().bind(RecentFiles.recentFilesProperty())
+            defaultFileProperty().bind(Settings.useMeoFileAsDefaultProperty().transform {
+                if (it) FileType.MeoFile else FileType.LPFile
+            })
         }
         center(SplitPane()) {
             add(BorderPane()) {
@@ -110,6 +112,10 @@ class View(state: State) : BorderPane() {
                     initScale = SCALE_INIT
                     minScale = SCALE_MIN
                     maxScale = SCALE_MAX
+                    labelRadiusProperty().bind(Settings.labelRadiusProperty())
+                    labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
+                    labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
+                    newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
                 }
                 bottom(HBox()) {
                     add(CTextSlider()) {
@@ -177,6 +183,8 @@ class View(state: State) : BorderPane() {
                     })
                     withContent(cTransArea) {
                         isWrapText = true
+                        ligatureRulesProperty().bind(Settings.ligatureRulesProperty())
+                        fontProperty().bindBidirectional(Preference.textAreaFontProperty())
                     }
                 }
 

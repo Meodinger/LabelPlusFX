@@ -4,10 +4,7 @@ import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.action.*
 import ink.meodinger.lpfx.component.common.CFileChooser
 import ink.meodinger.lpfx.component.dialog.*
-import ink.meodinger.lpfx.options.Logger
-import ink.meodinger.lpfx.options.Preference
-import ink.meodinger.lpfx.options.RecentFiles
-import ink.meodinger.lpfx.options.Settings
+import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.type.LPFXTask
 import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
@@ -19,9 +16,7 @@ import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
-import javafx.beans.binding.Bindings
-import javafx.beans.property.ListProperty
-import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.*
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -75,8 +70,28 @@ class CMenuBar(private val state: State) : MenuBar() {
     }
 
     private val recentFilesProperty: ListProperty<File> = SimpleListProperty()
+    /**
+     * The recent files that will be displayed
+     */
     fun recentFilesProperty(): ListProperty<File> = recentFilesProperty
+    /**
+     * @see recentFilesProperty
+     */
     val recentFiles: ObservableList<File> by recentFilesProperty
+
+    // endregion
+
+    // region Properties
+
+    private val defaultFileTypeProperty: ObjectProperty<FileType> = SimpleObjectProperty(FileType.LPFile)
+    /**
+     * The default save file type
+     */
+    fun defaultFileProperty(): ObjectProperty<FileType> = defaultFileTypeProperty
+    /**
+     * @see defaultFileTypeProperty
+     */
+    var defaultFileType: FileType by defaultFileTypeProperty
 
     // endregion
 
@@ -137,7 +152,7 @@ class CMenuBar(private val state: State) : MenuBar() {
                 accelerator = KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN)
             }
             menu(mOpenRecent) {
-                disableProperty().bind(Bindings.createBooleanBinding(items::isEmpty, items))
+                disableProperty().bind(items.emptyProperty())
             }
             item(I18N["m.close"]) {
                 does { closeTranslation() }
@@ -287,12 +302,11 @@ class CMenuBar(private val state: State) : MenuBar() {
     private fun newTranslation() {
         if (state.controller.stay()) return
 
-        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
-        chooserNew.initialFilename = "$FILENAME_DEFAULT.$extension"
+        chooserNew.initialFilename = "$FILENAME_DEFAULT.${defaultFileType.extension}"
 
         val file = chooserNew.showSaveDialog(state.stage)?.let file@{
             val name = it.nameWithoutExtension.takeUnless(FILENAME_DEFAULT::equals) ?: it.parentFile.name
-            val ext  = it.extension.lowercase().takeIf(EXTENSIONS_FILE::contains) ?: extension
+            val ext  = it.extension.lowercase().takeIf(EXTENSIONS_FILE::contains) ?: defaultFileType.extension
 
             return@file it.parentFile.resolve("$name.$ext")
         } ?: return
@@ -345,7 +359,7 @@ class CMenuBar(private val state: State) : MenuBar() {
         val bak = chooserBackup.showOpenDialog(state.stage) ?: return
         if (bak.parentFile?.parentFile != null) chooserFile.initialDirectory = bak.parentFile.parentFile
 
-        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
+        val extension = defaultFileType.extension
         val filename  = "Re.${bak.parentFile?.parentFile?.name ?: "cover"}"
 
         chooserFile.title = I18N["chooser.rec"]

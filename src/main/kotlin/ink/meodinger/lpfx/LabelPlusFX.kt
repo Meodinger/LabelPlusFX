@@ -201,7 +201,7 @@ class LabelPlusFX: HookedApplication() {
 
         Logger.info("App started", "Application")
 
-        if (!parameters.unnamed.contains(PARAM_UNNAMED_NO_CHECK_UPDATE))
+        if (PARAM_UNNAMED_NO_CHECK_UPDATE !in parameters.unnamed)
             if (Settings.autoCheckUpdate)
                 controller.checkUpdate()
 

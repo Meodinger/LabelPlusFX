@@ -597,7 +597,7 @@ class View(private val state: State) : BorderPane() {
         val selected = state.transFile.sortedPicNames
         val unselected = Files.walk(state.transFile.projectFolder.toPath(), 1)
             .filter {
-                if (selected.contains(it.name)) return@filter false
+                if (it.name in selected) return@filter false
                 for (extension in EXTENSIONS_PIC) if (it.extension == extension) return@filter true
                 false
             }.map(Path::name).collect(Collectors.toList())
@@ -614,9 +614,9 @@ class View(private val state: State) : BorderPane() {
         val resNames = result.get()
 
         val toAdd = ArrayList<String>()
-        for (picName in resNames) if (!picNames.contains(picName)) toAdd.add(picName)
+        for (picName in resNames) if (picName !in picNames) toAdd.add(picName)
         val toRemove = ArrayList<String>()
-        for (picName in picNames) if (!resNames.contains(picName)) toRemove.add(picName)
+        for (picName in picNames) if (picName !in resNames) toRemove.add(picName)
 
         if (toAdd.size == 0 && toRemove.size == 0) return
         if (toRemove.size != 0) {
@@ -638,7 +638,7 @@ class View(private val state: State) : BorderPane() {
         val actionList = ArrayList<Action>()
         val conflictList = ArrayList<String>()
         for (file in files) {
-            if (picNames.contains(file.name)) {
+            if (file.name in picNames) {
                 conflictList.add(file.path)
                 continue
             }

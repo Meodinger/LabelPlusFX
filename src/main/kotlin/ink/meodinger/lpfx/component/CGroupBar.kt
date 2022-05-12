@@ -152,7 +152,7 @@ class CGroupBar : HBox() {
          * Overridden to not set if `selectedItem` is it not contained in the `items`.
          */
         override fun select(transGroup: TransGroup?) {
-            if (transGroup == null || !groups.contains(transGroup)) {
+            if (transGroup == null || transGroup !in groups) {
                 selectedIndex = -1
                 selectedItem = null
             } else {

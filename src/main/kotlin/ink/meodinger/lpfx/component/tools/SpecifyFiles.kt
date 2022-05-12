@@ -99,7 +99,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
                         // auto-fill
                         val newPicPaths = Files.walk(directory.toPath(), 1)
-                            .filter { path -> EXTENSIONS_PIC.contains(path.extension.lowercase()) }
+                            .filter { path -> path.extension.lowercase() in EXTENSIONS_PIC }
                             .collect(Collectors.toList())
                         for (i in 0 until picCount) {
                             if (preserve && files[i].exists()) continue

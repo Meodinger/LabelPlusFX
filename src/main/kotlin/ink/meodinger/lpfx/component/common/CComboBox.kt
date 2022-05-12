@@ -147,7 +147,7 @@ class CComboBox<T> : HBox() {
      * Select an item. Note that only when the item exists will it be selected
      */
     fun select(item: T) {
-        if (items.contains(item)) selectionModel.select(item)
+        if (item in items) selectionModel.select(item)
     }
 
 }

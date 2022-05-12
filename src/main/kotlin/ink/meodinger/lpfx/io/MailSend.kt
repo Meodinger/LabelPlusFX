@@ -20,7 +20,9 @@ private const val REPORT_AUTH = "SUWAYUTJSKWQNDOF"
 private const val TARGET_USER = "meodinger@qq.com"
 
 /**
- * TODO
+ * Send a mail to Meodinger
+ * @param text Content text
+ * @param files Files to send, null values will be ingored
  */
 fun sendMailSync(text: String, vararg files: File?) {
     // properties
@@ -45,6 +47,6 @@ fun sendMailSync(text: String, vararg files: File?) {
 }
 
 /**
- * TODO
+ * @see sendMailSync
  */
 fun sendMail(text: String, vararg files: File?): LPFXTask<Unit> = LPFXTask.createTask { sendMailSync(text, *files) }

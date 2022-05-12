@@ -52,7 +52,7 @@ class CTreeView: TreeView<String>() {
     private val selectedGroupProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun selectedGroupProperty(): ReadOnlyIntegerProperty = selectedGroupProperty
     /**
-     * Selected GroupItem's GroupId, note that set this will not clear previous selection
+     * Selected GroupItem's GroupId
      */
     var selectedGroup: Int by selectedGroupProperty
         private set
@@ -60,7 +60,7 @@ class CTreeView: TreeView<String>() {
     private val selectedLabelProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     fun selectedLabelProperty(): ReadOnlyIntegerProperty = selectedLabelProperty
     /**
-     * Selected LabelItem's index, note that set this will not clear previous selection
+     * Selected LabelItem's index
      */
     var selectedLabel: Int by selectedLabelProperty
         private set
@@ -233,7 +233,7 @@ class CTreeView: TreeView<String>() {
     }
     fun selectLabels(labelIndices: Collection<Int>, clear: Boolean, scrollTo: Boolean) {
         if (clear) selectionModel.clearSelection()
-        val items = labelItems.filter { labelIndices.contains(it.index) }
+        val items = labelItems.filter { it.index in labelIndices }
 
         items.forEach(selectionModel::select)
         if (scrollTo) scrollTo(getRow(items.first()))

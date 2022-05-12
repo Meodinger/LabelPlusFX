@@ -56,7 +56,7 @@ class TransFile @JsonCreator constructor(
      * @return null if the trans-map does not contain the given name
      */
     fun getFile(picName: String): File? {
-        if (!transMapObservable.keys.contains(picName)) return null
+        if (picName !in transMapObservable.keys) return null
         return fileMap[picName] ?: projectFolder.resolve(picName).also { setFile(picName, it) }
     }
 

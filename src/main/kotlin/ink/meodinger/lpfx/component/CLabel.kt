@@ -106,6 +106,10 @@ class CLabel(
     private class CLabelSkin(private val control: CLabel) : Skin<CLabel> {
 
         private val root = Pane()
+        private val text = Text()
+        private val circle = Circle()
+
+        private var clip: Shape = circle // just a placeholder to make type non-null
 
         init {
             val pickerRadiusBinding = control.radiusProperty.transform { it.coerceAtLeast(MIN_PICK_RADIUS) }.primitive()
@@ -115,12 +119,12 @@ class CLabel(
                 prefHeightProperty().bind(pickerRadiusBinding * 2)
             }
 
-            val circle = Circle().apply {
+            circle.apply {
                 radiusProperty().bind(control.radiusProperty)
                 centerXProperty().bind(pickerRadiusBinding)
                 centerYProperty().bind(pickerRadiusBinding)
             }
-            val text = Text().apply {
+            text.apply {
                 textOrigin = VPos.CENTER
 
                 textProperty().bind(control.indexProperty.asString())
@@ -146,7 +150,6 @@ class CLabel(
                     }, pickerRadiusBinding, control.indexProperty
                 ))
             }
-            var clip: Shape = circle // just a placeholder to make type non-null
 
             // Update
             val updateListener = onChange<Any> {
@@ -175,7 +178,22 @@ class CLabel(
         override fun getNode(): Node = root
 
         override fun dispose() {
-            TODO("Not yet implemented")
+            clip.fillProperty().unbind()
+            root.children.remove(clip)
+
+            text.textProperty().unbind()
+            text.fillProperty().unbind()
+            text.fontProperty().unbind()
+            text.layoutXProperty().unbind()
+            text.layoutYProperty().unbind()
+            root.children.remove(text)
+
+            circle.radiusProperty().unbind()
+            circle.centerXProperty().unbind()
+            circle.centerYProperty().unbind()
+
+            root.prefWidthProperty().unbind()
+            root.prefHeightProperty().unbind()
         }
 
     }

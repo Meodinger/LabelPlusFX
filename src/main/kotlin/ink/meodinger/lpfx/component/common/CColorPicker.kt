@@ -36,9 +36,8 @@ import javafx.scene.paint.Color
  */
 class CColorPicker() : ColorPicker() {
 
-    // DO NOT EXPORT this property, use valueProperty() instead.
+    // Backing color hex TextField
     private val colorHexField: TextField = TextField()
-    private val colorHexProperty: StringProperty = colorHexField.textProperty()
 
     private val enableAlphaProperty: BooleanProperty = SimpleBooleanProperty(false)
     /**
@@ -65,13 +64,13 @@ class CColorPicker() : ColorPicker() {
         }
         colorHexField.setOnAction {
             // Add to recent colors
-            if (!customColors.contains(value)) customColors.add(value)
+            if (value !in customColors) customColors.add(value)
 
             fireEvent(ActionEvent(it.source, this))
             hide() // Manually invoke hide() to let PopupControl logically hide
         }
 
-        colorHexProperty.addListener(onNew {
+        colorHexField.textProperty().addListener(onNew {
             value = when (it.length) {
                 1 -> Color.web(it.repeat(6))
                 2 -> Color.web(it.repeat(3))
@@ -83,7 +82,7 @@ class CColorPicker() : ColorPicker() {
         })
 
         val handler = EventHandler<Event> {
-            colorHexProperty.set(if (enableAlpha) value.toHexRGBA() else value.toHexRGB())
+            colorHexField.textProperty().set(if (enableAlpha) value.toHexRGBA() else value.toHexRGB())
         }
         addEventHandler(ON_SHOWN, handler)
         addEventHandler(ON_HIDDEN, handler)

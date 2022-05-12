@@ -137,13 +137,16 @@ class CTreeMenu(
         textProperty().bind(gChangeColorPicker.valueProperty().transform(Color::toHexRGB))
     }
     private val gDeleteHandler = EventHandler<ActionEvent> {
+        // Clear selected to-remove items
+        view.selectionModel.clearSelection()
+
         state.doAction(GroupAction(
             ActionType.REMOVE, state,
             state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String))
         ))
 
         // Select the first group if TransFile has
-        state.currentGroupId = if (state.transFile.groupCount > 0) 0 else -1
+        if (state.transFile.groupCount > 0) view.selectGroup(state.transFile.groupList[0].name, clear = true, scrollTo = false)
     }
     private val gDeleteItem = MenuItem(I18N["context.delete_group"])
 
@@ -230,7 +233,7 @@ class CTreeMenu(
                 items.add(gChangeColorItem)
                 items.add(SeparatorMenuItem())
                 items.add(gDeleteItem)
-            } else if (rootCount == 0 && groupCount >= 2 && labelCount == 0) {
+            } else if (rootCount == 0 && groupCount > 1 && labelCount == 0) {
                 // multi groups
                 val groupNames = selectedItems.map { (it as CTreeGroupItem).name }
 

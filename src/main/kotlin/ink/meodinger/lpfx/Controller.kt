@@ -376,21 +376,6 @@ class Controller(private val state: State) {
     private fun bind() {
         Logger.info("Binding properties...", "Controller")
 
-        // Set components disabled
-        bSwitchViewMode.disableProperty().bind(!state.openedProperty())
-        bSwitchWorkMode.disableProperty().bind(!state.openedProperty())
-        cTransArea.disableProperty().bind(!state.openedProperty())
-        cTreeView.disableProperty().bind(!state.openedProperty())
-        cPicBox.disableProperty().bind(!state.openedProperty())
-        cGroupBox.disableProperty().bind(!state.openedProperty())
-        cLabelPane.disableProperty().bind(!state.openedProperty())
-        Logger.info("Bound disabled", "Controller")
-
-        // Switch Button text
-        bSwitchWorkMode.textProperty().bind(state.workModeProperty().asString())
-        bSwitchViewMode.textProperty().bind(state.viewModeProperty().asString())
-        Logger.info("Bound switch button text", "Controller")
-
         val groupIndexListener = onNew<Number, Int> {
             if (state.viewMode == ViewMode.GroupMode) {
                 if (it != NOT_FOUND) {
@@ -995,21 +980,17 @@ class Controller(private val state: State) {
      * @param to Which file will the backup recover to
      */
     fun recovery(from: File, to: File) {
-        Logger.info("Recovering from ${from.path}", "Controller")
+        Logger.info("Recovering from ${from.path}, to ${to.path}", "Controller")
 
         try {
-            val tempFile = File.createTempFile("LPFX", null).apply(File::deleteOnExit)
-            val transFile = load(from)
-
-            export(tempFile, transFile)
-            transfer(tempFile, to)
+            export(to, load(from))
         } catch (e: Exception) {
             Logger.error("Recover failed", "Controller")
             Logger.exception(e)
             showError(state.stage, I18N["error.recovery_failed"])
             showException(state.stage, e)
         }
-        Logger.info("Recovered to ${to.path}", "Controller")
+        Logger.info("Recovered", "Controller")
 
         open(to, to.parentFile)
     }

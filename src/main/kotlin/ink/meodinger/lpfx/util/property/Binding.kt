@@ -163,3 +163,7 @@ fun ObjectBinding<String>.primitive(): StringBinding = Bindings.createStringBind
 fun <E> ObservableList<E>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)
 fun <E> ObservableSet<E>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)
 fun <K, V> ObservableMap<K ,V>.emptyProperty(): BooleanBinding = Bindings.createBooleanBinding(this::isEmpty, this)
+
+// first & last
+fun <E> ListProperty<E>.firstElement(): ObjectBinding<E> = Bindings.createObjectBinding({ if (isEmpty()) null else get(0) }, this)
+fun <E> ListProperty<E>.lastElement(): ObjectBinding<E> = Bindings.createObjectBinding({ if (isEmpty()) null else get(size - 1) }, this)

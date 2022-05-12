@@ -334,16 +334,14 @@ class Controller(private val state: State) {
             ))
         }
         cLabelPane.setOnLabelHover {
-            cLabelPane.clearText()
-
             when (state.workMode) {
                 WorkMode.InputMode -> {
-                    cLabelPane.showLabelText(it.labelIndex, it.source.screenX + 8, it.source.screenY + 8)
+                    cLabelPane.showLabelText(it.labelIndex, it.displayX, it.displayY)
                 }
                 WorkMode.LabelMode -> {
                     val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
                     val transGroup = state.transFile.getTransGroup(transLabel.groupId)
-                    cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
+                    cLabelPane.showText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
                 }
             }
         }
@@ -368,9 +366,7 @@ class Controller(private val state: State) {
             if (state.currentGroupId == NOT_FOUND) return@setOnLabelOther
 
             val transGroup = state.transFile.getTransGroup(state.currentGroupId)
-
-            cLabelPane.clearText()
-            cLabelPane.createText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
+            cLabelPane.showText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
         }
         Logger.info("Registered CLabelPane Handler", "Controller")
     }
@@ -503,7 +499,7 @@ class Controller(private val state: State) {
         Logger.info("Added effect: show info on InfoLabel", "Controller")
 
         // Clear text when some state change
-        val clearTextListener = onChange<Any> { cLabelPane.clearText() }
+        val clearTextListener = onChange<Any> { cLabelPane.clearAllText() }
         state.currentGroupIdProperty().addListener(clearTextListener)
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", "Controller")

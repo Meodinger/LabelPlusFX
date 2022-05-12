@@ -190,12 +190,12 @@ class CLabelPane : ScrollPane() {
     /**
      * For text display
      */
-    private val textLayer = Canvas()
+    private val canvas = Canvas()
 
     /**
      * For labels display
      */
-    private val labelLayer = AnchorPane().apply { isPickOnBounds = false }
+    private val anchorPane = AnchorPane().apply { isPickOnBounds = false }
 
     /**
      * For image display
@@ -217,7 +217,7 @@ class CLabelPane : ScrollPane() {
     private var selecting = false
 
     @Suppress("UNCHECKED_CAST")
-    private val labelNodes: ObservableList<CLabel> get() = labelLayer.children as ObservableList<CLabel>
+    private val labelNodes: ObservableList<CLabel> get() = anchorPane.children as ObservableList<CLabel>
 
     // endregion
 
@@ -376,11 +376,11 @@ class CLabelPane : ScrollPane() {
                 isPreserveRatio = true
                 isPickOnBounds = true
             }
-            add(labelLayer) {
+            add(anchorPane) {
                 prefWidthProperty().bind(imageWidthBinding)
                 prefHeightProperty().bind(imageHeightBinding)
             }
-            add(textLayer) {
+            add(canvas) {
                 isMouseTransparent = true
                 graphicsContext2D.font = TEXT_FONT
                 graphicsContext2D.textBaseline = VPos.TOP
@@ -399,7 +399,7 @@ class CLabelPane : ScrollPane() {
         // NOTE: EventFilter is used to disable scroll when scale
         // NOTE: Horizon scroll use default impl: Shift + Scroll
         addEventFilter(ScrollEvent.SCROLL) {
-            clearText()
+            clearAllText()
         }
 
         // Scale
@@ -420,6 +420,14 @@ class CLabelPane : ScrollPane() {
 
                 it.consume()
             }
+        }
+
+        // Clear text
+        root.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            canvas.clearGraphicContext()
+        }
+        root.addEventHandler(MouseEvent.MOUSE_EXITED) {
+            canvas.clearGraphicContext()
         }
 
         // Draggable
@@ -466,15 +474,14 @@ class CLabelPane : ScrollPane() {
             val w = abs(it.x - shiftX)
             val h = abs(it.y - shiftY)
 
-            clearText()
-            val gc = textLayer.graphicsContext2D
-            gc.lineWidth = 2.0 / scale
-            gc.stroke = Color.BLACK
-            gc.strokeRect(x, y, w, h)
+            canvas.clearGraphicContext()
+            canvas.graphicsContext2D.lineWidth = 2.0 / scale
+            canvas.graphicsContext2D.stroke = Color.BLACK
+            canvas.graphicsContext2D.strokeRect(x, y, w, h)
         }
         root.addEventHandler(MouseEvent.MOUSE_RELEASED) {
             if (selecting) {
-                clearText()
+                canvas.clearGraphicContext()
 
                 val shiftPercentX = shiftX / image.width
                 val shiftPercentY = shiftY / image.height
@@ -523,7 +530,6 @@ class CLabelPane : ScrollPane() {
         }
         root.addEventHandler(MouseEvent.MOUSE_EXITED) {
             root.cursor = commonCursor
-            clearText()
         }
 
         // Handle
@@ -595,20 +601,27 @@ class CLabelPane : ScrollPane() {
                 .property(TransGroup::colorHexProperty)
                 .transform(Color::web)
             )
+
+            // Tooltip
+            tooltip = Tooltip().apply {
+                isWrapText = true
+                font = font.s(24.0)
+                textProperty().bind(transLabel.textProperty())
+
+                // We show and hide it manually
+                showDelay = Duration.INDEFINITE
+                hideDelay = Duration.INDEFINITE
+                showDuration = Duration.INDEFINITE
+            }
         }
 
-        // Tooltip
-        label.tooltip = Tooltip().apply {
-            isWrapText = true
-            font = font.s(24.0)
-            textProperty().bind(transLabel.textProperty())
-
-            // We show and hide it manually
-            showDelay = Duration.INDEFINITE
-            hideDelay = Duration.INDEFINITE
-            showDuration = Duration.INDEFINITE
+        // Hide text
+        label.addEventHandler(MouseEvent.MOUSE_DRAGGED) {
+            canvas.clearGraphicContext()
+            label.tooltip.hide()
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
+            canvas.clearGraphicContext()
             label.tooltip.hide()
         }
 
@@ -630,9 +643,6 @@ class CLabelPane : ScrollPane() {
             it.consume() // make sure root will not move together
 
             dragging = true
-
-            // Clear all texts when dragging
-            clearText()
 
             val newAnchorX = shiftX + it.sceneX / scale
             val newAnchorY = shiftY + it.sceneY / scale
@@ -673,12 +683,12 @@ class CLabelPane : ScrollPane() {
         }
         label.addEventHandler(MouseEvent.MOUSE_EXITED) {
             label.cursor = commonCursor
-            clearText()
         }
 
         // Event handle
         // FIXME: Event doesn't dispatch if mouse is still but by scrolling the pointer moves on it
         // I know the Mouse_Moved event is dispatched when the mouse actually moves, but I want this happen, too.
+        // see https://stackoverflow.com/questions/72169918/how-to-capture-the-event-when-node-moves-under-the-stand-still-mouse
         label.setOnMouseMoved {
             // Mark immediately when this event will be consumed
             it.consume() // disable further propagation
@@ -695,20 +705,26 @@ class CLabelPane : ScrollPane() {
             // Mark immediately when this event will be consumed
             it.consume() // disable further propagation
 
-            if (it.button == MouseButton.PRIMARY) {
-                fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
-                    it, transLabel.index,
-                    label.anchorX + it.x,
-                    label.anchorY + it.y,
-                    Double.NaN, Double.NaN
-                ))
-            } else if (it.button == MouseButton.SECONDARY) {
-                fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
-                    it, transLabel.index,
-                    label.anchorX + it.x,
-                    label.anchorY + it.y,
-                    Double.NaN, Double.NaN
-                ))
+            when (it.button) {
+                MouseButton.PRIMARY -> {
+                    fireEvent(LabelEvent(LabelEvent.LABEL_CLICK,
+                        it, transLabel.index,
+                        label.anchorX + it.x,
+                        label.anchorY + it.y,
+                        Double.NaN, Double.NaN
+                    ))
+                }
+                MouseButton.SECONDARY -> {
+                    fireEvent(LabelEvent(LabelEvent.LABEL_REMOVE,
+                        it, transLabel.index,
+                        label.anchorX + it.x,
+                        label.anchorY + it.y,
+                        Double.NaN, Double.NaN
+                    ))
+                }
+                else -> {
+                    doNothing()
+                }
             }
         }
 
@@ -738,22 +754,20 @@ class CLabelPane : ScrollPane() {
     // Text rendering
 
     /**
-     * Clear all the texts that are displaying
-     */
-    fun clearText() {
-        textLayer.graphicsContext2D.clearRect(0.0, 0.0, textLayer.width, textLayer.height)
-    }
-    /**
-     * Create some text at the given coordinate
+     * Create some text at the given position
      * @param text Text to display
      * @param color Color of the text
      * @param x X coordinate where the text will be displayed, based on the image width
-     * @param y Y coordinate where the text will be displayed, based on the image width
+     * @param y Y coordinate where the text will be displayed, based on the image height
      */
-    fun createText(text: String, color: Color, x: Double, y: Double) {
+    fun showText(text: String, color: Color, x: Double, y: Double) {
+        val gc = canvas.graphicsContext2D
+
+        // Clear
+        gc.clearRect(0.0, 0.0, canvas.width, canvas.height)
+
         val s = shortenWideText(shortenLongText(text), (image.width - 2 * (SHIFT_X + TEXT_INSET)) / 2, TEXT_FONT)
         val t = Text(s).apply { font = TEXT_FONT }
-        val gc = textLayer.graphicsContext2D
 
         val textW = t.boundsInLocal.width
         val textH = t.boundsInLocal.height
@@ -787,17 +801,26 @@ class CLabelPane : ScrollPane() {
     }
 
     /**
-     * Show TransLabel's Text
-     * TODO: Change x & y
-     * @param x X corrdinate based on screen
-     * @param y X corrdinate based on screen
+     * Show TransLabel's Text at the give position
+     * @param x X coordinate where the text will be displayed, based on the image width
+     * @param y Y coordinate where the text will be displayed, based on the image height
      */
     fun showLabelText(labelIndex: Int, x: Double, y: Double) {
         val label = labelNodes.first { it.index == labelIndex }
-        label.tooltip.show(label, x, y)
+
+        val screenBounds = root.localToScreen(root.boundsInLocal)
+        label.tooltip.show(root,
+            screenBounds.minX + x * scale + 8,
+            screenBounds.minY + y * scale + 8,
+        )
     }
-    fun hideLabelText() {
-        for (node in labelNodes) node.tooltip.hide()
+
+    /**
+     * Clear all displaying text
+     */
+    fun clearAllText() {
+        canvas.clearGraphicContext()
+        for (label in labelNodes) if (label.tooltip.isShowing) label.tooltip.hide()
     }
 
     // Layout position

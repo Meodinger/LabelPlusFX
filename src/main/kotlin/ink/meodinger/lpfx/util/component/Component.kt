@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.util.component
 
 import javafx.event.ActionEvent
+import javafx.scene.canvas.Canvas
 import javafx.scene.control.Button
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TextFormatter
@@ -37,6 +38,13 @@ inline infix fun MenuItem.does(crossinline onAction: MenuItem.(ActionEvent) -> U
  */
 fun <T : Stage> T.closeOnEscape() {
     addEventFilter(KeyEvent.KEY_PRESSED) { if (it.code == KeyCode.ESCAPE) close() }
+}
+
+/**
+ * Clear canvas
+ */
+fun Canvas.clearGraphicContext() {
+    graphicsContext2D.clearRect(0.0, 0.0, width, height)
 }
 
 /**

@@ -594,9 +594,12 @@ class Controller(private val state: State) {
 
             val number = code.char.toInt()
             if (numberBuilder.isEmpty()) {
+                // Not parsing
                 if (number == 0) {
+                    // Start parse
                     numberBuilder.append(0)
                 } else if (number in 1..state.transFile.groupCount) {
+                    // Try select
                     val index = number - 1
                     if (state.viewMode == ViewMode.GroupMode) {
                         cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
@@ -607,15 +610,18 @@ class Controller(private val state: State) {
                     doNothing()
                 }
             } else {
+                // Parsing
                 numberBuilder.append(number)
                 val index = numberBuilder.toString().toInt() - 1
                 if (index in 0 until state.transFile.groupCount) {
+                    // Try select
                     if (state.viewMode == ViewMode.GroupMode) {
                         cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
                     } else {
                         state.currentGroupId = index
                     }
                 } else {
+                    // Reset
                     numberBuilder.clear()
                     if (number == 0) numberBuilder.append(0)
                 }
@@ -637,15 +643,7 @@ class Controller(private val state: State) {
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
-        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
-            when (it.code) {
-                KeyCode.LEFT  -> cPicBox.back()
-                KeyCode.RIGHT -> cPicBox.next()
-                else -> return@handler
-            }
-
-            it.consume() // Consume used event
-        }
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
         Logger.info("Transformed Ctrl + Left/Right", "Controller")
 
         /**
@@ -657,16 +655,13 @@ class Controller(private val state: State) {
             cTreeView.getTreeItem(from).apply { this?.expand() }
 
             var index = from
-            var item: TreeItem<String>?
-            do {
+            while (true) {
+                val item = cTreeView.getTreeItem(index) ?: return NOT_FOUND
+                if (item is CTreeLabelItem) return index
+
+                item.expand()
                 index += direction
-                item = cTreeView.getTreeItem(index)
-                item?.expand()
-
-                if (item == null) return NOT_FOUND
-            } while (item !is CTreeLabelItem)
-
-            return index
+            }
         }
 
         // Transform Ctrl + Up/Down KeyEvent to CTreeView select (and have effect: move to label)
@@ -683,23 +678,16 @@ class Controller(private val state: State) {
             // Mark immediately when this event will be consumed
             it.consume() // disable further propagation
 
-            var itemIndex: Int = cTreeView.selectionModel.selectedIndex + itemShift
-            var item: TreeItem<String>? = cTreeView.getTreeItem(itemIndex)
-            while (item !is CTreeLabelItem) {
+            var itemIndex = getNextLabelItemIndex(cTreeView.selectionModel.selectedIndex, itemShift)
+            if (itemIndex == NOT_FOUND) {
                 // if selected first and try getting previous, return last;
                 // if selected last and try getting next, return first;
-                itemIndex = getNextLabelItemIndex(
-                    if (itemShift == -1)
-                        if (itemIndex != NOT_FOUND) itemIndex else cTreeView.expandedItemCount
-                    else
-                        if (itemIndex != NOT_FOUND) itemIndex else 0
-                , itemShift)
-                item = cTreeView.getTreeItem(itemIndex)
+                itemIndex = getNextLabelItemIndex(if (itemShift == -1) cTreeView.expandedItemCount else 0, itemShift)
             }
+            val item = cTreeView.getTreeItem(itemIndex) as CTreeLabelItem
 
-            val labelItem = item!! as CTreeLabelItem
-            cLabelPane.moveToLabel(labelItem.index)
-            cTreeView.selectLabel(labelItem.index, clear = true, scrollTo = true)
+            cLabelPane.moveToLabel(item.index)
+            cTreeView.selectLabel(item.index, clear = true, scrollTo = true)
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)

@@ -132,20 +132,14 @@ class FormatChecker(private val state: State) : Stage() {
 
         for (picName in state.transFile.sortedPicNames) {
             for (label in state.transFile.getTransList(picName)) {
-                var start = 0
-
-                var found: Boolean
-                while (true) {
-                    found = false
-                    for (typo in TypoList) {
-                        val result = typo.regex.find(label.text, start) ?: continue
-
-                        found = true
+                for (typo in TypoList) {
+                    var index = 0
+                    var result: MatchResult
+                    while (true) {
+                        result = typo.regex.find(label.text, index) ?: break
                         typoList.add(TypoInfo(picName, label.index, typo))
-                        start = result.range.last
-                        break
+                        index = result.range.last
                     }
-                    if (!found) break
                 }
             }
         }

@@ -76,7 +76,7 @@ fun main(vararg args: String) {
             contentPane.layout = BorderLayout()
             contentPane.add(JPanel().apply {
                 add(JLabel("Something Fatal Happened", JLabel.CENTER))
-                add(JLabel("Please Contact Meodinger For Help", JLabel.CENTER))
+                add(JLabel("Please Contact Meodinger (meodinger@qq.com) For Help", JLabel.CENTER))
             }, BorderLayout.CENTER)
             pack()
 

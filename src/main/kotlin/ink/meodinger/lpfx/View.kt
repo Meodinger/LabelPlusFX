@@ -11,6 +11,7 @@ import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.image.resizeByRadius
+import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.deleteTrailing
 import ink.meodinger.lpfx.util.string.emptyString
@@ -74,14 +75,14 @@ class View(private val state: State) : BorderPane() {
     val bSwitchViewMode: Button = Button()
 
     /**
-     * StatsBar label: location
-     */
-    val lLocation: Label = Label()
-
-    /**
      * StatsBar label: backup information
      */
     val lBackup: Label = Label()
+
+    /**
+     * StatsBar label: location
+     */
+    val lLocation: Label = Label()
 
     /**
      * StatsBar label: accumulate editing time
@@ -117,6 +118,10 @@ class View(private val state: State) : BorderPane() {
      * TransArea, edit label's text
      */
     val cTransArea: CLigatureArea = CLigatureArea()
+
+    // Private Components
+    private val cTreeMenu: CTreeMenu = CTreeMenu(state, cTreeView)
+    private var statsBar: HBox by once()
 
     // endregion
 
@@ -325,7 +330,9 @@ class View(private val state: State) : BorderPane() {
         }
         center(SplitPane()) {
             add(BorderPane()) {
-                top(cGroupBar)
+                top(cGroupBar) {
+                    setOnGroupCreate { cTreeMenu.triggerGroupCreate() }
+                }
                 center(cLabelPane) {
                     initScale = SCALE_INIT
                     minScale = SCALE_MIN
@@ -400,7 +407,7 @@ class View(private val state: State) : BorderPane() {
                         }
                     }
                     center(cTreeView) {
-                        contextMenu = CTreeMenu(state, this)
+                        contextMenu = cTreeMenu
                         disableProperty().bind(!state.openedProperty())
                     }
                 }
@@ -421,8 +428,7 @@ class View(private val state: State) : BorderPane() {
 
             dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         }
-
-        val statsBar = HBox().apply {
+        bottom(HBox()) {
             val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
             add(HBox()) {
                 hgrow = Priority.ALWAYS
@@ -451,8 +457,11 @@ class View(private val state: State) : BorderPane() {
                 prefWidth = 180.0
                 text = String.format(I18N["stats.accumulator.s"], "--:--:--")
             }
+
+            statsBar = this
         }
 
+        if (!Preference.isShowStatsBar) children.remove(statsBar)
         Preference.showStatsBarProperty().addListener(onNew {
             if (it) bottom(statsBar) else children.remove(statsBar)
         })

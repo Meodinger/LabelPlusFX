@@ -60,7 +60,7 @@ class CLabelPane : ScrollPane() {
      * of a MouseEvent, but provides more information about the label related.
      *
      * @param eventType Type of the LabelEvent
-     * @param source MouseEvent that produces the LabelEvent
+     * @param sourceEvent MouseEvent that produces the LabelEvent
      * @param labelIndex Index of the related label
      * @param displayX X coordinate based on the displaying image
      * @param displayY Y coordinate based on the displaying image
@@ -75,7 +75,7 @@ class CLabelPane : ScrollPane() {
      */
     class LabelEvent(
         eventType: EventType<LabelEvent>,
-        val source: MouseEvent,
+        val sourceEvent: MouseEvent,
         val labelIndex: Int,
         val displayX: Double,
         val displayY: Double,
@@ -87,7 +87,7 @@ class CLabelPane : ScrollPane() {
             /**
              * Root type of all LabelEventType
              */
-            val LABEL_ANY   : EventType<LabelEvent> = EventType(EventType.ROOT, "LABEL_ANY")
+            val LABEL_ANY : EventType<LabelEvent> = EventType(EventType.ROOT, "LABEL_ANY")
 
             /**
              * Indicate should create a label. `labelIndex` will be NOT_FOUND
@@ -95,7 +95,7 @@ class CLabelPane : ScrollPane() {
              * will be the coordinate of the label which will be created.
              * @see LabelEvent
              */
-            val LABEL_CREATE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CREATE")
+            val LABEL_CREATE : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_CREATE")
 
             /**
              * Incicate shoule remove a label. `labelIndex` will be the target
@@ -103,7 +103,7 @@ class CLabelPane : ScrollPane() {
              * they are useless here and should not make distraction.
              * @see LabelEvent
              */
-            val LABEL_REMOVE: EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_REMOVE")
+            val LABEL_REMOVE : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_REMOVE")
 
             /**
              * Incicate we are hovering on a label. `labelIndex` will be the target
@@ -128,7 +128,7 @@ class CLabelPane : ScrollPane() {
              * when we have finished moving a label.
              * @see LabelEvent
              */
-            val LABEL_MOVE  : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_MOVE")
+            val LABEL_MOVE : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_MOVE")
 
             /**
              * Incicate shoule remove a label. `labelIndex` will be NOT_FOUND
@@ -138,6 +138,11 @@ class CLabelPane : ScrollPane() {
              */
             val LABEL_OTHER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_OTHER")
         }
+
+        override fun toString(): String {
+            return "LabelEvent(type=$eventType, labelIndex=$labelIndex, displayX=$displayX, displayY=$displayY, labelX=$labelX, labelY=$labelY, button=${sourceEvent.button})"
+        }
+
     }
 
     // endregion

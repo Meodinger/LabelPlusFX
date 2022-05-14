@@ -106,6 +106,10 @@ object Logger {
         writer.write(log)
         writer.flush()
     }
+
+    fun debug(anything: Any?, from: String) {
+        debug(anything.toString(), from)
+    }
     fun debug(message: String, from: String) {
         log(LogLevel.DEBUG, message, from)
     }

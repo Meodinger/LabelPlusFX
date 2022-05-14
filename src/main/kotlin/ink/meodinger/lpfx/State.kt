@@ -181,7 +181,7 @@ class State {
     /**
      * @see undoableProperty
      */
-    val undoable: Boolean by canUndoProperty
+    val isUndoable: Boolean by canUndoProperty
 
     private val redoableProperty: BooleanProperty = SimpleBooleanProperty(false)
     /**
@@ -191,7 +191,7 @@ class State {
     /**
      * @see redoableProperty
      */
-    val redoable: Boolean by redoableProperty
+    val isRedoable: Boolean by redoableProperty
 
     /**
      * Do an action
@@ -208,28 +208,24 @@ class State {
     }
 
     /**
-     * Revert the last action if [undoable]
+     * Revert the last action if [isUndoable]
      */
     fun undo() {
-        if (!undoable) return
+        if (!isUndoable) return
 
-        Logger.info("Action reverting", "State")
         redoStack.push(undoStack.pop().apply(Action::revert))
-        Logger.info("Action reverted", "State")
 
         canUndoProperty.set(!undoStack.isEmpty())
         redoableProperty.set(true)
     }
 
     /**
-     * Redo (re-commit) the last reverted action if [redoable]
+     * Redo (re-commit) the last reverted action if [isRedoable]
      */
     fun redo() {
-        if (!redoable) return
+        if (!isRedoable) return
 
-        Logger.info("Action re-committing", "State")
         undoStack.push(redoStack.pop().apply(Action::commit))
-        Logger.info("Action re-committed", "State")
 
         canUndoProperty.set(true)
         redoableProperty.set(!redoStack.isEmpty())

@@ -50,34 +50,36 @@ const val GENERAL_ICON_RADIUS: Double = 32.0
 /**
  * Icon Image for LPFX
  */
-val ICON: Image = loadAsImage("/file/image/icon.png")
+val ICON: Image by lazy { loadAsImage("/file/image/icon.png") }
 
 /**
  * Image indicates CONFIRM
  */
-val IMAGE_CONFIRM: Image = loadAsImage("/file/image/dialog/Confirm.png")
+val IMAGE_CONFIRM: Image by lazy { loadAsImage("/file/image/dialog/Confirm.png") }
 /**
  * Image indicates INFORMATION
  */
-val IMAGE_INFO   : Image = loadAsImage("/file/image/dialog/Info.png")
+val IMAGE_INFO   : Image by lazy { loadAsImage("/file/image/dialog/Info.png") }
 /**
  * Image indicates WARNING
  */
-val IMAGE_WARNING: Image = loadAsImage("/file/image/dialog/Alert.png")
+val IMAGE_WARNING: Image by lazy { loadAsImage("/file/image/dialog/Alert.png") }
 /**
  * Image indicates ERROR
  */
-val IMAGE_ERROR  : Image = loadAsImage("/file/image/dialog/Error.png")
+val IMAGE_ERROR  : Image by lazy { loadAsImage("/file/image/dialog/Error.png") }
 
 /**
  * The initial dafault image for LabelPane. This image should not
  * larger than 480x480 to have best view.
  */
-val INIT_IMAGE: Image = Config.workingDir.resolve("init-image.png")
-    .takeIf(File::exists)?.let {
-        Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
-            ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
-    } ?: loadAsImage("/file/image/init_image.png")
+val INIT_IMAGE: Image by lazy {
+    Config.workingDir.resolve("init-image.png")
+        .takeIf(File::exists)?.let {
+            Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
+                ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
+        } ?: loadAsImage("/file/image/init_image.png")
+}
 
 /**
  * Sample Image for label propertis preview

@@ -69,11 +69,10 @@
             <version>2.0.1</version>
         </dependency>
 
-        <!-- Will be replaced by Jsoup in some time -->
         <dependency>
-            <groupId>com.github.meodinger</groupId>
-            <artifactId>htmlparser</artifactId>
-            <version>0.0.1</version>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.14.3-module</version>
         </dependency>
 
         <!-- JSON -->

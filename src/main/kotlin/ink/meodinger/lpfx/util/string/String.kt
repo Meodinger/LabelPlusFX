@@ -24,3 +24,13 @@ fun Char.repeat(n: Int): String = toString().repeat(n)
  * Remove end-of-line in the String
  */
 fun String.replaceEOL(replacement: String = "\\n"): String = replace("\n", replacement)
+
+/**
+ * Alias for replace(..., "")
+ */
+fun String.remove(regex: Regex): String = replace(regex, "")
+
+/**
+ * Alias for replace(..., "")
+ */
+fun String.remove(text: String): String = replace(text, "")

@@ -1,7 +1,5 @@
 package ink.meodinger.lpfx.component.tools
 
-import ink.meodinger.htmlparser.HNode
-import ink.meodinger.htmlparser.parse
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CTextFlow
 import ink.meodinger.lpfx.component.dialog.showException
@@ -12,8 +10,11 @@ import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
+import ink.meodinger.lpfx.util.string.remove
 import ink.meodinger.lpfx.util.translator.translateJP
 
+import org.jsoup.Jsoup
+import org.jsoup.nodes.TextNode
 import javafx.application.Platform
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -47,21 +48,13 @@ import javax.net.ssl.HttpsURLConnection
 class OnlineDict : Stage() {
 
     companion object {
-        private const val JD_SITE = "https://nekodict.com"
-        private const val JD_API  = "https://nekodict.com/words?q="
+        // Maybe: Take back Neko-Dict
+        // private const val NEKO_SITE = "https://nekodict.com"
+        // private const val NEKO_API  = "https://nekodict.com/words?q="
+
+        private const val WEBLIO_API  = "https://www.weblio.jp/content/"
 
         private const val FONT_SIZE = 16.0
-
-        private fun HNode.isWordExplanation() = attributes["class"]?.startsWith("my-4 p-3") ?: false
-        private fun HNode.isWordSentence() = attributes["class"]?.startsWith("sentence-block") ?: false
-        private fun HNode.jpText(): String {
-            val builder = StringBuilder()
-            for (node in children) {
-                if (node is HNode.HText) builder.append(node.text)
-                if (node.nodeType == "ruby") for (n in node.children) if (n is HNode.HText) builder.append(n.text)
-            }
-            return builder.toString()
-        }
     }
 
     private enum class TransState { WORD, SENTENCE; }
@@ -123,7 +116,7 @@ class OnlineDict : Stage() {
                         outputFlow.setText(I18N["dict.fetching"], FONT_SIZE)
                         outputFlow.flow()
                         when (transState) {
-                            TransState.WORD -> searchWord(text)
+                            TransState.WORD -> searchWeblio(text)
                             TransState.SENTENCE -> translate(text)
                         }
                     }
@@ -155,74 +148,79 @@ class OnlineDict : Stage() {
         closeOnEscape()
     }
 
-    private fun searchWordSync(word: String) {
+    private fun searchWeblioSync(word: String) {
         // URL encode the word to make sure we search the correct thing
-        val searchURL = JD_API + URLEncoder.encode(word, StandardCharsets.UTF_8)
-        Logger.debug("Dictionary: Fetching URL $searchURL", "Dictionary")
-        val searchConnection = URL(searchURL).openConnection().apply { connect() } as HttpsURLConnection
-        if (searchConnection.responseCode != 200) {
-            Logger.debug(searchConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
-            outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
+        val weblioURL = WEBLIO_API + URLEncoder.encode(word, StandardCharsets.UTF_8)
+        Logger.debug("Dictionary: Fetching URL $weblioURL", "Dictionary")
+        val weblioConnection = URL(weblioURL).openConnection().apply { connect() } as HttpsURLConnection
+        if (weblioConnection.responseCode != 200) {
+            Logger.debug(weblioConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
+            outputFlow.setText(String.format(I18N["dict.search_error.i"], weblioConnection.responseCode))
             return
         }
-        val searchHTML = searchConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
-            Logger.debug("Dictionary: Got HTML content:", "Dictionary")
-            Logger.debug(it, "Dictionary")
-        }
-        val searchPage = parse(searchHTML)
-        val searchResults = searchPage.body.children[1].children[3]
+        val weblioHTML = weblioConnection.inputStream.reader(StandardCharsets.UTF_8).readText()
+        val weblioPage = Jsoup.parse(weblioHTML)
 
-        // Look for detail information
-        val first = searchResults.children.getOrNull(0)
-        if (first == null || first.attributes["id"] == "out-search") {
-            outputFlow.setText(I18N["dict.not_found"])
+        val notfound = weblioPage.selectXpath("//div[@id=\"nrCntTH\"]/p/text()")
+        if (notfound.isNotEmpty()) {
+            outputFlow.clear()
+            outputFlow.appendLine(notfound[0].text())
             return
         }
 
-        // Go to the content page
-        val contentURL = JD_SITE + first.attributes["href"]
-        Logger.debug("Dictionary: Fetching URL $contentURL", "Dictionary")
-        val contentConnection = URL(contentURL).openConnection().apply { connect() } as HttpsURLConnection
-        if (contentConnection.responseCode != 200) {
-            Logger.debug(contentConnection.errorStream.reader(StandardCharsets.UTF_8).readText(), "Dictionary")
-            outputFlow.setText(String.format(I18N["dict.search_error.i"], searchConnection.responseCode))
-            return
-        }
-        val contentHTML = contentConnection.inputStream.reader(StandardCharsets.UTF_8).readText().also {
-            Logger.debug("Dictionary: Got HTML content:", "Dictionary")
-            Logger.debug(it, "Dictionary")
-        }
-        val contentPage = parse(contentHTML.replace("</body>", "</div></body>")) // ContentHTML has unclosed div
-        val contentResults = contentPage.body.children[1].children[1].children[0].children
+        // to remove
+        val regexDocumentWrtie = Regex("(document.write\\()(.*)(\\);)") // In-dom js
+        val regexUselessSource = Regex("(\u51fa\u5178)(.*)(\\))") // Useless Souce
+        val regexKanjiCafeSource = Regex("(\u203b\u3054\u5229\u7528)(.*)(Cafe.)") // Kanji Cafe Source
+        // to replace
+        val regexNumber = Regex("[\uFF10-\uFF19]+ ") // Full-Width 0-9
+        val regexEnglish = Regex(" [a-zA-Z]+ ") // English with trailing whitespace
+        val regexEnglishDot = Regex("[a-zA-Z]+, ") // English with trailing dot
+        val regexWhitespace = Regex("( )+") // Multi whitespace
+        val regexMultiNewLine = Regex("(\n)+") // Multi new line
 
-        // Build WordInfo
-        var nodeIndex = 0
-        var explanationIndex = 1
+        val sourceList = weblioPage.selectXpath("//div[@class=\"pbarTL\"]").map { it.wholeText().trim() }
+        val definationList = weblioPage.selectXpath("//div[@class=\"kiji\"]").map {
+            // Example sentences
+            if (it.children()[1].hasClass("Wnryj")) {
+                return@map it.children()[1].children()[0].children().mapIndexed { index, element ->
+                    "${index + 1}.${element.wholeText()}"
+                }.joinToString("\n\u3000")
+            }
+
+            it.selectXpath("//br").forEach { element -> element.replaceWith(TextNode(" ")) }
+            var text = it.wholeText()
+                .remove(regexDocumentWrtie)
+                .remove(regexUselessSource)
+                .remove(regexKanjiCafeSource)
+
+            regexNumber.findAll(text).toList().reversed().forEach { result ->
+                text = text.replaceRange(result.range, result.value.dropLast(1).plus("."))
+            }
+            regexEnglish.findAll(text).toList().reversed().forEach { result ->
+                text = text.replaceRange(result.range, result.value.drop(1).dropLast(1))
+            }
+            regexEnglishDot.findAll(text).toList().reversed().forEach { result ->
+                text = text.replaceRange(result.range, result.value.dropLast(1))
+            }
+
+            text.replace(regexWhitespace, "\n").replace(regexMultiNewLine, "\n\u3000").trim()
+        }
 
         outputFlow.clear()
-        outputFlow.appendLine("$word : ${(contentResults[2].children[0].children[0] as HNode.HText).text}", bold = true)
-        while (nodeIndex < contentResults.size) {
-            val node = contentResults[nodeIndex++]
-            if (!node.isWordExplanation()) continue
-
-            outputFlow.appendLine()
-            outputFlow.appendLine("<${explanationIndex++}> ${(node.children[0].children[0] as HNode.HText).text}")
-            while (nodeIndex < contentResults.size && contentResults[nodeIndex].isWordSentence()) {
-                val sentenceNode = contentResults[nodeIndex].children[0].children[0]
-                outputFlow.appendLine("  ${sentenceNode.children[0].jpText().trim()}", color = Color.RED)
-                outputFlow.appendLine("    ${(sentenceNode.children[1].children[0] as HNode.HText).text.trim()}", color = Color.BLUE)
-                nodeIndex++
-            }
+        for ((source, defination) in sourceList.zip(definationList)) {
+            outputFlow.appendLine(source, bold = true)
+            outputFlow.appendText("\u3000$defination\n\n")
         }
     }
-    private fun searchWord(word: String) {
-        LPFXTask.createTask<Unit> { searchWordSync(word) }.apply {
+    private fun searchWeblio(word: String) {
+        LPFXTask.createTask<Unit> { searchWeblioSync(word) }.apply {
             setOnSucceeded {
-                Logger.info("Dictionary: Fetched word info: $word", "Dictionary")
+                Logger.info("Dictionary: Fetched weblio info: $word", "Dictionary")
                 Platform.runLater { outputFlow.flow() }
             }
             setOnFailed {
-                Logger.error("Dictionary: Fetch word info failed", "Dictionary")
+                Logger.error("Dictionary: Fetch weblio info failed", "Dictionary")
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
                 showException(null, it)

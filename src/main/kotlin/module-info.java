@@ -14,7 +14,7 @@ module lpfx {
     // Mail
     requires jakarta.mail;
     // HTML Parser
-    requires ink.meodinger.htmlparser;
+    requires org.jsoup;
     // JSON
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;

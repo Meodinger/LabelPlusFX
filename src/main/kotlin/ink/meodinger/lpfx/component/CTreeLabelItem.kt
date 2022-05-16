@@ -39,15 +39,33 @@ class CTreeLabelItem(
     // region Properties
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(labelIndex)
+    /**
+     * The index of the TransLabel which this item stands for
+     */
     fun indexProperty(): IntegerProperty = indexProperty
+    /**
+     * @see indexProperty
+     */
     var index: Int by indexProperty
 
     private val textProperty: StringProperty = SimpleStringProperty(labelText)
+    /**
+     * The text of the TransLabel which this item stands for
+     */
     fun textProperty(): StringProperty = textProperty
+    /**
+     * @see textProperty
+     */
     var text: String by textProperty
 
     private val colorProperty: ObjectProperty<Color?> = SimpleObjectProperty(labelColor)
+    /**
+     * The color of the TransLabel's group which this item stands for
+     */
     fun colorProperty(): ObjectProperty<Color?> = colorProperty
+    /**
+     * @see colorProperty
+     */
     var color: Color? by colorProperty
 
     // endregion

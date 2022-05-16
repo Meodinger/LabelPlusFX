@@ -239,6 +239,10 @@ class CTreeView: TreeView<String>() {
         if (scrollTo) scrollTo(getRow(items.first()))
     }
 
+    /**
+     * Request the TreeView to re-render. This function is useful
+     * when some labels' group change in IndexMode.
+     */
     fun requestUpdate() { update() }
 
 }

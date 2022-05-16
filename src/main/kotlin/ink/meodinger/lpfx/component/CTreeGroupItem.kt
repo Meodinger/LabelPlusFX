@@ -35,11 +35,23 @@ class CTreeGroupItem(
     // region Properties
 
     private val nameProperty: StringProperty = SimpleStringProperty(groupName)
+    /**
+     * The name of the TransGroup which this item stands for
+     */
     fun nameProperty(): StringProperty = nameProperty
+    /**
+     * @see nameProperty
+     */
     var name: String by nameProperty
 
     private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(groupColor)
+    /**
+     * The color of the TransGroup which this item stands for
+     */
     fun colorProperty(): ObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
     var color: Color by colorProperty
 
     // endregion

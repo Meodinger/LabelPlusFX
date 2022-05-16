@@ -257,12 +257,25 @@ class CTreeMenu(
         })
     }
 
+    /**
+     * Trigger group-create action
+     */
     fun triggerGroupCreate() {
         rAddGroupItem.fire()
     }
+
+    /**
+     * Trigger group-rename action
+     * @param groupName Target group name
+     */
     fun triggerGroupRename(groupName: String) {
         gRenameItem.onAction.handle(ActionEvent(groupName, null))
     }
+
+    /**
+     * Trigger group-delete action
+     * @param groupName Target group name
+     */
     fun triggerGroupDelete(groupName: String) {
         gDeleteItem.onAction.handle(ActionEvent(groupName, null))
     }

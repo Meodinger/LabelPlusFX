@@ -139,6 +139,9 @@ class CLabelPane : ScrollPane() {
             val LABEL_OTHER : EventType<LabelEvent> = EventType(LABEL_ANY, "LABEL_OTHER")
         }
 
+        /**
+         * @see Event.toString
+         */
         override fun toString(): String {
             return "LabelEvent(type=$eventType, labelIndex=$labelIndex, displayX=$displayX, displayY=$displayY, labelX=$labelX, labelY=$labelY, button=${sourceEvent.button})"
         }
@@ -361,7 +364,13 @@ class CLabelPane : ScrollPane() {
     // region Properties:Selection
 
     private val selectedLabelsProperty: SetProperty<Int> = SimpleSetProperty(FXCollections.observableSet(HashSet()))
+    /**
+     * Press right-button of the mouse and drag to box-select some labels
+     */
     fun selectedLabelsProperty(): ReadOnlySetProperty<Int> = selectedLabelsProperty
+    /**
+     * @see selectedLabelsProperty
+     */
     val selectedLabels: Set<Int> by selectedLabelsProperty
     private var selectedIndices: ObservableSet<Int> by selectedLabelsProperty
 

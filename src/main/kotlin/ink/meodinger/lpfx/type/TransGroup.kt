@@ -68,34 +68,13 @@ class TransGroup @JsonCreator constructor(
 
     // endregion
 
-    init {
-        this.name = name
-        this.colorHex = colorHex
-    }
-
-    override operator fun equals(other: Any?): Boolean {
-        if (this === other) return true
-
-        if (other == null) return false
-        if (other !is TransGroup) return false
-        if (other.hashCode() != hashCode()) return false
-
-        if (name != other.name) return false
-        if (colorHex != other.colorHex) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + colorHex.hashCode()
-        return result
-    }
-
     override fun toString(): String = "TransGroup(name=$name, color=$colorHex)"
 
-    // ----- Destruction----- //
+    // region Destruction
 
     operator fun component1(): String = name
     operator fun component2(): String = colorHex
+
+    // endregion
 
 }

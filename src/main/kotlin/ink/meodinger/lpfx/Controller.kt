@@ -34,7 +34,6 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.*
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
 import javafx.stage.DirectoryChooser
 import java.io.File
 import java.io.FileInputStream
@@ -255,11 +254,18 @@ class Controller(private val state: State) {
         }
         Logger.info("Registered Drag and Drop", "Controller")
 
-        // Disable mnemonic parsing in TransArea
-        cTransArea.addEventFilter(KeyEvent.ANY) {
-            if (it.code == KeyCode.ALT) it.consume()
+        // Register Alt/Meta + X to mark/unmark Label
+        val markHandler = EventHandler<KeyEvent> {
+            if ((it.isAltDown || it.isMetaDown) && it.code == KeyCode.X) {
+                if (state.isOpened && state.currentLabelIndex != NOT_FOUND) {
+                    val transLabel = state.transFile.getTransLabel(state.currentPicName, state.currentLabelIndex)
+                    transLabel.isMarked = !transLabel.isMarked
+                }
+            }
         }
-        Logger.info("Registered CTransArea mnemonic parsing", "Controller")
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, markHandler)
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, markHandler)
+        Logger.info("Registered Ctrl/Meta + X mark/unmark TransLabel", "Controller")
 
         // Register Alias & Global redo/undo in TransArea
         cTransArea.addEventFilter(KeyEvent.KEY_PRESSED) {
@@ -345,7 +351,7 @@ class Controller(private val state: State) {
                 WorkMode.LabelMode -> {
                     val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
                     val transGroup = state.transFile.getTransGroup(transLabel.groupId)
-                    cLabelPane.showText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
+                    cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
         }
@@ -379,7 +385,7 @@ class Controller(private val state: State) {
                     if (state.currentGroupId == NOT_FOUND) return@handler
 
                     val transGroup = state.transFile.getTransGroup(state.currentGroupId)
-                    cLabelPane.showText(transGroup.name, Color.web(transGroup.colorHex), it.displayX, it.displayY)
+                    cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
         }

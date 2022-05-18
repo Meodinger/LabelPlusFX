@@ -18,6 +18,7 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
+import javafx.beans.value.ChangeListener
 
 import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
@@ -392,7 +393,7 @@ class View(private val state: State) : BorderPane() {
                                             graphic = null
                                         } else {
                                             text = item.name
-                                            graphic = Circle(8.0, item.colorHex.let(Color::web))
+                                            graphic = Circle(8.0, item.color)
                                         }
                                     }
                                 }
@@ -411,6 +412,36 @@ class View(private val state: State) : BorderPane() {
                     center(cTreeView) {
                         contextMenu = cTreeMenu
                         disableProperty().bind(!state.openedProperty())
+
+                        setCellFactory { object : TreeCell<String>() {
+
+                            private var markListener: ChangeListener<Boolean> = onNew {
+                                textFill = if (it) Color.RED else Color.BLACK
+                            }
+
+                            init {
+                                this.textFillProperty()
+                                treeItemProperty().addListener { _, oldV, newV ->
+                                    if (oldV is CTreeLabelItem) oldV.markedProperty().removeListener(markListener)
+                                    if (newV is CTreeLabelItem) newV.markedProperty().addListener(markListener)
+                                }
+                            }
+
+                            override fun updateItem(item: String?, empty: Boolean) {
+                                super.updateItem(item, empty)
+
+                                val actualItem = treeItem
+                                if (item != null && !empty) {
+                                    text = item
+                                    graphic = actualItem.graphic
+                                    textFill = if (actualItem is CTreeLabelItem && actualItem.isMarked) Color.RED else Color.BLACK
+                                } else {
+                                    text = emptyString()
+                                    graphic = null
+                                    textFill = Color.BLACK
+                                }
+                            }
+                        } }
                     }
                 }
                 add(TitledPane()) {

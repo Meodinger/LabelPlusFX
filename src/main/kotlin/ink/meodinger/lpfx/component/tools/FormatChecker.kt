@@ -29,19 +29,19 @@ import javafx.stage.Stage
 
 class FormatChecker(private val state: State) : Stage() {
 
-    private data class Typo(val regex: Regex, val autofix: String, val description: String)
-    private data class TypoInfo(val picName: String, val labelIndex: Int, val typo: Typo)
+    private data class IllFormat(val regex: Regex, val autofix: String, val description: String)
+    private data class IllFormatInfo(val picName: String, val labelIndex: Int, val illFormat: IllFormat)
 
     companion object {
-        private val TypoList: List<Typo> = listOf(
-            Typo(Regex("\n(\n)+"), "\n", I18N["format.lines"]),
-            Typo(Regex("\\.(\\.)+"), "\u2026", I18N["format.dots"]),
-            Typo(Regex("\u3002(\u3002)+"), "\u2026", I18N["format.dots"]),
+        private val illFormatLists: List<IllFormat> = listOf(
+            IllFormat(Regex("\n(\n)+"), "\n", I18N["format.lines"]),
+            IllFormat(Regex("\\.(\\.)+"), "\u2026", I18N["format.dots"]),
+            IllFormat(Regex("\u3002(\u3002)+"), "\u2026", I18N["format.dots"]),
         )
     }
 
-    private val typoListProperty: ListProperty<TypoInfo> = SimpleListProperty(FXCollections.observableArrayList())
-    private val typoList: ObservableList<TypoInfo> by typoListProperty
+    private val illListProperty: ListProperty<IllFormatInfo> = SimpleListProperty(FXCollections.observableArrayList())
+    private val illList: ObservableList<IllFormatInfo> by illListProperty
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     private var index: Int by indexProperty
@@ -70,27 +70,27 @@ class FormatChecker(private val state: State) : Stage() {
                     String.format(
                         I18N["checker.label.iis"],
                         it + 1,
-                        typoList.size,
-                        typoList.getOrNull(it)?.typo?.description ?: emptyString()
+                        illList.size,
+                        illList.getOrNull(it)?.illFormat?.description ?: emptyString()
                     )
                 })
             }
             add(Button(I18N["checker.continue"]), 1, 1) {
                 gridHAlign = HPos.CENTER
-                disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
+                disableProperty().bind(indexProperty eq (illListProperty.sizeProperty() - 1))
 
                 does {
-                    if (index + 1 < typoList.size) index++
+                    if (index + 1 < illList.size) index++
                 }
             }
             add(Button(I18N["checker.autofix"]), 2, 1) {
                 gridHAlign = HPos.CENTER
-                disableProperty().bind(indexProperty eq (typoListProperty.sizeProperty() - 1))
+                disableProperty().bind(indexProperty eq (illListProperty.sizeProperty() - 1))
 
                 does {
-                    val typo = typoList[index].typo
-                    if (typo.regex.matches(state.view.cTransArea.selectedText)) {
-                        state.view.cTransArea.replaceSelection(typo.autofix)
+                    val illFormat = illList[index].illFormat
+                    if (illFormat.regex.matches(state.view.cTransArea.selectedText)) {
+                        state.view.cTransArea.replaceSelection(illFormat.autofix)
                     }
                 }
             }
@@ -105,13 +105,13 @@ class FormatChecker(private val state: State) : Stage() {
 
         indexProperty.addListener(onNew<Number, Int> {
             if (it == NOT_FOUND) return@onNew
-            val (picName, labelIndex, typo) = typoList[it]
+            val (picName, labelIndex, illFormat) = illList[it]
 
             val match =
                 if (state.currentPicName == picName && state.currentLabelIndex == labelIndex) {
-                    typo.regex.find(state.view.cTransArea.text, state.view.cTransArea.caretPosition)
+                    illFormat.regex.find(state.view.cTransArea.text, state.view.cTransArea.caretPosition)
                 } else {
-                    typo.regex.find(state.transFile.getTransLabel(picName, labelIndex).text)
+                    illFormat.regex.find(state.transFile.getTransLabel(picName, labelIndex).text)
                 } ?: return@onNew
 
             Logger.debug("Checker found: (${match.range}) -> `${match.value}`", "FormatChecker")
@@ -126,18 +126,18 @@ class FormatChecker(private val state: State) : Stage() {
         closeOnEscape()
     }
 
-    private fun collectTypos() {
+    private fun collectIllFormats() {
         index = NOT_FOUND
-        typoList.clear()
+        illList.clear()
 
         for (picName in state.transFile.sortedPicNames) {
             for (label in state.transFile.getTransList(picName)) {
-                for (typo in TypoList) {
+                for (illFormat in illFormatLists) {
                     var index = 0
                     var result: MatchResult
                     while (true) {
-                        result = typo.regex.find(label.text, index) ?: break
-                        typoList.add(TypoInfo(picName, label.index, typo))
+                        result = illFormat.regex.find(label.text, index) ?: break
+                        illList.add(IllFormatInfo(picName, label.index, illFormat))
                         index = result.range.last
                     }
                 }
@@ -146,13 +146,13 @@ class FormatChecker(private val state: State) : Stage() {
     }
 
     /**
-     * Check if there are any typos in the TransFile
+     * Check if there are any ill-formats in the TransFile
      * @return `true` if there is/are, `false` if there isn't
      */
     fun check(): Boolean {
-        collectTypos()
+        collectIllFormats()
 
-        if (typoList.isEmpty()) return true
+        if (illList.isEmpty()) return true
 
         index = 0
         return false

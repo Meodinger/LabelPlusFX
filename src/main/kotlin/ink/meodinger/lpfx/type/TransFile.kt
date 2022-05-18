@@ -130,7 +130,8 @@ class TransFile @JsonCreator constructor(
         @Suppress("DEPRECATION") for (labels in transMap.values) for (label in labels) installLabel(label)
     }
 
-    // TransGroup
+    // region TransGroup
+
     fun getGroupIdByName(name: String): Int {
         return groupList.first { it.name == name }.let(groupList::indexOf)
     }
@@ -138,7 +139,9 @@ class TransFile @JsonCreator constructor(
         return transMap.values.flatten().any { label -> label.groupId == groupId }
     }
 
-    // TransLabel
+    // endregion
+
+    // region TransLabel
     /**
      * Install the color-property of TransLabel based on this TransFile
      */
@@ -156,7 +159,9 @@ class TransFile @JsonCreator constructor(
         TransLabel.disposeColor(transLabel)
     }
 
-    // ----- Data ----- //
+    // endregion
+
+    // region Getters
 
     fun getTransGroup(groupId: Int): TransGroup {
         return groupListObservable[groupId]
@@ -168,11 +173,15 @@ class TransFile @JsonCreator constructor(
         return getTransList(picName).first { it.index == labelIndex }
     }
 
-    // Destructing
+    // endregion
+
+    // region Destructing
 
     operator fun component1(): List<Int>                     = version
     operator fun component2(): String                        = comment
     operator fun component3(): List<TransGroup>              = groupList
     operator fun component4(): Map<String, List<TransLabel>> = transMap
+
+    // endregion
 
 }

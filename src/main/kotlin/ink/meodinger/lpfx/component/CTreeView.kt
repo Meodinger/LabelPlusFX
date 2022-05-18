@@ -174,6 +174,7 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty())
             textProperty().bind(transLabel.textProperty())
+            markedProperty().bind(transLabel.markedProperty())
             when (viewMode) {
                 ViewMode.IndexMode -> colorProperty().bind(transLabel.colorProperty())
                 ViewMode.GroupMode -> doNothing()
@@ -194,6 +195,7 @@ class CTreeView: TreeView<String>() {
         val labelItem = labelItems.first { it.index == transLabel.index }.apply {
             indexProperty().unbind()
             textProperty().unbind()
+            markedProperty().unbind()
             colorProperty().unbind()
         }
 

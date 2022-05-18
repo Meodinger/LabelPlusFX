@@ -1,8 +1,6 @@
 package ink.meodinger.lpfx.component
 
-import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.getValue
-import ink.meodinger.lpfx.util.property.transform
+import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.pad
 import ink.meodinger.lpfx.util.string.replaceEOL
@@ -28,8 +26,6 @@ class CTreeLabelItem(
     labelText:  String = emptyString(),
     labelColor: Color? = null
 ) : TreeItem<String>() {
-
-    // TODO: Use TransLabel
 
     companion object {
         /**
@@ -69,6 +65,16 @@ class CTreeLabelItem(
      * @see colorProperty
      */
     var color: Color? by colorProperty
+
+    private val markedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Indicates whether this TransLabel is marked
+     */
+    fun markedProperty(): BooleanProperty = markedProperty
+    /**
+     * @see markedProperty
+     */
+    var isMarked: Boolean by markedProperty
 
     // endregion
 

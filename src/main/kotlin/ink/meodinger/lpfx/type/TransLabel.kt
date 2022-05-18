@@ -113,41 +113,29 @@ class TransLabel @JsonCreator constructor(
      */
     val color: Color by colorProperty
 
+    private var markedProperty: BooleanProperty = SimpleBooleanProperty(false)
+    /**
+     * Indicates whether this TransLabel is marked as look-at-later
+     */
+    fun markedProperty(): BooleanProperty = markedProperty
+    /**
+     * @see markedProperty
+     */
+    var isMarked: Boolean by markedProperty
+
     // endregion
-
-    override operator fun equals(other: Any?): Boolean {
-        if (this === other) return true
-
-        if (other == null) return false
-        if (other !is TransLabel) return false
-        if (other.hashCode() != hashCode()) return false
-
-        if (index != other.index) return false
-        if (groupId != other.groupId) return false
-        if (x != other.x) return false
-        if (y != other.y) return false
-        if (text != other.text) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = index.hashCode()
-        result = 31 * result + groupId.hashCode()
-        result = 31 * result + x.hashCode()
-        result = 31 * result + y.hashCode()
-        result = 31 * result + text.hashCode()
-        return result
-    }
 
     override fun toString(): String = "TransLabel($index, $groupId, $x - $y, ${text.replaceEOL()})"
 
-    // ----- Destruction----- //
+    // region Destruction
 
     operator fun component1(): Int    = index
     operator fun component2(): Int    = groupId
     operator fun component3(): Double = x
     operator fun component4(): Double = y
     operator fun component5(): String = text
+
+    // endregion
 
 }
 

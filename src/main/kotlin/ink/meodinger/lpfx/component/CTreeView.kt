@@ -176,12 +176,10 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty())
             textProperty().bind(transLabel.textProperty())
-
             if (viewMode != ViewMode.IndexMode) return@apply
             colorProperty().bind(groupsProperty
                 .valueAt(transLabel.groupIdProperty())
-                .property(TransGroup::colorHexProperty)
-                .transform(Color::web)
+                .transform { Color.web(it.colorHex) }
             )
         }
 

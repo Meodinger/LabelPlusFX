@@ -610,11 +610,9 @@ class CLabelPane : ScrollPane() {
             radiusProperty().bind(labelRadiusProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)
             colorOpacityProperty().bind(labelColorOpacityProperty)
-            colorProperty().bind(groupsProperty
-                .valueAt(transLabel.groupIdProperty())
-                .property(TransGroup::colorHexProperty)
-                .transform(Color::web)
-            )
+
+            // NOTE: This transformation could succeed because TransFile::groupList listens to TransGroup::colorHexProperty
+            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
 
             // Tooltip
             tooltip = Tooltip().apply {

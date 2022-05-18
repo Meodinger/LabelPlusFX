@@ -149,8 +149,6 @@ inline fun <R> BooleanExpression.transform(crossinline transformer: (Boolean) ->
 inline fun <R> StringExpression.transform(crossinline transformer: (String) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
 inline fun <T, R> ObjectExpression<T>.transform(crossinline transformer: (T) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
 
-inline fun <T, R> ObjectExpression<T>.property(crossinline propertyGetter: (T) -> ObservableValue<R>): ObjectBinding<R> = transform { propertyGetter(it).value }
-
 // Get the primitive value
 fun ObjectBinding<Int>.primitive(): IntegerBinding = Bindings.createIntegerBinding(this::get, this)
 fun ObjectBinding<Long>.primitive(): LongBinding = Bindings.createLongBinding(this::get, this)
@@ -167,3 +165,12 @@ fun <K, V> ObservableMap<K ,V>.emptyProperty(): BooleanBinding = Bindings.create
 // first & last
 fun <E> ListProperty<E>.firstElement(): ObjectBinding<E> = Bindings.createObjectBinding({ if (isEmpty()) null else get(0) }, this)
 fun <E> ListProperty<E>.lastElement(): ObjectBinding<E> = Bindings.createObjectBinding({ if (isEmpty()) null else get(size - 1) }, this)
+
+// Get read-only property from expression
+fun IntegerExpression.readonly(): ReadOnlyIntegerProperty = SimpleIntegerProperty().also { it.bind(this) }
+fun LongExpression.readonly(): ReadOnlyLongProperty = SimpleLongProperty().also { it.bind(this) }
+fun FloatExpression.readonly(): ReadOnlyFloatProperty = SimpleFloatProperty().also { it.bind(this) }
+fun DoubleExpression.readonly(): ReadOnlyDoubleProperty = SimpleDoubleProperty().also { it.bind(this) }
+fun BooleanExpression.readonly(): ReadOnlyBooleanProperty = SimpleBooleanProperty().also { it.bind(this) }
+fun StringExpression.readonly(): ReadOnlyStringProperty = SimpleStringProperty().also { it.bind(this) }
+fun <T> ObjectExpression<T>.readonly(): ReadOnlyObjectProperty<T> = SimpleObjectProperty<T>().also { it.bind(this) }

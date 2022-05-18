@@ -7,7 +7,9 @@ import ink.meodinger.lpfx.util.property.setValue
 import ink.meodinger.lpfx.util.string.replaceEOL
 
 import com.fasterxml.jackson.annotation.*
+import javafx.beans.binding.ObjectExpression
 import javafx.beans.property.*
+import javafx.scene.paint.Color
 
 
 /**
@@ -30,9 +32,29 @@ class TransLabel @JsonCreator constructor(
 
     // TODO: Mark
 
+    companion object {
+
+        /**
+         * Bind TransLabel's ColorProperty, This function should only be called in TransFile
+         */
+        @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
+        fun installColor(transLabel: TransLabel, property: ObjectExpression<Color>) {
+            transLabel.colorProperty.bind(property)
+        }
+
+        /**
+         * Unbind TransLabel's ColorProperty, This function should only be called in TransFile
+         */
+        @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
+        fun disposeColor(transLabel: TransLabel) {
+            transLabel.colorProperty.unbind()
+        }
+
+    }
+
     // region Properties
 
-    private val indexProperty: IntegerProperty = SimpleIntegerProperty()
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(index)
     fun indexProperty(): IntegerProperty = indexProperty
     var index: Int
         get() = indexProperty.get()
@@ -42,7 +64,7 @@ class TransLabel @JsonCreator constructor(
             indexProperty.set(value)
         }
 
-    private val groupIdProperty: IntegerProperty = SimpleIntegerProperty()
+    private val groupIdProperty: IntegerProperty = SimpleIntegerProperty(groupId)
     fun groupIdProperty(): IntegerProperty = groupIdProperty
     var groupId: Int
         get() = groupIdProperty.get()
@@ -52,7 +74,7 @@ class TransLabel @JsonCreator constructor(
             groupIdProperty.set(value)
         }
 
-    private val xProperty: DoubleProperty = SimpleDoubleProperty()
+    private val xProperty: DoubleProperty = SimpleDoubleProperty(x)
     fun xProperty(): DoubleProperty = xProperty
     var x: Double
         get() = xProperty.get()
@@ -62,7 +84,7 @@ class TransLabel @JsonCreator constructor(
             xProperty.set(value)
         }
 
-    private val yProperty: DoubleProperty = SimpleDoubleProperty()
+    private val yProperty: DoubleProperty = SimpleDoubleProperty(y)
     fun yProperty(): DoubleProperty = yProperty
     var y: Double
         get() = yProperty.get()
@@ -78,16 +100,24 @@ class TransLabel @JsonCreator constructor(
 
     // endregion
 
-    init {
-        this.index = index
-        this.groupId = groupId
-        this.x = x
-        this.y = y
-    }
+    // region Additional
 
-    // ----- Object ----- //
+    private var colorProperty: ObjectProperty<Color> = SimpleObjectProperty()
+    /**
+     * This property will be bound with the color-property of group that groupId refers to.
+     * The binding procedure should be done while TransFile initializing.
+     */
+    fun colorProperty(): ReadOnlyObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
+    val color: Color by colorProperty
+
+    // endregion
 
     override operator fun equals(other: Any?): Boolean {
+        if (this === other) return true
+
         if (other == null) return false
         if (other !is TransLabel) return false
         if (other.hashCode() != hashCode()) return false

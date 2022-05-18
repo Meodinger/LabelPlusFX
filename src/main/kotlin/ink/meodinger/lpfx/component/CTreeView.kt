@@ -143,7 +143,7 @@ class CTreeView: TreeView<String>() {
     private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
         val groupItem = CTreeGroupItem().apply {
             nameProperty().bind(transGroup.nameProperty())
-            colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
+            colorProperty().bind(transGroup.colorProperty())
         }
 
         // Add view
@@ -155,12 +155,10 @@ class CTreeView: TreeView<String>() {
         groupItems.add(groupId, groupItem)
     }
     private fun removeGroupItem(transGroup: TransGroup) {
-        val groupId = groupItems.indexOfFirst { it.name == transGroup.name }
-        val groupItem = groupItems[groupId]
-
-        // Unbind
-        groupItem.nameProperty().unbind()
-        groupItem.colorProperty().unbind()
+        val groupItem = groupItems.first { it.name == transGroup.name }.apply {
+            nameProperty().unbind()
+            colorProperty().unbind()
+        }
 
         // Clear selection
         selectionModel.clearSelection(getRow(groupItem))
@@ -176,11 +174,10 @@ class CTreeView: TreeView<String>() {
         val labelItem = CTreeLabelItem().apply {
             indexProperty().bind(transLabel.indexProperty())
             textProperty().bind(transLabel.textProperty())
-            if (viewMode != ViewMode.IndexMode) return@apply
-            colorProperty().bind(groupsProperty
-                .valueAt(transLabel.groupIdProperty())
-                .transform { Color.web(it.colorHex) }
-            )
+            when (viewMode) {
+                ViewMode.IndexMode -> colorProperty().bind(transLabel.colorProperty())
+                ViewMode.GroupMode -> doNothing()
+            }
         }
 
         // Add view
@@ -194,12 +191,11 @@ class CTreeView: TreeView<String>() {
         labelItems.add(labelItem)
     }
     private fun removeLabelItem(transLabel: TransLabel) {
-        val labelItem = labelItems.first { it.index == transLabel.index }
-
-        // Unbind
-        labelItem.indexProperty().unbind()
-        labelItem.textProperty().unbind()
-        labelItem.graphicProperty().unbind()
+        val labelItem = labelItems.first { it.index == transLabel.index }.apply {
+            indexProperty().unbind()
+            textProperty().unbind()
+            colorProperty().unbind()
+        }
 
         // Clear selection
         selectionModel.clearSelection(getRow(labelItem))

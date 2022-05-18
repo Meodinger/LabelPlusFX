@@ -81,9 +81,9 @@ class LabelAction(
         if (transLabel.groupId >= state.transFile.groupCount)
             throw IllegalArgumentException(String.format(I18N["exception.action.label_group_invalid.i"], transLabel.groupId))
 
-        val labelIndex = transLabel.index
-        for (label in list) if (label.index >= labelIndex) label.index++
+        for (label in list) if (label.index >= transLabel.index) label.index++
         list.add(transLabel)
+        @Suppress("DEPRECATION") state.transFile.installLabel(transLabel)
 
         Logger.info("Added $picName @ $transLabel", "Action")
     }
@@ -91,9 +91,9 @@ class LabelAction(
         val list = state.transFile.transMapObservable[picName]
             ?: throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], picName))
 
-        val labelIndex = transLabel.index
-        list.remove(list.first { it.index == labelIndex })
-        for (label in list) if (label.index > labelIndex) label.index--
+        @Suppress("DEPRECATION") state.transFile.disposeLabel(transLabel)
+        list.remove(transLabel)
+        for (label in list) if (label.index > transLabel.index) label.index--
 
         Logger.info("Removed $picName @ $transLabel", "Action")
     }

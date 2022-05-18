@@ -438,7 +438,6 @@ class Controller(private val state: State) {
         Logger.info("Bound CTreeView properties", "Controller")
 
         // LabelPane
-        cLabelPane.groupsProperty().bind(groupsBinding)
         cLabelPane.imageProperty().bind(imageBinding)
         cLabelPane.labelsProperty().bind(labelsBinding)
         cLabelPane.commonCursorProperty().bind(state.workModeProperty().transform {

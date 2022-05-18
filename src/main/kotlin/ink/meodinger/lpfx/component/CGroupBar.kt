@@ -114,7 +114,7 @@ class CGroupBar : HBox() {
 
         children.add(groupId, CGroup().apply {
             nameProperty().bind(transGroup.nameProperty())
-            colorProperty().bind(transGroup.colorHexProperty().transform(Color::web))
+            colorProperty().bind(transGroup.colorProperty())
             setOnAction { selectionModel.select(transGroup) }
         })
     }

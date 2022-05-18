@@ -3,10 +3,13 @@ package ink.meodinger.lpfx.type
 import ink.meodinger.lpfx.I18N
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.color.isColorHex
+import ink.meodinger.lpfx.util.property.getValue
+import ink.meodinger.lpfx.util.property.readonly
+import ink.meodinger.lpfx.util.property.transform
 
 import com.fasterxml.jackson.annotation.*
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
+import javafx.scene.paint.Color
 
 
 /**
@@ -29,7 +32,7 @@ class TransGroup @JsonCreator constructor(
 
     // region Properties
 
-    private val nameProperty: StringProperty = SimpleStringProperty()
+    private val nameProperty: StringProperty = SimpleStringProperty(name)
     fun nameProperty(): StringProperty = nameProperty
     var name: String
         get() = nameProperty.get()
@@ -39,7 +42,7 @@ class TransGroup @JsonCreator constructor(
             nameProperty.set(value)
         }
 
-    private val colorHexProperty: StringProperty = SimpleStringProperty()
+    private val colorHexProperty: StringProperty = SimpleStringProperty(colorHex)
     fun colorHexProperty(): StringProperty = colorHexProperty
     var colorHex: String
         @JsonGetter("color") get() = colorHexProperty.get()
@@ -51,12 +54,28 @@ class TransGroup @JsonCreator constructor(
 
     // endregion
 
+    // region Additional
+
+    private val colorProperty: ReadOnlyObjectProperty<Color> = colorHexProperty.transform(Color::web).readonly()
+    /**
+     * This property is transformed from [colorHexProperty] by `Color::web`
+     */
+    fun colorProperty(): ReadOnlyObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
+    val color: Color by colorProperty
+
+    // endregion
+
     init {
         this.name = name
         this.colorHex = colorHex
     }
 
     override operator fun equals(other: Any?): Boolean {
+        if (this === other) return true
+
         if (other == null) return false
         if (other !is TransGroup) return false
         if (other.hashCode() != hashCode()) return false

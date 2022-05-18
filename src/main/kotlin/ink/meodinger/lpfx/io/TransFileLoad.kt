@@ -179,7 +179,7 @@ private fun loadLP(file: File): TransFile {
     val comment = parseText(LPTransFile.PIC_START)
 
     // Content
-    val transMap = HashMap<String, MutableList<TransLabel>>()
+    val transMap = LinkedHashMap<String, List<TransLabel>>()
     while (pointer < lineCount && lines[pointer].startsWith(LPTransFile.PIC_START)) {
         val picName = parsePicHead()
         val labels = parsePicBody()

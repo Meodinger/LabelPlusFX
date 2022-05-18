@@ -51,8 +51,9 @@ class PictureAction(
         if (state.transFile.transMapObservable.contains(picName))
             throw IllegalArgumentException(String.format(I18N["exception.action.picture_repeated.s"], picName))
 
-        state.transFile.setFile(picName, picFile)
         state.transFile.transMapObservable[picName] = FXCollections.observableArrayList(transList)
+        state.transFile.setFile(picName, picFile)
+        @Suppress("DEPRECATION") state.transFile.getTransList(picName).forEach(state.transFile::installLabel)
 
         Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", "Action")
     }
@@ -60,6 +61,7 @@ class PictureAction(
         if (!state.transFile.transMapObservable.contains(picName))
             throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], picName))
 
+        @Suppress("DEPRECATION") state.transFile.getTransList(picName).forEach(state.transFile::installLabel)
         state.transFile.setFile(picName, null)
         state.transFile.transMapObservable.remove(picName)
 

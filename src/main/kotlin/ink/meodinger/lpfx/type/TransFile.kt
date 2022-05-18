@@ -126,12 +126,34 @@ class TransFile @JsonCreator constructor(
 
     // endregion
 
+    init {
+        @Suppress("DEPRECATION") for (labels in transMap.values) for (label in labels) installLabel(label)
+    }
+
     // TransGroup
     fun getGroupIdByName(name: String): Int {
         return groupList.first { it.name == name }.let(groupList::indexOf)
     }
     fun isGroupStillInUse(groupId: Int): Boolean {
         return transMap.values.flatten().any { label -> label.groupId == groupId }
+    }
+
+    // TransLabel
+    /**
+     * Install the color-property of TransLabel based on this TransFile
+     */
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
+    fun installLabel(transLabel: TransLabel) {
+        @Suppress("DEPRECATION")
+        TransLabel.installColor(transLabel, groupListProperty.valueAt(transLabel.groupIdProperty()).transform(TransGroup::color))
+    }
+    /**
+     * Dispose the color-property of TransLabel
+     */
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
+    fun disposeLabel(transLabel: TransLabel) {
+        @Suppress("DEPRECATION")
+        TransLabel.disposeColor(transLabel)
     }
 
     // ----- Data ----- //

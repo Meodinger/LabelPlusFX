@@ -327,10 +327,6 @@ class CLabelPane : ScrollPane() {
 
     // region Properties:Layout
 
-    private val groupsProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableArrayList())
-    fun groupsProperty(): ListProperty<TransGroup> = groupsProperty
-    var groups: ObservableList<TransGroup> by groupsProperty
-
     private val imageProperty: ObjectProperty<Image> = imageView.imageProperty()
     fun imageProperty(): ObjectProperty<Image> = imageProperty
     var image: Image by imageProperty
@@ -607,12 +603,10 @@ class CLabelPane : ScrollPane() {
     private fun createLabel(transLabel: TransLabel) {
         val label = CLabel().apply {
             indexProperty().bind(transLabel.indexProperty())
+            colorProperty().bind(transLabel.colorProperty())
             radiusProperty().bind(labelRadiusProperty)
             textOpaqueProperty().bind(labelTextOpaqueProperty)
             colorOpacityProperty().bind(labelColorOpacityProperty)
-
-            // NOTE: This transformation could succeed because TransFile::groupList listens to TransGroup::colorHexProperty
-            colorProperty().bind(groupsProperty.valueAt(transLabel.groupIdProperty()).transform { Color.web(it.colorHex) })
 
             // Tooltip
             tooltip = Tooltip().apply {
@@ -753,11 +747,11 @@ class CLabelPane : ScrollPane() {
         val label = labelNodes.first { it.index == transLabel.index } ?: return
 
         // Unbind
-        label.radiusProperty().unbind()
         label.indexProperty().unbind()
         label.colorProperty().unbind()
-        label.colorOpacityProperty().unbind()
+        label.radiusProperty().unbind()
         label.textOpaqueProperty().unbind()
+        label.colorOpacityProperty().unbind()
 
         // Remove view
         labelNodes.remove(label)

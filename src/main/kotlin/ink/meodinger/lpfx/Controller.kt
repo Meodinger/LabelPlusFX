@@ -677,7 +677,7 @@ class Controller(private val state: State) {
             // Make sure we have items to select
             cTreeView.getTreeItem(from).apply { this?.expand() }
 
-            var index = from
+            var index = from + direction
             while (true) {
                 val item = cTreeView.getTreeItem(index) ?: return NOT_FOUND
                 if (item is CTreeLabelItem) return index
@@ -705,7 +705,7 @@ class Controller(private val state: State) {
             if (itemIndex == NOT_FOUND) {
                 // if selected first and try getting previous, return last;
                 // if selected last and try getting next, return first;
-                itemIndex = getNextLabelItemIndex(if (itemShift == -1) cTreeView.expandedItemCount else 0, itemShift)
+                itemIndex = getNextLabelItemIndex(if (itemShift == 1) 0 else cTreeView.expandedItemCount, itemShift)
             }
             val item = cTreeView.getTreeItem(itemIndex) as CTreeLabelItem
 

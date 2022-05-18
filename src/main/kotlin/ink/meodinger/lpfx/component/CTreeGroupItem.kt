@@ -25,6 +25,8 @@ class CTreeGroupItem(
     groupColor: Color  = Color.web("66CCFF")
 ) : TreeItem<String>() {
 
+    // TODO: Use TransGroup
+
     companion object {
         /**
          * TreeItem Graphic radius

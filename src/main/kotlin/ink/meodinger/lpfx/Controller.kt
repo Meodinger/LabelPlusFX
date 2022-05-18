@@ -72,8 +72,8 @@ class Controller(private val state: State) {
     // region View Components
 
     private val view            = state.view
-    private val bSwitchViewMode = view.bSwitchViewMode does { switchViewMode() }
-    private val bSwitchWorkMode = view.bSwitchWorkMode does { switchWorkMode() }
+    private val bSwitchViewMode = view.bSwitchViewMode
+    private val bSwitchWorkMode = view.bSwitchWorkMode
     private val lBackup         = view.lBackup
     private val lLocation       = view.lLocation
     private val lAccEditTime    = view.lAccEditTime
@@ -185,14 +185,6 @@ class Controller(private val state: State) {
     )
 
     // endregion
-
-    private fun switchViewMode() {
-        state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
-    }
-    private fun switchWorkMode() {
-        state.workMode = WorkMode.values()[(state.workMode.ordinal + 1) % WorkMode.values().size]
-        state.viewMode = Settings.viewModes[state.workMode.ordinal]
-    }
 
     init {
         state.controller = this
@@ -827,9 +819,8 @@ class Controller(private val state: State) {
             groupList = Settings.defaultGroupNameList
                 .mapIndexed { index, name -> TransGroup(name, Settings.defaultGroupColorHexList[index]) }
                 .filterIndexed { index, _ -> Settings.isGroupCreateOnNewTransList[index] }
-                .let { if (FileType.getFileType(file) == FileType.LPFile) it.subList(0, it.size.coerceAtMost(9)) else it }
-                .toMutableList(),
-            transMap = selectedPics.associateWithTo(HashMap()) { ArrayList() }
+                .let { if (FileType.getFileType(file) == FileType.LPFile) it.subList(0, it.size.coerceAtMost(9)) else it },
+            transMap = selectedPics.associateWith { emptyList() }
         )
         Logger.info("Built TransFile", "Controller")
 

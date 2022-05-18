@@ -28,7 +28,9 @@ class TransLabel @JsonCreator constructor(
     @JsonProperty("text")    text:    String = ""
 ) {
 
-    // ----- Properties ----- //
+    // TODO: Mark
+
+    // region Properties
 
     private val indexProperty: IntegerProperty = SimpleIntegerProperty()
     fun indexProperty(): IntegerProperty = indexProperty
@@ -74,6 +76,8 @@ class TransLabel @JsonCreator constructor(
     fun textProperty(): StringProperty = textProperty
     var text: String by textProperty
 
+    // endregion
+
     init {
         this.index = index
         this.groupId = groupId
@@ -82,8 +86,6 @@ class TransLabel @JsonCreator constructor(
     }
 
     // ----- Object ----- //
-
-    fun clone(): TransLabel = TransLabel(index, groupId, x, y, text)
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false

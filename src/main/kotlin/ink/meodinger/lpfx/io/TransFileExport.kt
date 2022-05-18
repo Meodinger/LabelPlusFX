@@ -156,12 +156,5 @@ fun TransFile.toJsonString(): String {
     return ObjectMapper()
         .enable(SerializationFeature.INDENT_OUTPUT)
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-        .writeValueAsString(TransFile(
-            version,
-            comment,
-            groupList.toMutableList(),
-            sortedPicNames.associateWithTo(LinkedHashMap()) {
-                transMap[it]!!.sortedBy(TransLabel::index).toMutableList()
-            }
-        ))
+        .writeValueAsString(TransFile(version, comment, groupList, sortedPicNames.associateWithTo(LinkedHashMap()) { transMap[it]!!.sortedBy(TransLabel::index) }))
 }

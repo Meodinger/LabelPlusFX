@@ -27,7 +27,7 @@ class TransGroup @JsonCreator constructor(
         private var ACC = 0
     }
 
-    // ----- Properties ----- //
+    // region Properties
 
     private val nameProperty: StringProperty = SimpleStringProperty()
     fun nameProperty(): StringProperty = nameProperty
@@ -49,12 +49,12 @@ class TransGroup @JsonCreator constructor(
             colorHexProperty.set(value)
         }
 
+    // endregion
+
     init {
         this.name = name
         this.colorHex = colorHex
     }
-
-    fun clone(): TransGroup = TransGroup(name, colorHex)
 
     override operator fun equals(other: Any?): Boolean {
         if (other == null) return false

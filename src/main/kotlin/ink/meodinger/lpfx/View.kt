@@ -370,6 +370,7 @@ class View(private val state: State) : BorderPane() {
                             isMnemonicParsing = false
                             disableProperty().bind(!state.openedProperty())
                             textProperty().bind(state.workModeProperty().asString())
+                            does { switchWorkMode() }
                         }
                         add(cGroupBox) {
                             prefWidth = 160.0
@@ -404,6 +405,7 @@ class View(private val state: State) : BorderPane() {
                             isMnemonicParsing = false
                             disableProperty().bind(!state.openedProperty())
                             textProperty().bind(state.viewModeProperty().asString())
+                            does { switchViewMode() }
                         }
                     }
                     center(cTreeView) {
@@ -467,6 +469,14 @@ class View(private val state: State) : BorderPane() {
         })
     }
 
+    private fun switchViewMode() {
+        state.viewMode = ViewMode.values()[(state.viewMode.ordinal + 1) % ViewMode.values().size]
+    }
+    private fun switchWorkMode() {
+        state.workMode = WorkMode.values()[(state.workMode.ordinal + 1) % WorkMode.values().size]
+        state.viewMode = Settings.viewModes[state.workMode.ordinal]
+    }
+
     private fun openRecentTranslation(item: MenuItem) {
         // Open recent, remove item if not exist
 
@@ -493,13 +503,14 @@ class View(private val state: State) : BorderPane() {
         chooserNew.initialFilename = "$FILENAME_DEFAULT.$extension"
         chooserNew.selectedExtensionFilter = filterAny
 
+        var differentWithInput = false
         val file = chooserNew.showSaveDialog(state.stage)?.let file@{
             val filename  = it.nameWithoutExtension.takeUnless(FILENAME_DEFAULT::equals) ?: it.parentFile.name
             val extexsion = it.extension.lowercase().takeIf(EXTENSIONS_FILE::contains) ?: extension
 
-            return@file it.parentFile.resolve("$filename.$extexsion")
+            return@file it.parentFile.resolve("$filename.$extexsion").also { final -> differentWithInput = it.name != final.name }
         } ?: return
-        if (file.exists()) {
+        if (differentWithInput && file.exists()) {
             val confirm = showConfirm(state.stage, String.format(I18N["m.new.dialog.overwrite.s"], file.name))
             if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
         }
@@ -530,14 +541,9 @@ class View(private val state: State) : BorderPane() {
         chooserFile.title = I18N["chooser.save"]
         chooserFile.initialFilename = state.translationFile.name
         chooserFile.selectedExtensionFilter = filterFile
+
         val file = chooserFile.showSaveDialog(state.stage) ?: return
-        if (file.exists()) {
-            val confirm = showConfirm(state.stage, String.format(I18N["m.file.dialog.overwrite.s"], file.name))
-            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
-        }
-
         state.controller.save(file)
-
         showChecker()
     }
     private fun closeTranslation() {
@@ -549,23 +555,17 @@ class View(private val state: State) : BorderPane() {
         if (state.controller.stay()) return
 
         chooserBackup.initialDirectory = state.getBakFolder() ?: CFileChooser.lastDirectory
+        chooserFile.initialDirectory = state.getFileFolder() ?: CFileChooser.lastDirectory
         val bak = chooserBackup.showOpenDialog(state.stage) ?: return
-        if (bak.parentFile?.parentFile != null) chooserFile.initialDirectory = bak.parentFile.parentFile
 
-        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
         val filename  = "Re.${bak.parentFile?.parentFile?.name ?: "cover"}"
-
+        val extension = if (Settings.useMeoFileAsDefault) EXTENSION_FILE_MEO else EXTENSION_FILE_LP
         chooserFile.title = I18N["chooser.rec"]
         chooserFile.initialFilename = "$filename.$extension"
         chooserFile.selectedExtensionFilter = if (Settings.useMeoFileAsDefault) filterMEO else filterLP
+
         val rec = chooserFile.showSaveDialog(state.stage) ?: return
-        if (rec.exists()) {
-            val confirm = showConfirm(state.stage, String.format(I18N["m.file.dialog.overwrite.s"], rec.name))
-            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
-        }
-
         state.reset()
-
         state.controller.recovery(bak, rec)
     }
     private fun exitApplication() {
@@ -682,22 +682,14 @@ class View(private val state: State) : BorderPane() {
         chooserFile.title = I18N["chooser.export"]
         chooserFile.initialFilename = "$exportName.${type.extension}"
         chooserFile.selectedExtensionFilter = if (type == FileType.MeoFile) filterMEO else filterLP
-        val file = chooserFile.showSaveDialog(state.stage) ?: return
-        if (file.exists()) {
-            val confirm = showConfirm(state.stage, String.format(I18N["m.file.dialog.overwrite.s"], file.name))
-            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
-        }
 
+        val file = chooserFile.showSaveDialog(state.stage) ?: return
         state.controller.export(file)
     }
     private fun exportTransPack() {
         chooserPack.initialFilename = "${state.getFileFolder()!!.name}.$EXTENSION_PACK"
-        val file = chooserPack.showSaveDialog(state.stage) ?: return
-        if (file.exists()) {
-            val confirm = showConfirm(state.stage, String.format(I18N["m.file.dialog.overwrite.s"], file.name))
-            if (!(confirm.isPresent && confirm.get() == ButtonType.YES)) return
-        }
 
+        val file = chooserPack.showSaveDialog(state.stage) ?: return
         state.controller.pack(file)
     }
 

@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.type
 
+import javafx.application.Platform
 import javafx.concurrent.Task
 
 
@@ -15,11 +16,19 @@ import javafx.concurrent.Task
 abstract class LPFXTask<T> : Task<T>() {
 
     companion object {
+        /**
+         * Create a Task by lambda
+         * @param task Lambda task
+         */
         fun <T> createTask(task: LPFXTask<T>.() -> T): LPFXTask<T> {
             return object : LPFXTask<T>() { override fun call(): T = task(this) }
         }
     }
 
+    /**
+     * What to do when task succeeded
+     * @param callback Take returned value of the task as it
+     */
     fun setOnSucceeded(callback: (T) -> Unit): LPFXTask<T> {
         super.setOnSucceeded {
             @Suppress("UNCHECKED_CAST")
@@ -29,6 +38,10 @@ abstract class LPFXTask<T> : Task<T>() {
         return this
     }
 
+    /**
+     * What to do when task failed
+     * @param callback Take thrown exception while running task as it
+     */
     fun setOnFailed(callback: (Throwable) -> Unit): LPFXTask<T> {
         super.setOnFailed {
             callback(it.source.exception)
@@ -37,8 +50,19 @@ abstract class LPFXTask<T> : Task<T>() {
         return this
     }
 
+    /**
+     * Start the task in a new thread
+     */
     fun startInNewThread() = Thread(this).start()
 
+    /**
+     * Start the task in FX thread
+     */
+    fun startInFXThread() = Platform.runLater(this)
+
+    /**
+     * Alias for [startInNewThread]
+     */
     operator fun invoke() = startInNewThread()
 
 }

@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.component.common
 
+import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
 
@@ -26,19 +27,19 @@ class CFileChooser {
     /// FileChooser is final class, inherit it is unavailable
 
     companion object {
-        private val lastDirectoryProperty: ObjectProperty<File> = SimpleObjectProperty(File(System.getProperty("user.home")))
+        private val lastDirectoryProperty: ObjectProperty<File?> = SimpleObjectProperty(File(System.getProperty("user.home")))
         /**
          * ObjectProperty for the shared last directory. This intents could not
          * to be bound to some other properties. If you want to change this manually,
          * use setter instead.
          */
-        fun lastDirectoryProperty(): ReadOnlyObjectProperty<File> = lastDirectoryProperty
+        fun lastDirectoryProperty(): ReadOnlyObjectProperty<File?> = lastDirectoryProperty
         /**
          * The shared last directory for all CFileChoosers.
          * @see lastDirectoryProperty
          */
         var lastDirectory : File?
-            get() = lastDirectoryProperty.get().takeIf(File::exists)
+            get() = lastDirectoryProperty.get().takeIf(File?::exists)
             set(value) {
                 if (value == null || !value.exists()) return
                 if (value.isDirectory) lastDirectoryProperty.set(value)
@@ -65,16 +66,16 @@ class CFileChooser {
      */
     var selectedExtensionFilter: ExtensionFilter? by selectedExtensionFilterProperty
 
-    private val initialDirectoryProperty: ObjectProperty<File> = chooser.initialDirectoryProperty()
+    private val initialDirectoryProperty: ObjectProperty<File?> = chooser.initialDirectoryProperty()
     /**
      * An export to `FileChooser::initialDirectoryProperty()`
      * @see javafx.stage.FileChooser.initialDirectory
      */
-    fun initialDirectoryProperty(): ObjectProperty<File> = initialDirectoryProperty
+    fun initialDirectoryProperty(): ObjectProperty<File?> = initialDirectoryProperty
     /**
      * @see initialDirectoryProperty
      */
-    var initialDirectory: File by initialDirectoryProperty
+    var initialDirectory: File? by initialDirectoryProperty
 
     private val initialFilenameProperty: ObjectProperty<String> = chooser.initialFileNameProperty()
     /**

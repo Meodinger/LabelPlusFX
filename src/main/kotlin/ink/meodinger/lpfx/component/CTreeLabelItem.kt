@@ -29,6 +29,8 @@ class CTreeLabelItem(
     labelColor: Color? = null
 ) : TreeItem<String>() {
 
+    // TODO: Use TransLabel
+
     companion object {
         /**
          * TreeItem Graphic radius

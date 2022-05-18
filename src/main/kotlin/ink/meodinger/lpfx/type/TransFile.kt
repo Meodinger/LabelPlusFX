@@ -21,19 +21,30 @@ import java.io.File
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
 class TransFile @JsonCreator constructor(
-    @JsonProperty("version")   version:   List<Int>                                   = listOf(1, 0),
-    @JsonProperty("comment")   comment:   String                                      = DEFAULT_COMMENT_LIST[0],
-    @JsonProperty("groupList") groupList: MutableList<TransGroup>                     = ArrayList(),
-    @JsonProperty("transMap")  transMap:  MutableMap<String, MutableList<TransLabel>> = HashMap()
+    @JsonProperty("version")   version:   List<Int>                     = listOf(1, 0),
+    @JsonProperty("comment")   comment:   String                        = DEFAULT_COMMENT_LIST[0],
+    @JsonProperty("groupList") groupList: List<TransGroup>              = emptyList(),
+    @JsonProperty("transMap")  transMap:  Map<String, List<TransLabel>> = emptyMap()
 )  {
 
     companion object {
+
+        /**
+         * 0 - LPFX;
+         * 1 - LP;
+         * 2 - MoeFlow;
+         * 3 - MoeTra (Deprecated)
+         */
         val DEFAULT_COMMENT_LIST: List<String> = arrayListOf(
             "使用 LabelPlusFX 导出",
             "Default Comment\nYou can edit me",
             "由 MoeFlow.com 导出",
             "由MoeTra.com导出"
         )
+
+        /**
+         * Default color hex list. Copy from LP
+         */
         val DEFAULT_COLOR_HEX_LIST: List<String> = listOf(
             "FF0000", "0000FF", "008000",
             "1E90FF", "FFD700", "FF00FF",
@@ -41,7 +52,8 @@ class TransFile @JsonCreator constructor(
         )
     }
 
-    // ----- Project Files Management ----- //
+    // region Project Files Management
+    // These data are only used in runtime, will not be saved
 
     /**
      * This will be set while opening
@@ -78,20 +90,25 @@ class TransFile @JsonCreator constructor(
         return transMapObservable.keys.filter { !getFile(it)!!.exists() }
     }
 
-    // ----- Properties ----- //
+    // endregion
+
+    // region Properties
     // Only internal use to avoid accidentally invoking their `set` methods
-    // Note1: all backing list/map/set should be mutable
-    // Note2: version is immutable
+    // Note1: version is immutable
+    // Note2: all backing list/map/set should be mutable
     // Note3: groups' properties' changes will be listened
+    // Note4: transMap use LinkedHashMap to preserve key order when export.
 
     private val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
     private val commentProperty: StringProperty = SimpleStringProperty(comment)
-    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(groupList) { arrayOf(it.nameProperty(), it.colorHexProperty()) })
-    private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap(transMap.mapValues { FXCollections.observableList(it.value) }))
+    private val groupListProperty: ListProperty<TransGroup> = SimpleListProperty(FXCollections.observableList(ArrayList(groupList)) { arrayOf(it.nameProperty(), it.colorHexProperty()) })
+    private val transMapProperty: MapProperty<String, ObservableList<TransLabel>> = SimpleMapProperty(FXCollections.observableMap((transMap.mapValuesTo(LinkedHashMap()) { FXCollections.observableArrayList(it.value) })))
 
     private val sortedPicNamesProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(transMapProperty.observableKeySet().observableSorted(Collection<String>::sortByDigit)).readOnlyProperty
 
-    // ----- Accessible Fields ----- //
+    // endregion
+
+    // region Accessible Fields
 
     // Following properties provide JSON getters
     val version: List<Int> by versionProperty
@@ -107,8 +124,9 @@ class TransFile @JsonCreator constructor(
     val picCount: Int get() = transMapProperty.size
     val sortedPicNames: List<String> by sortedPicNamesProperty
 
-    // TransGroup
+    // endregion
 
+    // TransGroup
     fun getGroupIdByName(name: String): Int {
         return groupList.first { it.name == name }.let(groupList::indexOf)
     }

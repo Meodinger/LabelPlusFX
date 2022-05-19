@@ -254,17 +254,17 @@ class Controller(private val state: State) {
         }
         Logger.info("Registered Drag and Drop", "Controller")
 
-        // Register Alt/Meta + X to mark/unmark Label
+        // Register Alt(Win)/Command(macOS) + X to mark/unmark Label
         val markHandler = EventHandler<KeyEvent> {
-            if ((it.isAltDown || it.isMetaDown) && it.code == KeyCode.X) {
+            if ((it.isAltDown || (Config.isMac && it.isControlDown)) && it.code == KeyCode.X) {
                 if (state.isOpened && state.currentLabelIndex != NOT_FOUND) {
                     val transLabel = state.transFile.getTransLabel(state.currentPicName, state.currentLabelIndex)
                     transLabel.isMarked = !transLabel.isMarked
                 }
             }
         }
-        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, markHandler)
         cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, markHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, markHandler)
         Logger.info("Registered Ctrl/Meta + X mark/unmark TransLabel", "Controller")
 
         // Register Alias & Global redo/undo in TransArea
@@ -706,8 +706,8 @@ class Controller(private val state: State) {
             }
             val item = cTreeView.getTreeItem(itemIndex) as CTreeLabelItem
 
-            cLabelPane.moveToLabel(item.index)
-            cTreeView.selectLabel(item.index, clear = true, scrollTo = true)
+            cLabelPane.moveToLabel(item.transLabel.index)
+            cTreeView.selectLabel(item.transLabel.index, clear = true, scrollTo = true)
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)

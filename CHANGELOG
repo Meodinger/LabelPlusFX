@@ -15,7 +15,7 @@ TODO:
 # 2.3.1
 
 Add
- - 现在可以使用Alt/Meta + X标记存有疑问的Label
+ - 现在可以使用Alt(Win)/Command(macOS) + X标记存有疑问的Label
 Fix
  - 修正了老板键的不正确行为
  - 修正了切换图片时若下一站图片没有Label会报运行时错误的问题

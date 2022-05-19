@@ -193,8 +193,11 @@ class CGroup(
                     textOrigin = VPos.TOP
                     textProperty().bind(control.nameProperty)
                     fillProperty().bind(control.colorProperty)
-                    layoutXProperty().bind(widthProperty().transform { (it - boundsInLocal.width) / 2 })
-                    layoutYProperty().bind(heightProperty().transform { (it - boundsInLocal.height) / 2 })
+
+                    // FIXME: Text will move a little upper if Group-Name changes
+
+                    layoutXProperty().bind(control.widthProperty().transform { (it - boundsInLocal.width) / 2 })
+                    layoutYProperty().bind(control.heightProperty().transform { (it - boundsInLocal.height) / 2 })
                 }
             }
         }

@@ -2,11 +2,9 @@ package ink.meodinger.lpfx.component
 
 import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.type.TransGroup
-import ink.meodinger.lpfx.util.component.add
 import ink.meodinger.lpfx.util.component.hgrow
 import ink.meodinger.lpfx.util.property.getValue
 import ink.meodinger.lpfx.util.property.setValue
-import ink.meodinger.lpfx.util.property.transform
 import ink.meodinger.lpfx.util.property.onNew
 
 import javafx.beans.property.*
@@ -81,6 +79,21 @@ class CGroupBar : HBox() {
 
     // endregion
 
+    // region Instance
+
+    private val holder = HBox().apply {
+        hgrow = Priority.ALWAYS
+    }
+    private val adder = CGroup("+", Color.BLACK).apply {
+        setOnAction {
+            onGroupCreate.handle(it)
+            isSelected = false
+        }
+    }
+
+
+    // endregion
+
     init {
         groupsProperty.addListener(ListChangeListener {
             while (it.next()) {
@@ -108,15 +121,16 @@ class CGroupBar : HBox() {
 
     private fun createGroupItem(transGroup: TransGroup, groupId: Int) {
         if (children.isEmpty()) {
-            add(HBox()) { hgrow = Priority.ALWAYS }
-            add(CGroup("+", Color.BLACK)) { setOnAction { onGroupCreate.handle(it); isSelected = false } }
+            children.add(holder)
+            children.add(adder)
         }
 
-        children.add(groupId, CGroup().apply {
+        val node = CGroup().apply {
             nameProperty().bind(transGroup.nameProperty())
             colorProperty().bind(transGroup.colorProperty())
             setOnAction { selectionModel.select(transGroup) }
-        })
+        }
+        children.add(groupId, node)
     }
     private fun removeGroupItem(transGroup: TransGroup) {
         if (children.size == 3) {
@@ -124,12 +138,11 @@ class CGroupBar : HBox() {
             children.removeLast()
         }
 
-        children.remove(children.filterIsInstance(CGroup::class.java).first {
-            it.name == transGroup.name
-        }.apply {
+        val node = children.filterIsInstance(CGroup::class.java).first { it.name == transGroup.name }.apply {
             nameProperty().unbind()
             colorProperty().unbind()
-        })
+        }
+        children.remove(node)
     }
 
     private inner class GroupBarSelectionModel : SingleSelectionModel<TransGroup>() {
@@ -149,7 +162,7 @@ class CGroupBar : HBox() {
         override fun getItemCount(): Int = groups.size
 
         /**
-         * Overridden to not set if `selectedItem` is it not contained in the `items`.
+         * Override. Do not set if `selectedItem` is it not contained in the `items`.
          */
         override fun select(transGroup: TransGroup?) {
             if (transGroup == null || transGroup !in groups) {

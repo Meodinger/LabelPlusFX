@@ -412,7 +412,6 @@ class View(private val state: State) : BorderPane() {
                     center(cTreeView) {
                         contextMenu = cTreeMenu
                         disableProperty().bind(!state.openedProperty())
-
                         setCellFactory { object : TreeCell<String>() {
 
                             private var markListener: ChangeListener<Boolean> = onNew {
@@ -422,23 +421,25 @@ class View(private val state: State) : BorderPane() {
                             init {
                                 this.textFillProperty()
                                 treeItemProperty().addListener { _, oldV, newV ->
-                                    if (oldV is CTreeLabelItem) oldV.markedProperty().removeListener(markListener)
-                                    if (newV is CTreeLabelItem) newV.markedProperty().addListener(markListener)
+                                    if (oldV is CTreeLabelItem) oldV.transLabel.markedProperty().removeListener(markListener)
+                                    if (newV is CTreeLabelItem) newV.transLabel.markedProperty().addListener(markListener)
                                 }
                             }
 
                             override fun updateItem(item: String?, empty: Boolean) {
                                 super.updateItem(item, empty)
+                                textFill = Color.BLACK
 
                                 val actualItem = treeItem
                                 if (item != null && !empty) {
                                     text = item
                                     graphic = actualItem.graphic
-                                    textFill = if (actualItem is CTreeLabelItem && actualItem.isMarked) Color.RED else Color.BLACK
+                                    if (actualItem is CTreeLabelItem && actualItem.transLabel.isMarked) {
+                                        textFill = Color.RED
+                                    }
                                 } else {
                                     text = emptyString()
                                     graphic = null
-                                    textFill = Color.BLACK
                                 }
                             }
                         } }

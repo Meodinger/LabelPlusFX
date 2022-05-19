@@ -169,7 +169,7 @@ class CTreeMenu(
             LabelAction(
                 ActionType.CHANGE, state,
                 state.currentPicName,
-                state.transFile.getTransLabel(state.currentPicName, it.index),
+                state.transFile.getTransLabel(state.currentPicName, it.transLabel.index),
                 newGroupId = newGroupId
             )
         }
@@ -188,7 +188,7 @@ class CTreeMenu(
             LabelAction(
                 ActionType.REMOVE, state,
                 state.currentPicName,
-                state.transFile.getTransLabel(state.currentPicName, it.index),
+                state.transFile.getTransLabel(state.currentPicName, it.transLabel.index),
             )
         }))
     }
@@ -222,12 +222,12 @@ class CTreeMenu(
                 // NOTE: we could not store name here because the name may change
                 val groupItem = selectedItems[0] as CTreeGroupItem
 
-                gChangeColorPicker.value = groupItem.color
+                gChangeColorPicker.value = groupItem.transGroup.color
                 gDeleteItem.isDisable = state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(groupItem.value))
 
-                gRenameItem.setOnAction { gRenameHandler.handle(ActionEvent(groupItem.name, gRenameItem)) }
-                gChangeColorPicker.setOnAction { gChangeColorHandler.handle(ActionEvent(groupItem.name, gChangeColorPicker)) }
-                gDeleteItem.setOnAction { gDeleteHandler.handle(ActionEvent(groupItem.name, gDeleteItem)) }
+                gRenameItem.setOnAction { gRenameHandler.handle(ActionEvent(groupItem.transGroup.name, gRenameItem)) }
+                gChangeColorPicker.setOnAction { gChangeColorHandler.handle(ActionEvent(groupItem.transGroup.name, gChangeColorPicker)) }
+                gDeleteItem.setOnAction { gDeleteHandler.handle(ActionEvent(groupItem.transGroup.name, gDeleteItem)) }
 
                 items.add(gRenameItem)
                 items.add(gChangeColorItem)
@@ -235,8 +235,8 @@ class CTreeMenu(
                 items.add(gDeleteItem)
             } else if (rootCount == 0 && groupCount > 1 && labelCount == 0) {
                 // multi groups
-                // NOTE: we cannot change names here so it is safe to store names
-                val groupNames = selectedItems.map { (it as CTreeGroupItem).name }
+                // NOTE: we cannot change names here, so it is safe to store names
+                val groupNames = selectedItems.map { (it as CTreeGroupItem).transGroup.name }
 
                 gDeleteItem.isDisable = groupNames.any { state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(it)) }
                 gDeleteItem.setOnAction { groupNames.forEach { gDeleteHandler.handle(ActionEvent(it, gDeleteItem)) } }

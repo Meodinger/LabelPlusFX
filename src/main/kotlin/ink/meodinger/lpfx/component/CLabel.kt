@@ -26,7 +26,7 @@ import javafx.scene.text.Text
  */
 
 /**
- * A Label component for LabelPane
+ * A Control that represents a TransLabel
  */
 class CLabel(
     labelIndex:  Int    = -1,
@@ -52,6 +52,16 @@ class CLabel(
      * @see indexProperty
      */
     var index: Int by indexProperty
+
+    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(labelColor)
+    /**
+     * The color of the CLabel
+     */
+    fun colorProperty(): ObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
+    var color: Color by colorProperty
 
     private val radiusProperty: DoubleProperty = SimpleDoubleProperty(labelRadius)
     /**
@@ -83,16 +93,6 @@ class CLabel(
      */
     var colorOpacity: Double by colorOpacityProperty
 
-    private val colorProperty: ObjectProperty<Color> = SimpleObjectProperty(labelColor)
-    /**
-     * The color of the CLabel
-     */
-    fun colorProperty(): ObjectProperty<Color> = colorProperty
-    /**
-     * @see colorProperty
-     */
-    var color: Color by colorProperty
-
     // endregion
 
     // region Skin
@@ -114,15 +114,9 @@ class CLabel(
         init {
             val pickerRadiusBinding = control.radiusProperty.transform { it.coerceAtLeast(MIN_PICK_RADIUS) }.primitive()
 
-            root.apply root@{
+            root.apply {
                 prefWidthProperty().bind(pickerRadiusBinding * 2)
                 prefHeightProperty().bind(pickerRadiusBinding * 2)
-            }
-
-            circle.apply {
-                radiusProperty().bind(control.radiusProperty)
-                centerXProperty().bind(pickerRadiusBinding)
-                centerYProperty().bind(pickerRadiusBinding)
             }
             text.apply {
                 textOrigin = VPos.CENTER
@@ -130,8 +124,7 @@ class CLabel(
                 textProperty().bind(control.indexProperty.asString())
                 fillProperty().bind(Bindings.createObjectBinding(
                     {
-                        if (control.isTextOpaque) Color.WHITE
-                        else Color.WHITE.opacity(control.colorOpacity)
+                        if (control.isTextOpaque) Color.WHITE else Color.WHITE.opacity(control.colorOpacity)
                     }, control.textOpaqueProperty, control.colorOpacityProperty
                 ))
                 fontProperty().bind(Bindings.createObjectBinding(
@@ -142,13 +135,18 @@ class CLabel(
                 layoutXProperty().bind(Bindings.createDoubleBinding(
                     {
                         pickerRadiusBinding.get() - boundsInLocal.width / 2
-                    }, pickerRadiusBinding, control.indexProperty
+                    }, control.indexProperty, pickerRadiusBinding
                 ))
                 layoutYProperty().bind(Bindings.createDoubleBinding(
                     {
                         pickerRadiusBinding.get()
-                    }, pickerRadiusBinding, control.indexProperty
+                    }, control.indexProperty, pickerRadiusBinding
                 ))
+            }
+            circle.apply {
+                radiusProperty().bind(control.radiusProperty)
+                centerXProperty().bind(pickerRadiusBinding)
+                centerYProperty().bind(pickerRadiusBinding)
             }
 
             // Update

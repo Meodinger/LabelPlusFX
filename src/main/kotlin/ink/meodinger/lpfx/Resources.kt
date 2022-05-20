@@ -40,7 +40,7 @@ fun loadAsBytes(path: String): ByteArray = loadAsStream(path).readAllBytes()
  */
 fun loadAsImage(path: String): Image = Image(loadAsURL(path).toString())
 
-// ---------- Images ---------- //
+// region Images
 
 /**
  * General Icon Radius
@@ -86,8 +86,9 @@ val INIT_IMAGE: Image by lazy {
  */
 val SAMPLE_IMAGE: Image by lazy { loadAsImage("/file/image/sample_320x320.jpg") }
 
+// endregion
 
-// ---------- Files ---------- //
+// region Files
 
 /**
  * The PS-Script
@@ -102,8 +103,9 @@ val TEMPLATE_EN: ByteArray by lazy { loadAsBytes("/file/script/ps_script_res/en.
  */
 val TEMPLATE_ZH: ByteArray by lazy { loadAsBytes("/file/script/ps_script_res/zh.psd") }
 
+// endregion
 
-// ---------- I18N ---------- //
+// region I18N
 
 /**
  * Language
@@ -127,3 +129,5 @@ val I18N = ResourceBundle.getBundle("ink.meodinger.lpfx.Lang", lang)!!
  * Provide map-like getter
  */
 operator fun ResourceBundle.get(key: String): String = this.getString(key)
+
+// endregion

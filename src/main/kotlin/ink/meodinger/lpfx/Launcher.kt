@@ -48,10 +48,10 @@ fun main(vararg args: String) {
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
         System.err.println("<UncaughtHandler>: On thread ${t.name}:\n${e.stackTraceToString()}")
 
-        if (!Logger.isStarted) return@setDefaultUncaughtExceptionHandler
-
-        Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
-        Logger.exception(e)
+        if (Logger.isStarted) {
+            Logger.error("Exception uncaught in Thread: ${t.name}", "Other")
+            Logger.exception(e)
+        }
     }
 
     // Immediately log exception and send if Logger started successfully
@@ -61,7 +61,6 @@ fun main(vararg args: String) {
         if (Logger.isStarted) {
             Logger.fatal("Launch failed", "Main")
             Logger.exception(e)
-
             try {
                 sendMailSync("Fatal Error!", Logger.log)
             } catch (_: Throwable) {

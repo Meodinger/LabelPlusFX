@@ -2,13 +2,13 @@ package ink.meodinger.lpfx.component.properties
 
 import ink.meodinger.lpfx.*
 import ink.meodinger.lpfx.component.common.CComboBox
+import ink.meodinger.lpfx.component.dialog.showError
+import ink.meodinger.lpfx.io.sendMail
 import ink.meodinger.lpfx.options.Logger
 import ink.meodinger.lpfx.options.Logger.LogLevel
 import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.options.Settings
 import ink.meodinger.lpfx.util.component.*
-import ink.meodinger.lpfx.component.dialog.showError
-import ink.meodinger.lpfx.io.sendMail
 import ink.meodinger.lpfx.util.event.isDoubleClick
 import ink.meodinger.lpfx.util.property.onChange
 
@@ -47,7 +47,7 @@ class DialogLogs : AbstractPropertiesDialog() {
             private val formatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         }
 
-        val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.name.toLongOrNull() ?: -1)))
+        val startTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.nameWithoutExtension.toLongOrNull() ?: -1)))
         val endTimeProperty: ReadOnlyStringProperty = SimpleStringProperty(formatter.format(Date(file.lastModified())))
         val sizeProperty: ReadOnlyStringProperty = SimpleStringProperty(String.format("%.2f KB", (file.length() / 1024.0)))
         val nameProperty: ReadOnlyStringProperty = SimpleStringProperty(file.name)

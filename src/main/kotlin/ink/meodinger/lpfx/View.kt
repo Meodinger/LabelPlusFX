@@ -18,8 +18,8 @@ import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
-import javafx.beans.value.ChangeListener
 
+import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
 import javafx.geometry.Insets
@@ -76,14 +76,14 @@ class View(private val state: State) : BorderPane() {
     val bSwitchViewMode: Button = Button()
 
     /**
-     * StatsBar label: backup information
-     */
-    val lBackup: Label = Label()
-
-    /**
      * StatsBar label: location
      */
     val lLocation: Label = Label()
+
+    /**
+     * StatsBar label: backup information
+     */
+    val lBackup: Label = Label()
 
     /**
      * StatsBar label: accumulate editing time
@@ -470,27 +470,29 @@ class View(private val state: State) : BorderPane() {
             add(Separator()) {
                 orientation = Orientation.VERTICAL
             }
-            add(lBackup) {
+            add(lLocation) {
+                text = "-- : --"
                 padding = generalPadding
-                prefWidth = 150.0
-                text = I18N["stats.not_backed"]
+                prefWidth = 120.0
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
             }
-            add(lLocation) {
+            add(lBackup) {
+                text = I18N["stats.not_backed"]
                 padding = generalPadding
-                prefWidth = 90.0
-                text = "-- : --"
+                prefWidth = 150.0
             }
             add(Separator()) {
                 orientation = Orientation.VERTICAL
             }
             add(lAccEditTime) {
+                text = String.format(I18N["stats.accumulator.s"], "--:--:--")
                 padding = generalPadding
                 prefWidth = 180.0
-                text = String.format(I18N["stats.accumulator.s"], "--:--:--")
             }
+            // TODO: Add a ResizeGrid.
+            //  see https://docs.microsoft.com/en-us/dotnet/api/system.windows.controls.primitives.resizegrip?view=windowsdesktop-6.0
 
             statsBar = this
         }

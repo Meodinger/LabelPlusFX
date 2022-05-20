@@ -73,8 +73,8 @@ class Controller(private val state: State) {
     private val view            = state.view
     private val bSwitchViewMode = view.bSwitchViewMode
     private val bSwitchWorkMode = view.bSwitchWorkMode
-    private val lBackup         = view.lBackup
     private val lLocation       = view.lLocation
+    private val lBackup         = view.lBackup
     private val lAccEditTime    = view.lAccEditTime
     private val cPicBox         = view.cPicBox
     private val cGroupBox       = view.cGroupBox
@@ -149,7 +149,13 @@ class Controller(private val state: State) {
                         imageByFX
                     } else {
                         Logger.warning("Load `$file` as FXImage failed", "Controller")
-                        Logger.exception(imageByFX.exception)
+
+                        // These exceptions are internal, so we cannot use `is`.
+                        when (imageByFX.exception::class.java.simpleName) {
+                            // No loader for image data (or url is null/empty, which will not happen)
+                            "ImageStorageException" -> doNothing()
+                            else -> Logger.exception(imageByFX.exception)
+                        }
 
                         try {
                             val imageByIO = ImageIO.read(FileInputStream(file))?.let { SwingFXUtils.toFXImage(it, null) }

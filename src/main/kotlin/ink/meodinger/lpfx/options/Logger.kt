@@ -30,7 +30,6 @@ object Logger {
         FATAL("FATAL");
 
         override fun toString(): String = type
-
     }
 
     private var writer: Writer by once()
@@ -40,12 +39,25 @@ object Logger {
     // private var depth = 0
     // private var mark = depth
 
+    /**
+     * Actual log file. Name: {timestamp}.txt
+     */
     val log: File
+
+    /**
+     * Log Level
+     * @see LogLevel
+     */
     var level: LogLevel = LogLevel.DEBUG
+
+    /**
+     * Whether the Logger started
+     */
     var isStarted: Boolean = false
+        private set
 
     init {
-        val path = Options.logs.resolve(Date().time.toString())
+        val path = Options.logs.resolve("${Date().time}.txt")
         if (Files.notExists(path)) Files.createFile(path)
         log = path.toFile()
     }

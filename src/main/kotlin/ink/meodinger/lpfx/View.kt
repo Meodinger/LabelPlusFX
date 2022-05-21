@@ -11,7 +11,6 @@ import ink.meodinger.lpfx.util.collection.contact
 import ink.meodinger.lpfx.util.component.*
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.image.resizeByRadius
-import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.property.*
 import ink.meodinger.lpfx.util.string.deleteTrailing
 import ink.meodinger.lpfx.util.string.emptyString
@@ -19,6 +18,10 @@ import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.translator.convert2Simplified
 import ink.meodinger.lpfx.util.translator.convert2Traditional
 
+import javafx.animation.Interpolator
+import javafx.animation.KeyFrame
+import javafx.animation.KeyValue
+import javafx.animation.Timeline
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.event.ActionEvent
@@ -37,6 +40,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.stage.FileChooser
 import javafx.util.Callback
+import javafx.util.Duration
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -121,8 +125,8 @@ class View(private val state: State) : BorderPane() {
     val cTransArea: CLigatureArea = CLigatureArea()
 
     // Private Components
+    private val statsBar: HBox = HBox()
     private val cTreeMenu: CTreeMenu = CTreeMenu(state, cTreeView)
-    private var statsBar: HBox by once()
 
     // endregion
 
@@ -330,6 +334,8 @@ class View(private val state: State) : BorderPane() {
             }
         }
         center(SplitPane()) {
+            orientation = Orientation.HORIZONTAL
+
             add(BorderPane()) {
                 top(cGroupBar) {
                     setOnGroupCreate { cTreeMenu.triggerGroupCreate() }
@@ -446,6 +452,26 @@ class View(private val state: State) : BorderPane() {
                     }
                 }
                 add(TitledPane()) {
+                    var lastDividerPosition = 0.0
+                    expandedProperty().addListener(onNew {
+                        if (!it) {
+                            lastDividerPosition = dividerPositions[0]
+                        } else {
+                            /**
+                             * @see javafx.scene.control.skin.TitledPaneSkin.doAnimationTransition
+                             */
+                            val keyValue = KeyValue(dividers[0].positionProperty(), lastDividerPosition, Interpolator.LINEAR)
+                            /**
+                             * @see javafx.scene.control.skin.TitledPaneSkin.TRANSITION_DURATION
+                             */
+                            val timeline = Timeline(KeyFrame(Duration.millis(350.0), keyValue))
+                            timeline.play()
+                        }
+                    })
+
+                    maxHeightProperty().bind(expandedProperty().transform {
+                        if (it) Double.MAX_VALUE else prefHeight
+                    })
                     textProperty().bind(state.currentLabelIndexProperty().transform {
                         if (it == NOT_FOUND) emptyString() else it.toString()
                     })
@@ -456,13 +482,13 @@ class View(private val state: State) : BorderPane() {
                         fontProperty().bindBidirectional(Preference.textAreaFontProperty())
                     }
                 }
-
+                // Set divider after added children, or there were no dividers
                 dividers[0].positionProperty().bindBidirectional(Preference.rightDividerPositionProperty())
             }
-
+            // Set divider after added children, or there were no dividers
             dividers[0].positionProperty().bindBidirectional(Preference.mainDividerPositionProperty())
         }
-        bottom(HBox()) {
+        bottom(statsBar) {
             val generalPadding = Insets(4.0, 8.0, 4.0, 8.0)
             add(HBox()) {
                 hgrow = Priority.ALWAYS
@@ -491,10 +517,10 @@ class View(private val state: State) : BorderPane() {
                 padding = generalPadding
                 prefWidth = 180.0
             }
-            // TODO: Add a ResizeGrid.
-            //  see https://docs.microsoft.com/en-us/dotnet/api/system.windows.controls.primitives.resizegrip?view=windowsdesktop-6.0
-
-            statsBar = this
+            add(CResizeGrid()) {
+                prefHeightProperty().bind(statsBar.heightProperty())
+                prefWidthProperty().bind(statsBar.heightProperty())
+            }
         }
 
         if (!Preference.isShowStatsBar) children.remove(statsBar)

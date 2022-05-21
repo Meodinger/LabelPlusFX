@@ -82,9 +82,9 @@ var Node.anchorY: Double
  * @see javafx.scene.Node.layoutX
  * @see javafx.scene.Node.boundsInLocalProperty
  */
-var Node.anchorL: Double
+var Node.anchorR: Double
     get() = AnchorPane.getRightAnchor(this) ?: (layoutX + boundsInLocal.width)
-    set(value) { AnchorPane.setLeftAnchor(this, value) }
+    set(value) { AnchorPane.setRightAnchor(this, value) }
 
 /**
  * Get AnchorPane anchor - Bottom. Getter return layoutY + localBoundsHeight if null

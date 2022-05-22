@@ -452,26 +452,32 @@ class View(private val state: State) : BorderPane() {
                     }
                 }
                 add(TitledPane()) {
+                    // The max-height of TitledPane is the same as pref-height by default.
+                    // If we set it to Double.MAX_VALUE, the divider position will not change
+                    // when expand/collapse. If we only let it be MAX when it is expanded,
+                    // the divider position will have a jump when collapse if actual width is
+                    // bigger than pref-width. So we set it to MAX and manually control the position.
+                    maxHeight = Double.MAX_VALUE // Make TitledPane cannot change divider position
+
+                    // Manually control the divider animation
                     var lastDividerPosition = 0.0
                     expandedProperty().addListener(onNew {
-                        if (!it) {
-                            lastDividerPosition = dividerPositions[0]
-                        } else {
-                            /**
-                             * @see javafx.scene.control.skin.TitledPaneSkin.doAnimationTransition
-                             */
+                        if (it) {
+                            // @see javafx.scene.control.skin.TitledPaneSkin.doAnimationTransition
                             val keyValue = KeyValue(dividers[0].positionProperty(), lastDividerPosition, Interpolator.LINEAR)
-                            /**
-                             * @see javafx.scene.control.skin.TitledPaneSkin.TRANSITION_DURATION
-                             */
+                            // @see javafx.scene.control.skin.TitledPaneSkin.TRANSITION_DURATION
+                            val timeline = Timeline(KeyFrame(Duration.millis(350.0), keyValue))
+                            // Start animation
+                            timeline.play()
+                        } else {
+                            lastDividerPosition = dividerPositions[0]
+
+                            val keyValue = KeyValue(dividers[0].positionProperty(), 1.0, Interpolator.LINEAR)
                             val timeline = Timeline(KeyFrame(Duration.millis(350.0), keyValue))
                             timeline.play()
                         }
                     })
 
-                    maxHeightProperty().bind(expandedProperty().transform {
-                        if (it) Double.MAX_VALUE else prefHeight
-                    })
                     textProperty().bind(state.currentLabelIndexProperty().transform {
                         if (it == NOT_FOUND) emptyString() else it.toString()
                     })

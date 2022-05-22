@@ -63,7 +63,7 @@ val IMAGE_INFO   : Image by lazy { loadAsImage("/file/image/dialog/Info.png") }
 /**
  * Image indicates WARNING
  */
-val IMAGE_WARNING: Image by lazy { loadAsImage("/file/image/dialog/Alert.png") }
+val IMAGE_WARNING: Image by lazy { loadAsImage("/file/image/dialog/Warning.png") }
 /**
  * Image indicates ERROR
  */
@@ -78,13 +78,13 @@ val INIT_IMAGE: Image by lazy {
         .takeIf(File::exists)?.let {
             Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
                 ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
-        } ?: loadAsImage("/file/image/init_image.png")
+        } ?: loadAsImage("/file/image/init-image.png")
 }
 
 /**
  * Sample Image for label propertis preview
  */
-val SAMPLE_IMAGE: Image by lazy { loadAsImage("/file/image/sample_320x320.jpg") }
+val SAMPLE_IMAGE: Image by lazy { loadAsImage("/file/image/sample-320x320.jpg") }
 
 // endregion
 

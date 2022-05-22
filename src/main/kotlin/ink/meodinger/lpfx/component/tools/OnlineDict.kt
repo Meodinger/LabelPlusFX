@@ -96,6 +96,14 @@ class OnlineDict : Stage() {
                 }
                 add(TextField()) {
                     hgrow = Priority.ALWAYS
+                    setOnAction {
+                        outputFlow.setText(I18N["dict.fetching"], FONT_SIZE)
+                        outputFlow.flow()
+                        when (transState) {
+                            TransState.WORD -> searchWeblio(text)
+                            TransState.SENTENCE -> translate(text)
+                        }
+                    }
                     addEventFilter(KeyEvent.KEY_PRESSED) {
                         if (it.code != KeyCode.TAB) return@addEventFilter
                         // Mark immediately when this event will be consumed
@@ -103,21 +111,14 @@ class OnlineDict : Stage() {
 
                         transState = TransState.values()[(transState.ordinal + 1) % TransState.values().size]
                     }
-                    addEventHandler(MouseEvent.MOUSE_CLICKED) {
+
+                    if (Config.enableIMEAssistance) addEventHandler(MouseEvent.MOUSE_CLICKED) {
                         if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
                             setImeConversionMode(
                                 getCurrentWindow(),
                                 ImeSentenceMode.AUTOMATIC,
                                 ImeConversionMode.JA_HIRAGANA
                             )
-                        }
-                    }
-                    setOnAction {
-                        outputFlow.setText(I18N["dict.fetching"], FONT_SIZE)
-                        outputFlow.flow()
-                        when (transState) {
-                            TransState.WORD -> searchWeblio(text)
-                            TransState.SENTENCE -> translate(text)
                         }
                     }
                 }
@@ -133,12 +134,12 @@ class OnlineDict : Stage() {
             }
         })
 
-        focusedProperty().addListener(onNew {
+        if (Config.enableIMEAssistance) focusedProperty().addListener(onNew {
             // We do not set the IMEConversion mode here because switch language need time.
             if (it) {
                 oriLang = getCurrentLanguage()
                 // Focus gain will take place after the rendering, so it's safe to set by sync.
-                availableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+                AvailableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
             } else {
                 // If set immediately after lose focus will cause focus on other stages fail.
                 // Use runLater to set language after the rendering.
@@ -149,7 +150,7 @@ class OnlineDict : Stage() {
     }
 
     private fun searchWeblioSync(word: String) {
-        // URL encode the word to make sure we search the correct thing
+        // URL-encode the word to make sure we search the correct thing
         val weblioURL = WEBLIO_API + URLEncoder.encode(word, StandardCharsets.UTF_8)
         Logger.debug("Dictionary: Fetching URL $weblioURL", "Dictionary")
         val weblioConnection = URL(weblioURL).openConnection().apply { connect() } as HttpsURLConnection

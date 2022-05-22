@@ -31,6 +31,15 @@ object Config {
     val isMac: Boolean = OS.contains("mac")
 
     /**
+     * Whether SystemProxy enabled
+     */
+    var enableProxy: Boolean = true
+    /**
+     * Whether JNI enabled
+     */
+    var enableJNI: Boolean = true
+
+    /**
      * Monospace font. Used in CLabel/CLabelPane
      */
     val MonoFont: String = if (isWin) "Terminal" else if (isMac) "Monaco" else "Monospace"
@@ -40,15 +49,6 @@ object Config {
     val TextFont: String = if (isWin) "SimSun" else if (isMac) "" else ""
 
     /**
-     * Whether JNI enabled
-     */
-    var enableJNI:   Boolean = true
-    /**
-     * Whether SystemProxy enabled
-     */
-    var enableProxy: Boolean = true
-
-    /**
      * Whether SystemTray is enabled. Used in BOSS key
      */
     val supportSysTray: Boolean = SystemTray.isSupported()
@@ -56,6 +56,11 @@ object Config {
     /**
      * The working dir of current process
      */
-    val workingDir:  File    = File(System.getProperty("user.dir"))
+    val workingDir: File = File(System.getProperty("user.dir"))
+
+    /**
+     * Whether IME assistance enabled
+     */
+    val enableIMEAssistance: Boolean get() = isWin && enableJNI
 
 }

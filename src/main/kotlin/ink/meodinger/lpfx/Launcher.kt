@@ -27,21 +27,21 @@ fun main(vararg args: String) {
     // CLI commands to App args
     val appArgs = ArrayList<String>()
     for (arg in args) when (arg) {
-        "--disable-jni"   -> Config.enableJNI   = false
         "--disable-proxy" -> Config.enableProxy = false
+        "--disable-jni"   -> Config.enableJNI   = false
         else -> appArgs.add(arg)
-    }
-
-    // Load IME-related jni library
-    if (Config.enableJNI) {
-        if (Config.isWin) System.loadLibrary("IMEWrapper")
-        System.err.println("Loaded JNI Libraries")
     }
 
     // Use System Proxies
     if (Config.enableProxy) {
         System.setProperty("java.net.useSystemProxies", "true")
         System.err.println("Enabled System Proxies")
+    }
+
+    // Load IME-related jni library
+    if (Config.enableJNI) {
+        if (Config.isWin) System.loadLibrary("IMEWrapper")
+        System.err.println("Loaded JNI Libraries")
     }
 
     // Global Uncaught Exception Handler

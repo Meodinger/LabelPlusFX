@@ -32,7 +32,7 @@ object Preference : AbstractProperties("Preference") {
         CProperty(MAIN_DIVIDER, 0.618),
         CProperty(RIGHT_DIVIDER, 0.618),
         CProperty(TEXTAREA_FONT_SIZE, 24),
-        CProperty(SHOW_STATS_BAR, false),
+        CProperty(SHOW_STATS_BAR, true),
         CProperty(LAST_UPDATE_NOTICE, 0)
     )
 

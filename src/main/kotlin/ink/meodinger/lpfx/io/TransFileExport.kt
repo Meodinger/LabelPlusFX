@@ -65,13 +65,10 @@ private fun exportLP(file: File, transFile: TransFile) {
 @Throws(IOException::class)
 private fun exportMeo(file: File, transFile: TransFile) {
     using {
-        val stream = FileOutputStream(file).autoClose()
-        val writer = BufferedWriter(OutputStreamWriter(stream, StandardCharsets.UTF_8))
+        val writer = BufferedWriter(OutputStreamWriter(FileOutputStream(file), StandardCharsets.UTF_8)).autoClose()
 
         writer.write(transFile.toJsonString())
-
         writer.flush()
-        stream.flush()
     } catch { e: IOException ->
         throw e
     } finally ::doNothing

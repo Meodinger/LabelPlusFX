@@ -620,8 +620,8 @@ class View(private val state: State) : BorderPane() {
     private fun bakRecovery() {
         if (state.controller.stay()) return
 
-        chooserBackup.initialDirectory = state.getBakFolder() ?: CFileChooser.lastDirectory
-        chooserFile.initialDirectory = state.getFileFolder() ?: CFileChooser.lastDirectory
+        chooserBackup.initialDirectory = if (state.isOpened) state.getBakFolder() else CFileChooser.lastDirectory
+        chooserFile.initialDirectory = if (state.isOpened) state.getFileFolder() else CFileChooser.lastDirectory
         val bak = chooserBackup.showOpenDialog(state.stage) ?: return
 
         val filename  = "Re.${bak.parentFile?.parentFile?.name ?: "cover"}"
@@ -741,9 +741,9 @@ class View(private val state: State) : BorderPane() {
         val exportName =
             if (Settings.useExportNameTemplate) Settings.exportNameTemplate
                 .replace(Settings.VARIABLE_FILENAME, state.translationFile.nameWithoutExtension)
-                .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder()!!.name)
+                .replace(Settings.VARIABLE_DIRNAME, state.getFileFolder().name)
                 .replace(Settings.VARIABLE_PROJECT, state.transFile.projectFolder.name)
-            else state.getFileFolder()!!.name
+            else state.getFileFolder().name
 
         chooserFile.title = I18N["chooser.export"]
         chooserFile.initialFilename = "$exportName.${type.extension}"
@@ -753,7 +753,7 @@ class View(private val state: State) : BorderPane() {
         state.controller.export(file)
     }
     private fun exportTransPack() {
-        chooserPack.initialFilename = "${state.getFileFolder()!!.name}.$EXTENSION_PACK"
+        chooserPack.initialFilename = "${state.getFileFolder().name}.$EXTENSION_PACK"
 
         val file = chooserPack.showSaveDialog(state.stage) ?: return
         state.controller.pack(file)

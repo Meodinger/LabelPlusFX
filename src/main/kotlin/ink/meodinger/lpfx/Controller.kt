@@ -36,7 +36,6 @@ import javafx.scene.input.*
 import javafx.scene.layout.VBox
 import javafx.stage.DirectoryChooser
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.net.*
 import java.text.DateFormat
@@ -92,7 +91,7 @@ class Controller(private val state: State) {
     private val backupManager = TimerTaskManager(AUTO_SAVE_DELAY, AUTO_SAVE_PERIOD) {
         if (state.isChanged) {
             val time = Date()
-            val bak = state.getBakFolder()!!.resolve("${bakFileFormatter.format(time)}.$EXTENSION_BAK")
+            val bak = state.getBakFolder().resolve("${bakFileFormatter.format(time)}.$EXTENSION_BAK")
             try {
                 export(bak, state.transFile)
                 Platform.runLater {
@@ -140,8 +139,10 @@ class Controller(private val state: State) {
         {
             val file = state.getPicFileNow()
             if (file == null) {
+                // Not opened or not selected
                 INIT_IMAGE
             } else {
+                // Opened and selected
                 if (file.exists()) {
                     val imageByFX = Image(file.toURI().toURL().toString())
 
@@ -158,7 +159,7 @@ class Controller(private val state: State) {
                         }
 
                         try {
-                            val imageByIO = ImageIO.read(FileInputStream(file))?.let { SwingFXUtils.toFXImage(it, null) }
+                            val imageByIO = ImageIO.read(file)?.let { SwingFXUtils.toFXImage(it, null) }
                             if (imageByIO != null) {
                                 imageByIO
                             } else {
@@ -177,7 +178,6 @@ class Controller(private val state: State) {
                 } else {
                     Logger.error("Picture `${file.path}` not exists", "Controller")
                     showError(state.stage, String.format(I18N["error.picture_not_exists.s"], file.path))
-
                     INIT_IMAGE
                 }
             }
@@ -489,7 +489,7 @@ class Controller(private val state: State) {
 
         // Default image auto-center
         val autoCenterListener = onChange<Number> {
-            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         }
         cLabelPane.widthProperty().addListener(autoCenterListener)
         cLabelPane.heightProperty().addListener(autoCenterListener)
@@ -892,7 +892,7 @@ class Controller(private val state: State) {
 
         // Auto backup
         backupManager.clear()
-        val bakDir = state.getBakFolder()!!
+        val bakDir = state.getBakFolder()
         if ((bakDir.exists() && bakDir.isDirectory) || bakDir.mkdir()) {
             backupManager.schedule()
             Logger.info("Scheduled auto-backup", "Controller")
@@ -1061,7 +1061,7 @@ class Controller(private val state: State) {
      * Backup immediately
      */
     fun emergency(): File? {
-        val bak = state.getBakFolder()!!.resolve("emergency.$EXTENSION_BAK")
+        val bak = state.getBakFolder().resolve("emergency.$EXTENSION_BAK")
         try {
             export(bak, state.transFile)
         } catch (e: IOException) {

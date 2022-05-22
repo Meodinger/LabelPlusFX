@@ -1,5 +1,6 @@
 package ink.meodinger.lpfx.options
 
+import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.using
 
 import java.io.IOException
@@ -26,8 +27,9 @@ abstract class AbstractProperties(val name: String) {
 
         @Throws(IOException::class)
         fun load(path: Path, instance: AbstractProperties) {
-            try {
-                val lines = Files.newBufferedReader(path).readLines()
+            using {
+                val reader = Files.newBufferedReader(path).autoClose()
+                val lines = reader.readLines()
                 var index = 0
 
                 while (index < lines.size) {
@@ -54,11 +56,11 @@ abstract class AbstractProperties(val name: String) {
                         instance[prop[0]].set(prop[1])
                     }
                 }
-            } catch (e: IndexOutOfBoundsException) {
+            } catch { e: IndexOutOfBoundsException ->
                 throw IOException("Load properties failed: KV format invalid").initCause(e)
-            } catch (e: IOException) {
+            } catch { e: IOException ->
                 throw IOException("Save properties I/O failed").initCause(e)
-            }
+            } finally ::doNothing
         }
 
         @Throws(IOException::class)
@@ -77,7 +79,7 @@ abstract class AbstractProperties(val name: String) {
                 }
             } catch { e: Exception ->
                 throw IOException("Save properties I/O failed").initCause(e)
-            }
+            } finally ::doNothing
         }
     }
 

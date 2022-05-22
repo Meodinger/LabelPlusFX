@@ -36,6 +36,11 @@ class State {
     var application: LabelPlusFX by once()
 
     /**
+     * Reference to the Controller. Available after started
+     */
+    var controller: Controller by once()
+
+    /**
      * Reference to the Primary Stage. Available after started
      */
     var stage: Stage by once()
@@ -44,11 +49,6 @@ class State {
      * Reference to the View. Available after started
      */
     var view: View by once()
-
-    /**
-     * Reference to the Controller. Available after started
-     */
-    var controller: Controller by once()
 
     // endregion
 
@@ -146,7 +146,7 @@ class State {
 
     /**
      * Get current picture's FileSystem file
-     * @return null if not opened of currentPicName isEmpty, else `TransFile::getFile`
+     * @return null if not opened or current-pic-name is empty, else call `TransFile::getFile`
      */
     fun getPicFileNow(): File? {
         return if (isOpened && currentPicName.isNotEmpty()) transFile.getFile(currentPicName) else null
@@ -155,15 +155,15 @@ class State {
     /**
      * Get current TransFile's FileSystem file's directory
      */
-    fun getFileFolder(): File? {
-        return if (isOpened) translationFile.parentFile else null
+    fun getFileFolder(): File {
+        return translationFile.parentFile
     }
 
     /**
      * Get current TransFile's FileSystem file's backup directory
      */
-    fun getBakFolder(): File? {
-        return if (isOpened) translationFile.parentFile.resolve(FOLDER_NAME_BAK) else null
+    fun getBakFolder(): File {
+        return translationFile.parentFile.resolve(FOLDER_NAME_BAK)
     }
 
     // endregion
@@ -197,7 +197,6 @@ class State {
      * Do an action
      */
     fun doAction(action: Action) {
-        Logger.info("Action committing", "State")
         undoStack.push(action.apply(Action::commit))
         redoStack.empty()
         Logger.info("Action committed", "State")
@@ -214,6 +213,7 @@ class State {
         if (!isUndoable) return
 
         redoStack.push(undoStack.pop().apply(Action::revert))
+        Logger.info("Action reverted", "State")
 
         canUndoProperty.set(!undoStack.isEmpty())
         redoableProperty.set(true)
@@ -226,6 +226,7 @@ class State {
         if (!isRedoable) return
 
         undoStack.push(redoStack.pop().apply(Action::commit))
+        Logger.info("Action re-committed", "State")
 
         canUndoProperty.set(true)
         redoableProperty.set(!redoStack.isEmpty())

@@ -70,6 +70,9 @@ private fun loadLP(file: File): TransFile {
     val lines = reader.readLines()
     val lineCount = lines.size
 
+    // Close the out-most reader/stream
+    reader.close()
+
     var pointer = 0
 
     /**

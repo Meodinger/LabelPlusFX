@@ -3,7 +3,6 @@ package ink.meodinger.lpfx
 import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 import java.net.URL
 import java.util.*
@@ -77,7 +76,7 @@ val INIT_IMAGE: Image by lazy {
     Config.workingDir.resolve("init-image.png")
         .takeIf(File::exists)?.let {
             Image(it.toURI().toURL().toString()).takeUnless(Image::isError)
-                ?: ImageIO.read(FileInputStream(it))?.let { image -> SwingFXUtils.toFXImage(image, null) }
+                ?: ImageIO.read(it)?.let { image -> SwingFXUtils.toFXImage(image, null) }
         } ?: loadAsImage("/file/image/init-image.png")
 }
 

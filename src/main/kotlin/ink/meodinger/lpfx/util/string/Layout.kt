@@ -44,7 +44,7 @@ fun shortenWideText(longText: String, maxWidth: Double, font: Font? = null): Str
             text.text += "..."
             builder.append(line).append("...")
 
-            // Fix: p should greater than 0 to hanldle "..." is wide enough case.
+            // Fix: p should greater than 0 to handle "..." is wide enough case.
             while (pointer > 0 && text.boundsInLocal.width > maxWidth) {
                 builder.deleteAt(pointer--)
                 text.text = builder.toString()

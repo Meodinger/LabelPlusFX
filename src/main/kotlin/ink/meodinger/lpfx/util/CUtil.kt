@@ -246,12 +246,12 @@ class AssignOnce<T> {
     private var _backing: T? = null
 
     /**
-     * Get the backing value, we assert user is sure that this field has been set when try getting
+     * Get the backing value, we assume user is sure that this field has been set before try getting
      */
     operator fun getValue(thisRef: Any, property: KProperty<*>): T = _backing!!
 
     /**
-     * Set the backing valye, make sure the value could be only set once
+     * Set the backing value, make sure the value only will be set once
      */
     operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         synchronized(this) {

@@ -60,7 +60,7 @@ class PictureAction(
         if (!state.transFile.transMapObservable.contains(picName))
             throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], picName))
 
-        @Suppress("DEPRECATION") state.transFile.getTransList(picName).forEach(state.transFile::installLabel)
+        @Suppress("DEPRECATION") state.transFile.getTransList(picName).forEach(state.transFile::disposeLabel)
         state.transFile.setFile(picName, null)
         state.transFile.transMapObservable.remove(picName)
 

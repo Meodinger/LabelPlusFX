@@ -30,8 +30,6 @@ class TransLabel @JsonCreator constructor(
     @JsonProperty("text")    text:    String = ""
 ) {
 
-    // TODO: Mark
-
     companion object {
 
         /**
@@ -105,7 +103,7 @@ class TransLabel @JsonCreator constructor(
     private var colorProperty: ObjectProperty<Color> = SimpleObjectProperty()
     /**
      * This property will be bound with the color-property of group that groupId refers to.
-     * The binding procedure should be done while TransFile initializing.
+     * The binding procedure should be done while TransFile initializing or Action committing.
      */
     fun colorProperty(): ReadOnlyObjectProperty<Color> = colorProperty
     /**

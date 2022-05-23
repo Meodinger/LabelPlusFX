@@ -30,8 +30,8 @@ private fun md5(text: String): String {
     }.toString()
 }
 private fun query(q: String, from: String, to: String): String {
-    val salt  = floor(Math.random() * 10000)
-    val sign  = md5("$ID$q$salt$KEY").lowercase()
+    val salt = floor(Math.random() * 10000)
+    val sign = md5("$ID$q$salt$KEY").lowercase()
 
     return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$ID&salt=$salt&sign=$sign"
 }

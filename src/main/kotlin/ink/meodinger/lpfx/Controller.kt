@@ -194,13 +194,11 @@ class Controller(private val state: State) {
         state.controller = this
 
         Logger.info("Controller initializing...", "Controller")
-
         init()
         bind()
         listen()
         effect()
         transform()
-
         Logger.info("Controller initialized", "Controller")
 
         // Display default image

@@ -10,8 +10,6 @@ import ink.meodinger.lpfx.util.string.deleteTrailingEOL
 import ink.meodinger.lpfx.util.string.fixed
 import ink.meodinger.lpfx.util.using
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import java.io.*
@@ -152,6 +150,10 @@ fun TransFile.toLPString(): String {
 fun TransFile.toJsonString(): String {
     return ObjectMapper()
         .enable(SerializationFeature.INDENT_OUTPUT)
-        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-        .writeValueAsString(TransFile(version, comment, groupList, sortedPicNames.associateWithTo(LinkedHashMap()) { transMap[it]!!.sortedBy(TransLabel::index) }))
+        .writeValueAsString(TransFile(
+            version,
+            comment,
+            groupList,
+            sortedPicNames.associateWithTo(LinkedHashMap()) { transMap[it]!!.sortedBy(TransLabel::index) }
+        ))
 }

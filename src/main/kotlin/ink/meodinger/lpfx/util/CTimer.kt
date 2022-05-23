@@ -62,8 +62,8 @@ class TimerTaskManager(
     var delay: Long
         get() = delayProperty.get()
         set(value) {
-            if (isRunning) throw IllegalStateException("You cannot change the delay when task is running")
-            if (value < 0) throw IllegalArgumentException("Delay must not be negative")
+            if (isRunning) throw IllegalStateException("Cannot change the delay while task running")
+            if (value <= 0) throw IllegalArgumentException("Delay should greater than 0")
             delayProperty.set(value)
         }
 
@@ -78,13 +78,13 @@ class TimerTaskManager(
     var interval: Long
         get() = intervalProperty.get()
         set(value) {
-            if (isRunning) throw IllegalStateException("You cannot change the period when task is running")
-            if (value < 0) throw IllegalArgumentException("Period must not be negative")
+            if (isRunning) throw IllegalStateException("Cannot change the interval while task running")
+            if (value <= 0) throw IllegalArgumentException("Interval should greater than 0")
             intervalProperty.set(value)
         }
 
     /**
-     * Start the timer task
+     * Start the timer task. If the timer already stared, do nothing.
      */
     fun schedule() {
         // if (running) throw IllegalStateException("Task already scheduled")
@@ -95,7 +95,7 @@ class TimerTaskManager(
     }
 
     /**
-     * Stop the timer task
+     * Stop the timer task. If the timer already stopped, do nothing.
      */
     fun clear() {
         // if (!running) throw IllegalStateException("Task not running")

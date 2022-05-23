@@ -140,7 +140,7 @@ infix fun NumberExpression.lt(other: Float): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: Double): BooleanBinding = lessThan(other)
 infix fun NumberExpression.lt(other: ObservableNumberValue): BooleanBinding = lessThan(other)
 
-// Transform, note that if overload with specified return type (at least Number) will have conficts.
+// Transform, note that if overload with specified return type (at least Number) will have conflicts.
 inline fun <R> IntegerExpression.transform(crossinline transformer: (Int) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
 inline fun <R> LongExpression.transform(crossinline transformer: (Long) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)
 inline fun <R> FloatExpression.transform(crossinline transformer: (Float) -> R): ObjectBinding<R> = Bindings.createObjectBinding({ transformer(get()) }, this)

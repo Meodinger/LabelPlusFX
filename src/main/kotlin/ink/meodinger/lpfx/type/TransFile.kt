@@ -19,7 +19,6 @@ import java.io.File
  * A MEO Translation file
  */
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.ANY)
 class TransFile @JsonCreator constructor(
     @JsonProperty("version")   version:   List<Int>                     = listOf(1, 0),
     @JsonProperty("comment")   comment:   String                        = DEFAULT_COMMENT_LIST[0],

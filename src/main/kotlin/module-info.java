@@ -30,11 +30,22 @@ module lpfx {
     opens ink.meodinger.lpfx.type to com.fasterxml.jackson.databind;
 
     exports ink.meodinger.lpfx;
-    exports ink.meodinger.lpfx.io;
-    exports ink.meodinger.lpfx.type;
-    exports ink.meodinger.lpfx.util;
-    exports ink.meodinger.lpfx.options;
+    exports ink.meodinger.lpfx.action;
     exports ink.meodinger.lpfx.component;
     exports ink.meodinger.lpfx.component.common;
+    exports ink.meodinger.lpfx.component.dialog;
     exports ink.meodinger.lpfx.component.properties;
+    exports ink.meodinger.lpfx.component.tools;
+    exports ink.meodinger.lpfx.ime;
+    exports ink.meodinger.lpfx.io;
+    exports ink.meodinger.lpfx.options;
+    exports ink.meodinger.lpfx.type;
+    exports ink.meodinger.lpfx.util;
+    exports ink.meodinger.lpfx.util.collection;
+    exports ink.meodinger.lpfx.util.component;
+    exports ink.meodinger.lpfx.util.event;
+    exports ink.meodinger.lpfx.util.file;
+    exports ink.meodinger.lpfx.util.property;
+    exports ink.meodinger.lpfx.util.string;
+
 }

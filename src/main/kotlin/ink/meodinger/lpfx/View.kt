@@ -425,7 +425,6 @@ class View(private val state: State) : BorderPane() {
                             }
 
                             init {
-                                this.textFillProperty()
                                 treeItemProperty().addListener { _, oldV, newV ->
                                     if (oldV is CTreeLabelItem) oldV.transLabel.markedProperty().removeListener(markListener)
                                     if (newV is CTreeLabelItem) newV.transLabel.markedProperty().addListener(markListener)

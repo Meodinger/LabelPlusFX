@@ -65,10 +65,9 @@ class TransFile @JsonCreator constructor(
     /**
      * Get the actual file of the given picture name
      * @param picName Name of target picture
-     * @return null if the trans-map does not contain the given name
+     * @return project-folder based file if the trans-map does not contain the given name
      */
-    fun getFile(picName: String): File? {
-        if (picName !in transMapObservable.keys) return null
+    fun getFile(picName: String): File {
         return fileMap[picName] ?: projectFolder.resolve(picName).also { setFile(picName, it) }
     }
 
@@ -87,7 +86,7 @@ class TransFile @JsonCreator constructor(
      * Check whether files of some pictures not exist
      */
     fun checkLost(): List<String> {
-        return transMapObservable.keys.filter { !getFile(it)!!.exists() }
+        return transMapObservable.keys.filter { !getFile(it).exists() }
     }
 
     // endregion

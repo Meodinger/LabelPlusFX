@@ -37,7 +37,7 @@ fun pack(target: File, transFile: TransFile, type: FileType) {
     }
     zip.zip(content.toByteArray(StandardCharsets.UTF_8), "/images/translation.${type.extension}")
 
-    for (picName in transFile.sortedPicNames) zip.zip(transFile.getFile(picName)!!, "/images/$picName")
+    for (picName in transFile.sortedPicNames) zip.zip(transFile.getFile(picName), "/images/$picName")
 
     zip.close()
 }

@@ -146,10 +146,9 @@ class State {
 
     /**
      * Get current picture's FileSystem file
-     * @return null if not opened or current-pic-name is empty, else call `TransFile::getFile`
      */
-    fun getPicFileNow(): File? {
-        return if (isOpened && currentPicName.isNotEmpty()) transFile.getFile(currentPicName) else null
+    fun getPicFileNow(): File {
+        return transFile.getFile(currentPicName)
     }
 
     /**

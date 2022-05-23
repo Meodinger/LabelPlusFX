@@ -106,7 +106,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
 
                             val lastIndex = newPicPaths.size - 1
                             for (j in newPicPaths.indices) {
-                                val oldPicFile = workingTransFile.getFile(picNames[i])!!
+                                val oldPicFile = workingTransFile.getFile(picNames[i])
                                 // check full filename & simple filename
                                 val fit =
                                     newPicPaths[j].name == oldPicFile.name || newPicPaths[j].nameWithoutExtension == oldPicFile.nameWithoutExtension
@@ -153,7 +153,7 @@ class SpecifyFiles(private val state: State) : Dialog<List<File?>>() {
         fileChooser.initialDirectory = state.transFile.projectFolder
         dirChooser.initialDirectory = state.transFile.projectFolder
 
-        files = MutableList(picCount) { workingTransFile.getFile(picNames[it])?.takeIf(File::exists) }
+        files = MutableList(picCount) { workingTransFile.getFile(picNames[it]).takeIf(File::exists) }
         labels = MutableList(picCount) { CRollerLabel().apply {
             prefWidth = 300.0
             text = files[it]?.takeIf(File::exists)?.let(File::getPath) ?: Unspecified

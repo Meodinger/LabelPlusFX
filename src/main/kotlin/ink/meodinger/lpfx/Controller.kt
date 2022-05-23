@@ -14,7 +14,6 @@ import ink.meodinger.lpfx.util.event.*
 import ink.meodinger.lpfx.util.file.*
 import ink.meodinger.lpfx.util.image.*
 import ink.meodinger.lpfx.util.property.*
-import ink.meodinger.lpfx.util.string.emptyString
 import ink.meodinger.lpfx.util.string.sortByDigit
 import ink.meodinger.lpfx.util.timer.TimerTaskManager
 
@@ -137,12 +136,12 @@ class Controller(private val state: State) {
     )
     private val imageBinding: ObjectBinding<Image> = Bindings.createObjectBinding(
         {
-            val file = state.getPicFileNow()
-            if (file == null) {
-                // Not opened or not selected
+            if (!state.isOpened) {
+                // Not opened
                 INIT_IMAGE
             } else {
                 // Opened and selected
+                val file = state.getPicFileNow()
                 if (file.exists()) {
                     val imageByFX = Image(file.toURI().toURL().toString())
 
@@ -435,7 +434,12 @@ class Controller(private val state: State) {
         // PictureBox
         cPicBox.itemsProperty().bind(picNamesBinding)
         cPicBox.indexProperty().addListener(onNew<Number, Int> {
-            state.currentPicName = state.transFile.sortedPicNames.getOrElse(it) { emptyString() }
+            if (state.isOpened) {
+                // PicBox index should never be -1 (value should never be null)
+                state.currentPicName = state.transFile.sortedPicNames[it]
+            } else {
+                // Closed, do nothing. Let State set current-pic-name to empty string
+            }
         })
         state.currentPicNameProperty().addListener(onNew {
             cPicBox.index = state.transFile.sortedPicNames.indexOf(it)
@@ -489,7 +493,7 @@ class Controller(private val state: State) {
 
         // Default image auto-center
         val autoCenterListener = onChange<Number> {
-            if (!state.getPicFileNow().exists()) cLabelPane.moveToCenter()
+            if (!state.isOpened || !state.getPicFileNow().exists()) cLabelPane.moveToCenter()
         }
         cLabelPane.widthProperty().addListener(autoCenterListener)
         cLabelPane.heightProperty().addListener(autoCenterListener)

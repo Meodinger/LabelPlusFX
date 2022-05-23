@@ -37,15 +37,14 @@ class PictureAction(
 ) : Action {
 
     private val oriTransList: List<TransLabel> = state.transFile.transMapObservable[targetPicName] ?: emptyList()
-    private val oriPicFile: File? = state.transFile.getFile(targetPicName)
+    private val oriPicFile: File = state.transFile.getFile(targetPicName)
 
-    private fun applyPicFile(picFile: File) {
-        val curFile = state.transFile.getFile(targetPicName)
-            ?: throw IllegalArgumentException(String.format(I18N["exception.action.picture_not_found.s"], targetPicName))
-
+    private fun applyPicFile(picFile: File?) {
+        val lastFile = state.transFile.getFile(targetPicName)
         state.transFile.setFile(targetPicName, picFile)
+        val currFile = state.transFile.getFile(targetPicName)
 
-        Logger.info("Change file of picture <$targetPicFile> ${curFile.path} -> ${picFile.path}", "Action")
+        Logger.info("Change file of picture <$targetPicFile> ${lastFile.path} -> ${currFile.path}", "Action")
     }
     private fun addPicture(picName: String, transList: List<TransLabel>, picFile: File?) {
         if (state.transFile.transMapObservable.contains(picName))
@@ -55,7 +54,7 @@ class PictureAction(
         state.transFile.setFile(picName, picFile)
         @Suppress("DEPRECATION") state.transFile.getTransList(picName).forEach(state.transFile::installLabel)
 
-        Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName)!!.path}", "Action")
+        Logger.info("Added picture <$picName>: ${state.transFile.getFile(picName).path}", "Action")
     }
     private fun removePicture(picName: String) {
         if (!state.transFile.transMapObservable.contains(picName))
@@ -72,7 +71,7 @@ class PictureAction(
         when (type) {
             ActionType.ADD    -> addPicture(targetPicName, emptyList(), targetPicFile)
             ActionType.REMOVE -> removePicture(targetPicName)
-            ActionType.CHANGE -> applyPicFile(targetPicFile!!)
+            ActionType.CHANGE -> applyPicFile(targetPicFile)
         }
     }
 
@@ -80,7 +79,7 @@ class PictureAction(
         when (type) {
             ActionType.ADD    -> removePicture(targetPicName)
             ActionType.REMOVE -> addPicture(targetPicName, oriTransList, oriPicFile)
-            ActionType.CHANGE -> applyPicFile(oriPicFile!!)
+            ActionType.CHANGE -> applyPicFile(oriPicFile)
         }
     }
 

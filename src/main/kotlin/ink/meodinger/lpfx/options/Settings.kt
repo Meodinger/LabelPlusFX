@@ -23,7 +23,7 @@ import kotlin.math.roundToInt
 /**
  * The settings that user set through CSettingsDialog
  */
-object Settings : AbstractProperties("Settings") {
+object Settings : AbstractProperties("Settings", Options.settings) {
 
     // ----- Constants ----- //
 
@@ -150,7 +150,7 @@ object Settings : AbstractProperties("Settings") {
 
     @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
-        load(Options.settings, this)
+        load(this)
 
         defaultGroupNameList        = FXCollections.observableList(this[DefaultGroupNameList].asStringList())
         defaultGroupColorHexList    = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
@@ -189,7 +189,7 @@ object Settings : AbstractProperties("Settings") {
         this[UseExportNameTemplate]   .set(useExportNameTemplate)
         this[ExportNameTemplate]      .set(exportNameTemplate)
 
-        save(Options.settings, this)
+        save(this)
     }
 
 }

@@ -18,7 +18,7 @@ import java.io.IOException
 /**
  * The recent files that user opens while using
  */
-object RecentFiles : AbstractProperties("Recent Files") {
+object RecentFiles : AbstractProperties("Recent Files", Options.recentFiles) {
 
     private const val MAX_SIZE = 20
     private const val RECENT   = "RecentFiles"
@@ -63,7 +63,7 @@ object RecentFiles : AbstractProperties("Recent Files") {
 
     @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
-        load(Options.recentFiles, this)
+        load(this)
 
         val recentPaths = this[RECENT].asStringList().map(::File)
         val progressPairList = this[PROGRESS].asPairList().map { it.first.toInt() to it.second.toInt() }
@@ -80,7 +80,7 @@ object RecentFiles : AbstractProperties("Recent Files") {
         this[RECENT].set(recentFiles)
         this[PROGRESS].set(recentFiles.map { progressMap[it.path] })
 
-        save(Options.recentFiles, this)
+        save(this)
     }
 
     fun add(file: File) {

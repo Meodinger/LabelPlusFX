@@ -1,9 +1,12 @@
 package ink.meodinger.lpfx.options
 
 import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.component.dialog.showError
 import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.get
+import ink.meodinger.lpfx.util.doNothing
+import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.once
 import ink.meodinger.lpfx.util.string.isMathematicalNatural
 
@@ -15,6 +18,7 @@ import java.nio.file.Path
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 import kotlin.io.path.name
+import kotlin.io.path.createTempFile
 import kotlin.system.exitProcess
 
 
@@ -37,13 +41,17 @@ object Options {
 
     private var profileDir: Path by once()
 
-    val preference:  Path get() = profileDir.resolve(FileName_Preference)
-    val settings:    Path get() = profileDir.resolve(FileName_Settings)
-    val recentFiles: Path get() = profileDir.resolve(FileName_RecentFiles)
-    val logs:        Path get() = profileDir.resolve(FolderName_Logs)
+    // region Paths
+
+    internal val preference:  Path by lazy { profileDir.resolve(FileName_Preference) }
+    internal val settings:    Path by lazy { profileDir.resolve(FileName_Settings) }
+    internal val recentFiles: Path by lazy { profileDir.resolve(FileName_RecentFiles) }
+    internal val logs:        Path by lazy { profileDir.resolve(FolderName_Logs) }
+
+    // endregion
 
     fun init(dirname: String = ".lpfx") {
-        profileDir = Paths.get(System.getProperty("user.home")).resolve(dirname)
+        profileDir = Paths.get(System.getProperty("user.home")).resolve(dirname).resolve(V.toString())
 
         // project data folder
         if (Files.notExists(profileDir)) Files.createDirectories(profileDir)
@@ -52,9 +60,9 @@ object Options {
 
     fun load() {
         try {
-            loadProperties(RecentFiles, recentFiles)
-            loadProperties(Preference, preference)
-            loadProperties(Settings, settings)
+            loadProperties(RecentFiles)
+            loadProperties(Preference)
+            loadProperties(Settings)
             cleanLogs()
 
             Logger.level = Settings.logLevel
@@ -78,29 +86,47 @@ object Options {
     }
 
     @Throws(IOException::class)
-    private fun loadProperties(instance: AbstractProperties, path: Path) {
-        if (Files.notExists(path)) Files.createFile(path)
+    private fun loadProperties(instance: AbstractProperties) {
+        // Unknown properties will be defaults, so we just need to
+        // make sure the file we will load exists.
+        if (Files.notExists(instance.path)) Files.createFile(instance.path)
 
         try {
             instance.load()
             Logger.info("Loaded ${instance.name}", "Options")
-        } catch (e: NumberFormatException) {
+        } catch (e: Throwable) {
+            // Copy invalid properties file to temp, prepare for sending
+            val tempFile = createTempFile().toFile()
+            try {
+                transfer(instance.path.toFile(), tempFile)
+            } catch (e: Throwable) {
+                doNothing()
+            } finally {
+                tempFile.deleteOnExit()
+            }
+
+            // Export a valid file and reload. Fatal IOException may occur here
             instance.useDefault()
-            AbstractProperties.save(path, instance)
+            AbstractProperties.save(instance)
             instance.load()
 
-            Logger.error("Load ${instance.name} properties failed", "Options")
+            Logger.error("Load ${instance.name} properties failed, using default", "Options")
             Logger.exception(e)
             showError(null, String.format(I18N["error.options.load_failed.s"], instance.name))
+            showException(null, e, tempFile)
         }
     }
 
     private fun saveProperties(instance: AbstractProperties) {
-        instance.save()
-        Logger.info("Saved ${instance.name}", "Options")
+        try {
+            instance.save()
+            Logger.info("Saved ${instance.name}", "Options")
+        } catch (e: Throwable) {
+            Logger.error("Save ${instance.name} properties failed", "Options")
+            Logger.exception(e)
+        }
     }
 
-    @Throws(IOException::class)
     private fun cleanLogs() {
         val failed = ArrayList<File>()
 
@@ -111,7 +137,7 @@ object Options {
                 .map(Path::toFile).collect(Collectors.toList())
                 .apply { sortByDescending(File::lastModified) }
                 .forEach { file ->
-                    val del = count++ > Logfile_MAXCOUNT || !file.name.isMathematicalNatural()
+                    val del = count++ > Logfile_MAXCOUNT || !file.nameWithoutExtension.isMathematicalNatural()
                     if (del && !file.delete()) failed.add(file)
                 }
         } catch (e : IOException) {
@@ -121,11 +147,11 @@ object Options {
         }
 
         if (failed.isNotEmpty()) {
+            val names = failed.joinToString("\n", transform = File::getName)
+            Logger.warning("Some error occurred when cleaning following old logs: \n$names", "Options")
+
             // Try one more time
             failed.forEach(File::deleteOnExit)
-
-            val names = failed.joinToString("\n") { it.name }
-            Logger.warning("Some error occurred when cleaning following old logs: \n$names", "Options")
         } else {
             Logger.info("Old logs cleaned", "Options")
         }

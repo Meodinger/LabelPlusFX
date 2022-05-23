@@ -18,7 +18,7 @@ import java.io.IOException
 /**
  * The preferences that user set while using
  */
-object Preference : AbstractProperties("Preference") {
+object Preference : AbstractProperties("Preference", Options.preference) {
 
     const val WINDOW_SIZE        = "WindowSize"
     const val MAIN_DIVIDER       = "MainDivider"
@@ -68,7 +68,7 @@ object Preference : AbstractProperties("Preference") {
 
     @Throws(IOException::class, NumberFormatException::class)
     override fun load() {
-        load(Options.preference, this)
+        load(this)
 
         val windowSizes = this[WINDOW_SIZE].asDoubleList().takeIf { it.size >= 2 } ?: default[0].asDoubleList()
 
@@ -90,7 +90,7 @@ object Preference : AbstractProperties("Preference") {
         this[SHOW_STATS_BAR]    .set(isShowStatsBar)
         this[LAST_UPDATE_NOTICE].set(lastUpdateNotice)
 
-        save(Options.preference, this)
+        save(this)
     }
 
 }

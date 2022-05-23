@@ -17,8 +17,10 @@ import kotlin.collections.ArrayList
 
 /**
  * Abstract properties structure for save/load/check
+ * @param name The display name of the properties
+ * @param path The path to properties file
  */
-abstract class AbstractProperties(val name: String) {
+abstract class AbstractProperties(val name: String, val path: Path) {
 
     companion object {
 
@@ -26,9 +28,9 @@ abstract class AbstractProperties(val name: String) {
         private const val KV_SPILT = '='
 
         @Throws(IOException::class)
-        fun load(path: Path, instance: AbstractProperties) {
+        fun load(instance: AbstractProperties) {
             using {
-                val reader = Files.newBufferedReader(path).autoClose()
+                val reader = Files.newBufferedReader(instance.path).autoClose()
                 val lines = reader.readLines()
                 var index = 0
 
@@ -64,9 +66,9 @@ abstract class AbstractProperties(val name: String) {
         }
 
         @Throws(IOException::class)
-        fun save(path: Path, instance: AbstractProperties) {
+        fun save(instance: AbstractProperties) {
             using {
-                val writer = Files.newBufferedWriter(path).autoClose()
+                val writer = Files.newBufferedWriter(instance.path).autoClose()
                 for (property in instance.properties) {
                     val builder = StringBuilder()
                     if (property.isList) {
@@ -77,13 +79,20 @@ abstract class AbstractProperties(val name: String) {
                     }
                     writer.write(builder.toString())
                 }
-            } catch { e: Exception ->
+            } catch { e: IOException ->
                 throw IOException("Save properties I/O failed").initCause(e)
             } finally ::doNothing
         }
     }
 
+    /**
+     * A List of CProperties that hold defaults
+     */
     protected abstract val default: List<CProperty>
+
+    /**
+     * Actual List of CProperties
+     */
     protected val properties: ArrayList<CProperty> = ArrayList()
 
     @Throws(IOException::class, NumberFormatException::class)
@@ -98,8 +107,6 @@ abstract class AbstractProperties(val name: String) {
 
     operator fun get(key: String): CProperty = properties.first { it.key == key }
 
-    override fun toString(): String {
-        return properties.joinToString(", \n", transform = CProperty::toString)
-    }
+    override fun toString(): String = properties.joinToString(", \n", transform = CProperty::toString)
 
 }

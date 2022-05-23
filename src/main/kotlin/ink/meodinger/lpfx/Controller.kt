@@ -468,7 +468,20 @@ class Controller(private val state: State) {
     private fun listen() {
         Logger.info("Attaching Listeners...", "Controller")
 
-        // Bind Tree and Current
+        // Update StatsBar
+        state.currentPicNameProperty().addListener(onNew {
+            lLocation.text = String.format("%s : --", it.ifEmpty { "--" })
+        })
+        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+            if (it == NOT_FOUND) {
+                lLocation.text = String.format("%s : --", state.currentPicName.ifEmpty { "--" })
+            } else {
+                lLocation.text = String.format("%s : %02d", state.currentPicName, it)
+            }
+        })
+        Logger.info("Added effect: show info on InfoLabel", "Controller")
+
+        // Listened Tree for Current
         cTreeView.selectedGroupProperty().addListener(onNew<Number, Int> {
             if (it != NOT_FOUND) state.currentGroupId = it
         })
@@ -476,6 +489,29 @@ class Controller(private val state: State) {
             if (it != NOT_FOUND) state.currentLabelIndex = it
         })
         Logger.info("Listened for selectedGroup/Label", "Controller")
+
+        // Clear selected label when change picture.
+        // This could clear the label-index related bindings like TransArea text
+        state.currentPicNameProperty().addListener(onChange {
+            // If switch picture in CTreeView, the fours on TreeCell will not clear automatically
+            // So we should manually clear it to make sure we start from the first label
+            cTreeView.selectRoot(clear = true, scrollTo = false)
+            // Clear here, because the already happened selection may change it
+            state.currentLabelIndex = NOT_FOUND
+        })
+        Logger.info("Listened for current-pic-name change for clear label-index selection", "Controller")
+
+        // TextArea Text
+        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
+            if (!state.isOpened) return@onNew
+            // unbind TextArea
+            cTransArea.unbindText()
+
+            if (it == NOT_FOUND) return@onNew
+            // bind new text property
+            cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty())
+        })
+        Logger.info("Listened for label-index change for binding text property", "Controller")
 
         // isChanged
         cTransArea.textProperty().addListener(onChange {
@@ -497,53 +533,11 @@ class Controller(private val state: State) {
         cLabelPane.heightProperty().addListener(autoCenterListener)
         Logger.info("Added effect: default image auto-center", "Controller")
 
-        // Update StatsBar
-        state.currentPicNameProperty().addListener(onNew {
-            lLocation.text = String.format("%s : --", it.ifEmpty { "--" })
-        })
-        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
-            if (it == NOT_FOUND) {
-                lLocation.text = String.format("%s : --", state.currentPicName.ifEmpty { "--" })
-            } else {
-                lLocation.text = String.format("%s : %02d", state.currentPicName, it)
-            }
-        })
-        Logger.info("Added effect: show info on InfoLabel", "Controller")
-
         // Clear text when some state change
         val clearTextListener = onChange<Any> { cLabelPane.clearAllText() }
         state.currentGroupIdProperty().addListener(clearTextListener)
         state.workModeProperty().addListener(clearTextListener)
         Logger.info("Added effect: clear text when some state change", "Controller")
-
-        // Set current-label-index to unbind TextArea & clear CTreeView focus
-        state.currentPicNameProperty().addListener(onChange {
-            state.currentLabelIndex = NOT_FOUND
-
-            // If switch picture in CTreeView, the foucs on TreeCell will not clear automatically
-            // So we should manually clear it to make sure we start from the first label
-            if (cTreeView.isFocused) {
-                // Use run-later to clear after items rendering
-                Platform.runLater {
-                    cTreeView.selectionModel.clearSelection()
-                    cTreeView.selectionModel.select(cTreeView.root)
-                }
-            }
-        })
-
-        // Update text area when label change
-        state.currentLabelIndexProperty().addListener(onNew<Number, Int> {
-            if (!state.isOpened) return@onNew
-
-            // unbind TextArea
-            cTransArea.unbindText()
-
-            if (it == NOT_FOUND) return@onNew
-
-            // bind new text property
-            cTransArea.bindText(state.transFile.getTransLabel(state.currentPicName, it).textProperty())
-        })
-        Logger.info("Added effect: bind text property on CurrentLabelIndex change", "Controller")
 
         // Bind Tree and LabelPane
         cTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED) {
@@ -564,7 +558,6 @@ class Controller(private val state: State) {
         })
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
             if (cLabelPane.selectedLabels.isEmpty()) return@handler
-
             if (it.code == KeyCode.DELETE || it.code == KeyCode.BACK_SPACE) {
                 val indices = cLabelPane.selectedLabels.toSortedSet().reversed()
 
@@ -919,7 +912,13 @@ class Controller(private val state: State) {
         state.currentGroupId = 0
         state.currentPicName = state.transFile.sortedPicNames[picIndex.takeIf { it in 0 until state.transFile.picCount } ?: 0]
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
-        if (labelIndex != NOT_FOUND) cLabelPane.moveToLabel(labelIndex)
+
+        // Move to center
+        // FIXME: May throw NoSuchElementException if render not complete
+        if (labelIndex != NOT_FOUND) {
+            cTreeView.selectLabel(labelIndex, clear = true, scrollTo = true)
+            cLabelPane.moveToLabel(labelIndex)
+        }
 
         // Accumulator
         accumulatorManager.clear()

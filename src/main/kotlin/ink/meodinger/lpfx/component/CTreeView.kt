@@ -176,29 +176,43 @@ class CTreeView: TreeView<String>() {
         labelItems.remove(labelItem)
     }
 
+    fun selectRoot(clear: Boolean, scrollTo: Boolean) {
+        if (clear) clearSelection()
+        selectionModel.select(root)
+        if (scrollTo) scrollTo(getRow(root))
+    }
     fun selectGroup(groupName: String, clear: Boolean, scrollTo: Boolean) {
         // In IndexMode this is not available
         if (viewMode == ViewMode.IndexMode) return
 
-        if (clear) selectionModel.clearSelection()
+        if (clear) clearSelection()
         val item = groupItems.first { it.transGroup.name == groupName }
 
         selectionModel.select(item)
         if (scrollTo) scrollTo(getRow(item))
     }
     fun selectLabel(labelIndex: Int, clear: Boolean, scrollTo: Boolean) {
-        if (clear) selectionModel.clearSelection()
+        if (clear) clearSelection()
         val item = labelItems.first { it.transLabel.index == labelIndex }
 
         selectionModel.select(item)
         if (scrollTo) scrollTo(getRow(item))
     }
     fun selectLabels(labelIndices: Collection<Int>, clear: Boolean, scrollTo: Boolean) {
-        if (clear) selectionModel.clearSelection()
+        if (clear) clearSelection()
         val items = labelItems.filter { it.transLabel.index in labelIndices }
 
         items.forEach(selectionModel::select)
         if (scrollTo) scrollTo(getRow(items.first()))
+    }
+
+    /**
+     * This will also clear the selected-index
+     */
+    fun clearSelection() {
+        selectionModel.clearSelection()
+        selectedGroup = NOT_FOUND
+        selectedLabel = NOT_FOUND
     }
 
     /**

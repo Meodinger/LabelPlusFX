@@ -138,7 +138,7 @@ class CTreeMenu(
     }
     private val gDeleteHandler = EventHandler<ActionEvent> {
         // Clear selected to-remove items
-        view.selectionModel.clearSelection()
+        view.clearSelection()
 
         state.doAction(GroupAction(
             ActionType.REMOVE, state,

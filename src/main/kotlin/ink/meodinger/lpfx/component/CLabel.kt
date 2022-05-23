@@ -95,6 +95,18 @@ class CLabel(
 
     // endregion
 
+    // region Privates
+
+    private val pickerRadiusProperty = radiusProperty.transform { it.coerceAtLeast(MIN_PICK_RADIUS) }.primitive().readonly()
+    private val pickerRadius: Double by pickerRadiusProperty
+
+    // endregion
+
+    init {
+        prefWidthProperty().bind(pickerRadiusProperty * 2)
+        prefHeightProperty().bind(pickerRadiusProperty * 2)
+    }
+
     // region Skin
 
     /**
@@ -112,11 +124,9 @@ class CLabel(
         private var clip: Shape = circle // just a placeholder to make type non-null
 
         init {
-            val pickerRadiusBinding = control.radiusProperty.transform { it.coerceAtLeast(MIN_PICK_RADIUS) }.primitive()
-
             root.apply {
-                prefWidthProperty().bind(pickerRadiusBinding * 2)
-                prefHeightProperty().bind(pickerRadiusBinding * 2)
+                prefWidthProperty().bind(control.pickerRadiusProperty)
+                prefHeightProperty().bind(control.pickerRadiusProperty)
             }
             text.apply {
                 textOrigin = VPos.CENTER
@@ -134,19 +144,19 @@ class CLabel(
                 ))
                 layoutXProperty().bind(Bindings.createDoubleBinding(
                     {
-                        pickerRadiusBinding.get() - boundsInLocal.width / 2
-                    }, control.indexProperty, pickerRadiusBinding
+                        control.pickerRadius - boundsInLocal.width / 2
+                    }, control.indexProperty, control.pickerRadiusProperty
                 ))
                 layoutYProperty().bind(Bindings.createDoubleBinding(
                     {
-                        pickerRadiusBinding.get()
-                    }, control.indexProperty, pickerRadiusBinding
+                        control.pickerRadius
+                    }, control.indexProperty, control.pickerRadiusProperty
                 ))
             }
             circle.apply {
                 radiusProperty().bind(control.radiusProperty)
-                centerXProperty().bind(pickerRadiusBinding)
-                centerYProperty().bind(pickerRadiusBinding)
+                centerXProperty().bind(control.pickerRadiusProperty)
+                centerYProperty().bind(control.pickerRadiusProperty)
             }
 
             // Update

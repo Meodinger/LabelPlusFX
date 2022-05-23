@@ -93,7 +93,7 @@ class DialogSettings : AbstractPropertiesDialog() {
     init {
         title = I18N["settings.title"]
         dialogPane.prefWidth = 600.0
-        dialogPane.prefHeight = 400.0
+        dialogPane.prefHeight = 480.0
         dialogPane.buttonTypes.addAll(ButtonType.OK, ButtonType.CANCEL)
         dialogPane.withContent(TabPane()) {
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE

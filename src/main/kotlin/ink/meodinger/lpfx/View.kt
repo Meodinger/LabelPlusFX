@@ -349,6 +349,7 @@ class View(private val state: State) : BorderPane() {
                     labelColorOpacityProperty().bind(Settings.labelColorOpacityProperty())
                     labelTextOpaqueProperty().bind(Settings.labelTextOpaqueProperty())
                     newPictureScaleProperty().bind(Settings.newPictureScaleProperty())
+                    useWheelToScaleProperty().bind(Settings.useWheelToScaleProperty())
                 }
                 bottom(HBox()) {
                     add(CTextSlider()) {
@@ -772,6 +773,7 @@ class View(private val state: State) : BorderPane() {
             Settings.LigatureRules            -> Settings.ligatureRules               .setAll(value as List<Pair<String, String>>)
             Settings.ViewModes                -> Settings.viewModes                   .setAll(value as List<ViewMode>)
             Settings.NewPictureScale          -> Settings.newPictureScalePicture      = value as CLabelPane.NewPictureScale
+            Settings.UseWheelToScale          -> Settings.useWheelToScale             = value as Boolean
             Settings.LabelRadius              -> Settings.labelRadius                 = value as Double
             Settings.LabelColorOpacity        -> Settings.labelColorOpacity           = value as Double
             Settings.LabelTextOpaque          -> Settings.labelTextOpaque             = value as Boolean

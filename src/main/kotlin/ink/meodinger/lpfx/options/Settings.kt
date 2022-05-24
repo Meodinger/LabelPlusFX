@@ -39,7 +39,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     const val LigatureRules            = "LigatureRules"
     const val ViewModes                = "ViewMode"
     const val NewPictureScale          = "ScaleOnNewPicture"
-    const val LogLevel                 = "LogLevel"
+    const val UseWheelToScale          = "UseWheelToScale"
     const val LabelRadius              = "LabelRadius"
     const val LabelColorOpacity        = "LabelColorOpacity"
     const val LabelTextOpaque          = "LabelTextOpaque"
@@ -49,6 +49,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
     const val UseExportNameTemplate    = "UseExportNameTemplate"
     const val ExportNameTemplate       = "ExportNameTemplate"
+    const val LogLevel                 = "LogLevel"
 
     // ----- Default ----- //
 
@@ -70,7 +71,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         ),
         CProperty(ViewModes, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
         CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
-        CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
+        CProperty(UseWheelToScale, false),
         CProperty(LabelRadius, 24.0),
         CProperty(LabelColorOpacity, "80"),
         CProperty(LabelTextOpaque, false),
@@ -80,6 +81,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         CProperty(UseMeoFileAsDefault, false),
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, I18N["settings.other.template.default"]),
+        CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
     )
 
     private val defaultGroupNameListProperty: ListProperty<String> = SimpleListProperty()
@@ -106,9 +108,9 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     fun newPictureScaleProperty(): ObjectProperty<CLabelPane.NewPictureScale> = newPictureScaleProperty
     var newPictureScalePicture: CLabelPane.NewPictureScale by newPictureScaleProperty
 
-    private val logLevelProperty: ObjectProperty<Logger.LogLevel> = SimpleObjectProperty()
-    fun logLevelProperty(): ObjectProperty<Logger.LogLevel> = logLevelProperty
-    var logLevel: Logger.LogLevel by logLevelProperty
+    private val useWheelToScaleProperty: BooleanProperty = SimpleBooleanProperty()
+    fun useWheelToScaleProperty(): BooleanProperty = useWheelToScaleProperty
+    var useWheelToScale: Boolean by useWheelToScaleProperty
 
     private val labelRadiusProperty: DoubleProperty = SimpleDoubleProperty()
     fun labelRadiusProperty(): DoubleProperty = labelRadiusProperty
@@ -146,6 +148,11 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     fun exportNameTemplateProperty(): StringProperty = exportNameTemplateProperty
     var exportNameTemplate: String by exportNameTemplateProperty
 
+    private val logLevelProperty: ObjectProperty<Logger.LogLevel> = SimpleObjectProperty()
+    fun logLevelProperty(): ObjectProperty<Logger.LogLevel> = logLevelProperty
+    var logLevel: Logger.LogLevel by logLevelProperty
+
+
     init { useDefault() }
 
     @Throws(IOException::class, NumberFormatException::class)
@@ -158,7 +165,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
         viewModes                   = FXCollections.observableList(this[ViewModes].asIntegerList().map(ViewMode.values()::get))
         newPictureScalePicture      = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
-        logLevel                    = Logger.LogLevel.values()[this[LogLevel].asInteger()]
+        useWheelToScale             = this[UseWheelToScale].asBoolean()
         labelRadius                 = this[LabelRadius].asDouble()
         labelColorOpacity           = this[LabelColorOpacity].asInteger(16) / 255.0
         labelTextOpaque             = this[LabelTextOpaque].asBoolean()
@@ -168,6 +175,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         useMeoFileAsDefault         = this[UseMeoFileAsDefault].asBoolean()
         useExportNameTemplate       = this[UseExportNameTemplate].asBoolean()
         exportNameTemplate          = this[ExportNameTemplate].asString()
+        logLevel                    = Logger.LogLevel.values()[this[LogLevel].asInteger()]
     }
 
     @Throws(IOException::class)
@@ -178,7 +186,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         this[LigatureRules]           .set(ligatureRules)
         this[ViewModes]               .set(viewModes.map(Enum<*>::ordinal))
         this[NewPictureScale]         .set(newPictureScalePicture.ordinal)
-        this[LogLevel]                .set(logLevel.ordinal)
+        this[UseWheelToScale]         .set(useWheelToScale)
         this[LabelRadius]             .set(labelRadius)
         this[LabelColorOpacity]       .set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LabelTextOpaque]         .set(labelTextOpaque)
@@ -188,6 +196,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         this[UseMeoFileAsDefault]     .set(useMeoFileAsDefault)
         this[UseExportNameTemplate]   .set(useExportNameTemplate)
         this[ExportNameTemplate]      .set(exportNameTemplate)
+        this[LogLevel]                .set(logLevel.ordinal)
 
         save(this)
     }

@@ -554,7 +554,7 @@ class Controller(private val state: State) {
 
         // When LabelPane Box Selection
         cLabelPane.selectedLabelsProperty().addListener(SetChangeListener {
-            cTreeView.selectLabels(it.set, clear = true, scrollTo = true)
+            if (state.isOpened) cTreeView.selectLabels(it.set, clear = true, scrollTo = true)
         })
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
             if (cLabelPane.selectedLabels.isEmpty()) return@handler

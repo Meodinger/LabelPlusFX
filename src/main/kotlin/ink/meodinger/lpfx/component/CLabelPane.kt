@@ -269,6 +269,10 @@ class CLabelPane : ScrollPane() {
             scaleProperty.set(temp)
         }
 
+    private val useWheelToScaleProperty: BooleanProperty = SimpleBooleanProperty(false)
+    fun useWheelToScaleProperty(): BooleanProperty = useWheelToScaleProperty
+    var useWheelToScale: Boolean by useWheelToScaleProperty
+
     // endregion
 
     // region Properties:Handler
@@ -417,11 +421,16 @@ class CLabelPane : ScrollPane() {
             root.scaleY = it
         })
         root.addEventFilter(ScrollEvent.SCROLL) {
-            if (it.isControlDown || it.isAltDown || it.isMetaDown) {
-                val deltaScale = if (it.deltaY > 0) 0.1 else -0.1
+            val isShortCutDown = it.isControlDown || it.isAltDown || it.isMetaDown
+            if ((isShortCutDown && !useWheelToScale) || (!isShortCutDown && useWheelToScale)) {
+                // In scale mode, with shift is one time faster
+                val deltaScale = if (it.isShiftDown) {
+                    if (it.deltaX > 0) 0.2 else -0.2
+                } else {
+                    if (it.deltaY > 0) 0.1 else -0.1
+                }
 
                 scale += deltaScale
-
                 // x, y -> location not related to scale, based on left-top of the image
                 // nLx = Lx + (imgW / 2 - x) * dS
                 root.translateX += deltaScale * (image.width  / 2 - it.x)

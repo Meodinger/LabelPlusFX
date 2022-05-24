@@ -74,6 +74,7 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
     private val mComboScale = CComboBox<CLabelPane.NewPictureScale>()
+    private val mCheckWheel = CheckBox(I18N["settings.mode.use_wheel"])
 
     private val lCLabel = CLabel(labelIndex = 8, labelColor = Color.RED)
     private val lLabelPane = AnchorPane()
@@ -141,6 +142,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                     // 2
                     // 3 Scale on new picture
                     // 4 | selection | < >       (NewPicScale)
+                    // 5
+                    // 6 Use wheel to scale      (UseWheelToScale)
 
                     add(Label(I18N["mode.work.input"]), 0, 0)
                     add(mComboInput, 1, 0) {
@@ -161,6 +164,8 @@ class DialogSettings : AbstractPropertiesDialog() {
                         items = FXCollections.observableList(CLabelPane.NewPictureScale.values().toList())
                         isWrapped = true
                     }
+                    add(HBox(), 0, 5)
+                    add(mCheckWheel, 0, 6, 2, 1)
                 }
             }
             add(I18N["settings.label.title"]) {
@@ -475,6 +480,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         mComboInput.select(Settings.viewModes[0])
         mComboLabel.select(Settings.viewModes[1])
         mComboScale.select(Settings.newPictureScalePicture)
+        mCheckWheel.isSelected = Settings.useWheelToScale
 
         // Label
         lCLabel.anchorX = (lLabelPane.prefWidth - lCLabel.prefWidth) / 2
@@ -552,6 +558,7 @@ class DialogSettings : AbstractPropertiesDialog() {
 
         map[Settings.ViewModes] = listOf(mComboInput.index, mComboLabel.index).map(ViewMode.values()::get)
         map[Settings.NewPictureScale] = mComboScale.index.let(CLabelPane.NewPictureScale.values()::get)
+        map[Settings.UseWheelToScale] = mCheckWheel.isSelected
 
         return map
     }

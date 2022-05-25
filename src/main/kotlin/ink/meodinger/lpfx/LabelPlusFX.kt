@@ -1,12 +1,11 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.component.properties.*
 import ink.meodinger.lpfx.component.tools.*
 import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.component.withOwner
-import ink.meodinger.lpfx.component.dialog.showException
-import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.application.Platform
@@ -156,8 +155,8 @@ class LabelPlusFX: HookedApplication() {
         Logger.info("App starting...", "Application")
 
         // FX Thread Catcher
-        Thread.currentThread().setUncaughtExceptionHandler { t, e ->
-            Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
+        Thread.currentThread().setUncaughtExceptionHandler { _, e ->
+            Logger.error("Exception uncaught in FX Thread", "Application")
             Logger.exception(e)
             if (state.isOpened) {
                 showException(primaryStage, e, state.controller.emergency())
@@ -217,8 +216,13 @@ class LabelPlusFX: HookedApplication() {
 
         // Check update
         if (PARAM_UNNAMED_NO_CHECK_UPDATE !in parameters.unnamed) if (Settings.autoCheckUpdate) controller.checkUpdate()
-        // Open last
-        if (Settings.autoOpenLastFile) {
+        // Open file
+        if (parameters.raw.isNotEmpty() && File(parameters.raw.last()).isFile) {
+            // Open the given file
+            val file = File(parameters.raw.last())
+            Platform.runLater { state.controller.open(file, file.parentFile) }
+        } else if (Settings.autoOpenLastFile) {
+            // Open last
             val file = RecentFiles.lastFile?.takeIf(File::exists)?.takeIf(File::isFile)
             if (file != null) Platform.runLater { state.controller.open(file, file.parentFile) }
         }

@@ -51,9 +51,7 @@ class OnlineDict : Stage() {
         // Maybe: Take back Neko-Dict
         // private const val NEKO_SITE = "https://nekodict.com"
         // private const val NEKO_API  = "https://nekodict.com/words?q="
-
         private const val WEBLIO_API  = "https://www.weblio.jp/content/"
-
         private const val FONT_SIZE = 16.0
     }
 
@@ -170,7 +168,7 @@ class OnlineDict : Stage() {
         }
 
         // to remove
-        val regexDocumentWrtie = Regex("(document.write\\()(.*)(\\);)") // In-dom js
+        val regexDocumentWrite = Regex("(document.write\\()(.*)(\\);)") // In-dom js
         val regexUselessSource = Regex("(\u51fa\u5178)(.*)(\\))") // Useless Souce
         val regexKanjiCafeSource = Regex("(\u203b\u3054\u5229\u7528)(.*)(Cafe.)") // Kanji Cafe Source
         // to replace
@@ -181,7 +179,7 @@ class OnlineDict : Stage() {
         val regexMultiNewLine = Regex("(\n)+") // Multi new line
 
         val sourceList = weblioPage.selectXpath("//div[@class=\"pbarTL\"]").map { it.wholeText().trim() }
-        val definationList = weblioPage.selectXpath("//div[@class=\"kiji\"]").map {
+        val definitionList = weblioPage.selectXpath("//div[@class=\"kiji\"]").map {
             // Example sentences
             if (it.children()[1].hasClass("Wnryj")) {
                 return@map it.children()[1].children()[0].children().mapIndexed { index, element ->
@@ -191,7 +189,7 @@ class OnlineDict : Stage() {
 
             it.selectXpath("//br").forEach { element -> element.replaceWith(TextNode(" ")) }
             var text = it.wholeText()
-                .remove(regexDocumentWrtie)
+                .remove(regexDocumentWrite)
                 .remove(regexUselessSource)
                 .remove(regexKanjiCafeSource)
 
@@ -209,9 +207,9 @@ class OnlineDict : Stage() {
         }
 
         outputFlow.clear()
-        for ((source, defination) in sourceList.zip(definationList)) {
+        for ((source, definition) in sourceList.zip(definitionList)) {
             outputFlow.appendLine(source, bold = true)
-            outputFlow.appendText("\u3000$defination\n\n")
+            outputFlow.appendText("\u3000$definition\n\n")
         }
     }
     private fun searchWeblio(word: String) {
@@ -224,7 +222,7 @@ class OnlineDict : Stage() {
                 Logger.error("Dictionary: Fetch weblio info failed", "Dictionary")
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
-                showException(null, it)
+                showException(this@OnlineDict, it)
             }
         }() // Remember to invoke
     }
@@ -242,7 +240,7 @@ class OnlineDict : Stage() {
                 Logger.error("Dictionary: Fetch translation failed", "Dictionary")
                 Logger.exception(it)
                 Platform.runLater { outputFlow.flow() }
-                showException(null, it)
+                showException(this@OnlineDict, it)
             }
         }() // Remember to invoke
     }

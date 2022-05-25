@@ -6,7 +6,6 @@ import ink.meodinger.lpfx.options.Options
 import ink.meodinger.lpfx.util.doNothing
 
 import javafx.application.Application
-import javafx.application.Platform
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -82,8 +81,9 @@ fun main(vararg args: String) {
             setLocationRelativeTo(null)
             contentPane.layout = BorderLayout()
             contentPane.add(JPanel().apply {
-                add(JLabel("Something Fatal Happened", JLabel.CENTER))
-                add(JLabel("Please Contact Meodinger (meodinger@qq.com) For Help", JLabel.CENTER))
+                layout = BorderLayout()
+                add(JLabel("Something Fatal Happened", JLabel.CENTER), BorderLayout.CENTER)
+                add(JLabel("Please Contact Meodinger (meodinger@qq.com) For Help", JLabel.CENTER), BorderLayout.SOUTH)
             }, BorderLayout.CENTER)
             pack()
 

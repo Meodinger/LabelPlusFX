@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx
 
+import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.component.tools.OnlineDict
+import ink.meodinger.lpfx.options.Logger
 
 import javafx.application.Application
 import javafx.stage.Stage
@@ -12,19 +14,25 @@ import javafx.stage.Stage
  */
 
 /**
- * Only Open Dict
+ * Only Open Dictionary. This Application will be started
+ * when using command-line argument `--dictionary`.
  */
 class LabelPlusFXDict: Application() {
 
     /**
-     * Start Standalone Dict
+     * Start the Standalone Dict
      */
     override fun start(primaryStage: Stage) {
-        val dict = OnlineDict()
-
-        primaryStage.title = "${dict.title} (Standalone)"
-        primaryStage.scene = dict.scene
-        primaryStage.width = 300.0
+        // FX Thread Catcher
+        Thread.currentThread().setUncaughtExceptionHandler { _, e ->
+            Logger.error("Exception uncaught in FX Thread", "Application")
+            Logger.exception(e)
+            showException(primaryStage, e)
+        }
+        // Set up the Stage
+        primaryStage.title = "LPFX Dictionary (Standalone)"
+        primaryStage.scene = OnlineDict().scene
+        primaryStage.width = 400.0
         primaryStage.height = 400.0
         primaryStage.show()
     }

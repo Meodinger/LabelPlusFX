@@ -468,6 +468,24 @@ class Controller(private val state: State) {
     private fun listen() {
         Logger.info("Attaching Listeners...", "Controller")
 
+        // Switch Prism for once (only in windows)
+        imageBinding.addListener(onNew {
+            // The restore procedure will be registered as a shutdown-hook
+            // when Config::usingSWPrism is true, here is next time LPFX starts.
+            if (Config.isWin && !Config.usingSWPrism) {
+                if (it != null && (it.width >= 4096 || it.height >= 4096)) {
+                    val result = showConfirm(state.stage, "Switch to SW? (only once)")
+                    if (result.isPresent && result.get() == ButtonType.YES) {
+                        state.application.addShutdownHook("UseSWPrism", ::useSoftwarePrism)
+                        state.application.stop()
+                    } else {
+                        showError(state.stage, "Image too Large!")
+                    }
+                }
+            }
+        })
+        Logger.info("Listened for prism crash", "Controller")
+
         // Update StatsBar
         state.currentPicNameProperty().addListener(onNew {
             lLocation.text = String.format("%s : --", it.ifEmpty { "--" })
@@ -479,7 +497,7 @@ class Controller(private val state: State) {
                 lLocation.text = String.format("%s : %02d", state.currentPicName, it)
             }
         })
-        Logger.info("Added effect: show info on InfoLabel", "Controller")
+        Logger.info("Listened for InfoLabel", "Controller")
 
         // Listened Tree for Current
         cTreeView.selectedGroupProperty().addListener(onNew<Number, Int> {

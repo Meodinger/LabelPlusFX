@@ -226,6 +226,10 @@ class LabelPlusFX: HookedApplication() {
             val file = RecentFiles.lastFile?.takeIf(File::exists)?.takeIf(File::isFile)
             if (file != null) Platform.runLater { state.controller.open(file, file.parentFile) }
         }
+        // Register restore hook
+        if (Config.isWin && Config.usingSWPrism) {
+            state.application.addShutdownHook("RestorePrism", ::useHardwarePrism)
+        }
 
         // endregion
 

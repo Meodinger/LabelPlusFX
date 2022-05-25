@@ -6,6 +6,7 @@ import ink.meodinger.lpfx.options.*
 import ink.meodinger.lpfx.util.HookedApplication
 import ink.meodinger.lpfx.util.component.withOwner
 import ink.meodinger.lpfx.component.dialog.showException
+import ink.meodinger.lpfx.util.file.exists
 import ink.meodinger.lpfx.util.property.onChange
 
 import javafx.application.Platform
@@ -17,6 +18,7 @@ import javafx.scene.input.KeyEvent
 import javafx.stage.Stage
 import java.awt.SystemTray
 import java.awt.TrayIcon
+import java.io.File
 import java.awt.MenuItem as AwtMenuItem
 import java.awt.PopupMenu as AwtPopupMenu
 
@@ -129,24 +131,28 @@ class LabelPlusFX: HookedApplication() {
         DialogSettings() withOwner state.stage
     }
 
-    init {
+    /**
+     * Initialize the Options
+     */
+    override fun init() {
+        state.application = this
+
+        // Start Logger Timer
         Logger.tic()
 
         Logger.info("App initializing...", "Application")
-
-        state.application = this
-
         Options.load()
-
         Logger.info("App initialized", "Application")
     }
 
     /**
-     * Start the Application
+     * Start the Application.
+     * The start order is `Stage` -> `View` -> `Controller` -> `Post-Start Operations`
      */
     override fun start(primaryStage: Stage) {
         Logger.info("App starting...", "Application")
 
+        // FX Thread Catcher
         Thread.currentThread().setUncaughtExceptionHandler { t, e ->
             Logger.error("Exception uncaught in Thread: ${t.name}", "Application")
             Logger.exception(e)
@@ -159,6 +165,7 @@ class LabelPlusFX: HookedApplication() {
 
         state.stage = primaryStage
 
+        // View & Controller
         val root: View
         val controller: Controller
         try {
@@ -171,6 +178,7 @@ class LabelPlusFX: HookedApplication() {
             return
         }
 
+        // Start construct scene & stage
         primaryStage.title = INFO["application.name"]
         primaryStage.icons.add(ICON)
         primaryStage.scene = Scene(root, Preference.windowWidth, Preference.windowHeight)
@@ -197,30 +205,39 @@ class LabelPlusFX: HookedApplication() {
             }
         }
 
+        // Show
         primaryStage.show()
 
         Logger.info("App started", "Application")
 
-        if (PARAM_UNNAMED_NO_CHECK_UPDATE !in parameters.unnamed)
-            if (Settings.autoCheckUpdate)
-                controller.checkUpdate()
+        // region Post-Start Operations
+
+        // Check update
+        if (PARAM_UNNAMED_NO_CHECK_UPDATE !in parameters.unnamed) if (Settings.autoCheckUpdate) controller.checkUpdate()
+        // Open last
+        if (Settings.autoOpenLastFile) {
+            val file = RecentFiles.lastFile?.takeIf(File::exists)?.takeIf(File::isFile)
+            if (file != null) Platform.runLater { state.controller.open(file, file.parentFile) }
+        }
+
+        // endregion
 
         Logger.toc()
     }
 
     /**
-     * Stop the Application
+     * Stop the Application.
+     * The close order is `Hooks` -> `Options` -> `Stage`
      */
     override fun stop() {
         Logger.info("App stopping...", "Application")
-
-        state.stage.close()
-        Options.save()
 
         runHooks {
             Logger.error("Exception occurred during hooks run", "Application")
             Logger.exception(it)
         }
+        Options.save()
+        state.stage.close()
 
         Platform.exit()
     }

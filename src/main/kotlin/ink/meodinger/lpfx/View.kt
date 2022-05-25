@@ -778,6 +778,7 @@ class View(private val state: State) : BorderPane() {
             Settings.LabelColorOpacity        -> Settings.labelColorOpacity           = value as Double
             Settings.LabelTextOpaque          -> Settings.labelTextOpaque             = value as Boolean
             Settings.AutoCheckUpdate          -> Settings.autoCheckUpdate             = value as Boolean
+            Settings.AutoOpenLastFile         -> Settings.autoOpenLastFile            = value as Boolean
             Settings.InstantTranslate         -> Settings.instantTranslate            = value as Boolean
             Settings.CheckFormatWhenSave      -> Settings.checkFormatWhenSave         = value as Boolean
             Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault         = value as Boolean

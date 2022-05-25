@@ -44,6 +44,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     const val LabelColorOpacity        = "LabelColorOpacity"
     const val LabelTextOpaque          = "LabelTextOpaque"
     const val AutoCheckUpdate          = "AutoCheckUpdate"
+    const val AutoOpenLastFile         = "AutoOpenLastFile"
     const val InstantTranslate         = "InstantTranslate"
     const val CheckFormatWhenSave      = "CheckFormatWhenSave"
     const val UseMeoFileAsDefault      = "UseMeoFileAsDefault"
@@ -76,6 +77,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         CProperty(LabelColorOpacity, "80"),
         CProperty(LabelTextOpaque, false),
         CProperty(AutoCheckUpdate, true),
+        CProperty(AutoOpenLastFile, false),
         CProperty(InstantTranslate, false),
         CProperty(CheckFormatWhenSave, true),
         CProperty(UseMeoFileAsDefault, false),
@@ -128,6 +130,10 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     fun autoCheckUpdateProperty(): BooleanProperty = autoCheckUpdateProperty
     var autoCheckUpdate: Boolean by autoCheckUpdateProperty
 
+    private val autoOpenLastFileProperty: BooleanProperty = SimpleBooleanProperty()
+    fun autoOpenLastFileProperty(): BooleanProperty = autoOpenLastFileProperty
+    var autoOpenLastFile: Boolean by autoOpenLastFileProperty
+
     private val instantTranslateProperty: BooleanProperty = SimpleBooleanProperty()
     fun instantTranslateProperty(): BooleanProperty = instantTranslateProperty
     var instantTranslate: Boolean by instantTranslateProperty
@@ -170,6 +176,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         labelColorOpacity           = this[LabelColorOpacity].asInteger(16) / 255.0
         labelTextOpaque             = this[LabelTextOpaque].asBoolean()
         autoCheckUpdate             = this[AutoCheckUpdate].asBoolean()
+        autoOpenLastFile            = this[AutoOpenLastFile].asBoolean()
         instantTranslate            = this[InstantTranslate].asBoolean()
         checkFormatWhenSave         = this[CheckFormatWhenSave].asBoolean()
         useMeoFileAsDefault         = this[UseMeoFileAsDefault].asBoolean()
@@ -191,6 +198,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         this[LabelColorOpacity]       .set((labelColorOpacity * 255).roundToInt().toString(16).padStart(2, '0'))
         this[LabelTextOpaque]         .set(labelTextOpaque)
         this[AutoCheckUpdate]         .set(autoCheckUpdate)
+        this[AutoOpenLastFile]        .set(autoOpenLastFile)
         this[InstantTranslate]        .set(instantTranslate)
         this[CheckFormatWhenSave]     .set(checkFormatWhenSave)
         this[UseMeoFileAsDefault]     .set(useMeoFileAsDefault)

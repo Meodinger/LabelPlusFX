@@ -50,26 +50,26 @@ class DialogSettings : AbstractPropertiesDialog() {
         private const val rRuleIndex = "C_Rule_Index"
     }
 
-    private val gLabelHint = Label(I18N["settings.group.hint"])
-    private val gLabelIsCreate = Label(I18N["settings.group.is_create_on_new"])
-    private val gLabelName = Label(I18N["settings.group.name"])
-    private val gLabelColor = Label(I18N["settings.group.color"])
     private val gGridPane = GridPane().apply {
         alignment = Pos.TOP_CENTER
         padding = Insets(16.0)
         vgap = 16.0
         hgap = 16.0
     }
+    private val gLabelHint = Label(I18N["settings.group.hint"])
+    private val gLabelName = Label(I18N["settings.group.name"])
+    private val gLabelColor = Label(I18N["settings.group.color"])
+    private val gLabelCreate = Label(I18N["settings.group.is_create_on_new"])
 
-    private val rLabelHint = Label(I18N["settings.ligature.hint"])
-    private val rLabelFrom = Label(I18N["settings.ligature.from"])
-    private val rLabelTo = Label(I18N["settings.ligature.to"])
     private val rGridPane = GridPane().apply {
         alignment = Pos.TOP_CENTER
         padding = Insets(16.0)
         vgap = 16.0
         hgap = 16.0
     }
+    private val rLabelHint = Label(I18N["settings.ligature.hint"])
+    private val rLabelFrom = Label(I18N["settings.ligature.from"])
+    private val rLabelTo = Label(I18N["settings.ligature.to"])
 
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
@@ -82,14 +82,15 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val lSliderAlpha = Slider()
     private val lLabelRadius = CInputLabel()
     private val lLabelAlpha = CInputLabel()
-    private val lTextOpaqueCheckBox = CheckBox(I18N["settings.label.text_opaque"])
+    private val lCheckTextOpaque = CheckBox(I18N["settings.label.text_opaque"])
 
-    private val xUpdCheckBox = CheckBox(I18N["settings.other.auto_check_upd"])
-    private val xInstCheckBox = CheckBox(I18N["settings.other.inst_trans"])
-    private val xCheckFormatBox = CheckBox(I18N["settings.other.check_format"])
-    private val xUseMCheckBox = CheckBox(I18N["settings.other.meo_default"])
-    private val xUseTCheckBox = CheckBox(I18N["settings.other.template.enable"])
-    private val xTemplateField = TextField()
+    private val xCheckUpdate = CheckBox(I18N["settings.other.auto_check_upd"])
+    private val xCheckAutoOp = CheckBox(I18N["settings.other.auto_open_last"])
+    private val xCheckInstTr = CheckBox(I18N["settings.other.inst_trans"])
+    private val xCheckFormat = CheckBox(I18N["settings.other.check_format"])
+    private val xCheckUseMeo = CheckBox(I18N["settings.other.meo_default"])
+    private val xCheckUseTmp = CheckBox(I18N["settings.other.template.enable"])
+    private val xFieldTemplate = TextField()
 
     init {
         title = I18N["settings.title"]
@@ -203,7 +204,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                         add(lCLabel) {
                             radiusProperty().bind(lSliderRadius.valueProperty())
                             colorOpacityProperty().bind(lSliderAlpha.valueProperty())
-                            textOpaqueProperty().bind(lTextOpaqueCheckBox.selectedProperty())
+                            textOpaqueProperty().bind(lCheckTextOpaque.selectedProperty())
 
                             // Draggable & drag-limitation
                             var shiftX = 0.0
@@ -311,7 +312,7 @@ class DialogSettings : AbstractPropertiesDialog() {
                             labelText = "0x$alphaStr"
                         }
                     }
-                    add(lTextOpaqueCheckBox, 1, 4, 2, 1)
+                    add(lCheckTextOpaque, 1, 4, 2, 1)
                     add(Label(I18N["settings.label.helpText"]), 1, 5, 2, 1) {
                         isWrapText = true
                         textAlignment = TextAlignment.CENTER
@@ -327,19 +328,21 @@ class DialogSettings : AbstractPropertiesDialog() {
 
                     //   0        1
                     // 0 O UpdateCheck
-                    // 1 O InstantTranslate
-                    // 2 O CheckFormatWhenSave
-                    // 3 O UseMeoFileAsDefault
-                    // 4 O UseExportTemplate
-                    // 5   |  template text  |
+                    // 1 O OpenLastFile
+                    // 2 O InstantTranslate
+                    // 3 O CheckFormatWhenSave
+                    // 4 O UseMeoFileAsDefault
+                    // 5 O UseExportTemplate
+                    // 6   |  template text  |
 
-                    add(xUpdCheckBox, 0, 0, 2, 1)
-                    add(xInstCheckBox, 0, 1, 2, 1)
-                    add(xCheckFormatBox, 0, 2, 2, 1)
-                    add(xUseMCheckBox, 0, 3, 2, 1)
-                    add(xUseTCheckBox, 0, 4, 2, 1)
-                    add(xTemplateField, 1, 5) {
-                        disableProperty().bind(!xUseTCheckBox.selectedProperty())
+                    add(xCheckUpdate, 0, 0, 2, 1)
+                    add(xCheckAutoOp, 0, 1, 2, 1)
+                    add(xCheckInstTr, 0, 2, 2, 1)
+                    add(xCheckFormat, 0, 3, 2, 1)
+                    add(xCheckUseMeo, 0, 4, 2, 1)
+                    add(xCheckUseTmp, 0, 5, 2, 1)
+                    add(xFieldTemplate, 1, 6) {
+                        disableProperty().bind(!xCheckUseTmp.selectedProperty())
                         textFormatter = genTextFormatter<String> { it.text.replace(Regex("[:*?<>|/\"\\\\]"), "") }
                         tooltip = Tooltip(I18N["settings.other.template.hint"]).apply {
                             showDelay = Duration(500.0)
@@ -373,7 +376,7 @@ class DialogSettings : AbstractPropertiesDialog() {
             gGridPane.children.clear()
             gGridPane.add(gLabelName, 0, 0)
             gGridPane.add(gLabelColor, 1, 0)
-            gGridPane.add(gLabelIsCreate, 2, 0)
+            gGridPane.add(gLabelCreate, 2, 0)
         }
 
         val groupId = newRowIndex - gRowShift
@@ -405,7 +408,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         gGridPane.children.removeAll(toRemoveSet)
 
         if (gGridPane.rowCount == gRowShift) {
-            gGridPane.children.removeAll(gLabelIsCreate, gLabelName, gLabelColor)
+            gGridPane.children.removeAll(gLabelCreate, gLabelName, gLabelColor)
             gGridPane.add(gLabelHint, 0, 0)
         }
     }
@@ -492,15 +495,16 @@ class DialogSettings : AbstractPropertiesDialog() {
         lLabelAlpha.isEditing = false
         lSliderAlpha.value = Settings.labelColorOpacity
 
-        lTextOpaqueCheckBox.isSelected = Settings.labelTextOpaque
+        lCheckTextOpaque.isSelected = Settings.labelTextOpaque
 
         // Other
-        xUpdCheckBox.isSelected = Settings.autoCheckUpdate
-        xInstCheckBox.isSelected = Settings.instantTranslate
-        xCheckFormatBox.isSelected = Settings.checkFormatWhenSave
-        xUseMCheckBox.isSelected = Settings.useMeoFileAsDefault
-        xUseTCheckBox.isSelected = Settings.useExportNameTemplate
-        xTemplateField.text = Settings.exportNameTemplate
+        xCheckUpdate.isSelected = Settings.autoCheckUpdate
+        xCheckAutoOp.isSelected = Settings.autoOpenLastFile
+        xCheckInstTr.isSelected = Settings.instantTranslate
+        xCheckFormat.isSelected = Settings.checkFormatWhenSave
+        xCheckUseMeo.isSelected = Settings.useMeoFileAsDefault
+        xCheckUseTmp.isSelected = Settings.useExportNameTemplate
+        xFieldTemplate.text = Settings.exportNameTemplate
     }
 
     // ----- Result convert ---- //
@@ -567,19 +571,20 @@ class DialogSettings : AbstractPropertiesDialog() {
 
         map[Settings.LabelRadius] = lSliderRadius.value
         map[Settings.LabelColorOpacity] = lSliderAlpha.value
-        map[Settings.LabelTextOpaque] = lTextOpaqueCheckBox.isSelected
+        map[Settings.LabelTextOpaque] = lCheckTextOpaque.isSelected
 
         return map
     }
     private fun convertOther(): Map<String, Any> {
         val map = HashMap<String, Any>()
 
-        map[Settings.AutoCheckUpdate] = xUpdCheckBox.isSelected
-        map[Settings.InstantTranslate] = xInstCheckBox.isSelected
-        map[Settings.CheckFormatWhenSave] = xCheckFormatBox.isSelected
-        map[Settings.UseMeoFileAsDefault] = xUseMCheckBox.isSelected
-        map[Settings.UseExportNameTemplate] = xUseTCheckBox.isSelected
-        map[Settings.ExportNameTemplate] = xTemplateField.text
+        map[Settings.AutoCheckUpdate] = xCheckUpdate.isSelected
+        map[Settings.AutoOpenLastFile] = xCheckAutoOp.isSelected
+        map[Settings.InstantTranslate] = xCheckInstTr.isSelected
+        map[Settings.CheckFormatWhenSave] = xCheckFormat.isSelected
+        map[Settings.UseMeoFileAsDefault] = xCheckUseMeo.isSelected
+        map[Settings.UseExportNameTemplate] = xCheckUseTmp.isSelected
+        map[Settings.ExportNameTemplate] = xFieldTemplate.text
 
         return map
     }

@@ -63,7 +63,6 @@ data class Version(val a: Int, val b: Int, val c: Int): Comparable<Version> {
  */
 abstract class HookedApplication : Application() {
 
-    private var shuttingDown: Boolean = false
     private val shutdownHooks = LinkedHashMap<String, () -> Unit>()
 
     /**
@@ -71,7 +70,6 @@ abstract class HookedApplication : Application() {
      * Should use the resolve function as callback
      */
     fun addShutdownHook(key: String, onShutdown: () -> Unit) {
-        if (shuttingDown) return
         shutdownHooks[key] = onShutdown
     }
 
@@ -79,7 +77,6 @@ abstract class HookedApplication : Application() {
      * Remove a shutdown hook
      */
     fun removeShutdownHook(key: String) {
-        if (shuttingDown) return
         shutdownHooks.remove(key)
     }
 
@@ -87,23 +84,21 @@ abstract class HookedApplication : Application() {
      * Clear all shutdown hooks
      */
     fun clearShutdownHooks() {
-        if (shuttingDown) return
         shutdownHooks.clear()
     }
 
     /**
      *
-     * You MUST run this before or within Application::stop or hooks will not be executed.
+     * You MUST run this before or within Application::stop, or hooks will not be executed.
      */
     protected fun runHooks(onError: (Throwable) -> Unit) {
-        if (shuttingDown) return
-
-        shuttingDown = true
-        shutdownHooks.values.forEach {
-            try {
-                it()
-            } catch (e: Throwable) {
-                onError(e)
+        synchronized(this) {
+            shutdownHooks.values.forEach {
+                try {
+                    it()
+                } catch (e: Throwable) {
+                    onError(e)
+                }
             }
         }
     }

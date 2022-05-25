@@ -857,10 +857,10 @@ class CLabelPane : ScrollPane() {
         val fakeY = image.height / 2 * (1 - scale) + label.anchorY * scale
 
         // To center
-        // -> Scroll / 2 = Layout + Fake
+        // -> Scroll / 2 = Layout + Fake + Radius
         // -> Layout = Scroll / 2 - Fake
-        root.translateX = width / 2 - fakeX
-        root.translateY = height / 2 - fakeY
+        root.translateX = width  / 2 - fakeX - labelRadius
+        root.translateY = height / 2 - fakeY - labelRadius
     }
     /**
      * Move the image to the top-left of the LabelPane

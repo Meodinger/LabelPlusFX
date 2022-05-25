@@ -135,6 +135,9 @@ class LabelPlusFX: HookedApplication() {
      * Initialize the Options
      */
     override fun init() {
+        // Let FX Thread keep running when Stage closed by BOSS Key
+        Platform.setImplicitExit(false)
+
         state.application = this
 
         // Start Logger Timer

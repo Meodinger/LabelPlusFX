@@ -21,14 +21,22 @@ import kotlin.system.exitProcess
  */
 
 /**
+ * App to start
+ */
+private enum class App { MAIN, DICT }
+
+/**
  * Launcher for LabelPlusFX
  */
 fun main(vararg args: String) {
+    var app: App = App.MAIN
+
     // CLI commands to App args
     val appArgs = ArrayList<String>()
     for (arg in args) when (arg) {
         "--disable-proxy" -> Config.enableProxy = false
         "--disable-jni"   -> Config.enableJNI   = false
+        "--dictionary"    -> app = App.DICT
         else -> appArgs.add(arg)
     }
 
@@ -85,14 +93,14 @@ fun main(vararg args: String) {
         }
     }
 
-    // Let FX Thread keep running when Stage closed by BOSS Key
-    Platform.setImplicitExit(false)
-
     // Init options
     Options.init()
 
     Logger.start()
-    Application.launch(LabelPlusFX::class.java, *appArgs.toTypedArray())
+    when (app) {
+        App.MAIN -> Application.launch(LabelPlusFX::class.java, *appArgs.toTypedArray())
+        App.DICT -> Application.launch(LabelPlusFXDict::class.java, *appArgs.toTypedArray())
+    }
     Logger.stop()
 
     exitProcess(0)

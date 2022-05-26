@@ -172,21 +172,21 @@ class State {
     private val undoStack: Stack<Action> = ArrayStack()
     private val redoStack: Stack<Action> = ArrayStack()
 
-    private val canUndoProperty: BooleanProperty = SimpleBooleanProperty(false)
+    private val undoableProperty: BooleanProperty = SimpleBooleanProperty(false)
     /**
      * Whether undo is available
      */
-    fun undoableProperty(): ReadOnlyBooleanProperty = canUndoProperty
+    fun undoableProperty(): ReadOnlyBooleanProperty = undoableProperty
     /**
      * @see undoableProperty
      */
-    val isUndoable: Boolean by canUndoProperty
+    val isUndoable: Boolean by undoableProperty
 
     private val redoableProperty: BooleanProperty = SimpleBooleanProperty(false)
     /**
      * Whether redo is available
      */
-    fun canRedoProperty(): ReadOnlyBooleanProperty = redoableProperty
+    fun redoableProperty(): ReadOnlyBooleanProperty = redoableProperty
     /**
      * @see redoableProperty
      */
@@ -201,7 +201,7 @@ class State {
         Logger.info("Action committed", "State")
 
         isChanged = true
-        canUndoProperty.set(true)
+        undoableProperty.set(true)
         redoableProperty.set(false)
     }
 
@@ -214,7 +214,7 @@ class State {
         redoStack.push(undoStack.pop().apply(Action::revert))
         Logger.info("Action reverted", "State")
 
-        canUndoProperty.set(!undoStack.isEmpty())
+        undoableProperty.set(!undoStack.isEmpty())
         redoableProperty.set(true)
     }
 
@@ -227,18 +227,16 @@ class State {
         undoStack.push(redoStack.pop().apply(Action::commit))
         Logger.info("Action re-committed", "State")
 
-        canUndoProperty.set(true)
+        undoableProperty.set(true)
         redoableProperty.set(!redoStack.isEmpty())
     }
 
     // endregion
 
     /**
-     * Reset the entire worksapce, be ready to open another translation.
+     * Reset the entire workspace, be ready to open another translation.
      */
     fun reset() {
-        if (!isOpened) return
-
         controller.reset()
 
         undoStack.empty()

@@ -110,13 +110,23 @@ class OnlineDict : Stage() {
                         transState = TransState.values()[(transState.ordinal + 1) % TransState.values().size]
                     }
 
-                    if (Config.enableIMEAssistance) addEventHandler(MouseEvent.MOUSE_CLICKED) {
-                        if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
-                            setImeConversionMode(
-                                getCurrentWindow(),
-                                ImeSentenceMode.AUTOMATIC,
-                                ImeConversionMode.JA_HIRAGANA
-                            )
+                    if (Config.enableIMEAssistance) {
+                        focusedProperty().addListener(onNew {
+                            // We do not set the IMEConversion mode here because switch language need time.
+                            if (it) {
+                                oriLang = getCurrentLanguage()
+                                // Focus gain will take place after the rendering, so it's safe to set by sync.
+                                AvailableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
+                            } else {
+                                // If set immediately after lose focus will cause focus on other stages fail.
+                                // Use runLater to set language after the rendering.
+                                Platform.runLater { setCurrentLanguage(oriLang) }
+                            }
+                        })
+                        addEventHandler(MouseEvent.MOUSE_CLICKED) {
+                            if (it.isDoubleClick && getCurrentLanguage().startsWith(JA)) {
+                                setImeConversionMode(getCurrentWindow(), ImeSentenceMode.AUTOMATIC, ImeConversionMode.JA_HIRAGANA)
+                            }
                         }
                     }
                 }
@@ -132,18 +142,6 @@ class OnlineDict : Stage() {
             }
         })
 
-        if (Config.enableIMEAssistance) focusedProperty().addListener(onNew {
-            // We do not set the IMEConversion mode here because switch language need time.
-            if (it) {
-                oriLang = getCurrentLanguage()
-                // Focus gain will take place after the rendering, so it's safe to set by sync.
-                AvailableLanguages.firstOrNull { lang -> lang.startsWith(JA) }?.apply(::setCurrentLanguage)
-            } else {
-                // If set immediately after lose focus will cause focus on other stages fail.
-                // Use runLater to set language after the rendering.
-                Platform.runLater { setCurrentLanguage(oriLang) }
-            }
-        })
         closeOnEscape()
     }
 

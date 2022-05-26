@@ -123,6 +123,7 @@ class FormatChecker(private val state: State) : Stage() {
             // Select Range
             state.view.cTransArea.selectRange(match.range.first, match.range.last + 1)
         })
+
         closeOnEscape()
     }
 

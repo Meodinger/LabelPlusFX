@@ -104,7 +104,7 @@ class Controller(private val state: State) {
         }
     }
 
-    private var accumulator: Long = 16 * 60 * 60 * ONE_SECOND
+    private var accumulator: Long = 16 * 60 * 60 * ONE_SECOND  // Shift to 1970/01/02 00:00 GMT+8
     private val accumulatorFormatter = SimpleDateFormat("HH:mm:ss")
     private val accumulatorManager = TimerTaskManager(0, ONE_SECOND) {
         if (state.isOpened) {
@@ -202,12 +202,7 @@ class Controller(private val state: State) {
         Logger.info("Controller initialized", "Controller")
 
         // Display default image
-        cLabelPane.isVisible = false
-        Platform.runLater {
-            // re-locate after the initial rendering
-            cLabelPane.moveToCenter()
-            cLabelPane.isVisible = true
-        }
+        cLabelPane.moveToCenter()
     }
 
     /**
@@ -1122,38 +1117,38 @@ class Controller(private val state: State) {
             val version = fetchLatestSync()
             if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", "Controller")
 
-            if (version > V) Platform.runLater {
-                val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
+            Platform.runLater {
+                if (version > V) {
+                    val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
 
-                val dialog = Dialog<ButtonType>()
-                dialog.initOwner(this@Controller.state.stage)
-                dialog.title = I18N["update.dialog.title"]
-                dialog.graphic = ImageView(IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS))
-                dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
-                dialog.dialogPane.withContent(VBox()) {
-                    add(Label(String.format(I18N["update.dialog.content.s"], version)))
-                    add(Separator()) {
-                        padding = Insets(8.0, 0.0, 8.0, 0.0)
+                    val dialog = Dialog<ButtonType>()
+                    dialog.initOwner(this@Controller.state.stage)
+                    dialog.title = I18N["update.dialog.title"]
+                    dialog.graphic = ImageView(IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS))
+                    dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
+                    dialog.dialogPane.withContent(VBox()) {
+                        add(Label(String.format(I18N["update.dialog.content.s"], version)))
+                        add(Separator()) {
+                            padding = Insets(8.0, 0.0, 8.0, 0.0)
+                        }
+                        add(Hyperlink(I18N["update.dialog.link"])) {
+                            padding = Insets(0.0)
+                            setOnAction { this@Controller.state.application.hostServices.showDocument(release) }
+                        }
                     }
-                    add(Hyperlink(I18N["update.dialog.link"])) {
-                        padding = Insets(0.0)
-                        setOnAction { this@Controller.state.application.hostServices.showDocument(release) }
+
+                    val suppressButton = dialog.dialogPane.lookupButton(suppressNoticeButtonType)
+                    ButtonBar.setButtonUniformSize(suppressButton, false)
+
+                    dialog.showAndWait().ifPresent { type ->
+                        if (type == suppressNoticeButtonType) {
+                            Preference.lastUpdateNotice = time
+                            Logger.info("Check suppressed, next notice time is ${time + delay}", "Controller")
+                        }
                     }
+                } else if (showWhenUpdated) {
+                    showInfo(this@Controller.state.stage, I18N["update.info.updated"])
                 }
-
-                val suppressButton = dialog.dialogPane.lookupButton(suppressNoticeButtonType)
-                ButtonBar.setButtonUniformSize(suppressButton, false)
-
-                dialog.showAndWait().ifPresent { type ->
-                    if (type == suppressNoticeButtonType) {
-                        Preference.lastUpdateNotice = time
-                        Logger.info("Check suppressed, next notice time is ${time + delay}",
-                            "Controller"
-                        )
-                    }
-                }
-            } else if (showWhenUpdated) Platform.runLater {
-                showInfo(this@Controller.state.stage, I18N["update.info.updated"])
             }
         }()
     }

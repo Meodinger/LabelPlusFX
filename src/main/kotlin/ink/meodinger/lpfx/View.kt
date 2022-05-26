@@ -243,7 +243,7 @@ class View(private val state: State) : BorderPane() {
                 }
                 item(I18N["m.redo"]) {
                     does { state.redo() }
-                    disableProperty().bind(!state.canRedoProperty())
+                    disableProperty().bind(!state.redoableProperty())
                     accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
                 }
                 separator()

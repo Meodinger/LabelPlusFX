@@ -9,12 +9,10 @@ import javafx.collections.*
  * Have fun with my code!
  */
 
-// FIXME: JFX's UnmodifiableSet use WeakListener which may cause change cannot go to the next layer.
-//  Write my own to replace it
 
 /**
- * Return a ObservableSet that reflect the keys and their changes of the ObservableMap
- * @return An unmodifiable ObservableSet
+ * Return a ObservableSet that reflect the keys and their changes of the ObservableMap.
+ * @return An ObservableSet that **MUTABLE** but you should better **NOT** change it.
  */
 fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
     val set = FXCollections.observableSet(HashSet(keys))
@@ -32,12 +30,13 @@ fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
         }
     })
 
-    return FXCollections.unmodifiableObservableSet(set)
+    // It's a compromise with the WeakListener attached to UnmodifiableSet which often offline.
+    return set
 }
 
 /**
  * Return a ObservableList that reflect the sorted elements and their changes of the ObservableSet
- * @return An unmodifiable ObservableList
+ * @return An ObservableList that **MUTABLE** but you should better **NOT** change it.
  */
 fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
@@ -47,11 +46,12 @@ fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): Observab
         list.setAll(sorter(it.set))
     })
 
-    return FXCollections.unmodifiableObservableList(list)
+    // It's a compromise with the WeakListener attached to UnmodifiableList which often offline.
+    return list
 }
 /**
  * Return a ObservableList that reflect the sorted elements and their changes of the ObservableList
- * @return An unmodifiable ObservableList
+ * @return An ObservableList that **MUTABLE** but you should better **NOT** change it.
  */
 fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
@@ -61,5 +61,6 @@ fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): Observ
         list.setAll(sorter(it.list))
     })
 
-    return FXCollections.unmodifiableObservableList(list)
+    // It's a compromise with the WeakListener attached to UnmodifiableList which often offline.
+    return list
 }

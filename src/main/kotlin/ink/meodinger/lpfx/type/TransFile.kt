@@ -16,7 +16,7 @@ import java.io.File
  */
 
 /**
- * A MEO Translation file
+ * A Translation file
  */
 @JsonIncludeProperties("version", "comment", "groupList", "transMap")
 class TransFile @JsonCreator constructor(
@@ -131,21 +131,23 @@ class TransFile @JsonCreator constructor(
 
     init {
         @Suppress("DEPRECATION") for (labels in transMap.values) for (label in labels) installLabel(label)
+        @Suppress("DEPRECATION") for (transGroup in groupList) installGroup(transGroup)
     }
-
-    // TODO: Use Group-Name
 
     // region TransGroup
 
-    fun getGroupIdByName(name: String): Int {
-        return groupList.first { it.name == name }.let(groupList::indexOf)
-    }
-    fun isGroupStillInUse(groupId: Int): Boolean {
+    /**
+     * Whether a TransGroup is still in use
+     * @param groupName The target TransGroup's name
+     */
+    fun isGroupStillInUse(groupName: String): Boolean {
+        val groupId = groupList.indexOfFirst { it.name == groupName }
         return transMap.values.flatten().any { label -> label.groupId == groupId }
     }
 
     /**
-     * Install the color-property of TransLabel based on this TransFile
+     * Install the color-property of TransLabel based on this TransFile.
+     * This should only be called within an Action.
      */
     @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
     fun installGroup(transGroup: TransGroup) {
@@ -153,7 +155,8 @@ class TransFile @JsonCreator constructor(
         TransGroup.installIndex(transGroup, groupListProperty.observableIndexOf(transGroup))
     }
     /**
-     * Dispose the color-property of TransLabel
+     * Dispose the color-property of TransLabel.
+     * This should only be called within an Action.
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
@@ -167,7 +170,8 @@ class TransFile @JsonCreator constructor(
     // region TransLabel
 
     /**
-     * Install the color-property of TransLabel based on this TransFile
+     * Install the index-property of TransGroup based on this TransFile.
+     * This should only be called within an Action.
      */
     @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
     fun installLabel(transLabel: TransLabel) {
@@ -175,7 +179,8 @@ class TransFile @JsonCreator constructor(
         TransLabel.installColor(transLabel, groupListProperty.valueAt(transLabel.groupIdProperty()).transform(TransGroup::color))
     }
     /**
-     * Dispose the color-property of TransLabel
+     * Dispose the index-property of TransGroup.
+     * This should only be called within an Action.
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
@@ -188,10 +193,6 @@ class TransFile @JsonCreator constructor(
 
     // region Getters
 
-    @Deprecated(level = DeprecationLevel.WARNING, message = "Use name")
-    fun getTransGroup(groupId: Int): TransGroup {
-        return groupListObservable[groupId]
-    }
     fun getTransGroup(groupName: String): TransGroup {
         return groupListObservable.first { it.name == groupName }
     }

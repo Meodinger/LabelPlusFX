@@ -348,7 +348,7 @@ class Controller(private val state: State) {
                 }
                 WorkMode.LabelMode -> {
                     val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
-                    val transGroup = state.transFile.getTransGroup(transLabel.groupId)
+                    val transGroup = state.transFile.groupList[transLabel.groupId]
                     cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
@@ -382,7 +382,7 @@ class Controller(private val state: State) {
                 WorkMode.LabelMode -> {
                     if (state.currentGroupId == NOT_FOUND) return@handler
 
-                    val transGroup = state.transFile.getTransGroup(state.currentGroupId)
+                    val transGroup = state.transFile.groupList[state.currentGroupId]
                     cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
@@ -400,10 +400,10 @@ class Controller(private val state: State) {
                 if (it != NOT_FOUND) {
                     if (cTreeView.isFocused) {
                         // if the change is result of CTreeView selection, add
-                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = false, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[it].name, clear = false, scrollTo = false)
                     } else {
                         // if the change is result of GroupBar/Box selection, set
-                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = true, scrollTo = true)
+                        cTreeView.selectGroup(state.transFile.groupList[it].name, clear = true, scrollTo = true)
                     }
                 }
             } else {
@@ -620,7 +620,7 @@ class Controller(private val state: State) {
                     // Try select
                     val index = number - 1
                     if (state.viewMode == ViewMode.GroupMode) {
-                        cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[index].name, clear = true, scrollTo = false)
                     } else {
                         state.currentGroupId = index
                     }
@@ -634,7 +634,7 @@ class Controller(private val state: State) {
                 if (index in 0 until state.transFile.groupCount) {
                     // Try select
                     if (state.viewMode == ViewMode.GroupMode) {
-                        cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[index].name, clear = true, scrollTo = false)
                     } else {
                         state.currentGroupId = index
                     }

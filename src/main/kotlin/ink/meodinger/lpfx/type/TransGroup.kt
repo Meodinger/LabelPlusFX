@@ -32,7 +32,7 @@ class TransGroup @JsonCreator constructor(
         private var ACC = 0
 
         /**
-         * Bind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Bind TransGroup's index-property, This function should only be called in TransFile
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun installIndex(transGroup: TransGroup, property: IntegerExpression) {
@@ -40,7 +40,7 @@ class TransGroup @JsonCreator constructor(
         }
 
         /**
-         * Unbind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Unbind TransGroup's index-property, This function should only be called in TransFile
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun disposeIndex(transGroup: TransGroup) {
@@ -75,6 +75,16 @@ class TransGroup @JsonCreator constructor(
 
     // region Additional
 
+    private val colorProperty: ReadOnlyObjectProperty<Color> = colorHexProperty.transform(Color::web).readonly()
+    /**
+     * This property is transformed from [colorHexProperty] by `Color::web`
+     */
+    fun colorProperty(): ReadOnlyObjectProperty<Color> = colorProperty
+    /**
+     * @see colorProperty
+     */
+    val color: Color by colorProperty
+
     private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
     /**
      * This property represents the group-id of this TransGroup
@@ -85,16 +95,6 @@ class TransGroup @JsonCreator constructor(
      * @see indexProperty
      */
     val index: Int by indexProperty
-
-    private val colorProperty: ReadOnlyObjectProperty<Color> = colorHexProperty.transform(Color::web).readonly()
-    /**
-     * This property is transformed from [colorHexProperty] by `Color::web`
-     */
-    fun colorProperty(): ReadOnlyObjectProperty<Color> = colorProperty
-    /**
-     * @see colorProperty
-     */
-    val color: Color by colorProperty
 
     // endregion
 

@@ -33,7 +33,7 @@ class TransLabel @JsonCreator constructor(
     companion object {
 
         /**
-         * Bind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Bind TransLabel's color-property, This function should only be called within a TransFile.
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun installColor(transLabel: TransLabel, property: ObjectExpression<Color>) {
@@ -41,7 +41,7 @@ class TransLabel @JsonCreator constructor(
         }
 
         /**
-         * Unbind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Unbind TransLabel's color-property, This function should only be called within a TransFile.
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun disposeColor(transLabel: TransLabel) {

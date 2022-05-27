@@ -117,7 +117,7 @@ class CTreeMenu(
         // do Action
         state.doAction(GroupAction(
             ActionType.CHANGE, state,
-            state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String)),
+            state.transFile.getTransGroup(it.source as String),
             newName = newName
         ))
     }
@@ -128,7 +128,7 @@ class CTreeMenu(
     private val gChangeColorHandler = EventHandler<ActionEvent> {
         state.doAction(GroupAction(
             ActionType.CHANGE, state,
-            state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String)),
+            state.transFile.getTransGroup(it.source as String),
             newColorHex = (it.target as ColorPicker).value.toHexRGB()
         ))
     }
@@ -142,7 +142,7 @@ class CTreeMenu(
 
         state.doAction(GroupAction(
             ActionType.REMOVE, state,
-            state.transFile.getTransGroup(state.transFile.getGroupIdByName(it.source as String))
+            state.transFile.getTransGroup(it.source as String)
         ))
 
         // Select the first group if TransFile has
@@ -163,14 +163,14 @@ class CTreeMenu(
         }
         val choice = dialog.showAndWait()
         if (!choice.isPresent) return@EventHandler
-        val newGroupId = state.transFile.getGroupIdByName(choice.get())
+        val transGroup = state.transFile.getTransGroup(choice.get())
 
         val labelActions = items.map {
             LabelAction(
                 ActionType.CHANGE, state,
                 state.currentPicName,
                 state.transFile.getTransLabel(state.currentPicName, it.transLabel.index),
-                newGroupId = newGroupId
+                newGroupId = transGroup.index
             )
         }
         val moveAction = FunctionAction(
@@ -223,7 +223,7 @@ class CTreeMenu(
                 val groupItem = selectedItems[0] as CTreeGroupItem
 
                 gChangeColorPicker.value = groupItem.transGroup.color
-                gDeleteItem.isDisable = state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(groupItem.value))
+                gDeleteItem.isDisable = state.transFile.isGroupStillInUse(groupItem.value)
 
                 gRenameItem.setOnAction { gRenameHandler.handle(ActionEvent(groupItem.transGroup.name, gRenameItem)) }
                 gChangeColorPicker.setOnAction { gChangeColorHandler.handle(ActionEvent(groupItem.transGroup.name, gChangeColorPicker)) }
@@ -238,7 +238,7 @@ class CTreeMenu(
                 // NOTE: we cannot change names here, so it is safe to store names
                 val groupNames = selectedItems.map { (it as CTreeGroupItem).transGroup.name }
 
-                gDeleteItem.isDisable = groupNames.any { state.transFile.isGroupStillInUse(state.transFile.getGroupIdByName(it)) }
+                gDeleteItem.isDisable = groupNames.any { state.transFile.isGroupStillInUse(it) }
                 gDeleteItem.setOnAction { groupNames.forEach { gDeleteHandler.handle(ActionEvent(it, gDeleteItem)) } }
 
                 items.add(gDeleteItem)

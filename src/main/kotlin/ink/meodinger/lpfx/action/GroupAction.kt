@@ -65,7 +65,7 @@ class GroupAction(
         Logger.info("Added TransGroup: $transGroup", "Action")
     }
     private fun removeTransGroup(transGroup: TransGroup) {
-        if (state.transFile.isGroupStillInUse(transGroup.index))
+        if (state.transFile.isGroupStillInUse(transGroup.name))
             throw IllegalArgumentException(String.format(I18N["exception.action.group_still_in_use.s"], transGroup.name))
 
         @Suppress("DEPRECATION") state.transFile.disposeGroup(transGroup)

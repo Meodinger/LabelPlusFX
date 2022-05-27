@@ -942,7 +942,7 @@ class Controller(private val state: State) {
         }
 
         // Use temp if overwrite
-        val exportDest = if (overwrite) File.createTempFile(file.path, "temp").apply(File::deleteOnExit) else file
+        val exportDest = if (overwrite) File.createTempFile("LPFX", file.extension).apply(File::deleteOnExit) else file
 
         // Export
         try {

@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.util.property
 
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.IntegerBinding
 import javafx.collections.*
 
 
@@ -63,4 +65,11 @@ fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): Observ
 
     // It's a compromise with the WeakListener attached to UnmodifiableList which often offline.
     return list
+}
+
+/**
+ * Return a IntegerBinding that represents the index in the list of the given element
+ */
+fun <E> ObservableList<E>.observableIndexOf(element: E): IntegerBinding {
+    return Bindings.createIntegerBinding({ indexOf(element) }, this)
 }

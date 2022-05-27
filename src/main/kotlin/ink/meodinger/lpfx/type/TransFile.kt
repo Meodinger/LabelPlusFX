@@ -91,11 +91,15 @@ class TransFile @JsonCreator constructor(
     // endregion
 
     // region Properties
+
     // Only internal use to avoid accidentally invoking their `set` methods
-    // Note1: version is immutable
-    // Note2: all backing list/map/set should be mutable
-    // Note3: groups' properties' changes will be listened
-    // Note4: transMap use LinkedHashMap to preserve key order when export.
+    // Note1: version is immutable.
+    // Note2: all backing list/map/set should be mutable.
+    // Note3: groups' properties' changes will be listened.
+    // Note4: transMap use LinkedHashMap to preserve the key order when exported,
+    //        and for a more general constructor with `Map` instead of `MutableMap`.
+    //        LinkedHashMap doesn't slower than an ordinary HashMap, please see
+    //        https://stackoverflow.com/a/17708526/15969136.
 
     private val versionProperty: ReadOnlyListProperty<Int> = SimpleListProperty(FXCollections.observableList(version))
     private val commentProperty: StringProperty = SimpleStringProperty(comment)
@@ -108,12 +112,13 @@ class TransFile @JsonCreator constructor(
 
     // region Accessible Fields
 
-    // Following properties provide JSON getters
+    // Following properties provide JSON getters/setters
     val version: List<Int> by versionProperty
     var comment: String by commentProperty
     val groupList: List<TransGroup> by groupListProperty
     val transMap: Map<String, List<TransLabel>> by transMapProperty
 
+    // Only use these when you want an ObservableValue or modify properties (except sorted-pic-names)
     val groupListObservable: ObservableList<TransGroup> by groupListProperty
     val transMapObservable: ObservableMap<String, ObservableList<TransLabel>> by transMapProperty
     val sortedPicNamesObservable: ObservableList<String> by sortedPicNamesProperty
@@ -128,6 +133,8 @@ class TransFile @JsonCreator constructor(
         @Suppress("DEPRECATION") for (labels in transMap.values) for (label in labels) installLabel(label)
     }
 
+    // TODO: Use Group-Name
+
     // region TransGroup
 
     fun getGroupIdByName(name: String): Int {
@@ -137,9 +144,28 @@ class TransFile @JsonCreator constructor(
         return transMap.values.flatten().any { label -> label.groupId == groupId }
     }
 
+    /**
+     * Install the color-property of TransLabel based on this TransFile
+     */
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
+    fun installGroup(transGroup: TransGroup) {
+        @Suppress("DEPRECATION")
+        TransGroup.installIndex(transGroup, groupListProperty.observableIndexOf(transGroup))
+    }
+    /**
+     * Dispose the color-property of TransLabel
+     */
+    @Suppress("DeprecatedCallableAddReplaceWith")
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
+    fun disposeGroup(transGroup: TransGroup) {
+        @Suppress("DEPRECATION")
+        TransGroup.disposeIndex(transGroup)
+    }
+
     // endregion
 
     // region TransLabel
+
     /**
      * Install the color-property of TransLabel based on this TransFile
      */
@@ -151,6 +177,7 @@ class TransFile @JsonCreator constructor(
     /**
      * Dispose the color-property of TransLabel
      */
+    @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated(level = DeprecationLevel.WARNING, message = "Only in Action")
     fun disposeLabel(transLabel: TransLabel) {
         @Suppress("DEPRECATION")
@@ -161,8 +188,12 @@ class TransFile @JsonCreator constructor(
 
     // region Getters
 
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Use name")
     fun getTransGroup(groupId: Int): TransGroup {
         return groupListObservable[groupId]
+    }
+    fun getTransGroup(groupName: String): TransGroup {
+        return groupListObservable.first { it.name == groupName }
     }
     fun getTransList(picName: String): List<TransLabel> {
         return transMapObservable[picName]!!

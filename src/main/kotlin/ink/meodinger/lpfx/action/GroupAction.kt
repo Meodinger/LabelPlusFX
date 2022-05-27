@@ -58,21 +58,20 @@ class GroupAction(
                 throw IllegalArgumentException(String.format(I18N["exception.action.group_repeated.s"], transGroup.name))
 
         state.transFile.groupListObservable.add(groupId, transGroup)
-
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
             if (label.groupId >= groupId) label.groupId++
+        @Suppress("DEPRECATION") state.transFile.installGroup(transGroup)
 
         Logger.info("Added TransGroup: $transGroup", "Action")
     }
     private fun removeTransGroup(transGroup: TransGroup) {
-        val groupId = state.transFile.getGroupIdByName(transGroup.name)
-        if (state.transFile.isGroupStillInUse(groupId))
+        if (state.transFile.isGroupStillInUse(transGroup.index))
             throw IllegalArgumentException(String.format(I18N["exception.action.group_still_in_use.s"], transGroup.name))
 
+        @Suppress("DEPRECATION") state.transFile.disposeGroup(transGroup)
         for (labels in state.transFile.transMapObservable.values) for (label in labels)
-            if (label.groupId >= groupId) label.groupId--
-
-        state.transFile.groupListObservable.removeAt(groupId)
+            if (label.groupId >= transGroup.index) label.groupId--
+        state.transFile.groupListObservable.removeAt(transGroup.index)
 
         Logger.info("Removed TransGroup: $transGroup", "Action")
     }

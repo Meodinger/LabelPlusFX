@@ -911,8 +911,8 @@ class Controller(private val state: State) {
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
 
         // Move to center
-        // FIXME: May throw NoSuchElementException if render not complete
         if (labelIndex != NOT_FOUND) {
+            // NotNow: May throw NoSuchElementException if render not complete
             cTreeView.selectLabel(labelIndex, clear = true, scrollTo = true)
             cLabelPane.moveToLabel(labelIndex)
         }

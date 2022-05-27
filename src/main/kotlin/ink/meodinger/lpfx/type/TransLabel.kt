@@ -77,7 +77,7 @@ class TransLabel @JsonCreator constructor(
     var x: Double
         get() = xProperty.get()
         set(value) {
-            if (value < 0 || value > 1)
+            if (!value.isNaN() && (value < 0 || value > 1))
                 throw IllegalArgumentException(String.format(I18N["exception.trans_label.x_invalid.d"], value))
             xProperty.set(value)
         }
@@ -87,7 +87,7 @@ class TransLabel @JsonCreator constructor(
     var y: Double
         get() = yProperty.get()
         set(value) {
-            if (value < 0 || value > 1)
+            if (!value.isNaN() && (value < 0 || value > 1))
                 throw IllegalArgumentException(String.format(I18N["exception.trans_label.y_invalid.d"], value))
             yProperty.set(value)
         }

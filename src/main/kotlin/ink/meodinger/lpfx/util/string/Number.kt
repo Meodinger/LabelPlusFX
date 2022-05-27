@@ -11,6 +11,8 @@ package ink.meodinger.lpfx.util.string
  * Is the String a mathematical natural number
  */
 fun String.isMathematicalNatural(): Boolean {
+    if (isEmpty()) return false
+
     val iterator = this.toCharArray().iterator()
     while (iterator.hasNext())
         if (iterator.nextChar() !in '0'..'9')
@@ -23,9 +25,10 @@ fun String.isMathematicalNatural(): Boolean {
  * Is the String a mathematical integer
  */
 fun String.isMathematicalInteger(): Boolean {
+    if (isEmpty()) return false
+
     val chars = this.toCharArray()
     val isNegative = chars[0] == '-'
-
     return if (isNegative) substring(1).isMathematicalNatural() else isMathematicalNatural()
 }
 
@@ -33,8 +36,9 @@ fun String.isMathematicalInteger(): Boolean {
  * Is the String a mathematical decimal
  */
 fun String.isMathematicalDecimal(): Boolean {
-    val chars = this.toCharArray()
+    if (isEmpty()) return false
 
+    val chars = this.toCharArray()
     var index = 0
     val isNegative = chars[index] == '-'
     if (isNegative) index++

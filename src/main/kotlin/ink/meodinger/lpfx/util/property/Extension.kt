@@ -9,6 +9,8 @@ import javafx.collections.*
  * Have fun with my code!
  */
 
+// FIXME: JFX's UnmodifiableSet use WeakListener which may cause change cannot go to the next layer.
+//  Write my own to replace it
 
 /**
  * Return a ObservableSet that reflect the keys and their changes of the ObservableMap
@@ -40,7 +42,10 @@ fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
 fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 
-    addListener(SetChangeListener { list.setAll(sorter(it.set)) })
+    addListener(SetChangeListener {
+        // Sort the set whenever it changes
+        list.setAll(sorter(it.set))
+    })
 
     return FXCollections.unmodifiableObservableList(list)
 }
@@ -51,7 +56,10 @@ fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): Observab
 fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 
-    addListener(ListChangeListener { list.setAll(sorter(it.list)) })
+    addListener(ListChangeListener {
+        // Sort the list whenever it changes
+        list.setAll(sorter(it.list))
+    })
 
     return FXCollections.unmodifiableObservableList(list)
 }

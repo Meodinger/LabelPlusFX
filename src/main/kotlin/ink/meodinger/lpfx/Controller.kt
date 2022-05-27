@@ -428,8 +428,10 @@ class Controller(private val state: State) {
         cPicBox.itemsProperty().bind(picNamesBinding)
         cPicBox.indexProperty().addListener(onNew<Number, Int> {
             if (state.isOpened) {
-                // PicBox index should never be -1 (value should never be null)
-                state.currentPicName = state.transFile.sortedPicNames[it]
+                if (it != NOT_FOUND) {
+                    // PicBox index should never be -1 except when removing a picture
+                    state.currentPicName = state.transFile.sortedPicNames[it]
+                }
             } else {
                 // Closed, do nothing. Let State set current-pic-name to empty string
             }

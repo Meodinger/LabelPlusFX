@@ -44,6 +44,8 @@ class CStringKtTest {
 
     @Test
     fun isMathNaturalTest()  {
+        assertFalse("".isMathematicalNatural())
+
         assertTrue("123".isMathematicalNatural())
 
         assertFalse("-123".isMathematicalNatural())
@@ -70,6 +72,7 @@ class CStringKtTest {
 
     @Test
     fun isMathIntegerTest()  {
+        assertFalse("".isMathematicalInteger())
         assertTrue("123".isMathematicalInteger())
 
         assertTrue("-123".isMathematicalInteger())
@@ -96,6 +99,7 @@ class CStringKtTest {
 
     @Test
     fun isMathDecimalTest()  {
+        assertFalse("".isMathematicalDecimal())
         assertTrue("123".isMathematicalDecimal())
 
         assertTrue("-123".isMathematicalDecimal())

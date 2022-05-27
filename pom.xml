@@ -7,7 +7,7 @@
 
     <groupId>ink.meodinger</groupId>
     <artifactId>lpfx</artifactId>
-    <version>2.3.3-SNAPSHOT</version>
+    <version>2.3.3</version>
     <packaging>jar</packaging>
 
     <name>lpfx</name>

@@ -9,6 +9,7 @@
 
 
 <!-- PROJECT LOGO -->
+[简体中文](/README_ZH.md) | English
 <br />
 <p align="center">
   <a href="https://github.com/Meodinger/LabelPlusFX">
@@ -117,9 +118,13 @@ Distributed under the AGPLv3 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
+### original
 Meodinger Wang - [@Meodinger_Wang](https://twitter.com/Meodinger_Wang) - meodinger@qq.com
 
 Project Link: [https://github.com/Meodinger/LabelPlusFX](https://github.com/Meodinger/LabelPlusFX)
+
+### current
+Ding Ye - kanaumachi@gmail.com
 
 <!-- SPONSOR -->
 

@@ -53,9 +53,9 @@ abstract class AbstractProperties(val name: String, val path: Path) {
                         while (index < lines.size && lines[index].startsWith(CProperty.LIST_SEPARATOR)) {
                             propList.add(lines[index++].substring(1))
                         }
-                        instance[prop[0]].set(propList)
+                        instance.find(prop[0])?.set(propList)
                     } else {
-                        instance[prop[0]].set(prop[1])
+                        instance.find(prop[0])?.set(prop[1])
                     }
                 }
             } catch { e: IndexOutOfBoundsException ->
@@ -105,7 +105,9 @@ abstract class AbstractProperties(val name: String, val path: Path) {
         properties.addAll(default.map(CProperty::copy))
     }
 
-    operator fun get(key: String): CProperty = properties.first { it.key == key }
+    operator fun get(key: String): CProperty = properties.first() { it.key == key }
+
+    fun find(key: String): CProperty? = properties.firstOrNull() { it.key == key }
 
     override fun toString(): String = properties.joinToString(", \n", transform = CProperty::toString)
 

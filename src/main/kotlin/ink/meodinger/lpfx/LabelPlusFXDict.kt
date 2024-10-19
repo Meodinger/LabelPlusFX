@@ -30,6 +30,7 @@ class LabelPlusFXDict: Application() {
             showException(primaryStage, e)
         }
         // Set up the Stage
+        primaryStage.icons.add(ICON)
         primaryStage.title = "LPFX Dictionary (Standalone)"
         primaryStage.scene = OnlineDict().scene
         primaryStage.width = 400.0

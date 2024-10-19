@@ -9,6 +9,7 @@
 
 
 <!-- PROJECT LOGO -->
+[简体中文](/README_ZH.md) | English
 <br />
 <p align="center">
   <a href="https://github.com/Meodinger/LabelPlusFX">

@@ -50,7 +50,16 @@ class LabelAction(
 
         if (newLabelIndex != NOT_FOUND) {
             builder.append("@index: ${targetTransLabel.index.pad(2)} -> ${index.pad(2)}; ")
-            targetTransLabel.index = index
+            if (targetTransLabel.index  == index) return
+            val transLabel = TransLabel(
+                index,
+                targetTransLabel.groupId,
+                targetTransLabel.x,
+                targetTransLabel.y,
+                targetTransLabel.text
+            )
+            removeTransLabel(targetPicName,targetTransLabel)
+            addTransLabel(targetPicName,transLabel)
         }
         if (newGroupId != NOT_FOUND) {
             builder.append("@groupId: ${targetTransLabel.groupId.pad(2)} -> ${groupId.pad(2)}; ")
@@ -82,7 +91,7 @@ class LabelAction(
             throw IllegalArgumentException(String.format(I18N["exception.action.label_group_invalid.i"], transLabel.groupId))
 
         for (label in list) if (label.index >= transLabel.index) label.index++
-        list.add(transLabel)
+        list.add(transLabel.index -1 ,transLabel)
         @Suppress("DEPRECATION") state.transFile.installLabel(transLabel)
 
         Logger.info("Added $picName @ $transLabel", "Action")

@@ -845,7 +845,8 @@ class CLabelPane : ScrollPane() {
      * @param labelIndex Index of the label which will be displaye at the center
      */
     fun moveToLabel(labelIndex: Int) {
-        val label = labelNodes.first { it.index == labelIndex }
+        val label = labelNodes.firstOrNull { it.index == labelIndex } ?:return
+
 
         vvalue = 0.0
         hvalue = 0.0

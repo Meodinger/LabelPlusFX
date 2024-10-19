@@ -37,6 +37,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     const val DefaultGroupColorHexList = "DefaultGroupColorList"
     const val IsGroupCreateOnNewTrans  = "IsGroupCreateOnNew"
     const val LigatureRules            = "LigatureRules"
+    const val QuickInputTexts          = "QuickInputTexts"
     const val ViewModes                = "ViewMode"
     const val NewPictureScale          = "ScaleOnNewPicture"
     const val UseWheelToScale          = "UseWheelToScale"
@@ -51,6 +52,9 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     const val UseExportNameTemplate    = "UseExportNameTemplate"
     const val ExportNameTemplate       = "ExportNameTemplate"
     const val LogLevel                 = "LogLevel"
+    const val UseCustomBaiduKey        = "UseCustomBaiduKey"
+    const val BaiduTransLateKey        = "BaiduTransLateKey"
+    const val BaiduTransLateAppId      = "BaiduTransLateAppId"
 
     // ----- Default ----- //
 
@@ -70,6 +74,19 @@ object Settings : AbstractProperties("Settings", Options.settings) {
             "cc"     to "◎",
             "*"      to "※",
         ),
+        CProperty(QuickInputTexts,
+            "「",
+            "」",
+            "『",
+            "』",
+            "⭐",
+            "♢",
+            "♡",
+            "♪",
+            "◎",
+            "※",
+            "♥",
+        ),
         CProperty(ViewModes, ViewMode.IndexMode.ordinal, ViewMode.GroupMode.ordinal),
         CProperty(NewPictureScale, CLabelPane.NewPictureScale.DEFAULT.ordinal),
         CProperty(UseWheelToScale, false),
@@ -84,6 +101,9 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         CProperty(UseExportNameTemplate, false),
         CProperty(ExportNameTemplate, I18N["settings.other.template.default"]),
         CProperty(LogLevel, Logger.LogLevel.INFO.ordinal),
+        CProperty(UseCustomBaiduKey, false),
+        CProperty(BaiduTransLateKey, "lkjooeJUgW0spOctSbZb"),
+        CProperty(BaiduTransLateAppId, "20200730000529751"),
     )
 
     private val defaultGroupNameListProperty: ListProperty<String> = SimpleListProperty()
@@ -101,6 +121,11 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     private val ligatureRulesProperty: ListProperty<Pair<String, String>> = SimpleListProperty()
     fun ligatureRulesProperty(): ListProperty<Pair<String, String>> = ligatureRulesProperty
     var ligatureRules: ObservableList<Pair<String, String>> by ligatureRulesProperty
+
+    val quickInputTextsProperty: ListProperty<String> = SimpleListProperty()
+    fun quickInputTextsProperty(): ListProperty<String> = quickInputTextsProperty
+    var quickInputTexts: ObservableList<String> by quickInputTextsProperty
+
 
     private val viewModesProperty: ListProperty<ViewMode> = SimpleListProperty()
     fun viewModesProperty(): ListProperty<ViewMode> = viewModesProperty
@@ -158,6 +183,18 @@ object Settings : AbstractProperties("Settings", Options.settings) {
     fun logLevelProperty(): ObjectProperty<Logger.LogLevel> = logLevelProperty
     var logLevel: Logger.LogLevel by logLevelProperty
 
+    private val useCustomBaiduKeyProperty: BooleanProperty = SimpleBooleanProperty()
+    fun useCustomBaiduKeyProperty(): BooleanProperty = useCustomBaiduKeyProperty
+    var useCustomBaiduKey: Boolean by useCustomBaiduKeyProperty
+
+    private val baiduTransLateKeyProperty: StringProperty = SimpleStringProperty()
+    fun baiduTransLateKeyProperty(): StringProperty = baiduTransLateKeyProperty
+    var baiduTransLateKey: String by baiduTransLateKeyProperty
+
+    private val baiduTransLateAppIdProperty: StringProperty = SimpleStringProperty()
+    fun baiduTransLateAppIdProperty(): StringProperty = baiduTransLateAppIdProperty
+    var baiduTransLateAppId: String by baiduTransLateAppIdProperty
+
 
     init { useDefault() }
 
@@ -169,6 +206,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         defaultGroupColorHexList    = FXCollections.observableList(this[DefaultGroupColorHexList].asStringList())
         isGroupCreateOnNewTransList = FXCollections.observableList(this[IsGroupCreateOnNewTrans].asBooleanList())
         ligatureRules               = FXCollections.observableList(this[LigatureRules].asPairList())
+        quickInputTexts                 = FXCollections.observableList(this[QuickInputTexts].asStringList())
         viewModes                   = FXCollections.observableList(this[ViewModes].asIntegerList().map(ViewMode.values()::get))
         newPictureScalePicture      = CLabelPane.NewPictureScale.values()[this[NewPictureScale].asInteger()]
         useWheelToScale             = this[UseWheelToScale].asBoolean()
@@ -183,6 +221,9 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         useExportNameTemplate       = this[UseExportNameTemplate].asBoolean()
         exportNameTemplate          = this[ExportNameTemplate].asString()
         logLevel                    = Logger.LogLevel.values()[this[LogLevel].asInteger()]
+        useCustomBaiduKey           = this[UseCustomBaiduKey].asBoolean()
+        baiduTransLateKey           = this[BaiduTransLateKey].asString()
+        baiduTransLateAppId         = this[BaiduTransLateAppId].asString()
     }
 
     @Throws(IOException::class)
@@ -191,6 +232,7 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         this[DefaultGroupColorHexList].set(defaultGroupColorHexList)
         this[IsGroupCreateOnNewTrans] .set(isGroupCreateOnNewTransList)
         this[LigatureRules]           .set(ligatureRules)
+        this[QuickInputTexts]         .set(quickInputTexts)
         this[ViewModes]               .set(viewModes.map(Enum<*>::ordinal))
         this[NewPictureScale]         .set(newPictureScalePicture.ordinal)
         this[UseWheelToScale]         .set(useWheelToScale)
@@ -205,7 +247,9 @@ object Settings : AbstractProperties("Settings", Options.settings) {
         this[UseExportNameTemplate]   .set(useExportNameTemplate)
         this[ExportNameTemplate]      .set(exportNameTemplate)
         this[LogLevel]                .set(logLevel.ordinal)
-
+        this[UseCustomBaiduKey]       .set(useCustomBaiduKey)
+        this[BaiduTransLateKey]       .set(baiduTransLateKey)
+        this[BaiduTransLateAppId]     .set(baiduTransLateAppId)
         save(this)
     }
 

@@ -33,7 +33,7 @@ class TransLabel @JsonCreator constructor(
     companion object {
 
         /**
-         * Bind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Bind TransLabel's color-property, This function should only be called within a TransFile.
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun installColor(transLabel: TransLabel, property: ObjectExpression<Color>) {
@@ -41,7 +41,7 @@ class TransLabel @JsonCreator constructor(
         }
 
         /**
-         * Unbind TransLabel's ColorProperty, This function should only be called in TransFile
+         * Unbind TransLabel's color-property, This function should only be called within a TransFile.
          */
         @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
         fun disposeColor(transLabel: TransLabel) {
@@ -77,7 +77,7 @@ class TransLabel @JsonCreator constructor(
     var x: Double
         get() = xProperty.get()
         set(value) {
-            if (value < 0 || value > 1)
+            if (!value.isNaN() && (value < 0 || value > 1))
                 throw IllegalArgumentException(String.format(I18N["exception.trans_label.x_invalid.d"], value))
             xProperty.set(value)
         }
@@ -87,7 +87,7 @@ class TransLabel @JsonCreator constructor(
     var y: Double
         get() = yProperty.get()
         set(value) {
-            if (value < 0 || value > 1)
+            if (!value.isNaN() && (value < 0 || value > 1))
                 throw IllegalArgumentException(String.format(I18N["exception.trans_label.y_invalid.d"], value))
             yProperty.set(value)
         }

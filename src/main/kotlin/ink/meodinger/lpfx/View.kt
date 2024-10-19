@@ -124,9 +124,11 @@ class View(private val state: State) : BorderPane() {
      */
     val cTransArea: CLigatureArea = CLigatureArea()
 
+
     // Private Components
     private val statsBar: HBox = HBox()
     private val cTreeMenu: CTreeMenu = CTreeMenu(state, cTreeView)
+    private val cTextMenu: CTextMenu = CTextMenu(cTransArea)
 
     // endregion
 
@@ -230,6 +232,9 @@ class View(private val state: State) : BorderPane() {
                 item(I18N["m.bak_recovery"]) {
                     does { bakRecovery() }
                 }
+                item(I18N["m.settings"]) {
+                    does { settings() }
+                }
                 separator()
                 item(I18N["m.exit"]) {
                     does { exitApplication() }
@@ -243,7 +248,7 @@ class View(private val state: State) : BorderPane() {
                 }
                 item(I18N["m.redo"]) {
                     does { state.redo() }
-                    disableProperty().bind(!state.canRedoProperty())
+                    disableProperty().bind(!state.redoableProperty())
                     accelerator = KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN)
                 }
                 separator()
@@ -311,9 +316,6 @@ class View(private val state: State) : BorderPane() {
                 }
             }
             menu(I18N["mm.about"]) {
-                item(I18N["m.settings"]) {
-                    does { settings() }
-                }
                 item(I18N["m.logs"]) {
                     does { logs() }
                 }
@@ -771,6 +773,7 @@ class View(private val state: State) : BorderPane() {
             Settings.DefaultGroupColorHexList -> Settings.defaultGroupColorHexList    .setAll(value as List<String>)
             Settings.IsGroupCreateOnNewTrans  -> Settings.isGroupCreateOnNewTransList .setAll(value as List<Boolean>)
             Settings.LigatureRules            -> Settings.ligatureRules               .setAll(value as List<Pair<String, String>>)
+            Settings.QuickInputTexts          -> Settings.quickInputTexts             .setAll(value as List<String>)
             Settings.ViewModes                -> Settings.viewModes                   .setAll(value as List<ViewMode>)
             Settings.NewPictureScale          -> Settings.newPictureScalePicture      = value as CLabelPane.NewPictureScale
             Settings.UseWheelToScale          -> Settings.useWheelToScale             = value as Boolean
@@ -784,6 +787,9 @@ class View(private val state: State) : BorderPane() {
             Settings.UseMeoFileAsDefault      -> Settings.useMeoFileAsDefault         = value as Boolean
             Settings.UseExportNameTemplate    -> Settings.useExportNameTemplate       = value as Boolean
             Settings.ExportNameTemplate       -> Settings.exportNameTemplate          = value as String
+            Settings.UseCustomBaiduKey        -> Settings.useCustomBaiduKey           = value as Boolean
+            Settings.BaiduTransLateKey        -> Settings.baiduTransLateKey           = value as String
+            Settings.BaiduTransLateAppId      -> Settings.baiduTransLateAppId         = value as String
             else -> doNothing()
         }
     }

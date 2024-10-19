@@ -46,6 +46,7 @@ class DialogSettings : AbstractPropertiesDialog() {
     companion object {
         private const val gRowShift = 1
         private const val rRowShift = 1
+        private const val qRowShift = 1
         private const val rIsFrom = "C_Is_From"
         private const val rRuleIndex = "C_Rule_Index"
     }
@@ -71,6 +72,14 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val rLabelFrom = Label(I18N["settings.ligature.from"])
     private val rLabelTo = Label(I18N["settings.ligature.to"])
 
+    private val qGridPane = GridPane().apply {
+        alignment = Pos.TOP_CENTER
+        padding = Insets(16.0)
+        vgap = 16.0
+        hgap = 16.0
+    }
+    private val qLabelHint = Label(I18N["settings.quick_input.hint"])
+
     private val mComboInput = CComboBox<ViewMode>()
     private val mComboLabel = CComboBox<ViewMode>()
     private val mComboScale = CComboBox<CLabelPane.NewPictureScale>()
@@ -91,6 +100,9 @@ class DialogSettings : AbstractPropertiesDialog() {
     private val xCheckUseMeo = CheckBox(I18N["settings.other.meo_default"])
     private val xCheckUseTmp = CheckBox(I18N["settings.other.template.enable"])
     private val xFieldTemplate = TextField()
+    private val xCheckUseCustomBaiduKey = CheckBox(I18N["settings.other.Translate_keys.enable"])
+    private val xFieldBaiduTranslateKey = TextField()
+    private val xFieldBaiduTranslateAppId = TextField()
 
     init {
         title = I18N["settings.title"]
@@ -127,6 +139,22 @@ class DialogSettings : AbstractPropertiesDialog() {
                         add(Label(I18N["settings.ligature.sample"]))
                         add(HBox()) { hgrow = Priority.ALWAYS }
                         add(Button(I18N["settings.ligature.add"])) { does { createLigatureRow() } }
+                    }
+                }
+            }
+            add(I18N["settings.quick_input.title"]) {
+                withContent(BorderPane()) {
+                    val stackPane = StackPane(qGridPane)
+                    val scrollPane = ScrollPane(stackPane)
+                    stackPane.prefWidthProperty().bind(scrollPane.widthProperty() - 16.0)
+
+                    center(scrollPane) { style = "-fx-background-color:transparent;" }
+                    bottom(HBox()) {
+                        alignment = Pos.CENTER_RIGHT
+                        padding = Insets(16.0, 8.0, 8.0, 16.0)
+                        add(Label(I18N["settings.quick_input.sample"]))
+                        add(HBox()) { hgrow = Priority.ALWAYS }
+                        add(Button(I18N["settings.quick_input.add"])) { does { createQuickInputRow() } }
                     }
                 }
             }
@@ -348,6 +376,16 @@ class DialogSettings : AbstractPropertiesDialog() {
                             showDelay = Duration(500.0)
                         }
                     }
+                    add(xCheckUseCustomBaiduKey, 0, 7, 2, 1)
+                    add(Label(I18N["settings.other.Translate_keys.key"]), 0, 8)
+                    add(xFieldBaiduTranslateKey, 1, 8) {
+                        disableProperty().bind(!xCheckUseCustomBaiduKey.selectedProperty())
+
+                    }
+                    add(Label(I18N["settings.other.Translate_keys.app_id"]), 0, 9)
+                    add(xFieldBaiduTranslateAppId, 1, 9) {
+                        disableProperty().bind(!xCheckUseCustomBaiduKey.selectedProperty())
+                    }
                 }
             }
         }
@@ -471,6 +509,50 @@ class DialogSettings : AbstractPropertiesDialog() {
         }
     }
 
+    // ----- Quick Input  ----- //
+    private fun initQuickInputTab() {
+        qGridPane.children.clear()
+
+        val quickInputTextsList = Settings.quickInputTexts
+
+        if (quickInputTextsList.isEmpty()) {
+            qGridPane.add(qLabelHint, 0, 0)
+        } else {
+            for ( text in quickInputTextsList) createQuickInputRow(text)
+        }
+    }
+    private fun createQuickInputRow(text: String = "") {
+        val newRowIndex = if (qGridPane.rowCount == 0) 1 else qGridPane.rowCount
+        if (qGridPane.children.size == 1 || qGridPane.rowCount == 0) { // Only hint || nothing
+            qGridPane.children.clear()
+        }
+        val textField = TextField(text).apply {
+            textFormatter = genGeneralFormatter()
+        }
+        val button = Button(I18N["common.delete"]) does { removeQuickInputRow(GridPane.getRowIndex(this)) }
+        //   0         1         2
+        // 1 textField  ________  Delete
+        qGridPane.add(textField, 0, newRowIndex)
+        qGridPane.add(button, 1, newRowIndex)
+    }
+    private fun removeQuickInputRow(index: Int) {
+        val toRemoveSet = HashSet<Node>()
+        for (node in qGridPane.children) {
+            val row = GridPane.getRowIndex(node) ?: 0
+            if (row == index) toRemoveSet.add(node)
+            if (row > index) {
+                GridPane.setRowIndex(node, row - 1)
+            }
+        }
+        qGridPane.children.removeAll(toRemoveSet)
+
+        if (qGridPane.rowCount == qRowShift) {
+            qGridPane.children.removeAll()
+            qGridPane.add(qLabelHint, 0, 0)
+        }
+    }
+
+
     // ----- Initialize Properties ----- //
     override fun initProperties() {
         // Group
@@ -478,6 +560,9 @@ class DialogSettings : AbstractPropertiesDialog() {
 
         // Ligature Rule
         initLigatureTab()
+
+        // quick Input
+        initQuickInputTab()
 
         // Mode
         mComboInput.select(Settings.viewModes[0])
@@ -505,6 +590,9 @@ class DialogSettings : AbstractPropertiesDialog() {
         xCheckUseMeo.isSelected = Settings.useMeoFileAsDefault
         xCheckUseTmp.isSelected = Settings.useExportNameTemplate
         xFieldTemplate.text = Settings.exportNameTemplate
+        xCheckUseCustomBaiduKey.isSelected = Settings.useCustomBaiduKey
+        xFieldBaiduTranslateKey.text = Settings.baiduTransLateKey
+        xFieldBaiduTranslateAppId.text = Settings.baiduTransLateAppId
     }
 
     // ----- Result convert ---- //
@@ -557,6 +645,22 @@ class DialogSettings : AbstractPropertiesDialog() {
 
         return map
     }
+    private fun convertQuickInput(): Map<String, Any> {
+        val map = HashMap<String, Any>()
+        val size = qGridPane.rowCount - qRowShift
+        if (size < 0) return emptyMap()
+
+        val textList = MutableList(size) { "" }
+        for (node in qGridPane.children) {
+            val groupId = GridPane.getRowIndex(node) - qRowShift
+            if (groupId < 0) continue
+            when (node) {
+                is TextField -> textList[groupId] = node.text
+            }
+        }
+        map[Settings.QuickInputTexts] = textList
+        return map
+    }
     private fun convertMode(): Map<String, Any> {
         val map = HashMap<String, Any>()
 
@@ -585,6 +689,9 @@ class DialogSettings : AbstractPropertiesDialog() {
         map[Settings.UseMeoFileAsDefault] = xCheckUseMeo.isSelected
         map[Settings.UseExportNameTemplate] = xCheckUseTmp.isSelected
         map[Settings.ExportNameTemplate] = xFieldTemplate.text
+        map[Settings.UseCustomBaiduKey] = xCheckUseCustomBaiduKey.isSelected
+        map[Settings.BaiduTransLateKey] = xFieldBaiduTranslateKey.text
+        map[Settings.BaiduTransLateAppId] = xFieldBaiduTranslateAppId.text
 
         return map
     }
@@ -593,6 +700,7 @@ class DialogSettings : AbstractPropertiesDialog() {
         return HashMap<String, Any>().apply {
             putAll(convertGroup())
             putAll(convertLigatureRule())
+            putAll(convertQuickInput())
             putAll(convertMode())
             putAll(convertLabel())
             putAll(convertOther())

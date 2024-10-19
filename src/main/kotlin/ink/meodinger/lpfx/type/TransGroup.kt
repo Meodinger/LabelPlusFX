@@ -1,6 +1,7 @@
 package ink.meodinger.lpfx.type
 
 import ink.meodinger.lpfx.I18N
+import ink.meodinger.lpfx.NOT_FOUND
 import ink.meodinger.lpfx.get
 import ink.meodinger.lpfx.util.color.isColorHex
 import ink.meodinger.lpfx.util.property.getValue
@@ -8,6 +9,7 @@ import ink.meodinger.lpfx.util.property.readonly
 import ink.meodinger.lpfx.util.property.transform
 
 import com.fasterxml.jackson.annotation.*
+import javafx.beans.binding.IntegerExpression
 import javafx.beans.property.*
 import javafx.scene.paint.Color
 
@@ -28,6 +30,23 @@ class TransGroup @JsonCreator constructor(
 ) {
     companion object {
         private var ACC = 0
+
+        /**
+         * Bind TransGroup's index-property, This function should only be called in TransFile
+         */
+        @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
+        fun installIndex(transGroup: TransGroup, property: IntegerExpression) {
+            transGroup.indexProperty.bind(property)
+        }
+
+        /**
+         * Unbind TransGroup's index-property, This function should only be called in TransFile
+         */
+        @Deprecated(level = DeprecationLevel.WARNING, message = "Only in TransFile")
+        fun disposeIndex(transGroup: TransGroup) {
+            transGroup.indexProperty.unbind()
+        }
+
     }
 
     // region Properties
@@ -65,6 +84,17 @@ class TransGroup @JsonCreator constructor(
      * @see colorProperty
      */
     val color: Color by colorProperty
+
+    private val indexProperty: IntegerProperty = SimpleIntegerProperty(NOT_FOUND)
+    /**
+     * This property represents the group-id of this TransGroup
+     * if this TransGroup was installed by a TransFile, or NOT_FOUND.
+     */
+    fun indexProperty(): ReadOnlyIntegerProperty = indexProperty
+    /**
+     * @see indexProperty
+     */
+    val index: Int by indexProperty
 
     // endregion
 

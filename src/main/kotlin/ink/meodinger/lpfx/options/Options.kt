@@ -5,6 +5,7 @@ import ink.meodinger.lpfx.V
 import ink.meodinger.lpfx.component.dialog.showError
 import ink.meodinger.lpfx.component.dialog.showException
 import ink.meodinger.lpfx.get
+import ink.meodinger.lpfx.util.Version
 import ink.meodinger.lpfx.util.doNothing
 import ink.meodinger.lpfx.util.file.transfer
 import ink.meodinger.lpfx.util.once
@@ -89,7 +90,11 @@ object Options {
     private fun loadProperties(instance: AbstractProperties) {
         // Unknown properties will be defaults, so we just need to
         // make sure the file we will load exists.
-        if (Files.notExists(instance.path)) Files.createFile(instance.path)
+        if (Files.notExists(instance.path)) {
+            val file = Files.createFile(instance.path).toFile()
+            findOldProperties(instance.path)?.let { transfer(it,file) }
+            Logger.info("Loaded ${instance.name} in old version to use for the new version ", "Options")
+        }
 
         try {
             instance.load()
@@ -97,10 +102,12 @@ object Options {
         } catch (e: Throwable) {
             // Copy invalid properties file to temp, prepare for sending
             val tempFile = createTempFile().toFile()
+            Logger.info("tempFile: ${tempFile.path}", "Options")
             try {
                 transfer(instance.path.toFile(), tempFile)
             } catch (e: Throwable) {
                 doNothing()
+                Logger.error("create ${instance.name} properties failed, using default", "Options")
             } finally {
                 tempFile.deleteOnExit()
             }
@@ -115,6 +122,17 @@ object Options {
             showError(null, String.format(I18N["error.options.load_failed.s"], instance.name))
             showException(null, e, tempFile)
         }
+    }
+    // find the old Properties to use for the new version
+    private  fun findOldProperties(nowPropsPath :Path) :File?{
+        val parentDir = nowPropsPath.parent.parent
+        if(Files.list(parentDir).count() <=1) return null
+        val oldPropsPath = Files.list(parentDir)
+            .toList()
+            .filter { Files.isDirectory(it) and (it.fileName.toString() != V.toString())  }
+            .maxWithOrNull(compareBy { Version(it.fileName.toString())})
+
+    return oldPropsPath?.resolve(nowPropsPath.fileName)?.toFile()
     }
 
     private fun saveProperties(instance: AbstractProperties) {

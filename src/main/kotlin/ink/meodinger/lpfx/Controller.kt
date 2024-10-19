@@ -104,7 +104,7 @@ class Controller(private val state: State) {
         }
     }
 
-    private var accumulator: Long = 16 * 60 * 60 * ONE_SECOND
+    private var accumulator: Long = 16 * 60 * 60 * ONE_SECOND  // Shift to 1970/01/02 00:00 GMT+8
     private val accumulatorFormatter = SimpleDateFormat("HH:mm:ss")
     private val accumulatorManager = TimerTaskManager(0, ONE_SECOND) {
         if (state.isOpened) {
@@ -143,7 +143,13 @@ class Controller(private val state: State) {
                 // Opened and selected
                 val file = state.getPicFileNow()
                 if (file.exists()) {
-                    val imageByFX = Image(file.toURI().toURL().toString())
+                    var imageByFX = Image(file.toURI().toURL().toString())
+
+                    //if the image is too large,limit the size of image
+                    if(imageByFX.width > 5000 || imageByFX.height > 5000) {
+                        Logger.info("limit the size of image because `$file` is too large  ", "Controller")
+                        imageByFX = Image(file.toURI().toURL().toString(),5000.0,5000.0,true,true)
+                    }
 
                     if (!imageByFX.isError) {
                         imageByFX
@@ -202,12 +208,7 @@ class Controller(private val state: State) {
         Logger.info("Controller initialized", "Controller")
 
         // Display default image
-        cLabelPane.isVisible = false
-        Platform.runLater {
-            // re-locate after the initial rendering
-            cLabelPane.moveToCenter()
-            cLabelPane.isVisible = true
-        }
+        cLabelPane.moveToCenter()
     }
 
     /**
@@ -353,7 +354,7 @@ class Controller(private val state: State) {
                 }
                 WorkMode.LabelMode -> {
                     val transLabel = state.transFile.getTransLabel(state.currentPicName, it.labelIndex)
-                    val transGroup = state.transFile.getTransGroup(transLabel.groupId)
+                    val transGroup = state.transFile.groupList[transLabel.groupId]
                     cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
@@ -387,7 +388,7 @@ class Controller(private val state: State) {
                 WorkMode.LabelMode -> {
                     if (state.currentGroupId == NOT_FOUND) return@handler
 
-                    val transGroup = state.transFile.getTransGroup(state.currentGroupId)
+                    val transGroup = state.transFile.groupList[state.currentGroupId]
                     cLabelPane.showText(transGroup.name, transGroup.color, it.displayX, it.displayY)
                 }
             }
@@ -405,10 +406,10 @@ class Controller(private val state: State) {
                 if (it != NOT_FOUND) {
                     if (cTreeView.isFocused) {
                         // if the change is result of CTreeView selection, add
-                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = false, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[it].name, clear = false, scrollTo = false)
                     } else {
                         // if the change is result of GroupBar/Box selection, set
-                        cTreeView.selectGroup(state.transFile.getTransGroup(it).name, clear = true, scrollTo = true)
+                        cTreeView.selectGroup(state.transFile.groupList[it].name, clear = true, scrollTo = true)
                     }
                 }
             } else {
@@ -433,8 +434,10 @@ class Controller(private val state: State) {
         cPicBox.itemsProperty().bind(picNamesBinding)
         cPicBox.indexProperty().addListener(onNew<Number, Int> {
             if (state.isOpened) {
-                // PicBox index should never be -1 (value should never be null)
-                state.currentPicName = state.transFile.sortedPicNames[it]
+                if (it != NOT_FOUND) {
+                    // PicBox index should never be -1 except when removing a picture
+                    state.currentPicName = state.transFile.sortedPicNames[it]
+                }
             } else {
                 // Closed, do nothing. Let State set current-pic-name to empty string
             }
@@ -512,10 +515,13 @@ class Controller(private val state: State) {
         // This could clear the label-index related bindings like TransArea text
         state.currentPicNameProperty().addListener(onChange {
             // If switch picture in CTreeView, the fours on TreeCell will not clear automatically
-            // So we should manually clear it to make sure we start from the first label
-            cTreeView.selectRoot(clear = true, scrollTo = false)
-            // Clear here, because the already happened selection may change it
+            //clear selection
             state.currentLabelIndex = NOT_FOUND
+            // So we should manually clear it to make sure we start from the first label
+             cTreeView.selectFirst(clear = true, scrollTo = false)
+             cLabelPane.moveToLabel(cTreeView.selectedLabel)
+            // Clear here, because the already happened selection may change it
+//            state.currentLabelIndex = NOT_FOUND
         })
         Logger.info("Listened for current-pic-name change for clear label-index selection", "Controller")
 
@@ -598,7 +604,6 @@ class Controller(private val state: State) {
      */
     private fun transform() {
         Logger.info("Applying Transformations...", "Controller")
-
         // Transform tab press in CTreeView to ViewModeBtn click
         cTreeView.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.TAB) {
@@ -621,6 +626,22 @@ class Controller(private val state: State) {
         }
         Logger.info("Transformed Tab on CLabelPane", "Controller")
 
+        val changePicHandler = EventHandler<KeyEvent> handler@{
+            if (it.isControlDown || it.isMetaDown || it.isShiftDown || it.isAltDown || it.code.isDigitKey)  return@handler
+            // Mark immediately when this event will be consumed
+            it.consume() // stop further propagation
+
+            when (it.code) {
+                KeyCode.Q -> cPicBox.back()
+                KeyCode.W -> cPicBox.next()
+                else -> return@handler
+            }
+            cTreeView.selectFirst()
+            it.consume() // Consume used event
+        }
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, changePicHandler)
+        Logger.info("Transformed A/D", "Controller")
+
         // Transform number key press to CTreeView select
         val numberBuilder = StringBuilder()
         view.addEventHandler(KeyEvent.KEY_PRESSED) handler@{
@@ -631,17 +652,17 @@ class Controller(private val state: State) {
             // Mark immediately when this event will be consumed
             it.consume() // stop further propagation
 
-            val number = it.code.char.toInt()
+            val number = it.text.toInt()
             if (numberBuilder.isEmpty()) {
                 // Not parsing
                 if (number == 0) {
                     // Start parse
                     numberBuilder.append(0)
-                } else if (number in 1..state.transFile.groupCount) {
+                } else if (state.transFileProperty().isNotNull.value && number in 1..state.transFile.groupCount) {
                     // Try select
                     val index = number - 1
                     if (state.viewMode == ViewMode.GroupMode) {
-                        cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[index].name, clear = true, scrollTo = false)
                     } else {
                         state.currentGroupId = index
                     }
@@ -652,10 +673,10 @@ class Controller(private val state: State) {
                 // Parsing
                 numberBuilder.append(number)
                 val index = numberBuilder.toString().toInt() - 1
-                if (index in 0 until state.transFile.groupCount) {
+                if ( state.transFileProperty().isNotNull.value &&index in 0 until state.transFile.groupCount) {
                     // Try select
                     if (state.viewMode == ViewMode.GroupMode) {
-                        cTreeView.selectGroup(state.transFile.getTransGroup(index).name, clear = true, scrollTo = false)
+                        cTreeView.selectGroup(state.transFile.groupList[index].name, clear = true, scrollTo = false)
                     } else {
                         state.currentGroupId = index
                     }
@@ -667,23 +688,6 @@ class Controller(private val state: State) {
             }
         }
         Logger.info("Transformed num-key pressed", "Controller")
-
-        // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
-        val arrowKeyChangePicHandler = EventHandler<KeyEvent> handler@{
-            if (!(it.isControlDown || it.isMetaDown)) return@handler
-
-            when (it.code) {
-                KeyCode.LEFT  -> cPicBox.back()
-                KeyCode.RIGHT -> cPicBox.next()
-                else -> return@handler
-            }
-
-            it.consume() // Consume used event
-        }
-        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
-        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
-        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
-        Logger.info("Transformed Ctrl + Left/Right", "Controller")
 
         /**
          * Find next LabelItem as int index.
@@ -703,6 +707,40 @@ class Controller(private val state: State) {
             }
         }
 
+        fun moveCurrLabelTo(direction: Int) {
+            var itemIndex = getNextLabelItemIndex(cTreeView.selectionModel.selectedIndex, direction)
+            if (itemIndex == NOT_FOUND) {
+                // if selected first and try getting previous, return last;
+                // if selected last and try getting next, return first;
+                itemIndex = getNextLabelItemIndex(if (direction == 1) 0 else cTreeView.expandedItemCount, direction)
+            }
+            if(itemIndex == NOT_FOUND) {
+                return
+            }
+            val item = cTreeView.getTreeItem(itemIndex) as CTreeLabelItem
+
+            cLabelPane.moveToLabel(item.transLabel.index)
+            cTreeView.selectLabel(item.transLabel.index, clear = true, scrollTo = true)
+        }
+
+        // Transform Ctrl + Left/Right KeyEvent to CPicBox button click
+        val arrowKeyChangePicHandler = EventHandler<KeyEvent> handler@{
+            if (!(it.isControlDown || it.isMetaDown)) return@handler
+
+            when (it.code) {
+                KeyCode.LEFT -> cPicBox.back()
+                KeyCode.RIGHT -> cPicBox.next()
+                else -> return@handler
+            }
+            cTreeView.selectFirst()
+            it.consume() // Consume used event
+        }
+        cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangePicHandler)
+        Logger.info("Transformed Ctrl + Left/Right", "Controller")
+
+
         // Transform Ctrl + Up/Down KeyEvent to CTreeView select (and have effect: move to label)
         val arrowKeyChangeLabelHandler = EventHandler<KeyEvent> handler@{
             if (!((it.isControlDown || it.isMetaDown) && it.code.isArrowKey)) return@handler
@@ -717,16 +755,7 @@ class Controller(private val state: State) {
             // Mark immediately when this event will be consumed
             it.consume() // stop further propagation
 
-            var itemIndex = getNextLabelItemIndex(cTreeView.selectionModel.selectedIndex, itemShift)
-            if (itemIndex == NOT_FOUND) {
-                // if selected first and try getting previous, return last;
-                // if selected last and try getting next, return first;
-                itemIndex = getNextLabelItemIndex(if (itemShift == 1) 0 else cTreeView.expandedItemCount, itemShift)
-            }
-            val item = cTreeView.getTreeItem(itemIndex) as CTreeLabelItem
-
-            cLabelPane.moveToLabel(item.transLabel.index)
-            cTreeView.selectLabel(item.transLabel.index, clear = true, scrollTo = true)
+            moveCurrLabelTo(itemShift)
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, arrowKeyChangeLabelHandler)
@@ -742,20 +771,58 @@ class Controller(private val state: State) {
             // transform
             if (it.isShiftDown) {
                 // Met the bounds, change picture
-                if (itemIndex == NOT_FOUND) cLabelPane.fireEvent(keyEvent(it, code = KeyCode.LEFT, character = "", text = ""))
-                // Go to previous label
-                cLabelPane.fireEvent(keyEvent(it, code = KeyCode.UP, character = "", text = ""))
+                if (itemIndex == NOT_FOUND) {
+                    cPicBox.back()
+                    cTreeView.selectLast()
+                } else {
+                    // Go to previous label
+                    moveCurrLabelTo(direction = -1)
+                }
             } else {
                 // Met the bounds, change picture
-                if (itemIndex == NOT_FOUND) cLabelPane.fireEvent(keyEvent(it, code = KeyCode.RIGHT, character = "", text = ""))
-                // Go to previous label
-                cLabelPane.fireEvent(keyEvent(it, code = KeyCode.DOWN, character = "", text = ""))
+                if (itemIndex == NOT_FOUND) {
+                    cPicBox.next()
+                    cTreeView.selectFirst()
+                } else {
+                    // Go to previous label
+                    moveCurrLabelTo(direction = 1)
+                }
 
             }
         }
         cLabelPane.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         cTransArea.addEventHandler(KeyEvent.KEY_PRESSED, enterKeyTransformerHandler)
         Logger.info("Transformed Ctrl + Enter", "Controller")
+
+
+
+        val copyLabelHandler = EventHandler<KeyEvent> handler@{
+            if (!(it.isControlDown || it.isMetaDown)) return@handler
+            when (it.code) {
+                KeyCode.C -> //                    cTreeView.pasteLabelsText(selectItems.map { it.transLabel.index },state)
+                {
+                    @Suppress("UNCHECKED_CAST") val treeItem = cTreeView.getTreeItem(cTreeView.selectionModel.selectedIndex) as CTreeLabelItem
+                    cTreeView.copyLabelText(treeItem.transLabel.index)
+                }
+                KeyCode.V -> {
+                    @Suppress("UNCHECKED_CAST") val selectItems:Collection<CTreeLabelItem> =
+                        cTreeView.selectionModel.selectedIndices.map { cTreeView.getTreeItem(it)}
+                            .filter { it is CTreeLabelItem } as List<CTreeLabelItem>
+                    cTreeView.pasteLabelsText(selectItems.map { it.transLabel.index },state)
+                }
+                else ->//                    cTreeView.pasteLabelsText(selectItems.map { it.transLabel.index },state)
+                    //                    cTreeView.pasteLabelsText(selectItems.map { it.transLabel.index },state)
+                {
+                    return@handler
+                }
+            }
+            it.consume() // Consume used event
+        }
+        cTreeView.addEventHandler(KeyEvent.KEY_PRESSED, copyLabelHandler)
+        Logger.info("Transformed Ctrl + C/V", "Controller")
+//
+
+
     }
 
     // Controller Methods
@@ -932,8 +999,8 @@ class Controller(private val state: State) {
         state.currentLabelIndex = labelIndex.takeIf { state.transFile.getTransList(state.currentPicName).any { l -> l.index == it } } ?: NOT_FOUND
 
         // Move to center
-        // FIXME: May throw NoSuchElementException if render not complete
         if (labelIndex != NOT_FOUND) {
+            // NotNow: May throw NoSuchElementException if render not complete
             cTreeView.selectLabel(labelIndex, clear = true, scrollTo = true)
             cLabelPane.moveToLabel(labelIndex)
         }
@@ -965,7 +1032,7 @@ class Controller(private val state: State) {
         }
 
         // Use temp if overwrite
-        val exportDest = if (overwrite) File.createTempFile(file.path, "temp").apply(File::deleteOnExit) else file
+        val exportDest = if (overwrite) File.createTempFile("LPFX", ".${file.extension}").apply(File::deleteOnExit) else file
 
         // Export
         try {
@@ -1140,38 +1207,38 @@ class Controller(private val state: State) {
             val version = fetchLatestSync()
             if (version != Version.V0) Logger.info("Got latest version: $version (current $V)", "Controller")
 
-            if (version > V) Platform.runLater {
-                val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
+            Platform.runLater {
+                if (version > V) {
+                    val suppressNoticeButtonType = ButtonType(I18N["update.dialog.suppress"], ButtonBar.ButtonData.OK_DONE)
 
-                val dialog = Dialog<ButtonType>()
-                dialog.initOwner(this@Controller.state.stage)
-                dialog.title = I18N["update.dialog.title"]
-                dialog.graphic = ImageView(IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS))
-                dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
-                dialog.dialogPane.withContent(VBox()) {
-                    add(Label(String.format(I18N["update.dialog.content.s"], version)))
-                    add(Separator()) {
-                        padding = Insets(8.0, 0.0, 8.0, 0.0)
+                    val dialog = Dialog<ButtonType>()
+                    dialog.initOwner(this@Controller.state.stage)
+                    dialog.title = I18N["update.dialog.title"]
+                    dialog.graphic = ImageView(IMAGE_INFO.resizeByRadius(GENERAL_ICON_RADIUS))
+                    dialog.dialogPane.buttonTypes.addAll(suppressNoticeButtonType, ButtonType.CLOSE)
+                    dialog.dialogPane.withContent(VBox()) {
+                        add(Label(String.format(I18N["update.dialog.content.s"], version)))
+                        add(Separator()) {
+                            padding = Insets(8.0, 0.0, 8.0, 0.0)
+                        }
+                        add(Hyperlink(I18N["update.dialog.link"])) {
+                            padding = Insets(0.0)
+                            setOnAction { this@Controller.state.application.hostServices.showDocument(release) }
+                        }
                     }
-                    add(Hyperlink(I18N["update.dialog.link"])) {
-                        padding = Insets(0.0)
-                        setOnAction { this@Controller.state.application.hostServices.showDocument(release) }
+
+                    val suppressButton = dialog.dialogPane.lookupButton(suppressNoticeButtonType)
+                    ButtonBar.setButtonUniformSize(suppressButton, false)
+
+                    dialog.showAndWait().ifPresent { type ->
+                        if (type == suppressNoticeButtonType) {
+                            Preference.lastUpdateNotice = time
+                            Logger.info("Check suppressed, next notice time is ${time + delay}", "Controller")
+                        }
                     }
+                } else if (showWhenUpdated) {
+                    showInfo(this@Controller.state.stage, I18N["update.info.updated"])
                 }
-
-                val suppressButton = dialog.dialogPane.lookupButton(suppressNoticeButtonType)
-                ButtonBar.setButtonUniformSize(suppressButton, false)
-
-                dialog.showAndWait().ifPresent { type ->
-                    if (type == suppressNoticeButtonType) {
-                        Preference.lastUpdateNotice = time
-                        Logger.info("Check suppressed, next notice time is ${time + delay}",
-                            "Controller"
-                        )
-                    }
-                }
-            } else if (showWhenUpdated) Platform.runLater {
-                showInfo(this@Controller.state.stage, I18N["update.info.updated"])
             }
         }()
     }

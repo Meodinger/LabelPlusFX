@@ -1,6 +1,8 @@
 package ink.meodinger.lpfx.util.translator
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import ink.meodinger.lpfx.options.Logger
+import ink.meodinger.lpfx.options.Settings
 import java.io.IOException
 import java.net.*
 import java.nio.charset.Charset
@@ -31,9 +33,12 @@ private fun md5(text: String): String {
 }
 private fun query(q: String, from: String, to: String): String {
     val salt = floor(Math.random() * 10000)
-    val sign = md5("$ID$q$salt$KEY").lowercase()
+    val key = if (Settings.useCustomBaiduKey) Settings.baiduTransLateKey else KEY
+    val appId = if (Settings.useCustomBaiduKey) Settings.baiduTransLateAppId else ID
+    val sign = md5("$appId$q$salt$key").lowercase()
+    Logger.info("TranslateAppId:${Settings.baiduTransLateAppId},TranslateAppId:${Settings.baiduTransLateKey}", "Translate")
 
-    return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$ID&salt=$salt&sign=$sign"
+    return "$ROOT?q=${URLEncoder.encode(q, utf8Charset)}&from=$from&to=$to&appid=$appId&salt=$salt&sign=$sign"
 }
 
 /**

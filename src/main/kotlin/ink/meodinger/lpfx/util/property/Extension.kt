@@ -1,5 +1,7 @@
 package ink.meodinger.lpfx.util.property
 
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.IntegerBinding
 import javafx.collections.*
 
 
@@ -11,8 +13,8 @@ import javafx.collections.*
 
 
 /**
- * Return a ObservableSet that reflect the keys and their changes of the ObservableMap
- * @return An unmodifiable ObservableSet
+ * Return a ObservableSet that reflect the keys and their changes of the ObservableMap.
+ * @return An ObservableSet that **MUTABLE** but you should better **NOT** change it.
  */
 fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
     val set = FXCollections.observableSet(HashSet(keys))
@@ -30,28 +32,44 @@ fun <K> ObservableMap<K, *>.observableKeySet(): ObservableSet<K> {
         }
     })
 
-    return FXCollections.unmodifiableObservableSet(set)
+    // It's a compromise with the WeakListener attached to UnmodifiableSet which often offline.
+    return set
 }
 
 /**
  * Return a ObservableList that reflect the sorted elements and their changes of the ObservableSet
- * @return An unmodifiable ObservableList
+ * @return An ObservableList that **MUTABLE** but you should better **NOT** change it.
  */
 fun <E> ObservableSet<E>.observableSorted(sorter: (Set<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 
-    addListener(SetChangeListener { list.setAll(sorter(it.set)) })
+    addListener(SetChangeListener {
+        // Sort the set whenever it changes
+        list.setAll(sorter(it.set))
+    })
 
-    return FXCollections.unmodifiableObservableList(list)
+    // It's a compromise with the WeakListener attached to UnmodifiableList which often offline.
+    return list
 }
 /**
  * Return a ObservableList that reflect the sorted elements and their changes of the ObservableList
- * @return An unmodifiable ObservableList
+ * @return An ObservableList that **MUTABLE** but you should better **NOT** change it.
  */
 fun <E> ObservableList<E>.observableSorted(sorter: (List<E>) -> List<E>): ObservableList<E> {
     val list = FXCollections.observableArrayList(sorter(this))
 
-    addListener(ListChangeListener { list.setAll(sorter(it.list)) })
+    addListener(ListChangeListener {
+        // Sort the list whenever it changes
+        list.setAll(sorter(it.list))
+    })
 
-    return FXCollections.unmodifiableObservableList(list)
+    // It's a compromise with the WeakListener attached to UnmodifiableList which often offline.
+    return list
+}
+
+/**
+ * Return a IntegerBinding that represents the index in the list of the given element
+ */
+fun <E> ObservableList<E>.observableIndexOf(element: E): IntegerBinding {
+    return Bindings.createIntegerBinding({ indexOf(element) }, this)
 }
